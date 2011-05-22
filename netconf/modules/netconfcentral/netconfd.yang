@@ -23,6 +23,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-04-24 {
+       description 
+         "Added --protocols parameter via uses ProtocolsParm.";
+    }
+
     revision 2011-04-02 {
        description 
          "Added --delete-np-containers parameter.";
@@ -76,6 +81,8 @@ module netconfd {
       uses ncxapp:NcxAppCommon;
 
       uses ncxapp:SubdirsParm;
+
+      uses ncxapp:ProtocolsParm;
 
       leaf access-control {
         description

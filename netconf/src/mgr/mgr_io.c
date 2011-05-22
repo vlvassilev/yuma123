@@ -108,6 +108,9 @@ date         init     comment
  *                       C O N S T A N T S                           *
  *                                                                   *
  *********************************************************************/
+#ifdef DEBUG
+/* #define MGR_IO_DEBUG 1 */
+#endif
 
 
 /********************************************************************
@@ -452,6 +455,14 @@ status_t
                 continue;
             }
 
+#ifdef MGR_IO_DEBUG
+            if (LOGDEBUG4) {
+                log_debug4("\nmgr_io: enter select (%u:%u)",
+                           timeout.tv_sec,
+                           timeout.tv_usec);
+            }
+#endif
+
             /* Block until input arrives on one or more active sockets. 
              * or the timer expires
              */
@@ -460,6 +471,15 @@ status_t
                          &write_fd_set, 
                          NULL, 
                          &timeout);
+
+#ifdef MGR_IO_DEBUG
+            if (LOGDEBUG4) {
+                log_debug4("\nmgr_io: exit select (%u:%u)",
+                           timeout.tv_sec,
+                           timeout.tv_usec);
+            }
+#endif
+
             if (ret > 0) {
                 /* normal return with some bytes */
                 done2 = TRUE;

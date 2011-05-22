@@ -21,6 +21,8 @@
 date         init     comment
 ----------------------------------------------------------------------
 06jun06      abb      begun;
+29apr11      abb      add support for NETCONF:base:1.1 
+                      message framing
 
 *********************************************************************
 *                                                                   *
@@ -94,6 +96,48 @@ static uint32    freecnt;
 static dlq_hdr_t freeQ;
 static dlq_hdr_t inreadyQ;
 static dlq_hdr_t outreadyQ;
+
+
+/********************************************************************
+* FUNCTION do_send_buff
+*
+* Send the specified buffer.
+* Add framing chars if needed for base:1.1 over SSH
+*
+* INPUTS:
+*   scb == session control block to use
+*   buff == buffer to send
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    do_send_buff (ses_cb_t *scb,
+                  ses_msg_buff_t *buff)
+{
+    status_t   res = NO_ERR;
+
+    if (scb->framing11) {
+        ses_msg_add_framing(scb, buff);
+        /* bufflen has been adjusted for buffstart */
+        if (buff->bufflen > 0) {
+            res = send_buff(scb->fd, 
+                            (const char *)&buff->buff[buff->buffstart], 
+                            buff->bufflen);
+        }
+    } else if (buff->bufflen > buff->buffstart) {
+        /* send with base:1.0 framing; EOM markers in the buffer */
+        res = send_buff(scb->fd, 
+                        (const char *)buff->buff, 
+                        buff->bufflen);
+    } else if (LOGDEBUG2) {
+        log_debug2("\nses: skip sending empty buffer on sesion '%d'",
+                  scb->sid);
+    }
+
+    return res;
+
+}  /* do_send_buff */
 
 
 /********************************************************************
@@ -252,6 +296,8 @@ void
 *
 * INPUTS:
 *   scb == session control block to malloc a new message for
+*   outbuff == TRUE if this is for outgoing message
+*              FALSE if this is for incoming message
 *   buff == address of ses_msg_buff_t pointer that will be set
 *
 * OUTPUTS:
@@ -262,6 +308,7 @@ void
 *********************************************************************/
 status_t
     ses_msg_new_buff (ses_cb_t *scb, 
+                      boolean outbuff,
                       ses_msg_buff_t **buff)
 {
     ses_msg_buff_t *newbuff;
@@ -276,11 +323,13 @@ status_t
     if (scb->freecnt) {
         newbuff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
         if (newbuff) {
-            newbuff->bufflen = 0;
-            newbuff->buffpos = 0;
+            /* use buffer from freeQ */
+            ses_msg_init_buff(scb, outbuff, newbuff);
+
 #ifdef DEBUG
             memset(newbuff->buff, 0x0, SES_MSG_BUFFSIZE);
 #endif
+
             *buff = newbuff;
             scb->freecnt--;
             return NO_ERR;
@@ -297,13 +346,12 @@ status_t
 
     /* malloc the buffer */
     newbuff = m__getObj(ses_msg_buff_t);
-    if (!newbuff) {
+    if (newbuff == NULL) {
         return ERR_INTERNAL_MEM;
     }
 
     /* set the fields and exit */
-    newbuff->bufflen = 0;
-    newbuff->buffpos = 0;
+    ses_msg_init_buff(scb, outbuff, newbuff);
 
 #ifdef DEBUG
     memset(newbuff->buff, 0x0, SES_MSG_BUFFSIZE);
@@ -313,7 +361,7 @@ status_t
     scb->buffcnt++;
     return NO_ERR;
 
-} /* ses_new_buff */
+} /* ses_msg_new_buff */
 
 
 /********************************************************************
@@ -349,7 +397,12 @@ void
 *
 * Add some text to the message buffer
 *
+* Upper layer code should never write framing chars to the
+* output buff -- that is always done in this module.
+* Use ses_finish_msg to cause framing chars to be written/
+*
 * INPUTS:
+*   scb == session control block to use
 *   buff == buffer to write to
 *   ch  == xmlChar to write
 *
@@ -358,22 +411,33 @@ void
 *
 *********************************************************************/
 status_t
-    ses_msg_write_buff (ses_msg_buff_t *buff,
+    ses_msg_write_buff (ses_cb_t *scb,
+                        ses_msg_buff_t *buff,
                         uint32 ch)
 {
+    status_t   res;
 
 #ifdef DEBUG
-    if (!buff) {
+    if (buff == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    if (buff->bufflen < SES_MSG_BUFFSIZE) {
-        buff->buff[buff->bufflen++] = (xmlChar)ch;
-        return NO_ERR;
+    res = NO_ERR;
+    if (scb->framing11) {
+        if (buff->bufflen < (SES_MSG_BUFFSIZE - SES_ENDCHUNK_PAD)) {
+            buff->buff[buff->bufflen++] = (xmlChar)ch;
+        } else {
+            res = ERR_BUFF_OVFL;
+        }
     } else {
-        return ERR_BUFF_OVFL;
+        if (buff->bufflen < SES_MSG_BUFFSIZE) {
+            buff->buff[buff->bufflen++] = (xmlChar)ch;
+        } else {
+            res = ERR_BUFF_OVFL;
+        }
     }
+    return res;
     
 } /* ses_msg_write_buff */
 
@@ -394,11 +458,12 @@ status_t
     ses_msg_send_buffs (ses_cb_t *scb)
 {
     ses_msg_buff_t  *buff;
-    uint32    buffleft, total;
-    ssize_t   retcnt;
-    int       i, cnt;
-    boolean   done, dologmsg;
-    struct iovec iovs[SES_MAX_BUFFSEND];
+    uint32           buffleft, total;
+    ssize_t          retcnt;
+    int              i, cnt;
+    boolean          done, dologmsg;
+    status_t         res;
+    struct iovec     iovs[SES_MAX_BUFFSEND];
 
 #ifdef DEBUG
     if (!scb) {
@@ -465,11 +530,34 @@ status_t
     }
 
     /* make sure there is at least one buffer set */
-    if (!iovs[0].iov_base) {
+    if (iovs[0].iov_base == NULL) {
         return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
-    /* write a packet to the session socket */
+    if (scb->framing11) {
+        /* send the 'cnt' number of buffs identified above
+         * do not use the iovs array because this function
+         * may not write the entire amount requested
+         * and that would not match the huge chunksize;
+         * so just send each buffer as a chunk
+         */
+        for (i=0; i < cnt; i++) {
+            buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
+            if (buff == NULL) {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            }
+            res = do_send_buff(scb, buff);
+            ses_msg_free_buff(scb, buff);            
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+        return NO_ERR;
+    }
+
+    /* else base:1.0 framing
+     * write a packet to the session socket 
+     */
     retcnt = writev(scb->fd, iovs, cnt);
     if (retcnt < 0) {
         /* should not need retries because the select loop
@@ -524,6 +612,7 @@ status_t
 *
 * OUTPUTS:
 *   scb->outbuff, scb->outready, and scb->outQ will be changed
+*   !!! buffer will be sent if stream output mode, then buffer reused
 *   
 * RETURNS:
 *   status, could return malloc or buffers exceeded error
@@ -552,11 +641,8 @@ status_t
          * is not being streamed right now
          */
         if (buff->bufflen) {
-            res = send_buff(scb->fd, 
-                            (const char *)buff->buff, 
-                            buff->bufflen);
-            buff->bufflen = 0;
-            buff->buffpos = 0;
+            res = do_send_buff(scb, buff);
+            ses_msg_init_buff(scb, TRUE, buff);
         } else {
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
@@ -569,7 +655,7 @@ status_t
         dlq_enque(scb->outbuff, &scb->outQ);
         ses_msg_make_outready(scb);
         scb->outbuff = NULL;
-        res = ses_msg_new_buff(scb, &scb->outbuff);
+        res = ses_msg_new_buff(scb, TRUE, &scb->outbuff);
     }
     return res;
 
@@ -654,30 +740,26 @@ void
     status_t   res;
 
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL || scb->outbuff == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
 #endif
 
     if (scb->stream_output) {
-        if (scb->outbuff && scb->outbuff->bufflen) {
-            res = send_buff(scb->fd, 
-                            (const char *)scb->outbuff->buff, 
-                            scb->outbuff->bufflen);
-            scb->outbuff->bufflen = 0;
-            scb->outbuff->buffpos = 0;
-            if (res != NO_ERR) {
-                log_error("\nError: IO failed on session '%d'", scb->sid);
-            }
+        res = do_send_buff(scb, scb->outbuff);
+        ses_msg_init_buff(scb, TRUE, scb->outbuff);
+        if (res != NO_ERR) {
+            log_error("\nError: IO failed on session '%d' (%s)", 
+                      scb->sid,
+                      get_error_string(res));
         }
     } else {
-        if (scb->outbuff && scb->outbuff->bufflen) {
-            scb->outbuff->buffpos = 0;
-            dlq_enque(scb->outbuff, &scb->outQ);
-            scb->outbuff = NULL;
-            (void)ses_msg_new_buff(scb, &scb->outbuff);
-        }
+        scb->outbuff->buffpos = scb->outbuff->buffstart;
+        dlq_enque(scb->outbuff, &scb->outQ);
+        scb->outbuff = NULL;
+        (void)ses_msg_new_buff(scb, TRUE, &scb->outbuff);
+
         ses_msg_make_outready(scb);
     }
 
@@ -763,7 +845,7 @@ void
     for (buff = (const ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
          buff != NULL;
          buff = (const ses_msg_buff_t *)dlq_nextEntry(buff)) {
-        for (i=0; i<buff->bufflen; i++) {
+        for (i = buff->buffstart; i < buff->bufflen; i++) {
             log_write("%c", buff->buff[i]);
         }
         anytext = TRUE;
@@ -774,6 +856,98 @@ void
     }
 
 } /* ses_msg_dump */
+
+
+/********************************************************************
+* FUNCTION ses_msg_add_framing
+*
+* Add the base:1.1 framing chars to the buffer and adjust
+* the buffer size pointers
+*
+* INPUTS:
+*   scb == session control block
+*   buff == buffer control block
+*
+* OUTPUTS:
+*   framing chars added to buff->buff
+*
+*********************************************************************/
+void
+    ses_msg_add_framing (ses_cb_t *scb,
+                         ses_msg_buff_t *buff)
+{
+    size_t     buffsize;
+    int32      numlen;
+    char       *p, numbuff[SES_MAX_CHUNKNUM_SIZE];
+
+#ifdef DEBUG
+    if (scb == NULL || buff == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!scb->framing11) {
+        return;
+    }
+
+    /* get the chunk size */
+    buffsize = buff->bufflen - SES_STARTCHUNK_PAD;
+    numlen = sprintf(numbuff, "%zu", buffsize);
+
+    /* figure out where to put the start chunks within
+     * the beginning pad area; total size is numlen+3
+     *     \n#numlen\n
+     */
+    buff->buffstart = SES_STARTCHUNK_PAD - (numlen + 3);
+
+    p = (char *)&buff->buff[buff->buffstart];
+
+    *p++ = '\n';
+    *p++ = '#';
+    memcpy(p, numbuff, numlen);
+    p += numlen;
+    *p = '\n';
+
+    if (buff->islast) {
+        memcpy(&buff->buff[buff->bufflen], 
+               NC_SSH_END_CHUNKS,
+               NC_SSH_END_CHUNKS_LEN);
+        buff->bufflen += NC_SSH_END_CHUNKS_LEN;
+    }
+
+    buff->bufflen -= buff->buffstart;
+
+}  /* ses_msg_add_framing */
+
+
+/********************************************************************
+* FUNCTION ses_msg_init_buff
+*
+* Init the buffer fields
+*
+* INPUTS:
+*   scb == session control block
+*   outbuff == TRUE if oupput buffer; FALSE if input buffer
+*   buff == buffer to send
+*********************************************************************/
+void
+    ses_msg_init_buff (ses_cb_t *scb,
+                       boolean outbuff,
+                       ses_msg_buff_t *buff)
+{
+    buff->bufflen = 0;
+    buff->buffpos = 0;
+    buff->buffstart = 0;
+    buff->islast = FALSE;
+    if (outbuff && scb->framing11) {
+        buff->buffstart = SES_STARTCHUNK_PAD;
+        buff->bufflen = SES_STARTCHUNK_PAD;
+    }
+
+    /* do not clear mem in buffer buff->buff */
+
+}  /* ses_msg_init_buff */
 
 
 /* END file ses_msg.c */

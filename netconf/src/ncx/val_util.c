@@ -64,6 +64,10 @@ date         init     comment
 #include "ncx_feature.h"
 #endif
 
+#ifndef _H_ncx_list
+#include "ncx_list.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -2661,12 +2665,11 @@ void
 }  /* val_set_path_parms */
 
 
-
 /********************************************************************
 * FUNCTION val_set_subdirs_parm
 *   --subdirs
 *
-* Check the specified value set for the subdirs boolean
+* Handle the --subdirs parameter
 *
 * INPUTS:
 *   parentval == CLI container to check for the subdirs parm
@@ -2689,7 +2692,7 @@ void
     }
 #endif
 
-    /* get the modpath parameter */
+    /* get the subdirs parameter */
     val = val_find_child(parentval, 
                          val_get_mod_name(parentval),
                          NCX_EL_SUBDIRS);
@@ -2829,6 +2832,126 @@ void
 
     
 }  /* val_set_feature_parms */
+
+
+/********************************************************************
+* FUNCTION val_set_protocols_parm
+*
+*   --protocols=bits [netconf1.0, netconf1.1]
+*
+* Handle the protocols parameter
+*
+* INPUTS:
+*   parentval == CLI container to check for the protocols parm
+*
+* RETURNS:
+*    status:  at least 1 protocol must be selected
+*********************************************************************/
+status_t
+    val_set_protocols_parm (val_value_t *parentval)
+{
+    val_value_t        *val;
+    boolean             anyset = FALSE;
+
+#ifdef DEBUG
+    if (!parentval) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    /* get the protocols parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_PROTOCOLS);
+    if (val && val->res == NO_ERR) {
+        /* set to the values specified */
+        if (ncx_string_in_list(NCX_EL_NETCONF10,
+                               &(VAL_BITS(val)))) {
+            anyset = TRUE;
+            ncx_set_protocol_enabled(NCX_PROTO_NETCONF10);
+        }
+        if (ncx_string_in_list(NCX_EL_NETCONF11,
+                               &(VAL_BITS(val)))) {
+            anyset = TRUE;
+            ncx_set_protocol_enabled(NCX_PROTO_NETCONF11);
+        }
+    } else {
+        /* set to the default -- all versions enabled */
+        anyset = TRUE;
+        ncx_set_protocol_enabled(NCX_PROTO_NETCONF10);
+        ncx_set_protocol_enabled(NCX_PROTO_NETCONF11);
+    }
+    
+    return (anyset) ? NO_ERR : ERR_NCX_MISSING_PARM;
+
+}  /* val_set_protocols_parm */
+
+
+/********************************************************************
+* FUNCTION val_set_ses_protocols_parm
+*
+*   --protocols=bits [netconf1.0, netconf1.1]
+*
+* Handle the protocols parameter
+*
+* INPUTS:
+*   scb == session control block to use
+*   parentval == CLI container to check for the protocols parm
+*
+* RETURNS:
+*    status:  at least 1 protocol must be selected
+*********************************************************************/
+status_t
+    val_set_ses_protocols_parm (ses_cb_t *scb,
+                                val_value_t *parentval)
+{
+    val_value_t        *val;
+    boolean             anyset = FALSE;
+
+#ifdef DEBUG
+    if (!parentval) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    /* get the protocols parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_PROTOCOLS);
+    if (val && val->res == NO_ERR) {
+        /* set to the values specified */
+        if (ncx_string_in_list(NCX_EL_NETCONF10,
+                               &(VAL_BITS(val)))) {
+            anyset = TRUE;
+            ses_set_protocols_requested(scb, NCX_PROTO_NETCONF10);
+        }
+        if (ncx_string_in_list(NCX_EL_NETCONF11,
+                               &(VAL_BITS(val)))) {
+            anyset = TRUE;
+            ses_set_protocols_requested(scb, NCX_PROTO_NETCONF11);
+        }
+    } else {
+        /* set to the default -- whatever was set globally */
+        anyset = TRUE;
+        if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
+            ses_set_protocols_requested(scb, NCX_PROTO_NETCONF10);
+        }
+        if (ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+            ses_set_protocols_requested(scb, NCX_PROTO_NETCONF11);
+        }
+    }
+    
+    return (anyset) ? NO_ERR : ERR_NCX_MISSING_PARM;
+
+}  /* val_set_ses_protocols_parm */
 
 
 /********************************************************************

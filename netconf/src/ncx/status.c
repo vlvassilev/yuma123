@@ -662,6 +662,8 @@ const char *
         return "cannot write to this configuration directly";
     case ERR_NCX_MISSING_RBRACE:
         return "YANG file missing right brace";
+    case ERR_NCX_INVALID_FRAMING:
+        return "invalid protocol framing characters received";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

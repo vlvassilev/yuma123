@@ -2010,6 +2010,12 @@ static status_t
     /* set the subdirs parm */
     val_set_subdirs_parm(mgr_cli_valset);
 
+    /* set the protocols parm */
+    res = val_set_protocols_parm(mgr_cli_valset);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* set the feature code generation parameters */
     val_set_feature_parms(mgr_cli_valset);
 
@@ -2137,10 +2143,10 @@ static status_t
         }
     }
 
-    /* get the port parameter */
+    /* get the --ncport parameter */
     parm = val_find_child(mgr_cli_valset, 
                           YANGCLI_MOD, 
-                          YANGCLI_PORT);
+                          YANGCLI_NCPORT);
     if (parm && parm->res == NO_ERR) {
         /* save to the connect_valset parmset */
         res = add_clone_parm(parm, connect_valset);
@@ -2343,6 +2349,18 @@ static void
     log_write("\n\nServer Enterprise Capabilities");
     cap_dump_entcaps(&mscb->caplist);
     log_write("\n");
+
+    log_write("\nProtocol version set to: ");
+    switch (ses_get_protocol(scb)) {
+    case NCX_PROTO_NETCONF10:
+        log_write("RFC 4741 (base:1.0)");
+        break;
+    case NCX_PROTO_NETCONF11:
+        log_write("RFC 4741bis (base:1.1)");
+        break;
+    default:
+        log_write("unknown");
+    }
 
     log_write("\nDefault target set to: ");
 

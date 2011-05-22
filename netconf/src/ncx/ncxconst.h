@@ -62,11 +62,20 @@ extern "C" {
 
 #define NC_OK_REPLY  (const xmlChar *)"RpcOkReplyType"
 
+/* NETCONF namespace used for base:10 and base:1.1 */
 #define NC_URN  (const xmlChar *)"urn:ietf:params:xml:ns:netconf:base:1.0"
 
 /* NETCONF SSH End of Message Marker */
 #define NC_SSH_END "]]>]]>"
 #define NC_SSH_END_LEN 6
+
+/* NETCONF SSH Start of Chunks Marker */
+#define NC_SSH_START_CHUNK "\n#"
+
+
+/* NETCONF SSH End of Chunks Marker */
+#define NC_SSH_END_CHUNKS "\n##\n"
+#define NC_SSH_END_CHUNKS_LEN 4
 
 /* NETCONF Module Owner */
 #define NC_OWNER        (const xmlChar *)"ietf"
@@ -534,6 +543,8 @@ extern "C" {
 #define NCX_EL_NCXCONNECT      (const xmlChar *)"ncx-connect"
 #define NCX_EL_NAMESPACE       (const xmlChar *)"namespace"
 #define NCX_EL_NETCONF         (const xmlChar *)"netconf"
+#define NCX_EL_NETCONF10       (const xmlChar *)"netconf1.0"
+#define NCX_EL_NETCONF11       (const xmlChar *)"netconf1.1"
 #define NCX_EL_NO              (const xmlChar *)"no"
 #define NCX_EL_NODEFAULT       (const xmlChar *)"no default"
 #define NCX_EL_NODUPLICATES    (const xmlChar *)"no-duplicates"
@@ -569,6 +580,7 @@ extern "C" {
 #define NCX_EL_POSITION        (const xmlChar *)"position"
 #define NCX_EL_PREFIX          (const xmlChar *)"prefix"
 #define NCX_EL_PROTOCOL        (const xmlChar *)"protocol"
+#define NCX_EL_PROTOCOLS       (const xmlChar *)"protocols"
 #define NCX_EL_QNAME           (const xmlChar *)"qname"
 #define NCX_EL_REPLACE         (const xmlChar *)"replace"
 #define NCX_EL_REPORT_ALL      (const xmlChar *)"report-all"
@@ -677,6 +689,10 @@ extern "C" {
 /* bit definitions for ncx_lstr_t flags field */
 #define NCX_FL_RANGE_ERR   bit0
 #define NCX_FL_VALUE_ERR   bit1
+
+/* bit definitions for NETCONF session protocol versions */
+#define NCX_FL_PROTO_NETCONF10  bit0
+#define NCX_FL_PROTO_NETCONF11  bit1
 
 
 /* textual parameter tags for various NCX functions

@@ -36,6 +36,10 @@ date	     init     comment
 #include "cap.h"
 #endif
 
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -107,10 +111,25 @@ extern cap_list_t *
 * INPUTS:
 *    none
 * RETURNS:
-*    pointer to the agent caps list
+*    pointer to the manager caps list
 *********************************************************************/
 extern val_value_t * 
     mgr_cap_get_capsval (void);
+
+
+/********************************************************************
+* FUNCTION mgr_cap_get_ses_capsval
+*
+* Get the NETCONF manager capabilities ain val_value_t format
+* for a specific session, v2 supports base1.0 and/or base1.1
+* INPUTS:
+*    scb == session control block to use
+* RETURNS:
+*    MALLOCED pointer to the manager caps list to use
+*    and then discard with val_free_value
+*********************************************************************/
+extern val_value_t * 
+    mgr_cap_get_ses_capsval (ses_cb_t *scb);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

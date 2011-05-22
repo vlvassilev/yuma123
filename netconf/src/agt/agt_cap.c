@@ -176,11 +176,19 @@ status_t
         }
     }
 
-    /* add capability for NETCONF version 1.0 support */
+    /* add capability for NETCONF version 1.0 and/or 1.1 support */
     if (res == NO_ERR) {
-        res = cap_add_std(newmycaps, CAP_STDID_V1);
-        if (res == NO_ERR) {
-            res = cap_add_stdval(newcaps, CAP_STDID_V1);
+        if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
+            res = cap_add_std(newmycaps, CAP_STDID_V1);
+            if (res == NO_ERR) {
+                res = cap_add_stdval(newcaps, CAP_STDID_V1);
+            }
+        }
+        if (ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+            res = cap_add_std(newmycaps, CAP_STDID_V11);
+            if (res == NO_ERR) {
+                res = cap_add_stdval(newcaps, CAP_STDID_V11);
+            }
         }
     }
 
@@ -223,9 +231,17 @@ status_t
     if (res == NO_ERR) {
         if (agt_profile->agt_usevalidate) {
             /* set the validate capability */
-            res = cap_add_std(newmycaps, CAP_STDID_VALIDATE);
-            if (res == NO_ERR) {
-                res = cap_add_stdval(newcaps, CAP_STDID_VALIDATE);
+            if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
+                res = cap_add_std(newmycaps, CAP_STDID_VALIDATE);
+                if (res == NO_ERR) {
+                    res = cap_add_stdval(newcaps, CAP_STDID_VALIDATE);
+                }
+            }
+            if (ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+                res = cap_add_std(newmycaps, CAP_STDID_VALIDATE11);
+                if (res == NO_ERR) {
+                    res = cap_add_stdval(newcaps, CAP_STDID_VALIDATE11);
+                }
             }
         }
     }

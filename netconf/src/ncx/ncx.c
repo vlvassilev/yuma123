@@ -290,6 +290,9 @@ boolean             use_prefix;
  */
 boolean             cwd_subdirs;
 
+/* bitmask of protocols to match ncx_protocol_t enum */
+uint32              protocols_enabled;
+
 /********************************************************************
 * FUNCTION check_moddef
 * 
@@ -7537,6 +7540,59 @@ boolean
 {
     return cwd_subdirs;
 }   /* ncx_get_cwd_subdirs */
+
+
+/********************************************************************
+* FUNCTION ncx_protocol_enabled
+*
+* Check if the specified protocol version is enabled
+*
+* RETURNS:
+*   TRUE if protocol enabled
+*   FALSE if protocol not enabled or error
+*********************************************************************/
+boolean
+    ncx_protocol_enabled (ncx_protocol_t proto)
+{
+    boolean ret = FALSE;
+    switch (proto) {
+    case NCX_PROTO_NETCONF10:
+        ret = (protocols_enabled & NCX_FL_PROTO_NETCONF10) ? TRUE : FALSE;
+        break;
+    case NCX_PROTO_NETCONF11:
+        ret = (protocols_enabled & NCX_FL_PROTO_NETCONF11) ? TRUE : FALSE;
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return ret;
+
+}   /* ncx_protocol_enabled */
+
+
+/********************************************************************
+* FUNCTION ncx_set_protocol_enabled
+*
+* Set the specified protocol version to be enabled
+*
+* INPUTS:
+*   proto == protocol version to enable
+*********************************************************************/
+void
+    ncx_set_protocol_enabled (ncx_protocol_t proto)
+{
+    switch (proto) {
+    case NCX_PROTO_NETCONF10:
+        protocols_enabled |= NCX_FL_PROTO_NETCONF10;
+        break;
+    case NCX_PROTO_NETCONF11:
+        protocols_enabled |= NCX_FL_PROTO_NETCONF11;
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}   /* ncx_set_protocol_enabled */
 
 
 /* END file ncx.c */

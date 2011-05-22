@@ -81,7 +81,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#define RPC_ERR_NUM_ERRORS   ((uint32)RPC_ERR_PARTIAL_OPERATION)
+#define RPC_ERR_NUM_ERRORS   ((uint32)RPC_ERR_LAST_ERROR)
 
 
 /********************************************************************
@@ -126,6 +126,7 @@ static rpc_err_map_t  rpc_err_map[] = {
       (const xmlChar *)"operation-not-supported" },
     { RPC_ERR_OPERATION_FAILED, (const xmlChar *)"operation-failed" },
     { RPC_ERR_PARTIAL_OPERATION, (const xmlChar *)"partial-operation" },
+    { RPC_ERR_MALFORMED_MESSAGE, (const xmlChar *)"malformed-message" },
     { RPC_ERR_NONE, NULL }
 };
 
@@ -251,7 +252,7 @@ static void
 const xmlChar *
     rpc_err_get_errtag (rpc_err_t errid)
 {
-    if (errid > RPC_ERR_PARTIAL_OPERATION) {
+    if (errid > RPC_ERR_LAST_ERROR) {
         SET_ERROR(ERR_INTERNAL_VAL);
         errid = RPC_ERR_NONE;
     }
@@ -284,7 +285,7 @@ rpc_err_t
 #endif
 
     for (errcode = RPC_ERR_IN_USE;
-         errcode <= RPC_ERR_PARTIAL_OPERATION;
+         errcode <= RPC_ERR_LAST_ERROR;
          errcode++) {
 
         if (!xml_strcmp(errtag, rpc_err_map[errcode].errtag)) {

@@ -320,7 +320,8 @@ typedef enum status_t_
     ERR_NCX_ACCESS_READ_ONLY,           /* 375 */
     ERR_NCX_CONFIG_NOT_TARGET,          /* 376 */
     ERR_NCX_MISSING_RBRACE,             /* 377 */
-    ERR_LAST_USR_ERR,                   /* 378 -- not really used */
+    ERR_NCX_INVALID_FRAMING,            /* 378 */
+    ERR_LAST_USR_ERR,                   /* 379 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

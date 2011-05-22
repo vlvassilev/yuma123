@@ -129,13 +129,15 @@ static ses_total_stats_t   *mytotals;
 * by the manager and this server
 * 
 * INPUTS:
+*    scb == session control block
 *    val == value struct for the hello message to check
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    check_manager_hello (val_value_t *val)
+    check_manager_hello (ses_cb_t *scb,
+                         val_value_t *val)
 {
     val_value_t  *caps, *cap;
 
@@ -143,21 +145,48 @@ static status_t
     caps = val_find_child(val, NC_MODULE, NCX_EL_CAPABILITIES);
     if (caps && caps->res == NO_ERR) {
 
-        for (cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
-             cap != NULL;
-             cap = val_find_next_child(caps, 
-                                       NC_MODULE, 
-                                       NCX_EL_CAPABILITY, 
-                                       cap)) {
+        if (ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+            for (cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
+                 cap != NULL;
+                 cap = val_find_next_child(caps, 
+                                           NC_MODULE, 
+                                           NCX_EL_CAPABILITY, 
+                                           cap)) {
+                if (cap->res == NO_ERR) {
+                    if (!xml_strcmp(VAL_STR(cap), CAP_BASE_URN11)) {
+                        if (LOGDEBUG3) {
+                            log_debug3("\nagt_hello: set "
+                                       "protocol to base:1.1");
+                        }
+                        ses_set_protocol(scb, NCX_PROTO_NETCONF11);
+                        return NO_ERR;
+                    }
+                }
+            }
+        }
 
-            if (cap->res == NO_ERR) {
-                if (!xml_strcmp(VAL_STR(cap), CAP_BASE_URN)) {
-                    return NO_ERR;
+        if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
+            for (cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
+                 cap != NULL;
+                 cap = val_find_next_child(caps, 
+                                           NC_MODULE, 
+                                           NCX_EL_CAPABILITY, 
+                                           cap)) {
+                if (cap->res == NO_ERR) {
+                    if (!xml_strcmp(VAL_STR(cap), CAP_BASE_URN)) {
+                        if (LOGDEBUG3) {
+                            log_debug3("\nagt_hello: set "
+                                       "protocol to base:1.0");
+                        }
+                        ses_set_protocol(scb, NCX_PROTO_NETCONF10);
+                        return NO_ERR;
+                    }
                 }
             }
         }
     }
 
+    log_info("\nagt_hello: no NETCONF base:1.0 or base:1.1 URI found");
     return ERR_NCX_MISSING_VAL_INST;
 
 } /* check_manager_hello */
@@ -303,7 +332,7 @@ void
      * and it matches the server protocol version
      */
     if (res == NO_ERR) {
-        res = check_manager_hello(val);
+        res = check_manager_hello(scb, val);
     }
 
     /* report first error and close session */
@@ -331,6 +360,11 @@ void
                      scb->sid, 
                      scb->username, 
                      scb->peeraddr);
+            if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
+                log_info(" (base:1.1)");
+            } else {
+                log_info(" (base:1.0)");
+            }
         }
 
     }

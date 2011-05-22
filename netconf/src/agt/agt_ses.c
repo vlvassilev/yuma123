@@ -636,6 +636,13 @@ ses_cb_t *
             scb->withdef = profile->agt_defaultStyleEnum;
             scb->indent = profile->agt_indent;
 
+            if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
+                scb->protocols_requested |= NCX_FL_PROTO_NETCONF10;
+            }
+            if (ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+                scb->protocols_requested |= NCX_FL_PROTO_NETCONF11;
+            }
+
             /* initialize the static vars */
             scb->type = SES_TYP_NETCONF;
             scb->transport = transport;
@@ -648,7 +655,7 @@ ses_cb_t *
             scb->fd = fd;
             scb->instate = SES_INST_IDLE;
             scb->stream_output = TRUE;
-            res = ses_msg_new_buff(scb, &scb->outbuff);
+            res = ses_msg_new_buff(scb, TRUE, &scb->outbuff);
         } else {
             res = ERR_INTERNAL_MEM;
         }

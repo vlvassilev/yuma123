@@ -324,11 +324,6 @@ static void
         }
     }
 
-    /* check the subdirs parameter */
-    val_set_subdirs_parm(valset);
-
-    /* version param handled externally */
-
     /* get usexmlorder param */
     val = val_find_child(valset, 
                          AGT_CLI_MODULE, 
@@ -490,6 +485,14 @@ status_t
 
         /* set the feature code generation parameters */
         val_set_feature_parms(valset);
+
+        /* check the subdirs parameter */
+        val_set_subdirs_parm(valset);
+
+        /* check the protocols parameter */
+        res = val_set_protocols_parm(valset);
+
+        /* version param handled externally */
 
         /* check if version mode requested */
         val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);

@@ -2732,6 +2732,30 @@ extern void
 extern boolean
     ncx_get_cwd_subdirs (void);
 
+/********************************************************************
+* FUNCTION ncx_protocol_enabled
+*
+* Check if the specified protocol version is enabled
+*
+* RETURNS:
+*   TRUE if protocol enabled
+*   FALSE if protocol not enabled or error
+*********************************************************************/
+extern boolean
+    ncx_protocol_enabled (ncx_protocol_t proto);
+
+
+/********************************************************************
+* FUNCTION ncx_set_protocol_enabled
+*
+* Set the specified protocol version to be enabled
+*
+* INPUTS:
+*   proto == protocol version to enable
+*********************************************************************/
+extern void
+    ncx_set_protocol_enabled (ncx_protocol_t proto);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -57,9 +57,13 @@ extern "C" {
 
 #define CAP_VERSION_LEN  15
 
-/* NETCONF Base Protocol Capability String */
+/* NETCONF Base Protocol Capability String (base:1.0) */
 #define CAP_BASE_URN ((const xmlChar *) \
 		      "urn:ietf:params:netconf:base:1.0")
+
+/* NETCONF Base Protocol Capability String (base:1.1) */
+#define CAP_BASE_URN11 ((const xmlChar *) \
+                        "urn:ietf:params:netconf:base:1.1")
 
 
 /* NETCONF Capability Identifier Base String */
@@ -73,7 +77,6 @@ extern "C" {
     (const xmlChar *)"http://xml.juniper.net/netconf/junos/1.0"
 
 #define CAP_SEP_CH   '/'
-
 
 
 /************************************************************
@@ -96,9 +99,11 @@ extern "C" {
 #define CAP_BIT_INTERLEAVE    bit10
 #define CAP_BIT_PARTIAL_LOCK  bit11
 #define CAP_BIT_WITH_DEFAULTS bit12
+#define CAP_BIT_V11           bit13
+#define CAP_BIT_VALIDATE11    bit14
 
 /* put the version numbers in the capability names for now */
-#define CAP_NAME_V1                 ((const xmlChar *)"")
+#define CAP_NAME_V1                 ((const xmlChar *)"base:1.0")
 #define CAP_NAME_WR_RUN             ((const xmlChar *)"writable-running:1.0")
 #define CAP_NAME_CANDIDATE          ((const xmlChar *)"candidate:1.0")
 #define CAP_NAME_CONF_COMMIT        ((const xmlChar *)"confirmed-commit:1.0")
@@ -111,6 +116,8 @@ extern "C" {
 #define CAP_NAME_INTERLEAVE         ((const xmlChar *)"interleave:1.0")
 #define CAP_NAME_PARTIAL_LOCK       ((const xmlChar *)"partial-lock:1.0")
 #define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults:1.0")
+#define CAP_NAME_V11                ((const xmlChar *)"base:1.1")
+#define CAP_NAME_VALIDATE11         ((const xmlChar *)"validate:1.1")
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="
@@ -157,6 +164,8 @@ typedef enum cap_stdid_t_ {
     CAP_STDID_INTERLEAVE,
     CAP_STDID_PARTIAL_LOCK,
     CAP_STDID_WITH_DEFAULTS,
+    CAP_STDID_V11,
+    CAP_STDID_VALIDATE11,
     CAP_STDID_LAST_MARKER
 } cap_stdid_t;
 

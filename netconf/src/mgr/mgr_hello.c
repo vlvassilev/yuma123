@@ -144,6 +144,7 @@ static status_t
     mgr_scb_t    *mscb;
     boolean       c1, c2;
     status_t      res;
+    ncx_protocol_t proto;
 
     mscb = mgr_ses_get_mscb(scb);
 
@@ -190,7 +191,8 @@ static status_t
                  * }
                  */
                 if (LOGDEBUG2) {
-                    log_debug2("\nmgr: Got enterprise capability %s", VAL_STR(cap));
+                    log_debug2("\nmgr: Got enterprise capability %s", 
+                               VAL_STR(cap));
                 }
 
                 /* hack: check for juniper 1.0 server
@@ -214,11 +216,81 @@ static status_t
     }
 
     /* check if the mandatory base protocol capability was set */
-    if (!cap_std_set(&mscb->caplist, CAP_STDID_V1)) {
-        log_error("\nError: no support for RFC 4741 (base:1.0) "
-                  "found in server <hello>");
+    res = NO_ERR;
+    proto = NCX_PROTO_NONE;
+    c1 = cap_std_set(&mscb->caplist, CAP_STDID_V1);
+    c2 = cap_std_set(&mscb->caplist, CAP_STDID_V11);
+
+    if (c1 && c2) {
+        if (LOGDEBUG2) {
+            log_debug2("\nmgr_hello: server supports "
+                       "base:1.0 and base:1.1");
+        }
+        if (ses_protocol_requested(scb, NCX_PROTO_NETCONF11)) {
+            if (LOGDEBUG2) {
+                log_debug2("\nmgr_hello: set protocol to base:1.1 "
+                           "for session '%d'",
+                           scb->sid);
+            }
+            ses_set_protocol(scb, NCX_PROTO_NETCONF11);
+        } else if (ses_protocol_requested(scb, NCX_PROTO_NETCONF10)) {
+            if (LOGDEBUG2) {
+                log_debug2("\nmgr_hello: set protocol to base:1.0 "
+                           "for session '%d'",
+                           scb->sid);
+            }
+            ses_set_protocol(scb, NCX_PROTO_NETCONF10);
+        } else {
+            log_error("\nError: Internal: no protocols requested, "
+                      "dropping session '%d'",
+                      scb->sid);
+            res = ERR_NCX_MISSING_VAL_INST;
+        }
+    } else if (c1) {
+        if (LOGDEBUG2) {
+            log_debug2("\nmgr_hello: server supports "
+                       "base:1.0 only");
+        }
+        if (ses_protocol_requested(scb, NCX_PROTO_NETCONF10)) {
+            if (LOGDEBUG2) {
+                log_debug2("\nmgr_hello: set protocol to base:1.0 "
+                           "for session '%d'",
+                           scb->sid);
+            }
+            ses_set_protocol(scb, NCX_PROTO_NETCONF10);
+        } else {
+            log_error("\nError: Server supports base:1.0 only;"
+                     "\n  Protocol 'netconf1.0' not enabled, "
+                      "dropping session '%d'",
+                      scb->sid);
+            res = ERR_NCX_MISSING_VAL_INST;
+        }
+    } else if (c2) {
+        if (LOGDEBUG2) {
+            log_debug2("\nmgr_hello: server supports "
+                       "base:1.1 only");
+        }
+        if (ses_protocol_requested(scb, NCX_PROTO_NETCONF11)) {
+            if (LOGDEBUG2) {
+                log_debug2("\nmgr_hello: set protocol to base:1.1 "
+                           "for session '%d'",
+                           scb->sid);
+            }
+            ses_set_protocol(scb, NCX_PROTO_NETCONF11);
+        } else {
+            log_error("\nError: Server supports base:1.1 only;"
+                     "\n  Protocol 'netconf1.1' not enabled, "
+                      "dropping session '%d'",
+                      scb->sid);
+            res = ERR_NCX_MISSING_VAL_INST;
+        }
+    } else {
+        log_error("\nError: no support for base:1.0 "
+                  "or base:1.1 found in server <hello>;"
+                  "\n   dropping session '%d'",
+                  scb->sid);
         return ERR_NCX_MISSING_VAL_INST;
-    }   
+    }
 
     /* set target type var in the manager session control block */
     c1 = cap_std_set(&mscb->caplist, CAP_STDID_WRITE_RUNNING);
@@ -451,8 +523,8 @@ status_t
     xml_init_attrs(&attrs);
     nc_id = xmlns_nc_id();
 
-    /* get my client caps */
-    mycaps = mgr_cap_get_capsval();
+    /* get my client caps, custom made for this session */
+    mycaps = mgr_cap_get_ses_capsval(scb);
     if (!mycaps) {
         res = SET_ERROR(ERR_INTERNAL_PTR);
     }
@@ -498,6 +570,9 @@ status_t
 
     xml_clean_attrs(&attrs);
     xml_msg_clean_hdr(&msg);
+    if (mycaps != NULL) {
+        val_free_value(mycaps);
+    }
     return res;
 
 } /* mgr_hello_send */

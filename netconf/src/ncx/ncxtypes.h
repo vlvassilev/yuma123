@@ -533,6 +533,14 @@ typedef enum ncx_feature_code_t_ {
 } ncx_feature_code_t;
 
 
+/* NCX session protocol versions supported */
+typedef enum ncx_protocol_t_ {
+    NCX_PROTO_NONE,
+    NCX_PROTO_NETCONF10,      /* RFC 4741 base:1.0  */
+    NCX_PROTO_NETCONF11       /* RFC xxxx base:1.1 */
+} ncx_protocol_t;
+
+
 /* YANG feature entry */
 typedef struct ncx_feature_t_ {
     dlq_hdr_t           qhdr;

@@ -125,6 +125,9 @@ extern void
 *             needed
 *   retsid == address of session ID output
 *   getvar_cb == XPath get varbind callback function
+*   protocols_parent == pointer to val_value_t that may contain
+*         a session-specific --protocols variable to set
+*         == NULL if not used
 *
 * OUTPUTS:
 *   *retsid == session ID, if no error
@@ -139,7 +142,8 @@ extern status_t
 			 uint16 port,
                          ncxmod_temp_progcb_t *progcb,
 			 ses_id_t *retsid,
-                         xpath_getvar_fn_t getvar_fn);
+                         xpath_getvar_fn_t getvar_fn,
+                         val_value_t *protocols_parent);
 
 
 /********************************************************************

@@ -84,7 +84,7 @@ extern "C" {
 #define SES_NULL_SID  0
 
 /* controls the size of each buffer chuck */
-#define SES_MSG_BUFFSIZE  2000
+#define SES_MSG_BUFFSIZE  1000   /* 2000 */
 
 /* max number of buffer chunks a session can have allocated at once  */
 #define SES_MAX_BUFFERS  4096
@@ -98,7 +98,29 @@ extern "C" {
 /* max number of bytes to try to send in one call to the write_fn */
 #define SES_MAX_BYTESEND   0xffff
 
+/* max desired lines size; not a hard limit */
 #define SES_DEF_LINESIZE   72
+
+/* max size of a valid base:1.1 chunk header start tag */
+#define SES_MAX_STARTCHUNK_SIZE 13
+
+/* max size of the chunk size number in the chunk start tag */
+#define SES_MAX_CHUNKNUM_SIZE 10
+
+/* the buffers start point will always be a low number
+ * with maybe up to 16 or so framing chars
+ * pick a random number that won't be a real buffer start
+ */
+#define SES_FAKE_BUFFSTART 104201
+
+/* padding at start of buffer for chunk tagging
+ * Max: \n#xxxxxxx\n --> 7 digit chunk size
+ */
+#define SES_STARTCHUNK_PAD  10
+
+/* leave enough room at the end for EOChunks */
+#define SES_ENDCHUNK_PAD  4
+
 
 /********************************************************************
 *                                                                   *
@@ -118,10 +140,10 @@ typedef enum ses_type_t_ {
 } ses_type_t;
 
 
-/* Transport Types */
+/* NETCONF Transport Types */
 typedef enum ses_transport_t_ {
     SES_TRANSPORT_NONE,
-    SES_TRANSPORT_SSH,
+    SES_TRANSPORT_SSH,   /* only enum supported */
     SES_TRANSPORT_BEEP,
     SES_TRANSPORT_SOAP,
     SES_TRANSPORT_SOAPBEEP,
@@ -146,7 +168,10 @@ typedef enum ses_instate_t_ {
     SES_INST_NONE,
     SES_INST_IDLE,
     SES_INST_INMSG,
-    SES_INST_INEND
+    SES_INST_INSTART,
+    SES_INST_INBETWEEN,
+    SES_INST_INEND,
+    SES_INST_FINMSG
 } ses_instate_t;
 
 
@@ -218,8 +243,10 @@ typedef struct ses_total_stats_t_ {
 /* Session Message Buffer */
 typedef struct ses_msg_buff_t_ {
     dlq_hdr_t        qhdr;
-    size_t           bufflen;      /* buff actual size */
-    size_t           buffpos;      /* buff cur position */
+    size_t           buffstart;        /* buff start pos */
+    size_t           bufflen;        /* buff actual size */
+    size_t           buffpos;       /* buff cur position */
+    boolean          islast;      /* T: last buff in msg */
     xmlChar          buff[SES_MSG_BUFFSIZE];   
 } ses_msg_buff_t;
 
@@ -236,9 +263,12 @@ typedef struct ses_ready_t_ {
 typedef struct ses_msg_t_ {
     dlq_hdr_t        qhdr;        /* Q header for buffcb->msgQ */
     boolean          ready;               /* ready for parsing */
+    boolean          deferred;          /* framing not set yet */
     ses_msg_buff_t  *curbuff;         /* cur position in buffQ */
     dlq_hdr_t        buffQ;             /* Q of ses_msg_buff_t */
     ses_prolog_state_t prolog_state;      /* for insert prolog */
+    size_t           curchunksize;           /* cur chunk rcvd */
+    size_t           expchunksize;      /* expected chunk size */
 } ses_msg_t;
 
 /* optional read function for the session */
@@ -254,6 +284,8 @@ typedef status_t (*ses_write_fn_t) (void *s);
 typedef struct ses_cb_t_ {
     dlq_hdr_t        qhdr;           /* queued by manager only */
     ses_type_t       type;                      /* session type */
+    uint32           protocols_requested;            /* bitmask */
+    ncx_protocol_t   protocol;       /* protocol version in use */
     ses_transport_t  transport;               /* transport type */
     ses_state_t      state;                    /* session state */
     ses_mode_t       mode;                      /* session mode */
@@ -261,21 +293,23 @@ typedef struct ses_cb_t_ {
     ses_id_t         killedbysid;       /* killed-by session ID */
     ses_id_t         rollback_sid;   /* session ID for rollback */
     ses_term_reason_t termreason;
-    time_t           hello_time;     /* used for hello timeout */
-    time_t           last_rpc_time;   /* used for idle timeout */
+    time_t           hello_time;      /* used for hello timeout */
+    time_t           last_rpc_time;    /* used for idle timeout */
     xmlChar         *start_time;         /* dateTime start time */
     xmlChar         *username;                       /* user ID */
     xmlChar         *peeraddr;           /* Inet address string */
+    boolean          eomdone;            /* SSH EOM established */
     boolean          active;            /* <hello> completed ok */
     boolean          notif_active;       /* subscription active */
     boolean          stream_output;        /* buffer/stream svr */
     boolean          noxmlns;          /* xml-nons display-mode */
+    boolean          framing11;     /* T: base:1.1, F: base:1.0 */
     xmlTextReaderPtr reader;             /* input stream reader */
     FILE            *fp;             /* set if output to a file */
     int              fd;           /* set if output to a socket */
     ses_read_fn_t    rdfn;          /* set if external write fn */
     ses_write_fn_t   wrfn;           /* set if external read fn */
-    uint32           inendpos;          /* inside EOM directive */
+    uint32           inendpos;      /* inside framing directive */
     ses_instate_t    instate;               /* input state enum */
     uint32           buffcnt;           /* current buffer count */
     uint32           freecnt;            /* current freeQ count */
@@ -287,6 +321,8 @@ typedef struct ses_cb_t_ {
     ses_ready_t      outready;          /* header for outreadyQ */
     ses_stats_t      stats;           /* per-session statistics */
     void            *mgrcb;    /* if manager session, mgr_scb_t */
+    xmlChar          startchunk[SES_MAX_STARTCHUNK_SIZE+1];
+
     /*** user preferences ***/
     int32            indent;          /* indent N spaces (0..9) */
     uint32           linesize;              /* TERM line length */
@@ -750,6 +786,69 @@ extern void
 *********************************************************************/
 extern boolean
     ses_get_xml_nons (const ses_cb_t *scb);
+
+
+/********************************************************************
+* FUNCTION ses_set_protocol
+* 
+*  set the NETCONF protocol version in use
+*
+* INPUTS:
+*    scb == session to set
+*    proto == protocol to set
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    ses_set_protocol (ses_cb_t *scb,
+                      ncx_protocol_t proto);
+
+
+/********************************************************************
+* FUNCTION ses_get_protocol
+* 
+*  Get the NETCONF protocol set (or unset) for this session
+*
+* INPUTS:
+*    scb == session to get
+*
+* RETURNS:
+*   protocol enumeration in use
+*********************************************************************/
+extern ncx_protocol_t
+    ses_get_protocol (const ses_cb_t *scb);
+
+
+/********************************************************************
+* FUNCTION ses_set_protocols_requested
+* 
+*  set the NETCONF protocol versions requested
+*
+* INPUTS:
+*    scb == session to set
+*    proto == protocol to set
+* RETURNS:
+*    status
+*********************************************************************/
+extern void
+    ses_set_protocols_requested (ses_cb_t *scb,
+                                 ncx_protocol_t proto);
+
+
+/********************************************************************
+* FUNCTION ses_protocol_requested
+* 
+*  check if the NETCONF protocol version was requested
+*
+* INPUTS:
+*    scb == session to check
+*    proto == protocol to check
+* RETURNS:
+*    TRUE is requested; FALSE otherwise
+*********************************************************************/
+extern boolean
+    ses_protocol_requested (ses_cb_t *scb,
+                            ncx_protocol_t proto);
 
 
 #ifdef __cplusplus

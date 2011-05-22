@@ -222,6 +222,20 @@ extern "C" {
                 has succeeded (<ok-element>), failed (<bad-element>),
                 or not attempted (<noop-element>).
 
+   [New in NETCONF base:1.1; do not send to NETCONF:base:1.0 sessions]
+
+    error-tag:      malformed-message
+    error-type:     rpc
+    error-severity: error
+    error-info:     none
+    Description:    A message could not be handled because it failed to
+                 be parsed correctly. For example, the message is not
+                 well-formed XML or it uses an invalid character set.
+
+                 This error-tag is new in :base:1.1 and MUST NOT be
+                 sent to old clients.
+
+
 
 ***/
 
@@ -306,6 +320,7 @@ extern "C" {
 #define RPC_ERR_APPTAG_NO_SUPPORT       (const xmlChar *)"no-support"
 
 
+#define RPC_ERR_LAST_ERROR RPC_ERR_MALFORMED_MESSAGE
 
 
 /********************************************************************
@@ -335,7 +350,8 @@ typedef enum rpc_err_t_ {
     RPC_ERR_DATA_MISSING,
     RPC_ERR_OPERATION_NOT_SUPPORTED,
     RPC_ERR_OPERATION_FAILED,
-    RPC_ERR_PARTIAL_OPERATION
+    RPC_ERR_PARTIAL_OPERATION,    /* deprecated; not used */
+    RPC_ERR_MALFORMED_MESSAGE
 } rpc_err_t;
 
 

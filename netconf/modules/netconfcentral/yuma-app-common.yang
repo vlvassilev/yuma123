@@ -14,6 +14,12 @@ module yuma-app-common {
     description 
        "Common CLI parameters used in all yuma applications.";
 
+    revision 2011-04-24 {
+       description 
+         "Remove empty featureParms grouping.
+          Add ProtocolsParm grouping.";
+    }
+
     revision 2011-01-28 {
        description 
          "Add OutputParm grouping";
@@ -346,9 +352,6 @@ module yuma-app-common {
         }
     }
 
-    grouping FeatureParms {
-    }
-
     grouping OutputParm {
         leaf output {
           description 
@@ -392,8 +395,25 @@ module yuma-app-common {
         }
     }
 
-
-
+    grouping ProtocolsParm {
+        leaf protocols {
+           description
+             "Specifies which protocol versions the program or session
+              will attempt to use. Empty set is not allowed.";
+           must ". != ''";
+           type bits {
+              bit netconf1.0 {
+                 description "RFC 4741 base:1.0";
+                 position 0;
+              }
+              bit netconf1.1 {
+                 description "RFC xxxx base:1.1";
+                 position 1;
+              }
+           }
+           /* default "netconf1.0 netconf1.1"; */
+        }
+    }
 }
 
 

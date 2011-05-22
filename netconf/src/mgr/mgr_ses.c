@@ -544,6 +544,9 @@ void
 *             needed
 *   retsid == address of session ID output
 *   getvar_cb == XPath get varbind callback function
+*   protocols_parent == pointer to val_value_t that may contain
+*         a session-specific --protocols variable to set
+*         == NULL if not used
 *
 * OUTPUTS:
 *   *retsid == session ID, if no error
@@ -558,7 +561,8 @@ status_t
                          uint16 port,
                          ncxmod_temp_progcb_t *progcb,
                          ses_id_t *retsid,
-                         xpath_getvar_fn_t getvar_fn)
+                         xpath_getvar_fn_t getvar_fn,
+                         val_value_t *protocols_parent)
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
@@ -612,7 +616,7 @@ status_t
     scb->mgrcb = mscb;
 
     /* make sure at least 1 outbuff buffer is available */
-    res = ses_msg_new_buff(scb, &scb->outbuff);
+    res = ses_msg_new_buff(scb, TRUE, &scb->outbuff);
     if (res != NO_ERR) {
         mgr_free_scb(scb->mgrcb);
         scb->mgrcb = NULL;
@@ -682,6 +686,10 @@ status_t
     /* add the FD to SCB mapping in the definition registry */
     if (res == NO_ERR) {
         res = def_reg_add_scb(scb->fd, scb);
+    }
+
+    if (res == NO_ERR && protocols_parent != NULL) {
+        res = val_set_ses_protocols_parm(scb, protocols_parent);
     }
 
     /* send the manager hello to the agent */
@@ -1142,11 +1150,13 @@ status_t
 
     while (buff) {
         if (res == NO_ERR) {
+            ses_msg_add_framing(scb, buff);
             done = FALSE;
             while (!done) {
-                ret = libssh2_channel_write(mscb->channel, 
-                                            (char *)buff->buff, 
-                                            buff->bufflen);
+                ret = 
+                    libssh2_channel_write(mscb->channel,
+                                          (char *)&buff->buff[buff->buffstart],
+                                          buff->bufflen);
                 if (ret < 0 || ret != (int)buff->bufflen) {
                     if (ret == LIBSSH2_ERROR_EAGAIN) {
                         continue;

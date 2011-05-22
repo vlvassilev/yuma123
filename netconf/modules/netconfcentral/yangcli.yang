@@ -50,6 +50,12 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2011-04-22 {
+       description 
+          "Added --protocols parm via uses ProtocolsParm.
+           Also allow setting --protocols in <connect> RPC.";
+    }
+
     revision 2011-03-19 {
        description 
           "Added 'xml-nons' display mode to display-mode parameter.
@@ -275,6 +281,7 @@ module yangcli {
           type nt:Timeout;
         }
  
+        uses ncxapp:ProtocolsParm;
     }
 
     grouping XPathParms {

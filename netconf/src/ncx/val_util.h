@@ -756,6 +756,42 @@ extern void
 
 
 /********************************************************************
+* FUNCTION val_set_protocols_parm
+*
+*   --protocols=bits [netconf1.0, netconf1.1]
+*
+* Handle the protocols parameter
+*
+* INPUTS:
+*   parentval == CLI container to check for the protocols parm
+*
+* RETURNS:
+*    status:  at least 1 protocol must be selected
+*********************************************************************/
+extern status_t
+    val_set_protocols_parm (val_value_t *parentval);
+
+
+/********************************************************************
+* FUNCTION val_set_ses_protocols_parm
+*
+*   --protocols=bits [netconf1.0, netconf1.1]
+*
+* Handle the protocols parameter
+*
+* INPUTS:
+*   scb == session control block to use
+*   parentval == CLI container to check for the protocols parm
+*
+* RETURNS:
+*    status:  at least 1 protocol must be selected
+*********************************************************************/
+extern status_t
+    val_set_ses_protocols_parm (ses_cb_t *scb,
+                                val_value_t *parentval);
+
+
+/********************************************************************
 * FUNCTION val_ok_to_partial_lock
 *
 * Check if the specified root val could be locked

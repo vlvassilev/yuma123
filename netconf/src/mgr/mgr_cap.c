@@ -127,7 +127,7 @@ status_t
         res = ERR_INTERNAL_MEM;
     }
 
-    /* get a new val_value_t cap list for agent <hello> messages */
+    /* get a new val_value_t cap list for manager <hello> messages */
     if (res == NO_ERR) {
         newcaps = xml_val_new_struct(NCX_EL_CAPABILITIES, nc_id);
         if (!newcaps) {
@@ -192,13 +192,62 @@ cap_list_t *
 * INPUTS:
 *    none
 * RETURNS:
-*    pointer to the agent caps list
+*    pointer to the manager caps list
 *********************************************************************/
 val_value_t * 
     mgr_cap_get_capsval (void)
 {
     return mgr_caps;
 } /* mgr_cap_get_capsval */
+
+
+/********************************************************************
+* FUNCTION mgr_cap_get_ses_capsval
+*
+* Get the NETCONF manager capabilities ain val_value_t format
+* for a specific session, v2 supports base1.0 and/or base1.1
+* INPUTS:
+*    scb == session control block to use
+* RETURNS:
+*    MALLOCED pointer to the manager caps list to use
+*    and then discard with val_free_value
+*********************************************************************/
+val_value_t * 
+    mgr_cap_get_ses_capsval (ses_cb_t *scb)
+{
+    val_value_t *newcaps;
+    xmlns_id_t  nc_id;
+    status_t    res;
+
+    nc_id = xmlns_nc_id();
+    res = NO_ERR;
+
+    /* get a new val_value_t cap list for manager <hello> messages */
+    newcaps = xml_val_new_struct(NCX_EL_CAPABILITIES, nc_id);
+    if (newcaps == NULL) {
+        return NULL;
+    }
+
+    /* add capability for NETCONF version 1.0 support */
+    if (ses_protocol_requested(scb, NCX_PROTO_NETCONF10)) {
+        res = cap_add_stdval(newcaps, CAP_STDID_V1);
+    }
+    /* add capability for NETCONF version 1.1 support */
+    if (res == NO_ERR &&
+        ses_protocol_requested(scb, NCX_PROTO_NETCONF11)) {
+        res = cap_add_stdval(newcaps, CAP_STDID_V11);
+    }
+
+    /* check the return value */
+    if (res != NO_ERR) {
+        val_free_value(newcaps);
+        newcaps = NULL;
+    }   
+
+    return newcaps;;
+
+
+} /* mgr_cap_get_ses_capsval */
 
 
 

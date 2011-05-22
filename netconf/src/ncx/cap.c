@@ -148,6 +148,8 @@ static cap_stdrec_t stdcaps[] =
     CAP_NAME_PARTIAL_LOCK },
   { CAP_STDID_WITH_DEFAULTS, CAP_BIT_WITH_DEFAULTS, 
     CAP_NAME_WITH_DEFAULTS },
+  { CAP_STDID_V11, CAP_BIT_V11, CAP_NAME_V11 },
+  { CAP_STDID_VALIDATE11, CAP_BIT_VALIDATE11, CAP_NAME_VALIDATE11 },
   { CAP_STDID_LAST_MARKER, 0x0, 
     (const xmlChar *)"" } /* end-of-list marker */
 };
@@ -730,6 +732,10 @@ status_t
         pfix = CAP_BASE_URN;
         cap = NULL;
         len = xml_strlen(pfix);
+    } else if (capstd==CAP_STDID_V11) {
+        pfix = CAP_BASE_URN11;
+        cap = NULL;
+        len = xml_strlen(pfix);
     } else {
         pfix = CAP_URN;
         cap = stdcaps[capstd].cap_name;
@@ -751,7 +757,8 @@ status_t
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
-                                xmlns_nc_id(), str);
+                                xmlns_nc_id(), 
+                                str);
     if (!capval) {
         m__free(str);
         return ERR_INTERNAL_MEM;
@@ -791,9 +798,14 @@ status_t
     }
 #endif
 
-    /* the base capability is a different form than the rest */
+    /* the base:1.0 capability is a different form than the rest */
     if (!xml_strcmp(uri, CAP_BASE_URN)) {
         return cap_add_std(caplist, CAP_STDID_V1);
+    }
+
+    /* the base:1.1 capability is a different form than the rest */
+    if (!xml_strcmp(uri, CAP_BASE_URN11)) {
+        return cap_add_std(caplist, CAP_STDID_V11);
     }
 
     /* hack: support juniper servers which send the NETCONF
@@ -1761,13 +1773,7 @@ void
     }
 #endif
 
-    if (cap_std_set(caplist, CAP_STDID_V1)) {
-        log_write("\n   Protocol Version: RFC 4741");
-    } else {
-        log_write("\n   Protocol Version: Unknown");
-    }
-
-    for (capid = CAP_STDID_WRITE_RUNNING;
+    for (capid = CAP_STDID_V1;
          capid < CAP_STDID_LAST_MARKER;  
          capid++) {
 

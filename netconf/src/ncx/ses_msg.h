@@ -141,6 +141,8 @@ extern void
 *
 * INPUTS:
 *   scb == session control block to malloc a new message for
+*   outbuff == TRUE if this is for outgoing message
+*              FALSE if this is for incoming message
 *   buff == address of ses_msg_buff_t pointer that will be set
 *
 * OUTPUTS:
@@ -151,7 +153,8 @@ extern void
 *********************************************************************/
 extern status_t
     ses_msg_new_buff (ses_cb_t *scb, 
-		      ses_msg_buff_t **buff);
+                      boolean outbuff,
+                      ses_msg_buff_t **buff);
 
 
 /********************************************************************
@@ -177,6 +180,7 @@ extern void
 * Add some text to the message buffer
 *
 * INPUTS:
+*   scb == session control block to use
 *   buff == buffer to write to
 *   ch  == xmlChar to write
 *
@@ -185,8 +189,9 @@ extern void
 *
 *********************************************************************/
 extern status_t
-    ses_msg_write_buff (ses_msg_buff_t *buff,
-			uint32 ch);
+    ses_msg_write_buff (ses_cb_t *scb,
+                        ses_msg_buff_t *buff,
+                        uint32 ch);
 
 
 /********************************************************************
@@ -308,6 +313,42 @@ extern ses_ready_t *
 extern void
     ses_msg_dump (const ses_msg_t *msg,
 		  const xmlChar *text);
+
+
+/********************************************************************
+* FUNCTION ses_msg_add_framing
+*
+* Add the base:1.1 framing chars to the buffer and adjust
+* the buffer size pointers
+*
+* INPUTS:
+*   scb == session control block
+*   buff == buffer control block
+*
+* OUTPUTS:
+*   framing chars added to buff->buff
+*
+*********************************************************************/
+ extern void
+    ses_msg_add_framing (ses_cb_t *scb,
+                         ses_msg_buff_t *buff);
+
+
+/********************************************************************
+* FUNCTION ses_msg_init_buff
+*
+* Init the buffer fields
+*
+* INPUTS:
+*   scb == session control block
+*   outbuff == TRUE if oupput buffer; FALSE if input buffer
+*   buff == buffer to send
+*********************************************************************/
+extern void
+    ses_msg_init_buff (ses_cb_t *scb,
+                       boolean outbuff,
+                       ses_msg_buff_t *buff);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -1955,6 +1955,7 @@ static void
     val_value_t            *val;
     status_t                res;
     uint16                  port;
+    boolean                 startedsession;
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
@@ -2027,7 +2028,7 @@ static void
     port = 0;
     val = val_find_child(server_cb->connect_valset,
                          YANGCLI_MOD, 
-                         YANGCLI_PORT);
+                         YANGCLI_NCPORT);
     if (val && val->res == NO_ERR) {
         port = VAL_UINT16(val);
     }
@@ -2036,6 +2037,7 @@ static void
              username, 
              server);
 
+    startedsession = FALSE;
     server_cb->state = MGR_IO_ST_CONNECT;
 
     /* this function call will cause us to block while the
@@ -2047,8 +2049,10 @@ static void
                               port, 
                               server_cb->temp_progcb,
                               &server_cb->mysid,
-                              xpath_getvar_fn);
+                              xpath_getvar_fn,
+                              server_cb->connect_valset);
     if (res == NO_ERR) {
+        startedsession = TRUE;
         server_cb->state = MGR_IO_ST_CONN_START;
         log_debug("\nyangcli: Start session %d OK for server '%s'", 
                   server_cb->mysid, 
@@ -2059,7 +2063,13 @@ static void
         if (res != NO_ERR) {
             log_error("\nError: Could not set XPath variable callback");
         }
-    } else {
+    }
+
+    if (res != NO_ERR) {
+        if (startedsession) {
+            mgr_ses_free_session(server_cb->mysid);
+            server_cb->mysid = 0;
+        }
         log_info("\nyangcli: Start session failed for user %s on "
                  "%s (%s)\n", 
                  username, 

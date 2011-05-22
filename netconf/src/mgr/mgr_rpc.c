@@ -331,10 +331,12 @@ mgr_rpc_req_t *
     memset(req, 0x0, sizeof(mgr_rpc_req_t));
 
     mscb = mgr_ses_get_mscb(scb);
+    sprintf(numbuff, "%u", mscb->next_id);
     if (mscb->next_id >= MGR_MAX_REQUEST_ID) {
         mscb->next_id = 0;
+    } else {
+        mscb->next_id++;
     }
-    sprintf(numbuff, "%u", ++mscb->next_id);
 
     req->msg_id = xml_strdup((const xmlChar *)numbuff);
     if (req->msg_id) {
@@ -492,8 +494,8 @@ uint32
 
         timediff = difftime(timenow, req->starttime);
         if (timediff >= (double)req->timeout) {
-            log_debug("\nmgr_rpc: deleting timed out request '%s'",
-                      req->msg_id);
+            log_info("\nmgr_rpc: deleting timed out request '%s'",
+                     req->msg_id);
             deletecount++;
             dlq_remove(req);
             mgr_rpc_free_request(req);

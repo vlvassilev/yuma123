@@ -1327,10 +1327,7 @@ void
     status_t               res, res2;
     boolean                errdone;
     xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
-
-#ifndef IGNORE_STRICT_RFC4741
-    xml_attr_t             *attr, errattr;
-#endif
+    xml_attr_t             *attr;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -1413,12 +1410,14 @@ void
     /* set the default for the with-defaults parameter */
     msg->mhdr.withdef = ses_withdef(scb);
 
-#ifndef IGNORE_STRICT_RFC4741
     /* get the NC RPC message-id attribute; must be present */
     attr = xml_find_attr(top, 0, NCX_EL_MESSAGE_ID);
+
+#ifndef IGNORE_STRICT_RFC4741
     if (!attr || !attr->attr_val) {
+        xml_attr_t             errattr;
+
         res2 = ERR_NCX_MISSING_ATTRIBUTE;
-            
         memset(&errattr, 0x0, sizeof(xml_attr_t));
         errattr.attr_ns = xmlns_nc_id();
         errattr.attr_name = NCX_EL_MESSAGE_ID;
@@ -1485,12 +1484,19 @@ void
         (void)time(&scb->last_rpc_time);
 
         if (LOGDEBUG) {
+            const xmlChar *msgid;
             tstamp_datetime(tstampbuff);
-            log_debug("\nagt_rpc: <%s> for %u=%s@%s [%s]", 
+            if (attr != NULL && attr->attr_val != NULL) {
+                msgid = attr->attr_val;
+            } else {
+                msgid = NCX_EL_NONE;
+            }
+            log_debug("\nagt_rpc: <%s> for %u=%s@%s (m:%s) [%s]", 
                       method.elname,
                       scb->sid,
                       scb->username,
                       scb->peeraddr,
+                      msgid,
                       tstampbuff);
             if (LOGDEBUG2) {
                 xml_dump_node(&method);

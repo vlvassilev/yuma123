@@ -1813,10 +1813,10 @@ static status_t
     ncxmod_mode_t   mode;
 
 
-    if (LOGDEBUG) {
-        log_debug("\nAttempting to load module '%s'", modname);
+    if (LOGDEBUG2) {
+        log_debug2("\nAttempting to load module '%s'", modname);
         if (revision) {
-            log_debug(" r:%s", revision);
+            log_debug2(" r:%s", revision);
         }
     }
 
@@ -1958,9 +1958,9 @@ static status_t
 
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
-            if (LOGDEBUG) {
-                log_debug("\nncxmod: Using module '%s' already loaded", 
-                          modname);
+            if (LOGDEBUG2) {
+                log_debug2("\nncxmod: Using module '%s' already loaded", 
+                           modname);
             }
             if (!pcb->top) {
                 pcb->top = testmod;

@@ -371,25 +371,12 @@ static ssize_t
 {
     boolean   readdone;
     ssize_t   retcnt;
-    uint32    readtries;
 
     readdone = FALSE;
     retcnt = 0;
-    readtries = 0;
     *retres = NO_ERR;
 
     while (!readdone && *retres == NO_ERR) {
-        if (++readtries > MAX_READ_TRIES) {
-#ifdef SUBSYS_TRACE
-            if (errfile) {
-                fprintf(errfile, "\nmax read retries reached");
-            }
-            errdirty = 1;
-#endif
-            *retres = ERR_NCX_SKIPPED;
-            continue;
-        }
-
         retcnt = read(readfd, readbuff, readcnt);
         if (retcnt < 0) {
             if (errno != EAGAIN) {

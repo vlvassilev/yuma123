@@ -1297,7 +1297,6 @@ status_t
     status_t        res;
     ssize_t         ret;
     boolean         done, readdone, erragain;
-    uint32          readtries;
 
 #ifdef DEBUG
     if (!scb) {
@@ -1315,7 +1314,6 @@ status_t
     res = NO_ERR;
     done = FALSE;
     readdone = FALSE;
-    readtries = 0;
     ret = 0;
 
     while (!done) {
@@ -1331,19 +1329,6 @@ status_t
 
         readdone = FALSE;
         while (!readdone && res == NO_ERR) {
-
-            /*#ifdef SES_SSH_DEBUG*/
-            if (++readtries > MAX_READ_TRIES) {
-                if (LOGDEBUG4) {
-                    log_debug4("\nses: max EAGAIN reached for ses(%u)",
-                               scb->sid);
-                }
-                res = NO_ERR;  /* res = ERR_NCX_READ_FAILED; */
-                ses_msg_free_buff(scb, buff);
-                return res;
-            }
-            /*#endif*/
-
             /* read data into the new buffer */
             if (scb->rdfn) {
                 erragain = FALSE;

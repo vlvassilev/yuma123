@@ -3740,7 +3740,7 @@ status_t
     }            
 
     if (LOGDEBUG) {
-        log_debug("\nLoading %s module from file %s", 
+        log_debug("\nLoading %s module from file:\n  %s", 
                    (isyang) ? "YANG" : "YIN",
                    filespec);
     }

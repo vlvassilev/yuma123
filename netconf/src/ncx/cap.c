@@ -1089,7 +1089,6 @@ status_t
                          uri);
             }
         }
-        return ERR_NCX_SKIPPED;
     }
 
     /* assume this is a module capability URI
@@ -1111,16 +1110,18 @@ status_t
         return ERR_INTERNAL_MEM;
     }
 
-    cap->cap_module = xml_strndup(module, modulelen);
-    if (!cap->cap_module) {
-        free_cap(cap);
-        return ERR_INTERNAL_MEM;
+    if (module != NULL && modulelen > 0) {
+        cap->cap_module = xml_strndup(module, modulelen);
+        if (!cap->cap_module) {
+            free_cap(cap);
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     /* check wrong module namespace base URI */
     if (foundnsid) {
         parmname = xmlns_get_module(foundnsid);
-        if (xml_strcmp(parmname, cap->cap_module)) {
+        if (cap->cap_module != NULL && xml_strcmp(parmname, cap->cap_module)) {
             if (usewarning) {
                 log_warn("\nWarning: capability base URI mismatch, "
                          "got '%s' not '%s''", 
@@ -1819,10 +1820,18 @@ void
         }
 
         anycaps = TRUE;
-        if (cap->cap_revision) {
+        if (cap->cap_module && cap->cap_revision) {
             log_write("\n   %s@%s", cap->cap_module, cap->cap_revision);
-        } else {
+        } else if (cap->cap_revision) {
+            log_write("\n   ??@%s", cap->cap_revision);
+        } else if (cap->cap_module) {
             log_write("\n   %s", cap->cap_module);
+        } else if (cap->cap_namespace) {
+            log_write("\n   %s", cap->cap_namespace);            
+        } else if (cap->cap_uri) {
+            log_write("\n   %s", cap->cap_uri);            
+        } else {
+            log_write("\n   ??");            
         }
         
         if (!dlq_empty(&cap->cap_feature_list.memQ)) {

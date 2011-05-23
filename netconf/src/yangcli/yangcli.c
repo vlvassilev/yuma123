@@ -3685,7 +3685,11 @@ static status_t
     /* initialize the module library search result queue */
     {
         log_debug_t dbglevel = log_get_debug_level();
-        log_set_debug_level(LOG_DEBUG_NONE);
+        if (LOGDEBUG3) {
+            ; 
+        } else {
+            log_set_debug_level(LOG_DEBUG_NONE);
+        }
         res = ncxmod_find_all_modules(&modlibQ);
         log_set_debug_level(dbglevel);
         if (res != NO_ERR) {

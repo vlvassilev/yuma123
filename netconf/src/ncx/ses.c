@@ -450,6 +450,7 @@ static status_t
     msg2 = NULL;
     res = NO_ERR;
     buff->buffstart = 0;
+    ch = 0;
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3 && scb->state != SES_ST_INIT) {

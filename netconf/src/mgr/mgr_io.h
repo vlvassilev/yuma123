@@ -170,11 +170,14 @@ extern status_t
  * INPUTS:
  *    cursid == current session ID to check
  *    wantdata == address of return wantdata flag
+ *    anystdout == address of return anystdout flag
  *
  * OUTPUTS:
  *   *wantdata == TRUE if the agent has sent a keepalive
  *                and is expecting a request
  *             == FALSE if no keepalive received this time
+ *  *anystdout  == TRUE if maybe STDOUT was written
+ *                 FALSE if definately no STDOUT written
  *
  * RETURNS:
  *   TRUE if session alive or not confirmed
@@ -182,7 +185,8 @@ extern status_t
  *********************************************************************/
 extern boolean
     mgr_io_process_timeout (ses_id_t  cursid,
-                            boolean *wantdata);
+                            boolean *wantdata,
+                            boolean *anystdout);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

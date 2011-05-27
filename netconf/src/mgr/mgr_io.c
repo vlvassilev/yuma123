@@ -551,11 +551,14 @@ status_t
  * INPUTS:
  *    cursid == current session ID to check
  *    wantdata == address of return wantdata flag
+ *    anystdout == address of return anystdout flag
  *
  * OUTPUTS:
  *   *wantdata == TRUE if the agent has sent a keepalive
  *                and is expecting a request
  *             == FALSE if no keepalive received this time
+ *  *anystdout  == TRUE if maybe STDOUT was written
+ *                 FALSE if definately no STDOUT written
  *
  * RETURNS:
  *   TRUE if session alive or not confirmed
@@ -563,22 +566,28 @@ status_t
  *********************************************************************/
 boolean
     mgr_io_process_timeout (ses_id_t  cursid,
-                            boolean *wantdata)
+                            boolean *wantdata,
+                            boolean *anystdout)
 {
     struct timeval  timeout;
     int             i, ret;
-    boolean         done, retval;
+    boolean         done, retval, anyread;
 
 #ifdef DEBUG
-    if (!wantdata) {
+    if (wantdata == NULL || anystdout == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return TRUE;
     }
 #endif
 
+    /* !!! the client keepalive polling is not implemented !!!! */
+    *wantdata = FALSE;
+    *anystdout = FALSE;
+
     write_sessions();
 
     /* setup select parameters */
+    anyread = FALSE;
     timeout.tv_sec = 0;
     timeout.tv_usec = 100;
     read_fd_set = active_fd_set;
@@ -597,7 +606,7 @@ boolean
                  &timeout);
     if (ret > 0) {
         /* normal return with some bytes */
-        ;
+        anyread = TRUE;
     } else if (ret < 0) {
         /* some error, don't care about EAGAIN here */
         return TRUE;
@@ -611,26 +620,32 @@ boolean
     /* loop: go through the file descriptor numbers and
      * service all the sockets with input pending 
      */
-    for (i = 0; i <= maxrdnum; i++) {
-
-        /* check read input from agent */
-        if (FD_ISSET(i, &read_fd_set)) {
-            retval = read_session(i, cursid);
+    if (anyread) {
+        for (i = 0; i <= maxrdnum; i++) {
+            
+            /* check read input from agent */
+            if (FD_ISSET(i, &read_fd_set)) {
+                retval = read_session(i, cursid);
+            }
         }
     }
 
     /* drain the ready queue before accepting new input */
-    done = FALSE;
-    while (!done) {
-        if (!mgr_ses_process_first_ready()) {
-            done = TRUE;
-        } else if (mgr_shutdown_requested()) {
-            done = TRUE;
+    if (anyread) {
+        done = FALSE;
+        while (!done) {
+            if (!mgr_ses_process_first_ready()) {
+                /* did not write to any session */
+                anyread = FALSE;  
+                done = TRUE;
+            } else if (mgr_shutdown_requested()) {
+                done = TRUE;
+            }
         }
+        write_sessions();
     }
 
-    write_sessions();
-
+    *anystdout = anyread;
     return retval;
 
 }  /* mgr_io_process_timeout */

@@ -385,7 +385,7 @@ static GlAfterTimeout
 {
     server_cb_t  *server_cb;
     ses_cb_t    *scb;
-    boolean      retval, wantdata;
+    boolean      retval, wantdata, anystdout;
 
     (void)gl;
     server_cb = (server_cb_t *)data;
@@ -405,16 +405,16 @@ static GlAfterTimeout
     }
 
     wantdata = FALSE;
-    retval = mgr_io_process_timeout(scb->sid, &wantdata);
+    anystdout = FALSE;
+    retval = mgr_io_process_timeout(scb->sid, &wantdata, &anystdout);
     if (retval) {
         /* this session is probably still alive */
         if (wantdata) {
             server_cb->returncode = MGR_IO_RC_WANTDATA;
-            return GLTO_CONTINUE;
         } else {
             server_cb->returncode = MGR_IO_RC_PROCESSED;
-            return GLTO_REFRESH;
         }
+        return (anystdout) ? GLTO_REFRESH : GLTO_CONTINUE;
     } else {
         /* this session was dropped just now */
         server_cb->returncode = MGR_IO_RC_DROPPED_NOW;

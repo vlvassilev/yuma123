@@ -740,9 +740,7 @@ xmlChar *
         }
         done = TRUE;
         *res = ERR_NCX_CANCELED;
-        if (rcxt->script_level == 0) {
-            rcxt->script_cancel = FALSE;
-        }
+        runstack_clear_cancel(rcxt);
     }
 
     /* get a command line, handling comment and continuation lines */
@@ -862,6 +860,29 @@ void
         rcxt->script_cancel = TRUE;
     }
 }  /* runstack_cancel */
+
+
+/********************************************************************
+* FUNCTION runstack_clear_cancel
+* 
+*  Clear the cancel flags 
+*
+* INPUTS:
+*     rcxt == runstack context to use
+*********************************************************************/
+void
+    runstack_clear_cancel (runstack_context_t *rcxt)
+{
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    if (rcxt->script_level == 0 && rcxt->script_cancel) {
+        rcxt->cur_src = RUNSTACK_SRC_USER;
+        rcxt->script_cancel = FALSE;
+    }
+
+}  /* runstack_clear_cancel */
 
 
 /********************************************************************
@@ -1290,7 +1311,7 @@ xmlChar *
         }
         *res = ERR_NCX_CANCELED;
         if (rcxt->script_level == 0) {
-            rcxt->script_cancel = FALSE;
+            runstack_clear_cancel(rcxt);
         } else {
             runstack_pop(rcxt);
         }

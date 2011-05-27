@@ -3195,6 +3195,8 @@ static mgr_io_state_t
     /* figure out where to get the next input line */
     rsrc = runstack_get_source(server_cb->runstack_context);
 
+    runstack_clear_cancel(server_cb->runstack_context);
+
     switch (rsrc) {
     case RUNSTACK_SRC_NONE:
         res = SET_ERROR(ERR_INTERNAL_VAL);

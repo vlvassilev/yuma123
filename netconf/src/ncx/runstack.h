@@ -301,6 +301,18 @@ extern void
 
 
 /********************************************************************
+* FUNCTION runstack_clear_cancel
+* 
+*  Clear the cancel flags 
+*
+* INPUTS:
+*     rcxt == runstack context to use
+*********************************************************************/
+extern void
+    runstack_clear_cancel (runstack_context_t *rcxt);
+
+
+/********************************************************************
 * FUNCTION runstack_get_que
 * 
 *  Read the current runstack context and figure

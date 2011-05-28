@@ -351,6 +351,12 @@ static ncx_withdefaults_t  withdefaults;
 /* default indent amount */
 static int32            defindent;
 
+/* default echo-replies */
+static boolean echo_replies;
+
+/* default time-rpc */
+static boolean time_rpcs;
+
 
 /********************************************************************
 * FUNCTION get_line_timeout
@@ -526,6 +532,9 @@ static void
     }
     if (server_cb->password) {
         m__free(server_cb->password);
+    }
+    if (server_cb->local_result) {
+        val_free_value(server_cb->local_result);
     }
     if (server_cb->result_name) {
         m__free(server_cb->result_name);
@@ -717,6 +726,9 @@ static server_cb_t *
     server_cb->history_size = YANGCLI_HISTLEN;
     server_cb->command_mode = CMD_MODE_NORMAL;
     server_cb->defindent = defindent;
+    server_cb->echo_replies = echo_replies;
+    server_cb->time_rpcs = time_rpcs;
+
     return server_cb;
 
 }  /* new_server_cb */
@@ -749,6 +761,8 @@ static void
     server_cb->display_mode = display_mode;
     server_cb->withdefaults = withdefaults;
     server_cb->defindent = defindent;
+    server_cb->echo_replies = echo_replies;
+    server_cb->time_rpcs = time_rpcs;
 
 }  /* update_server_cb_vars */
 
@@ -891,6 +905,28 @@ static status_t
         } else {
             log_error("\nError: value must be 'plain', 'prefixed' "
                       "'xml' or 'xml-nons'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_ECHO_REPLIES)) {
+        if (ncx_is_true(usestr)) {
+            server_cb->echo_replies = TRUE;
+            echo_replies = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            server_cb->echo_replies = FALSE;
+            echo_replies = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_TIME_RPCS)) {
+        if (ncx_is_true(usestr)) {
+            server_cb->time_rpcs = TRUE;
+            time_rpcs = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            server_cb->time_rpcs = FALSE;
+            time_rpcs = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (!xml_strcmp(configval->name, YANGCLI_USER)) {
@@ -1800,6 +1836,22 @@ static status_t
         return res;
     }
 
+    /* $$ echo-replies = boolean */
+    res = create_config_var(server_cb,
+                            YANGCLI_ECHO_REPLIES, 
+                            (echo_replies) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* $$ time-rpcs = boolean */
+    res = create_config_var(server_cb,
+                            YANGCLI_TIME_RPCS, 
+                            (time_rpcs) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* $$user = string */
     strval = NULL;
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
@@ -2091,6 +2143,26 @@ static status_t
         }
     } else {
         display_mode = YANGCLI_DEF_DISPLAY_MODE;
+    }
+
+    /* get the echo-replies parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_ECHO_REPLIES);
+    if (parm && parm->res == NO_ERR) {
+        echo_replies = VAL_BOOL(parm);
+    } else {
+        echo_replies = TRUE;
+    }
+
+    /* get the time-rpcs parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_TIME_RPCS);
+    if (parm && parm->res == NO_ERR) {
+        time_rpcs = VAL_BOOL(parm);
+    } else {
+        time_rpcs = FALSE;
     }
 
     /* get the fixorder parameter */
@@ -3294,16 +3366,26 @@ static mgr_io_state_t
         case MGR_IO_ST_IDLE:
         case MGR_IO_ST_CONN_IDLE:
             /* check assignment statement active */
-            if (server_cb->result_name || 
-                server_cb->result_filename) {
-                /* save the filled in value */
-                resultstr = (res == NO_ERR) ? 
-                    (const xmlChar *)"ok" :
-                    (const xmlChar *)get_error_string(res);
-
-                res = finish_result_assign(server_cb, 
-                                           NULL,
-                                           resultstr);
+            if (server_cb->result_name != NULL || 
+                 server_cb->result_filename != NULL) {
+                if (server_cb->local_result != NULL) {
+                    val_value_t  *resval = server_cb->local_result;
+                    server_cb->local_result = NULL;
+                    /* pass off malloced local_result here */
+                    res = finish_result_assign(server_cb, 
+                                               resval,
+                                               NULL);
+                    /* clear_result already called */
+                } else {
+                    /* save the filled in value */
+                    resultstr = (res == NO_ERR) ? 
+                        (const xmlChar *)"ok" :
+                        (const xmlChar *)get_error_string(res);
+                    res = finish_result_assign(server_cb, 
+                                               NULL,
+                                               resultstr);
+                    /* clear_result already called */
+                }
             } else {
                 clear_result(server_cb);
             }
@@ -3460,6 +3542,8 @@ static status_t
     erroption = OP_ERROP_NONE;
     defop = OP_DEFOP_MERGE;   /* was 'none' , now 'merge' */
     withdefaults = NCX_WITHDEF_NONE;
+    echo_replies = TRUE;
+    time_rpcs = FALSE;
     temp_progcb = NULL;
     dlq_createSQue(&modlibQ);
 
@@ -3848,6 +3932,53 @@ static rpc_err_t
 }  /* get_rpc_error_tag */
 
 
+/********************************************************************
+ * FUNCTION handle_rpc_timing
+ * 
+ * Get the roundtrip time and print the roundtrip time
+ *
+ * INPUTS:
+ *   server_cb == server control block to use
+ *   req == original message request
+ *
+ *********************************************************************/
+static void
+    handle_rpc_timing (server_cb_t *server_cb,
+                       mgr_rpc_req_t *req)
+{
+    struct timeval      now;
+    long int            sec, usec;
+    xmlChar             numbuff[NCX_MAX_NUMLEN];
+
+    if (!server_cb->time_rpcs) {
+        return;
+    }
+
+    gettimeofday(&now, NULL);
+
+    /* get the resulting delta */
+    if (now.tv_usec < req->perfstarttime.tv_usec) {
+        now.tv_usec += 1000000;
+        now.tv_sec--;
+    }
+
+    sec = now.tv_sec - req->perfstarttime.tv_sec;
+    usec = now.tv_usec - req->perfstarttime.tv_usec;
+
+    sprintf((char *)numbuff, "%ld.%06ld", sec, usec);
+
+    if (interactive_mode()) {
+        log_stdout("\nRoundtrip time: %s seconds\n", numbuff);
+        if (log_get_logfile() != NULL) {
+            log_write("\nRoundtrip time: %s seconds\n", numbuff);
+        }
+    } else {
+        log_write("\nRoundtrip time: %s seconds\n", numbuff);
+    }
+
+}  /* handle_rpc_timing */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -4074,6 +4205,7 @@ void
     }
 #endif
 
+    res = NO_ERR;
     mgrcb = scb->mgrcb;
     if (mgrcb) {
         usesid = mgrcb->agtsid;
@@ -4093,7 +4225,7 @@ void
         if (val_find_child(rpy->reply, 
                            NC_MODULE,
                            NCX_EL_RPC_ERROR)) {
-            if (server_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
+            if (server_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG) {
                 log_error("\nRPC Error Reply %s for session %u:\n",
                           rpy->msg_id, 
                           usesid);
@@ -4107,28 +4239,47 @@ void
                 log_error("\n");
                 anyout = TRUE;
             }
+            if (server_cb->time_rpcs) {
+                handle_rpc_timing(server_cb, req);
+                anyout = TRUE;
+            }
             anyerrors = TRUE;
         } else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
             if (server_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
-                log_info("\nRPC OK Reply %s for session %u:\n",
-                         rpy->msg_id, 
-                         usesid);
+                if (server_cb->echo_replies) {
+                    log_info("\nRPC OK Reply %s for session %u:\n",
+                             rpy->msg_id, 
+                             usesid);
+                    anyout = TRUE;
+                }
+            }
+            if (server_cb->time_rpcs) {
+                handle_rpc_timing(server_cb, req);
                 anyout = TRUE;
             }
         } else if ((server_cb->command_mode == CMD_MODE_NORMAL && LOGINFO) ||
                    (server_cb->command_mode != CMD_MODE_NORMAL && LOGDEBUG2)) {
 
-            log_info("\nRPC Data Reply %s for session %u:\n",
-                     rpy->msg_id, 
-                     usesid);
-            val_dump_value_max(rpy->reply, 
-                               0,
-                               server_cb->defindent,
-                               DUMP_VAL_LOG,
-                               server_cb->display_mode,
-                               FALSE,
-                               FALSE);
-            log_info("\n");
+            if (server_cb->echo_replies) {
+                log_info("\nRPC Data Reply %s for session %u:\n",
+                         rpy->msg_id, 
+                         usesid);
+                val_dump_value_max(rpy->reply, 
+                                   0,
+                                   server_cb->defindent,
+                                   DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
+                log_info("\n");
+                anyout = TRUE;
+            }
+            if (server_cb->time_rpcs) {
+                handle_rpc_timing(server_cb, req);
+                anyout = TRUE;
+            }
+        } else if (server_cb->time_rpcs) {
+            handle_rpc_timing(server_cb, req);
             anyout = TRUE;
         }
 
@@ -4169,7 +4320,8 @@ void
     }
 
     /* check if a script is running */
-    if (anyerrors && runstack_level(server_cb->runstack_context)) {
+    if ((anyerrors || res != NO_ERR) && 
+        runstack_level(server_cb->runstack_context)) {
         runstack_cancel(server_cb->runstack_context);
     }
 
@@ -4311,6 +4463,8 @@ void
  * finish the assignment to result_name or result_filename
  * use 1 of these 2 parms:
  *    resultval == result to output to file
+ *    !!! This is a live var that is freed by this function
+ *
  *    resultstr == result to output as string
  *
  * INPUTS:

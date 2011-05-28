@@ -655,6 +655,10 @@ void
     }
 #endif
 
+    if (server_cb->local_result) {
+        val_free_value(server_cb->local_result);
+        server_cb->local_result = NULL;
+    }
     if (server_cb->result_name) {
         m__free(server_cb->result_name);
         server_cb->result_name = NULL;
@@ -663,6 +667,8 @@ void
         m__free(server_cb->result_filename);
         server_cb->result_filename = NULL;
     }
+    server_cb->result_vartype = VAR_TYP_NONE;
+    server_cb->result_format = RF_NONE;
 
 }  /* clear_result */
 

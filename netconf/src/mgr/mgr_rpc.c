@@ -32,6 +32,7 @@ date         init     comment
 #include <string.h>
 #include <memory.h>
 #include <time.h>
+#include <sys/time.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -568,6 +569,9 @@ status_t
                            NCX_EL_MESSAGE_ID,
                            req->msg_id);
     }
+
+    /* set perf timestamp in case response timing active */
+    gettimeofday(&req->perfstarttime, NULL);     
 
     /* send the <?xml?> directive */
     if (res == NO_ERR) {

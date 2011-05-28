@@ -33,6 +33,7 @@ date	     init     comment
 */
 
 #include <time.h>
+//#include <sys/time.h>
 #include <xmlstring.h>
 #include "libtecla.h"
 
@@ -115,6 +116,7 @@ extern "C" {
 
 #define YANGCLI_DEF_INDENT    2
 
+#define YANGCLI_NUM_TIMERS    16
 
 #ifdef MACOSX
 #define ENV_HOST        (const char *)"HOST"
@@ -161,8 +163,11 @@ extern "C" {
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
 #define YANGCLI_CONFIG      (const xmlChar *)"config"
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
+#define YANGCLI_DELTA       (const xmlChar *)"delta"
 #define YANGCLI_DIR         (const xmlChar *)"dir"
 #define YANGCLI_DISPLAY_MODE  (const xmlChar *)"display-mode"
+#define YANGCLI_ECHO        (const xmlChar *)"echo"
+#define YANGCLI_ECHO_REPLIES (const xmlChar *)"echo-replies"
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
 #define YANGCLI_ERROR_OPTION (const xmlChar *)"error-option"
 #define YANGCLI_FILES       (const xmlChar *)"files"
@@ -171,6 +176,7 @@ extern "C" {
 #define YANGCLI_FULL        (const xmlChar *)"full"
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
+#define YANGCLI_ID          (const xmlChar *)"id"
 #define YANGCLI_INDEX       (const xmlChar *)"index"
 #define YANGCLI_LOAD        (const xmlChar *)"load"
 #define YANGCLI_LOCK_TIMEOUT (const xmlChar *)"lock-timeout"
@@ -187,6 +193,7 @@ extern "C" {
 #define YANGCLI_ORDER       (const xmlChar *)"order"
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PROTOCOLS   (const xmlChar *)"protocols"
+#define YANGCLI_RESTART_OK  (const xmlChar *)"restart-ok"
 #define YANGCLI_RETRY_INTERVAL (const xmlChar *)"retry-interval"
 #define YANGCLI_RUN_COMMAND (const xmlChar *)"run-command"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
@@ -196,6 +203,7 @@ extern "C" {
 #define YANGCLI_SYSTEM      (const xmlChar *)"system"
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
+#define YANGCLI_TIME_RPCS   (const xmlChar *)"time-rpcs"
 #define YANGCLI_USER        (const xmlChar *)"user"
 #define YANGCLI_VALUE       (const xmlChar *)"value"
 #define YANGCLI_VAR         (const xmlChar *)"var"
@@ -239,6 +247,8 @@ extern "C" {
 #define YANGCLI_SGET    (const xmlChar *)"sget"
 #define YANGCLI_SGET_CONFIG   (const xmlChar *)"sget-config"
 #define YANGCLI_SHOW    (const xmlChar *)"show"
+#define YANGCLI_START_TIMER  (const xmlChar *)"start-timer"
+#define YANGCLI_STOP_TIMER  (const xmlChar *)"stop-timer"
 #define YANGCLI_WHILE   (const xmlChar *)"while"
 #define YANGCLI_XGET    (const xmlChar *)"xget"
 #define YANGCLI_XGET_CONFIG   (const xmlChar *)"xget-config"
@@ -318,7 +328,7 @@ typedef struct completion_state_t_ {
     obj_template_t        *cmdobj;
     obj_template_t        *cmdinput;
     obj_template_t        *cmdcurparm;
-    struct server_cb_t_    *server_cb;
+    struct server_cb_t_   *server_cb;
     ncx_module_t          *cmdmodule;
     command_state_t        cmdstate;
     boolean                assignstmt;
@@ -386,6 +396,7 @@ typedef struct server_cb_t_ {
     var_type_t           result_vartype;
     xmlChar             *result_filename;
     result_format_t      result_format;
+    val_value_t         *local_result; 
 
     /* per-server shadows of global config vars */
     boolean              get_optional;
@@ -401,6 +412,8 @@ typedef struct server_cb_t_ {
     op_defop_t           defop;
     ncx_withdefaults_t   withdefaults;
     int32                defindent;
+    boolean              echo_replies;
+    boolean              time_rpcs;
 
     /* session support */
     mgr_io_state_t       state;
@@ -453,6 +466,9 @@ typedef struct server_cb_t_ {
     /* runstack context for script processing */
     runstack_context_t  *runstack_context;
 
+    /* per session timer support */
+    struct timeval       timers[YANGCLI_NUM_TIMERS];
+
     /* per-session CLI support */
     const xmlChar       *cli_fn;
     GetLine             *cli_gl;
@@ -464,6 +480,8 @@ typedef struct server_cb_t_ {
     completion_state_t   completion_state;
     boolean              climore;
     xmlChar              clibuff[YANGCLI_BUFFLEN];
+
+
 } server_cb_t;
 
 

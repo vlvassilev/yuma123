@@ -1166,8 +1166,6 @@ static status_t
 }  /* new_editvars */
 
 
-
-
 /********************************************************************
 * FUNCTION copy_editvars
 * 

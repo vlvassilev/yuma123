@@ -80,8 +80,10 @@ typedef struct mgr_rpc_req_t_ {
     xml_attrs_t    attrs;          /* Extra <rpc> attrs */
     val_value_t   *data;      /* starts with the method */
     time_t         starttime;     /* tstamp for timeout */
+    struct timeval perfstarttime; /* tstamp to perf meas */
     uint32         timeout;       /* timeout in seconds */
     void          *replycb;           /* mgr_rpc_cbfn_t */
+
 } mgr_rpc_req_t;
 
 /* NETCONF client <rpc-reply> message header */

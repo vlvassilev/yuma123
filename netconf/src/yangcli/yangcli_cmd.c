@@ -204,6 +204,10 @@ date         init     comment
 #include "yangcli_tab.h"
 #endif
 
+#ifndef _H_yangcli_timer
+#include "yangcli_timer.h"
+#endif
+
 #ifndef _H_yangcli_util
 #include "yangcli_util.h"
 #endif
@@ -6875,6 +6879,14 @@ static status_t
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
         if (cond) {
             res = do_show(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_START_TIMER)) {
+        if (cond) {
+            res = yangcli_timer_start(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_STOP_TIMER)) {
+        if (cond) {
+            res = yangcli_timer_stop(server_cb, rpc, line, len);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_WHILE)) {
         res = do_while(server_cb, rpc, line, len);

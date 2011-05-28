@@ -50,6 +50,13 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2011-05-27 {
+       description 
+          "Added start-timer and stop-timer local RPC functions.
+           Added --echo-replies parameter and system variable.
+           Added --time-rpcs parameter and system variable";
+    }
+
     revision 2011-04-22 {
        description 
           "Added --protocols parm via uses ProtocolsParm.
@@ -86,6 +93,15 @@ module yangcli {
        description 
           "Index into a log buffer.";
        type uint32;
+    }
+
+    typedef TimerId {
+       description 
+          "Identifier for a local timer to use with
+           the start-timer and stop-timer commands.";
+       type uint8 {
+         range "0 .. 15";
+       }
     }
 
     /*************************************************************
@@ -446,6 +462,24 @@ module yangcli {
         default plain;
       }
 
+      leaf echo-replies {
+        description
+          "Allow RPC replies to be echoes to the log or STDOUT
+
+           If 'true', <rpc-reply> messages containing data
+           will be output to the log, if log-level is 
+           'info' or higher.
+
+           If 'false', <rpc-reply> messages containing data
+           will not be output to the log, regardless of
+           the value of log-level.
+
+           The $$echo-replies system variable is derived from
+           this parameter.";
+        type boolean;
+        default true;
+      }
+
       leaf fixorder {
         description
           "Controls whether PDU parameters will be
@@ -487,6 +521,19 @@ module yangcli {
            type string {
              length "1 .. 4095";
            }
+        }
+
+        leaf time-rpcs {
+          description 
+           "Measure the round-trip time of each <rpc> request and
+            <rpc-reply> at the session level.
+            Echo the elapsed time value to screen if in
+            interactive mode, as well as the log if the
+            log is a file instead of stdout.
+            The $$time-rpcs system variable is derived from this
+            parameter.";
+          type boolean;
+          default false;
         }
       }
 
@@ -1285,6 +1332,65 @@ module yangcli {
           }
         }
         uses ncxapp:HelpMode;
+      }
+    }
+
+    rpc start-timer {
+      description 
+        "Start a timer to do simple performance measurements.";
+      input {
+        ncx:default-parm id;
+        leaf id {
+          description 
+            "The timer ID to use.";
+          type TimerId;
+          default 0;
+        }
+        leaf restart-ok {
+          description 
+            "Indicates whether the timer will be used if
+             it is already running.  If 'true', the timer
+             will be restarted if it is already running.
+             If 'false', an error will occur if the timer
+             is already running.";
+          type boolean;
+          default true;
+        }
+      }
+    }
+
+    rpc stop-timer {
+      description 
+        "Stop a timer and output the delta value.";
+      input {
+        ncx:default-parm id;
+        leaf id {
+          description 
+            "The timer ID to use.";
+          type TimerId;
+          default 0;
+        }
+        leaf echo {
+          description 
+            "Echo the elapsed time value to screen if in
+             interactive mode, as well as the log if the
+             log is a file instead of stdout.";
+          type boolean;
+          default true;
+        }
+      }
+      output {
+        // yangcli local RPC commands can return 1 value of any type
+        // as an output parameter.  No extra parameters will be
+        // processed in assignment statements
+        leaf delta {
+          description
+            "The elapsed time since the timer started.";
+          type decimal64 {
+            fraction-digits 6;  // microseconds
+          }
+          units seconds;
+        }
       }
     }
 

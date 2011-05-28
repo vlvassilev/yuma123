@@ -1430,14 +1430,6 @@ void
     /* finish up the element */
     ses_putchar(scb, '>');
 
-#if 0
-    /* hack in XMLDOC mode to get more readable XSD output */
-    if (scb->mode==SES_MODE_XMLDOC && 
-        indent==ses_indent_count(scb)) {
-        ses_putchar(scb, '\n');
-    }
-#endif
-
 }  /* xml_wr_end_elem */
 
 

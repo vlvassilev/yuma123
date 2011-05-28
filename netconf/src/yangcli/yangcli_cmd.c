@@ -3930,35 +3930,14 @@ static status_t
             return res;
         }
     } else {
-        /* !!! leaving in this old code for now because not sure
-         * !!! if it breaks anything that uses a dummy container
-         * !!! var references return the exact object filled
-         * !!! so the comment below is probably out of date
-         */
-#if 0
-        /* need a hack here to adjust for variables that
-         * start with a data node because they are
-         * from a variable reference
-         */
-        if (config_content->btyp == NCX_BT_CONTAINER) {
-            val_move_children(config_content, parm);
-            val_free_value(config_content);
-            config_content = NULL;
-            res = NO_ERR;
-        } else {
-#endif
-            /* !!! use the parm as-is, even if a container !!! */
-            dummy_parm = NULL;
-            res = add_config_from_content_node(server_cb,
-                                               rpc, 
-                                               config_content,
-                                               config_content->obj,
-                                               parm, 
-                                               &dummy_parm);
-#if 0
-        }
-#endif
-
+        /* !!! use the parm as-is, even if a container !!! */
+        dummy_parm = NULL;
+        res = add_config_from_content_node(server_cb,
+                                           rpc, 
+                                           config_content,
+                                           config_content->obj,
+                                           parm, 
+                                           &dummy_parm);
         if (res != NO_ERR) {
             val_free_value(config_content);
             val_free_value(reqdata);

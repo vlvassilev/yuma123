@@ -332,6 +332,14 @@ status_t
 
             *buff = newbuff;
             scb->freecnt--;
+
+            if (LOGDEBUG4) {
+                log_debug4("\nses_msg: reused %s buff %p for s %u", 
+                           (outbuff) ? "out" : "in",
+                           newbuff,
+                           scb->sid);
+            }
+
             return NO_ERR;
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
@@ -359,6 +367,14 @@ status_t
 
     *buff = newbuff;
     scb->buffcnt++;
+
+    if (LOGDEBUG4) {
+        log_debug4("\nses_msg: new %s buff %p for s %u", 
+                   (outbuff) ? "out" : "in",
+                   newbuff,
+                   scb->sid);
+    }
+
     return NO_ERR;
 
 } /* ses_msg_new_buff */
@@ -384,7 +400,18 @@ void
         scb->freecnt < SES_MAX_FREE_BUFFERS) {
         dlq_enque(buff, &scb->freeQ);
         scb->freecnt++;
+
+        if (LOGDEBUG4) {
+            log_debug4("\nses_msg: cache buff %p for s %u", 
+                       buff,
+                       scb->sid);
+        }
     } else {
+        if (LOGDEBUG4) {
+            log_debug4("\nses_msg: free buff %p for s %u", 
+                       buff,
+                       scb->sid);
+        }
         m__free(buff);
         scb->buffcnt--;
     }

@@ -1218,11 +1218,7 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir((const char *)buff);
     if (!dp) {
-#if 0
-        return SET_ERROR(ERR_INTERNAL_VAL);
-#else
         return NO_ERR;
-#endif
     }
 
     /* go through again but this time just dive into the subdirs */
@@ -2266,12 +2262,7 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir(buff);
     if (!dp) {
-#if 0
-        log_error("\nError: open directory '%s' failed\n", buff);
-        return ERR_OPEN_DIR_FAILED;
-#else
         return NO_ERR;
-#endif
     }
 
     dirdone = FALSE;

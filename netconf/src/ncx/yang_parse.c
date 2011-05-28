@@ -2651,17 +2651,6 @@ static status_t
         }
     }
 
-#if 0
-    /* !!! change this to a warning; not an error !!! */
-    if (!descrdone) {
-        retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "revision", 
-                            "description");
-    }
-#endif
-
     if (rev->version) {
         /* check if the version string is valid */
         res = yang_validate_date_string(tkc, 

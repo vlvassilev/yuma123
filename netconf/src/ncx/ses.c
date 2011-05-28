@@ -556,7 +556,7 @@ static status_t
                 /* return framing error */
                 done = TRUE;
                 res = ERR_NCX_INVALID_FRAMING;
-                SET_ERROR(ERR_INTERNAL_VAL);  /***/
+                /***/
             }
             break;
         case SES_INST_INSTART:
@@ -571,7 +571,6 @@ static status_t
                      */
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 }
             } else if (scb->inendpos == 2) {
                 /* expecting at least 1 starting digit */
@@ -582,7 +581,6 @@ static status_t
                     /* return framing error */
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 }
             } else {
                 /* looking for end of a number
@@ -592,7 +590,6 @@ static status_t
                     /* invalid number -- too long error */
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 } else if (ch == '\n') {
                     /* have the complete number now
                      * done with chunk start tag
@@ -613,7 +610,6 @@ static status_t
                     } else {
                         done = TRUE;
                         res = ERR_NCX_INVALID_FRAMING;
-                        SET_ERROR(ERR_INTERNAL_VAL);  /***/
                     }
                     ncx_clean_num(NCX_BT_UINT32, &num);
                 } else if (ch >= '0' && ch <= '9') {
@@ -624,7 +620,6 @@ static status_t
                     /* return framing error; invalid char */
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 }
             }
             break;
@@ -653,7 +648,7 @@ static status_t
                 copylen = buff->bufflen;
                 buff->bufflen = buff->buffpos;
 
-                /* check comon case; message and EoChunks
+                /* check common case; message and EoChunks
                  * fits into the same buffer
                  * If bufflen big enough, check EoCh now
                  */
@@ -674,6 +669,9 @@ static status_t
                                    &buff->buff[buff->buffpos + 
                                                NC_SSH_END_CHUNKS_LEN],
                                    buff2->bufflen);
+                            if (!qbuffdone) {
+                                dlq_enque(buff, &msg->buffQ);
+                            }
                             qbuffdone = FALSE;
                             buff = buff2;
                             buff2 = NULL;
@@ -681,6 +679,11 @@ static status_t
                             done = TRUE;
                         }
                     } else {
+                        /* buffer exactly chunk-part+EoChunks */
+                        if (!qbuffdone) {
+                            dlq_enque(buff, &msg->buffQ);
+                            qbuffdone = TRUE;
+                        }
                         buff = NULL;
                     }
                 } else {
@@ -694,6 +697,9 @@ static status_t
                             memcpy(buff2->buff, 
                                    &buff->buff[buff->buffpos],
                                    buff2->bufflen);
+                            if (!qbuffdone) {
+                                dlq_enque(buff, &msg->buffQ);
+                            }
                             qbuffdone = FALSE;
                             buff = buff2;
                             buff2 = NULL;
@@ -701,7 +707,6 @@ static status_t
                             done = TRUE;
                         }
                     } else {
-                        buff = NULL;
                         done = TRUE;
                     }
                 }
@@ -715,7 +720,6 @@ static status_t
                 } else {
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 }
             } else if (scb->inendpos == 1) {
                 if (ch == '#') {
@@ -723,7 +727,6 @@ static status_t
                 } else {
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 }
             } else {
                 if (ch == '#') {
@@ -738,7 +741,6 @@ static status_t
                 } else {
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
-                    SET_ERROR(ERR_INTERNAL_VAL);  /***/
                 }
             }
             break;
@@ -749,7 +751,6 @@ static status_t
             if (ch != chunkmatch[scb->inendpos]) {
                 done = TRUE;
                 res = ERR_NCX_INVALID_FRAMING;
-                SET_ERROR(ERR_INTERNAL_VAL);  /***/
             } else if (++scb->inendpos == NC_SSH_END_CHUNKS_LEN) {
                 scb->instate = SES_INST_FINMSG;
             }  /* else still more chars in EOM string to match */
@@ -1833,10 +1834,10 @@ status_t
                     }
                 }
 
-                if (LOGDEBUG2 && res != NO_ERR) {
-                    log_debug2("\nses read failed on session %d (%s)", 
-                               scb->sid, 
-                               strerror(errno));
+                if (res == ERR_NCX_READ_FAILED) {
+                    log_error("\nError: ses read failed on session %d (%s)", 
+                              scb->sid, 
+                              strerror(errno));
                 }
             } else {
                 /* channel closed or returned byte count */

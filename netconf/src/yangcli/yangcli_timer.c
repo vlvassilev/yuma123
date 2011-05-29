@@ -345,6 +345,7 @@ status_t
 
     gettimeofday(&now, NULL);
 
+    timer_id = 0;
     res = NO_ERR;
     imode = interactive_mode();
     valset = get_valset(server_cb, rpc, &line[len], &res);

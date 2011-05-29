@@ -490,6 +490,17 @@ extern status_t
                                           const val_value_t *virval,
                                           val_value_t  *dstval);
 
+
+/********************************************************************
+* FUNCTION agt_ses_invalidate_session_acm_caches
+*
+* Invalidate all session ACM caches so they will be rebuilt
+* TBD:: optimize and figure out exactly what needs to change
+*
+*********************************************************************/
+extern void
+    agt_ses_invalidate_session_acm_caches (void);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

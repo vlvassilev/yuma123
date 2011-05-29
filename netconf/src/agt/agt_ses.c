@@ -42,6 +42,10 @@ date         init     comment
 #include  "agt.h"
 #endif
 
+#ifndef _H_agt_acm
+#include  "agt_acm.h"
+#endif
+
 #ifndef _H_agt_cb
 #include  "agt_cb.h"
 #endif
@@ -575,6 +579,7 @@ void
     }
 #endif
 
+    agt_acm_clear_session_cache(scb);
     ses_free_scb(scb);
     agtses[0] = NULL;
 
@@ -749,6 +754,9 @@ void
      * to read from this file desciptor again
      */
     agt_ncxserver_clear_fd(scb->fd);
+
+    /* clear any NACM cache that this session was using */
+    agt_acm_clear_session_cache(scb);
 
     /* this will close the socket if it is still open */
     ses_free_scb(scb);
@@ -1596,6 +1604,26 @@ status_t
     return NO_ERR;
 
 } /* agt_ses_get_session_outNotifications */
+
+
+/********************************************************************
+* FUNCTION agt_ses_invalidate_session_acm_caches
+*
+* Invalidate all session ACM caches so they will be rebuilt
+* TBD:: optimize and figure out exactly what needs to change
+*
+*********************************************************************/
+void
+    agt_ses_invalidate_session_acm_caches (void)
+{
+    uint32          i;
+
+    for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
+        if (agtses[i] != NULL) {
+            agt_acm_invalidate_session_cache(agtses[i]);
+        }
+    }
+}  /* acm_ses_invalidate_session_acm_caches */
 
 
 /* END file agt_ses.c */

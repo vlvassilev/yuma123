@@ -328,6 +328,16 @@ typedef struct ses_cb_t_ {
     uint32           linesize;              /* TERM line length */
     ncx_withdefaults_t  withdef;       /* with-defaults default */
     uint32           cache_timeout;  /* vir-val cache tmr in sec */
+
+    /* agent access control for database reads and writes;
+     * for incoming agent <rpc> requests, the access control
+     * cache is used to minimize data structure processing
+     * during authorization procedures in agt/agt_acm.c
+     * this is embedded in the XML header so it can
+     * be easily passed to the xml_wr functions
+     */
+    struct agt_acm_cache_t_ *acm_cache;
+
 } ses_cb_t;
 
 

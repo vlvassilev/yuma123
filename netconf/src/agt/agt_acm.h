@@ -89,6 +89,7 @@ extern "C" {
 #define FL_ACM_DEFEXEC_OK       bit5
 #define FL_ACM_MODRULES_SET     bit6
 #define FL_ACM_DATARULES_SET    bit7
+#define FL_ACM_CACHE_VALID      bit8
 
 
 /********************************************************************
@@ -291,16 +292,19 @@ extern boolean
 * and attach it to the incoming message
 *
 * INPUTS:
+*   scb == session control block to use
 *   msg == message to use
 *
 * OUTPUTS:
+*   scb->acm_cache pointer may be set, if it was NULL
 *   msg->acm_cache pointer set
 *
 * RETURNS:
 *   status
 *********************************************************************/
 extern status_t
-    agt_acm_init_msg_cache (xml_msg_hdr_t *msg);
+    agt_acm_init_msg_cache (ses_cb_t *scb,
+                            xml_msg_hdr_t *msg);
 
 
 /********************************************************************
@@ -321,6 +325,50 @@ extern void
 
 
 /********************************************************************
+* FUNCTION agt_acm_clear_session_cache
+*
+* Clear an agt_acm_cache_t struct in a session control block
+*
+* INPUTS:
+*   scb == sesion control block to use
+*
+* OUTPUTS:
+*   scb->acm_cache pointer is freed and set to NULL
+*
+*********************************************************************/
+extern void agt_acm_clear_session_cache (ses_cb_t *scb);
+
+
+/********************************************************************
+* FUNCTION agt_acm_invalidate_session_cache
+*
+* Mark an agt_acm_cache_t struct in a session control block
+* as invalid so it will be refreshed next use
+*
+* INPUTS:
+*   scb == sesion control block to use
+*
+*********************************************************************/
+extern void agt_acm_invalidate_session_cache (ses_cb_t *scb);
+
+
+/********************************************************************
+* FUNCTION agt_acm_session_cache_valid
+*
+* Check if the specified session NACM cache is valid
+*
+* INPUTS:
+*   scb == session to check
+*
+* RETURNS:
+*   TRUE if session acm_cache is valid
+*   FALSE if session acm_cache is NULL or not valid
+*********************************************************************/
+extern boolean
+    agt_acm_session_cache_valid (const ses_cb_t *scb);
+
+
+/********************************************************************
 * FUNCTION agt_acm_session_is_superuser
 *
 * Check if the specified session is the superuser
@@ -334,6 +382,7 @@ extern void
 *********************************************************************/
 extern boolean
     agt_acm_session_is_superuser (const ses_cb_t *scb);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

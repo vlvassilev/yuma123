@@ -75,6 +75,9 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+/* clear buffers before use */
+/* #define SES_MSG_CLEAR_INIT_BUFFERS 1 */
+
 /* max number of buffers a session is allowed to cache in its freeQ */
 #define MAX_FREE_MSGS  32
 
@@ -326,7 +329,7 @@ status_t
             /* use buffer from freeQ */
             ses_msg_init_buff(scb, outbuff, newbuff);
 
-#ifdef DEBUG
+#ifdef SES_MSG_CLEAR_INIT_BUFFERS
             memset(newbuff->buff, 0x0, SES_MSG_BUFFSIZE);
 #endif
 

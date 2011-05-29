@@ -94,6 +94,10 @@ date         init     comment
 #include  "agt_not.h"
 #endif
 
+#ifndef _H_agt_ses
+#include  "agt_ses.h"
+#endif
+
 #ifndef _H_agt_util
 #include  "agt_util.h"
 #endif
@@ -733,6 +737,7 @@ static agt_acm_cache_t  *
     dlq_createSQue(&acm_cache->modruleQ);
     dlq_createSQue(&acm_cache->dataruleQ);
     acm_cache->mode = acmode;
+    acm_cache->flags |= FL_ACM_CACHE_VALID;
     return acm_cache;
 
 } /* new_acm_cache */
@@ -1887,6 +1892,7 @@ static status_t
             free_acm_cache(notif_cache);
             notif_cache = NULL;
         }
+        agt_ses_invalidate_session_acm_caches();
     }
 
     return res;
@@ -2595,16 +2601,19 @@ boolean
 * and attach it to the incoming message
 *
 * INPUTS:
+*   scb == session control block to use
 *   msg == message to use
 *
 * OUTPUTS:
+*   scb->acm_cache pointer may be set, if it was NULL
 *   msg->acm_cache pointer set
 *
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
-    agt_acm_init_msg_cache (xml_msg_hdr_t *msg)
+    agt_acm_init_msg_cache (ses_cb_t *scb,
+                            xml_msg_hdr_t *msg)
 {
 #ifdef DEBUG
     if (!msg) {
@@ -2618,7 +2627,17 @@ status_t
     }
 
     msg->acm_cbfn = agt_acm_val_read_allowed;
-    msg->acm_cache = new_acm_cache();
+
+    if (agt_acm_session_cache_valid(scb)) {
+        msg->acm_cache = scb->acm_cache;
+    } else {
+        if (scb->acm_cache != NULL) {
+            free_acm_cache(scb->acm_cache);
+        }
+        scb->acm_cache = new_acm_cache();
+        msg->acm_cache = scb->acm_cache;
+    }
+
     if (!msg->acm_cache) {
         return ERR_INTERNAL_MEM;
     } else {
@@ -2641,23 +2660,104 @@ status_t
 *   msg->acm_cache pointer is freed and set to NULL
 *
 *********************************************************************/
-void
-    agt_acm_clear_msg_cache (xml_msg_hdr_t *msg)
+void agt_acm_clear_msg_cache (xml_msg_hdr_t *msg)
 {
 #ifdef DEBUG
-    if (!msg) {
+    if (msg == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
 #endif
 
     msg->acm_cbfn = NULL;
-    if (msg->acm_cache) {
-        free_acm_cache(msg->acm_cache);
-        msg->acm_cache = NULL;
-    }
+    msg->acm_cache = NULL;
 
 } /* agt_acm_clear_msg_cache */
+
+
+/********************************************************************
+* FUNCTION agt_acm_clear_session_cache
+*
+* Clear an agt_acm_cache_t struct in a session control block
+*
+* INPUTS:
+*   scb == sesion control block to use
+*
+* OUTPUTS:
+*   scb->acm_cache pointer is freed and set to NULL
+*
+*********************************************************************/
+void agt_acm_clear_session_cache (ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (scb->acm_cache != NULL) {
+        free_acm_cache(scb->acm_cache);
+        scb->acm_cache = NULL;
+    }
+
+} /* agt_acm_clear_session_cache */
+
+
+/********************************************************************
+* FUNCTION agt_acm_invalidate_session_cache
+*
+* Mark an agt_acm_cache_t struct in a session control block
+* as invalid so it will be refreshed next use
+*
+* INPUTS:
+*   scb == sesion control block to use
+*
+*********************************************************************/
+void agt_acm_invalidate_session_cache (ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (scb->acm_cache != NULL) {
+        scb->acm_cache->flags &= ~FL_ACM_CACHE_VALID; 
+    }
+
+} /* agt_acm_invalidate_session_cache */
+
+
+/********************************************************************
+* FUNCTION agt_acm_session_cache_valid
+*
+* Check if a session ACM cache is valid
+*
+* INPUTS:
+*   scb == sesion control block to check
+*
+* RETURNS:
+*   TRUE if cache calid
+*   FALSE if cache invalid or NULL
+*********************************************************************/
+boolean agt_acm_session_cache_valid (const ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (scb->acm_cache != NULL) {
+        return (scb->acm_cache->flags 
+                & FL_ACM_CACHE_VALID) ? TRUE : FALSE;
+    } else {
+        return FALSE;
+    }
+} /* agt_acm_session_cache_valid */
 
 
 /********************************************************************

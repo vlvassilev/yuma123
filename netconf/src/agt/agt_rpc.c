@@ -1446,7 +1446,7 @@ void
      * get used if the RPC method is invalid
      */
     if (res == NO_ERR) {
-        res = agt_acm_init_msg_cache(&msg->mhdr);
+        res = agt_acm_init_msg_cache(scb, &msg->mhdr);
     }
 
     if (res != NO_ERR) {

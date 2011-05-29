@@ -6,8 +6,8 @@
 # need some way to set versions without using
 # environment vars, so it works in plain debuild, rpmbuild
 #
-LIBNCX_MAJOR_VERSION=1
-LIBNCX_MINOR_VERSION=15
+LIBNCX_MAJOR_VERSION=2
+LIBNCX_MINOR_VERSION=0
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 # default DESTDIR is NULL; it is only used by packaging builds
@@ -246,14 +246,4 @@ addheader:
 	  mv $$h.hdr $$h;\
 	done
 
-
-fixcopyright:
-	for c in $(CEES); do\
-          sed 's/Netconf Central, Inc./Andy Bierman/' $$c > $$c.tmp;\
-	  mv $$c.tmp $$c;\
-	done
-	for h in $(HEES); do\
-          sed 's/Netconf Central, Inc./Andy Bierman/' $$h > $$h.tmp;\
-	  mv $$h.tmp $$h;\
-	done
 

@@ -199,7 +199,7 @@ static void
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
     agt_profile.agt_defaultStyle = NCX_EL_EXPLICIT;
-    agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
+    agt_profile.agt_superuser = NULL;
     agt_profile.agt_eventlog_size = 1000;
     agt_profile.agt_maxburst = 10;
     agt_profile.agt_hello_timeout = 300;

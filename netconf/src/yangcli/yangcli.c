@@ -42,6 +42,8 @@ date         init     comment
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <time.h>
+#include <sys/time.h>
 
 /* #define MEMORY_DEBUG 1 */
 

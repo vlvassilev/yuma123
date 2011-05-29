@@ -39,6 +39,10 @@ date         init     comment
 #include "agt.h"
 #endif
 
+#ifndef _H_agt_acm
+#include "agt_acm.h"
+#endif
+
 #ifndef _H_agt_cap
 #include "agt_cap.h"
 #endif
@@ -1978,7 +1982,7 @@ static status_t
                      val_value_t  *curval,
                      boolean done)
 {
-    val_value_t   *v_val;
+    val_value_t   *v_val, *useval;
     status_t       res;
     obj_type_t     objtype;
 
@@ -1986,6 +1990,33 @@ static status_t
     v_val = NULL;
 
     if (cbtyp==AGT_CB_VALIDATE) {
+        if (newval != NULL) {
+            useval = newval;
+        } else if (curval != NULL) {
+            useval = curval;
+        } else {
+            useval = NULL;
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        /* check if allowed acces to this node */
+        if (!agt_acm_val_write_allowed(&msg->mhdr, 
+                                       scb->username, 
+                                       useval,
+                                       editop)) {
+            res = ERR_NCX_ACCESS_DENIED;
+            agt_record_error(scb, 
+                             (msg) ? &msg->mhdr : NULL,
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             NULL, 
+                             NCX_NT_NONE, 
+                             NULL,
+                             NCX_NT_VAL, 
+                             useval);
+            return res;
+        }
+
         if (curval && val_is_virtual(curval)) {
             v_val = val_get_virtual_value(scb, curval, &res);
 
@@ -2240,7 +2271,19 @@ static status_t
                      val_value_t  *newval,
                      val_value_t  *curval)
 {
-    status_t  res;
+    val_value_t  *useval;
+    status_t      res;
+
+    res = NO_ERR;
+
+    /* get the node to check */
+    if (newval != NULL) {
+        useval = newval;
+    } else if (curval != NULL) {
+        useval = curval;
+    } else {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
 
     /* check if trying to write to a config=false node */
     if (newval != NULL && !val_is_config_data(newval)) {

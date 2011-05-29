@@ -324,10 +324,14 @@ static status_t
              * so check that now;  this is a different
              * procedure than the NACM filtering done
              * silently on get* retrievals
+             *
+             * !!! just checking if the user has Update
+             * !!! permissions, not checking Create and Delete
              */
             if (!agt_acm_val_write_allowed(&msg->mhdr,
                                            SES_MY_USERNAME(scb),
-                                           testval)) {
+                                           testval,
+                                           OP_EDITOP_MERGE)) {
                 res = ERR_NCX_ACCESS_DENIED;
                 agt_record_error(scb,
                                  &msg->mhdr,

@@ -23,9 +23,17 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-05-29 {
+       description 
+         "Removed superuser YANG default to disable by default,
+          to make sure an admin has to explicitly enable 
+          this feature.";
+    }
+
     revision 2011-04-24 {
        description 
-         "Added --protocols parameter via uses ProtocolsParm.";
+         "Added --protocols parameter via uses ProtocolsParm.
+          Not available in yuma v1 branch.";
     }
 
     revision 2011-04-02 {
@@ -272,12 +280,13 @@ module netconfd {
            See yuma-nacm.yang for more details.
 
            To disable the superuser account completely,
-           set this parameter to the empty string.";
+           set this parameter to the empty string or do
+           not set it at all. The default mode is to
+          disable superuser access.";
         type union {
             type nt:NcxName;
             type string { length 0; }
         }
-        default "superuser";
       }
 
       leaf target {

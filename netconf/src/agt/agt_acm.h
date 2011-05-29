@@ -233,6 +233,7 @@ extern boolean
 *   msg == XML header from incoming message in progress
 *   user == user name string
 *   val  == val_value_t in progress to check
+*   editop == requested CRUD operation
 *
 * RETURNS:
 *   TRUE if user allowed this level of access to the value node
@@ -240,7 +241,8 @@ extern boolean
 extern boolean 
     agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
 			       const xmlChar *user,
-			       const val_value_t *val);
+			       const val_value_t *val,
+                               op_editop_t editop);
 
 
 /********************************************************************

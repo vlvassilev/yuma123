@@ -1190,6 +1190,15 @@ static boolean
      */
     testobj = val->obj;
 
+    /* special case -- there are no ACM rules for the
+     * config root, so allow all writes on this
+     * container and start checking at the top-level
+     * YANG nodes instead
+     */
+    if (iswrite && obj_is_root(val->obj)) {
+        return TRUE;
+    }
+
     /* make sure this is not an nested object within a
      * object tagged as ncx:secure or ncx:very-secure
      */
@@ -2448,6 +2457,7 @@ boolean
 }   /* agt_acm_notif_allowed */
 
 
+
 /********************************************************************
 * FUNCTION agt_acm_val_write_allowed
 *
@@ -2459,16 +2469,31 @@ boolean
 *   msg == XML header from incoming message in progress
 *   user == user name string
 *   val  == val_value_t in progress to check
+*   editop == requested CRUD operation
 *
 * RETURNS:
 *   TRUE if user allowed this level of access to the value node
 *********************************************************************/
 boolean 
     agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
-                               const xmlChar *user,
-                               const val_value_t *val)
+			       const xmlChar *user,
+			       const val_value_t *val,
+                               op_editop_t editop)
 {
     boolean  retval;
+
+    /* do not check writes during the bootup process
+     * cannot compare 'superuser' name in case it is
+     * disabled or changed from the default
+     */
+    if (editop == OP_EDITOP_LOAD) {
+        return TRUE;
+    }
+
+    /* defer check if no edit op requested on this node */
+    if (editop == OP_EDITOP_NONE) {
+        return TRUE;
+    }
 
 #ifdef DEBUG
     if (!msg || !msg->acm_cache || !user || !val) {
@@ -2476,6 +2501,8 @@ boolean
         return FALSE;
     }
 #endif
+
+    /* !!! TBD: support standard NACM with CRUD, not R/W privs !!! */
 
     retval = valnode_access_allowed(msg->acm_cache,
                                     user,

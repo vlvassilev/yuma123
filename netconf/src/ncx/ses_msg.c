@@ -966,14 +966,16 @@ void
                        boolean outbuff,
                        ses_msg_buff_t *buff)
 {
-    buff->bufflen = 0;
+
     buff->buffpos = 0;
-    buff->buffstart = 0;
     buff->islast = FALSE;
     if (outbuff && scb->framing11) {
         buff->buffstart = SES_STARTCHUNK_PAD;
-        buff->bufflen = SES_STARTCHUNK_PAD;
+    } else {
+        buff->buffstart = 0;
     }
+    buff->bufflen = buff->buffstart;
+    memset(buff->inchunks, 0x0, sizeof(buff->inchunks));
 
     /* do not clear mem in buffer buff->buff */
 

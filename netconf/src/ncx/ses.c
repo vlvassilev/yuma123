@@ -391,11 +391,13 @@ static status_t
 * is encountered.  Handle NETCONF over SSH base:1.1 protocol framing
 * 
 * This function breaks the byte stream into ses_msg_t structs
-* that get queued on the session's msgQ.  Each chunk will
-* be stored in ses_buffer_t structs aligned with chunks if
-* possible.  There will be wasted buffer space if the chunks
-* are too fragmented (e.g., client chunk size bigger than server
-* buffer size.
+* that get queued on the session's msgQ.  
+*
+* The chunks encoded into each incoming buffer will be
+* be mapped and stored in 1 or more ses_buffer_t structs.
+* There will be wasted buffer space if the chunks
+* are very small and more than SES_MAX_BUFF_CHUNKS
+* per buffer are received
 *
 * RFC 4742bis, 4.2.  Chunked Framing Mechanism
 
@@ -440,6 +442,7 @@ static status_t
     ses_msg_buff_t *buff2;
     const char     *chunkmatch;
     status_t        res;
+    uint32          chunkidx;
     boolean         done, qbuffdone, inframing;
     xmlChar         ch;
     size_t          chunkleft, buffleft, copylen;
@@ -451,6 +454,7 @@ static status_t
     res = NO_ERR;
     buff->buffstart = 0;
     ch = 0;
+    chunkidx = 0;
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3 && scb->state != SES_ST_INIT) {
@@ -556,7 +560,6 @@ static status_t
                 /* return framing error */
                 done = TRUE;
                 res = ERR_NCX_INVALID_FRAMING;
-                /***/
             }
             break;
         case SES_INST_INSTART:
@@ -605,7 +608,11 @@ static status_t
                     if (res == NO_ERR) {
                         msg->expchunksize = num.u;
                         msg->curchunksize = 0;
-                        buff->buffstart = buff->buffpos;
+                        buff->inchunks[chunkidx].chunkstart 
+                            = buff->buffpos;
+                        if (chunkidx == 0) {
+                            buff->buffstart = buff->buffpos;
+                        }
                         scb->instate = SES_INST_INMSG;
                     } else {
                         done = TRUE;
@@ -636,17 +643,18 @@ static status_t
                  */
                 msg->curchunksize += buffleft;
                 buff->buffpos = buff->bufflen;
+                buff->inchunks[chunkidx++].chunklen = buffleft;
             } else {
                 /* buffer >= remainder of chunk
-                 * buffer may not be done; split into new buffer
+                 * buffer may not be done; 
+                 * move to next inchunk map or split into new buffer
                  */
                 chunkmatch = NC_SSH_END_CHUNKS;
                 scb->inendpos = 0;
                 buff->buffpos += chunkleft;
+                buff->inchunks[chunkidx++].chunklen = chunkleft;
 
-                /* shorten the current buffer to the chunk size */
                 copylen = buff->bufflen;
-                buff->bufflen = buff->buffpos;
 
                 /* check common case; message and EoChunks
                  * fits into the same buffer
@@ -660,23 +668,32 @@ static status_t
                     scb->instate = SES_INST_FINMSG;
 
                     if (buffleft > (chunkleft + NC_SSH_END_CHUNKS_LEN)) {
-                        /* get a new buffer to hold the overflow */
-                        res = ses_msg_new_buff(scb, FALSE, &buff2);
-                        if (res == NO_ERR) {
-                            buff2->bufflen = copylen 
-                                - (buff->buffpos + NC_SSH_END_CHUNKS_LEN);
-                            memcpy(buff2->buff, 
-                                   &buff->buff[buff->buffpos + 
-                                               NC_SSH_END_CHUNKS_LEN],
-                                   buff2->bufflen);
-                            if (!qbuffdone) {
-                                dlq_enque(buff, &msg->buffQ);
-                            }
-                            qbuffdone = FALSE;
-                            buff = buff2;
-                            buff2 = NULL;
+                        if (chunkidx < SES_MAX_BUFF_CHUNKS) {
+                            /* skip over EoChunks and loop to next chunk */
+                            buff->buffpos += NC_SSH_END_CHUNKS_LEN;
                         } else {
-                            done = TRUE;
+                            /* shorten the buffer length to the chunk size */
+                            buff->bufflen = buff->buffpos;
+
+                            /* get a new buffer to hold the overflow */
+                            res = ses_msg_new_buff(scb, FALSE, &buff2);
+                            if (res == NO_ERR) {
+                                buff2->bufflen = copylen 
+                                    - (buff->buffpos + NC_SSH_END_CHUNKS_LEN);
+                                memcpy(buff2->buff, 
+                                       &buff->buff[buff->buffpos + 
+                                                   NC_SSH_END_CHUNKS_LEN],
+                                       buff2->bufflen);
+                                if (!qbuffdone) {
+                                    dlq_enque(buff, &msg->buffQ);
+                                }
+                                qbuffdone = FALSE;
+                                buff = buff2;
+                                buff2 = NULL;
+                                chunkidx = 0;
+                            } else {
+                                done = TRUE;
+                            }
                         }
                     } else {
                         /* buffer exactly chunk-part+EoChunks */
@@ -690,21 +707,26 @@ static status_t
                     scb->instate = SES_INST_INBETWEEN;
 
                     if (buffleft > chunkleft) {
-                        /* get a new buffer to hold the overflow */
-                        res = ses_msg_new_buff(scb, FALSE, &buff2);
-                        if (res == NO_ERR) {
-                            buff2->bufflen = copylen - buff->buffpos;
-                            memcpy(buff2->buff, 
-                                   &buff->buff[buff->buffpos],
-                                   buff2->bufflen);
-                            if (!qbuffdone) {
-                                dlq_enque(buff, &msg->buffQ);
-                            }
-                            qbuffdone = FALSE;
-                            buff = buff2;
-                            buff2 = NULL;
+                        if (chunkidx < SES_MAX_BUFF_CHUNKS) {
+                            ;
                         } else {
-                            done = TRUE;
+                            /* get a new buffer to hold the overflow */
+                            res = ses_msg_new_buff(scb, FALSE, &buff2);
+                            if (res == NO_ERR) {
+                                buff2->bufflen = copylen - buff->buffpos;
+                                memcpy(buff2->buff, 
+                                       &buff->buff[buff->buffpos],
+                                       buff2->bufflen);
+                                if (!qbuffdone) {
+                                    dlq_enque(buff, &msg->buffQ);
+                                }
+                                qbuffdone = FALSE;
+                                buff = buff2;
+                                buff2 = NULL;
+                                chunkidx = 0;
+                            } else {
+                                done = TRUE;
+                            }
                         }
                     } else {
                         done = TRUE;
@@ -865,8 +887,9 @@ static void
 * INPUTS:
 *   msg == current message to process
 *   buffer == buffer to fill in
-*   bufflen == max buff size
+*   bufflen == max buffer size
 *   buff == current buffer about to be read
+*   endpos == max end pos of buff to use
 *   retlen == address of running return length
 *
 * OUTPUTS:
@@ -879,6 +902,7 @@ static void
                          char *buffer,
                          int bufflen,
                          ses_msg_buff_t *buff,
+                         size_t endpos,
                          int *retlen)
 {
     boolean needprolog = FALSE;
@@ -890,7 +914,7 @@ static void
 
     switch (msg->prolog_state) {
     case SES_PRST_NONE:
-        if ((buff->bufflen - buff->buffstart) < 3) {
+        if ((endpos - buff->buffpos) < 3) {
             msg->prolog_state = SES_PRST_WAITING;
             return;
         } else if (!strncmp((const char *)&buff->buff[buff->buffpos], 
@@ -913,7 +937,7 @@ static void
         }
         break;
     case SES_PRST_WAITING:
-        if ((*retlen + (buff->bufflen - buff->buffpos)) < 3) {
+        if ((*retlen + (endpos - buff->buffpos)) < 3) {
             /* keep waiting */
             return;
         } else {
@@ -1660,9 +1684,10 @@ int
 {
     ses_cb_t         *scb;
     ses_msg_t        *msg;
-    ses_msg_buff_t   *buff, *buff2;
+    ses_msg_buff_t   *buff;
+    size_t            endpos;
     int               retlen;
-    boolean           done;
+    boolean           done, usechunks;
 
     if (len == 0) {
         return 0;
@@ -1690,9 +1715,13 @@ int
 
     retlen = 0;
 
+    usechunks = (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) 
+        ? TRUE : FALSE;
+
     /* check if this is the first read for this message */
     buff = msg->curbuff;
     if (buff == NULL) {
+        scb->inchunkidx = 0;
         buff = (ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
         if (buff == NULL) {
             return 0;
@@ -1702,18 +1731,42 @@ int
         }
     }
 
+    if (usechunks) {
+        endpos = buff->inchunks[scb->inchunkidx].chunkstart +
+            buff->inchunks[scb->inchunkidx].chunklen;
+    } else {
+        endpos = buff->bufflen;
+    }
+
     /* check current buffer end has been reached */
-    if (buff->buffpos == buff->bufflen) {
-        buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
-        if (!buff) {
-            return 0;
+    if (buff->buffpos == endpos) {
+        if (usechunks &&
+            (scb->inchunkidx < (SES_MAX_BUFF_CHUNKS-1) &&
+             buff->inchunks[scb->inchunkidx+1].chunkstart != 0)) {
+
+            scb->inchunkidx++;
+            buff->buffpos = buff->inchunks[scb->inchunkidx].chunkstart;
+            endpos = buff->buffpos +
+                buff->inchunks[scb->inchunkidx].chunklen;
         } else {
-            buff->buffpos = buff->buffstart;
-            msg->curbuff = buff;
+            scb->inchunkidx = 0;
+            buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+            if (buff == NULL) {
+                return 0;
+            } else {
+                buff->buffpos = buff->buffstart;
+                msg->curbuff = buff;
+                if (usechunks) {
+                    endpos = buff->buffstart +
+                        buff->inchunks[0].chunklen;
+                } else {
+                    endpos = buff->bufflen;
+                }
+            }
         }
     }
 
-    handle_prolog_state(msg, buffer, len, buff, &retlen);
+    handle_prolog_state(msg, buffer, len, buff, endpos, &retlen);
 
     /* start transferring bytes to the return buffer */
     done = FALSE;
@@ -1728,16 +1781,38 @@ int
         }
 
         /* check current buffer end has been reached */
-        if (buff->buffpos == buff->bufflen) {
-            buff2 = (ses_msg_buff_t *)dlq_nextEntry(buff);
-            if (!buff2) {
-                done = TRUE;
-                continue;
+        if (buff->buffpos == endpos) {
+            if (usechunks &&
+                (scb->inchunkidx < (SES_MAX_BUFF_CHUNKS-1) &&
+                 buff->inchunks[scb->inchunkidx+1].chunkstart != 0)) {
+
+                scb->inchunkidx++;
+                buff->buffpos = buff->inchunks[scb->inchunkidx].chunkstart;
+                endpos = buff->buffpos +
+                    buff->inchunks[scb->inchunkidx].chunklen;
             } else {
-                buff = buff2;
-                buff->buffpos = buff->buffstart;
-                msg->curbuff = buff;
-                handle_prolog_state(msg, buffer, len, buff, &retlen);
+                scb->inchunkidx = 0;
+                buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+                if (buff == NULL) {
+                    done = TRUE;
+                    continue;
+                } else {
+                    buff->buffpos = buff->buffstart;
+                    msg->curbuff = buff;
+                    if (usechunks) {
+                        endpos = buff->buffstart +
+                            buff->inchunks[0].chunklen;
+                    } else {
+                        endpos = buff->bufflen;
+                    }
+
+                    handle_prolog_state(msg, 
+                                        buffer, 
+                                        len, 
+                                        buff, 
+                                        endpos, 
+                                        &retlen);
+                }
             }
         }
     }

@@ -107,12 +107,6 @@ extern "C" {
 /* max size of the chunk size number in the chunk start tag */
 #define SES_MAX_CHUNKNUM_SIZE 10
 
-/* the buffers start point will always be a low number
- * with maybe up to 16 or so framing chars
- * pick a random number that won't be a real buffer start
- */
-#define SES_FAKE_BUFFSTART 104201
-
 /* padding at start of buffer for chunk tagging
  * Max: \n#xxxxxxx\n --> 7 digit chunk size
  */
@@ -121,6 +115,10 @@ extern "C" {
 /* leave enough room at the end for EOChunks */
 #define SES_ENDCHUNK_PAD  4
 
+/* max number of chunks an incoming buffer will allow to
+ * be threaded in base:1.1 buffer processing
+ */
+#define SES_MAX_BUFF_CHUNKS 4
 
 /********************************************************************
 *                                                                   *
@@ -240,6 +238,13 @@ typedef struct ses_total_stats_t_ {
 } ses_total_stats_t;
 
 
+/* Incoming base:1.1 buffer chunk map */
+typedef struct ses_msg_chunk_t_ {
+    size_t           chunkstart;      /* chunk start pos */
+    size_t           chunklen;       /* chunk data size */
+} ses_msg_chunk_t;
+
+
 /* Session Message Buffer */
 typedef struct ses_msg_buff_t_ {
     dlq_hdr_t        qhdr;
@@ -247,6 +252,7 @@ typedef struct ses_msg_buff_t_ {
     size_t           bufflen;        /* buff actual size */
     size_t           buffpos;       /* buff cur position */
     boolean          islast;      /* T: last buff in msg */
+    ses_msg_chunk_t  inchunks[SES_MAX_BUFF_CHUNKS];
     xmlChar          buff[SES_MSG_BUFFSIZE];   
 } ses_msg_buff_t;
 
@@ -321,7 +327,15 @@ typedef struct ses_cb_t_ {
     ses_ready_t      outready;          /* header for outreadyQ */
     ses_stats_t      stats;           /* per-session statistics */
     void            *mgrcb;    /* if manager session, mgr_scb_t */
+
+    /* base:1.1 chunk state handling;
+     * need to store number part of incoming chunk markers
+     * in the scb in case they are split across buffers
+     */
     xmlChar          startchunk[SES_MAX_STARTCHUNK_SIZE+1];
+
+    /* base:1.1 chunk map buff->inchunks[inchunkidx] */
+    uint32           inchunkidx;
 
     /*** user preferences ***/
     int32            indent;          /* indent N spaces (0..9) */
@@ -333,8 +347,8 @@ typedef struct ses_cb_t_ {
      * for incoming agent <rpc> requests, the access control
      * cache is used to minimize data structure processing
      * during authorization procedures in agt/agt_acm.c
-     * this is embedded in the XML header so it can
-     * be easily passed to the xml_wr functions
+     * there is a back-ptr embedded in the XML header so it can
+     * be easily passed to the agt_val and xml_wr functions
      */
     struct agt_acm_cache_t_ *acm_cache;
 

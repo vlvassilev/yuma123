@@ -380,7 +380,8 @@ static status_t
 {
     obj_template_t        *childobj;
     val_value_t           *childval;
-    xmlChar               *str, *name, *endptr;
+    xmlChar               *str, *name;
+    char                  *endptr;
     status_t               res;
     uint32                 leafcount;
     uint64                 counter;
@@ -434,8 +435,8 @@ static status_t
     endptr = NULL;
     done = FALSE;
     while (!done) {
-      counter = strtoull((char *)str, (char **)&endptr, 10);
-        if (counter == 0 && str == endptr) {
+        counter = strtoull((const char *)str, &endptr, 10);
+        if (counter == 0 && str == (xmlChar *)endptr) {
             /* number conversion failed */
             log_error("\nError: /proc/net/dev number conversion failed");
             return ERR_NCX_OPERATION_FAILED;

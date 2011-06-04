@@ -432,9 +432,9 @@ static status_t
     }
 
     /* keep getting counters until the line runs out */
-    endptr = NULL;
     done = FALSE;
     while (!done) {
+        endptr = NULL;
         counter = strtoull((const char *)str, &endptr, 10);
         if (counter == 0 && str == (xmlChar *)endptr) {
             /* number conversion failed */
@@ -452,7 +452,7 @@ static status_t
 
         leafcount++;
 
-        str = endptr;
+        str = (xmlChar *)endptr;
         if (*str == '\0' || *str == '\n') {
             done = TRUE;
         } else {

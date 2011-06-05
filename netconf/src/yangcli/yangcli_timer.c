@@ -152,7 +152,7 @@ date         init     comment
 /* macros from http://linux.die.net/man/2/gettimeofday */
 #define timerisset(tvp)\
         ((tvp)->tv_sec || (tvp)->tv_usec)
-#define timerclear(tvp)\
+#define timer_clear(tvp)\
         ((tvp)->tv_sec = (tvp)->tv_usec = 0)
 
 
@@ -209,7 +209,7 @@ static void
     clear_timer (server_cb_t *server_cb,
                  uint8 timer_id)
 {
-    timerclear(&server_cb->timers[timer_id]);
+    timer_clear(&server_cb->timers[timer_id]);
 
 }  /* clear_timer */
 
@@ -264,6 +264,9 @@ status_t
     uint8               timer_id;
 
     res = NO_ERR;
+    timer_id = 0;
+    restart_ok = FALSE;
+
     valset = get_valset(server_cb, rpc, &line[len], &res);
 
     /* check if the 'id' field is set */

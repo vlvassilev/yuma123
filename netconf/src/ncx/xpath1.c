@@ -7894,26 +7894,28 @@ static xpath_result_t *
         if (*res != NO_ERR) {
             return NULL;
         } else {
+            nexttyp = tk_next_typ(pcb->tkc);
             minuscnt++;
         }
     }
 
     val1 = parse_union_expr(pcb, res);
 
-    if (*res == NO_ERR && minuscnt/2) {
+    if (*res == NO_ERR && (minuscnt & 1)) {
         if (pcb->val || pcb->obj) {
             /* odd number of negate ops requested */
 
-            if (val1->restype == XP_RT_BOOLEAN) {
-                val1->r.boo = !val1->r.boo;
+            if (val1->restype == XP_RT_NUMBER) {
+                val1->r.num.d *= -1;
                 return val1;
             } else {
-                result = new_result(pcb, XP_RT_BOOLEAN);
+                result = new_result(pcb, XP_RT_NUMBER);
                 if (!result) {
                     *res = ERR_INTERNAL_MEM;
                     return NULL;
                 }
-                result->r.boo = xpath_cvt_boolean(val1);
+                xpath_cvt_number(val1, &result->r.num);
+                result->r.num.d *= -1;
                 free_result(pcb, val1);
                 return result;
             }

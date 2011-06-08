@@ -103,6 +103,8 @@ const xmlChar *
         return NCX_EL_DISCARD_CHANGES;
     case OP_VALIDATE:
         return NCX_EL_VALIDATE;
+    case OP_CANCEL_COMMIT:
+        return NCX_EL_CANCEL_COMMIT;
     default:
         return NCX_EL_ILLEGAL;
     }
@@ -137,6 +139,8 @@ const xmlChar *
         return NCX_EL_LOAD;
     case OP_EDITOP_COMMIT:
         return NCX_EL_COMMIT;
+    case OP_EDITOP_REMOVE:
+        return NCX_EL_REMOVE;
     default:
         return (const xmlChar *) "illegal";
     }
@@ -175,11 +179,14 @@ op_editop_t
     if (!xml_strcmp(opstr, NCX_EL_DELETE)) {
         return OP_EDITOP_DELETE;
     }
+    if (!xml_strcmp(opstr, NCX_EL_REMOVE)) {
+        return OP_EDITOP_REMOVE;
+    }
     if (!xml_strcmp(opstr, NCX_EL_NONE)) {
         return OP_EDITOP_NONE;
     }
 
-    /* internal extensions, should not be used */
+    /* internal extensions, should not be used in NETCONF PDU */
     if (!xml_strcmp(opstr, NCX_EL_LOAD)) {
         return OP_EDITOP_LOAD;
     }

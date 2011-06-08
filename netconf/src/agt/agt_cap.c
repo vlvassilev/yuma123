@@ -208,9 +208,21 @@ status_t
             }
 
             if (res == NO_ERR) {
-                res = cap_add_std(newmycaps, CAP_STDID_CONF_COMMIT);
-                if (res == NO_ERR) {
-                    res = cap_add_stdval(newcaps, CAP_STDID_CONF_COMMIT);
+                if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
+                    res = cap_add_std(newmycaps, 
+                                      CAP_STDID_CONF_COMMIT);
+                    if (res == NO_ERR) {
+                        res = cap_add_stdval(newcaps, 
+                                             CAP_STDID_CONF_COMMIT);
+                    }
+                }
+                if (ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+                    res = cap_add_std(newmycaps, 
+                                      CAP_STDID_CONF_COMMIT11);
+                    if (res == NO_ERR) {
+                        res = cap_add_stdval(newcaps, 
+                                             CAP_STDID_CONF_COMMIT11);
+                    }
                 }
             }
             break;

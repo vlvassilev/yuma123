@@ -27,6 +27,11 @@ module yuma-netconf {
      "Translated by Andy Bierman.
       Send comments to <andy@netconfcentral.org>.";
 
+   revision "2011-05-30" {
+     description 
+       "Update for NETCONF base:1.1 version";
+   }
+
    revision "2010-05-24" {
      description 
        "Align rpc statements with ietf-netconf.yang";
@@ -89,51 +94,86 @@ module yuma-netconf {
 
    // NETCONF capabilities defined as features
    feature writable-running {
-       description "NETCONF :writable-running capability";
-       reference "RFC 4741, section 8.2";
+     description
+       "NETCONF :writable-running capability;
+        If the server advertises the :writable-running
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.2.";
    }
 
    feature candidate {
-       description "NETCONF :candidate capability";
-       reference "RFC 4741, section 8.3";
+     description
+       "NETCONF :candidate capability;
+        If the server advertises the :candidate
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.3.";
    }
 
    feature confirmed-commit {
-       description "NETCONF :confirmed-commit capability";
-       reference "RFC 4741, section 8.4";
-       if-feature candidate;
+     if-feature candidate;
+     description
+       "NETCONF :confirmed-commit:1.1 capability;
+        If the server advertises the :confirmed-commit:1.1
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+
+     reference "RFC 6241, section 8.4.";
    }
 
    feature rollback-on-error {
-       description "NETCONF :rollback-on-error capability";
-       reference "RFC 4741, section 8.5";
+     description
+       "NETCONF :rollback-on-error capability;
+        If the server advertises the :rollback-on-error
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.5.";
    }
 
    feature validate {
-       description "NETCONF :validate.1.0 capability";
-       reference "RFC 4741, section 8.6";
-   }
-
-   feature validate-1.1 {
-       description "NETCONF :validate.1.1 capability";
-       reference "RFC 4741bis, section x.x";
+     description
+       "NETCONF :validate:1.1 capability;
+        If the server advertises the :validate:1.1
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.6.";
    }
 
    feature startup {
-       description "NETCONF :startup capability";
-       reference "RFC 4741, section 8.7";
+     description
+       "NETCONF :startup capability;
+        If the server advertises the :startup
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.7.";
    }
 
    feature url {
-       description "NETCONF :url capability";
-       reference "RFC 4741, section 8.8";
+     description
+       "NETCONF :url capability;
+        If the server advertises the :url
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.8.";
    }
 
    feature xpath {
-       description "NETCONF :xpath capability";
-       reference "RFC 4741, section 8.9";
+     description
+       "NETCONF :xpath capability;
+        If the server advertises the :xpath
+        capability for a session, then this feature must
+        also be enabled for that session.  Otherwise,
+        this feature must not be enabled.";
+     reference "RFC 6241, section 8.9.";
    }
-
 
    // NETCONF Simple Types
 
@@ -185,29 +225,117 @@ module yuma-netconf {
      }
    }
 
+
+   // NETCONF Simple Types
+
    typedef ErrorTag {
-     description "NETCONF Error Tag";
-     type enumeration { 
-       enum in-use;
-       enum invalid-value;
-       enum too-big;
-       enum missing-attribute;
-       enum bad-attribute;
-       enum unknown-attribute;
-       enum missing-element;
-       enum bad-element;
-       enum unknown-element;
-       enum unknown-namespace;
-       enum access-denied;
-       enum lock-denied;
-       enum resource-denied;
-       enum rollback-failed;
-       enum data-exists;
-       enum data-missing;
-       enum operation-not-supported;
-       enum operation-failed;
-       enum partial-operation;
-     }
+     type enumeration {
+        enum in-use {
+          description
+            "The request requires a resource that
+             already is in use.";
+        }
+        enum invalid-value {
+          description
+            "The request specifies an unacceptable value for one
+             or more parameters.";
+        }
+        enum too-big {
+          description
+            "The request or response (that would be generated) is
+             too large for the implementation to handle.";
+        }
+        enum missing-attribute {
+          description
+            "An expected attribute is missing.";
+        }
+        enum bad-attribute {
+          description
+            "An attribute value is not correct; e.g., wrong type,
+             out of range, pattern mismatch.";
+        }
+        enum unknown-attribute {
+          description
+            "An unexpected attribute is present.";
+        }
+        enum missing-element {
+          description
+            "An expected element is missing.";
+        }
+        enum bad-element {
+          description
+            "An element value is not correct; e.g., wrong type,
+             out of range, pattern mismatch.";
+        }
+        enum unknown-element {
+          description
+            "An unexpected element is present.";
+        }
+        enum unknown-namespace {
+          description
+            "An unexpected namespace is present.";
+        }
+        enum access-denied {
+          description
+            "Access to the requested protocol operation, or
+             data model is denied because authorization failed.";
+        }
+        enum lock-denied {
+          description
+            "Access to the requested lock is denied because the
+             lock is currently held by another entity.";
+        }
+        enum resource-denied {
+          description
+            "Request could not be completed because of
+             insufficient resources.";
+        }
+        enum rollback-failed {
+          description
+            "Request to rollback some configuration change (via
+             rollback-on-error or discard-changes operations) was
+             not completed for some reason.";
+
+        }
+        enum data-exists {
+          description
+            "Request could not be completed because the relevant
+             data model content already exists. For example,
+             a 'create' operation was attempted on data that
+             already exists.";
+        }
+        enum data-missing {
+          description
+            "Request could not be completed because the relevant
+             data model content does not exist.  For example,
+             a 'delete' operation was attempted on
+             data that does not exist.";
+        }
+        enum operation-not-supported {
+          description
+            "Request could not be completed because the requested
+             operation is not supported by this implementation.";
+        }
+        enum operation-failed {
+          description
+            "Request could not be completed because the requested
+             operation failed for some reason not covered by
+             any other error condition.";
+        }
+        enum partial-operation {
+          description
+            "This error-tag is obsolete, and SHOULD NOT be sent
+             by servers conforming to this document.";
+        }
+        enum malformed-message {
+          description
+            "A message could not be handled because it failed to
+             be parsed correctly. For example, the message is not
+             well-formed XML or it uses an invalid character set.";
+        }
+      }
+      description "NETCONF Error Tag";
+      reference "RFC 6241, Appendix A.";
    }
 
    typedef ErrorSeverity {
@@ -261,6 +389,7 @@ module yuma-netconf {
        enum replace;
        enum create;
        enum delete;
+       enum remove;    // only allowed if base:1.1 active
      }
      default "merge";
    }
@@ -1003,6 +1132,36 @@ module yuma-netconf {
           reference "RFC 4741, section 8.4.5.1";
           type ConfirmTimeoutType;
         }
+
+        leaf persist {
+          if-feature confirmed-commit;
+          type string;
+          description
+           "This parameter is used to make a confirmed commit
+            persistent.  A persistent confirmed commit is not aborted
+            if the NETCONF session terminates.  The only way to abort a
+            persistent confirmed commit it to let the timer expire, or
+            to use the cancel-commit operation.
+
+            The value of this parameter is a token that must be given
+            in the 'persist-id' parameter of commit or cancel-commit in
+            order to confirm or cancel the persistent confirmed commit.
+
+            The token should be a random string.";
+          reference "RFC 6241, section 8.3.4.1.";
+        }
+
+        leaf persist-id {
+          if-feature confirmed-commit;
+          type string;
+          description
+           "This parameter is given in order to commit a persistent
+            confirmed commit.  The value must be equal to the value
+            given in the 'persist' parameter to the commit operation.
+            If it does not match, the operation fails with an
+           'invalid-value' error.";
+          reference "RFC 6241, section 8.3.4.1.";
+        }
       }
    }
 
@@ -1019,7 +1178,28 @@ module yuma-netconf {
          configuration.";
 
       reference "RFC 4741, section 8.3.4.2";
+   }
 
+   rpc cancel-commit {
+     if-feature confirmed-commit;
+     description
+       "This operation is used to cancel an ongoing confirmed commit.
+        If the confirmed commit is persistent, the parameter
+        'persist-id' must be given, and it must match the value of the
+        'persist' parameter.";
+     reference "RFC 6241, section 8.4.4.1.";
+
+     input {
+       leaf persist-id {
+         type string;
+         description
+           "This parameter is given in order to cancel a persistent
+            confirmed commit.  The value must be equal to the value
+            given in the 'persist' parameter to the commit operation.
+            If it does not match, the operation fails with an
+           'invalid-value' error.";
+       }
+     }
    }
 
    rpc validate {

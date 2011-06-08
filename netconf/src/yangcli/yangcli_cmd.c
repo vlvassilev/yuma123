@@ -4769,7 +4769,7 @@ static status_t
     /* get the internal nc:operation object */
     operobj = ncx_find_object(get_netconf_mod(server_cb), 
                               NC_OPERATION_ATTR_NAME);
-    if (!operobj) {
+    if (operobj == NULL) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -4782,7 +4782,7 @@ static status_t
 
     /* get the string value for the edit operation */
     editopstr = op_editop_name(op);
-    if (!editopstr) {
+    if (editopstr  == NULL) {
         val_free_value(metaval);
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -5049,7 +5049,7 @@ static status_t
     topcontainer = FALSE;
     def_editop = server_cb->defop;
 
-    if (editop == OP_EDITOP_DELETE) {
+    if (editop == OP_EDITOP_DELETE || editop == OP_EDITOP_REMOVE) {
         isdelete = TRUE;
     } else {
         isdelete = FALSE;
@@ -5111,6 +5111,7 @@ static status_t
         switch (editop) {
         case OP_EDITOP_CREATE:
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             topcontainer = TRUE;
             break;
         case OP_EDITOP_MERGE:
@@ -6701,6 +6702,10 @@ static status_t
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
         if (cond) {
             res = do_edit(server_cb, rpc, line, len, OP_EDITOP_DELETE);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_REMOVE)) {
+        if (cond) {
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REMOVE);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_GET_LOCKS)) {
         if (cond) {

@@ -653,7 +653,7 @@ const char *
     case ERR_NCX_IN_USE_LOCKED:
         return "node is protected by a partial lock";
     case ERR_NCX_IN_USE_COMMIT:
-        return "cannot start a partial lock with confirmed-commit pending";
+        return "cannot perform the operation with confirmed-commit pending";
     case ERR_NCX_SUBMOD_NOT_LOADED:
         return "cannot directly load a submodule";
     case ERR_NCX_ACCESS_READ_ONLY:
@@ -664,6 +664,10 @@ const char *
         return "YANG file missing right brace";
     case ERR_NCX_INVALID_FRAMING:
         return "invalid protocol framing characters received";
+    case ERR_NCX_PROTO11_NOT_ENABLED:
+        return "base:1.1 protocol not enabled";
+    case ERR_NCX_CC_NOT_ACTIVE:
+        return "persistent confirmed commit not active";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

@@ -152,7 +152,8 @@ date         init     comment
 
 /* candidate commit control block struct */
 typedef struct commit_cb_t_ {
-    xmlChar     *cc_backup_source;
+    xmlChar     *cc_backup_source;   /* malloced */
+    xmlChar     *cc_persist_id;      /* malloced */
     time_t       cc_start_time;
     uint32       cc_cancel_timeout;
     ses_id_t     cc_ses_id;
@@ -1508,12 +1509,17 @@ static status_t
      * based on the current config state
      */
     res = cfg_ok_to_lock(cfg);
+
+    /* cannot start a lock when confirmed commit pending */
     if (res == NO_ERR) {
-        /* lock can be granted
-         * setup the user1 scratchpad with the cfg to lock 
-         */
-        msg->rpc_user1 = (void *)cfg;
-    } else {
+        if ((cfg->cfg_id == NCX_CFGID_RUNNING ||
+             cfg->cfg_id == NCX_CFGID_CANDIDATE) &&
+            commit_cb.cc_active) {
+            res = ERR_NCX_IN_USE_COMMIT;
+        }
+    }
+
+    if (res != NO_ERR) {
         /* lock probably already held */
         agt_record_error(scb,
                          &msg->mhdr, 
@@ -1524,7 +1530,13 @@ static status_t
                          cfg,
                          NCX_NT_NONE,
                          NULL);
+    } else {
+        /* lock can be granted
+         * setup the user1 scratchpad with the cfg to lock 
+         */
+        msg->rpc_user1 = (void *)cfg;
     }
+
     return res;
 
 } /* lock_validate */
@@ -1970,13 +1982,14 @@ static status_t
 {
     cfg_template_t       *candidate, *running;
     const agt_profile_t  *profile;
+    val_value_t          *errval;
     status_t              res;
     boolean               errdone;
 
 
     res = NO_ERR;
     errdone = FALSE;
-
+    errval = NULL;
     profile = agt_get_profile();
 
     if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
@@ -1985,14 +1998,47 @@ static status_t
         /* get the candidate config */
         candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
         running = cfg_get_config_id(NCX_CFGID_RUNNING);
-        if (!candidate || !running) {
+        if (candidate == NULL || running == NULL) {
             res = SET_ERROR(ERR_INTERNAL_VAL);
         } else {
+            val_value_t *persistval, *persistidval;
+
+            /* make sure base:1.1 params allowed if present */
+            persistval = val_find_child(msg->rpc_input,
+                                        val_get_mod_name(msg->rpc_input),
+                                        NCX_EL_PERSIST);
+            persistidval = val_find_child(msg->rpc_input,
+                                          val_get_mod_name(msg->rpc_input),
+                                          NCX_EL_PERSIST_ID);
+
+            if ((persistval != NULL || persistidval != NULL) &&
+                ses_get_protocol(scb) == NCX_PROTO_NETCONF10) {
+                res = ERR_NCX_PROTO11_NOT_ENABLED;
+                if (persistval != NULL) {
+                    errval = persistval;
+                } else {
+                    errval = persistidval;
+                }
+            }
+
+            if (res == NO_ERR && persistidval != NULL) {
+                if (!commit_cb.cc_active) {
+                    res = ERR_NCX_CC_NOT_ACTIVE;
+                    errval = persistidval;
+                } else if (commit_cb.cc_persist_id == NULL ||
+                           xml_strcmp(VAL_STR(persistidval),
+                                      commit_cb.cc_persist_id)) {
+                    res = ERR_NCX_INVALID_VALUE;
+                    errval = persistidval;
+                }
+            }
 
             /* check if this session is allowed to clear the
              * candidate config now
              */
-            res = cfg_ok_to_write(candidate, SES_MY_SID(scb));
+            if (res == NO_ERR) {
+                res = cfg_ok_to_write(candidate, SES_MY_SID(scb));
+            }
 
             if (res == NO_ERR) {
                 /* check if the running config can be written */
@@ -2028,8 +2074,8 @@ static status_t
                          methnode,
                          NCX_NT_NONE, 
                          NULL, 
-                         NCX_NT_NONE, 
-                         NULL);
+                         (errval != NULL) ? NCX_NT_VAL : NCX_NT_NONE, 
+                         errval);
     }
 
     return res;
@@ -2085,6 +2131,27 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION clear_commit_cb
+*
+* Clear the commit_cb data structure
+*
+*********************************************************************/
+static void
+    clear_commit_cb (void)
+{
+    if (commit_cb.cc_persist_id != NULL) {
+        m__free(commit_cb.cc_persist_id);
+    }
+    if (commit_cb.cc_backup_source != NULL) {
+        m__free(commit_cb.cc_backup_source);
+    }
+
+    memset(&commit_cb, 0x0, sizeof(commit_cb_t));
+
+} /* clear_commit_cb */
+
+
+/********************************************************************
 * FUNCTION commit_invoke
 *
 * commit : invoke callback
@@ -2100,6 +2167,7 @@ static status_t
                    xml_node_t *methnode)
 {
     val_value_t    *confirmedval, *timeoutval;
+    val_value_t    *persistval, *persistidval, *errval;
     cfg_template_t *candidate, *running;
     xmlChar        *fname;
     status_t        res;
@@ -2107,10 +2175,11 @@ static status_t
 
     res = NO_ERR;
     errdone = FALSE;
+    errval = NULL;
 
     candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
     running = cfg_get_config_id(NCX_CFGID_RUNNING);
-    if (!candidate || !running) {
+    if (candidate == NULL || running == NULL) {
         res = SET_ERROR(ERR_INTERNAL_VAL);
         agt_record_error(scb, 
                          &msg->mhdr, 
@@ -2136,6 +2205,20 @@ static status_t
                                 val_get_mod_name(msg->rpc_input),
                                 NCX_EL_CONFIRM_TIMEOUT);
 
+    
+    /* get the persist parameters only if base:1.1 enabled */
+    if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
+        persistval = val_find_child(msg->rpc_input,
+                                    val_get_mod_name(msg->rpc_input),
+                                    NCX_EL_PERSIST);
+        persistidval = val_find_child(msg->rpc_input,
+                                      val_get_mod_name(msg->rpc_input),
+                                      NCX_EL_PERSIST_ID);
+    } else {
+        persistval = NULL;
+        persistidval = NULL;
+    }
+
     /* figure out what to do wrt/ confirmed-commit */
     if (commit_cb.cc_active) {
         /* confirmed-commit already active
@@ -2143,78 +2226,159 @@ static status_t
          * confirmed commit or extending the timer
          * and perhaps adding more data to running
          */
-        if (confirmedval) {
-            /* check same session that started cc */
-            if (commit_cb.cc_ses_id != SES_MY_SID(scb)) {
-                log_warn("\nWarning: session %u extending "
-                         "confirmed-commit started by session %u",
-                         SES_MY_SID(scb),
-                         commit_cb.cc_ses_id);
-            }
-            
-            /* extend the timer */
-            (void)time(&commit_cb.cc_start_time);
-            if (timeoutval) {
-                commit_cb.cc_cancel_timeout = 
-                    VAL_UINT(timeoutval);
+        if (confirmedval != NULL) {
+            if (persistidval != NULL && 
+                commit_cb.cc_persist_id != NULL &&
+                !xml_strcmp(VAL_STR(persistidval), 
+                            commit_cb.cc_persist_id)) {
+                /* this session is allowed to be different than
+                 * one that started the conf-commit
+                 */
+                ;
+            } else if (commit_cb.cc_persist_id == NULL) {
+                /* check same session that started cc */
+                if (commit_cb.cc_ses_id != SES_MY_SID(scb)) {
+                    res = ERR_NCX_IN_USE_COMMIT;
+                    errval = confirmedval;
+                }
             } else {
-                commit_cb.cc_cancel_timeout = 
-                    NCX_DEF_CONFIRM_TIMEOUT;
-            }
-            if (LOGDEBUG2) {
-                log_debug2("\nConfirmed commit timer extended "
-                           "by %u seconds",
-                           commit_cb.cc_cancel_timeout);
-            }
-            save_nvstore = FALSE;
-            agt_sys_send_sysConfirmedCommit(scb,
-                                            NCX_CC_EVENT_EXTEND);
-        } else {
-            /* check same session that started cc */
-            if (commit_cb.cc_ses_id != SES_MY_SID(scb)) {
-                log_warn("\nWarning: session %u completing "
-                         "confirmed-commit started by session %u",
-                         SES_MY_SID(scb),
-                         commit_cb.cc_ses_id);
-            } else if (LOGDEBUG2) {
-                log_debug2("\nConfirmed commit completed");
+                res = ERR_NCX_OPERATION_FAILED;
+                errval = confirmedval;
             }
 
-            /* finish the confirmed-commit */
-            res = agt_ncx_cfg_save(running, FALSE);
-            if (res != NO_ERR) {
-                errdone = FALSE;
+            /* set the persist-id if needed */
+            if (res == NO_ERR && persistval != NULL) {
+                if (commit_cb.cc_persist_id != NULL) {
+                    if (LOGDEBUG) {
+                        log_debug("\nagt_ncx: confirmed-commit by '%u' "
+                                  "changing persist from '%s' to '%s'",
+                                  SES_MY_SID(scb),
+                                  commit_cb.cc_persist_id,
+                                  VAL_STR(persistval));
+                    }
+                    m__free(commit_cb.cc_persist_id);
+                } else {
+                    if (LOGDEBUG) {
+                        log_debug("\nagt_ncx: confirmed-commit by '%u' "
+                                  "setting persist to '%s'",
+                                  SES_MY_SID(scb),
+                                  VAL_STR(persistval));
+                    }
+                }
+                commit_cb.cc_persist_id = 
+                    xml_strdup(VAL_STR(persistval));
+                if (commit_cb.cc_persist_id == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                    errval = persistval;
+                }
             }
-            agt_sys_send_sysConfirmedCommit(scb,
-                                            NCX_CC_EVENT_COMPLETE);
-            commit_cb.cc_active = FALSE;
-            commit_cb.cc_ses_id = 0;
+
+            /* extend the conf-commit timer and send a notification */
+            if (res == NO_ERR) {
+                /* perhaps set a new owner session */
+                commit_cb.cc_ses_id = SES_MY_SID(scb);
+
+                /* extend the timer */
+                (void)time(&commit_cb.cc_start_time);
+                if (timeoutval != NULL) {
+                    commit_cb.cc_cancel_timeout = 
+                        VAL_UINT(timeoutval);
+                } else {
+                    commit_cb.cc_cancel_timeout = 
+                        NCX_DEF_CONFIRM_TIMEOUT;
+                }
+                if (LOGDEBUG2) {
+                    log_debug2("\nConfirmed commit timer extended "
+                               "by %u seconds",
+                               commit_cb.cc_cancel_timeout);
+                }
+                save_nvstore = FALSE;
+                agt_sys_send_sysConfirmedCommit(scb,
+                                                NCX_CC_EVENT_EXTEND);
+            }
+        } else {
+            /* confirmedval == NULL; finishing conf-commit */
+            if (persistidval == NULL &&
+                commit_cb.cc_ses_id != SES_MY_SID(scb)) {
+                /* persist-id not present and session ID did not match */
+                res = ERR_NCX_IN_USE_COMMIT;
+                errval = persistidval;
+            } else if (LOGDEBUG2) {
+                log_debug2("\nConfirmed commit completed by session %u",
+                           SES_MY_SID(scb));
+            }
+
+            /* finish the confirmed-commit unless invalid persist-id */
+            if (res == NO_ERR) {
+                res = agt_ncx_cfg_save(running, FALSE);
+            }
+            if (res == NO_ERR) {
+                agt_sys_send_sysConfirmedCommit(scb,
+                                                NCX_CC_EVENT_COMPLETE);
+
+                clear_commit_cb();
+            }
         }
     } else {
         /* check if a new confirmed commit is starting */
-        if (confirmedval) {
-            /* save the session ID that started this conf-commit */
-            commit_cb.cc_ses_id = SES_MY_SID(scb);
-
-            /* set the timer */
-            (void)time(&commit_cb.cc_start_time);
-            if (timeoutval) {
-                commit_cb.cc_cancel_timeout = 
-                    VAL_UINT(timeoutval);
-            } else {
-                commit_cb.cc_cancel_timeout = 
-                    NCX_DEF_CONFIRM_TIMEOUT;
+        if (confirmedval != NULL) {
+            /* save the session ID that started this conf-commit
+             * if persist active and orig session terminated,
+             * this will be reset to 0; otherwise keep
+             * the starting session the same
+             */
+            if (commit_cb.cc_ses_id == 0) {
+                commit_cb.cc_ses_id = SES_MY_SID(scb);
             }
-            commit_cb.cc_active = TRUE;
-            save_nvstore = FALSE;
 
-            if (LOGDEBUG2) {
-                log_debug2("\nConfirmed commit started, timeout in "
-                           "%u seconds",
-                           commit_cb.cc_cancel_timeout);
+            if (persistval != NULL) {
+                if (commit_cb.cc_persist_id != NULL) {
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                    if (LOGDEBUG) {
+                        log_debug("\nagt_ncx: confirmed-commit by '%u' "
+                                  "changing persist from '%s' to '%s'",
+                                  SES_MY_SID(scb),
+                                  commit_cb.cc_persist_id,
+                                  VAL_STR(persistval));
+                    }
+                    m__free(commit_cb.cc_persist_id);
+                } else {
+                    if (LOGDEBUG) {
+                        log_debug("\nagt_ncx: confirmed-commit by '%u' "
+                                  "setting persist to '%s'",
+                                  SES_MY_SID(scb),
+                                  VAL_STR(persistval));
+                    }
+                }
+
+                commit_cb.cc_persist_id = 
+                    xml_strdup(VAL_STR(persistval));
+                if (commit_cb.cc_persist_id == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                }
             }
-            agt_sys_send_sysConfirmedCommit(scb,
-                                            NCX_CC_EVENT_START);
+
+            if (res == NO_ERR) {
+                /* set the timer */
+                (void)time(&commit_cb.cc_start_time);
+                if (timeoutval) {
+                    commit_cb.cc_cancel_timeout = 
+                        VAL_UINT(timeoutval);
+                } else {
+                    commit_cb.cc_cancel_timeout = 
+                        NCX_DEF_CONFIRM_TIMEOUT;
+                }
+                commit_cb.cc_active = TRUE;
+                save_nvstore = FALSE;
+
+                if (LOGDEBUG2) {
+                    log_debug2("\nConfirmed commit started, timeout in "
+                               "%u seconds",
+                               commit_cb.cc_cancel_timeout);
+                }
+                agt_sys_send_sysConfirmedCommit(scb,
+                                                NCX_CC_EVENT_START);
+            }
         } else {
             /* no confirmed commit is starting */
             save_nvstore = TRUE;
@@ -2224,10 +2388,8 @@ static status_t
     /* make a backup of running to make sure
      * that if this step fails, running config MUST not change
      */ 
-    if (commit_cb.cc_backup_source) {
-        /* rewrite the existing backup file */
-        ;
-    } else {
+    if (res == NO_ERR &&
+        commit_cb.cc_backup_source == NULL) {
         /* search for the default startup-cfg.xml filename */
         fname = ncxmod_find_data_file(NCX_DEF_BACKUP_FILE, 
                                       FALSE, 
@@ -2297,13 +2459,127 @@ static status_t
                          methnode,
                          NCX_NT_NONE, 
                          NULL, 
-                         NCX_NT_VAL,
-                         candidate->root);
+                         (errval != NULL) ? NCX_NT_VAL : NCX_NT_NONE,
+                         errval);
     }
 
     return res;
 
 } /* commit_invoke */
+
+
+/********************************************************************
+* FUNCTION cancel_commit_validate
+*
+* cancel-commit : validate params callback
+*
+* INPUTS:
+*    see agt/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    cancel_commit_validate (ses_cb_t *scb,
+                            rpc_msg_t *msg,
+                            xml_node_t *methnode)
+{
+    cfg_template_t       *running;
+    const agt_profile_t  *profile;
+    val_value_t          *persistidval;
+    const xmlChar        *cc_persistid;
+    status_t              res;
+
+    running = NULL;
+    profile = agt_get_profile();
+    persistidval = NULL;
+    cc_persistid = NULL;
+    res = NO_ERR;
+
+    if (ses_get_protocol(scb) != NCX_PROTO_NETCONF11) {
+        res = ERR_NCX_UNKNOWN_ELEMENT;
+    } else if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    } else if (!agt_ncx_cc_active()) {
+        res = ERR_NCX_OPERATION_FAILED;
+    } else {
+        /* get the running config */
+        running = cfg_get_config_id(NCX_CFGID_RUNNING);
+        if (running == NULL) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            /* check if this session is allowed to revert running now */
+            res = cfg_ok_to_write(running, SES_MY_SID(scb));
+        }
+    }
+
+    if (res == NO_ERR) {
+        cc_persistid = agt_ncx_cc_persist_id();
+
+        persistidval = val_find_child(msg->rpc_input,
+                                      val_get_mod_name(msg->rpc_input),
+                                      NCX_EL_PERSIST_ID);
+        if (persistidval == NULL && cc_persistid == NULL) {
+            ; /* no persist in progress or requested - this is OK */
+        } else if (persistidval == NULL && cc_persistid != NULL) {
+            /* the persist-id is mandatory now */
+            res = ERR_NCX_MISSING_PARM;
+        } else if (persistidval != NULL && cc_persistid == NULL) {
+            /* no persist cc in progress so cannot match ID */
+            res = ERR_NCX_CC_NOT_ACTIVE;
+        } else {
+            /* try to match the persist ID */
+            if (xml_strcmp(VAL_STR(persistidval), cc_persistid)) {
+                res = ERR_NCX_INVALID_VALUE;
+            }
+        }
+    }
+
+    if (res == NO_ERR && cc_persistid == NULL) {
+        /* the cc session is the only one that can cancel */
+        if (SES_MY_SID(scb) != agt_ncx_cc_ses_id()) {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+    }
+
+    if (res != NO_ERR) {
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res, 
+                         methnode,
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_NONE, 
+                         NULL);
+        return res;
+    }
+
+    return res;
+
+} /* cancel_commit_validate */
+
+
+/********************************************************************
+* FUNCTION cancel_commit_invoke
+*
+* cancel-commit : invoke callback
+* 
+* INPUTS:
+*    see agt/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    cancel_commit_invoke (ses_cb_t *scb,
+                          rpc_msg_t *msg,
+                          xml_node_t *methnode)
+{
+    (void)msg;
+    (void)methnode;
+    agt_ncx_cancel_confirmed_commit(scb, NCX_CC_EVENT_CANCEL);
+    return NO_ERR;
+
+} /* cancel_commit_invoke */
 
 
 /********************************************************************
@@ -3025,6 +3301,23 @@ static status_t
         return SET_ERROR(res);
     }
 
+    /* cancel-commit :confirmed-commit + :base:1.1 capability */
+    res = agt_rpc_register_method(NC_MODULE,
+                                  op_method_name(OP_CANCEL_COMMIT),
+                                  AGT_RPC_PH_VALIDATE,
+                                  cancel_commit_validate);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = agt_rpc_register_method(NC_MODULE,
+                                  op_method_name(OP_CANCEL_COMMIT),
+                                  AGT_RPC_PH_INVOKE,
+                                  cancel_commit_invoke);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
     /* load-config extension */
     res = agt_rpc_register_method(NC_MODULE, 
                                   NCX_EL_LOAD_CONFIG,
@@ -3134,6 +3427,9 @@ static void
     agt_rpc_unregister_method(NC_MODULE, 
                               op_method_name(OP_DISCARD_CHANGES));
 
+    /* cancel-commit (base:1.1 only) */
+    agt_rpc_unregister_method(NC_MODULE, NCX_EL_CANCEL_COMMIT);
+
     /* load-config extension */
     agt_rpc_unregister_method(NC_MODULE, NCX_EL_LOAD_CONFIG);
 
@@ -3147,7 +3443,7 @@ static void
     agt_rpc_unregister_method(AGT_SYS_MODULE, NCX_EL_SHUTDOWN);
 
     /* no-op extension */
-    agt_rpc_unsupport_method(AGT_SYS_MODULE, NCX_EL_NO_OP);
+    agt_rpc_unregister_method(AGT_SYS_MODULE, NCX_EL_NO_OP);
 
 } /* unregister_nc_callbacks */
 
@@ -3202,10 +3498,7 @@ void
 
         unregister_nc_callbacks();
 
-        if (commit_cb.cc_backup_source) {
-            m__free(commit_cb.cc_backup_source);
-        }
-        memset(&commit_cb, 0x0, sizeof(commit_cb_t));
+        clear_commit_cb();
 
         agt_ncx_init_done = FALSE;
     }
@@ -3483,12 +3776,10 @@ boolean
 /********************************************************************
 * FUNCTION agt_ncx_cc_ses_id
 *
-* Check if a confirmed-commit is active, and the timeout
-* may need to be processed
+* Get the confirmed commit session ID
 *
 * RETURNS:
-*    TRUE if confirmed-commit is active
-*    FALSE otherwise
+*    session ID for the confirmed commit
 *********************************************************************/
 ses_id_t
     agt_ncx_cc_ses_id (void)
@@ -3497,6 +3788,40 @@ ses_id_t
     return commit_cb.cc_ses_id;
 
 } /* agt_ncx_cc_ses_id */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_clear_cc_ses_id
+*
+* Clear the confirmed commit session ID
+* This will be called by agt_ses when the current
+* session exits during a persistent confirmed-commit
+*
+*********************************************************************/
+void
+    agt_ncx_clear_cc_ses_id (void)
+{
+
+    commit_cb.cc_ses_id = 0;
+
+} /* agt_ncx_clear_cc_ses_id */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_cc_persist_id
+*
+* Get the confirmed commit persist ID
+*
+* RETURNS:
+*    session ID for the confirmed commit
+*********************************************************************/
+const xmlChar *
+    agt_ncx_cc_persist_id (void)
+{
+
+    return commit_cb.cc_persist_id;
+
+} /* agt_ncx_cc_persist_id */
 
 
 /********************************************************************
@@ -3569,8 +3894,7 @@ void
 
     agt_sys_send_sysConfirmedCommit(scb, event);
 
-    commit_cb.cc_active = FALSE;
-    commit_cb.cc_ses_id = 0;
+    clear_commit_cb();
 
 } /* agt_ncx_cancel_confirmed_commit */
 

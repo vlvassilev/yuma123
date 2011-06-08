@@ -886,8 +886,13 @@ void
         return;
     }
 
+    /* handle confirmed commit started by this session */
     if (agt_ncx_cc_active() && agt_ncx_cc_ses_id() == sid) {
-        agt_ncx_cancel_confirmed_commit(scb, NCX_CC_EVENT_CANCEL);
+        if (agt_ncx_cc_persist_id() == NULL) {
+            agt_ncx_cancel_confirmed_commit(scb, NCX_CC_EVENT_CANCEL);
+        } else {
+            agt_ncx_clear_cc_ses_id();
+        }
     }
 
     agt_sys_send_sysSessionEnd(scb,

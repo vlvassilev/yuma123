@@ -701,7 +701,8 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE ||
+        retval->editvars->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -748,7 +749,8 @@ static status_t
             break;
         case XML_NT_STRING:
             if (val_all_whitespace(valnode.simval) &&
-                retval->editvars->editop == OP_EDITOP_DELETE) {
+                (retval->editvars->editop == OP_EDITOP_DELETE ||
+                 retval->editvars->editop == OP_EDITOP_REMOVE)) {
                 res = NO_ERR;
             } else {
                 /* get the non-whitespace string here */
@@ -766,7 +768,8 @@ static status_t
             break;
         case XML_NT_END:
             enddone = TRUE;
-            if (retval->editvars->editop == OP_EDITOP_DELETE) {
+            if (retval->editvars->editop == OP_EDITOP_DELETE ||
+                retval->editvars->editop == OP_EDITOP_REMOVE) {
                 retval->btyp = NCX_BT_ENUM;
                 /* leave value empty, OK for leaf */
             } else {
@@ -1002,7 +1005,8 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE ||
+        retval->editvars->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1171,7 +1175,8 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
     
     /* make sure the startnode is correct */
-    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE ||
+        retval->editvars->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1411,7 +1416,8 @@ static status_t
   
     /* check empty string corner case */
     if (empty) {
-        if (retval->editvars->editop == OP_EDITOP_DELETE) {
+        if (retval->editvars->editop == OP_EDITOP_DELETE ||
+            retval->editvars->editop == OP_EDITOP_REMOVE) {
             if (obj->objtype == OBJ_TYP_LEAF) {
                 res = NO_ERR;
             } else if (allow_delete_all) {
@@ -1684,7 +1690,8 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE ||
+        retval->editvars->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1732,7 +1739,8 @@ static status_t
             break;
         case XML_NT_STRING:
             if (val_all_whitespace(valnode.simval) &&
-                retval->editvars->editop == OP_EDITOP_DELETE) {
+                (retval->editvars->editop == OP_EDITOP_DELETE ||
+                 retval->editvars->editop == OP_EDITOP_REMOVE)) {
                 res = NO_ERR;
             } else {
                 retval->v.idref.nsid = valnode.contentnsid;
@@ -1762,7 +1770,8 @@ static status_t
             break;
         case XML_NT_END:
             enddone = TRUE;
-            if (retval->editvars->editop == OP_EDITOP_DELETE) {
+            if (retval->editvars->editop == OP_EDITOP_DELETE ||
+                retval->editvars->editop == OP_EDITOP_REMOVE) {
                 retval->btyp = NCX_BT_IDREF;
             } else {
                 res = ERR_NCX_INVALID_VALUE;
@@ -1878,7 +1887,8 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    if (retval->editvars->editop == OP_EDITOP_DELETE) {
+    if (retval->editvars->editop == OP_EDITOP_DELETE ||
+        retval->editvars->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -2555,7 +2565,8 @@ static status_t
     }
 
     /* check if delete, these attrs not allowed at all then */
-    if (val->editvars->editop == OP_EDITOP_DELETE) {
+    if (val->editvars->editop == OP_EDITOP_DELETE ||
+        val->editvars->editop == OP_EDITOP_REMOVE) {
         checkcnt = 0;
     }
 

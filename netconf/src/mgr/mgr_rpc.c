@@ -715,7 +715,7 @@ void
     req = find_request(scb, rpy->msg_id);
     if (!req) {
 #ifdef MGR_RPC_DEBUG
-        log_debug("\nmgr_rpc: go request found for msg (%s) on session %d", 
+        log_debug("\nmgr_rpc: got request found for msg (%s) on session %d", 
                   rpy->msg_id, 
                   scb->sid);
 #endif

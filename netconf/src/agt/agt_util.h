@@ -553,7 +553,8 @@ extern status_t
 *              being affected by this operation, if any.
 *           == NULL if no current node exists
 *   iqual == effective instance qualifier for this value
-* 
+*   proto == protocol in use
+*
 * OUTPUTS:
 *   *cop may be adjusted to simplify further processing,
 *    based on the following reduction algorithm:
@@ -572,11 +573,12 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    agt_check_editop (op_editop_t pop,
-		      op_editop_t *cop,
-		      val_value_t *newnode,
-		      val_value_t *curnode,
-		      ncx_iqual_t  iqual);
+    agt_check_editop (op_editop_t   pop,
+                      op_editop_t  *cop,
+                      val_value_t *newnode,
+                      val_value_t *curnode,
+                      ncx_iqual_t iqual,
+                      ncx_protocol_t proto);
 
 
 /********************************************************************

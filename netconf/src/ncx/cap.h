@@ -100,7 +100,8 @@ extern "C" {
 #define CAP_BIT_PARTIAL_LOCK  bit11
 #define CAP_BIT_WITH_DEFAULTS bit12
 #define CAP_BIT_V11           bit13
-#define CAP_BIT_VALIDATE11    bit14
+#define CAP_BIT_CONF_COMMIT11 bit14
+#define CAP_BIT_VALIDATE11    bit15
 
 /* put the version numbers in the capability names for now */
 #define CAP_NAME_V1                 ((const xmlChar *)"base:1.0")
@@ -118,6 +119,7 @@ extern "C" {
 #define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults:1.0")
 #define CAP_NAME_V11                ((const xmlChar *)"base:1.1")
 #define CAP_NAME_VALIDATE11         ((const xmlChar *)"validate:1.1")
+#define CAP_NAME_CONF_COMMIT11      ((const xmlChar *)"confirmed-commit:1.1")
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="
@@ -166,6 +168,7 @@ typedef enum cap_stdid_t_ {
     CAP_STDID_WITH_DEFAULTS,
     CAP_STDID_V11,
     CAP_STDID_VALIDATE11,
+    CAP_STDID_CONF_COMMIT11,
     CAP_STDID_LAST_MARKER
 } cap_stdid_t;
 

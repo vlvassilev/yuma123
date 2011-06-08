@@ -240,6 +240,7 @@ extern "C" {
 #define YANGCLI_QUIT    (const xmlChar *)"quit"
 #define YANGCLI_RECALL  (const xmlChar *)"recall"
 #define YANGCLI_RELEASE_LOCKS (const xmlChar *)"release-locks"
+#define YANGCLI_REMOVE  (const xmlChar *)"remove"
 #define YANGCLI_REPLACE (const xmlChar *)"replace"
 #define YANGCLI_RUN     (const xmlChar *)"run"
 #define YANGCLI_SAVE    (const xmlChar *)"save"

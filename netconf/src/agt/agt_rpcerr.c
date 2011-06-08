@@ -266,7 +266,8 @@ static rpc_err_t
         return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNKNOWN_PARM:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-        return RPC_ERR_UNKNOWN_ELEMENT;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT :
+            RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_INVALID_NAME:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
         return (isel) ? RPC_ERR_BAD_ELEMENT
@@ -290,7 +291,8 @@ static rpc_err_t
         return RPC_ERR_DATA_MISSING;
     case ERR_NCX_EXTRA_PARM:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-        return RPC_ERR_UNKNOWN_ELEMENT;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT :
+            RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_EMPTY_VAL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
         return (isel) ? RPC_ERR_BAD_ELEMENT 
@@ -517,7 +519,8 @@ static rpc_err_t
         return RPC_ERR_DATA_MISSING;   /* 13.5 */
     case ERR_NCX_EXTRA_VAL_INST:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-        return RPC_ERR_UNKNOWN_ELEMENT;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT :
+            RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_NOT_WRITABLE:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
         return RPC_ERR_ACCESS_DENIED;
@@ -639,7 +642,8 @@ static rpc_err_t
         return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_RPC_WHEN_FAILED:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-        return RPC_ERR_UNKNOWN_ELEMENT;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT :
+            RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_NO_MATCHES:
         *apptag = RPC_ERR_APPTAG_NO_MATCHES;
         return RPC_ERR_OPERATION_FAILED;
@@ -682,6 +686,13 @@ static rpc_err_t
     case ERR_NCX_INVALID_FRAMING:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
         return RPC_ERR_MALFORMED_MESSAGE;
+    case ERR_NCX_PROTO11_NOT_ENABLED:
+        *apptag = RPC_ERR_APPTAG_NO_SUPPORT;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT :
+            RPC_ERR_UNKNOWN_ATTRIBUTE;
+    case ERR_NCX_CC_NOT_ACTIVE:
+        *apptag = RPC_ERR_APPTAG_GEN_ERROR;
+        return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -1601,6 +1612,8 @@ rpc_err_rec_t *
 *   attr   == attribute that had the error
 *   errnode == XML node where error occurred
 *           == NULL then there is no valid XML node (maybe the error!)
+*   errnodeval == valuse struct for the error node id errnode NULL
+*           == NULL if not used
 *   badns == URI string of the namespace that is bad (or NULL)
 *
 * RETURNS:
@@ -1614,6 +1627,7 @@ rpc_err_rec_t *
                                status_t   interr,
                                const xml_attr_t *attr,
                                const xml_node_t *errnode,
+                               const val_value_t *errnodeval,
                                const xmlChar *badns,
                                xmlChar *error_path)
 {
@@ -1621,7 +1635,7 @@ rpc_err_rec_t *
     rpc_err_sev_t   errsev;
     rpc_err_t       rpcerr;
     xmlChar        *badval, *error_msg;
-    const void     *err1, *err2;
+    const void     *err1, *err2, *err4;
     const xmlChar  *msg, *apptag;
     status_t        res;
     xmlns_id_t      badnsid1, badnsid2;
@@ -1636,13 +1650,18 @@ rpc_err_rec_t *
     badnsid1 = 0;
     badnsid2 = 0;
     err1 = NULL;
+    err2 = NULL;
+    err4 = NULL;
     apptag = NULL;
 
     if (attr) {
         badnsid1 = attr->attr_ns;
         err2 = (const void *)attr->attr_name;
-    } else {
-        err2 = NULL;
+    }
+
+    if (errnode == NULL && errnodeval != NULL) {
+        badnsid2 = val_get_nsid(errnodeval);
+        err4 = errnodeval->name;
     }
 
     rpcerr = get_rpcerr(interr, FALSE, &errsev, &apptag); 
@@ -1664,7 +1683,6 @@ rpc_err_rec_t *
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
     } 
 
     /* generate a default error message */
@@ -1691,7 +1709,7 @@ rpc_err_rec_t *
                         badnsid2,
                         err1, 
                         err2, 
-                        NULL);
+                        err4);
     if (res != NO_ERR) {
         /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
         ;    /* add error statistics (TBD) */

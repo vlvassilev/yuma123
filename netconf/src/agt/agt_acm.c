@@ -1874,6 +1874,7 @@ static status_t
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_CREATE:
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             clear_cache = TRUE;
             break;
         default:
@@ -1961,6 +1962,7 @@ static status_t
             }
             break;
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             break;
         default:
             res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -2502,14 +2504,18 @@ boolean
     }
 
 #ifdef DEBUG
-    if (!msg || !msg->acm_cache || !user || !val) {
+    if (msg == NULL || user == NULL || val == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
 #endif
 
-    /* !!! TBD: support standard NACM with CRUD, not R/W privs !!! */
+    if (msg->acm_cache == NULL) {
+        /* this is a rollback operation so just allow it */
+        return TRUE;
+    }
 
+    /* !!! TBD: support standard NACM with CRUD, not R/W privs !!! */
     retval = valnode_access_allowed(msg->acm_cache,
                                     user,
                                     val,

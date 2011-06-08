@@ -521,9 +521,14 @@ status_t
                     buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
                 }
             } else {
-                log_debug2("\nses_msg_send first buffer:\n%s",
-                           &buff->buff[buff->buffpos]);
-
+                size_t  pos;
+                xmlChar buf[2];
+                buf[1] = 0;
+                log_debug2("\nses_msg_send first buffer:\n");
+                for (pos = buff->buffpos; pos < buff->bufflen; pos++) {
+                    buf[0] = buff->buff[pos];
+                    log_debug2("%s", buf);
+                }
             }
         }
     }

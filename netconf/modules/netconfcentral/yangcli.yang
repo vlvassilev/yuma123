@@ -50,11 +50,12 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-05-27 {
+    revision 2011-06-05 {
        description 
           "Added start-timer and stop-timer local RPC functions.
            Added --echo-replies parameter and system variable.
-           Added --time-rpcs parameter and system variable";
+           Added --time-rpcs parameter and system variable
+           Added remove command for base:1.1 support";
     }
 
     revision 2011-04-22 {
@@ -1138,6 +1139,21 @@ module yangcli {
        description 
          "Unlock all the server databases that were
           previously locked with the get-locks command.";
+    }
+
+    rpc remove {
+      description
+       "Remove some NETCONF config data with the edit-config operation";
+      input {
+        ncx:default-parm  target;
+        leaf target {
+          description 
+           "Xpath expression indicating the node which is going
+            to be deleted.";
+          type string;
+          mandatory true;
+        }
+      }
     }
 
     rpc run {

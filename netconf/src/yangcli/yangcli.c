@@ -2430,7 +2430,7 @@ static void
         log_write("RFC 4741 (base:1.0)");
         break;
     case NCX_PROTO_NETCONF11:
-        log_write("RFC 4741bis (base:1.1)");
+        log_write("RFC 6241 (base:1.1)");
         break;
     default:
         log_write("unknown");

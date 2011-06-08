@@ -857,10 +857,8 @@ void
     rpc_err_rec_t      *err;
     dlq_hdr_t          *errQ;
     xmlChar            *pathbuff;
-    ses_total_stats_t  *totals;
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
-    totals = ses_get_total_stats();
     pathbuff = NULL;
     err = NULL;
 
@@ -968,11 +966,11 @@ void
     rpc_err_rec_t      *err;
     xmlChar            *buff;
     dlq_hdr_t          *errQ;
-    ses_total_stats_t  *totals;
+    const val_value_t  *errnodeval;
 
     (void)scb;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
-    totals = ses_get_total_stats();
+    errnodeval = NULL;
 
     if (errQ) {
         buff = NULL;
@@ -980,16 +978,19 @@ void
             if (nodetyp==NCX_NT_STRING) {
                 buff = xml_strdup((const xmlChar *)errnode);
             } else if (nodetyp==NCX_NT_VAL) {
+                errnodeval = (const val_value_t *)errnode;
                 (void)val_gen_instance_id(msghdr, 
-                                          (const val_value_t *)errnode, 
+                                          errnodeval,
                                           NCX_IFMT_XPATH1, 
                                           &buff);
+
             }
         }
         err = agt_rpcerr_gen_attr_error(layer, 
                                         res, 
                                         xmlattr, 
                                         xmlnode, 
+                                        errnodeval,
                                         badns, 
                                         buff);
         if (err) {
@@ -1036,7 +1037,6 @@ void
     rpc_err_rec_t       *err;
     dlq_hdr_t           *errQ;
     xmlChar             *pathbuff;
-    ses_total_stats_t   *totals;
 
 #ifdef DEBUG
     if (!errval) {
@@ -1046,7 +1046,6 @@ void
 #endif
 
     errQ = (msghdr) ? &msghdr->errQ : NULL;
-    totals = ses_get_total_stats();
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
@@ -1113,7 +1112,6 @@ void
     rpc_err_rec_t       *err;
     dlq_hdr_t           *errQ;
     xmlChar             *pathbuff;
-    ses_total_stats_t   *totals;
     status_t             interr;
 
 #ifdef DEBUG
@@ -1125,7 +1123,6 @@ void
 
     interr = ERR_NCX_UNIQUE_TEST_FAILED;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
-    totals = ses_get_total_stats();
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
@@ -1659,6 +1656,7 @@ status_t
         }
     case OP_EDITOP_CREATE:
     case OP_EDITOP_DELETE:
+    case OP_EDITOP_REMOVE:
         switch (acc) {
         case NCX_ACCESS_NONE:
             return ERR_NCX_NO_ACCESS_MAX;
@@ -1711,7 +1709,8 @@ status_t
 *              being affected by this operation, if any.
 *           == NULL if no current node exists
 *   iqual == effective instance qualifier for this value
-* 
+*   proto == protocol in use
+*
 * OUTPUTS:
 *   *cop may be adjusted to simplify further processing,
 *    based on the following reduction algorithm:
@@ -1734,7 +1733,8 @@ status_t
                       op_editop_t  *cop,
                       val_value_t *newnode,
                       val_value_t *curnode,
-                      ncx_iqual_t iqual)
+                      ncx_iqual_t iqual,
+                      ncx_protocol_t proto)
 {
     status_t           res;
     agt_profile_t     *profile;
@@ -1754,6 +1754,13 @@ status_t
      */
     if (*cop==OP_EDITOP_NONE) {
         *cop = pop;
+    }
+
+    /* check remove allowed */
+    if (*cop == OP_EDITOP_REMOVE || pop == OP_EDITOP_REMOVE) {
+        if (proto != NCX_PROTO_NETCONF11) {
+            return ERR_NCX_PROTO11_NOT_ENABLED;
+        }
     }
 
     /* check the child editop against the parent editop */
@@ -1812,6 +1819,7 @@ status_t
             }
             break;
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             /* this is an error since the merge or replace
              * cannot be performed and its parent node is
              * also getting deleted at the same time
@@ -1879,6 +1887,7 @@ status_t
             /* create inside create okay */
             break;
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             /* create inside a delete is an error */
             res = ERR_NCX_DATA_MISSING;
             break;
@@ -1890,26 +1899,31 @@ status_t
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
+    case OP_EDITOP_REMOVE:
     case OP_EDITOP_DELETE:
         /* explicit delete means the current node must exist
-         * unlike a replace which removes nodes if they exist,
+         * unlike a remove which removes nodes if they exist,
          * without any error checking for curnode exists
          */
-        if (!curnode) {
-            /* delete on non-existing node is always an error */
-            res = ERR_NCX_DATA_MISSING;
+        if (curnode == NULL) {
+            if (*cop == OP_EDITOP_DELETE) {
+                /* delete on non-existing node is always an error */
+                res = ERR_NCX_DATA_MISSING;
+            }
         } else {
             /* check if the node is really present for delete */
             switch (profile->agt_defaultStyleEnum) {
             case NCX_WITHDEF_REPORT_ALL:
                 break;
             case NCX_WITHDEF_TRIM:
-                if (val_is_default(curnode)) {
+                if (*cop == OP_EDITOP_DELETE && 
+                    val_is_default(curnode)) {
                     res = ERR_NCX_DATA_MISSING;
                 }
                 break;
             case NCX_WITHDEF_EXPLICIT:
-                if (val_set_by_default(curnode)) {
+                if (*cop == OP_EDITOP_DELETE && 
+                    val_set_by_default(curnode)) {
                     res = ERR_NCX_DATA_MISSING;
                 }
                 break;
@@ -1941,6 +1955,7 @@ status_t
                 res = ERR_NCX_DATA_MISSING;
                 break;
             case OP_EDITOP_DELETE:
+            case OP_EDITOP_REMOVE:
                 /* delete within delete always okay */
                 break;
             case OP_EDITOP_LOAD:
@@ -2376,6 +2391,7 @@ status_t
         *cacheptr = newval;
         break;
     case OP_EDITOP_DELETE:
+    case OP_EDITOP_REMOVE:
         *cacheptr = NULL;
         break;
     case OP_EDITOP_LOAD:

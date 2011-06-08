@@ -184,15 +184,38 @@ extern boolean
 /********************************************************************
 * FUNCTION agt_ncx_cc_ses_id
 *
-* Check if a confirmed-commit is active, and the timeout
-* may need to be processed
+* Get the confirmed commit session ID
 *
 * RETURNS:
-*    TRUE if confirmed-commit is active
-*    FALSE otherwise
+*    session ID for the confirmed commit
 *********************************************************************/
 extern ses_id_t
     agt_ncx_cc_ses_id (void);
+
+
+/********************************************************************
+* FUNCTION agt_ncx_clear_cc_ses_id
+*
+* Clear the confirmed commit session ID
+* This will be called by agt_ses when the current
+* session exits during a persistent confirmed-commit
+*
+*********************************************************************/
+extern void
+    agt_ncx_clear_cc_ses_id (void);
+
+
+/********************************************************************
+* FUNCTION agt_ncx_cc_persist_id
+*
+* Get the confirmed commit persist ID
+*
+* RETURNS:
+*    session ID for the confirmed commit
+*********************************************************************/
+extern const xmlChar *
+    agt_ncx_cc_persist_id (void);
+
 
 /********************************************************************
 * FUNCTION agt_ncx_check_cc_timeout

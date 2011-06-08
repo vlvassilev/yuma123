@@ -66,7 +66,8 @@ typedef enum op_method_t_ {
     OP_KILL_SESSION,
     OP_COMMIT,                   /* #candidate capability */
     OP_DISCARD_CHANGES,          /* #candidate capability */
-    OP_VALIDATE                  /* #validate capability */
+    OP_VALIDATE,                  /* #validate capability */
+    OP_CANCEL_COMMIT            /* base:1.1 + conf-commit */
 } op_method_t;
 
 
@@ -113,7 +114,8 @@ typedef enum op_editop_t_ {
     OP_EDITOP_CREATE,
     OP_EDITOP_DELETE,
     OP_EDITOP_LOAD,         /* internal enumeration */
-    OP_EDITOP_COMMIT
+    OP_EDITOP_COMMIT,
+    OP_EDITOP_REMOVE               /* base:1.1 only */
 } op_editop_t;
 
 

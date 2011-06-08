@@ -271,6 +271,8 @@ extern rpc_err_rec_t *
 *   attr   == attribute that had the error
 *   errnode == XML node where error occurred
 *           == NULL then there is no valid XML node (maybe the error!)
+*   errnodeval == valuse struct for the error node id errnode NULL
+*           == NULL if not used
 *   badns == URI string of the namespace that is bad (or NULL)
 *
 * RETURNS:
@@ -281,11 +283,13 @@ extern rpc_err_rec_t *
 *********************************************************************/
 extern rpc_err_rec_t *
     agt_rpcerr_gen_attr_error (ncx_layer_t layer,
-			       status_t   interr,
-			       const xml_attr_t *attr,
-			       const xml_node_t *errnode,
-			       const xmlChar *badns,
-			       xmlChar *error_path);
+                               status_t   interr,
+                               const xml_attr_t *attr,
+                               const xml_node_t *errnode,
+                               const val_value_t *errnodeval,
+                               const xmlChar *badns,
+                               xmlChar *error_path);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -302,6 +302,14 @@ static status_t
     }
 #endif
 
+    /* no difference during apply stage, so treat remove
+     * the same as a delete for user callback purposes
+     */
+    if (editop == OP_EDITOP_REMOVE) {
+        editop = OP_EDITOP_DELETE;
+    }
+
+    /* find the right callback function to call */
     done = FALSE;
     while (!done) {
         cbset = NULL;
@@ -496,6 +504,7 @@ static boolean
     case OP_EDITOP_CREATE:
     case OP_EDITOP_LOAD:
     case OP_EDITOP_DELETE:
+    case OP_EDITOP_REMOVE:
         retval = TRUE;
         break;
     default:
@@ -688,7 +697,8 @@ static status_t
 
     res = NO_ERR;
 
-    if (newval->editvars->editop == OP_EDITOP_DELETE) {
+    if (newval->editvars->editop == OP_EDITOP_DELETE ||
+        newval->editvars->editop == OP_EDITOP_REMOVE) {
         /* this error already checked in agt_val_parse */
         return NO_ERR;
     }
@@ -929,7 +939,8 @@ static status_t
     } else if (editop == OP_EDITOP_COMMIT) {
         applyhere = (newval) ? val_get_dirty_flag(newval) : FALSE;
         *done = applyhere;
-    } else if (editop == OP_EDITOP_DELETE) {
+    } else if (editop == OP_EDITOP_DELETE || 
+               editop == OP_EDITOP_REMOVE) {
         applyhere = TRUE;
         *done = TRUE;
     } else {
@@ -986,7 +997,9 @@ static status_t
         /* check corner case applying to the config root */
         if (newval && obj_is_root(newval->obj)) {
             ;
-        } else if (!add_defs_done && editop != OP_EDITOP_DELETE) {
+        } else if (!add_defs_done && 
+                   (editop != OP_EDITOP_DELETE &&
+                    editop != OP_EDITOP_REMOVE)) {
             if (cbtyp != AGT_CB_COMMIT_CHECK) {
                 res = val_add_defaults(newval, FALSE);
                 if (res != NO_ERR) {
@@ -1089,7 +1102,8 @@ static status_t
         if (editop != OP_EDITOP_LOAD) {
             cfg_set_dirty_flag(target);
 
-            if (editop == OP_EDITOP_DELETE) {
+            if (editop == OP_EDITOP_DELETE ||
+                editop == OP_EDITOP_REMOVE) {
                 if (parent) {
                     val_set_dirty_flag(parent);
                 }
@@ -1176,6 +1190,7 @@ static status_t
         case OP_EDITOP_LOAD:
             break;
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             if (curval) {
                 if (val_is_default(curval)) {
                     /* need to mark this leaf as a default
@@ -1313,7 +1328,8 @@ static status_t
     } else if (newval->editvars->editop == OP_EDITOP_COMMIT) {
         applyhere = val_get_dirty_flag(newval);
         *done = applyhere;
-    } else if (newval->editvars->editop == OP_EDITOP_DELETE) {
+    } else if (newval->editvars->editop == OP_EDITOP_DELETE ||
+               newval->editvars->editop == OP_EDITOP_REMOVE) {
         applyhere = TRUE;
         *done = TRUE;
     } else {
@@ -1468,6 +1484,7 @@ static status_t
             res = SET_ERROR(ERR_INTERNAL_VAL);
             break;
         case OP_EDITOP_DELETE:
+        case OP_EDITOP_REMOVE:
             if (curval) {
                 profile = agt_get_profile();
                 switch (profile->agt_defaultStyleEnum) {
@@ -1575,7 +1592,27 @@ static status_t
                                &newval->editvars->editop, 
                                newval, 
                                curval, 
-                               iqual);
+                               iqual,
+                               ses_get_protocol(scb));
+        if (res != NO_ERR) {
+            xml_attr_t             errattr;
+
+            memset(&errattr, 0x0, sizeof(xml_attr_t));
+            errattr.attr_ns = xmlns_nc_id();
+            errattr.attr_name = NC_OPERATION_ATTR_NAME;
+            errattr.attr_val = (xmlChar *)NULL;
+
+            agt_record_attr_error(scb, 
+                                  &msg->mhdr, 
+                                  NCX_LAYER_CONTENT,
+                                  res, 
+                                  &errattr, 
+                                  NULL, 
+                                  NULL, 
+                                  NCX_NT_VAL,
+                                  newval);
+            errdone = TRUE;
+        }
 
         /* check the operation against the object definition
          * and whether or not the entry currently exists
@@ -1771,7 +1808,8 @@ static status_t
                                &newval->editvars->editop, 
                                newval, 
                                curval, 
-                               iqual);
+                               iqual,
+                               ses_get_protocol(scb));
         if (res == NO_ERR) {
             res = agt_check_max_access(newval->editvars->editop, 
                                        obj_get_max_access(newval->obj), 
@@ -2128,6 +2166,7 @@ static void
         undo->newnode = NULL;
         break;
     case OP_EDITOP_DELETE:
+    case OP_EDITOP_REMOVE:
         /* Since 'delete' cannot apply to an attribute,
          * the metadata is not checked
          */

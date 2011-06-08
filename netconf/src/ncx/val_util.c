@@ -3251,7 +3251,8 @@ status_t
      * in those subtrees need to be ignored now
      */
     if (editop == OP_EDITOP_REPLACE ||
-        editop == OP_EDITOP_DELETE) {
+        editop == OP_EDITOP_DELETE ||
+        editop == OP_EDITOP_REMOVE) {
 
         for (childval = val_get_first_child(val);
              childval != NULL;

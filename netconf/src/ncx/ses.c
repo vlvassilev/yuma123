@@ -92,7 +92,7 @@ date         init     comment
 #define QSTR      (const xmlChar *)"&quot;"
 
 /* used by yangcli to read in between stdin polling */
-#define MAX_READ_TRIES   100
+#define MAX_READ_TRIES   500
 
 
 /********************************************************************
@@ -1848,6 +1848,7 @@ status_t
     status_t        res;
     ssize_t         ret;
     boolean         done, readdone, erragain;
+    uint32          readtries;
 
 #ifdef DEBUG
     if (!scb) {
@@ -1866,7 +1867,6 @@ status_t
     done = FALSE;
     readdone = FALSE;
     ret = 0;
-
  
     while (!done) {
         if (scb->state >= SES_ST_SHUTDOWN_REQ) {
@@ -1880,8 +1880,16 @@ status_t
         }
 
         /* loop until 1 buffer is read OK or retry count hit */
+        readtries = 0;
         readdone = FALSE;
         while (!readdone && res == NO_ERR) {
+            /* check read retry count */
+            if (readtries++ == MAX_READ_TRIES) {
+                readdone = TRUE;
+                res = ERR_NCX_SKIPPED;
+                continue;
+            }
+
             /* read data into the new buffer */
             if (scb->rdfn) {
                 erragain = FALSE;
@@ -1923,6 +1931,9 @@ status_t
 
         if (res != NO_ERR) {
             ses_msg_free_buff(scb, buff);
+            if (res == ERR_NCX_SKIPPED) {
+                res = NO_ERR;
+            }
             return res;
         }
 

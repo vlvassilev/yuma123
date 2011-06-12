@@ -425,6 +425,8 @@ static boolean
  *   mscb == manager session control block to use
  *   module == module name to copy
  *   revision == revision date to copy
+ *   isyang == TRUE if .yang extension needed
+ *             FALSE if .yin extension needed
  *   res == address of return status
  *
  * OUTPUTS:
@@ -438,6 +440,7 @@ static ncxmod_temp_filcb_t *
     get_new_temp_filcb (mgr_scb_t *mscb,
                         const xmlChar *module,
                         const xmlChar *revision,
+                        boolean isyang,
                         status_t *res)
 {
     xmlChar             *filebuffer, *p;
@@ -451,7 +454,11 @@ static ncxmod_temp_filcb_t *
     if (revision) {
         len_needed += (xml_strlen(revision) + 1);
     }
-    len_needed += 5;   /* .yang */
+    if (isyang) {
+        len_needed += 5;   /* .yang */
+    } else {
+        len_needed += 4;   /* .yin */
+    }
 
     filebuffer = m__getMem(len_needed+1);
     if (filebuffer == NULL) {
@@ -466,7 +473,11 @@ static ncxmod_temp_filcb_t *
         *p++ = '@';
         p += xml_strcpy(p, revision);
     }
-    p += xml_strcpy(p, (const xmlChar *)".yang");
+    if (isyang) {
+        p += xml_strcpy(p, (const xmlChar *)".yang");
+    } else {
+        p += xml_strcpy(p, (const xmlChar *)".yin");
+    }
 
     /* get a temp file control block
      * it will be stored in the session control block
@@ -504,7 +515,7 @@ static status_t
     xmlChar             *linebuffer;
     FILE                *srcfile, *destfile;
     ncxmod_temp_filcb_t *temp_filcb;
-    boolean              done;
+    boolean              done, isyang;
     status_t             res;
 
     res = NO_ERR;
@@ -512,9 +523,18 @@ static status_t
     srcfile = NULL;
     destfile = NULL;
 
+    if (yang_fileext_is_yang(source)) {
+        isyang = TRUE;
+    } else if (yang_fileext_is_yin(source)) {
+        isyang = FALSE;
+    } else {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     temp_filcb = get_new_temp_filcb(mscb,
                                     module,
                                     revision,
+                                    isyang,
                                     &res);
     if (temp_filcb == NULL) {
         return res;
@@ -528,8 +548,8 @@ static status_t
     }
 
 #ifdef YANGCLI_AUTOLOAD_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nyangcli_autoload: Copying '%s' to '%s'",
+    if (LOGDEBUG2) {
+        log_debug2("\nyangcli_autoload: Copying '%s' to '%s'",
                    source,
                    temp_filcb->source);
     }
@@ -543,7 +563,7 @@ static status_t
         return res;
     }
 
-    /* open the YANG source file for reading */
+    /* open the YANG or YIN source file for reading */
     srcfile = fopen((const char *)source, "r");
     if (srcfile == NULL) {
         res = errno_to_status();
@@ -564,6 +584,7 @@ static status_t
             log_error("\nError: copy to temp file failed");
             /*** keeping partial file around!!! ***/
             done = TRUE;
+            res = ERR_FIL_WRITE;
         }
     }
 
@@ -571,7 +592,7 @@ static status_t
     fclose(destfile);
     m__free(linebuffer);
 
-    return NO_ERR;
+    return res;
 
 }   /* copy_module_to_tempdir */
 
@@ -1078,6 +1099,7 @@ status_t
             temp_filcb = get_new_temp_filcb(mscb,
                                             module,
                                             revision,
+                                            TRUE,   /* isyang */
                                             &res);
             if (temp_filcb != NULL) {
                 /* copy the value node to the work directory

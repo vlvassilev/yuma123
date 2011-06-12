@@ -486,6 +486,25 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ses_puthstr
+*
+* write HTML element safe content string
+* Write a zero-terminated element content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*
+*********************************************************************/
+extern void
+    ses_puthstr (ses_cb_t *scb,
+                 const xmlChar *str);
+
+
+/********************************************************************
 * FUNCTION ses_putcchar
 *
 * Write one content char to the session, with translation as needed

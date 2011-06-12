@@ -446,7 +446,9 @@ static status_t
                 return res;
             }
 
-            /* write the string part */
+            /* write the string part 
+             * do not add any extra whiespace to the XML string
+             */
             if (mapping->elem) {
                 ses_putchar(scb, '>');
 
@@ -455,11 +457,8 @@ static status_t
                                mapping->argname,
                                startindent + cp->indent);
                 ses_putchar(scb, '>');
-                ses_indent(scb, startindent + (cp->indent * 2));
                 write_cur_token(scb, pcb, TRUE);
-                end_yin_elem(scb, 
-                             mapping->argname, 
-                             startindent + cp->indent);
+                end_yin_elem(scb, mapping->argname, -1);
             } else {
                 /* encode argname,value as an attribute */
                 ses_putchar(scb, ' ');
@@ -573,7 +572,9 @@ static status_t
                 return res;
             }
 
-            /* write the string part */
+            /* write the string part
+             * do not add any extra whiespace chars to the string
+             */
             if (extension->argel) {
                 ses_putchar(scb, '>');
 
@@ -583,12 +584,8 @@ static status_t
                                extension->arg,
                                startindent + cp->indent);
                 ses_putchar(scb, '>');
-                ses_indent(scb, startindent + (cp->indent * 2));
                 write_cur_token(scb, pcb, TRUE);
-                end_ext_elem(scb, 
-                             prefix,
-                             extension->arg, 
-                             startindent + cp->indent);
+                end_ext_elem(scb, prefix, extension->arg, -1);
             } else {
                 /* encode argname,value as an attribute */
                 ses_putchar(scb, ' ');

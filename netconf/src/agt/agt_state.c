@@ -240,6 +240,7 @@ date         init     comment
 #define AGT_STATE_OBJ_LOCKED_NODES    (const xmlChar *)"locked-nodes"
 
 #define AGT_STATE_FORMAT_YANG         (const xmlChar *)"yang"
+#define AGT_STATE_FORMAT_YIN          (const xmlChar *)"yin"
 
 #define AGT_STATE_ENUM_NETCONF        (const xmlChar *)"NETCONF"
 
@@ -1071,6 +1072,8 @@ static status_t
     xmlns_id_t       nsid;
     status_t         res;
     uint32           revcount;
+    ncx_modformat_t  modformat;
+
 
     res = NO_ERR;
     findmod = NULL;
@@ -1102,6 +1105,18 @@ static status_t
     if (valformat && valformat->res == NO_ERR) {
         format = VAL_IDREF_NAME(valformat);
         nsid = VAL_IDREF_NSID(valformat);
+        if (nsid != statemod->nsid) {
+            res = ERR_NCX_INVALID_VALUE;
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res, 
+                             methnode, 
+                             NCX_NT_VAL, 
+                             valformat,
+                             NCX_NT_VAL, 
+                             valformat);
+        }
     }
 
     if (identifier == NULL) {
@@ -1109,9 +1124,42 @@ static status_t
         return ERR_NCX_MISSING_PARM;
     }
 
+    /* set default format to YANG if needed */
     if (format == NULL) {
         format = AGT_STATE_FORMAT_YANG;
         nsid = statemod->nsid;
+    }
+
+    /* check format parameter: only YANG and YIN supported for now */
+    if (!xml_strcmp(format, AGT_STATE_FORMAT_YANG)) {
+        modformat = NCX_MODFORMAT_YANG;
+    } else if (!xml_strcmp(format, AGT_STATE_FORMAT_YIN)) {
+        modformat = NCX_MODFORMAT_YIN;
+    } else {
+        modformat = NCX_MODFORMAT_NONE;
+    }
+    if (nsid != statemod->nsid) {
+        res = ERR_NCX_WRONG_NS;
+        agt_record_error(scb,
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res, 
+                         methnode, 
+                         NCX_NT_VAL, 
+                         valformat,
+                         NCX_NT_VAL, 
+                         valformat);
+    } else if (modformat == NCX_MODFORMAT_NONE) {
+        res = ERR_NCX_VALUE_NOT_SUPPORTED;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res, 
+                         methnode, 
+                         NCX_NT_STRING, 
+                         format,
+                         NCX_NT_VAL, 
+                         valformat);
     }
 
     /* check the identifier: must be valid module name */
@@ -1136,6 +1184,7 @@ static status_t
         version = NULL;
     }
 
+    /* client must specify a revision if the server has more than 1 */
     if (version == NULL) {
         revcount = ncx_mod_revision_count(identifier);
         if (revcount > 1) {
@@ -1152,46 +1201,71 @@ static status_t
         }
     }
 
-    /* check format parameter: only YANG supported for now */
-    if (xml_strcmp(format, AGT_STATE_FORMAT_YANG) ||
-        nsid != statemod->nsid) {
+    /* find the module that is loaded; this is the only format
+     * that is supported at this time; TBD: registry of filespecs
+     * or URLs that are supported for each [sub]module 
+     * instead of just returning the format loaded into memory
+     */
+    if (res == NO_ERR) {
+        findmod = ncx_find_module(identifier, version);
+        if (findmod == NULL) {
+            val_value_t *errval = validentifier;
 
-        res = ERR_NCX_VALUE_NOT_SUPPORTED;
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res, 
-                         methnode, 
-                         NCX_NT_STRING, 
-                         format,
-                         NCX_NT_VAL, 
-                         valformat);
-
+            res = ERR_NCX_NO_MATCHES;
+            if (version != NULL) {
+                findmod = ncx_find_module(identifier, NULL);
+                if (findmod != NULL) {
+                    errval = valversion;
+                }
+            }
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION,
+                             res, 
+                             methnode, 
+                             NCX_NT_VAL, 
+                             errval,
+                             NCX_NT_VAL, 
+                             errval);
+        } else {
+            /* check if format is correct for request */
+            switch (modformat) {
+            case NCX_MODFORMAT_YANG:
+                if (yang_fileext_is_yin(findmod->source)) {
+                    res = ERR_NCX_VALUE_NOT_SUPPORTED;
+                }
+                break;
+            case NCX_MODFORMAT_YIN:
+                if (yang_fileext_is_yang(findmod->source)) {
+                    res = ERR_NCX_VALUE_NOT_SUPPORTED;
+                }
+                break;
+            default:
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+            if (res != NO_ERR) {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 methnode, 
+                                 NCX_NT_STRING, 
+                                 format,
+                                 (valformat) ? NCX_NT_VAL : NCX_NT_NONE,
+                                 valformat);
+            }
+        }
     }
 
     if (res == NO_ERR) {
-        findmod = ncx_find_module(identifier, version);
-        if (!findmod) {
-            res = ERR_NCX_NO_MATCHES;
-            agt_record_error(scb, 
-                             &msg->mhdr, 
-                             NCX_LAYER_OPERATION, 
-                             res, 
-                             methnode, 
-                             NCX_NT_STRING, 
-                             identifier,
-                             NCX_NT_VAL, 
-                             validentifier);
-        } else {
-            /* save the found module and format
-             * setup the automatic output using the callback
-             * function in agt_util.c
-             */
-            msg->rpc_user1 = (void *)findmod;
-            msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
-            msg->rpc_data_type = RPC_DATA_STD;
-            msg->rpc_datacb = agt_output_schema;
-        }
+        /* save the found module and format
+         * setup the automatic output using the callback
+         * function in agt_util.c
+         */
+        msg->rpc_user1 = (void *)findmod;
+        msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
+        msg->rpc_data_type = RPC_DATA_STD;
+        msg->rpc_datacb = agt_output_schema;
     }
 
     return res;

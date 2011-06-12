@@ -1067,8 +1067,11 @@ static status_t
     if (pcb->obj) {
         if (loopcount != keytotal) {
             if (keycount < keytotal) {
-                if (pcb->flags & XP_FL_SCHEMA_INSTANCEID) {
-                    /* schema-instance allowed to skip keys */
+                if (pcb->flags & XP_FL_SCHEMA_INSTANCEID ||
+                    pcb->source == XP_SRC_LEAFREF) {
+                    /* schema-instance allowed to skip keys 
+                     * leafref path-expr allowed to skip keys
+                     */
                     ;   
                 } else {
                     /* regular instance-identifier must have all keys */
@@ -1612,7 +1615,10 @@ status_t
          */
         *leafobj = pcb->targobj;
 
-        /* make sure the config vs. non-config rules are followed */
+        /* make sure the config vs. non-config rules are followed
+         * if obj is config, it can point at only config targobj
+         * if obj not config, it can point at any targobj node
+         */
         if (obj_get_config_flag(obj) &&
             !obj_get_config_flag(pcb->targobj)) {
 

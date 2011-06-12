@@ -1866,6 +1866,7 @@ static status_t
         } else if (!xml_strcmp(str+1, YIN_SUFFIX)) {
             isfile = TRUE;
             mode = NCXMOD_MODE_FILEYIN;
+            try_yin = TRUE;
         }
     }
 
@@ -2154,7 +2155,15 @@ static status_t
                     *retmod = pcb->top;
                 } 
             }
-        }
+        } else if (res != NO_ERR) {
+            if (pcb->retmod) {
+                log_debug("\nFree retmod import %p (%s)",
+                          pcb->retmod,
+                          pcb->retmod->name);
+                ncx_free_module(pcb->retmod);
+                pcb->retmod = NULL;
+            }
+        } /* else pcb->top will get deleted in yang_free_pcb */
         return res;
     } else {
         return (res == NO_ERR) ? ERR_NCX_MOD_NOT_FOUND : res;

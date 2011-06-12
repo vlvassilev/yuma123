@@ -924,6 +924,23 @@ extern const tk_token_ptr_t *
     tk_find_tkptr (const tk_chain_t  *tkc,
                    const void *field);
 
+
+/********************************************************************
+* FUNCTION tk_tkptr_quotes
+* 
+* Get the specified token pointer record token ID type
+* Use the first string or only string
+*
+* INPUTS:
+*   tkptr  = token pointer to use
+*
+* RETURNS:
+*   number of quotes used in first string
+*********************************************************************/
+extern uint32
+    tk_tkptr_quotes (const tk_token_ptr_t  *tkptr);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

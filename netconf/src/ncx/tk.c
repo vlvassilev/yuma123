@@ -3355,33 +3355,18 @@ status_t
         return NO_ERR;
     }
 
-    if (!TK_HAS_ORIGTK(tk)) {
+    if (!TK_TYP_STR(tk->typ)) {
         return NO_ERR;
     }
 
-    if (!dlq_empty(&tk->origstrQ)) {
-        /* need token pointer because there is string concat */
-        tkptr = new_token_ptr(tk, field);
-        if (tkptr == NULL) {
-            return ERR_INTERNAL_MEM;
-        }
-        dlq_enque(tkptr, &tkc->tkptrQ);
-    } else if (tk->typ == TK_TT_QSTRING) {
-        /* just 1 double quoted string; 
-         * check if it changed after processing
-         */
-        if (xml_strcmp(tk->val, tk->origval)) {
-            tkptr = new_token_ptr(tk, field);
-            if (tkptr == NULL) {
-                return ERR_INTERNAL_MEM;
-            }
-            dlq_enque(tkptr, &tkc->tkptrQ);
-        }
-    } else {
-        /* just 1 single-quoted string that can be freed */
-        m__free(tk->origval);
-        tk->origval = NULL;
+    /* save all string tokens, not just the ones that
+     * have multi-part format, needed for original quotes
+     */
+    tkptr = new_token_ptr(tk, field);
+    if (tkptr == NULL) {
+        return ERR_INTERNAL_MEM;
     }
+    dlq_enque(tkptr, &tkc->tkptrQ);
 
     return NO_ERR;
 
@@ -3415,7 +3400,10 @@ const xmlChar *
     const tk_token_t  *tk;
 
 #ifdef DEBUG
-    if (tkptr == NULL || dquote == NULL || morestr == NULL) {
+    if (tkptr == NULL || 
+        tkptr->tk == NULL || 
+        dquote == NULL || 
+        morestr == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -3566,6 +3554,41 @@ const tk_token_ptr_t *
     return NULL;
 
 }  /* tk_find_tkptr */
+
+
+/********************************************************************
+* FUNCTION tk_tkptr_quotes
+* 
+* Get the specified token pointer record token ID type
+* Use the first string or only string
+*
+* INPUTS:
+*   tkptr  = token pointer to use
+*
+* RETURNS:
+*   number of quotes used in first string
+*********************************************************************/
+uint32
+    tk_tkptr_quotes (const tk_token_ptr_t  *tkptr)
+{
+
+#ifdef DEBUG
+    if (tkptr == NULL || tkptr->tk == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    switch (tkptr->tk->typ) {
+    case TK_TT_SQSTRING:
+        return 1;
+    case TK_TT_QSTRING:
+        return 2;
+    default:
+        return 0;
+    }
+
+}  /* tk_tkptr_quotes */
 
 
 /* END file tk.c */

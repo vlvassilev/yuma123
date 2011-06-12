@@ -795,13 +795,18 @@ typedef boolean (*ncx_feature_cbfn_t) (const ncx_module_t *mod,
 				       void *cookie);
 
 
-/* enum for get-schema format type enum values */
+/* enum for get-schema format type enum values
+ * matches the schema-format identities in RFC 6022
+ */
 typedef enum ncx_modformat_t_ { 
     NCX_MODFORMAT_NONE,
     NCX_MODFORMAT_XSD,
     NCX_MODFORMAT_YANG,
-    NCX_MODFORMAT_RNG
+    NCX_MODFORMAT_YIN,
+    NCX_MODFORMAT_RNG,
+    NCX_MODFORMAT_RNC
 } ncx_modformat_t;
+
 
 /* used with obj_deviation_t to defer object lookups */
 typedef struct ncx_save_deviations_t_ {

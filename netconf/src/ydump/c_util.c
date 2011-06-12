@@ -1031,6 +1031,9 @@ void
     btyp = obj_get_basetype(obj);
 
     switch (btyp) {
+    case NCX_BT_BITS:
+        ses_putstr(scb, (const xmlChar *)"VAL_BITS");
+        break;
     case NCX_BT_EMPTY:
         ses_putstr(scb, (const xmlChar *)"VAL_EMPTY");
         break;

@@ -625,6 +625,7 @@ extern "C" {
 #define NCX_EL_STRING          (const xmlChar *)"string"
 #define NCX_EL_STRUCT          (const xmlChar *)"struct"
 #define NCX_EL_SUBDIRS         (const xmlChar *)"subdirs"
+#define NCX_EL_SUBMODULE       (const xmlChar *)"submodule"
 #define NCX_EL_SUBTREE         (const xmlChar *)"subtree"
 #define NCX_EL_SUPERUSER       (const xmlChar *)"superuser"
 #define NCX_EL_SYNTAX          (const xmlChar *)"syntax"

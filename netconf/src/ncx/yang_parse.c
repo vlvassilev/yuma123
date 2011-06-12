@@ -1304,7 +1304,7 @@ static status_t
             ver = TRUE;
 
             /* get the version number */
-            res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
+            res = ncx_consume_token(tkc, mod, TK_TT_STRING);
             if (res != NO_ERR) {
                 retres = res;
                 if (NEED_EXIT(res)) {
@@ -2173,6 +2173,35 @@ static status_t
 
                         /* save a back-ptr in the include directive as well */
                         inc->submod = foundmod;
+
+                        if (LOGDEBUG3) {
+                            if (node->mod && node->submod) {
+                                log_debug3("\nAdd node %p with submod "
+                                           "%p (%s) to mod (%s) "
+                                           "in Q %p",
+                                           node,
+                                           node->submod,
+                                           node->submod->name,
+                                           node->mod->name,
+                                           allQ);
+                            } else if (node->submod) {
+                                log_debug3("\nAdd node %p with submod %p (%s) "
+                                           "in Q %p",
+                                           node,
+                                           node->submod,
+                                           node->submod->name,
+                                           allQ);
+                            } else if (node->mod) {
+                                log_debug3("\nAdd node %p with mod %p (%s) "
+                                           "in Q %p",
+                                           node,
+                                           node->mod,
+                                           node->mod->name,
+                                           allQ);
+                            } else {
+                                SET_ERROR(ERR_INTERNAL_VAL);
+                            }
+                        }
                     }
                 } else {
                     SET_ERROR(ERR_INTERNAL_VAL);
@@ -3216,6 +3245,15 @@ static status_t
         /* consume submodule-header-stmts */
         res = consume_submod_hdr(tkc, mod);
         CHK_EXIT(res, retres);
+    }
+
+    if (mod->prefix == NULL) {
+        if (retres == NO_ERR) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            retres = ERR_NCX_INVALID_VALUE;
+        }
+        log_error("\nError: cannot continue without module prefix set");
+        return retres;
     }
 
     /* set the namespace and the XML prefix now,

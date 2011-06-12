@@ -2493,6 +2493,22 @@ extern const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_presence_string_field
+*
+* Get the address ot the presence-stmt value, if any
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to address of presence string
+*   NULL if none
+*********************************************************************/
+extern void *
+    obj_get_presence_string_field (const obj_template_t *obj);
+
+
+/********************************************************************
  * FUNCTION obj_get_child_node
  * 
  * Get the correct child node for the specified parent and

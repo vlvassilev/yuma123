@@ -1334,6 +1334,41 @@ void
 
 
 /********************************************************************
+* FUNCTION ses_puhcstr
+*
+* write HTML element safe content string
+* Write a zero-terminated element content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*
+*********************************************************************/
+void
+    ses_puthstr (ses_cb_t *scb,
+                 const xmlChar *str)
+{
+    while (*str) {
+        if (*str == '<') {
+            ses_putstr(scb, LTSTR);
+            str++;
+        } else if (*str == '>') {
+            ses_putstr(scb, GTSTR);
+            str++;
+        } else if (*str == '&') {
+            ses_putstr(scb, AMPSTR);
+            str++;
+        } else {
+            ses_putchar(scb, *str++);
+        }
+    }
+}  /* ses_puthstr */
+
+
+/********************************************************************
 * FUNCTION ses_putcchar
 *
 * Write one content char to the session, with translation as needed

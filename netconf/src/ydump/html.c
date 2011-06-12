@@ -190,6 +190,27 @@ static void
 
 
 /********************************************************************
+* FUNCTION has_nl
+* 
+* Check if string has newlines
+*
+* INPUTS:
+*   str == string to use
+*
+*********************************************************************/
+static boolean
+    has_nl (const xmlChar *str)
+{
+    while (*str && *str != '\n') {
+        str++;
+    }
+    return (*str) ? TRUE : FALSE;
+
+}  /* has_nl */
+
+
+
+/********************************************************************
 * FUNCTION start_elem
 * 
 * Generate a start tag
@@ -486,7 +507,8 @@ static void
         ;
     }
 
-    ses_putcstr(scb, strval, indent);
+    (void)indent;
+    ses_puthstr(scb, strval);
 
     switch (quotes) {
     case 1:
@@ -512,15 +534,18 @@ static void
 * INPUTS:
 *   scb == session control block to use for writing
 *   tkptr == token ptr to token with original strings
+*   strval == string val pased to write_complex_str
 *   indent == current indent count
 *********************************************************************/
 static void
     write_comstr (ses_cb_t *scb,
                   const tk_token_ptr_t *tkptr,
+                  const xmlChar *strval,
                   int32 indent)
 {
     const xmlChar *str;
     const tk_origstr_t *origstr;
+    uint32         numquotes;
     boolean        dquotes, moreflag, newline;
 
     /* put the first string (maybe only fragment) */
@@ -530,12 +555,15 @@ static void
 
     str = tk_get_first_origstr(tkptr, &dquotes, &moreflag);
     if (str == NULL) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        str = strval;
+        numquotes = tk_tkptr_quotes(tkptr);
+        moreflag = FALSE;
+    } else {
+        numquotes = dquotes ? 2 : 1;
     }
 
     /* write first string at current indent point */
-    write_str(scb, str, dquotes ? 2 : 1, indent);
+    write_str(scb, str, numquotes, indent);
 
     if (!moreflag) {
         return;
@@ -551,6 +579,7 @@ static void
         str = tk_get_origstr_parts(origstr, &dquotes, &newline);
         if (str == NULL) {
             SET_ERROR(ERR_INTERNAL_VAL);
+            return;
         } else {
             if (newline) {
                 ses_putstr_indent(scb, (const xmlChar *)"+ ", indent);
@@ -956,14 +985,15 @@ static void
     ses_indent(scb, indent);
     write_kw(scb, kwname);
     if (strval) {
-        if (xml_strlen(strval) < 39) {
+        if (!has_nl(strval) &&
+            (xml_strlen(strval) + 1) < ses_line_left(scb)) {
             ses_putchar(scb, ' ');
         } else {
             indent += ses_indent_count(scb);
             ses_indent(scb, indent);
         }
-        if (tkptr) {
-            write_comstr(scb, tkptr, indent);
+        if (tkptr != NULL) {
+            write_comstr(scb, tkptr, strval, indent);
         } else {
             write_str(scb, strval, quotes, indent);
         }
@@ -1032,7 +1062,7 @@ static void
                          YANG_K_STATUS,
                          ncx_get_status_string(status),
                          indent, 
-                         2, 
+                         0, 
                          TRUE);
     }
 }  /* write_status */
@@ -1444,7 +1474,7 @@ static void
                                   YANG_K_BIT, 
                                   bit->name,
                                   startindent, 
-                                  2, 
+                                  0, 
                                   FALSE);
 
                 write_appinfoQ(scb, mod, cp, &bit->appinfoQ, indent);
@@ -1532,7 +1562,7 @@ static void
                              (const xmlChar *)buff,
                              startindent,
                              0,
-                             FALSE);
+                             TRUE);
             /* fall through to check range */
         case NCX_BT_INT8:
         case NCX_BT_INT16:
@@ -1625,7 +1655,7 @@ static void
                              (constrained_set) 
                              ? NCX_EL_TRUE : NCX_EL_FALSE,
                              startindent, 
-                             2, 
+                             0, 
                              TRUE);
             break;
         case NCX_BT_IDREF:
@@ -2121,27 +2151,33 @@ static void
 
 
 /********************************************************************
-* FUNCTION write_cyang_presence_stmt
+* FUNCTION write_presence_stmt
 * 
 * Write the presence-stmt
 *
 * INPUTS:
 *   scb == session control block to use for writing
+*   tkc == token chain to use
+*   field == address of presence field
 *   presence == presence string (may be NULL to skip)
 *   indent = indent amount
 *********************************************************************/
 static void
     write_presence_stmt (ses_cb_t *scb,
+                         tk_chain_t *tkc,
+                         void *field,
                          const xmlChar *presence,
                          int32 indent)
 {
     if (presence) {
-        write_simple_str(scb, 
-                         YANG_K_PRESENCE, 
-                         presence, 
-                         indent, 
-                         2, 
-                         TRUE);
+        write_complex_str(scb, 
+                          tkc,
+                          field,
+                          YANG_K_PRESENCE, 
+                          presence, 
+                          indent, 
+                          2, 
+                          TRUE);
     }
 
 }  /* write_presence_stmt */
@@ -2213,7 +2249,7 @@ static void
                              YANG_K_CONFIG, 
                              NCX_EL_FALSE,
                              indent, 
-                             2, 
+                             0, 
                              TRUE);
         }
     }
@@ -2245,7 +2281,7 @@ static void
                          YANG_K_CONFIG, 
                          (flag) ? NCX_EL_TRUE : NCX_EL_FALSE,
                          indent, 
-                         2, 
+                         0, 
                          TRUE);
     }
 
@@ -2275,7 +2311,7 @@ static void
                              YANG_K_MANDATORY,
                              NCX_EL_TRUE,
                              indent,
-                             2,
+                             0,
                              TRUE);
         }
     }
@@ -2307,7 +2343,7 @@ static void
                          YANG_K_MANDATORY,
                          (flag) ? NCX_EL_TRUE : NCX_EL_FALSE,
                          indent,
-                         2,
+                         0,
                          TRUE);
     }
 
@@ -2343,7 +2379,7 @@ static void
                          YANG_K_MIN_ELEMENTS, 
                          (const xmlChar *)buff,
                          indent, 
-                         2, 
+                         0, 
                          TRUE);
     }
 
@@ -2353,7 +2389,7 @@ static void
                              YANG_K_MAX_ELEMENTS, 
                              YANG_K_UNBOUNDED,
                              indent, 
-                             2, 
+                             0, 
                              TRUE);
         } else {
             sprintf(buff, "%u", maxval);
@@ -2361,7 +2397,7 @@ static void
                              YANG_K_MAX_ELEMENTS, 
                              (const xmlChar *)buff,
                              indent, 
-                             2, 
+                             0, 
                              TRUE);
         }
     }
@@ -2418,7 +2454,7 @@ static void
                      unicomp->unobj->tkerr.linenum,
                      unicomp->xpath);
             if (nextunicomp) {
-                ses_putstr(scb, (const xmlChar *)", ");
+                ses_putstr(scb, (const xmlChar *)" ");
             }
         }
         ses_putstr(scb, (const xmlChar *)"\";");
@@ -2464,7 +2500,7 @@ static status_t
     obj_notif_t       *notif;
     obj_refine_t      *refine;
     obj_key_t         *key, *nextkey;
-    const xmlChar     *fname, *fversion, *submod, *str;
+    const xmlChar     *fname, *fversion, *submod;
     int32              indent;
     boolean            isempty, fullcase;
 
@@ -2519,8 +2555,11 @@ static status_t
         write_when(scb, cp, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_musts(scb, cp, obj_get_mustQ(obj), indent);
-        str = obj_get_presence_string(obj);
-        write_presence_stmt(scb, str, indent);
+        write_presence_stmt(scb, 
+                            cp->tkc, 
+                            obj_get_presence_string_field(obj),
+                            obj_get_presence_string(obj),
+                            indent);
         write_config_stmt(scb, obj, indent);
         write_sdr(scb, cp, obj, indent);
         write_typedefs(scb, mod, cp, con->typedefQ, indent);
@@ -2548,12 +2587,14 @@ static status_t
         write_musts(scb, cp, obj_get_mustQ(obj), indent);
 
         if (leaf->defval) {
-            write_simple_str(scb, 
-                             YANG_K_DEFAULT, 
-                             leaf->defval, 
-                             indent, 
-                             2, 
-                             TRUE);
+            write_complex_str(scb, 
+                              cp->tkc,
+                              &leaf->defval,
+                              YANG_K_DEFAULT, 
+                              leaf->defval, 
+                              indent, 
+                              2, 
+                              TRUE);
         }
 
         write_config_stmt(scb, obj, indent);
@@ -2588,7 +2629,7 @@ static status_t
                              YANG_K_ORDERED_BY, 
                              YANG_K_USER,
                              indent, 
-                             2, 
+                             0, 
                              TRUE);
         }
         write_sdr(scb, cp, obj, indent);
@@ -2640,7 +2681,7 @@ static status_t
                              YANG_K_ORDERED_BY, 
                              YANG_K_USER,
                              indent, 
-                             2, 
+                             0, 
                              TRUE);
         }
 
@@ -2657,12 +2698,14 @@ static status_t
         write_when(scb, cp, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         if (choic->defval) {
-            write_simple_str(scb,
-                             YANG_K_DEFAULT, 
-                             choic->defval,
-                             indent,
-                             2,
-                             TRUE);
+            write_complex_str(scb,
+                              cp->tkc,
+                              &choic->defval,
+                              YANG_K_DEFAULT, 
+                              choic->defval,
+                              indent,
+                              2,
+                              TRUE);
         }
         write_mandatory_stmt(scb, obj, indent);
         write_sdr(scb, cp, obj, indent);
@@ -2878,19 +2921,25 @@ static status_t
             break;
         case OBJ_TYP_CONTAINER:
             write_musts(scb, cp, obj_get_mustQ(obj), indent); 
-            write_presence_stmt(scb, refine->presence, indent);
+            write_presence_stmt(scb, 
+                                cp->tkc,
+                                &refine->presence, 
+                                refine->presence,
+                                indent);
             write_config_stmt_force(scb, obj, indent);
             write_sdr(scb, cp, obj, indent);
             break;
         case OBJ_TYP_LEAF:
             write_musts(scb, cp, obj_get_mustQ(obj), indent); 
             if (refine->def) {
-                write_simple_str(scb, 
-                                 YANG_K_DEFAULT, 
-                                 refine->def, 
-                                 indent, 
-                                 2, 
-                                 TRUE);
+                write_complex_str(scb, 
+                                  cp->tkc,
+                                  &refine->def,
+                                  YANG_K_DEFAULT, 
+                                  refine->def, 
+                                  indent, 
+                                  2, 
+                                  TRUE);
             }
             write_config_stmt_force(scb, obj, indent);
             write_mandatory_stmt_force(scb, obj, indent);
@@ -2910,12 +2959,14 @@ static status_t
             break;
         case OBJ_TYP_CHOICE:
             if (refine->def) {
-                write_simple_str(scb, 
-                                 YANG_K_DEFAULT, 
-                                 refine->def, 
-                                 indent, 
-                                 2, 
-                                 TRUE);
+                write_complex_str(scb, 
+                                  cp->tkc,
+                                  &refine->def,
+                                  YANG_K_DEFAULT, 
+                                  refine->def, 
+                                  indent, 
+                                  2, 
+                                  TRUE);
             }
             write_config_stmt_force(scb, obj, indent);
             write_mandatory_stmt_force(scb, obj, indent);
@@ -3046,8 +3097,8 @@ static void
                          YANG_K_YIN_ELEMENT, 
                          ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
                          indent + ses_indent_count(scb),
-                         2,
-                         FALSE);
+                         0,
+                         TRUE);
         ses_putstr_indent(scb, END_SEC, indent);
     }
 
@@ -3442,7 +3493,7 @@ static void
                          (deviate->config) ?
                          NCX_EL_TRUE : NCX_EL_FALSE,
                          indent, 
-                         2, 
+                         0, 
                          TRUE);
     }
 
@@ -3453,7 +3504,7 @@ static void
                          (deviate->mandatory) ?
                          NCX_EL_TRUE : NCX_EL_FALSE,
                          indent, 
-                         2, 
+                         0, 
                          TRUE);
     }
 
@@ -3674,11 +3725,11 @@ static void
                      YANG_K_PREFIX, 
                      modprefix,
                      indent + ses_indent_count(scb), 
-                     2, 
+                     0, 
                      TRUE);
     if (modrevision) {
         write_simple_str(scb, 
-                         YANG_K_REVISION,
+                         YANG_K_REVISION_DATE,
                          modrevision,
                          indent + ses_indent_count(scb), 
                          2, 
@@ -3756,24 +3807,33 @@ static void
                           indent,
                           2, 
                           TRUE);
+        ses_putchar(scb, '\n');
     } else {
-        write_simple_str(scb,
-                         YANG_K_BELONGS_TO, 
-                         mod->belongs,
-                         indent, 
-                         2, 
-                         TRUE);
+        write_complex_str(scb,
+                          cp->tkc,
+                          &mod->belongs,
+                          YANG_K_BELONGS_TO, 
+                          mod->belongs,
+                          indent, 
+                          0, 
+                          FALSE);
     }
-    ses_putchar(scb, '\n');
 
-    /* prefix for module only */ 
     if (mod->ismod) {
         write_simple_str(scb,
                          YANG_K_PREFIX,
                          mod->prefix,
                          indent, 
-                         2, 
+                         0, 
                          TRUE);
+    } else {
+        write_simple_str(scb,
+                         YANG_K_PREFIX,
+                         mod->prefix,
+                         indent + indent, 
+                         0, 
+                         TRUE);
+        ses_putstr_indent(scb, (const xmlChar *)"}", indent);
     }
 
     /* blank line */
@@ -3846,7 +3906,7 @@ static void
                                indent + ses_indent_count(scb));
                 if (inc->revision) {
                     write_simple_str(scb, 
-                                     YANG_K_REVISION, 
+                                     YANG_K_REVISION_DATE, 
                                      inc->revision,
                                      indent + ses_indent_count(scb),
                                      2, 

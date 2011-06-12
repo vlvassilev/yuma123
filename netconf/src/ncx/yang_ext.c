@@ -264,11 +264,17 @@ static status_t
         /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_YIN_ELEMENT)) {
             if (save) {
-                res = yang_consume_boolean(tkc, mod, &ext->argel,
-                                           &yinel, &ext->appinfoQ);
+                res = yang_consume_boolean(tkc, 
+                                           mod, 
+                                           &ext->argel,
+                                           &yinel, 
+                                           &ext->appinfoQ);
             } else {
-                res = yang_consume_boolean(tkc, mod, &errsave,
-                                           NULL, NULL);
+                res = yang_consume_boolean(tkc, 
+                                           mod, 
+                                           &errsave,
+                                           NULL, 
+                                           NULL);
             }
         } else {
             res = ERR_NCX_WRONG_TKVAL;

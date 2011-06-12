@@ -135,7 +135,7 @@ date         init     comment
 *********************************************************************/
 
 #ifdef DEBUG
-#define YANG_DEBUG 1
+/* #define YANG_DEBUG 1 */
 #endif
 
 /********************************************************************
@@ -175,6 +175,11 @@ static const xmlChar *top_keywords[] =
     YANG_K_YANG_VERSION,
     NULL
 };
+
+#ifdef YANG_DEBUG
+static uint32 new_node_cnt = 0;
+static uint32 free_node_cnt = 0;
+#endif
 
 
 /********************************************************************
@@ -652,7 +657,7 @@ status_t
 {
     const xmlChar *p;
     tk_type_t      tktyp;
-    status_t       res, retres;
+    status_t       res;
     uint32         plen, nlen;
 
     res = TK_ADV(tkc);
@@ -661,10 +666,18 @@ status_t
         return res;
     }
 
-    retres = NO_ERR;
+    if (prefix) {
+        *prefix = NULL;
+    }
+    if (field) {
+        *field = NULL;
+    }
+
     tktyp = TK_CUR_TYP(tkc);
 
-    if (tktyp==TK_TT_QSTRING || tktyp==TK_TT_SQSTRING) {
+    if (tktyp == TK_TT_QSTRING || 
+        tktyp == TK_TT_SQSTRING ||
+        tktyp == TK_TT_STRING) {
         p = TK_CUR_VAL(tkc);
         while (*p && *p != ':') {
             p++;
@@ -685,14 +698,18 @@ status_t
                     /* have valid syntax for prefix:identifier */
                     if (prefix) {
                         *prefix = xml_strndup(TK_CUR_VAL(tkc), plen);
-                        if (!*prefix) {
+                        if (*prefix == NULL) {
                             res = ERR_INTERNAL_MEM;
                         }
                     }
-                    if (field) {
+                    if (res == NO_ERR && field) {
                         *field = xml_strndup(p+1, nlen);
-                        if (!*field) {
+                        if (*field == NULL) {
                             res = ERR_INTERNAL_MEM;
+                            if (prefix) {
+                                m__free(*prefix);
+                                *prefix = NULL;
+                            }
                         }
                     }
                     if (res != NO_ERR) {
@@ -708,7 +725,7 @@ status_t
                     return res;
                 }
             }
-        }
+        } /* else drop through and try again */
     }
 
     if (TK_CUR_ID(tkc) ||
@@ -718,27 +735,23 @@ status_t
             if (ncx_valid_name(TK_CUR_VAL(tkc), TK_CUR_LEN(tkc))) {
                 if (field) {
                     *field = xml_strdup(TK_CUR_VAL(tkc));
-                    if (!*field) {
+                    if (*field == NULL) {
                         res = ERR_INTERNAL_MEM;
+                    } else {
+                        ncx_check_warn_idlen(tkc, mod, *field);
                     }
                 }
             } else {
                 res = ERR_NCX_INVALID_NAME;
             }
             
-            if (res != NO_ERR) {
-                ncx_mod_exp_err(tkc, mod, res, "identifier-ref string");
-                retres = res;
-                res = NO_ERR;
-            }
-
             /* validate prefix name string if any */
-            if (TK_CUR_MOD(tkc)) {
+            if (res == NO_ERR && TK_CUR_MOD(tkc)) {
                 if (ncx_valid_name(TK_CUR_MOD(tkc),
                                    TK_CUR_MODLEN(tkc))) {
                     if (prefix) {
                         *prefix = xml_strdup(TK_CUR_MOD(tkc));
-                        if (!*prefix) {
+                        if (*prefix == NULL) {
                             res = ERR_INTERNAL_MEM;
                         }
                     }
@@ -763,10 +776,17 @@ status_t
     }
 
     if (res != NO_ERR) {
-        ncx_print_errormsg(tkc, mod, res);
-        retres = res;
+        ncx_mod_exp_err(tkc, mod, res, "identifier-ref string");
+        if (prefix && *prefix) {
+            m__free(*prefix);
+            *prefix = NULL;
+        }
+        if (field && *field) {
+            m__free(*field);
+            *field = NULL;
+        }
     }
-    return retres;
+    return res;
     
 }  /* yang_consume_pid_string */
 
@@ -2729,6 +2749,14 @@ yang_node_t *
     if (!node) {
         return NULL;
     }
+
+#ifdef YANG_DEBUG
+    new_node_cnt++;
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_new_node: %p (%u)", node, new_node_cnt);
+    }
+#endif
+
     memset(node, 0x0, sizeof(yang_node_t));
     return node;
 
@@ -2751,6 +2779,16 @@ void
     if (!node) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
+    }
+#endif
+
+#ifdef YANG_DEBUG
+    free_node_cnt++;
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_free_node: %p (%u)", node, free_node_cnt);
+        if (node->submod && node->submod->name) {
+            log_debug4(" %s", node->submod->name);
+        }
     }
 #endif
 
@@ -4006,6 +4044,25 @@ boolean
     return !xml_strcmp(&filename[len - 3], YIN_SUFFIX);
 
 }  /* yang_fileext_is_yin */
+
+
+
+/********************************************************************
+* FUNCTION yang_final_memcheck
+* 
+* Check the node malloc and free counts
+*********************************************************************/
+void
+    yang_final_memcheck (void)
+{
+#ifdef YANG_DEBUG
+    if (new_node_cnt != free_node_cnt) {
+        log_error("\nError: YANG node count: new(%u) free(%u)",
+                  new_node_cnt,
+                  free_node_cnt);
+    }
+#endif
+}  /* yang_final_memcheck */
 
 
 

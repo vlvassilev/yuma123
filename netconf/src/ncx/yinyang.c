@@ -284,16 +284,11 @@ static status_t
             }
         }
     } else {
-        /* should be YANG extension found
-         * !!!! only supporting prefixed extension
-         * !!!! names so far; eventually need to
-         * !!!! convert xmlns directly to module prefix
-         * !!!! somehow, and allow extension in default namespace
-         * !!!!
-         */
+        /* YANG extension usage found */
         res = tk_add_pid_token(tkc, 
                                startnode->qname,
-                               (uint32)(startnode->elname - startnode->qname),
+                               (uint32)
+                               (startnode->elname - startnode->qname - 1),
                                startnode->elname);
         if (res != NO_ERR) {
             return res;

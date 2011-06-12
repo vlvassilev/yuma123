@@ -364,7 +364,6 @@ static void
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childdatadefQ;
-    boolean            dowrite;
 
     if (dlq_empty(datadefQ)) {
         return;
@@ -386,29 +385,7 @@ static void
             write_h_objects(scb, childdatadefQ, typcdefQ);
         }
 
-        dowrite = TRUE;
-
-#if 0
-        switch (obj->objtype) {
-        case OBJ_TYP_RPC:
-            dowrite = FALSE;
-            break;
-        case OBJ_TYP_RPCIO:
-        case OBJ_TYP_NOTIF:
-        case OBJ_TYP_CONTAINER:
-        case OBJ_TYP_LIST:
-            if (obj_first_child(obj) == NULL) {
-                dowrite = FALSE;
-            }
-            break;
-        default:
-            ;
-        }
-#endif
-
-        if (dowrite) {
-            write_h_object_typdef(scb, obj, typcdefQ);
-        }
+        write_h_object_typdef(scb, obj, typcdefQ);
     }
 
 }  /* write_h_objects */

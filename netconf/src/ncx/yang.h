@@ -1477,6 +1477,15 @@ extern boolean
 extern boolean
     yang_fileext_is_yin (const xmlChar *filename);
 
+
+/********************************************************************
+* FUNCTION yang_final_memcheck
+* 
+* Check the node malloc and free counts
+*********************************************************************/
+extern void
+    yang_final_memcheck (void);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

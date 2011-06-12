@@ -174,7 +174,9 @@ date         init     comment
 /* this flag will cause debug3 trace statements to be printed
  * to the log during operation for module alloc and free operations
  */
+#ifdef DEBUG
 /* #define NCX_DEBUG_MOD_MEMORY  1 */
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -479,10 +481,10 @@ static void
 
 #ifdef NCX_DEBUG_MOD_MEMORY
     if (LOGDEBUG3) {
-        log_debug3("\nncx_freemod: %p (%s) %d", 
+        log_debug3("\n%p:modtrace:freemod:%s:%s", 
                    mod, 
-                   mod->name, 
-                   mod->ismod);
+                   (mod->ismod) ? NCX_EL_MODULE : NCX_EL_SUBMODULE,
+                   mod->name);
     }
 #endif
 
@@ -1260,7 +1262,7 @@ ncx_module_t *
 
 #ifdef NCX_DEBUG_MOD_MEMORY
     if (LOGDEBUG3) {
-        log_debug3("\nncx_newmod: %p", mod);
+        log_debug3("\n%p:modtrace:newmod", mod);
     }
 #endif
 

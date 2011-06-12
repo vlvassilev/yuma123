@@ -9265,24 +9265,24 @@ static status_t
 
         is_targetmod = (testobj->tkerr.mod == mod);
 
-        if (LOGDEBUG3) {
+        if (LOGDEBUG4) {
             if (!obj_has_name(testobj)) {
-                log_debug3("\nresolve_xpath: %s", 
+                log_debug4("\nresolve_xpath: %s", 
                            obj_get_typestr(testobj));
             } else {
                 xmlChar *mybuff = NULL;
                 res = obj_gen_object_id(testobj, &mybuff);
                 if (res == NO_ERR) {
-                    log_debug3("\nresolve_xpath: %s", mybuff);
+                    log_debug4("\nresolve_xpath: %s", mybuff);
                 } else {
-                    log_debug3("\nresolve_xpath: %s", obj_get_name(testobj));
+                    log_debug4("\nresolve_xpath: %s", obj_get_name(testobj));
                 }
                 if (mybuff) {
                     m__free(mybuff);
                 }
             }
             if (is_targetmod) {
-                log_debug3(" (targmod)");
+                log_debug4(" (targmod)");
             }
         }
 

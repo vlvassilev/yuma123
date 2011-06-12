@@ -51,6 +51,10 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_yang
+#include  "yang.h"
+#endif
+
 #ifndef _H_yangdump
 #include  "yangdump.h"
 #endif
@@ -114,6 +118,8 @@ int
     }
 
     print_error_count();
+
+    yang_final_memcheck();
 
 #ifdef MEMORY_DEBUG
     muntrace();

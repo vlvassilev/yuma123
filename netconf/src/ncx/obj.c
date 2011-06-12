@@ -98,7 +98,11 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
+
+#ifdef DEBUG
 /* #define OBJ_CLONE_DEBUG 1 */
+/* #define OBJ_MEM_DEBUG 1 */
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -553,16 +557,16 @@ static void
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
-    if (con->name && notclone) {
+    if (notclone && con->name != NULL) {
         m__free(con->name);
     }
-    if (con->descr) {
+    if (con->descr != NULL) {
         m__free(con->descr);
     }
-    if (con->ref) {
+    if (con->ref != NULL) {
         m__free(con->ref);
     }
-    if (con->presence) {
+    if (con->presence != NULL) {
         m__free(con->presence);
     }
 
@@ -752,24 +756,25 @@ static void
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
-    if (leaf->name && notclone) {
+    if (notclone && leaf->name != NULL) {
         m__free(leaf->name);
     }
-    if (leaf->units && notclone) {
+    if (notclone && leaf->units != NULL) {
         m__free(leaf->units);
     }
-    if (leaf->defval) {
+    if (leaf->defval != NULL) {
         m__free(leaf->defval);
     }
-    if (leaf->descr) {
+    if (leaf->descr != NULL) {
         m__free(leaf->descr);
     }
-    if (leaf->ref) {
+    if (leaf->ref != NULL) {
         m__free(leaf->ref);
     }
 
-    if (leaf->typdef && (leaf->typdef->tclass != NCX_CL_BASE)
-        && notclone) {
+    if (notclone && 
+        (leaf->typdef != NULL && 
+         (leaf->typdef->tclass != NCX_CL_BASE))) {
         typ_free_typdef(leaf->typdef);
     }
 
@@ -930,20 +935,20 @@ static void
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
-    if (leaflist->name && notclone) {
+    if (notclone && leaflist->name != NULL) {
         m__free(leaflist->name);
     }
-    if (leaflist->units && notclone) {
+    if (notclone && leaflist->units != NULL) {
         m__free(leaflist->units);
     }
-    if (leaflist->descr) {
+    if (leaflist->descr != NULL) {
         m__free(leaflist->descr);
     }
-    if (leaflist->ref) {
+    if (leaflist->ref != NULL) {
         m__free(leaflist->ref);
     }
 
-    if (leaflist->typdef && notclone) {
+    if (notclone && leaflist->typdef != NULL) {
         typ_free_typdef(leaflist->typdef);
     }
 
@@ -1067,16 +1072,16 @@ static void
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
-    if (list->name && notclone) {
+    if (notclone && list->name != NULL) {
         m__free(list->name);
     }
-    if (list->keystr && notclone) {
+    if (notclone && list->keystr != NULL) {
         m__free(list->keystr);
     }
-    if (list->descr) {
+    if (list->descr != NULL) {
         m__free(list->descr);
     }
-    if (list->ref) {
+    if (list->ref != NULL) {
         m__free(list->ref);
     }
 
@@ -1334,13 +1339,13 @@ static obj_case_t *
 static void
     free_case (obj_case_t *cas)
 {
-    if (cas->name && !cas->nameclone) {
+    if (!cas->nameclone && cas->name != NULL) {
         m__free(cas->name);
     }
-    if (cas->descr) {
+    if (cas->descr != NULL) {
         m__free(cas->descr);
     }
-    if (cas->ref) {
+    if (cas->ref != NULL) {
         m__free(cas->ref);
     }
     if (!cas->datadefclone) {
@@ -1411,16 +1416,16 @@ static void
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
-    if (choic->name && notclone) {
+    if (notclone && choic->name != NULL) {
         m__free(choic->name);
     }
-    if (choic->defval) {
+    if (choic->defval != NULL) {
         m__free(choic->defval);
     }
-    if (choic->descr) {
+    if (choic->descr != NULL) {
         m__free(choic->descr);
     }
-    if (choic->ref) {
+    if (choic->ref != NULL) {
         m__free(choic->ref);
     }
 
@@ -1581,16 +1586,16 @@ static obj_uses_t *
 static void 
     free_uses (obj_uses_t *us)
 {
-    if (us->prefix) {
+    if (us->prefix != NULL) {
         m__free(us->prefix);
     }
-    if (us->name) {
+    if (us->name != NULL) {
         m__free(us->name);
     }
-    if (us->descr) {
+    if (us->descr != NULL) {
         m__free(us->descr);
     }
-    if (us->ref) {
+    if (us->ref != NULL) {
         m__free(us->ref);
     }
 
@@ -1642,19 +1647,19 @@ static obj_refine_t *
 static void 
     free_refine (obj_refine_t *refi)
 {
-    if (refi->target) {
+    if (refi->target != NULL) {
         m__free(refi->target);
     }
-    if (refi->descr) {
+    if (refi->descr != NULL) {
         m__free(refi->descr);
     }
-    if (refi->ref) {
+    if (refi->ref != NULL) {
         m__free(refi->ref);
     }
-    if (refi->presence) {
+    if (refi->presence != NULL) {
         m__free(refi->presence);
     }
-    if (refi->def) {
+    if (refi->def != NULL) {
         m__free(refi->def);
     }
 
@@ -1713,14 +1718,14 @@ static obj_augment_t *
 static void 
     free_augment (obj_augment_t *aug)
 {
-    if (aug->target) {
+    if (aug->target != NULL) {
         m__free(aug->target);
     }
 
-    if (aug->descr) {
+    if (aug->descr != NULL) {
         m__free(aug->descr);
     }
-    if (aug->ref) {
+    if (aug->ref != NULL) {
         m__free(aug->ref);
     }
 
@@ -1779,13 +1784,13 @@ static obj_rpc_t *
 static void
     free_rpc (obj_rpc_t *rpc)
 {
-    if (rpc->name) {
+    if (rpc->name != NULL) {
         m__free(rpc->name);
     }
-    if (rpc->descr) {
+    if (rpc->descr != NULL) {
         m__free(rpc->descr);
     }
-    if (rpc->ref) {
+    if (rpc->ref != NULL) {
         m__free(rpc->ref);
     }
     typ_clean_typeQ(&rpc->typedefQ);
@@ -1838,7 +1843,7 @@ static obj_rpcio_t *
 static void
     free_rpcio (obj_rpcio_t *rpcio)
 {
-    if (rpcio->name) {
+    if (rpcio->name != NULL) {
         m__free(rpcio->name);
     }
     typ_clean_typeQ(&rpcio->typedefQ);
@@ -1889,13 +1894,13 @@ static obj_notif_t *
 static void
     free_notif (obj_notif_t *notif)
 {
-    if (notif->name) {
+    if (notif->name != NULL) {
         m__free(notif->name);
     }
-    if (notif->descr) {
+    if (notif->descr != NULL) {
         m__free(notif->descr);
     }
-    if (notif->ref) {
+    if (notif->ref != NULL) {
         m__free(notif->ref);
     }
     typ_clean_typeQ(&notif->typedefQ);
@@ -3119,12 +3124,25 @@ void
     }
 #endif
 
+#ifdef OBJ_MEM_DEBUG
+    if (LOGDEBUG4) {
+        if (obj_is_cloned(obj)) {
+            log_debug4("\nobj_free: %p (cloned)", obj);
+        } else {
+            log_debug4("\nobj_free: %p (%s)",
+                       obj,
+                       obj_get_name(obj));
+        }
+    }
+#endif
+
     clean_metadataQ(&obj->metadataQ);
     ncx_clean_appinfoQ(&obj->appinfoQ);
     ncx_clean_iffeatureQ(&obj->iffeatureQ);
 
-    if (obj->when) {
+    if (obj->when != NULL) {
         xpath_free_pcb(obj->when);
+        obj->when = NULL;
     }
 
     switch (obj->objtype) {
@@ -8209,7 +8227,7 @@ const obj_template_t *
 /********************************************************************
 * FUNCTION obj_get_presence_string
 *
-* Get the present-stmt value, if any
+* Get the presence-stmt value, if any
 *
 * INPUTS:
 *   obj == obj_template to check
@@ -8236,6 +8254,38 @@ const xmlChar *
     return obj->def.container->presence;
 
 }  /* obj_get_presence_string */
+
+
+/********************************************************************
+* FUNCTION obj_get_presence_string_field
+*
+* Get the address ot the presence-stmt value, if any
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to address of presence string
+*   NULL if none
+*********************************************************************/
+void *
+    obj_get_presence_string_field (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CONTAINER) {
+        return NULL;
+    }
+
+    return &obj->def.container->presence;
+
+}  /* obj_get_presence_string_field */
 
 
 /********************************************************************

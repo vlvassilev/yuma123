@@ -2648,6 +2648,21 @@ extern const dlq_hdr_t *
     ncx_get_const_allincQ (const ncx_module_t *mod);
 
 
+/********************************************************************
+* FUNCTION ncx_get_parent_mod
+*
+* Find the correct module by checking mod->parent nodes
+*
+* INPUTS:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to parent module (!! not submodule !!)
+*   NULL if none found
+*********************************************************************/
+extern ncx_module_t *
+    ncx_get_parent_mod (ncx_module_t *mod);
+
 
 /********************************************************************
 * FUNCTION ncx_get_vtimeout_value

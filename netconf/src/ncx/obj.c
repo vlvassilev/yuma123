@@ -3352,7 +3352,7 @@ obj_template_t *
     }
 #endif
 
-    /* check the main module */
+    /* check the [sub]module datadefQ */
     obj = find_template(&mod->datadefQ, 
                         modname, 
                         objname, 
@@ -3363,24 +3363,25 @@ obj_template_t *
         return obj;
     }
 
+    /* Q of all includes this [sub]module has seen */
     que = ncx_get_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
+     * to this module or submodule
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
          inc != NULL;
          inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
         /* get the real submodule struct */
-        if (!inc->submod) {
+        if (inc->submod == NULL) {
             node = yang_find_node(que, 
                                   inc->submodule,
                                   inc->revision);
             if (node) {
                 inc->submod = node->submod;
             }
-            if (!inc->submod) {
+            if (inc->submod == NULL) {
                 /* include not found, skip this one */
                 continue;
             }
@@ -3398,10 +3399,27 @@ obj_template_t *
         }
     }
 
+    /* if this is a submodule, then still need to check
+     * the datadefQ of the main module
+     */
+    if (!mod->ismod) {
+        ncx_module_t  *mainmod = ncx_get_parent_mod(mod);
+        obj = NULL;
+        if (mainmod != NULL) {
+            /* check the [sub]module datadefQ */
+            obj = find_template(&mainmod->datadefQ, 
+                                modname, 
+                                objname, 
+                                FALSE, 
+                                FALSE, 
+                                NULL);
+        }
+        return obj;
+    }
+
     return NULL;
 
 }   /* obj_find_template_top */
-
 
 
 /********************************************************************

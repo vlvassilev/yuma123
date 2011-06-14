@@ -7400,6 +7400,39 @@ const dlq_hdr_t *
 
 
 /********************************************************************
+* FUNCTION ncx_get_parent_mod
+*
+* Find the correct module by checking mod->parent nodes
+*
+* INPUTS:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to parent module (!! not submodule !!)
+*   NULL if none found
+*********************************************************************/
+ncx_module_t *
+    ncx_get_parent_mod (ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    while (mod->parent != NULL) {
+        mod = mod->parent;
+        if (mod != NULL && mod->ismod) {
+            return mod;
+        }
+    }
+    return NULL;
+
+}   /* ncx_get_parent_mod */
+
+
+/********************************************************************
 * FUNCTION ncx_get_vtimeout_value
 *
 * Get the virtual node cache timeout value

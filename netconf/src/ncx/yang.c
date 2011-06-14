@@ -2344,8 +2344,7 @@ status_t
                              ext_template_t **ext)
 {
     ncx_import_t   *imp;
-    ncx_module_t   *imod;
-    status_t        res, retres;
+    status_t        res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !prefix || !name || !ext) {
@@ -2353,37 +2352,28 @@ status_t
     }
 #endif
 
-    imod = NULL;
     res = NO_ERR;
-    retres = NO_ERR;
     *ext = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
-    if (!imp) {
+    if (imp == NULL) {
         res = ERR_NCX_PREFIX_NOT_FOUND;
         log_error("\nError: import for prefix '%s' not found", prefix);
-    } else if (imp->mod) {
-        imod = imp->mod;
-    } else {
+    } else if (imp->mod == NULL) {
         res = ncxmod_load_module(imp->module, 
                                  imp->revision,
                                  pcb->savedevQ,
-                                 &imod);
-        CHK_EXIT(res, retres);
-
-        if (!imod) {
+                                 &imp->mod);
+        if (res != NO_ERR) {
             log_error("\nError: failure importing module '%s'",
                       imp->module);
-            res = ERR_NCX_DEF_NOT_FOUND;
-        } else {
-            imp->mod = imod;
         }
     }
         
     /* found import OK, look up imported extension definition */
-    if (imod) {
-        *ext = ext_find_extension(imod, name);
-        if (!*ext) {
+    if (imp->mod) {
+        *ext = ext_find_extension(imp->mod, name);
+        if (*ext == NULL) {
             res = ERR_NCX_DEF_NOT_FOUND;
             log_error("\nError: extension definition for '%s:%s' not found"
                       " in module %s", 
@@ -2436,8 +2426,7 @@ status_t
                            ncx_feature_t **feature)
 {
     ncx_import_t   *imp;
-    ncx_module_t   *imod;
-    status_t        res, retres;
+    status_t        res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !prefix || !name || !feature) {
@@ -2445,37 +2434,29 @@ status_t
     }
 #endif
 
-    imod = NULL;
     res = NO_ERR;
-    retres = NO_ERR;
     *feature = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
-    if (!imp) {
+    if (imp == NULL) {
         res = ERR_NCX_PREFIX_NOT_FOUND;
         log_error("\nError: import for prefix '%s' not found", prefix);
-    } else if (imp->mod) {
-        imod = imp->mod;
-    } else {
+    } else if (imp->mod == NULL) {
         res = ncxmod_load_module(imp->module,
                                  imp->revision,
                                  pcb->savedevQ,
                                  &imp->mod);
-        CHK_EXIT(res, retres);
-
-        if (!imod) {
+        if (imp->mod == NULL) {
             log_error("\nError: failure importing module '%s'",
                       imp->module);
             res = ERR_NCX_DEF_NOT_FOUND;
-        } else {
-            imp->mod = imod;
         }
     }
 
     /* found import OK, look up imported extension definition */
-    if (imod) {
-        *feature = ncx_find_feature(imod, name);
-        if (!*feature) {
+    if (imp->mod != NULL) {
+        *feature = ncx_find_feature(imp->mod, name);
+        if (*feature == NULL) {
             res = ERR_NCX_DEF_NOT_FOUND;
             log_error("\nError: feature definition for '%s:%s' not found"
                       " in module %s", 
@@ -2528,8 +2509,7 @@ status_t
                             ncx_identity_t **identity)
 {
     ncx_import_t   *imp;
-    ncx_module_t   *imod;
-    status_t        res, retres;
+    status_t        res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !prefix || !name || !identity) {
@@ -2537,37 +2517,29 @@ status_t
     }
 #endif
 
-    imod = NULL;
     res = NO_ERR;
-    retres = NO_ERR;
     *identity = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
-    if (!imp) {
+    if (imp == NULL) {
         res = ERR_NCX_PREFIX_NOT_FOUND;
         log_error("\nError: import for prefix '%s' not found", prefix);
-    } else if (imp->mod) {
-        imod = imp->mod;
-    } else {
+    } else if (imp->mod == NULL) {
         res = ncxmod_load_module(imp->module,
                                  imp->revision,
                                  pcb->savedevQ,
                                  &imp->mod);
-        CHK_EXIT(res, retres);
-
-        if (!imod) {
+        if (imp->mod == NULL) {
             log_error("\nError: failure importing module '%s'",
                       imp->module);
             res = ERR_NCX_DEF_NOT_FOUND;
-        } else {
-            imp->mod = imod;
         }
     } 
 
-    if (imod) {
+    if (imp->mod != NULL) {
         /* found import OK, look up imported extension definition */
-        *identity = ncx_find_identity(imod, name, FALSE);
-        if (!*identity) {
+        *identity = ncx_find_identity(imp->mod, name, FALSE);
+        if (*identity == NULL) {
             res = ERR_NCX_DEF_NOT_FOUND;
             log_error("\nError: identity definition for '%s:%s' not found"
                       " in module %s", 
@@ -2709,7 +2681,9 @@ void
             testimp->mod = impmod;
         }
 
-        /* check if the import is newer than this file, skip yuma-netconf hack */
+        /* check if the import is newer than this file,
+         * skip yuma-netconf hack 
+         */
         if (!testimp->force_yuma_nc && 
             impmod && 
             impmod->version && 

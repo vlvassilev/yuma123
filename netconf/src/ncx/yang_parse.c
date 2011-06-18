@@ -2257,6 +2257,11 @@ static status_t
 
     while (!done) {
 
+        if (!pcb->keepmode && retres != NO_ERR) {
+            done = TRUE;
+            continue;
+        }
+
         /* get the next token */
         res = TK_ADV(tkc);
         if (res != NO_ERR) {
@@ -3270,6 +3275,14 @@ static status_t
     /* Get the linkage statements (imports, include) */
     res = consume_linkage_stmts(tkc, mod, pcb);
     CHK_EXIT(res, retres);
+
+    if (!pcb->keepmode && retres != NO_ERR) {
+        if (LOGDEBUG) {
+            log_debug("\nStop parsing '%s' due to linkage errors",
+                      mod->name);
+        }
+        return retres;
+    }
 
     /* Get the meta statements (organization, etc.) */
     res = consume_meta_stmts(tkc, mod);

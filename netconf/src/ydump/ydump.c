@@ -2104,6 +2104,11 @@ status_t
 	}
     }
 
+    /* save intermediate files to prevent expanded augments, etc.
+     * from pointing at deleted modules
+     */
+    ncx_set_use_deadmodQ();
+
     /* convert one file or N files or 1 subtree */
     res = NO_ERR;
     val = val_find_child(cvtparms->cli_val, 

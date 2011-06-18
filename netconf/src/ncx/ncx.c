@@ -211,6 +211,11 @@ static dlq_hdr_t        *ncx_curQ;
  */
 static dlq_hdr_t        *ncx_sesmodQ;
 
+
+/* pointer to dead modules during yangdump subtree processing */
+static dlq_hdr_t          deadmodQ;
+static boolean            usedeadmodQ;
+  
 /* Q of ncx_filptr_t
  * used as a cache of subtree filtering headers 
  */
@@ -485,8 +490,16 @@ static void
                    mod, 
                    (mod->ismod) ? NCX_EL_MODULE : NCX_EL_SUBMODULE,
                    mod->name);
+        if (usedeadmodQ) {
+            log_debug3(" save in deadmodQ");
+        }
     }
 #endif
+
+    if (usedeadmodQ) {
+        dlq_enque(mod, &deadmodQ);
+        return;
+    }
 
     /* clear the revision Q */
     while (!dlq_empty(&mod->revhistQ)) {
@@ -991,6 +1004,7 @@ status_t
 
     /* create the module and appnode queues */
     dlq_createSQue(&ncx_modQ);
+    dlq_createSQue(&deadmodQ);
     ncx_curQ = &ncx_modQ;
     ncx_sesmodQ = NULL;
     dlq_createSQue(&ncx_filptrQ);
@@ -1193,6 +1207,11 @@ void
 
     while (!dlq_empty(&ncx_modQ)) {
         mod = (ncx_module_t *)dlq_deque(&ncx_modQ);
+        free_module(mod);
+    }
+    usedeadmodQ = FALSE;
+    while (!dlq_empty(&deadmodQ)) {
+        mod = (ncx_module_t *)dlq_deque(&deadmodQ);
         free_module(mod);
     }
 
@@ -7628,6 +7647,20 @@ void
     }
 
 }   /* ncx_set_protocol_enabled */
+
+
+/********************************************************************
+* FUNCTION ncx_set_use_deadmodQ
+*
+* Set the usedeadmodQ flag
+*
+*********************************************************************/
+void
+    ncx_set_use_deadmodQ (void)
+{
+    usedeadmodQ = TRUE;
+
+}   /* ncx_set_use_deadmodQ */
 
 
 /* END file ncx.c */

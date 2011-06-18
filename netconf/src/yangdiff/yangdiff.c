@@ -1690,6 +1690,9 @@ static status_t
     }
 
     if (res == NO_ERR) {
+        /* prevent back-ptrs in corner-case error parse modes */
+        ncx_set_use_deadmodQ();
+
         /* compare one file to another or 1 subtree to another */
         if (diffparms.new_isdir) {
             res = ncxmod_process_subtree((const char *)diffparms.new,

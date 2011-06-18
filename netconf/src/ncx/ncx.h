@@ -2772,6 +2772,16 @@ extern void
     ncx_set_protocol_enabled (ncx_protocol_t proto);
 
 
+/********************************************************************
+* FUNCTION ncx_set_use_deadmodQ
+*
+* Set the usedeadmodQ flag
+*
+*********************************************************************/
+extern void
+    ncx_set_use_deadmodQ (void);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

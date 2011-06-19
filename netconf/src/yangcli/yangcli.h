@@ -97,6 +97,11 @@ extern "C" {
 
 #define YANGCLI_HISTLEN  4095
 
+#define YANGCLI_MOD  (const xmlChar *)"yangcli"
+
+#define YANGCLI_NUM_TIMERS    16
+
+/* look in yangcli.c:yangcli_init for defaults not listed here */
 #define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)\
     "~/.yuma/.yangcli_history"
 
@@ -112,11 +117,22 @@ extern "C" {
 
 #define YANGCLI_DEF_SERVER (const xmlChar *)"default"
 
-#define YANGCLI_MOD  (const xmlChar *)"yangcli"
+#define YANGCLI_DEF_TEST_OPTION OP_TESTOP_SET
+
+#define YANGCLI_DEF_ERROR_OPTION OP_ERROP_NONE
+
+#define YANGCLI_DEF_DEFAULT_OPERATION OP_DEFOP_MERGE
+
+#define YANGCLI_DEF_WITH_DEFAULTS  NCX_WITHDEF_NONE
 
 #define YANGCLI_DEF_INDENT    2
 
-#define YANGCLI_NUM_TIMERS    16
+#define YANGCLI_DEF_BAD_DATA NCX_BAD_DATA_CHECK
+
+#define YANGCLI_DEF_MAXLOOPS  65535
+
+#define YANGCLI_DEF_HISTORY_LINES  25
+
 
 #ifdef MACOSX
 #define ENV_HOST        (const char *)"HOST"
@@ -211,8 +227,6 @@ extern "C" {
 #define YANGCLI_VARS        (const xmlChar *)"vars"
 #define YANGCLI_WITH_DEFAULTS  (const xmlChar *)"with-defaults"
 
-#define BAD_DATA_DEFAULT NCX_BAD_DATA_CHECK
-
 /* YANGCLI local RPC commands */
 #define YANGCLI_CD      (const xmlChar *)"cd"
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
@@ -268,10 +282,6 @@ extern "C" {
 
 #define YANGCLI_MSG      (const xmlChar *)"msg"
 #define YANGCLI_MAXLOOPS (const xmlChar *)"maxloops"
-
-#define YANGCLI_DEF_MAXLOOPS  65535
-
-#define YANGCLI_DEF_HISTORY_LINES  25
 
 #define YANGCLI_MAX_INDENT    9
 

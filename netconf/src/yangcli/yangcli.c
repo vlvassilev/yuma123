@@ -2115,10 +2115,10 @@ static status_t
         baddata = ncx_get_baddata_enum(VAL_ENUM_NAME(parm));
         if (baddata == NCX_BAD_DATA_NONE) {
             SET_ERROR(ERR_INTERNAL_VAL);
-            baddata = BAD_DATA_DEFAULT;
+            baddata = YANGCLI_DEF_BAD_DATA;
         }
     } else {
-        baddata = BAD_DATA_DEFAULT;
+        baddata = YANGCLI_DEF_BAD_DATA;
     }
 
     /* get the batch-mode parameter */
@@ -3532,7 +3532,7 @@ static status_t
     autocomp = TRUE;
     autohistory = TRUE;
     autoload = TRUE;
-    baddata = BAD_DATA_DEFAULT;
+    baddata = YANGCLI_DEF_BAD_DATA;
     connect_valset = NULL;
     confname = NULL;
     default_module = NULL;
@@ -3540,10 +3540,10 @@ static status_t
     display_mode = NCX_DISPLAY_MODE_PLAIN;
     fixorder = TRUE;
     optional = FALSE;
-    testoption = OP_TESTOP_NONE;
-    erroption = OP_ERROP_NONE;
-    defop = OP_DEFOP_MERGE;   /* was 'none' , now 'merge' */
-    withdefaults = NCX_WITHDEF_NONE;
+    testoption = YANGCLI_DEF_TEST_OPTION;
+    erroption = YANGCLI_DEF_ERROR_OPTION;
+    defop = YANGCLI_DEF_DEFAULT_OPERATION;
+    withdefaults = YANGCLI_DEF_WITH_DEFAULTS;
     echo_replies = TRUE;
     time_rpcs = FALSE;
     temp_progcb = NULL;

@@ -3610,7 +3610,7 @@ xmlChar *
     }
 
     m__free(buff);
-    *res = ERR_NCX_MOD_NOT_FOUND;
+    *res = ERR_NCX_CFG_NOT_FOUND;
     return NULL;
 
 }  /* ncxmod_find_data_file */

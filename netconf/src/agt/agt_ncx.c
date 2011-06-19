@@ -796,6 +796,7 @@ static status_t
     srcurl = NULL;
     srcurlspec = NULL;
     srcurlval = NULL;
+    errval = NULL;
     destcfg = NULL;
     desturl = NULL;
     desturlspec = NULL;
@@ -805,7 +806,7 @@ static status_t
 
     /* get the agent capabilities */
     mycaps = agt_cap_get_caps();
-    if (!mycaps) {
+    if (mycaps == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 
@@ -832,7 +833,10 @@ static status_t
         if (res != NO_ERR) {
             retres = res;
         }
-    } /* else errors already recorded */
+    } else {
+        /* else errors already recorded or NO_ERR */
+        retres = res;
+    }
 
     /* set the errval to the srcval for now, just in case */
     errval = val_find_child(msg->rpc_input,
@@ -840,7 +844,7 @@ static status_t
                             NCX_EL_SOURCE);
 
     /* check the source config, URL, or inline (copy source) */
-    if (res == NO_ERR && srccfg != NULL) {
+    if (retres == NO_ERR && srccfg != NULL) {
         switch (srccfg->cfg_id) {
         case NCX_CFGID_CANDIDATE:
             if (!cap_std_set(mycaps, CAP_STDID_CANDIDATE)) {
@@ -874,29 +878,30 @@ static status_t
     } else if (res == NO_ERR && srcurl != NULL) {
         /* get the pointer to the filespec part */
         srcurlspec = agt_get_filespec_from_url(srcurl, &res);
+        srcfile = NULL;
 
         /* check the URL parameter to see if it is valid */
         if (srcurlspec != NULL && res == NO_ERR) {
             srcfile = ncxmod_find_data_file(srcurlspec, FALSE, &res);
-            if (srcfile == NULL || res != NO_ERR) {
-                /* source file not found */
-                agt_record_error(scb, 
-                                 &msg->mhdr, 
-                                 NCX_LAYER_OPERATION, 
-                                 res,
-                                 methnode, 
-                                 NCX_NT_STRING,
-                                 (const void *)srcurl, 
-                                 NCX_NT_VAL, 
-                                 errval);
-                retres = res;
-            }
-        } else if (res != NO_ERR) {
+        }
+        if (srcfile == NULL || res != NO_ERR) {
+            /* source file not found */
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             methnode, 
+                             NCX_NT_STRING,
+                             (const void *)srcurl, 
+                             NCX_NT_VAL, 
+                             errval);
             retres = res;
         }
     }
 
-    /* set the errval tp the destval for now, just in case */
+    /* set the errval tp the destval for now, just in case
+     * look for more errors, even if src already invalid
+     */
     errval = val_find_child(msg->rpc_input,
                             NC_MODULE,
                             NCX_EL_TARGET);
@@ -954,16 +959,42 @@ static status_t
             /* check the URL parameter to see if it is valid */
             if (desturlspec != NULL && res == NO_ERR) {
                 /* allowed to be a not-found error */
-                res = NO_ERR;
                 destfile = ncxmod_find_data_file(desturlspec, FALSE, &res);
                 /* ignore error for now */
+            } else {
+                /* file spec is invalid for this implementation */
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res,
+                                 methnode, 
+                                 (desturl) ? NCX_NT_STRING : NCX_NT_NONE,
+                                 (const void *)desturl, 
+                                 NCX_NT_VAL, 
+                                 errval);
+                retres = res;
             }
         } else if (res != NO_ERR) {
+            /* error already recorded */
             retres = res;
         }
     } else if (res == ERR_NCX_FOUND_INLINE) {
-        retres = ERR_NCX_INVALID_VALUE;
+        /* got some inline <config> as the <target> parameter
+         * error not recorded yet; only OK for <source>
+         */
+        retres = ERR_NCX_OPERATION_NOT_SUPPORTED;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_NONE,
+                         NULL,
+                         NCX_NT_VAL, 
+                         errval);
+        retres = res;
     } else {
+        /* error already recorded or NO_ERR */
         retres = res;
     }
 
@@ -986,9 +1017,7 @@ static status_t
      * allowed by this server
      */
     if (srcurl != NULL && desturl != NULL) {
-
         retres = ERR_NCX_OPERATION_NOT_SUPPORTED;
-
         agt_record_error(scb, 
                          &msg->mhdr, 
                          NCX_LAYER_OPERATION, 
@@ -1000,8 +1029,10 @@ static status_t
                          errval);
     }
 
-    /* check the with-defaults parameter */
-    if (retres == NO_ERR) {
+    /* check the with-defaults parameter, but only if the
+     * target is an <url>; otherwise basic mode will be used
+     */
+    if (retres == NO_ERR && desturl != NULL) {
         res = agt_set_with_defaults(scb, msg, methnode);
         if (res != NO_ERR) {
             /* error already recorded */
@@ -1011,7 +1042,6 @@ static status_t
 
     /* check source config == dest config */
     if (retres == NO_ERR && srccfg != NULL && srccfg == destcfg) {
-
         /* invalid operation */
         res = ERR_NCX_OPERATION_NOT_SUPPORTED;
         agt_record_error(scb, 
@@ -3747,7 +3777,7 @@ status_t
 
     res = agt_rpc_load_config_file(filespec, 
                                    cfg, 
-                                   FALSE, 
+                                   FALSE, /* OP_EDITOP_REPLACE */
                                    use_sid);
     return res;
 
@@ -3890,6 +3920,15 @@ void
         log_error("\nError: restore running config failed (%s)",
                   get_error_string(res));
 
+    }
+
+    if (res == NO_ERR) {
+        res = cfg_fill_candidate_from_running();
+        if (res != NO_ERR) {
+            log_error("\nError: resynch candidate after restore "
+                      "running config failed (%s)",
+                      get_error_string(res));
+        }
     }
 
     agt_sys_send_sysConfirmedCommit(scb, event);

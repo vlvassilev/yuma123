@@ -422,7 +422,7 @@ static status_t
     if (*useobj) {
         /* get child node of this object */
         if ((*useobj)->parent) {
-            foundobj = (*useobj)->parent;
+            foundobj = obj_get_real_parent(*useobj);
         } else if (*useobj != pcb->docroot) {
             foundobj = pcb->docroot;
         }
@@ -430,13 +430,13 @@ static status_t
         /* setting object for the first time
          * get parent node of the the start object 
          */
-        foundobj = pcb->obj->parent;
-        if (!foundobj) {
+        foundobj = obj_get_real_parent(pcb->obj);
+        if (foundobj == NULL) {
             foundobj = pcb->docroot;
         }
     }
 
-    if (!foundobj) {
+    if (foundobj == NULL) {
         res = ERR_NCX_DEF_NOT_FOUND;
         if (pcb->logerrors) {
             log_error("\nError: parent not found for object '%s'",

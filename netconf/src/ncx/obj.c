@@ -8243,6 +8243,43 @@ const obj_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_get_real_parent
+* 
+* Get the parent of the current object;
+* skip OBJ_TYP_CHOICE and OBJ_TYP_CASE
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the parent of this object or NULL if none
+*********************************************************************/
+obj_template_t *
+    obj_get_real_parent (obj_template_t  *obj)
+{
+#ifdef DEBUG
+    if (obj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    obj = obj->parent;
+    if (obj != NULL) {
+        switch (obj->objtype) {
+        case OBJ_TYP_CHOICE:
+        case OBJ_TYP_CASE:
+            return obj_get_real_parent(obj);
+        default:
+            return obj;
+        }
+    }
+    return NULL;
+
+}  /* obj_get_real_parent */
+
+
+/********************************************************************
 * FUNCTION obj_get_presence_string
 *
 * Get the presence-stmt value, if any

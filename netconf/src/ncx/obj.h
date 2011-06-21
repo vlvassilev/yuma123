@@ -2477,6 +2477,22 @@ extern const obj_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_get_real_parent
+* 
+* Get the parent of the current object;
+* skip OBJ_TYP_CHOICE and OBJ_TYP_CASE
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the parent of this object or NULL if none
+*********************************************************************/
+extern obj_template_t *
+    obj_get_real_parent (obj_template_t  *obj);
+
+
+/********************************************************************
 * FUNCTION obj_get_presence_string
 *
 * Get the present-stmt value, if any

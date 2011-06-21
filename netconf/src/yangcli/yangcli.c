@@ -3245,11 +3245,17 @@ static mgr_io_state_t
         if (!runscriptdone) {
             runscriptdone = TRUE;
             (void)do_startup_script(server_cb, runscript);
+            /* drop through and get input line from runstack */
         }
     } else if (runcommand) {
         if (!runcommanddone) {
             runcommanddone = TRUE;
             (void)do_startup_command(server_cb, runcommand);
+            /* exit now in case there was a session started up and a remote
+             * command sent as part of run-command.  May need to let write_sessions()
+             * run in mgr_io.c.  If not, 2nd loop through this fn will hit get_input_line
+             */
+            return server_cb->state;            
         }
     }
 

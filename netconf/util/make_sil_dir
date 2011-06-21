@@ -27,11 +27,12 @@ if [ ! -d $1 ]; then
   exit 1
 fi
 
+
 mkdir $1/src
 mkdir $1/bin
 mkdir $1/lib
 
-if [ ! -d $YUMA_HOME ]; then
+if [ -z $YUMA_HOME ]; then
   if [ ! -f /usr/share/yuma/util/makefile.sil ]; then
     echo "Error: /usr/share/yuma/util/makefile.sil not found"
     exit 1

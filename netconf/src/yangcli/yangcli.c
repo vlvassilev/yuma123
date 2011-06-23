@@ -3252,19 +3252,13 @@ static mgr_io_state_t
             runcommanddone = TRUE;
             (void)do_startup_command(server_cb, runcommand);
             /* exit now in case there was a session started up and a remote
-             * command sent as part of run-command.  May need to let write_sessions()
-             * run in mgr_io.c.  If not, 2nd loop through this fn will hit get_input_line
+             * command sent as part of run-command.  
+             * May need to let write_sessions() run in mgr_io.c.
+             * If not, 2nd loop through this fn will hit get_input_line
              */
             return server_cb->state;            
         }
     }
-
-    /* check batch-mode corner-case, nothing else to do */
-    if (batchmode) {
-        mgr_request_shutdown();
-        return server_cb->state;
-    }
-
 
     /* get a line of user input
      * this is really a const pointer
@@ -3282,13 +3276,19 @@ static mgr_io_state_t
         res = SET_ERROR(ERR_INTERNAL_VAL);
         break;
     case RUNSTACK_SRC_USER:
-        if (line==NULL) {
+        if (line == NULL) {
+            /* could have just transitioned from script mode to
+             * user mode; check batch-mode exit;
+             */
+            if (batchmode) {
+                mgr_request_shutdown();
+            }
             return server_cb->state;
         }
         break;
     case RUNSTACK_SRC_SCRIPT:
         /* get one line of script text */
-        if (line==NULL || res != NO_ERR) {
+        if (line == NULL || res != NO_ERR) {
             if (res == ERR_NCX_EOF) {
                 ;
             }

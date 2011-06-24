@@ -7842,6 +7842,42 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_mod
+* 
+* Get the module pointer for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to module
+*********************************************************************/
+ncx_module_t *
+    obj_get_mod (obj_template_t  *obj)
+{
+    ncx_module_t  *usemod;
+
+#ifdef DEBUG
+    if (obj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (obj->mod != NULL) {
+        usemod = obj->mod;
+    } else if (obj->tkerr.mod != NULL) {
+        usemod = obj->tkerr.mod;
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    return usemod;
+
+}  /* obj_get_mod */
+
+
+/********************************************************************
 * FUNCTION obj_get_mod_version
 * 
 * Get the module version for this object
@@ -10955,6 +10991,56 @@ const xmlChar *
     return obj->def.list->keystr;
 
 }  /* obj_get_keystr */
+
+
+/********************************************************************
+* FUNCTION obj_delete_obsolete
+*
+* Delete any obsolete child nodes within the specified object subtree
+*
+* INPUTS:
+*   objQ == Q of obj_template to check
+*
+*********************************************************************/
+void
+    obj_delete_obsolete (dlq_hdr_t  *objQ)
+{
+    obj_template_t  *childobj, *nextobj;
+    dlq_hdr_t       *childdatadefQ;
+
+#ifdef DEBUG
+    if (objQ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (childobj = (obj_template_t *)dlq_firstEntry(objQ);
+         childobj != NULL;
+         childobj = nextobj) {
+
+        nextobj = (obj_template_t *)dlq_nextEntry(childobj);
+        if (obj_has_name(childobj) &&
+            obj_get_status(childobj) == NCX_STATUS_OBSOLETE) {
+            if (LOGDEBUG) {
+                ncx_module_t  *testmod = obj_get_mod(childobj);
+                log_debug("\nDeleting obsolete node '%s' "
+                          "from %smodule '%s'",
+                          obj_get_name(childobj),
+                          (testmod && !testmod->ismod) ? "sub" : "",
+                          (testmod) ? testmod->name : EMPTY_STRING);
+            }
+            dlq_remove(childobj);
+            obj_free_template(childobj);
+        } else {
+            childdatadefQ = obj_get_datadefQ(childobj);
+            if (childdatadefQ != NULL) {
+                obj_delete_obsolete(childdatadefQ);
+            }
+        }
+    }
+
+}  /* obj_delete_obsolete */
 
 
 /* END obj.c */

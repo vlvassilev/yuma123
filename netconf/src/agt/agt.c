@@ -726,6 +726,9 @@ status_t
         return res;
     }
 
+    /* prune all the obsolete objects */
+    ncx_delete_all_obsolete_objects();
+
     /************* L O A D   R U N N I N G   C O N F I G ***************/
 
     /* load the NV startup config into the running config if it exists */

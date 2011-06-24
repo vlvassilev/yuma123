@@ -2314,6 +2314,21 @@ extern const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_mod
+* 
+* Get the module pointer for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to module
+*********************************************************************/
+extern ncx_module_t *
+    obj_get_mod (obj_template_t  *obj);
+
+
+/********************************************************************
 * FUNCTION obj_get_mod_version
 * 
 * Get the module version for this object
@@ -3510,6 +3525,21 @@ extern void
 *********************************************************************/
 extern const xmlChar *
     obj_get_keystr (obj_template_t *obj);
+
+
+
+/********************************************************************
+* FUNCTION obj_delete_obsolete
+*
+* Delete any obsolete child nodes within the specified object subtree
+*
+* INPUTS:
+*   objQ == Q of obj_template to check
+*
+*********************************************************************/
+extern void
+    obj_delete_obsolete (dlq_hdr_t  *objQ);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

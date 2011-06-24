@@ -7663,4 +7663,42 @@ void
 }   /* ncx_set_use_deadmodQ */
 
 
+/********************************************************************
+* FUNCTION ncx_delete_all_obsolete_objects
+* 
+* Go through all the modules and delete the obsolete nodes
+* 
+*********************************************************************/
+void
+    ncx_delete_all_obsolete_objects (void)
+{
+    ncx_module_t   *mod;
+    yang_node_t    *node;
+
+    for (mod = ncx_get_first_module();
+         mod != NULL;
+         mod = ncx_get_next_module(mod)) {
+
+        obj_delete_obsolete(&mod->datadefQ);
+
+        if (!mod->ismod) {
+            continue;
+        }
+
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+
+            if (node->submod == NULL) {
+                SET_ERROR(ERR_INTERNAL_PTR);
+                continue;
+            }
+
+            obj_delete_obsolete(&node->submod->datadefQ);
+        }
+    }
+
+}  /* ncx_delete_all_obsolete_objects */
+
+
 /* END file ncx.c */

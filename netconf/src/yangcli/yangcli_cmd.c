@@ -214,6 +214,33 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION need_get_parm
+* 
+*  Check if the get_foo function should fill in this parameter
+*  or not
+* 
+* INPUTS:
+*   parm == object template to check
+*
+* RETURNS:
+*    TRUE if value should be filled in
+*    FALSE if it should be skipped
+*********************************************************************/
+static boolean
+    need_get_parm (obj_template_t *parm)
+{
+    if (!obj_is_config(parm) || 
+        obj_is_abstract(parm) ||
+        obj_get_status(parm) == NCX_STATUS_OBSOLETE) {
+        return FALSE;
+    }
+
+    return TRUE;
+
+}  /* need_get_parm */
+
+
+/********************************************************************
 * FUNCTION parse_rpc_cli
 * 
 *  Call the cli_parse for an RPC input value set
@@ -1232,7 +1259,7 @@ static status_t
          parm != NULL && res == NO_ERR;
          parm = obj_next_child(parm)) {
 
-        if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+        if (!need_get_parm(parm)) {
             continue;
         }
 
@@ -1340,7 +1367,7 @@ static status_t
              parm != NULL;
              parm = obj_next_child(parm)) {
 
-            if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+            if (!need_get_parm(parm)) {
                 continue;
             }
 
@@ -1396,7 +1423,7 @@ static status_t
     for (; cas != NULL;
          cas = obj_next_child(cas)) {
 
-        if (!obj_is_config(cas) || obj_is_abstract(cas)) {
+        if (!need_get_parm(cas)) {
             continue;
         }
 
@@ -1523,7 +1550,7 @@ static status_t
              cas != NULL && !done;
              cas = obj_next_child(cas)) {
 
-            if (!obj_is_config(cas) || obj_is_abstract(cas)) {
+            if (!need_get_parm(cas)) {
                 continue;
             }
 
@@ -1737,7 +1764,7 @@ static status_t
          parm != NULL && res==NO_ERR;
          parm = obj_next_child(parm)) {
 
-        if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+        if (!need_get_parm(parm)) {
             continue;
         }
 

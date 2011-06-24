@@ -7188,6 +7188,17 @@ static status_t
         return NO_ERR;
     }
 
+    if (obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
+        if (LOGDEBUG) {
+            log_debug("\nSkip expand of obsolete uses '%s' "
+                      "in %smodule '%s'",
+                      uses->grp,
+                      mod->ismod ? "" : "sub",
+                      mod->name);
+        }
+        return NO_ERR;
+    }
+
 #ifdef YANG_OBJ_DEBUG_USES
     if (LOGDEBUG4) {
         log_debug4("\nexpand_uses: uses '%s' in mod '%s' on line %u",
@@ -7459,6 +7470,17 @@ static status_t
         /* this node has errors, currently proccessing for
          * errors only, so just keep going
          */
+        return NO_ERR;
+    }
+
+    if (obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
+        if (LOGDEBUG) {
+            log_debug("\nSkip expand of obsolete augment '%s' "
+                      "in %smodule '%s'",
+                      aug->target,
+                      mod->ismod ? "" : "sub",
+                      mod->name);
+        }
         return NO_ERR;
     }
 

@@ -2782,6 +2782,16 @@ extern void
     ncx_set_use_deadmodQ (void);
 
 
+/********************************************************************
+* FUNCTION ncx_delete_all_obsolete_objects
+* 
+* Go through all the modules and delete the obsolete nodes
+* 
+*********************************************************************/
+extern void
+    ncx_delete_all_obsolete_objects (void);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

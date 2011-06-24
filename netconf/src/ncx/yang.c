@@ -2371,7 +2371,7 @@ status_t
     }
         
     /* found import OK, look up imported extension definition */
-    if (imp->mod) {
+    if (imp != NULL && imp->mod != NULL) {
         *ext = ext_find_extension(imp->mod, name);
         if (*ext == NULL) {
             res = ERR_NCX_DEF_NOT_FOUND;
@@ -2454,7 +2454,7 @@ status_t
     }
 
     /* found import OK, look up imported extension definition */
-    if (imp->mod != NULL) {
+    if (imp != NULL && imp->mod != NULL) {
         *feature = ncx_find_feature(imp->mod, name);
         if (*feature == NULL) {
             res = ERR_NCX_DEF_NOT_FOUND;
@@ -2536,7 +2536,7 @@ status_t
         }
     } 
 
-    if (imp->mod != NULL) {
+    if (imp != NULL && imp->mod != NULL) {
         /* found import OK, look up imported extension definition */
         *identity = ncx_find_identity(imp->mod, name, FALSE);
         if (*identity == NULL) {

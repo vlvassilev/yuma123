@@ -1720,7 +1720,8 @@ static val_value_t *
 *   rpc == RPC method that is being called
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*
+*   iswrite == TRUE if write command
+*              FALSE if not a write command
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
 *
@@ -1731,7 +1732,8 @@ static status_t
     fill_valset (server_cb_t *server_cb,
                  obj_template_t *rpc,
                  val_value_t *valset,
-                 val_value_t *oldvalset)
+                 val_value_t *oldvalset,
+                 boolean iswrite)
 {
     obj_template_t        *parm;
     val_value_t           *val, *oldval;
@@ -1768,8 +1770,13 @@ static status_t
             continue;
         }
 
-        if (!server_cb->get_optional && !obj_is_mandatory(parm)) {
-            continue;
+        if (!server_cb->get_optional) {
+            if (!obj_is_mandatory(parm)) {
+                continue;
+            }
+            if (!iswrite && !obj_is_key(parm)) {
+                continue;
+            }
         }
 
         set_completion_state(&server_cb->completion_state,
@@ -1803,7 +1810,7 @@ static status_t
             val = val_find_child(valset, 
                                  obj_get_mod_name(parm),
                                  obj_get_name(parm));
-            if (!val) {
+            if (val == NULL) {
                 res = get_parm(server_cb, rpc, parm, valset, oldvalset);
                 switch (res) {
                 case NO_ERR:
@@ -1885,7 +1892,7 @@ static status_t
             }
 
             /* recurse with the child nodes */
-            res = fill_valset(server_cb, rpc, val, oldval);
+            res = fill_valset(server_cb, rpc, val, oldval, iswrite);
 
             switch (res) {
             case NO_ERR:
@@ -1915,7 +1922,7 @@ static status_t
                 /* recurse with the child node -- NO OLD VALUE
                  * TBD: get keys, then look up old matching entry
                  */
-                res = fill_valset(server_cb, rpc, val, NULL);
+                res = fill_valset(server_cb, rpc, val, NULL, iswrite);
 
                 switch (res) {
                 case NO_ERR:
@@ -3258,7 +3265,8 @@ static status_t
         res = fill_valset(server_cb, 
                           rpc, 
                           newparm, 
-                          curparm);
+                          curparm,
+                          TRUE);
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }
@@ -4645,7 +4653,8 @@ static val_value_t *
                 res = fill_valset(server_cb, 
                                   rpc,
                                   (newparm) ? newparm : targval,
-                                  curparm);
+                                  curparm,
+                                  iswrite);
             }
         }
 
@@ -5617,7 +5626,7 @@ static status_t
                             NULL, 
                             source, 
                             timeoutval, 
-                            dofill,
+                             FALSE,  /* dofill; don't fill again */
                             withdef);
     if (res != NO_ERR) {
         log_error("\nError: send get-config operation failed (%s)",
@@ -7148,7 +7157,11 @@ status_t
         /* fill in any missing parameters from the CLI */
         if (res == NO_ERR) {
             if (interactive_mode()) {
-                res = fill_valset(server_cb, rpc, valset, NULL);
+                res = fill_valset(server_cb, 
+                                  rpc, 
+                                  valset, 
+                                  NULL, 
+                                  TRUE);
                 if (res == ERR_NCX_SKIPPED) {
                     res = NO_ERR;
                 }
@@ -7614,7 +7627,8 @@ status_t
             res = fill_valset(server_cb, 
                               rpc, 
                               valset, 
-                              connect_valset);
+                              connect_valset,
+                              TRUE);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -8141,7 +8155,7 @@ val_value_t *
 
     /* fill in any missing parameters from the CLI */
     if (*res==NO_ERR && interactive_mode()) {
-        *res = fill_valset(server_cb, rpc, valset, NULL);
+        *res = fill_valset(server_cb, rpc, valset, NULL, TRUE);
     }
 
     if (*res==NO_ERR) {

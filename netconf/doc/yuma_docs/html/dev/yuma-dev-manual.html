@@ -11,7 +11,7 @@
     <meta content="" name="DC.subject" />
     <meta content="" name="DC.description" />
     <meta content="Andy Bierman" name="DC.creator" />
-    <meta content="2011-04-17T12:11:28" name="DC.date" />
+    <meta content="2011-06-19T10:00:15" name="DC.date" />
     <meta content="" name="DC.language" />
     <style media="all" type="text/css">
       body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
@@ -47,9 +47,9 @@
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-weight:normal;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">Server Instrumentation Library Development</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15-1</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">April 17, 2011</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated: June 19, 2011</p>
     <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
     <div id="TableofContents1" style="background-color:transparent">
       <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma Developer Manual</p>
@@ -702,7 +702,7 @@
         </tr>
         <tr>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
-            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$$FOO</p>
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$FOO</p>
           </td>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
             <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Environment variable FOO</p>
@@ -829,7 +829,7 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Make sure the <span style="font-weight:bold">$$YUMA_HOME</span> environment variable is defined, and pointing to your Yuma development tree.</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Make sure the <span style="font-weight:bold">$YUMA_HOME</span> environment variable is defined, and pointing to your Yuma development tree.</p>
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">Create a SIL development subtree</span> </p>
@@ -850,11 +850,6 @@
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">Use your text editor to fill in the device-specific instrumentation </span>for each object, RPC method, and notification.  Almost all possible NETCONF-specific code is either handled in the central stack, or generated automatically. so this code is responsible for implementing the semantics of the YANG data model.</p>
-        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
-          <li>
-            <p class="Textbody" dir="ltr" lang="en-US" style="color:#b80047" xml:lang="en-US">You can mostly ignore the developer manual if you look in the auto-generated code for C comments to 'begin add your code here' and end add your code here'.  All database operations and YANG machine-readable constructs are handled by the server, so the only code needed are the hooks from the data model to the device instrumentation.</p>
-          </li>
-        </ul>
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">Compile your code</p>
@@ -7644,7 +7639,7 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">shell program, such as bash</p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Yuma development tree: the source tree containing Yuma code, specified with the <br /><span style="font-weight:bold">$$YUMA_HOME</span> environment variable.</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Yuma development tree: the source tree containing Yuma code, specified with the <br /><span style="font-weight:bold">$YUMA_HOME</span> environment variable.</p>
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">SIL development tree: the source tree containing server instrumentation code</p>

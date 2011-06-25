@@ -11,7 +11,7 @@
     <meta content="" name="DC.subject" />
     <meta content="" name="DC.description" />
     <meta content="Andy Bierman" name="DC.creator" />
-    <meta content="2011-04-17T12:49:57" name="DC.date" />
+    <meta content="2011-06-19T11:09:21" name="DC.date" />
     <meta content="" name="DC.language" />
     <style media="all" type="text/css">
       body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
@@ -47,9 +47,9 @@
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">Common User Manual</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15-1</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">April 17, 2011</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated June 19, 2011</p>
     <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
     <div id="TableofContents1" style="background-color:transparent">
       <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma User Manual</p>
@@ -475,7 +475,7 @@
         </tr>
         <tr>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
-            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$$FOO</p>
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$FOO</p>
           </td>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
             <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Environment variable FOO</p>
@@ -525,6 +525,18 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Partial Lock RPC for NETCONF (RFC 5717)</p>
       </li>
       <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">YANG Data Modeling Language (RFC 6020)</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Common YANG Data Types (RFC 6021)</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">NETCONF Monitoring Schema (RFC 6022)</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">With-defaults capability for NETCONF (RFC TBD)</p>
+      </li>
+      <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">SSH2 (RFC 4252 - 4254)</p>
       </li>
       <li>
@@ -534,7 +546,7 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">XPath 1.0</p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">YANG Data modeling language (RFC xxxx) [draft-ietf-netmod-yang-13.txt]</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">YANG Data modeling language (RFC 6020)</p>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
@@ -560,25 +572,25 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Although any arbitrary YANG file can be automatically supported by Yuma, the following content (YANG modules) is built into the <span style="font-weight:bold">netconfd</span> server, and supported by the <span style="font-weight:bold">yangcli</span> client:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">yuma-netconf.yang</span>: all the NETCONF protocol operations, including all YANG extensions to the NETCONF protocol (RFC 4741).  This file contains meta-data used in the yangcli and netconfd programs, which is not available in the ietf-netconf.yang version.</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">yuma-netconf.yang</span>: all the NETCONF protocol operations, including all YANG extensions to the NETCONF protocol (RFC 4741).  This file contains meta-data used in the yangcli and netconfd programs, which is not available in the <span style="font-weight:bold">ietf-netconf.yang</span> version.</p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-yang-types.yang</span>: the standard derived types library in progress for YANG.  This module is being developed by the NETMOD WG. (draft-ietf-netmod-types-09.txt)</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-yang-types.yang</span>: the standard derived types library in progress for YANG.  This module is being developed by the NETMOD WG. (RFC 6021)</p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-inet-types.yang</span>: the standard Internet address types library in progress for YANG.  This module is being developed by the NETMOD WG. (draft-ietf-netmod-types-09.txt)</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-inet-types.yang</span>: the standard Internet address types library in progress for YANG.  This module is being developed by the NETMOD WG. (RFC 6021)</p>
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
           <span style="font-weight:bold">ietf-netconf-monitoring.yang: </span>
-          <span style="font-weight:normal">the standard NETCONF monitoring module in progress by the NETCONF WG (draft-ietf-netconf-monitoring-15.txt)</span>
+          <span style="font-weight:normal">the standard NETCONF monitoring module in progress by the NETCONF WG (RFC 6022)</span>
         </p>
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-netconf-partial-lock.yang</span>: the standard NETCONF module for multiple concurrent partial database locks (RFC 5717).</p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-with-defaults.yang</span>: the standard NETCONF default value control module in progress by the NETCONF WG (draft-ietf-netconf-with-defaults-07.txt)</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">ietf-with-defaults.yang</span>: the standard NETCONF default value control module in progress by the NETCONF WG (draft-ietf-netconf-with-defaults-10.txt)</p>
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">yuma-interfaces.yang</span>: interfaces monitoring and configuration scaffolding.</p>
@@ -602,7 +614,10 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">yuma-nacm.yang</span>: Proprietary NETCONF Access Control Model</p>
       </li>
       <li>
-        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">test/*.yang</span>: Several modules are included for testing YANG and NETCONF behavior.</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">test/pass/*.yang</span>: Several modules are included for testing YANG and NETCONF behavior.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">test/fail/*.yang</span>: Several modules with errors are included for testing YANG compiler behavior</p>
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -1391,12 +1406,12 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">CLI override:  none</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">C shell example:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> setenv $HOME  /home/andy<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> setenv HOME  /home/andy<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Bash shell example:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> set $HOME=/home/andy<br /> export HOME<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> export HOME=/home/andy<br /></p>
     <h3 dir="ltr" id="toc23"><span class="SectionNumber">4.1.2</span> $YUMA_HOME</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">$YUMA_HOME</span> environment variable contains the directory specification of the current Yuma project root directory.  This is the path to the 'netconf' directory, within a Yuma source tree.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -1407,10 +1422,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> --yuma-home=/home/andy/swdev/yuma/trunk/netconf<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">C shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> setenv $YUMA_HOME  /home/andy/swdev/yuma/trunk/netconf<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> setenv YUMA_HOME  /home/andy/swdev/yuma/trunk/netconf<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Bash shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> set $YUMA_HOME=/home/andy/swdev/yuma/trunk/netconf<br /> export YUMA_HOME<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> export YUMA_HOME=/home/andy/swdev/yuma/trunk/netconf<br /></p>
     <h3 dir="ltr" id="toc24"><span class="SectionNumber">4.1.3</span> $YUMA_INSTALL</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">$YUMA_INSTALL</span> environment variable contains the directory specification of the Yuma installation root directory.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -1418,10 +1433,10 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">CLI override:  none</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">C shell example:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> setenv $YUMA_INSTALL  /sw/yuma<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> setenv YUMA_INSTALL  /sw/yuma<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Bash shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> set $YUMA_INSTALL=/sw/yuma<br /> export YUMA_INSTALL<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> export YUMA_INSTALL=/sw/yuma<br /></p>
     <h3 dir="ltr" id="toc25"><span class="SectionNumber">4.1.4</span> $YUMA_MODPATH</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">$YUMA_MODPATH</span> environment variable contains a list of directory specifications that should be searched (in order) to find YANG or YIN modules and submodules.  It can be used to extend the search path beyond the default locations.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The syntax for this parameter is a string containing the desired directory paths, separated by colon (:) characters.  If the trailing forward slash (/) character is missing, then it will be added when searching for files.</p>
@@ -1434,10 +1449,10 @@
     <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> --modpath=”$HOME/modules2:/usr/local/modules”<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">C shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> setenv $YUMA_MODPATH  “$HOME/modules2:/usr/local/modules”<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"><br /> setenv YUMA_MODPATH  “$HOME/modules2:/usr/local/modules”<br /></p>
     <p class="Standard" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Bash shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> set $YUMA_MODPATH=“$HOME/modules2:/usr/local/modules”<br /> export YUMA_MODPATH<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> export YUMA_MODPATH=“$HOME/modules2:/usr/local/modules”<br /></p>
     <h3 dir="ltr" id="toc26"><span class="SectionNumber">4.1.5</span> $YUMA_DATAPATH</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">$YUMA_DATAPATH</span> environment variable contains a list of directory specifications that should be searched (in order) to find data files used by Yuma applications.  It can be used to extend the search path beyond the default locations.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Data files used by the <span style="font-weight:bold">yangcli</span> program are affected by this environment variable.</p>
@@ -1453,10 +1468,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> --datapath=”$HOME/mydata:$HOME/project1/data”<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">C shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> setenv $YUMA_DATAPATH  “$HOME/mydata:$HOME/project1/data”<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> setenv YUMA_DATAPATH  “$HOME/mydata:$HOME/project1/data”<br /></p>
     <p class="Standard" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Bash shell example:</p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> set $YUMA_DATAPATH=“$HOME/mydata:$HOME/project1/data”<br /> export YUMA_DATAPATH<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> export YUMA_DATAPATH=“$HOME/mydata:$HOME/project1/data”<br /></p>
     <h3 dir="ltr" id="toc27"><span class="SectionNumber">4.1.6</span> $YUMA_RUNPATH</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">$YUMA_RUNPATH</span> environment variable contains a list of directory specifications that should be searched (in order) to find script files used by Yuma applications.  It can be used to extend the search path beyond the default locations.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Script files used by the <span style="font-weight:bold">yangcli</span> program are affected by this environment variable.</p>
@@ -1472,11 +1487,11 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">C shell example:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> setenv $YUMA_RUNPATH  “$HOME/scripts:/usr/local/scripts”<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> setenv YUMA_RUNPATH  “$HOME/scripts:/usr/local/scripts”<br /></p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Bash shell example:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> set $YUMA_RUNPATH=“$HOME/scripts:/usr/local/scripts”<br /> export YUMA_RUNPATH<br /></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> export YUMA_RUNPATH=“$HOME/scripts:/usr/local/scripts”<br /></p>
     <h2 dir="ltr" id="toc28"><span class="SectionNumber">4.2</span> Searching for Files</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">All Yuma programs search for YANG and other files in the same manner, using the same configuration parameters. The current working directory is included in this search path, so it is important to consider the directory in which a Yuma program is invoked.  The search ends as soon as a suitable matching file is found.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are two types of module searches:</p>
@@ -2532,271 +2547,281 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <h2 dir="ltr" id="toc51"><span class="SectionNumber">6.1</span> Error Messages</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The current list of error numbers and default error messages can be obtained with the yangdump program <span style="font-weight:bold">--show-errors</span> parameter.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The current list of error numbers and default error messages can be obtained with the <span style="font-weight:bold">yangdump</span> program <span style="font-weight:bold">--show-errors</span> parameter.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The default error message can be replaced for some error conditions with the YANG error-message statement.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following list shows the default error messages for all error numbers currently in use.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  0 ok </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  1 EOF reached </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  2 NULL pointer </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  3 malloc failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  4 invalid internal value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  5 internal buffering failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  6 invalid queue deletion </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  7 wrong init sequence </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  8 queue node not header </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  9 queue node not data </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> 10 invalid queue header </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> 11 entry already queued </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> 12 too many entries </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> 13 libxml2 operation failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">100 cannot open file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">101 cannot read file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">102 cannot close file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">103 cannot write file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">104 cannot change directory </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">105 cannot stat file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">106 buffer overflow error </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">107 cannot delete file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">108 cannot access file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">109 db connect failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">110 db entry exists </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">111 db not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">112 db query failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">113 db delete failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">114 wrong checksum </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">115 wrong tag type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">116 db read failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">117 db write failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">118 db init failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">119 beep init failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">120 beep init nc failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">121 xml reader internal </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">122 open directory failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">123 read directory failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">200 no config file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">201 no source file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">202 POST read input </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">203 bad drive </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">204 bad path </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">205 bad filename </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">206 duplicate value pair </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">207 page not handled </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">208 page access denied </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">209 missing form params </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">210 invalid form state </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">211 duplicate namespace </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">212 xml reader start failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">213 xml reader read failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">214 wrong XML node type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">215 xml reader null name </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">216 xml reader null value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">217 xml reader wrong name </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">218 xml reader wrong value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">219 xml reader wrong element </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">220 xml reader extra nodes </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">221 xml reader EOF </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">222 wrong length </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">223 entry exists </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">224 duplicate entry </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">225 not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">226 missing file </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">227 unknown parameter </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">228 invalid name </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">229 unknown namespace </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">230 wrong namespace </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">231 wrong data type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">232 wrong value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">233 missing parameter </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">234 extra parameter </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">235 empty value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">236 module not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">237 max length exceeded </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">238 invalid token </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">239 unended quoted string </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">240 read failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">241 invalid number </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">242 invalid hex number </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">243 invalid real number </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">244 EOF reached </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">245 wrong token type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">246 wrong token value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">247 buffer overflow </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">248 invalid range </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">249 overlapping range </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">250 definition not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">251 definition segment not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">252 type not allowed in index </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">253 index type not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">254 type not mdata </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">255 meta-data not allowed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">256 top not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">257 resource in use </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">258 invalid value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">259 too big </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">260 missing attribute </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">261 bad attribute </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">262 unknown attribute </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">263 missing element </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">264 bad element </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">265 unknown element </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">266 unknown namespace </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">267 access denied </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">268 lock denied </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">269 resource denied </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">270 rollback failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">271 data exists </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">272 data missing </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">273 operation not supported </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">274 operation failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">275 partial operation </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">276 wrong namespace </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">277 wrong node depth </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">278 wrong owner </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">279 wrong element </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">280 wrong order </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">281 extra node </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">282 wrong node type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">283 expecting complex node type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">284 expecting string node type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">285 wrong data type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">286 wrong data value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">287 invalid number length </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">288 value not in range </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">289 wrong number type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">290 invalid enum value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">291 value not in set </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">292 extra list string found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">293 unknown object </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">294 extra parameter instance </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">295 extra case in choice </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">296 missing mandatory choice </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">297 wrong config state </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">298 unknown application </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">299 unknown data type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">300 access control violation </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">301 config locked </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">302 wrong config state </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">303 max-access exceeded </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">304 wrong index type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">305 wrong instance type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">306 missing index component </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">307 config not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">308 extra attribute instance(s) found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">309 required attribute not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">310 required value instance not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">311 extra value instance(s) found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">312 target is read only </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">313 invalid pattern </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">314 wrong version </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">315 connect failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">316 unknown host </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">317 session failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">318 authentication failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">319 end of comment not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">320 invalid string concatenation </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">321 import not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">322 missing typedef sub-section </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">323 restriction not allowed for this type </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">324 specified refinement not allowed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">325 definition loop detected </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">326 default case contains mandatory object(s) </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">327 import loop </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">328 include loop </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">329 expecting module </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">330 expecting submodule </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">331 undefined prefix </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">332 imported module has errors </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">333 pattern match failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">334 invalid data type change </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">335 mandatory object not allowed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">336 unique-stmt test failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">337 max-elements exceeded </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">338 min-elements not reached </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">339 must-stmt test failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">340 data restriction violation </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">341 missing instance for insert operation </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">342 object not config </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">343 invalid conditional object </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">344 using obsolete definition </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">345 invalid augment target </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">346 duplicate refine sub-clause </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">347 invalid deviate sub-clause </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">348 invalid XPath expression syntax </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">349 invalid instance-identifier syntax </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">350 require-instance test failed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">351 key or select attribute not allowed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">352 invalid unique-stmt node </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">353 invalid duplicate import-stmt </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">354 invalid duplicate include-stmt </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">355 ambiguous command </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">356 unknown module </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">357 unknown version </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">358 value not supported </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">359 leafref path loop </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">360 variable not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">361 variable is read-only </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">362 decimal64 base number overflow </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">363 decimal64 fraction precision overflow </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">364 when-stmt tested false </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">365 no matches found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">366 missing refine target </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">367 candidate cannot be locked, discard-changes needed </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">368 timeout occurred </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">369 multiple module revisions exist </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">370 XPath result not a nodeset </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">371 XPath node-set result is empty </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">372 node is protected by a partial lock </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">373 cannot start a partial lock with confirmed-commit pending </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">400 duplicate source </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">401 include file not found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">402 invalid command line value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">403 invalid command line option </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">404 command line option unknown </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">405 invalid command line syntax </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">406 missing command line value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">407 invalid form input </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">408 invalid form </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">409 no instance found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">410 session closed by remote peer </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">411 duplicate import </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">412 duplicate import with different prefix value </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">413 local typedef not used </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">414 local grouping not used </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">415 import not used </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">416 duplicate unique-stmt argument </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">417 statement ignored </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">418 duplicate include </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">419 include not used </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">420 revision date before 1970 </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">421 revision date in the future </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">422 enum value order </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">423 bit position order </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">424 invalid status for child node </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">425 duplicate sibling node name from external augment </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">426 duplicate if-feature statement </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">427 using deprecated definition </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">428 XPath object predicate check limit reached </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">429 empty XPath result in must or when expr </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">430 no ancestor node available </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">431 no parent node available </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">432 no child node available </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">433 no descendant node available </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">434 no nodes available </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">435 bad revision-stmt order </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">436 duplicate prefix </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">437 identifier length exceeded </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">438 display line length exceeded </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">439 received unknown capability </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">440 invalid module capability URI </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">441 unknown child node, using anyxml </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">442 invalid value used for parm </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">443 changing object type to string </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">444 using a reserved name </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">445 conf file parm already exists </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">446 no valid revision statements found </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">447 dependency file has errors </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">448 top-level object is mandatory </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">yangdump  errors and warnings</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  0 ok</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  1 EOF reached</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  2 NULL pointer</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  3 malloc failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  4 invalid internal value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  5 internal buffering failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  6 invalid queue deletion</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  7 wrong init sequence</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  8 queue node not header</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">  9 queue node not data</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US"> 10 invalid queue header</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US"> 11 entry already queued</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US"> 12 too many entries</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US"> 13 libxml2 operation failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">100 cannot open file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">101 cannot read file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">102 cannot close file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">103 cannot write file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">104 cannot change directory</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">105 cannot stat file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">106 buffer overflow error</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">107 cannot delete file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">108 cannot access file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">109 db connect failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">110 db entry exists</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">111 db not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">112 db query failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">113 db delete failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">114 wrong checksum</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">115 wrong tag type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">116 db read failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">117 db write failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">118 db init failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">119 beep init failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">120 beep init nc failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">121 xml reader internal</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">122 open directory failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">123 read directory failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">200 no config file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">201 no source file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">202 POST read input</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">203 bad drive</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">204 bad path</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">205 bad filename</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">206 duplicate value pair</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">207 page not handled</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">208 page access denied</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">209 missing form params</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">210 invalid form state</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">211 duplicate namespace</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">212 xml reader start failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">213 xml reader read failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">214 wrong XML node type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">215 xml reader null name</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">216 xml reader null value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">217 xml reader wrong name</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">218 xml reader wrong value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">219 xml reader wrong element</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">220 xml reader extra nodes</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">221 xml reader EOF</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">222 wrong length</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">223 entry exists</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">224 duplicate entry</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">225 not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">226 missing file</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">227 unknown parameter</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">228 invalid name</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">229 unknown namespace</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">230 wrong namespace</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">231 wrong data type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">232 wrong value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">233 missing parameter</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">234 extra parameter</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">235 empty value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">236 module not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">237 max length exceeded</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">238 invalid token</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">239 unended quoted string</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">240 read failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">241 invalid number</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">242 invalid hex number</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">243 invalid real number</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">244 EOF reached</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">245 wrong token type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">246 wrong token value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">247 buffer overflow</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">248 invalid range</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">249 overlapping range</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">250 definition not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">251 definition segment not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">252 type not allowed in index</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">253 index type not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">254 type not mdata</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">255 meta-data not allowed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">256 top not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">257 resource in use</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">258 invalid value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">259 too big</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">260 missing attribute</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">261 bad attribute</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">262 unknown attribute</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">263 missing element</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">264 bad element</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">265 unknown element</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">266 unknown namespace</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">267 access denied</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">268 lock denied</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">269 resource denied</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">270 rollback failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">271 data exists</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">272 data missing</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">273 operation not supported</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">274 operation failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">275 partial operation</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">276 wrong namespace</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">277 wrong node depth</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">278 wrong owner</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">279 wrong element</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">280 wrong order</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">281 extra node</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">282 wrong node type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">283 expecting complex node type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">284 expecting string node type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">285 wrong data type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">286 wrong data value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">287 invalid number length</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">288 value not in range</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">289 wrong number type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">290 invalid enum value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">291 value not in set</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">292 extra list string found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">293 unknown object</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">294 extra parameter instance</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">295 extra case in choice</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">296 missing mandatory choice</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">297 wrong config state</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">298 unknown application</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">299 unknown data type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">300 access control violation</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">301 config locked</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">302 wrong config state</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">303 max-access exceeded</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">304 wrong index type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">305 wrong instance type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">306 missing index component</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">307 config not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">308 extra attribute instance(s) found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">309 required attribute not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">310 required value instance not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">311 extra value instance(s) found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">312 target is read only</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">313 invalid pattern</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">314 wrong version</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">315 connect failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">316 unknown host</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">317 session failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">318 authentication failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">319 end of comment not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">320 invalid string concatenation</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">321 import not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">322 missing typedef sub-section</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">323 restriction not allowed for this type</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">324 specified refinement not allowed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">325 definition loop detected</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">326 default case contains mandatory object(s)</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">327 import loop</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">328 include loop</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">329 expecting module</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">330 expecting submodule</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">331 undefined prefix</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">332 imported module has errors</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">333 pattern match failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">334 invalid data type change</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">335 mandatory object not allowed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">336 unique-stmt test failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">337 max-elements exceeded</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">338 min-elements not reached</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">339 must-stmt test failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">340 data restriction violation</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">341 missing instance for insert operation</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">342 object not config</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">343 invalid conditional object</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">344 using obsolete definition</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">345 invalid augment target</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">346 duplicate refine sub-clause</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">347 invalid deviate sub-clause</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">348 invalid XPath expression syntax</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">349 invalid instance-identifier syntax</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">350 require-instance test failed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">351 key or select attribute not allowed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">352 invalid unique-stmt node</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">353 invalid duplicate import-stmt</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">354 invalid duplicate include-stmt</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">355 ambiguous command</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">356 unknown module</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">357 unknown version</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">358 value not supported</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">359 leafref path loop</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">360 variable not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">361 variable is read-only</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">362 decimal64 base number overflow</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">363 decimal64 fraction precision overflow</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">364 when-stmt tested false</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">365 no matches found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">366 missing refine target</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">367 candidate cannot be locked, discard-changes needed</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">368 timeout occurred</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">369 multiple module revisions exist</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">370 XPath result not a nodeset</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">371 XPath node-set result is empty</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">372 node is protected by a partial lock</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">373 cannot perform the operation with confirmed-commit pending</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">374 cannot directly load a submodule</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">375 cannot write to a read-only object</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">376 cannot write to this configuration directly</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">377 YANG file missing right brace</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">378 invalid protocol framing characters received</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">379 base:1.1 protocol not enabled</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">380 persistent confirmed commit not active</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">400 duplicate source</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">401 include file not found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">402 invalid command line value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">403 invalid command line option</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">404 command line option unknown</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">405 invalid command line syntax</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">406 missing command line value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">407 invalid form input</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">408 invalid form</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">409 no instance found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">410 session closed by remote peer</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">411 duplicate import</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">412 duplicate import with different prefix value</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">413 local typedef not used</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">414 local grouping not used</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">415 import not used</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">416 duplicate unique-stmt argument</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">417 statement ignored</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">418 duplicate include</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">419 include not used</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">420 revision date before 1970</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">421 revision date in the future</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">422 enum value order</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">423 bit position order</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">424 invalid status for child node</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">425 duplicate sibling node name from external augment</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">426 duplicate if-feature statement</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">427 using deprecated definition</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">428 XPath object predicate check limit reached</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">429 empty XPath result in must or when expr</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">430 no ancestor node available</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">431 no parent node available</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">432 no child node available</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">433 no descendant node available</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">434 no nodes available</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">435 bad revision-stmt order</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">436 duplicate prefix</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">437 identifier length exceeded</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">438 display line length exceeded</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">439 received unknown capability</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">440 invalid module capability URI</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">441 unknown child node, using anyxml</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">442 invalid value used for parm</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">443 changing object type to string</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">444 using a reserved name</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">445 conf file parm already exists</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">446 no valid revision statements found</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">447 dependency file has errors</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">448 top-level object is mandatory</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-family:&#39;Liberation Serif&#39;,serif" xml:lang="en-US">449 file name does not match [sub]module name</p>
   </body>
 </html>

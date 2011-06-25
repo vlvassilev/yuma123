@@ -11,7 +11,7 @@
     <meta content="" name="DC.subject" />
     <meta content="" name="DC.description" />
     <meta content="Andy Bierman" name="DC.creator" />
-    <meta content="2011-04-17T12:43:52" name="DC.date" />
+    <meta content="2011-06-19T10:31:04" name="DC.date" />
     <meta content="" name="DC.language" />
     <style media="all" type="text/css">
       body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
@@ -47,9 +47,9 @@
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">Client/Server Quickstart Guide</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15-1</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">April 17, 2011</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated: June 19, 2011</p>
     <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
     <div id="TableofContents1" style="background-color:transparent">
       <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma Quickstart Guide</p>
@@ -518,7 +518,7 @@
         </tr>
         <tr>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
-            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$$FOO</p>
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$FOO</p>
           </td>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
             <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Environment variable FOO</p>
@@ -576,8 +576,8 @@
     <h2 dir="ltr" id="toc10"><span class="SectionNumber">2.4</span> How Does a Developer Use NETCONF and YANG?</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A NETCONF server developer decides what modules need to be supported by the NETCONF server, and implements the device instrumentation code for those modules.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Much of the NETCONF protocol related code is handled by the NETCONF stack, based on the YANG module contents.  Therefore, the most important task for a developer is designing a good YANG module.</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">After the YANG module is written, the yangdump program is used to generate the template C code for the server instrumentation library for the YANG module.  The device instrumentation code for the YANG module is then added by the developer.  This 'callback code' is called from the NETCONF stack when database operation requests for the object(s) in the YANG module are received by the server.</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Once this library is completed, the YANG module and its binary server instrumentation library (SIL) can be loaded into the NETCONF server at run-time.  There is no need to recompile the NETCONF server, or even reboot it.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">After the YANG module is written, the <span style="font-weight:bold">yangdump</span> program is used to generate the template C code for the server instrumentation library for the YANG module.  The device instrumentation code for the YANG module is then added by the developer.  This 'callback code' is called from the NETCONF stack when database operation requests for the object(s) in the YANG module are received by the server.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Once this library is completed, the YANG module and its binary server instrumentation library (SIL) can be loaded into the NETCONF server at run-time.  There is no need to recompile the <span style="font-weight:bold">netconfd</span> server, or even reboot it.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Once the YANG module and its instrumentation code is completed, it needs be published, so operators and application developers can use the WEB documentation and other tools to access the information in the NETCONF server.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <h1 dir="ltr" id="toc11"><span class="SectionNumber">3</span> Getting Started with toaster.yang</h1>
@@ -1902,7 +1902,7 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <h2 dir="ltr" id="toc57"><span class="SectionNumber">4.6</span> Scripts</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Scripts are simply a collection of <span style="font-weight:bold">yangcli</span> commands and/or assignment statements that are stored in a text file, instead of typed directly.  Scripts can call other scripts (except loops are not allowed), and numbered parameters are available (e.g., --P1='fred' passed as parameter, the $1 expands to 'fred' inside the script).</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The $$YUMA_RUNPATH environment variable, or the --runpath configuration variable, can be used to set the directory path to look for script files.  There is also a default path for finding files, explained in the Yuma Tools User Manual.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">$YUMA_RUNPATH</span> environment variable, or the <span style="font-weight:bold">--runpath</span> configuration variable, can be used to set the directory path to look for script files.  There is also a default path for finding files, explained in the Yuma Tools User Manual.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The command '<span style="font-weight:bold">list scripts</span>' can be used to show the potential script file available in the run path.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The command '<span style="font-weight:bold">run foo</span>' is used to invoke a script named 'foo' (with no file extension).</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If a command fails during a script, execution is halted right away and no more commands in the script are executed.  If 'get-locks' was used, then any locks obtained will be automatically released.  All script runstack levels will be canceled, not just the current script.</p>

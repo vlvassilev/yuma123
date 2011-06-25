@@ -1146,6 +1146,9 @@ status_t
         return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
 
+    /* do not generate C code for obsolete objects */
+    ncx_delete_all_obsolete_objects();
+
     res = write_h_file(scb, mod, cp);
 
     return res;

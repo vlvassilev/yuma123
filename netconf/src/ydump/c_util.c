@@ -977,6 +977,9 @@ void
         }
         ses_putstr(scb, STRING);
         break;
+    case NCX_BT_BITS:
+        ses_putstr(scb, BITS);
+        break;
     default:
         /* assume complex type */
         if (cdefQ == NULL) {

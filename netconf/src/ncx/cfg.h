@@ -729,6 +729,21 @@ extern status_t
     cfg_ok_to_partial_lock (const cfg_template_t *cfg);
 
 
+/********************************************************************
+* FUNCTION cfg_get_root
+*
+* Get the config root for the specified config
+*
+* INPUTS:
+*    cfgid == config ID to get root from
+* 
+* RETURNS:
+*    config root or NULL if none or error
+*********************************************************************/
+extern val_value_t *
+    cfg_get_root (ncx_cfg_t cfgid);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

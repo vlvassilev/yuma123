@@ -1681,4 +1681,31 @@ status_t
 } /* cfg_ok_to_partial_lock */
 
 
+/********************************************************************
+* FUNCTION cfg_get_root
+*
+* Get the config root for the specified config
+*
+* INPUTS:
+*    cfgid == config ID to get root from
+* 
+* RETURNS:
+*    config root or NULL if none or error
+*********************************************************************/
+val_value_t *
+    cfg_get_root (ncx_cfg_t cfgid)
+{
+    cfg_template_t  *cfg = NULL;
+
+    if (cfgid <= MAX_CFGID) {
+        cfg = cfg_arr[cfgid];
+    }
+    if (cfg != NULL) {
+        return cfg->root;
+    }
+    return NULL;
+
+} /* cfg_get_root */
+
+
 /* END file cfg.c */

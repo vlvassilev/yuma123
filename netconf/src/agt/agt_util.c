@@ -2291,6 +2291,41 @@ val_value_t *
 
 
 /********************************************************************
+* FUNCTION agt_add_top_virtual
+*
+* make a val_value_t struct for a specified virtual 
+* top-level data node
+*
+INPUTS:
+*   obj == object node of the virtual data node to create
+*   callbackfn == get callback function to install
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_add_top_virtual (obj_template_t *obj,
+                         getcb_fn_t callbackfn)
+{
+    val_value_t     *rootval, *nodeval;
+
+    rootval = cfg_get_root(NCX_CFGID_RUNNING);
+    if (rootval == NULL) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    nodeval = val_new_value();
+    if (!nodeval) {
+        return ERR_INTERNAL_MEM;
+    }
+    val_init_virtual(nodeval, callbackfn, obj);
+    val_add_child(nodeval, rootval);
+    return NO_ERR;
+
+}  /* agt_add_top_virtual */
+
+
+/********************************************************************
 * FUNCTION agt_init_cache
 *
 * init a cache pointer during the init2 callback

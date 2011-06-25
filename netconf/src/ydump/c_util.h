@@ -107,6 +107,7 @@ extern "C" {
 #define BOOLEAN       (const xmlChar *)"boolean"
 #define FLOAT         (const xmlChar *)"float"
 #define DOUBLE        (const xmlChar *)"double"
+#define BITS          (const xmlChar *)"ncx_list_t"
 
 #define STRUCT        (const xmlChar *)"struct"
 #define UNION         (const xmlChar *)"union"

@@ -740,6 +740,24 @@ extern val_value_t *
 
 
 /********************************************************************
+* FUNCTION agt_add_top_virtual
+*
+* make a val_value_t struct for a specified virtual 
+* top-level data node
+*
+INPUTS:
+*   obj == object node of the virtual data node to create
+*   callbackfn == get callback function to install
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_add_top_virtual (obj_template_t *obj,
+                         getcb_fn_t callbackfn);
+
+
+/********************************************************************
 * FUNCTION agt_init_cache
 *
 * init a cache pointer during the init2 callback

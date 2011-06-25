@@ -434,6 +434,7 @@ static void
 
         if (!obj_has_name(obj) ||
             !obj_is_enabled(obj) ||
+            !obj_is_config(obj) ||
             obj_is_cli(obj) || 
             obj_is_abstract(obj) ||
             obj_is_rpc(obj) ||
@@ -542,6 +543,7 @@ static void
 
         if (!obj_has_name(obj) ||
             !obj_is_enabled(obj) ||
+            !obj_is_config(obj) ||
             obj_is_cli(obj) || 
             obj_is_abstract(obj) ||
             obj_is_rpc(obj) ||
@@ -1322,6 +1324,106 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_c_top_mro_fn
+* 
+* Generate the C code for the foo_object_mro function
+* Make virtual read-only top-level object
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   obj == object struct for the database object
+*   objnameQ == Q of c_define_t structs to search for this object
+*********************************************************************/
+static void
+    write_c_top_mro_fn (ses_cb_t *scb,
+                        ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        obj_template_t *obj,
+                        dlq_hdr_t *objnameQ)
+{
+    const xmlChar   *modname;
+    c_define_t      *cdef;
+    int32            indent;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_ANYXML:
+        return;
+    default:
+        ;
+    }
+
+    modname = ncx_get_modname(mod);
+    indent = cp->indent;
+
+    cdef = find_path_cdefine(objnameQ, obj);
+    if (cdef == NULL) {
+        SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return;
+    }
+
+    /* generate function banner comment */
+    ses_putstr(scb, FN_BANNER_START);
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, MRO_SUFFIX);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"Make read-only top-level node");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"Path: ");
+    ses_putstr(scb, cdef->valstr);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_RETURN_STATUS);
+    ses_putstr(scb, FN_BANNER_END);
+
+    /* generate the function prototype lines */
+    ses_putstr(scb, (const xmlChar *)"\nstatic status_t");
+    ses_putstr_indent(scb, cdef->idstr, indent);
+    ses_putstr(scb, MRO_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" (void)");
+    ses_putstr(scb, (const xmlChar *)"\n{");
+
+    /* generate static vars */
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"status_t res;",
+                      indent);
+
+    /* call agt_add_top_virtual(...) */
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"/* add ",
+                      indent);
+    ses_putstr(scb, cdef->valstr);
+    ses_putstr(scb, (const xmlChar *)" */");
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"res = agt_add_top_virtual(",
+                      indent);
+    ses_indent(scb, indent+indent);
+    write_c_safe_str(scb, obj_get_name(obj));
+    ses_putstr(scb, (const xmlChar *)"_obj,");
+    ses_indent(scb, indent+indent);
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, GET_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)");");
+
+    /* return result */
+    ses_putchar(scb, '\n');
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"return res;");
+
+    /* end the function */
+    ses_putstr(scb, (const xmlChar *)"\n\n} /* ");
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, MRO_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" */\n");
+
+} /* write_c_top_mro_fn */
+
+
+/********************************************************************
 * FUNCTION write_c_objects
 * 
 * Generate the callback functions for each object found
@@ -1382,6 +1484,9 @@ static void
             if (obj_is_leafy(obj)) {
                 /* generate the foo_get function */
                 write_c_get_cbfn(scb, mod, cp, obj, objnameQ);
+            }
+            if (obj_is_top(obj)) {
+                write_c_top_mro_fn(scb, mod, cp, obj, objnameQ);
             }
         }
     }
@@ -2429,7 +2534,26 @@ static void
             continue;
         }
 
-        /* init the cache value pointer */
+        /* check if this is a top-level config=false node */
+        if (!obj_get_config_flag(cdef->obj)) {
+            if (obj_is_leafy(cdef->obj)) {
+                /* OBJ_TYP_LEAF or OBJ_TYP_LEAFLIST so create a
+                 * top-level virtual leaf for this node
+                 * TBD: support _mro functions for complex types
+                 */
+                ses_putchar(scb, '\n');
+                ses_putstr_indent(scb, 
+                                  (const xmlChar *)"res = ",
+                                  indent);
+                ses_putstr(scb, cdef->idstr);
+                ses_putstr(scb, MRO_SUFFIX);
+                ses_putstr(scb, (const xmlChar *)"();");
+                write_if_res(scb, cp, indent);
+            }
+            continue;
+        }
+
+        /* init the cache value pointer for config=true top nodes */
         ses_putchar(scb, '\n');
         ses_indent(scb, indent);
         write_c_value_var(scb, obj_get_name(cdef->obj));
@@ -2727,6 +2851,9 @@ status_t
     if (!mod) {
         return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
+
+    /* do not generate C code for obsolete objects */
+    ncx_delete_all_obsolete_objects();
 
     res = write_c_file(scb, mod, cp);
     (void)cp;

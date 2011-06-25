@@ -12,10 +12,14 @@ SUBDIR_CPP=
 TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
 
+ifdef FREEBSD
+REAL_INST=$(DESTDIR)$(PREFIX)/lib
+else
 ifdef LIB64
 REAL_INST=$(DESTDIR)$(PREFIX)/lib64
 else
 REAL_INST=$(DESTDIR)$(PREFIX)/lib
+endif
 endif
 
 # if the target is DEBIAN or RPM package, then
@@ -66,7 +70,7 @@ install: $(BLD_INCLUDES)
 ifndef STATIC
 # install dynamic libncx file
 	mkdir -p $(REAL_INST)
-	install $(OWNER) $(GRP) \
+	install -v $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
 # libncx.so --> libncx.so.M.N
 # libncx.so.1 --> libncx.so.M.N
@@ -142,8 +146,13 @@ endif
 
 # this rule is ignored if STATIC=1; used only in linux
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
+ifdef FREEBSD
+	$(CC) $(CFLAGS) -shared $(RDYNAMIC) -Wl,-soname,libncx.so.$(SOVERSION) \
+	-o $@ $(OBJS) -L/usr/local/lib $(LC) -lxml2
+else
 	$(CC) $(CFLAGS) -shared $(RDYNAMIC) -Wl,-soname,libncx.so.$(SOVERSION) \
 	-o $@ $(OBJS) $(LC) -lxml2
+endif
 
 # this rule is ignored if STATIC=1; used only on MacOSX
 $(LBASE)/libncx.dylib: $(OBJS)

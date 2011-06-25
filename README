@@ -12,31 +12,26 @@ Pre-Build steps:
 
 Build Variables:
 
+  CYGWIN=1: build on windows within cygwin environment
+
   DEBUG=1: set to add gdb symbols instead of -O2;
            does not remove the #ifdef DEBUG function
            NULL pointer checks in external functions
 
   DESTDIR=string: set the debian target build (default NULL)
 
-  PREFIX=string: set the top install dir (after DESTDIR)
-         default: /usr
-
   ETC_PREFIX=string: set the top etc dir (after DESTDIR)
          default: /etc
+
+  FREEBSD=1: Build for a FreeBSD platform
+
+  FULL_STATIC=1: solve linking problems forcing static versions
+      of all external libraries (used only by debian package build)
 
   LIB64=1: install and look for SIL libs in /usr/lib64/yuma
          instead of /usr/lib/yuma (used by FC14 64 bit)
 
   MAC=1: set to compile for MacOsX
-
-  STATIC=1:set to use static libraries such as libncx.a,
-         instead of dynamic libraries like libncx.so 
-
-  FULL_STATIC=1: solve linking problems forcing static versions
-      of all external libraries (used only by debian package build)
-
-  RELEASE=N: sets the version to ver-release instead of
-             version.svnversion
 
   MEMTRACE=1: enables mtrace debugging
        Used when Memory leak error message printed upon exit.
@@ -44,7 +39,14 @@ Build Variables:
        Tools will generate an 'mtracefile' in the CWD.
        Run mtrace /path/to/program ./mtracefile
        
-  CYGWIN=1: build on windows within cygwin environment
+  PREFIX=string: set the top install dir (after DESTDIR)
+         default: /usr
+
+  RELEASE=N: sets the version to ver-release instead of
+             version.svnversion
+
+  STATIC=1:set to use static libraries such as libncx.a,
+         instead of dynamic libraries like libncx.so 
 
   NOFLOAT: disable use of double and tgmath.h; XPath eval
            of complex numbers will cause invalid results;

@@ -55,7 +55,7 @@ uninstall:
 	rm -f  $(REAL_INST)/$(SUBDIR_NM)
 
 yangdump: $(OBJS) $(LIBTARGS)
-	$(LINK) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(SUBDIR_NM) $(LPATH) $(LIBS)
+	$(LINK) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(SUBDIR_NM) $(LPATH) $(FPATH) $(LIBS)
 
 clean:
 	rm -f $(OBJS) $(BIN_INST)/$(SUBDIR_NM)

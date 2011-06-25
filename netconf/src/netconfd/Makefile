@@ -13,12 +13,15 @@ TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)$(PREFIX)/sbin
 
+ifdef FREEBSD
+LIB_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+else
 ifdef LIB64
 LIB_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
 else
 LIB_INST=$(DESTDIR)$(PREFIX)/lib/yuma
 endif
-
+endif
 PROG=netconfd
 
 ##################### LIBRARIES ########################
@@ -34,8 +37,10 @@ PROG=netconfd
 
 LIBS = 	-lagt \
 	-lncx \
-	-lxml2 -lz \
-	-ldl
+	-lxml2 -lz 
+ifndef FREEBSD
+LIBS += -ldl
+endif
 
 LIBTARGS= $(LBASE)/libagt.a \
 	$(LBASE)/libncx.$(LIBNCXSUFFIX)
@@ -78,7 +83,7 @@ distclean: superclean uninstall
 # intermediate files
 netconfd: $(OBJS) $(LIBTARGS)
 	$(LINK) $(CFLAGS) $(LFLAGS) -rdynamic $(OBJS) \
-	-o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	-o $(BIN_INST)/$(PROG) $(LPATH) $(FPATH) $(LIBS)
 
 
 

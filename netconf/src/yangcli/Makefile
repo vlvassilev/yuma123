@@ -42,7 +42,10 @@ endif
 DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L../../../libtecla -ltecla \
 	$(LFIRST) -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
-	-L$(PREFIX)/lib -lz -ldl
+	-L$(PREFIX)/lib -lz 
+ifndef FREEBSD
+DLIBS += -ldl
+endif
 
 
 ifdef DEBIAN

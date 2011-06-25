@@ -61,7 +61,7 @@ distclean: superclean uninstall
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files
 subsys: $(OBJS)
-	$(LINK) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	$(LINK) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(FPATH) $(LIBS)
 
 
 # prevent the make program from choking on all the symbols

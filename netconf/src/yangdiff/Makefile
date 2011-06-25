@@ -59,7 +59,7 @@ uninstall:
 # this real test rule keeps make from deleting the $(OBJS) as
 # intermediate files
 yangdiff: $(OBJS) $(LIBTARGS)
-	$(LINK) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	$(LINK) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(FPATH) $(LIBS)
 
 clean:
 	rm -f $(OBJS) $(BIN_INST)/$(PROG)

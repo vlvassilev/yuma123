@@ -35,8 +35,11 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 */
+#ifdef FREEBSD
+#include <sys/socket.h>
+#include <netinet/in.h>
+#endif
 
 #include <unistd.h>
 #include <fcntl.h>

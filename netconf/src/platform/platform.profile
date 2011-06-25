@@ -54,6 +54,9 @@ endif
 ifdef DESTDIR
 OWNER=
 else
+ifdef FREEBSD
+OWNER=-o root
+else
 ifdef MAC
 OWNER=-oroot
 else
@@ -61,6 +64,7 @@ ifdef CYGWIN
 OWNER=
 else
 OWNER= --owner=root
+endif
 endif
 endif
 endif
@@ -125,6 +129,9 @@ endif
 ifdef MAC
    GRP=
 else
+ifdef FREEBSD
+   GRP=-g wheel
+else
 ifdef DESTDIR
    GRP=
 else
@@ -132,6 +139,7 @@ ifdef CYGWIN
    GRP=
 else
    GRP=--group=root
+endif
 endif
 endif
 endif
@@ -165,10 +173,14 @@ LINT=splint
 LINTFLAGS= '-weak -macrovarprefix "m_"'
 ##LIBFLAGS=-lsocket
 
+ifdef FREEBSD
+FPATH=-L/usr/local/lib
+CDEFS += -DFREEBSD
+endif
 
 #LFLAGS=-v --no-as-needed
 LFLAGS=-lm
-LPATH=-L$(LBASE)
+LPATH=-L$(LBASE) 
 
 CEES = $(wildcard *.c)
 

@@ -24,10 +24,14 @@ ifndef PREFIX
     PREFIX=/usr
 endif
 
+ifdef FREEBSD
+REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+else
 ifdef LIB64
 REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
 else
 REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+endif
 endif
 
 #################### MAKE RULES ########################
@@ -281,7 +285,11 @@ superclean:
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
+ifdef FREEBSD
+	$(CC) $(CFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -L/usr/local/lib -lxml2 $(LAGT) -lagt -lncx
+else
 	$(CC) $(CFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl -lxml2 $(LAGT) -lagt -lncx
+endif
 
 #	$(CC) $(CFLAGS) -shared -Wl,-soname,libtoaster.so -o $@ $(OBJS) -lc
 

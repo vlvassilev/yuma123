@@ -52,8 +52,8 @@ ifdef DEBIAN
 SLIBS = -L../../target/lib -lmgr -lncx \
 	-L$(PREFIX)/lib -lxml2 \
 	-l:$(PREFIX)/lib/libssh2.a \
-	-l:/lib/libgcrypt.a \
-	-l:/lib/libgpg-error.a \
+	-L$(PREFIX)/lib -lgcrypt \
+	-L$(PREFIX)/lib -lgpg-error \
 	-l:../../../libtecla/libtecla.a \
 	-l:$(PREFIX)/lib/libncurses.a
 else

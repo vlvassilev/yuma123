@@ -5138,9 +5138,20 @@ static status_t
                                       TRUE,
                                       &res,
                                       &valroot);
-    if (!content) {
+    if (content == NULL) {
+        if (res != NO_ERR) {
+            if (LOGDEBUG2) {
+                log_debug2("get_content error %d = (%s)",
+                           res,
+                           get_error_string(res));
+            }
+            res = ERR_NCX_MISSING_PARM;
+        } else {
+            log_error("\nError: operations on root '/' not supported");
+            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+        }
         val_free_value(valset);
-        return (res == NO_ERR) ? ERR_NCX_MISSING_PARM : res;
+        return res;
     }
 
     if (valroot == NULL && content->btyp == NCX_BT_CONTAINER) {

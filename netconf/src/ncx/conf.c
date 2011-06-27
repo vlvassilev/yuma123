@@ -903,7 +903,7 @@ status_t
     }
 
     if (LOGINFO) {
-        log_info("Loading CLI parameters from '%s'", sourcespec);
+        log_info("\nLoading CLI parameters from '%s'", sourcespec);
     }
 
     m__free(sourcespec);

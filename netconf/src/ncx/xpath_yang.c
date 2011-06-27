@@ -1168,6 +1168,7 @@ static status_t
              * is allowed to be a single forward slash
              * to indicate the entire document
              */
+            pcb->targobj = pcb->docroot;
             done = TRUE;
             continue;
         }
@@ -1673,8 +1674,10 @@ status_t
 
         /* this test is probably not worth doing,
          * but check for the loop anyway
+         * special case: allow docroot as return target
          */
-        if (pcb->targobj == pcb->obj) {
+        if (pcb->targobj == pcb->obj &&
+            pcb->targobj != pcb->docroot) {
             res = ERR_NCX_DEF_LOOP;
             if (pcb->logerrors) {
                 log_error("\nError: path target '%s' is set to "

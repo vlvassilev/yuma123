@@ -1270,12 +1270,14 @@ static status_t
                 }
             }
         }
-        statresult = fclose(fil);
-        if (statresult == EOF) {
-            log_error("\nError: assignment file '%s' could "
-                      "not be closed",
-                      server_cb->result_filename);
-            res = errno_to_status();
+        if (fil != NULL) {
+            statresult = fclose(fil);
+            if (statresult == EOF) {
+                log_error("\nError: assignment file '%s' could "
+                          "not be closed",
+                          server_cb->result_filename);
+                res = errno_to_status();
+            }
         }
     }
 

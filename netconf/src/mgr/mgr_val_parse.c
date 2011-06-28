@@ -2255,6 +2255,8 @@ status_t
                    tk_get_btype_sym(obj_get_basetype(obj)));
     }
 #endif
+
+    res = NO_ERR;
     usenode = NULL;
     xml_init_node(&topnode);
 

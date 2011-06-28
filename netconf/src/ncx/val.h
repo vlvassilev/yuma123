@@ -246,6 +246,7 @@ extern "C" {
 
 #define VAL_BITS VAL_LIST
 
+#define VAL_EXTERN(V)  ((V)->v.fname)
 
 
 /********************************************************************

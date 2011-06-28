@@ -160,6 +160,33 @@ extern void
 
 
 /********************************************************************
+* FUNCTION mgr_ses_new_dummy_session
+*
+* Create a dummy session control block
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to initialized dummy SCB, or NULL if malloc error
+*********************************************************************/
+extern ses_cb_t *
+    mgr_ses_new_dummy_session (void);
+
+
+/********************************************************************
+* FUNCTION mgr_ses_free_dummy_session
+*
+* Free a dummy session control block
+*
+* INPUTS:
+*   scb == session control block to free
+*
+*********************************************************************/
+extern void
+    mgr_ses_free_dummy_session (ses_cb_t *scb);
+
+
+/********************************************************************
 * FUNCTION mgr_ses_process_first_ready
 *
 * Check the readyQ and process the first message, if any

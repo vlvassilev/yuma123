@@ -4020,6 +4020,43 @@ boolean
 }  /* yang_fileext_is_yin */
 
 
+/********************************************************************
+* FUNCTION yang_fileext_is_xml
+* 
+* Check if the filespec ends with the .xml extension
+*
+* INPUTS:
+*   filename == filename string
+*
+* RETURNS:
+*    TRUE if .xml file extension found
+*    FALSE if not
+*********************************************************************/
+boolean
+    yang_fileext_is_xml (const xmlChar *filename)
+{
+    uint32   len;
+
+#ifdef DEBUG
+    if (filename == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    len = xml_strlen(filename);
+    if (len < 5) {
+        return FALSE;
+    }
+
+    if (filename[len - 4] != '.') {
+        return FALSE;
+    }
+
+    return !xml_strcmp(&filename[len - 3], (const xmlChar *)"xml");
+
+}  /* yang_fileext_is_xml */
+
 
 /********************************************************************
 * FUNCTION yang_final_memcheck

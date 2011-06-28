@@ -775,6 +775,78 @@ void
 }  /* mgr_ses_free_session */
 
 
+
+/********************************************************************
+* FUNCTION mgr_ses_new_dummy_session
+*
+* Create a dummy session control block
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to initialized dummy SCB, or NULL if malloc error
+*********************************************************************/
+ses_cb_t *
+    mgr_ses_new_dummy_session (void)
+{
+    ses_cb_t  *scb;
+
+    if (!mgr_ses_init_done) {
+        mgr_ses_init();
+    }
+
+    /* check if dummy session already cached */
+    if (mgrses[0] != NULL) {
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return NULL;
+    }
+
+    /* no, so create it */
+    scb = ses_new_dummy_scb();
+    if (!scb) {
+        return NULL;
+    }
+
+    mgrses[0] = scb;
+    
+    return scb;
+
+}  /* mgr_ses_new_dummy_session */
+
+
+/********************************************************************
+* FUNCTION mgr_ses_free_dummy_session
+*
+* Free a dummy session control block
+*
+* INPUTS:
+*   scb == session control block to free
+*
+*********************************************************************/
+void
+    mgr_ses_free_dummy_session (ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (!mgr_ses_init_done) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+    if (scb->sid != 0 || mgrses[0] == NULL) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    ses_free_scb(scb);
+    mgrses[0] = NULL;
+
+}  /* mgr_ses_free_dummy_session */
+
+
 /********************************************************************
 * FUNCTION mgr_ses_process_first_ready
 *

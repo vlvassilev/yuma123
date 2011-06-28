@@ -5062,7 +5062,15 @@ status_t
 
     res = NO_ERR;
 
-    if (!typ_is_simple(val->btyp)) {
+    if (val->btyp == NCX_BT_EXTERN) {
+        clean_value(copy, TRUE);
+        val_init_from_template(copy, val->obj);
+        copy->v.fname = val->v.fname;
+        val->v.fname = NULL;
+        val->btyp = copy->btyp;
+        res = copy_editvars(val, copy);
+        return res;
+    } else if (!typ_is_simple(val->btyp)) {
         clean_value(copy, TRUE);
         val_init_from_template(copy, val->obj);
         val_move_children(val, copy);

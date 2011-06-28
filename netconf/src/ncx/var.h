@@ -607,6 +607,49 @@ extern val_value_t *
 
 
 /********************************************************************
+* FUNCTION var_get_script_val_ex
+* 
+* Create or fill in a val_value_t struct for a parameter assignment
+* within the script processing mode
+* Allow external values
+*
+* See ncxcli.c for details on the script syntax
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   obj == expected type template 
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
+*   val == value to fill in :: val->obj MUST be set
+*          == NULL to create a new one
+*   strval == string value to check
+*   istop == TRUE (ISTOP) if calling from top level assignment
+*            An unquoted string is the start of a command
+*         == FALSE (ISPARM) if calling from a parameter parse
+*            An unquoted string is just a string
+*   fillval == value from yangcli, could be NCX_BT_EXTERN;
+*              used instead of strval!
+*           == NULL: not used
+*   res == address of status result
+*   
+* OUTPUTS:
+*   *res == status
+*
+* RETURNS:
+*   If error, then returns NULL;
+*   If no error, then returns pointer to new val or filled in 'val'
+*********************************************************************/
+extern val_value_t *
+    var_get_script_val_ex (runstack_context_t *rcxt,
+                           obj_template_t *obj,
+                           val_value_t *val,
+                           const xmlChar *strval,
+                           boolean istop,
+                           val_value_t *fillval,
+                           status_t *res);
+
+
+/********************************************************************
 * FUNCTION var_check_script_val
 * 
 * Create a val_value_t struct for a parameter assignment

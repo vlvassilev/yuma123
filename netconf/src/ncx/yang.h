@@ -1479,6 +1479,22 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION yang_fileext_is_xml
+* 
+* Check if the filespec ends with the .xml extension
+*
+* INPUTS:
+*   filename == filename string
+*
+* RETURNS:
+*    TRUE if .xml file extension found
+*    FALSE if not
+*********************************************************************/
+extern boolean
+    yang_fileext_is_xml (const xmlChar *filename);
+
+
+/********************************************************************
 * FUNCTION yang_final_memcheck
 * 
 * Check the node malloc and free counts

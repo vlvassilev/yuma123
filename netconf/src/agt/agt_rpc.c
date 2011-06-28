@@ -894,7 +894,7 @@ static status_t
 * OUTPUTS:
 *    *configval set to the processed config node
 *       if NO_ERR, it has been removed from the rpc_input
-*       data strcuture and needs to be freed by the caller
+*       data structure and needs to be freed by the caller
 *    errorQ contains any rpc_err_rec_t structs that were
 *       generated during this RPC operation
 *

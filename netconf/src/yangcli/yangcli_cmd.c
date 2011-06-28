@@ -72,6 +72,10 @@ date         init     comment
 #include "mgr_io.h"
 #endif
 
+#ifndef _H_mgr_load
+#include "mgr_load.h"
+#endif
+
 #ifndef _H_mgr_not
 #include "mgr_not.h"
 #endif
@@ -4433,7 +4437,7 @@ static val_value_t *
     obj_template_t        *targobj;
     const xmlChar         *fromstr, *target;
     var_type_t             vartype;
-    boolean                iscli, isselect, saveopt;
+    boolean                iscli, isselect, saveopt, isextern, keepexterntop;
     status_t               res;
 
     /* init locals */
@@ -4443,6 +4447,8 @@ static val_value_t *
     fromstr = NULL;
     iscli = FALSE;
     isselect = FALSE;
+    isextern = FALSE;
+    keepexterntop = FALSE;   /* TBD: make this a aprameter */
     res = NO_ERR;
     vartype = VAR_TYP_NONE;
 
@@ -4478,7 +4484,7 @@ static val_value_t *
         parm = val_find_child(valset, 
                               YANGCLI_MOD, 
                               NCX_EL_TARGET);
-        if (!parm) {
+        if (parm == NULL) {
             log_error("\nError: target parameter is missing");
             server_cb->get_optional = saveopt;
             *retres = ERR_NCX_MISSING_PARM;
@@ -4514,13 +4520,36 @@ static val_value_t *
                               YANGCLI_MOD, 
                               YANGCLI_VALUE);
         if (parm && parm->res == NO_ERR) {
-            curparm = var_get_script_val(server_cb->runstack_context,
-                                         targobj, 
-                                         NULL, 
-                                         VAL_STR(parm),
-                                         ISPARM, 
-                                         &res);
-            if (!curparm || res != NO_ERR) {
+            if (parm->btyp == NCX_BT_EXTERN) {
+                isextern = TRUE;
+                curparm = mgr_load_extern_file(VAL_EXTERN(parm),
+                                               NULL,
+                                               &res);
+                if (res != NO_ERR) {
+                    *retres = res;
+                    return NULL;
+                }
+
+#if 0
+                curparm = 
+                    var_get_script_val_ex(server_cb->runstack_context,
+                                          targobj, 
+                                          NULL, 
+                                          NULL,
+                                          ISPARM,
+                                          parm,
+                                          &res);
+#endif
+            } else {
+                curparm = 
+                    var_get_script_val(server_cb->runstack_context,
+                                       targobj, 
+                                       NULL, 
+                                       VAL_STR(parm),
+                                       ISPARM, 
+                                       &res);
+            }
+            if (curparm == NULL || res != NO_ERR) {
                 log_error("\nError: Script value '%s' invalid (%s)", 
                           VAL_STR(parm), 
                           get_error_string(res)); 
@@ -4533,7 +4562,7 @@ static val_value_t *
                 *retres = res;
                 return NULL;
             }
-            if (curparm->obj != targobj) {
+            if (curparm->obj != targobj && !isextern) {
                 res = ERR_NCX_INVALID_VALUE;
                 log_error("\nError: current value '%s' "
                           "object type is incorrect.",
@@ -4650,11 +4679,33 @@ static val_value_t *
                 }
             }
             if (res == NO_ERR && dofill) {
-                res = fill_valset(server_cb, 
-                                  rpc,
-                                  (newparm) ? newparm : targval,
-                                  curparm,
-                                  iswrite);
+                val_value_t *mytarg = (newparm) ? newparm : targval;
+
+                if (isextern) {
+                    if (curparm != NULL && 
+                        mytarg != NULL &&
+                        !typ_is_simple(curparm->btyp) &&
+                        !typ_is_simple(mytarg->btyp)) {
+                        val_change_nsid(curparm, val_get_nsid(mytarg));
+                        val_move_children(curparm, mytarg);
+                    } else if (curparm != NULL && 
+                               mytarg != NULL &&
+                               typ_is_simple(curparm->btyp) &&
+                               !typ_is_simple(mytarg->btyp)) {
+                        val_change_nsid(curparm, val_get_nsid(mytarg));
+                        val_add_child(curparm, mytarg);
+                        curparm = NULL;
+                    } else if (curparm != NULL && mytarg != NULL) {
+                        val_change_nsid(curparm, val_get_nsid(mytarg));
+                        res = val_replace(curparm, mytarg);
+                    } /* else should not happen */
+                } else {
+                    res = fill_valset(server_cb, 
+                                      rpc,
+                                      mytarg,
+                                      curparm,
+                                      iswrite);
+                }
             }
         }
 

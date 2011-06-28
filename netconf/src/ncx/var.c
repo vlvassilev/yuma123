@@ -1693,14 +1693,66 @@ val_value_t *
                         boolean istop,
                         status_t *res)
 {
+    return var_get_script_val_ex (rcxt,
+                                  obj,
+                                  val,
+                                  strval,
+                                  istop,
+                                  NULL,
+                                  res);
+}  /* var_get_script_val */
+                                 
+
+/********************************************************************
+* FUNCTION var_get_script_val_ex
+* 
+* Create or fill in a val_value_t struct for a parameter assignment
+* within the script processing mode
+* Allow external values
+*
+* See ncxcli.c for details on the script syntax
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   obj == expected type template 
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
+*   val == value to fill in :: val->obj MUST be set
+*          == NULL to create a new one
+*   strval == string value to check
+*   istop == TRUE (ISTOP) if calling from top level assignment
+*            An unquoted string is the start of a command
+*         == FALSE (ISPARM) if calling from a parameter parse
+*            An unquoted string is just a string
+*   fillval == value from yangcli, could be NCX_BT_EXTERN;
+*              used instead of strval!
+*           == NULL: not used
+*   res == address of status result
+*   
+* OUTPUTS:
+*   *res == status
+*
+* RETURNS:
+*   If error, then returns NULL;
+*   If no error, then returns pointer to new val or filled in 'val'
+*********************************************************************/
+val_value_t *
+    var_get_script_val_ex (runstack_context_t *rcxt,
+                           obj_template_t *obj,
+                           val_value_t *val,
+                           const xmlChar *strval,
+                           boolean istop,
+                           val_value_t *fillval,
+                           status_t *res)
+{
     val_value_t           *varval;
     const xmlChar         *str, *name;
-    val_value_t           *newval, *useval;
+    val_value_t           *newval, *useval, *fillcopy;
     xmlChar               *fname, *intbuff, *sourcefile;
     uint32                 namelen, len;
     boolean                isvarref;
     var_type_t             vartype;
-
+    boolean                usefillval, simtyp;
 #ifdef DEBUG
     if (!obj || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1711,15 +1763,25 @@ val_value_t *
     newval = NULL;
     isvarref = FALSE;
     useval = NULL;
-
+    usefillval = FALSE;
     *res = NO_ERR;
 
     /* get a new value struct if one is not provided */
-    if (strval && *strval == NCX_VAR_CH) {
+    if (strval != NULL && *strval == NCX_VAR_CH) {
         isvarref = TRUE;
     }
 
-    if (val) {
+    simtyp = typ_is_simple(obj_get_basetype(obj));
+
+    if (fillval != NULL && simtyp) {
+        useval = NULL;
+        usefillval = TRUE;
+        /* must not pre-allocate and replace with fillval */
+        if (val != NULL) {
+            *res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+            return NULL;
+        }
+    } else if (val != NULL) {
         /* the obj and val->obj templates may not be the same */
         useval = val;
     } else {
@@ -1734,8 +1796,19 @@ val_value_t *
     }
 
     /* check if strval is NULL */
-    if (!strval) {
-        if (typ_is_simple(useval->btyp)) {
+    if (strval == NULL) {
+        if (fillval != NULL) {
+            fillcopy = val_clone(fillval);
+            if (fillcopy == NULL) {
+                *res = ERR_INTERNAL_MEM;
+            } else {
+                if (simtyp) {
+                    useval = fillcopy;
+                } else {
+                    val_add_child(fillcopy, useval);
+                }
+            }
+        } else if (simtyp) {
             *res = val_set_simval(useval,
                                   obj_get_typdef(obj),
                                   obj_get_nsid(obj),
@@ -1744,7 +1817,7 @@ val_value_t *
         } else {
             *res = ERR_NCX_WRONG_DATATYP;
         }
-    } else if (*strval==NCX_AT_CH) {
+    } else if (*strval == NCX_AT_CH) {
         /* this is a NCX_BT_EXTERNAL value
          * find the file with the raw XML data
          * treat this as a source file name which

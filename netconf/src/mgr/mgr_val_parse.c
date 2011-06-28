@@ -2236,10 +2236,12 @@ status_t
                    const xml_node_t *startnode,
                    val_value_t  *retval)
 {
+    const xml_node_t  *usenode;
     status_t  res;
+    xml_node_t  topnode;
 
 #ifdef DEBUG
-    if (!scb || !obj || !startnode || !retval) {
+    if (scb == NULL || obj == NULL || retval == NULL) {
         /* non-recoverable error */
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
@@ -2253,9 +2255,29 @@ status_t
                    tk_get_btype_sym(obj_get_basetype(obj)));
     }
 #endif
+    usenode = NULL;
+    xml_init_node(&topnode);
+
+    if (startnode == NULL) {
+        res = get_xml_node(scb, &topnode);
+        if (res == NO_ERR) {
+            val_set_name(retval, 
+                         topnode.elname,
+                         xml_strlen(topnode.elname));
+            val_change_nsid(retval, topnode.nsid);
+            usenode = &topnode;
+        }
+    } else {
+        usenode = startnode;
+    }
 
     /* get the element values */
-    res = parse_btype(scb, obj, startnode, retval);
+    if (res == NO_ERR) {
+        res = parse_btype(scb, obj, usenode, retval);
+    }
+
+    xml_clean_node(&topnode);
+        
     return res;
 
 }  /* mgr_val_parse */

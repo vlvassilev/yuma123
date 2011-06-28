@@ -1814,6 +1814,8 @@ val_value_t *
                                   obj_get_nsid(obj),
                                   obj_get_name(obj),
                                   NULL);
+        } else if (obj->objtype == OBJ_TYP_ANYXML) {
+            *res = val_replace_str(NULL, 0, useval);
         } else {
             *res = ERR_NCX_WRONG_DATATYP;
         }
@@ -1866,14 +1868,20 @@ val_value_t *
          */
         strval++;
 
-        /* set the counted string and leave off the last char
-         * which is the ending quote
-         */
-        *res = val_set_string2(useval, 
-                               obj_get_name(obj), 
-                               obj_get_typdef(obj), 
-                               strval, 
-                               xml_strlen(strval)-1); 
+        if (simtyp) {
+            /* set the counted string and leave off the last char
+             * which is the ending quote
+             */
+            *res = val_set_string2(useval, 
+                                   obj_get_name(obj), 
+                                   obj_get_typdef(obj), 
+                                   strval, 
+                                   xml_strlen(strval)-1); 
+        } else if (obj->objtype == OBJ_TYP_ANYXML) {
+            *res = val_replace_str(strval, 
+                                   xml_strlen(strval)-1,
+                                   useval);
+        }
     } else if ((*strval == NCX_XML1a_CH) &&
                (strval[1] == NCX_XML1b_CH)) {
 

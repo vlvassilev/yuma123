@@ -91,6 +91,7 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
+#define MAX_FILL  255
 
 
 /********************************************************************
@@ -1435,6 +1436,304 @@ static status_t
     return NO_ERR;
 
 }  /* find_val_node_unique */
+
+
+/********************************************************************
+* FUNCTION decode_url_string
+* 
+* Fill buffer with a plain string from a URL string
+*
+* INPUTS:
+*    urlstr == string to convert
+*    urlstrlen == number of bytes to check
+*    buffer == buffer to fill; may be NULL to get count
+*    cnt == address of return cnt
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *cnt = number bytes required
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    decode_url_string (const xmlChar *urlstr,
+                       uint32 urlstrlen,
+                       xmlChar *buffer,
+                       uint32 *cnt)
+{
+    const xmlChar   *instr;
+    xmlChar         *writeptr, ch, numbuff[4];
+    uint32           inlen, outlen;
+    boolean          done;
+    ncx_num_t        num;
+    status_t         res;
+
+    *cnt = 0;
+    instr = urlstr;
+    writeptr = buffer;
+    inlen = 0;
+    outlen = 0;
+    ncx_init_num(&num);
+
+    /* normal case, there is some top-level node next */
+    done = FALSE;
+    while (!done) {
+        /* check end of input string */
+        if (inlen == urlstrlen) {
+            if (writeptr != NULL) {
+                *writeptr = 0;
+            }
+            *cnt = outlen;
+            return NO_ERR;
+        }
+        ch = 0;
+        if (*instr == '%') {
+            /* hex encoded char */
+            instr++;
+            if (++inlen >= 2) {
+                numbuff[0] = instr[0];
+                numbuff[1] = instr[1];
+                numbuff[2] = 0;
+                res = ncx_convert_num(numbuff,
+                                      NCX_NF_HEX,
+                                      NCX_BT_UINT8,
+                                      &num);
+                if (res != NO_ERR) {
+                    ncx_clean_num(NCX_BT_UINT8, &num);
+                    return res;
+                }
+                ch = (xmlChar)num.u;
+                ncx_clean_num(NCX_BT_UINT8, &num);
+                inlen += 2;
+            } else {
+                /* invalid escaped char found */
+                return ERR_NCX_INVALID_VALUE;
+            }
+        } else {
+            /* normal char */
+            ch = *urlstr++;
+            inlen++;
+        }
+
+        if (ch == 0) {
+            return ERR_NCX_INVALID_VALUE;
+        } else {
+            outlen++;
+            if (writeptr != NULL) {
+                *writeptr++ = ch;
+            }
+        }
+    }
+    
+    *cnt = outlen;
+    return NO_ERR;
+
+}  /* decode_url_string */
+
+
+/********************************************************************
+* FUNCTION fill_xpath_string
+* 
+* Fill buffer with an XPath string from a URL string
+*
+* INPUTS:
+*    urlpath == string to convert
+*    buff == buffer to fill; may be NULL to get count
+*    cnt == address of return cnt
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *cnt = number bytes required
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    fill_xpath_string (const xmlChar *urlpath,
+                       xmlChar *buffer,
+                       uint32 *cnt)
+{
+    const xmlChar   *startstr, *p;
+    obj_template_t  *targobj;
+    obj_key_t       *objkey;
+    xmlChar         *writeptr, namebuff[MAX_FILL+1];
+    uint32           inlen, outlen, outtotal;
+    boolean          done, expectnode;
+    status_t         res;
+    *cnt = 0;
+
+    if (*urlpath != '/') {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    startstr = urlpath+1;
+
+    /* check special case; path is just docroot */
+    if (*startstr == 0) {
+        if (buffer != NULL) {
+            buffer[0] = '/';
+            buffer[1] = 0;
+        }
+        *cnt = 1;
+        return NO_ERR;
+    }
+
+    res = NO_ERR;
+    targobj = NULL;
+    expectnode = TRUE;
+    inlen = 0;
+    outlen = 0;
+    objkey = NULL;
+
+    /* account for output of starting '/' */
+    outtotal = 1;
+    writeptr = buffer;
+    if (writeptr != NULL) {
+        *writeptr++ = '/';
+    }
+
+    /* keep getting nodes until string ends or error out */
+    done = FALSE;
+    while (!done) {
+        /* get the chars that represent the content */
+        p = startstr;
+        while (*p != 0 && *p != '/') {
+            p++;
+        }
+
+        /* check // in the url path; not allowed */
+        if (p == startstr) {
+            return ERR_NCX_INVALID_VALUE;
+        }
+
+        /* got some string content; convert to plain string */
+        inlen = (uint32)(p - startstr);
+        if (expectnode) {
+            if (inlen >= MAX_FILL) {
+                return ERR_NCX_TOO_BIG;
+            }
+
+            /* get the identifier into the name buffer first */
+            outlen = 0;
+            res = decode_url_string(startstr,
+                                    inlen,
+                                    namebuff,
+                                    &outlen);
+            if (res != NO_ERR) {
+                return res;
+            }
+
+            if (writeptr != NULL) {
+                writeptr += xml_strncpy(writeptr, namebuff, outlen);
+            }
+            outtotal += outlen;
+
+            /* get the target database object to use */
+            if (targobj == NULL) {
+                targobj = ncx_find_any_object(namebuff);
+            } else {
+                targobj = obj_find_child(targobj, NULL, namebuff);
+            }
+            if (targobj == NULL) {
+                return ERR_NCX_INVALID_VALUE;
+            }
+
+            /* skip the rpc input node if needed */
+            if (targobj->objtype == OBJ_TYP_RPC) {
+                targobj = obj_find_child(targobj, 
+                                         NULL, 
+                                         YANG_K_INPUT);
+                if (targobj == NULL) {
+                    return SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
+
+            /* check list keys to follow */
+            objkey = obj_first_key(targobj);
+            if (objkey != NULL) {
+                expectnode = FALSE;
+            } else {
+                if (*p == '/') {
+                    outtotal++;
+                    if (writeptr != NULL) {
+                        *writeptr++ = '/';
+                    }
+                }
+            }
+        } else {
+            /* expecting a key value */
+            const xmlChar *namestr = obj_get_name(objkey->keyobj);
+
+            if (namestr == NULL) {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            }
+
+            /* account for [foo='val'] predicate
+             * first the [foo=' part
+             */
+            outtotal += (1 + xml_strlen(namestr) + 2);
+            if (writeptr != NULL) {
+                *writeptr++ = '[';
+                writeptr += xml_strcpy(writeptr, namestr);
+                *writeptr++ = '=';
+                *writeptr++ = '\'';
+            }
+
+            /* get the decoded value into the real buffer if used */
+            outlen = 0;
+            res = decode_url_string(startstr,
+                                    inlen,
+                                    writeptr,
+                                    &outlen);
+            if (res != NO_ERR) {
+                return res;
+            }
+            outtotal += outlen;
+            if (writeptr != NULL) {
+                writeptr += outlen;
+            }
+
+            /* account for the '] part */
+            outtotal += 2;
+            if (writeptr != NULL) {
+                *writeptr++ = '\'';
+                *writeptr++ = ']';
+            }
+
+            /* set up next key if any 
+             * account for next '/' if needed
+             */
+            objkey = obj_next_key(objkey);
+            if (objkey == NULL) {
+                expectnode = TRUE;
+
+                if (*p == '/') {
+                    outtotal++;
+                    if (writeptr != NULL) {
+                        *writeptr++ = '/';
+                    }
+                }
+            }
+        }
+
+        /* input string is either done or pointing at next '/' char */
+        if (*p == 0) {
+            done = TRUE;
+        } else {
+            /* skip '/' input char */
+            startstr = ++p;
+        }
+    }
+
+    if (writeptr != NULL) {
+        *writeptr = 0;
+    }
+
+    *cnt = outtotal;
+    return NO_ERR;
+
+}  /* fill_xpath_string */
 
 
 /************    E X T E R N A L   F U N C T I O N S    ************/
@@ -2986,6 +3285,55 @@ void
     }
 
 }  /* xpath_nodeset_delete_valptr */
+
+
+/********************************************************************
+* FUNCTION xpath_convert_url_to_path
+* 
+* Convert a URL format path to XPath format path
+*
+* INPUTS:
+*    urlpath == URL path string to convert to XPath
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   malloced string containing XPath expression from conversion
+*   NULL if some error
+*********************************************************************/
+xmlChar *
+    xpath_convert_url_to_path (const xmlChar *urlpath,
+                               status_t *res)
+{
+    xmlChar *buff;
+    uint32   cnt;
+
+#ifdef DEBUG
+    if (urlpath == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    buff = NULL;
+    *res = fill_xpath_string(urlpath, NULL, &cnt);
+    if (*res == NO_ERR) {
+        buff = m__getMem(cnt+1);
+        if (buff == NULL) {
+            *res = ERR_INTERNAL_MEM;
+            return NULL;
+        }
+        *res = fill_xpath_string(urlpath, buff, &cnt);
+        if (*res != NO_ERR) {
+            m__free(buff);
+            buff = NULL;
+        }
+    }
+    return buff;
+
+} /* xpath_convert_url_to_path */
 
 
 /* END xpath.c */

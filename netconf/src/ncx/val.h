@@ -1602,6 +1602,28 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION val_replace_str
+* 
+* Replace a specified val_value_t struct with a string type
+*
+* INPUTS:
+*    str == value to clone from; may be NULL
+*    stringlen == number of chars to use from str, if not NULL
+*    copy == address of value to replace
+*
+* OUTPUTS:
+*   *copy has been deleted and reforms with the contents of 'val'
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_replace_str (const xmlChar *str,
+                     uint32 stringlen,
+                     val_value_t *copy);
+
+
+/********************************************************************
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node

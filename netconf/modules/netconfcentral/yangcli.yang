@@ -50,6 +50,13 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2011-06-27 {
+       description 
+          "Added --urltarget=<url> parameter to FillParms grouping
+           to allow REST encoded requests to be converted to XPath
+           before use.";
+    }
+
     revision 2011-06-05 {
        description 
           "Added start-timer and stop-timer local RPC functions.
@@ -112,22 +119,33 @@ module yangcli {
      *************************************************************/
 
     grouping FillParms {
-       leaf target {
-         description 
-           "XPath target object to fill.  If prefixes are missing
-            then the first match in any namespace will be used.
-            Any prefix used must be the default prefix
-            assigned to the desired YANG module. Prefix usage is
-            optional.";
+       choice target-parm {
+         leaf target {
+           description 
+             "XPath target object to fill.  If prefixes are missing
+              then the first match in any namespace will be used.
+              Any prefix used must be the default prefix
+              assigned to the desired YANG module. Prefix usage is
+              optional.";
 
-         // type schema-instance-identifier;  TBD
+           // type schema-instance-identifier;  TBD
 
-         type string {
-           length "1..max";
-
+           type string {
+             length "1..max";
+           }
+           mandatory true;
+           ncx:schema-instance;
          }
-         mandatory true;
-         ncx:schema-instance;
+         leaf urltarget {
+           description 
+             "URL encoded target object to fill.
+              Encoding Rules: TBD.";
+           // type URL: TBD
+           type string {
+             length "1..max";
+           }
+           mandatory true;
+         }
        }
 
        leaf optional {

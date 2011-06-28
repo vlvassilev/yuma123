@@ -655,6 +655,7 @@ extern "C" {
 #define NCX_EL_UNSIGNED_SHORT  (const xmlChar *)"unsignedShort"
 #define NCX_EL_ULONG           (const xmlChar *)"ulong"
 #define NCX_EL_URL             (const xmlChar *)"url"
+#define NCX_EL_URLTARGET       (const xmlChar *)"urltarget"
 #define NCX_EL_USAGE           (const xmlChar *)"usage"
 #define NCX_EL_USAGE_C         (const xmlChar *)"conditional"
 #define NCX_EL_USAGE_M         (const xmlChar *)"mandatory"

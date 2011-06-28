@@ -5127,6 +5127,59 @@ status_t
 
 
 /********************************************************************
+* FUNCTION val_replace_str
+* 
+* Replace a specified val_value_t struct with a string type
+*
+* INPUTS:
+*    str == value to clone from; may be NULL
+*    stringlen == number of chars to use from str, if not NULL
+*    copy == address of value to replace
+*
+* OUTPUTS:
+*   *copy has been deleted and reforms with the contents of 'val'
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_replace_str (const xmlChar *str,
+                     uint32 stringlen,
+                     val_value_t *copy)
+{
+    val_value_t *strval;
+    xmlChar     *dumstr;
+    status_t     res;
+
+#ifdef DEBUG
+    if (copy == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    strval = val_make_string(copy->nsid, 
+                             copy->name, 
+                             (const xmlChar *)"dummy");
+    if (strval == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    
+    dumstr = xml_strndup(str, stringlen);
+    if (dumstr == NULL) {
+        val_free_value(strval);
+        return ERR_INTERNAL_MEM;
+    }
+    m__free(strval->v.str);
+    strval->v.str = dumstr;
+
+    res = val_replace(strval, copy);
+    val_free_value(strval);
+    return res;
+
+}  /* val_replace_str */
+
+
+/********************************************************************
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node

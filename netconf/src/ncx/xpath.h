@@ -1155,6 +1155,28 @@ extern void
     xpath_nodeset_delete_valptr (xpath_result_t *result,
                                  val_value_t *oldval);
 
+
+/********************************************************************
+* FUNCTION xpath_convert_url_to_path
+* 
+* Convert a URL format path to XPath format path
+*
+* INPUTS:
+*    urlpath == URL path string to convert to XPath
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   malloced string containing XPath expression from conversion
+*   NULL if some error
+*********************************************************************/
+extern xmlChar *
+    xpath_convert_url_to_path (const xmlChar *urlpath,
+                               status_t *res);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

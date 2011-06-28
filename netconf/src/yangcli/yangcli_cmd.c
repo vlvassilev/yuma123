@@ -4436,6 +4436,7 @@ static val_value_t *
     val_value_t           *targval;
     obj_template_t        *targobj;
     const xmlChar         *fromstr, *target;
+    xmlChar               *fromurl;
     var_type_t             vartype;
     boolean                iscli, isselect, saveopt, isextern, keepexterntop;
     status_t               res;
@@ -4445,6 +4446,7 @@ static val_value_t *
     targval = NULL;
     newparm = NULL;
     fromstr = NULL;
+    fromurl = NULL;
     iscli = FALSE;
     isselect = FALSE;
     isextern = FALSE;
@@ -4484,14 +4486,37 @@ static val_value_t *
         parm = val_find_child(valset, 
                               YANGCLI_MOD, 
                               NCX_EL_TARGET);
+        if (parm != NULL) {
+            target = VAL_STR(parm);
+        } else {
+            parm = val_find_child(valset, 
+                                  YANGCLI_MOD, 
+                                  NCX_EL_URLTARGET);
+            if (parm != NULL) {
+                res = NO_ERR;
+                fromurl = xpath_convert_url_to_path(VAL_STR(parm), &res);
+                if (fromurl == NULL || res != NO_ERR) {
+                    log_error("\nError: urltarget '%s' has "
+                              "invalid format (%s)",
+                              VAL_STR(parm),
+                              get_error_string(res));
+                    server_cb->get_optional = saveopt;
+                    *retres = res;
+                    if (fromurl != NULL) {
+                        m__free(fromurl);
+                    }
+                    return NULL;
+                } else {
+                    target = fromurl;
+                }
+            }
+        }
         if (parm == NULL) {
-            log_error("\nError: target parameter is missing");
+            log_error("\nError: target or urltarget parameter is missing");
             server_cb->get_optional = saveopt;
             *retres = ERR_NCX_MISSING_PARM;
             return NULL;
         }
-
-        target = VAL_STR(parm);
 
         *valroot = get_instanceid_parm(server_cb,
                                        target,
@@ -4507,14 +4532,25 @@ static val_value_t *
                 val_free_value(*valroot);
                 *valroot = NULL;
             }
+            if (fromurl != NULL) {
+                m__free(fromurl);
+            }
             server_cb->get_optional = saveopt;
             *retres = res;
             return NULL;
         } else if (*valroot == NULL) {
             /* indicates the docroot was selected */
+            if (fromurl != NULL) {
+                m__free(fromurl);
+            }
             return NULL;
         }
 
+        if (fromurl != NULL) {
+            m__free(fromurl);
+            fromurl = NULL;
+        }
+        
         curparm = NULL;
         parm = val_find_child(valset, 
                               YANGCLI_MOD, 
@@ -4529,17 +4565,6 @@ static val_value_t *
                     *retres = res;
                     return NULL;
                 }
-
-#if 0
-                curparm = 
-                    var_get_script_val_ex(server_cb->runstack_context,
-                                          targobj, 
-                                          NULL, 
-                                          NULL,
-                                          ISPARM,
-                                          parm,
-                                          &res);
-#endif
             } else {
                 curparm = 
                     var_get_script_val(server_cb->runstack_context,

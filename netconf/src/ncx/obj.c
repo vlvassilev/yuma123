@@ -5985,11 +5985,10 @@ obj_key_t *
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
+#endif
     if (obj->objtype != OBJ_TYP_LIST) {
-        SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
-#endif
 
     return (obj_key_t *)dlq_firstEntry(&obj->def.list->keyQ);
 
@@ -6015,11 +6014,10 @@ const obj_key_t *
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
+#endif
     if (obj->objtype != OBJ_TYP_LIST) {
-        SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
-#endif
 
     return (const obj_key_t *)dlq_firstEntry(&obj->def.list->keyQ);
 

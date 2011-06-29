@@ -2049,7 +2049,7 @@ static status_t
             break;  /* YANG clause assumed */
         default:
             retres = ERR_NCX_WRONG_TKTYPE;
-            ncx_mod_exp_err(tkc, mod, res, expstr);
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
             continue;
         }
 

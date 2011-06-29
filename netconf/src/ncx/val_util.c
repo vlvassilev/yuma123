@@ -1495,10 +1495,25 @@ val_value_t *
          chval != NULL;
          chval = val_get_next_child(chval)) {
 
-        if (chval->casobj && chval->casobj->parent==obj) {
-            return chval;
+        if (chval->casobj != NULL) {
+            boolean done2 = FALSE;
+            const obj_template_t 
+                *testobj = chval->casobj->parent;
+
+            while (!done2) {
+                if (testobj == obj) {
+                    return chval;
+                } else if (testobj != NULL &&
+                           (testobj->objtype == OBJ_TYP_CHOICE ||
+                            testobj->objtype == OBJ_TYP_CASE)) {
+                    testobj = testobj->parent;
+                } else {
+                    done2 = TRUE;
+                }
+            }
         }
     }
+
     return NULL;
 
 }  /* val_get_choice_first_set */
@@ -1583,9 +1598,26 @@ boolean
          testval != NULL && !done;
          testval = val_get_next_child(testval)) {
 
-        if (testval->casobj && testval->casobj->parent==obj) {
-            chval = testval;
-            done = TRUE;
+        if (testval->casobj != NULL) {
+            boolean done2 = FALSE;
+            const obj_template_t 
+                *testobj = testval->casobj->parent;
+
+            while (!done2) {
+                if (testobj == obj) {
+                    done2 = done = TRUE;
+                } else if (testobj != NULL &&
+                           (testobj->objtype == OBJ_TYP_CHOICE ||
+                            testobj->objtype == OBJ_TYP_CASE)) {
+                    testobj = testobj->parent;
+                } else {
+                    done2 = TRUE;
+                }
+            }
+
+            if (done) {
+                chval = testval;
+            }
         }
     }
 

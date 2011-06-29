@@ -112,6 +112,15 @@ module yangcli {
        }
     }
 
+    typedef UrlPath {
+       description 
+         "URL encoded path expression.
+          Encoding Rules: docs TBD.";
+       type string {
+          length "1..max";
+       }
+    }
+
     /*************************************************************
      *
      *     Groupings for parameters used in multiple commands
@@ -141,9 +150,7 @@ module yangcli {
              "URL encoded target object to fill.
               Encoding Rules: TBD.";
            // type URL: TBD
-           type string {
-             length "1..max";
-           }
+           type UrlPath;
            mandatory true;
          }
        }
@@ -260,6 +267,13 @@ module yangcli {
                  needed to maintain well-formed XML.";
               type string { length "1..max"; }
               ncx:xpath;
+            }
+
+            leaf urltarget {
+              description
+                "The URL path expression to use in the retrieval
+                 operation.";
+              type UrlPath;
             }
         }
 

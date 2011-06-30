@@ -4466,8 +4466,8 @@ static val_value_t *
     const xmlChar         *fromstr, *target;
     xmlChar               *fromurl;
     var_type_t             vartype;
-    boolean                iscli, isselect, saveopt;
-    boolean                isxselect, isextern, keepexterntop;
+    boolean                isvarref, iscli, isselect, saveopt;
+    boolean                isextern, keepexterntop;
     status_t               res;
 
     /* init locals */
@@ -4476,9 +4476,9 @@ static val_value_t *
     newparm = NULL;
     fromstr = NULL;
     fromurl = NULL;
+    isvarref = FALSE;
     iscli = FALSE;
     isselect = FALSE;
-    isxselect = FALSE;
     isextern = FALSE;
     keepexterntop = FALSE;   /* TBD: make this a parameter */
     res = NO_ERR;
@@ -4493,6 +4493,7 @@ static val_value_t *
                           YANGCLI_VARREF);
     if (parm != NULL) {
         /* content = uservar or $varref */
+        isvarref = TRUE;
         fromstr = VAL_STR(parm);
     } else {
         parm = val_find_child(valset, 
@@ -4502,37 +4503,40 @@ static val_value_t *
             /* content == select string for xget or xget-config */
             isselect = TRUE;
             fromstr = VAL_STR(parm);
-        } else if (!iswrite && 
-                   !xml_strncmp(obj_get_name(rpc),
-                                (const xmlChar *)"xget",
-                                4)) {
-            /* try urltarget; convert to XPath first */
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  NCX_EL_URLTARGET);
-            if (parm != NULL) {
-                fromurl = xpath_convert_url_to_path(VAL_STR(parm), &res);
-                if (fromurl == NULL || res != NO_ERR) {
-                    log_error("\nError: urltarget '%s' has "
-                              "invalid format (%s)",
-                              VAL_STR(parm),
-                              get_error_string(res));
-                    *retres = res;
-                    if (fromurl != NULL) {
-                        m__free(fromurl);
-                    }
-                    return NULL;
-                } else {
-                    fromstr = fromurl;
-                    isselect = TRUE;
+        }
+    }
+    if (parm == NULL && 
+        !iswrite && 
+        !xml_strncmp(obj_get_name(rpc),
+                     (const xmlChar *)"xget",
+                     4)) {
+
+        /* try urltarget; convert to XPath first */
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD, 
+                              NCX_EL_URLTARGET);
+        if (parm != NULL) {
+            fromurl = xpath_convert_url_to_path(VAL_STR(parm), &res);
+            if (fromurl == NULL || res != NO_ERR) {
+                log_error("\nError: urltarget '%s' has "
+                          "invalid format (%s)",
+                          VAL_STR(parm),
+                          get_error_string(res));
+                *retres = res;
+                if (fromurl != NULL) {
+                    m__free(fromurl);
                 }
+                return NULL;
             } else {
-                /* last choice; content is from the CLI */
-                iscli = TRUE;
+                fromstr = fromurl;
+                isselect = TRUE;
             }
         } else {
+            /* last choice; content is from the CLI */
             iscli = TRUE;
         }
+    } else {
+        iscli = TRUE;
     }
 
     if (iscli) {
@@ -4596,7 +4600,7 @@ static val_value_t *
             *retres = res;
             return NULL;
         } else if (*valroot == NULL) {
-            /* indicates the docroot was selected */
+            /* indicates the docroot was selected or path not found */
             if (fromurl != NULL) {
                 m__free(fromurl);
             }
@@ -4663,8 +4667,10 @@ static val_value_t *
         case OBJ_TYP_LEAF:
             if (isdelete) {
                 dofill = FALSE;
-            } else if (!iswrite && 
-                       obj_is_single_instance(targobj)) {
+            } else if (!iswrite && !server_cb->get_optional) {
+                /* for get operations, need --optional
+                 *  set to prompt for the target leaf
+                 */
                 dofill = FALSE;
             } /* else fall through */
         case OBJ_TYP_LEAF_LIST:
@@ -4875,7 +4881,7 @@ static val_value_t *
         /*  *valroot == NULL and not in use */
         *retres = res;
         return newparm;
-    } else {
+    } else if (isvarref) {
         /* from global or local variable 
          * *valroot == NULL and not used
          */
@@ -4911,7 +4917,10 @@ static val_value_t *
                 return newparm;
             }
         }
+    } else {
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
+
     *retres = res;
     return NULL;
 

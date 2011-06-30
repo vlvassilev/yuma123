@@ -626,12 +626,20 @@ module yangcli {
        "Delete some NETCONF config data with the edit-config operation";
       input {
         ncx:default-parm  target;
-        leaf target {
-          description 
-           "Xpath expression indicating the node which is going
-            to be deleted.";
-          type string;
+        choice delete-target {
           mandatory true;
+          leaf target {
+            description 
+             "Xpath expression indicating the node which is going
+              to be deleted.";
+            type string;
+          }
+          leaf urltarget {
+            description
+              "The URL path expression to use in the delete 
+               operation.";
+            type UrlPath;
+          }
         }
       }
     }

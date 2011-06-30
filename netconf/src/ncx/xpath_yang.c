@@ -2029,12 +2029,18 @@ val_value_t *
         }
         if (!childobj) {
             res = ERR_NCX_DEF_NOT_FOUND;
+            if (retres) {
+                *retres = res;
+            }
             continue;
         }
 
         childval = val_new_value();
         if (!childval) {
             res = ERR_INTERNAL_MEM;
+            if (retres) {
+                *retres = res;
+            }
             continue;
         }
         val_init_from_template(childval, childobj);
@@ -2185,6 +2191,10 @@ val_value_t *
         log_debug2("\nval_inst for expr '%s'\n", 
                    pcb->exprstr);
         val_dump_value(top, NCX_DEF_INDENT);
+    }
+
+    if (retres != NULL) {
+        *retres = res;
     }
 
     return top;

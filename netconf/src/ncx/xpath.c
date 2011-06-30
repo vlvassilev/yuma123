@@ -3329,6 +3329,10 @@ xmlChar *
         if (*res != NO_ERR) {
             m__free(buff);
             buff = NULL;
+        } else if (LOGDEBUG2) {
+            log_debug2("\nConverted urlstring '%s' to XPath '%s'",
+                       urlpath, 
+                       buff);
         }
     }
     return buff;

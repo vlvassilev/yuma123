@@ -1025,7 +1025,10 @@ status_t
     LIBXML_TEST_VERSION;
 
     /* init module library handler */
-    ncxmod_init();
+    res = ncxmod_init();
+    if (res != NO_ERR) {
+        return res;
+    }
 
     /* deal with bootstrap CLI parms */
     if (argv != NULL) {

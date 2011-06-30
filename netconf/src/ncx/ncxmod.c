@@ -122,6 +122,8 @@ static const xmlChar *ncxmod_yuma_home;
 
 static xmlChar *ncxmod_yuma_home_cli;
 
+static xmlChar *ncxmod_yumadir_path;
+
 static const xmlChar *ncxmod_env_install;
 
 static const xmlChar *ncxmod_env_userhome;
@@ -2706,7 +2708,6 @@ static status_t
 }  /* search_subtree_callback */
 
 
-
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -2715,14 +2716,17 @@ static status_t
 * 
 * Initialize the ncxmod module
 *
+* RETURNS:
+*   status
 *********************************************************************/
-void
+status_t
     ncxmod_init (void)
 {
+    status_t   res = NO_ERR;
+
 #ifdef DEBUG
     if (ncxmod_init_done) {
-        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-        return;
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 #endif
 
@@ -2739,6 +2743,15 @@ void
 
     /* try to get the module search path variable */
     ncxmod_mod_path = (const xmlChar *)getenv(NCXMOD_MODPATH);
+
+    if (ncxmod_env_userhome != NULL) {
+        ncxmod_yumadir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
+    } else {
+        ncxmod_yumadir_path = xml_strdup(NCXMOD_TEMP_YUMA_DIR);
+        if (ncxmod_yumadir_path == NULL) {
+            res = ERR_INTERNAL_MEM;
+        }
+    }
 
     ncxmod_mod_path_cli = NULL;
 
@@ -2757,6 +2770,8 @@ void
     ncxmod_subdirs = TRUE;
 
     ncxmod_init_done = TRUE;
+
+    return res;
 
 }  /* ncxmod_init */
 
@@ -2786,6 +2801,10 @@ void
 
     if (ncxmod_yuma_home_cli) {
         m__free(ncxmod_yuma_home_cli);
+    }
+
+    if (ncxmod_yumadir_path) {
+        m__free(ncxmod_yumadir_path);
     }
 
     if (ncxmod_mod_path_cli) {
@@ -4269,6 +4288,22 @@ void
 
 
 /********************************************************************
+* FUNCTION ncxmod_get_yumadir
+* 
+*   Get the yuma directory being used
+*
+* RETURNS:
+*   pointer to the yuma dir string
+*********************************************************************/
+const xmlChar *
+    ncxmod_get_yumadir (void)
+{
+    return ncxmod_yumadir_path;
+    
+}  /* ncxmod_get_yumadir */
+
+
+/********************************************************************
 * FUNCTION ncxmod_process_subtree
 *
 * Search the entire specified subtree, looking for YANG
@@ -4947,33 +4982,23 @@ status_t
 status_t
     ncxmod_setup_yumadir (void)
 {
-    xmlChar       *yumadir_path;
     DIR           *dp;
     status_t       res;
     int            retcode;
 
-    /* get the full filespec for ~/.yuma */
+    /* try to open yuma directory */
     res = NO_ERR;
-    yumadir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
-    if (yumadir_path == NULL) {
-        return res;
-    }
-
-    /* try to open ~/.yuma directory */
-    res = NO_ERR;
-    dp = opendir((const char *)yumadir_path);
+    dp = opendir((const char *)ncxmod_yumadir_path);
     if (dp == NULL) {
-        /* create a ~/.yuma directory with 700 permissions */
-        retcode = mkdir((const char *)yumadir_path, S_IRWXU);
+        /* create a yuma directory with 700 permissions */
+        retcode = mkdir((const char *)ncxmod_yumadir_path, S_IRWXU);
         if (retcode != 0) {
             res = errno_to_status();
         }
     } else {
-        /* use the existing ~/.yuma/tmp directory */
+        /* use the existing yuma directory */
         (void)closedir(dp);
     }
-
-    m__free(yumadir_path);
 
     if (res != NO_ERR) {
         log_error("\nError: Could not setup Yuma work directory\n");
@@ -4995,46 +5020,29 @@ status_t
 status_t
     ncxmod_setup_tempdir (void)
 {
-    xmlChar       *tempdir_path;
+    const xmlChar *tmpdir = NCXMOD_TEMP_DIR;
+    xmlChar       *tempdir_path, *str;
     DIR           *dp;
     status_t       res;
+    uint32         len;
     int            retcode;
 
-    /* get the full filespec for ~/.yuma */
     res = NO_ERR;
-    tempdir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
-    if (tempdir_path == NULL) {
-        return res;
-    }
 
-    /* try to open ~/.yuma directory */
+    /* make the string to use for the yuma temp directory */
+    len = xml_strlen(ncxmod_yumadir_path) + xml_strlen(tmpdir) + 1;
+    tempdir_path = m__getMem(len);
+    if (tempdir_path == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    str = tempdir_path;
+    str += xml_strcpy(str, ncxmod_yumadir_path);
+    xml_strcpy(str, tmpdir);
+
+    /* try to open yuma temp directory */
     dp = opendir((const char *)tempdir_path);
     if (dp == NULL) {
-        /* create a ~/.yuma directory with 700 permissions */
-        retcode = mkdir((const char *)tempdir_path, S_IRWXU);
-        if (retcode != 0) {
-            res = errno_to_status();
-        }
-    } else {
-        /* use the existing ~/.yuma/tmp directory */
-        (void)closedir(dp);
-    }
-
-    m__free(tempdir_path);
-
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    tempdir_path = ncx_get_source(NCXMOD_YUMA_TEMPDIR, &res);
-    if (tempdir_path == NULL) {
-        return res;
-    }
-
-    /* try to open ~/.yuma/tmp directory */
-    dp = opendir((const char *)tempdir_path);
-    if (dp == NULL) {
-        /* create a ~/.yuma/tmp directory with 700 permissions */
+        /* create a yuma temp directory with 700 permissions */
         retcode = mkdir((const char *)tempdir_path, S_IRWXU);
         if (retcode != 0) {
             res = errno_to_status();
@@ -5087,7 +5095,9 @@ ncxmod_temp_progcb_t *
     *res = NO_ERR;
     progcb = NULL;
     tstamp_datetime_dirname(datebuff);
-    fixedlen = xml_strlen(NCXMOD_YUMA_TEMPDIR);
+
+    fixedlen = xml_strlen(ncxmod_yumadir_path) +
+        xml_strlen(NCXMOD_TEMP_DIR);
 
     /* get positive 5 digit random number (0 -- 64k) */
     randnum = rand();
@@ -5110,7 +5120,8 @@ ncxmod_temp_progcb_t *
      * based on the current time + random number
      */
     p = buffer;
-    p += xml_strcpy(p, NCXMOD_YUMA_TEMPDIR);
+    p += xml_strcpy(p, ncxmod_yumadir_path);
+    p += xml_strcpy(p, NCXMOD_TEMP_DIR);
     *p++ = NCXMOD_PSCHAR;
     p += xml_strcpy(p, datebuff);
     xml_strcpy(p, numbuff);

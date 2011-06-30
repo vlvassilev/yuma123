@@ -3584,13 +3584,23 @@ static status_t
     }
 #endif
 
+    /* make sure the Yuma directory
+     * exists for saving per session data
+     */
+    res = ncxmod_setup_yumadir();
+    if (res != NO_ERR) {
+        log_error("\nError: could not setup yuma dir '%s'",
+                  ncxmod_get_yumadir());
+        return res;
+    }
+
     /* make sure the Yuma temp directory
      * exists for saving per session data
      */
     res = ncxmod_setup_tempdir();
     if (res != NO_ERR) {
-        log_error("\nError: could not setup temp dir '%s'",
-                  NCXMOD_YUMA_TEMPDIR);
+        log_error("\nError: could not setup temp dir '%s/tmp'",
+                  ncxmod_get_yumadir());
         return res;
     }
 

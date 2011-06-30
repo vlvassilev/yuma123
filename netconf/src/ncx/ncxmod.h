@@ -169,15 +169,19 @@ extern "C" {
 /* NCX Environment Variable for SCRIPTS search path */
 #define NCXMOD_RUNPATH      "YUMA_RUNPATH"
 
-/* per user yangcli internal data home */
+/* per user yangcli internal data home when $HOME defined */
 #define NCXMOD_YUMA_DIR (const xmlChar *)"~/.yuma"
+
+/* per user yangcli internal data home when $HOME not defined */
+#define NCXMOD_TEMP_YUMA_DIR (const xmlChar *)"/tmp/yuma"
 
 /* Yuma work directory name */
 #define NCXMOD_YUMA_DIRNAME    (const xmlChar *)".yuma"
 
-/* directory yangcli uses to store local per-session workdirs */
-#define NCXMOD_YUMA_TEMPDIR (const xmlChar *)"~/.yuma/tmp"
-
+/* sub-directory name yangcli uses to store local per-session workdirs
+ * appended to ncxmod_yumadir_path
+ */
+#define NCXMOD_TEMP_DIR (const xmlChar *)"/tmp"
 
 /********************************************************************
 *								    *
@@ -276,8 +280,10 @@ typedef status_t (*ncxmod_callback_fn_t) (const char *fullspec,
 * 
 * Initialize the ncxmod module
 *
+* RETURNS:
+*   status
 *********************************************************************/
-extern void
+extern status_t
     ncxmod_init (void);
 
 
@@ -832,6 +838,18 @@ extern void
 *********************************************************************/
 extern void
     ncxmod_set_subdirs (boolean usesubdirs);
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_yumadir
+* 
+*   Get the yuma directory being used
+*
+* RETURNS:
+*   pointer to the yuma dir string
+*********************************************************************/
+extern const xmlChar *
+    ncxmod_get_yumadir (void);
 
 
 /********************************************************************

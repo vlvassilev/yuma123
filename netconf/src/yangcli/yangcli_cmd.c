@@ -4535,7 +4535,7 @@ static val_value_t *
             /* last choice; content is from the CLI */
             iscli = TRUE;
         }
-    } else {
+    } else if (!(isvarref || isselect)) {
         iscli = TRUE;
     }
 

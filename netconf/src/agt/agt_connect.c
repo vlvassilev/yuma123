@@ -241,24 +241,6 @@ void
         }
     }
 
-    /* check the ncxserver port number */
-    if (res == NO_ERR) {
-        attr = xml_find_attr(top, 0, NCX_EL_PORT);
-        if (attr && attr->attr_val) {
-            res = ncx_convert_num(attr->attr_val, 
-                                  NCX_NF_DEC,
-                                  NCX_BT_UINT16, 
-                                  &num);
-            if (res == NO_ERR) {
-                if (!agt_ses_ssh_port_allowed((uint16)num.u)) {
-                    res = ERR_NCX_ACCESS_DENIED;
-                }
-            }
-        } else {
-            res = ERR_NCX_MISSING_ATTR;
-        }
-    }
-
     /* check the magic password string */
     if (res == NO_ERR) {
         attr = xml_find_attr(top, 0, NCX_EL_MAGIC);
@@ -276,8 +258,28 @@ void
     if (res == NO_ERR) {
         attr = xml_find_attr(top, 0, NCX_EL_TRANSPORT);
         if (attr && attr->attr_val) {
-            if (xml_strcmp(attr->attr_val, 
+            if ( 0 == xml_strcmp(attr->attr_val, 
                            (const xmlChar *)NCX_SERVER_TRANSPORT)) {
+                /* transport indicates an external connection over
+                 * ssh, check the ncxserver port number */
+                attr = xml_find_attr(top, 0, NCX_EL_PORT);
+                if (attr && attr->attr_val) {
+                    res = ncx_convert_num(attr->attr_val, 
+                                          NCX_NF_DEC,
+                                          NCX_BT_UINT16, 
+                                          &num);
+                    if (res == NO_ERR) {
+                        if (!agt_ses_ssh_port_allowed((uint16)num.u)) {
+                            res = ERR_NCX_ACCESS_DENIED;
+                        }
+                    }
+                } else {
+                    res = ERR_NCX_MISSING_ATTR;
+                }
+            }
+            else if ( xml_strcmp(attr->attr_val, 
+                           (const xmlChar *)NCX_SERVER_TRANSPORT_LOCAL)) {
+                /* transport is unsupported (i.e. not SSH or 'local' ) */
                 res = ERR_NCX_ACCESS_DENIED;
             }
         } else {

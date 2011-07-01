@@ -105,6 +105,9 @@ extern "C" {
 /* ncxserver server transport */
 #define NCX_SERVER_TRANSPORT "ssh"
 
+/* ncxserver server transport for local connections*/
+#define NCX_SERVER_TRANSPORT_LOCAL "local"
+
 /* ncxserver version */
 #define NCX_SERVER_VERSION   1
 

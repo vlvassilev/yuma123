@@ -134,13 +134,14 @@ date         init     comment
 *  none
 *********************************************************************/
 void
-    agt_top_dispatch_msg (ses_cb_t  *scb)
+    agt_top_dispatch_msg (ses_cb_t **ppscb)
 {
     ses_total_stats_t  *myagttotals;
     agt_profile_t      *profile;
     xml_node_t          top;
     status_t            res;
     top_handler_t       handler;
+    ses_cb_t           *scb = *ppscb;
     
 #ifdef DEBUG
     if (!scb) {
@@ -172,6 +173,10 @@ void
 
         xml_clean_node(&top);
         agt_ses_free_session(scb);
+
+        /* set the supplied ptr to ptr to scb to NULL so that the 
+         * caller of this function knows that it was deallotcated */
+        *ppscb=NULL;
         return;
     }
 
@@ -209,13 +214,22 @@ void
                      scb->sid, 
                      get_error_string(res));
         }
+
         agt_ses_free_session(scb);
+
+        /* set the supplied ptr to ptr to scb to NULL so that the 
+         * caller of this function knows that it was deallotcated */
+        *ppscb=NULL;
+
     } else if (profile->agt_stream_output &&
                scb->state == SES_ST_SHUTDOWN_REQ) {
         /* session was closed */
-        agt_ses_kill_session(scb->sid,
+        agt_ses_kill_session(scb,
                              scb->killedbysid,
                              scb->termreason);
+        /* set the supplied ptr to ptr to scb to NULL so that the 
+         * caller of this function knows that it was deallotcated */
+        *ppscb=NULL;
     }
 
     xml_clean_node(&top);

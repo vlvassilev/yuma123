@@ -64,7 +64,6 @@ extern "C" {
 *                                                                   *
 *********************************************************************/
 
-
 /********************************************************************
 *                                                                   *
 *                             T Y P E S                             *
@@ -205,7 +204,7 @@ extern boolean
 * Start the close of the specified session
 *
 * INPUTS:
-*   sid == session ID to close
+*   scb == the session to close
 *   killedby == session ID executing the kill-session or close-session
 *   termreason == termination reason code
 *
@@ -213,7 +212,7 @@ extern boolean
 *   none
 *********************************************************************/
 extern void
-    agt_ses_request_close (ses_id_t sid,
+    agt_ses_request_close (ses_cb_t *scb,
 			   ses_id_t killedby,
 			   ses_term_reason_t termreason);
 
@@ -224,12 +223,15 @@ extern void
 * Kill the specified session
 *
 * INPUTS:
-*   sid == session ID to kill
+*   scb == the session to close
+*   killedby == session ID executing the kill-session or close-session
+*   termreason == termination reason code
+*
 * RETURNS:
 *   none
 *********************************************************************/
 extern void
-    agt_ses_kill_session (ses_id_t sid,
+    agt_ses_kill_session (ses_cb_t *scb,
 			  ses_id_t killedby,
 			  ses_term_reason_t termreason);
 
@@ -500,6 +502,21 @@ extern status_t
 *********************************************************************/
 extern void
     agt_ses_invalidate_session_acm_caches (void);
+
+/********************************************************************
+* FUNCTION agt_ses_get_session_for_id
+*
+* get the session for the supplied sid
+*
+* INPUTS:
+*    ses_id_t the id of the session to get
+*
+* RETURNS:
+*    ses_cb_t* or NULL
+*    
+*********************************************************************/
+extern ses_cb_t* 
+    agt_ses_get_session_for_id(ses_id_t sid);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

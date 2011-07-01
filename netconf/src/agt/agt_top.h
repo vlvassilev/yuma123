@@ -60,11 +60,15 @@ extern "C" {
 *   scb == session control block containing the xmlreader
 *          set at the start of an incoming message.
 *
+* NOTES:
+*   This function might de-allocate the scb, if it does scb will be
+*   set to NULL
+*
 * RETURNS:
 *  none
 *********************************************************************/
 extern void
-    agt_top_dispatch_msg (ses_cb_t  *scb);
+    agt_top_dispatch_msg (ses_cb_t  **scb);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

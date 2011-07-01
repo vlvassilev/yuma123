@@ -1711,7 +1711,7 @@ static status_t
 
     (void)msg;
     (void)methnode;
-    agt_ses_request_close(SES_MY_SID(scb), 
+    agt_ses_request_close(scb, 
                           SES_MY_SID(scb),
                           SES_TR_CLOSED);
     return NO_ERR;
@@ -1817,10 +1817,13 @@ static status_t
                          NCX_NT_NONE, 
                          NULL);
     }
-
-    agt_ses_kill_session((ses_id_t)VAL_UINT(val), 
-                         scb->sid,
-                         SES_TR_KILLED);
+    else
+    {
+        ses_id_t sid = (ses_id_t)VAL_UINT(val);
+        agt_ses_kill_session( agt_ses_get_session_for_id( sid ),
+                                  scb->sid,
+                                  SES_TR_KILLED );
+    }
     return NO_ERR;
 
 } /* kill_session_invoke */

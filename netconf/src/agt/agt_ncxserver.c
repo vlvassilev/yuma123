@@ -363,13 +363,13 @@ status_t
                             }
                         }
                         if (res != NO_ERR) {
-                            agt_ses_kill_session(scb->sid, 
+                            agt_ses_kill_session(scb, 
                                                  scb->sid,
                                                  SES_TR_OTHER);
                             scb = NULL;
                         } else if (scb->state == SES_ST_SHUTDOWN_REQ) {
                             /* close-session reply sent, now kill ses */
-                            agt_ses_kill_session(scb->sid, 
+                            agt_ses_kill_session(scb, 
                                                  scb->killedbysid,
                                                  scb->termreason);
                             scb = NULL;
@@ -439,7 +439,7 @@ status_t
                                              get_error_string(res));
                                 }
                             }
-                            agt_ses_kill_session(scb->sid,
+                            agt_ses_kill_session(scb,
                                                  scb->sid,
                                                  SES_TR_DROPPED);
 

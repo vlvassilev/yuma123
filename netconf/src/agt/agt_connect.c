@@ -332,7 +332,7 @@ void
 
     /* report first error and close session */
     if (res != NO_ERR) {
-        agt_ses_request_close(scb->sid, scb->sid, SES_TR_BAD_START);
+        agt_ses_request_close(scb, scb->sid, SES_TR_BAD_START);
         if (LOGINFO) {
             log_info("\nagt_connect error (%s)\n"
                      "  dropping session %d",

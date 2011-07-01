@@ -2990,11 +2990,14 @@ void
         return;
     }
 
-    /* dispatch the test PDU */
-    agt_top_dispatch_msg(scb);
+    /* dispatch the test PDU, note scb might be deleted! */
+    agt_top_dispatch_msg(&scb);
 
     /* clean up and exit */
-    agt_ses_free_dummy_session(scb);
+    if ( scb )
+    {
+        agt_ses_free_dummy_session(scb);
+    }
 
 }  /* agt_val_parse_test */
 #endif

@@ -1356,7 +1356,7 @@ void
         }
         agttotals->stats.inBadRpcs++;
         agttotals->droppedSessions++;
-        agt_ses_request_close(scb->sid, 
+        agt_ses_request_close(scb, 
                               scb->sid, 
                               SES_TR_DROPPED);
 
@@ -1376,7 +1376,7 @@ void
                      res, 
                      get_error_string(res));
         }
-        agt_ses_request_close(scb->sid, 
+        agt_ses_request_close(scb, 
                               scb->sid, 
                               SES_TR_DROPPED);
         return;
@@ -1394,7 +1394,7 @@ void
                      res, 
                      get_error_string(res));
         }
-        agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
+        agt_ses_request_close(scb, scb->sid, SES_TR_OTHER);
         rpc_free_msg(msg);
         return;
     }

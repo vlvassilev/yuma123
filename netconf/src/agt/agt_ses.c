@@ -805,19 +805,10 @@ boolean
 *   none
 *********************************************************************/
 void
-    agt_ses_request_close (ses_id_t sid,
+    agt_ses_request_close (ses_cb_t *scb,
                            ses_id_t killedby,
                            ses_term_reason_t termreason)
 {
-    ses_cb_t *scb;
-
-    /* check the session ID */
-    if (!sid || sid > AGT_SES_MAX_SESSIONS) {
-        return;
-    }
-
-    /* check the session control block */
-    scb = agtses[sid];
     if (!scb) {
         return;
     }
@@ -835,7 +826,7 @@ void
     case SES_ST_IDLE:
     case SES_ST_SHUTDOWN:
     case SES_ST_SHUTDOWN_REQ:
-        agt_ses_kill_session(scb->sid, 
+        agt_ses_kill_session(scb, 
                              killedby,
                              termreason);
         break;
@@ -844,7 +835,7 @@ void
         break;
     default:
         if (dlq_empty(&scb->outQ)) {
-            agt_ses_kill_session(scb->sid, 
+            agt_ses_kill_session(scb, 
                                  killedby,
                                  termreason);
         } else {
@@ -866,17 +857,10 @@ void
 *   none
 *********************************************************************/
 void
-    agt_ses_kill_session (ses_id_t sid,
+    agt_ses_kill_session (ses_cb_t *scb,
                           ses_id_t killedby,
                           ses_term_reason_t termreason)
 {
-    ses_cb_t *scb;
-
-    if (!sid || sid > AGT_SES_MAX_SESSIONS) {
-        return;
-    }
-
-    scb = agtses[sid];
     if (!scb) {
         return;    /* no session found for this ID */
     }
@@ -887,7 +871,7 @@ void
     }
 
     /* handle confirmed commit started by this session */
-    if (agt_ncx_cc_active() && agt_ncx_cc_ses_id() == sid) {
+    if (agt_ncx_cc_active() && agt_ncx_cc_ses_id() == scb->sid) {
         if (agt_ncx_cc_persist_id() == NULL) {
             agt_ncx_cancel_confirmed_commit(scb, NCX_CC_EVENT_CANCEL);
         } else {
@@ -921,7 +905,6 @@ boolean
     ses_ready_t  *rdy;
     ses_msg_t    *msg;
     status_t      res;
-    ses_id_t      mysid;
 
 #ifdef AGT_SES_DEBUG
     xmlChar       buff[32];
@@ -944,8 +927,6 @@ boolean
 #endif
         return FALSE;
     }
-
-    mysid = scb->sid;
 
 #ifdef AGT_SES_DEBUG
     if (LOGDEBUG2) {
@@ -1010,22 +991,17 @@ boolean
         /* process the message 
          * the scb pointer may get deleted !!!
          */
-        agt_top_dispatch_msg(scb);
+        agt_top_dispatch_msg(&scb);
     } else {
         if (LOGINFO) {
             log_info("\nReset xmlreader failed for session %d (%s)",
                      scb->sid, 
                      get_error_string(res));
         }
-        agt_ses_kill_session(scb->sid, 0, SES_TR_OTHER);
+        agt_ses_kill_session(scb, 0, SES_TR_OTHER);
         scb = NULL;
     }
 
-    /* get the session control block again to make sure it was not
-     * removed due to invalid <ncxconnect> that caused the session
-     * to be deleted, or a close-session or kill-session operation
-     */
-    scb = agtses[mysid];
     if (scb) {
         /* free the message that was just processed */
         dlq_remove(msg);
@@ -1113,7 +1089,7 @@ void
                 if (LOGDEBUG) {
                     log_debug("\nHello timeout for session %u", i);
                 }
-                agt_ses_kill_session(i, 0, SES_TR_TIMEOUT);
+                agt_ses_kill_session(scb, 0, SES_TR_TIMEOUT);
                 continue;
             }
         }
@@ -1131,7 +1107,7 @@ void
                 if (LOGDEBUG) {
                     log_debug("\nIdle timeout for session %u", i);
                 }
-                agt_ses_kill_session(i, 0, SES_TR_TIMEOUT);
+                agt_ses_kill_session(scb, 0, SES_TR_TIMEOUT);
                 continue;
             }
         }
@@ -1629,6 +1605,31 @@ void
         }
     }
 }  /* acm_ses_invalidate_session_acm_caches */
+
+/********************************************************************
+* FUNCTION agt_ses_get_session_for_id
+*
+* get the session for the supplied sid
+*
+* INPUTS:
+*    ses_id_t the id of the session to get
+*
+* RETURNS:
+*    ses_cb_t*
+*    
+*********************************************************************/
+ses_cb_t* 
+    agt_ses_get_session_for_id(ses_id_t sid)
+{
+    ses_cb_t *scb = NULL;
+
+    if ( sid >0 && sid < AGT_SES_MAX_SESSIONS )
+    {
+        scb = agtses[ sid ];
+    }
+    return scb;
+}
+
 
 
 /* END file agt_ses.c */

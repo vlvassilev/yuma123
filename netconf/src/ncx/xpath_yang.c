@@ -869,6 +869,12 @@ static status_t
             } else if (pcb->objmod != NULL) {
                 ncx_inc_warnings(pcb->objmod);
             }
+        } else if (keytotal == 0) {
+            res = ERR_NCX_INVALID_VALUE;
+            log_error("\nError: Key predicates found for list "
+                      "'%s' which does not define any keys", 
+                      obj_get_name(pcb->targobj));
+            return res;
         }
     } else if ((pcb->flags & XP_FL_INSTANCEID) && 
                pcb->targobj && 

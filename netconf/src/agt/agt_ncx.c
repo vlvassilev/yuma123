@@ -1095,7 +1095,16 @@ static status_t
     /* setup the edit parms to save for the invoke phase */
     if (retres == NO_ERR) {
         copyparms = new_copyparms();
-        if (copyparms == NULL) {
+        if (copyparms != NULL) {
+            copyparms->srccfg = srccfg;
+            copyparms->destcfg = destcfg;
+            copyparms->srcval = srcval;
+            copyparms->srcurlval = srcurlval;
+            copyparms->srcfile = srcfile;
+            copyparms->destfile = destfile;
+            copyparms->desturlspec = desturlspec;
+            msg->rpc_user1 = copyparms;
+        } else {
             retres = ERR_INTERNAL_MEM;
             agt_record_error(scb, 
                              &msg->mhdr, 
@@ -1106,27 +1115,21 @@ static status_t
                              NULL,
                              NCX_NT_NONE, 
                              NULL);
-            if (srcurlval != NULL) {
-                val_free_value(srcurlval);
-            }
-            if (desturlspec != NULL) {
-                m__free(desturlspec);
-            }
-            if (srcfile != NULL) {
-                m__free(srcfile);
-            }
-            if (destfile != NULL) {
-                m__free(destfile);
-            }
-        } else {
-            copyparms->srccfg = srccfg;
-            copyparms->destcfg = destcfg;
-            copyparms->srcval = srcval;
-            copyparms->srcurlval = srcurlval;
-            copyparms->srcfile = srcfile;
-            copyparms->destfile = destfile;
-            copyparms->desturlspec = desturlspec;
-            msg->rpc_user1 = copyparms;
+        }
+    }
+
+    if (retres != NO_ERR ) {
+        if (srcurlval != NULL) {
+            val_free_value(srcurlval);
+        }
+        if (desturlspec != NULL) {
+            m__free(desturlspec);
+        }
+        if (srcfile != NULL) {
+            m__free(srcfile);
+        }
+        if (destfile != NULL) {
+            m__free(destfile);
         }
     }
 
@@ -1135,7 +1138,6 @@ static status_t
     }
 
     return retres;
-
 } /* copy_config_validate */
 
 

@@ -2,7 +2,7 @@
 Yuma README
 -----------
 
-Version:  2011-06-25 (v1.15-3)
+Version:  2011-06-30 (v1.15-3+)
 
 Pre-Build steps:
 
@@ -38,7 +38,9 @@ Build Variables:
        Need to install glibc-utils for the 'mtrace' program.
        Tools will generate an 'mtracefile' in the CWD.
        Run mtrace /path/to/program ./mtracefile
-       
+
+  NOTOASTER=1: disables building the example toaster SIL
+
   PREFIX=string: set the top install dir (after DESTDIR)
          default: /usr
 
@@ -55,7 +57,8 @@ Build Variables:
   USE_WERROR=1: use -Werror in the compile process
     Default is not to use -Werror.
 
-To build everything (shared libs) on Linux:
+To build everything (shared libs) on Linux, this will build 
+everything and install it in the default locations:
 
    - make [FLAGS]
    - [sudo] make [FLAGS] install
@@ -70,14 +73,20 @@ For example, to build everything (shared libs) on Fedora 14, 64-bit:
    - make LIB64=1
    - [sudo] make LIB64=1 install
 
-This will build everything and install it in its default location
+For example, to build everything (shared libs) 
+except /usr/lib/yuma/libtoaster.so
+
+   - make NOTOASTER=1
+   - [sudo] make NOTOASTER=1 install
 
 External file dependencies (for netconfd, optional):
+
    - /etc/services 
    - /etc/ssh/sshd_config
    - SELinux config to allow access to port 830
 
 Default Installed Programs:
+
    - /usr/bin/yangcli
    - /usr/bin/yangdump
    - /usr/bin/yangdiff
@@ -85,14 +94,17 @@ Default Installed Programs:
    - /usr/sbin/netconf-subsystem
 
 Default Installed Libraries:
+
   - /usr/lib/libncx.so.1
   - /usr/lib/yuma/libtoaster.so
 
 Default Installed Libraries if LIB64=1:
+
   - /usr/lib64/libncx.so.1
   - /usr/lib64/yuma/libtoaster.so
    
 Default Installed Additional Files:
+
   /usr/share/doc/yuma/*     -- user documentation
   /etc/yuma/*               -- sample application config files
   /usr/share/yuma/*         -- root of all YUMA data files

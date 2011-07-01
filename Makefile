@@ -10,16 +10,16 @@
 # Put only the directories that build object files in the list
 
 # make all targets
+ifdef NOTOASTER
+DIRS = libtecla netconf
+S_DIRS = netconf
+else
 DIRS = libtecla netconf libtoaster
 S_DIRS = netconf libtoaster
+endif
+
 C_DIRS = libtecla netconf
 L_DIRS = netconf
-
-#ifdef DESTDIR
-#JFLAG= 
-#else
-#JFLAG = -j4
-#endif
 
 #################### PLATFORM DEFINITIONS ############
 

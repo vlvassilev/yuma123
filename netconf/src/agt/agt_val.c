@@ -1594,7 +1594,7 @@ static status_t
                                curval, 
                                iqual,
                                ses_get_protocol(scb));
-        if (res != NO_ERR) {
+        if (res == ERR_NCX_BAD_ATTRIBUTE) {
             xml_attr_t             errattr;
 
             memset(&errattr, 0x0, sizeof(xml_attr_t));
@@ -1611,6 +1611,17 @@ static status_t
                                   NULL, 
                                   NCX_NT_VAL,
                                   newval);
+            errdone = TRUE;
+        } else if (res != NO_ERR) {
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_CONTENT,
+                             res, 
+                             NULL,
+                             NCX_NT_NONE,
+                             NULL, 
+                             NCX_NT_VAL,
+                             newval);
             errdone = TRUE;
         }
 

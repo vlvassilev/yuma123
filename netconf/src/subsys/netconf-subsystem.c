@@ -458,14 +458,16 @@ static status_t
 
         ret = select(FD_SETSIZE, &fds, NULL, NULL, NULL);
         if (ret < 0) {
+            if ( errno != EINTR ) {
 #ifdef SUBSYS_TRACE
-            if (errfile) {
-                fprintf(errfile, "\nnetconf select failed (%d)", ret);
-                errdirty = 1;
-            }
+                if (errfile) {
+                    fprintf(errfile, "\nnetconf select failed (%d)", ret);
+                    errdirty = 1;
+                }
 #endif
-            res = ERR_NCX_OPERATION_FAILED;
-            done = TRUE;
+                res = ERR_NCX_OPERATION_FAILED;
+                done = TRUE;
+            }
             continue;
         } else if (ret == 0) {
 #ifdef SUBSYS_TRACE

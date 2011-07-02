@@ -6284,8 +6284,9 @@ static status_t
     /***** augment is processed before resolve_list_final and the list keys
      ***** are filled into the orginal list (under augment, not in the
      ***** expanded list under the augment target
-     ***** THIS DOES NOT ALWAYS WORK FOR augment /obj-in-submod-a with obj-in-submod-b
-     ***** if submod-a processed before submod-b, this step will get skipped
+     ***** THIS DOES NOT ALWAYS WORK FOR augment /obj-in-submod-a with
+     *****  obj-in-submod-b if submod-a processed before submod-b, 
+     ***** this step will get skipped
      *****
      ***** The function yang_obj_top_resolve_final will be called for the
      ***** main module and all submodules will attempt this code again

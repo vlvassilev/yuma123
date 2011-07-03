@@ -1699,7 +1699,7 @@ static status_t
     /* save or delete the import struct, except in search mode */
     if (retres == NO_ERR && imp->usexsd && !pcb->searchmode) {
         node = yang_new_node();
-        if (!node) {
+        if (node == NULL) {
             retres = ERR_INTERNAL_MEM;
             ncx_print_errormsg(tkc, mod, retres);
             ncx_free_import(imp);
@@ -1707,7 +1707,7 @@ static status_t
             impptr = yang_new_import_ptr(imp->module, 
                                          imp->prefix,
                                          imp->revision);
-            if (!impptr) {
+            if (impptr == NULL) {
                 retres = ERR_INTERNAL_MEM;
                 tkc->curerr = &imp->tkerr;
                 ncx_print_errormsg(tkc, mod, retres);
@@ -1736,16 +1736,33 @@ static status_t
 
                 /* load the module now instead of later for validation
                  * it may not get used, but assume it will
+                 * skip if forcing yuma-netconf override of ietf-netconf
+                 * or if searchmode and just finding modname, revision
                  */
-                if (!imp->force_yuma_nc) {
-                    res = ncxmod_load_imodule(imp->module, 
-                                              imp->revision,
-                                              pcb, 
-                                              YANG_PT_IMPORT,
-                                              NULL,
-                                              NULL);
+                if (!(imp->force_yuma_nc || pcb->searchmode)) {
+                    ncx_module_t *impmod = NULL;
+
+                    /* in all cases, even diff-mode, it should be OK
+                     * to reuse the imported module if it has already
+                     * been parsed and loaded into the registry.
+                     * All modes that need the token chain are for the
+                     * top module, never an imported module
+                     */
+                    impmod = ncx_find_module(imp->module, imp->revision);
+                    if (impmod != NULL) {
+                        res = NO_ERR;
+                    } else {
+                        res = ncxmod_load_imodule(imp->module, 
+                                                  imp->revision,
+                                                  pcb, 
+                                                  YANG_PT_IMPORT,
+                                                  NULL,
+                                                  &impmod);
+                    }
+
                     /* save the status to prevent retrying this module */
                     imp->res = res;
+                    imp->mod = impmod;
                 } else if (LOGDEBUG) {
                     log_debug("\nSkipping import of ietf-netconf, "
                               "using yuma-netconf instead");
@@ -3322,7 +3339,11 @@ static status_t
         }
     }
 
-    /* check if this module is already loaded, except in diff mode */
+    /* check if this module is already loaded, except in diff mode 
+     * this cannot be done until the module revision is known, which
+     * unfortunately is not at the start of the module, but rather
+     * after all the other headers
+     */
     if (mod->ismod && 
         !pcb->diffmode &&
         ncx_find_module(mod->name, mod->version)) {
@@ -3695,7 +3716,6 @@ static void
     }
     
 }  /* set_source */
-
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/

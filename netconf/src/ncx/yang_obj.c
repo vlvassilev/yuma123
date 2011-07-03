@@ -5512,7 +5512,7 @@ static status_t
 * FUNCTION resolve_leaf
 * 
 * Check the leaf object type
-
+*
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
@@ -6281,26 +6281,30 @@ static status_t
 
     retres = NO_ERR;
 
-    /***** augment is processed before resolve_list_final and the list keys
-     ***** are filled into the orginal list (under augment, not in the
-     ***** expanded list under the augment target
-     ***** THIS DOES NOT ALWAYS WORK FOR augment /obj-in-submod-a with
-     *****  obj-in-submod-b if submod-a processed before submod-b, 
-     ***** this step will get skipped
-     *****
-     ***** The function yang_obj_top_resolve_final will be called for the
-     ***** main module and all submodules will attempt this code again
-     ***** in case the submod datadefQ was filled in by another submod
-     ***** after the first submod called yang_obj_resolve_final
-     *****/
+    /* augment is processed before resolve_list_final and the list keys
+     * are filled into the orginal list (under augment, not in the
+     * expanded list under the augment target
+     * THIS DOES NOT ALWAYS WORK FOR augment /obj-in-submod-a with
+     *  obj-in-submod-b if submod-a processed before submod-b, 
+     * this step will get skipped
+     *
+     * The function yang_obj_top_resolve_final will be called for the
+     * main module and all submodules will attempt this code again
+     * in case the submod datadefQ was filled in by another submod
+     * after the first submod called yang_obj_resolve_final
+     *
+     * For modules augmenting other modules, this step could
+     * be skipped, if the augmenting module is compiled after the
+     * augmented module, which is always the case, since the
+     * augmented module has to be imported, then resolve_list_final
+     * for the augmenting list was not done for the cloned list
+     */
 
-    /* validate key clause only if this has probably not been attempted yet */
+    /* validate key clause only if this has probably not 
+     * been attempted yet 
+     */
     if (list->keystr && dlq_empty(&list->keyQ)) {
-        res = get_list_key(pcb,
-                           tkc, 
-                           mod, 
-                           list, 
-                           obj);
+        res = get_list_key(pcb, tkc, mod, list, obj);
         CHK_EXIT(res, retres);
     }
 
@@ -6316,12 +6320,7 @@ static status_t
             continue;
         }
 
-        res = get_unique_comps(pcb,
-                               tkc, 
-                               mod, 
-                               list, 
-                               obj, 
-                               uni);
+        res = get_unique_comps(pcb, tkc, mod, list, obj, uni);
         CHK_EXIT(res, retres);
     }
 
@@ -7759,6 +7758,139 @@ static status_t
     return retres;
                                     
 }  /* expand_augment */
+
+
+/********************************************************************
+* FUNCTION resolve_augextern_final
+* 
+* Check for cloned lists that need final internal data structure
+* modifications
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t to check
+*        
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_augextern_final (yang_pcb_t *pcb,
+                             tk_chain_t *tkc,
+                             ncx_module_t *mod,
+                             dlq_hdr_t *datadefQ)
+{
+    obj_template_t    *chobj;
+    dlq_hdr_t         *child_datadefQ;
+    status_t           res, retres;
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    for (chobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+
+        if (!obj_has_name(chobj) ||
+            obj_get_status(chobj) == NCX_STATUS_OBSOLETE) {
+            continue;
+        }
+
+        if (chobj->objtype == OBJ_TYP_LIST) {
+            res = resolve_list_final(pcb, 
+                                     tkc, 
+                                     mod, 
+                                     chobj->def.list,
+                                     chobj);
+            CHK_EXIT(res, retres);
+        }
+
+        child_datadefQ = obj_get_datadefQ(chobj);
+        if (child_datadefQ != NULL) {
+            res = resolve_augextern_final(pcb,
+                                          tkc,
+                                          mod,
+                                          child_datadefQ);
+            CHK_EXIT(res, retres);
+        }
+    }
+
+    return retres;
+                                    
+}  /* resolve_augextern_final */
+
+
+/********************************************************************
+* FUNCTION resolve_augment_final
+* 
+* Check for cloned lists that need final internal data structure
+* modifications
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain
+*   mod == module in progress
+*   obj == obj_template_t of the augment target (augmented obj)
+*        
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_augment_final (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
+                           ncx_module_t  *mod,
+                           obj_template_t *obj)
+{
+    obj_augment_t     *aug;
+    dlq_hdr_t         *targQ;
+    status_t           res;
+    boolean            augextern;
+    
+    aug = obj->def.augment;
+    if (aug->target == NULL) {
+        /* this node has errors, currently proccessing for
+         * errors only, so just keep going
+         */
+        return NO_ERR;
+    }
+
+    if (obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
+        /* already reported in expand_augment */
+        return NO_ERR;
+    }
+
+    if (aug->targobj == NULL) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    augextern = xml_strcmp(obj_get_mod_name(obj),
+                           obj_get_mod_name(aug->targobj));
+    if (!augextern) {
+        return NO_ERR;
+    }
+
+    /* get the augment target datadefQ */
+    targQ = obj_get_datadefQ(aug->targobj);
+    if (targQ == NULL) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    /* go through each node in the augment
+     * make sure it is not already in the same datadefQ
+     * if not, then clone the grouping object and add it
+     * to the augment target
+     */
+    res = resolve_augextern_final(pcb, tkc, mod, targQ);
+    return res;
+                                    
+}  /* resolve_augment_final */
 
 
 /********************************************************************
@@ -10161,7 +10293,7 @@ status_t
 status_t 
     yang_obj_resolve_augments (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-                               ncx_module_t  *mod,
+                               ncx_module_t *mod,
                                dlq_hdr_t *datadefQ)
 {
     obj_template_t  *testobj;
@@ -10176,7 +10308,7 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
 
-    /* first resolve all the local type names */
+    /* go through all the object trees and check for augments */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
          testobj != NULL;
          testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
@@ -10194,6 +10326,63 @@ status_t
     return retres;
 
 }  /* yang_obj_resolve_augments */
+
+
+/********************************************************************
+* FUNCTION yang_obj_resolve_augments_final
+* 
+* Fourth pass object expand augments
+*
+* Clone any list keys missed in yang_obj_resolve_augments
+* This only occurs for augments of external objects, so
+* only top-level augment-stmts need to be checked.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_resolve_augments_final (yang_pcb_t *pcb,
+                                     tk_chain_t *tkc,
+                                     ncx_module_t *mod,
+                                     dlq_hdr_t *datadefQ)
+{
+    obj_template_t  *testobj;
+    status_t         res, retres;
+
+#ifdef DEBUG
+    if (!pcb || !tkc || !mod || !datadefQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* only need to check the top-level obkects because only
+     * top-level augments can be for other modules
+     */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+        if (testobj->objtype == OBJ_TYP_AUGMENT) {
+            res = resolve_augment_final(pcb, tkc, mod, testobj);
+            CHK_EXIT(res, retres);
+        }
+    }
+
+    return retres;
+
+}  /* yang_obj_resolve_augments_final */
 
 
 /********************************************************************

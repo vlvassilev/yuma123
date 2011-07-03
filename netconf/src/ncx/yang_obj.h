@@ -442,6 +442,34 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION yang_obj_resolve_augments_final
+* 
+* Fourth pass object expand augments
+*
+* Clone any list keys missed in yang_obj_resolve_augments
+* This only occurs for augments of external objects, so
+* only top-level augment-stmts need to be checked.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t 
+    yang_obj_resolve_augments_final (yang_pcb_t *pcb,
+                                     tk_chain_t *tkc,
+                                     ncx_module_t *mod,
+                                     dlq_hdr_t *datadefQ);
+
+
+/********************************************************************
 * FUNCTION yang_obj_resolve_deviations
 * 
 *

@@ -3555,7 +3555,7 @@ static status_t
                                  &mod->groupingQ);
     CHK_EXIT(res, retres);
 
-    /* One final check for object integrity */
+    /* Final check for object integrity */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve obj final");
     }
@@ -3564,6 +3564,19 @@ static status_t
                                  mod, 
                                  &mod->datadefQ,
                                  FALSE);
+    CHK_EXIT(res, retres);
+
+    /* Final augment expand
+     * List keys that were not cloned in yang_obj_resolve_augment
+     * so another check for cloned lists is needed here
+     */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve augments final");
+    }
+    res = yang_obj_resolve_augments_final(pcb,
+                                          tkc, 
+                                          mod, 
+                                          &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Validate all the XPath expressions within all cooked objects */

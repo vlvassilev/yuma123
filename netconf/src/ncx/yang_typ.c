@@ -3149,6 +3149,7 @@ static status_t
     boolean          defvaldone, hasdefval;
 
     defvaldone = FALSE;
+    res = NO_ERR;
     retres = NO_ERR;
 
     /* first resolve all the local type names */
@@ -3215,6 +3216,7 @@ static status_t
      * the union will print a typdef defualt error
      */
     if (defval != NULL && !defvaldone) {
+        retres = ERR_NCX_INVALID_VALUE;
         if (parent != NULL) {
             log_error("\nError: Union %s '%s' has invalid "
                       "default value (%s)",
@@ -3229,7 +3231,7 @@ static status_t
                       defval);
         }
         tkc->curerr = &un->typdef->tkerr;
-        ncx_print_errormsg(tkc, mod, res);
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     return retres;

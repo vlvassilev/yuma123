@@ -11,7 +11,6 @@
     contact
       "WG Web:   <http://tools.ietf.org/wg/ipfix/>
       WG List:  <mailto:ipfix@ietf.org>
-
       WG Chair: Nevil Brownlee
                 <n.brownlee@auckland.ac.nz>
 
@@ -1116,7 +1115,6 @@
         default 600;
         description "Sets time after which Options Templates are
           resent in the UDP Transport Session.
-
           Note that the configured lifetime MUST be adapted to the
           optionsTemplateLifeTime parameter value at the receiving
           Collecting Process.
@@ -2077,3 +2075,4 @@
       }
     }
   }
+

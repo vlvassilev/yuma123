@@ -1437,6 +1437,7 @@ static status_t
 * INPUTS:
 *    tkc == parent token chain (may be NULL)
 *    mod == module in progress
+*    obj == context node
 *    source == context for this expression
 *              XP_SRC_LEAFREF or XP_SRC_INSTANCEID
 *    pcb == initialized xpath parser control block
@@ -1474,6 +1475,7 @@ status_t
     }
 #endif
 
+    pcb->curmode = XP_CM_TARGET;
     pcb->logerrors = TRUE;
     if (tkc && tkc->cur) {
         linenum = TK_CUR_LNUM(tkc);

@@ -583,6 +583,30 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION yang_obj_resolve_xpath_final
+* 
+* Fifth pass validate defvals for XPath leafs
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t 
+    yang_obj_resolve_xpath_final (yang_pcb_t *pcb,
+                                  tk_chain_t *tkc,
+                                  ncx_module_t *mod,
+                                  dlq_hdr_t *datadefQ);
+
+
+/********************************************************************
 * FUNCTION yang_obj_check_leafref_loops
 * 
 * Check all leafref objects for hard-wired object loops

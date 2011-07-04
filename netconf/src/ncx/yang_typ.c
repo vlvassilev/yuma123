@@ -3014,11 +3014,11 @@ static status_t
 * INPUTS:
 *   tkc == token chain
 *   mod == module in progress
-*   unionQ == Q of unfinished typ_unionnode_t structs
-*   parent == obj_template_t containing the union (may be NULL)
-*   grp == grp_template_t containing the union (may be NULL)
-*   fromdef == TRUE if this is a call for a typedef
-*           == FALSE if this is a call for a leaf or leaf-list
+*   typdef == typdef to check
+*   obj == obj_template_t containing the union (may be NULL)
+*   btyp == base type for the typdef
+*   badvalok == TRUE if invalid value is OK (called from union)
+*               FALSE if must be OK (called from plain simple type)
 *   defval == default value, if any
 *   hasdefval == address of has default value return value
 *   name == typ_template_t name, if any
@@ -3239,6 +3239,120 @@ static status_t
 }   /* resolve_union_type */
 
 
+/********************************************************************
+* FUNCTION resolve_union_type_final
+* 
+* Check for XPath defaults
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   unionQ == Q of unfinished typ_unionnode_t structs
+*   parent == obj_template_t containing the union (may be NULL)
+*   defval == default value, if any
+*   name == typ_template_t name, if any
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    resolve_union_type_final (tk_chain_t *tkc,
+                              ncx_module_t *mod,
+                              dlq_hdr_t *unionQ,
+                              obj_template_t *parent,
+                              const xmlChar *defval,
+                              const xmlChar *name)
+{
+    typ_unionnode_t *un;
+    status_t         res, retres;
+    ncx_btype_t      btyp;
+    boolean          needtest, defvaldone, hasdefval;
+
+    if (defval == NULL) {
+        return NO_ERR;
+    }
+
+    needtest = FALSE;
+
+    /* check if this extra test is needed */
+    for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
+         un != NULL && !needtest;
+         un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+
+        if (!typ_ok(un->typdef)) {
+            return NO_ERR;
+        }
+        btyp = typ_get_basetype(un->typdef);
+
+        if (btyp == NCX_BT_LEAFREF ||
+            btyp == NCX_BT_UNION ||
+            typ_is_xpath_string(un->typdef)) {
+            needtest = TRUE;
+        }
+    }
+
+    if (!needtest) {
+        return NO_ERR;
+    }
+
+    defvaldone = FALSE;
+    retres = NO_ERR;
+
+    /* run the extra test */
+    for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
+         un != NULL && !needtest;
+         un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+
+        /* check default value if any defined */
+        if (!defvaldone && (btyp != NCX_BT_NONE)) {
+            hasdefval = FALSE;
+            res = check_defval(tkc, 
+                               mod, 
+                               un->typdef, 
+                               parent, 
+                               btyp, 
+                               TRUE, 
+                               defval,
+                               &hasdefval,
+                               name);
+            if (hasdefval) {
+                if (res == NO_ERR) {
+                    defvaldone = TRUE;
+                } else {
+                    retres = res;
+                }
+            }
+        }
+    }
+
+    /* only report error if defval passed caused the error
+     * otherwise the resolve_type pass for member types in 
+     * the union will print a typdef defualt error
+     */
+    if (defval != NULL && !defvaldone) {
+        retres = ERR_NCX_INVALID_VALUE;
+        if (parent != NULL) {
+            log_error("\nError: Union %s '%s' has invalid "
+                      "default value (%s)",
+                      (name) ? "type" : 
+                      (const char *)obj_get_typestr(parent),
+                      (name) ? name : obj_get_name(parent), 
+                      defval);
+        } else {
+            log_error("\nError: Union %s '%s' has invalid default value",
+                      (name) ? "Type" : "leaf or leaf-list",
+                      (name) ? (const char *)name : "--", 
+                      defval);
+        }
+        tkc->curerr = &un->typdef->tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
+    }
+
+    return retres;
+
+}   /* resolve_union_type_final */
+
+
 /*******************************************************************
 * FUNCTION resolve_type
 * 
@@ -3302,6 +3416,7 @@ static status_t
     res = NO_ERR;
     retres = NO_ERR;
     errdone = FALSE;
+    errname = NULL;
     btyp = typ_get_basetype(typdef);
 
 #ifdef YANG_TYP_DEBUG
@@ -3392,17 +3507,25 @@ static status_t
         (btyp != NCX_BT_NONE) && 
         (btyp != NCX_BT_UNION) && typ_ok(typdef)) {
 
-        boolean hasdefval = FALSE;
+        if (btyp == NCX_BT_LEAFREF || typ_is_xpath_string(typdef)) {
+            if (LOGDEBUG4) {
+                log_debug4("\nyang_typ: postponing default check "
+                           "for type '%s'", 
+                           (errname) ? errname : NCX_EL_NONE);
+            }
+        } else {
+            boolean hasdefval = FALSE;
 
-        res = check_defval(tkc, 
-                           mod, 
-                           typdef, 
-                           obj, 
-                           btyp, 
-                           FALSE, 
-                           defval,
-                           &hasdefval,
-                           name);
+            res = check_defval(tkc, 
+                               mod, 
+                               typdef, 
+                               obj, 
+                               btyp, 
+                               FALSE, 
+                               defval,
+                               &hasdefval,
+                               name);
+        }
     }
 
     /* check built-in type specific details */
@@ -3536,6 +3659,142 @@ static status_t
 }  /* resolve_type */
 
 
+/*******************************************************************
+* FUNCTION resolve_type_final
+* 
+* Finish checking default values
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   obj == object containing this type (may be NULL)
+*   typdef == typ_def_t struct to check
+*   defval == default value string to check (may be NULL)
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_type_final (tk_chain_t *tkc,
+                        ncx_module_t  *mod,
+                        obj_template_t *obj,
+                        typ_def_t *typdef,
+                        const xmlChar *defval)
+{
+    const xmlChar *typname;
+    xpath_pcb_t   *pcb;
+    obj_template_t *leafobj;
+    status_t       res;
+    ncx_btype_t    btyp;
+    boolean        hasdefval;
+    
+
+    if (defval == NULL) {
+        return NO_ERR;
+    }
+
+    if (!typ_ok(typdef)) {
+        /* skip this test if typdef malformed */
+        return NO_ERR;
+    }
+    if (typdef->tclass == NCX_CL_BASE) {
+        return NO_ERR;
+    }
+    if (defval == NULL && obj != NULL) {
+        return NO_ERR;
+    }
+
+    btyp = typ_get_basetype(typdef);
+    switch (btyp) {
+    case NCX_BT_LEAFREF:
+    case NCX_BT_UNION:
+        break;
+    default:
+        if (!typ_is_xpath_string(typdef)) {
+            return NO_ERR;
+        }
+    }
+
+    res = NO_ERR;
+
+    typname = (typdef->typenamestr) ? typdef->typenamestr : NCX_EL_NONE;
+
+#ifdef YANG_TYP_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_typ: resolve type final '%s'", typname);
+    }
+#endif
+
+    /* check default value if any defined */
+    switch (btyp) {
+    case NCX_BT_LEAFREF:
+    case NCX_BT_INSTANCE_ID:
+        pcb = typ_get_leafref_pcb(typdef);
+        if (tkc != NULL) {
+            tkc->curerr = &pcb->tkerr;
+        }
+
+        leafobj = NULL;
+        if (obj == NULL) {
+            obj = ncx_get_gen_root();
+        }
+        
+        res = xpath_yang_validate_path(mod, 
+                                       obj, 
+                                       pcb, 
+                                       FALSE,
+                                       &leafobj);
+        if (res == NO_ERR && leafobj != NULL) {
+            typ_set_xref_typdef(typdef, 
+                                obj_get_typdef(leafobj));
+            if (obj->objtype == OBJ_TYP_LEAF) {
+                obj->def.leaf->leafrefobj = leafobj;
+            } else {
+                obj->def.leaflist->leafrefobj = leafobj;
+            }
+        }
+        break;
+    default:
+        ;
+        
+    }
+
+    if (res != NO_ERR) {
+        return res;
+    }
+    
+    switch (btyp) {
+    case NCX_BT_UNION:
+        hasdefval = FALSE;
+
+        res = check_defval(tkc, 
+                           mod, 
+                           typdef, 
+                           obj, 
+                           btyp, 
+                           FALSE, 
+                           defval,
+                           &hasdefval,
+                           typname);
+        break;
+    default:
+        if (typdef->tclass == NCX_CL_SIMPLE) {
+            /* special check for union typdefs, errors printed by called fn */
+            res = resolve_union_type_final(tkc, 
+                                           mod,
+                                           &typdef->def.simple.unionQ,
+                                           obj, 
+                                           defval,
+                                           (obj) ? obj_get_name(obj) : NULL);
+        }
+    }
+    
+
+    return res;
+
+}  /* resolve_type_final */
+
+
 /********************************************************************
 * FUNCTION resolve_typedef
 * 
@@ -3588,6 +3847,46 @@ static status_t
     return retres;
 
 }  /* resolve_typedef */
+
+
+/********************************************************************
+* FUNCTION resolve_typedef_final
+* 
+* Analyze the typdef (check defaults for XPath types)
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typ == typ_template struct to check
+*   obj == obj_template containing this typdef, NULL if top-level
+*   grp == grp_template containing this typdef, NULL if none
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_typedef_final (tk_chain_t *tkc,
+                           ncx_module_t  *mod,
+                           typ_template_t *typ)
+{
+    status_t   res;
+
+    if (typ->res != NO_ERR) {
+        return NO_ERR;
+    }
+
+    typ->res = res = resolve_type_final(tkc, 
+                                        mod, 
+                                        NULL,
+                                        &typ->typdef, 
+                                        typ->defval);
+    return res;
+
+}  /* resolve_typedef_final */
 
 
 /********************************************************************
@@ -4300,6 +4599,56 @@ status_t
 
 
 /********************************************************************
+* FUNCTION yang_typ_resolve_typedefs_final
+* 
+* Analyze the entire typeQ within the module struct
+* Finish all default value checking that was not done before
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typeQ == Q of typ_template_t structs t0o check
+*   parent == obj_template containing this typeQ
+*          == NULL if this is a module-level typeQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_resolve_typedefs_final (tk_chain_t *tkc,
+                                     ncx_module_t *mod,
+                                     dlq_hdr_t *typeQ)
+{
+    typ_template_t  *typ;
+    status_t         res, retres;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !typeQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    /* first resolve all the local type names */
+    for (typ = (typ_template_t *)dlq_firstEntry(typeQ);
+         typ != NULL;
+         typ = (typ_template_t *)dlq_nextEntry(typ)) {
+
+        res = resolve_typedef_final(tkc, mod, typ);
+        CHK_EXIT(res, retres);
+    }
+
+    return retres;
+
+}  /* yang_typ_resolve_typedefs_final */
+
+
+/********************************************************************
 * FUNCTION yang_typ_resolve_typedefs_grp
 * 
 * Analyze the entire typeQ within the module struct
@@ -4433,6 +4782,47 @@ status_t
     return res;
 
 }  /* yang_typ_resolve_type */
+
+
+/********************************************************************
+* FUNCTION yang_typ_resolve_type_final
+* 
+* Check default values for XPath types
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typdef == typdef struct from leaf or leaf-list to check
+*   defval == default value string for this leaf (may be NULL)
+*   obj == obj_template containing this typdef
+*       == NULL if this is a top-level union typedef,
+*          checking its nested unnamed type clauses
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_typ_resolve_type_final (tk_chain_t *tkc,
+                                 ncx_module_t  *mod,
+                                 typ_def_t *typdef,
+                                 const xmlChar *defval,
+                                 obj_template_t *obj)
+{
+    status_t         res;
+
+#ifdef DEBUG
+    if (!tkc || !mod || !typdef) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = resolve_type_final(tkc, mod, obj, typdef, defval);
+    return res;
+
+}  /* yang_typ_resolve_type_final */
 
 
 /********************************************************************

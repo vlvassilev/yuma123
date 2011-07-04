@@ -9507,7 +9507,7 @@ static status_t
                 } else {
                     tkc->curerr = &pcb->tkerr;
                     res = xpath_yang_parse_path(tkc, 
-                                                mod, 
+                                                mod,
                                                 XP_SRC_LEAFREF,
                                                 pcbclone);
                     if (res == NO_ERR) {
@@ -10953,6 +10953,79 @@ status_t
     return retres;
 
 }  /* yang_obj_resolve_xpath */
+
+
+/********************************************************************
+* FUNCTION yang_obj_resolve_xpath_final
+* 
+* Fifth pass validate defvals for XPath leafs
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_resolve_xpath_final (yang_pcb_t *pcb,
+                                  tk_chain_t *tkc,
+                                  ncx_module_t *mod,
+                                  dlq_hdr_t *datadefQ)
+{
+    dlq_hdr_t       *childQ;
+    obj_template_t  *testobj;
+    status_t         res, retres;
+
+#ifdef DEBUG
+    if (!pcb || !tkc || !mod || !datadefQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* only need to check the top-level obkects because only
+     * top-level augments can be for other modules
+     */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+        if (obj_has_name(testobj) && 
+            obj_get_status(testobj) != NCX_STATUS_OBSOLETE) {
+
+            if (obj_is_leafy(testobj) && 
+                obj_get_default(testobj) != NULL) {
+                res = yang_typ_resolve_type_final(tkc,
+                                                  mod,
+                                                  obj_get_typdef(testobj),
+                                                  obj_get_default(testobj),
+                                                  testobj);
+                CHK_EXIT(res, retres);
+            } else {
+                /* get the augment target datadefQ */
+                childQ = obj_get_datadefQ(testobj);
+                if (childQ != NULL) { 
+                    res = yang_obj_resolve_xpath_final(pcb,
+                                                       tkc,
+                                                       mod,
+                                                       childQ);
+                    CHK_EXIT(res, retres);
+                }
+            }
+        }
+    }
+
+    return retres;
+
+}  /* yang_obj_resolve_xpath_final */
 
 
 /********************************************************************

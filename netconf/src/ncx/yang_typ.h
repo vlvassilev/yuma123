@@ -199,6 +199,31 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION yang_typ_resolve_typedefs_final
+* 
+* Analyze the entire typeQ within the module struct
+* Finish all default value checking that was not done before
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typeQ == Q of typ_template_t structs t0o check
+*   parent == obj_template containing this typeQ
+*          == NULL if this is a module-level typeQ
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t 
+    yang_typ_resolve_typedefs_final (tk_chain_t *tkc,
+                                     ncx_module_t *mod,
+                                     dlq_hdr_t *typeQ);
+
+
+/********************************************************************
 * FUNCTION yang_typ_resolve_typedefs_grp
 * 
 * Analyze the entire typeQ within the module struct
@@ -282,6 +307,33 @@ extern status_t
 			   typ_def_t *typdef,
 			   const xmlChar *defval,
 			   obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION yang_typ_resolve_type_final
+* 
+* Check default values for XPath types
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   typdef == typdef struct from leaf or leaf-list to check
+*   defval == default value string for this leaf (may be NULL)
+*   obj == obj_template containing this typdef
+*       == NULL if this is a top-level union typedef,
+*          checking its nested unnamed type clauses
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t 
+    yang_typ_resolve_type_final (tk_chain_t *tkc,
+                                 ncx_module_t  *mod,
+                                 typ_def_t *typdef,
+                                 const xmlChar *defval,
+                                 obj_template_t *obj);
 
 
 /********************************************************************

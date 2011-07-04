@@ -3566,19 +3566,6 @@ static status_t
                                  FALSE);
     CHK_EXIT(res, retres);
 
-    /* Final augment expand
-     * List keys that were not cloned in yang_obj_resolve_augment
-     * so another check for cloned lists is needed here
-     */
-    if (LOGDEBUG4) {
-        log_debug4("\nyang_parse: resolve augments final");
-    }
-    res = yang_obj_resolve_augments_final(pcb,
-                                          tkc, 
-                                          mod, 
-                                          &mod->datadefQ);
-    CHK_EXIT(res, retres);
-
     /* Validate all the XPath expressions within all cooked objects */
     if (mod->ismod || pcb->top == mod) {
         /* this will resolve all the XPath usage within
@@ -3586,6 +3573,9 @@ static status_t
          * need to wait until all the includes are processed for
          * the imported module, top module, or top submodule
          */
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_parse: resolve xpath");
+        }
         res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
         CHK_EXIT(res, retres);
 
@@ -3594,14 +3584,114 @@ static status_t
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
 
-            if (node->submod) {
-                res = yang_obj_top_resolve_final(pcb, 
-                                                 tkc,
-                                                 node->submod,
-                                                 &node->submod->datadefQ);
-                CHK_EXIT(res, retres);
+            if (node->submod == NULL) {
+                continue;
             }
+
+            /* finish list keys, etc. */
+            res = yang_obj_top_resolve_final(pcb, 
+                                             tkc,
+                                             node->submod,
+                                             &node->submod->datadefQ);
+            CHK_EXIT(res, retres);
+        
+            /* resolve XPath in submodules */
+            res = yang_obj_resolve_xpath(tkc,
+                                         node->submod,
+                                         &node->submod->datadefQ);
+            CHK_EXIT(res, retres);
         }
+
+        /* Final augment expand
+         * List keys that were not cloned in yang_obj_resolve_augment
+         * so another check for cloned lists is needed here
+         */
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_parse: resolve augments final");
+        }
+        res = yang_obj_resolve_augments_final(pcb,
+                                              tkc, 
+                                              mod, 
+                                              &mod->datadefQ);
+        CHK_EXIT(res, retres);
+
+        /* fill in all the list keys in cross-submodule augments */
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+
+            if (node->submod == NULL) {
+                continue;
+            }
+
+            /* check submod augmenting external modules */
+            res = yang_obj_resolve_augments_final(pcb,
+                                                  tkc, 
+                                                  node->submod, 
+                                                  &node->submod->datadefQ);
+            CHK_EXIT(res, retres);
+        }
+
+        /* Final XPath check
+         * defvals for XPath leafs (& leafref) were not checked
+         * in yang_obj_resolve_xpath so another check for 
+         * these leafs with defaults is needed
+         */
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_parse: resolve XPath final");
+        }
+        res = yang_obj_resolve_xpath_final(pcb,
+                                           tkc, 
+                                           mod, 
+                                           &mod->datadefQ);
+        CHK_EXIT(res, retres);
+
+        /* final XPath check for all sub-modules */
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+
+            if (node->submod == NULL) {
+                continue;
+            }
+
+            /* check submod augmenting external modules */
+            res = yang_obj_resolve_xpath_final(pcb,
+                                               tkc, 
+                                               node->submod, 
+                                               &node->submod->datadefQ);
+            CHK_EXIT(res, retres);
+        }
+
+        /* final check of defvals in typedefs */
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_parse: resolve XPath final");
+        }
+        res = yang_typ_resolve_typedefs_final(tkc, mod, &mod->typeQ);
+        CHK_EXIT(res, retres);
+
+        /* final XPath check in typedefs for all sub-modules */
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+
+            if (node->submod == NULL) {
+                continue;
+            }
+
+            /* check submod augmenting external modules */
+            res = yang_typ_resolve_typedefs_final(tkc, 
+                                                  node->submod, 
+                                                  &node->submod->typeQ);
+            CHK_EXIT(res, retres);
+        }
+
+        /* !!! TBD!!!
+         * !!! Need to add final XPath check for grouping 
+         * !!! only objects expanded from uses will have
+         * !!! this final check; unused groupings will not
+         * !!! be checked
+         */
     }
 
     /* check for loops in any leafref XPath targets */

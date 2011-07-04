@@ -1,8 +1,7 @@
-
    module ietf-interfaces {
 
      namespace "urn:ietf:params:xml:ns:yang:ietf-interfaces";
-     prefix "if";
+     prefix if;
 
      import iana-if-type {
        prefix ift;
@@ -37,6 +36,7 @@
         set forth in Section 4.c of the IETF Trust's Legal Provisions
         Relating to IETF Documents
         (http://trustee.ietf.org/license-info).
+
         This version of this YANG module is part of RFC XXXX; see
         the RFC itself for full legal notices.";
 
@@ -45,7 +45,7 @@
 
      // RFC Ed.: update the date below with the date of RFC publication
      // and remove this note.
-     revision 2011-03-29 {
+     revision 2011-05-20 {
        description
          "Initial revision.";
        reference
@@ -67,8 +67,7 @@
 
      feature snmp-if-mib {
        description
-         "This feature indicates that the server implements IF-MIB,
-          accessible over SNMP.";
+         "This feature indicates that the server implements IF-MIB.";
        reference
          "RFC 2863: The Interfaces Group MIB";
      }
@@ -147,16 +146,9 @@
               the interface.";
          }
 
-         leaf admin-status {
-           type enumeration {
-             enum "up" {
-               value 1;
-             }
-             enum "down" {
-               value 2;
-             }
-           }
-           default "up";
+         leaf enabled {
+           type boolean;
+           default "true";
            description
              "The desired state of the interface.
 
@@ -164,11 +156,6 @@
               interface.  Systems that implement the IF-MIB use the
               value of this leaf to set IF-MIB.ifAdminStatus after an
               ifEntry has been initialized, as described in RFC 2863.";
-           // FIXME: Can we say that changing ifAdminStatus does NOT
-           //        change this object?  If not, is the opposite
-           //        always true, i.e. that changing ifAdminStatus
-           //        results in a change of this object (in running)?
-           //        Or should we be silent?
            reference
              "RFC 2863: The Interfaces Group MIB - ifAdminStatus";
          }

@@ -1163,5 +1163,65 @@ ncx_module_t *
 }  /* get_netconf_mod */
 
 
+/********************************************************************
+* FUNCTION clone_old_parm
+* 
+*  Clone a parameter value from the 'old' value set
+*  if it exists there, and add it to the 'new' value set
+*  only if the new value set does not have this parm
+*
+* The old and new pvalue sets must be complex types 
+*  NCX_BT_LIST, NCX_BT_CONTAINER, or NCX_BT_ANYXML
+*
+* INPUTS:
+*   oldvalset == value set to copy from
+*   newvalset == value set to copy into
+*   parm == object template to find and copy
+*
+* RETURNS:
+*  status
+*********************************************************************/
+status_t
+    clone_old_parm (val_value_t *oldvalset,
+                    val_value_t *newvalset,
+                    obj_template_t *parm)
+{
+    val_value_t  *findval, *newval;
+
+#ifdef DEBUG
+    if (oldvalset == NULL || newvalset == NULL || parm == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!typ_has_children(oldvalset->btyp)) {
+        return ERR_NCX_INVALID_VALUE;
+    }
+    if (!typ_has_children(newvalset->btyp)) {
+        return ERR_NCX_INVALID_VALUE;
+    }
+#endif
+
+    findval = val_find_child(newvalset,
+                             obj_get_mod_name(parm),
+                             obj_get_name(parm));
+    if (findval != NULL) {
+        return NO_ERR;
+    }
+
+    findval = val_find_child(oldvalset,
+                             obj_get_mod_name(parm),
+                             obj_get_name(parm));
+    if (findval == NULL) {
+        return NO_ERR;
+    }
+
+    newval = val_clone(findval);
+    if (newval == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    val_add_child(newval, newvalset);
+    return NO_ERR;
+
+}  /* clone_old_parm */
+
 
 /* END yangcli_util.c */

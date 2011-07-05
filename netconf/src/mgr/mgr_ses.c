@@ -144,7 +144,7 @@ static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 
 
 /********************************************************************
-* FUNCTION connect_to_agent
+* FUNCTION connect_to_server
 *
 * Try to connect to the NETCONF server indicated by the host entry
 * Only trying one address at this time
@@ -162,7 +162,7 @@ static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 *   status
 *********************************************************************/
 static status_t
-    connect_to_agent (ses_cb_t *scb,
+    connect_to_server (ses_cb_t *scb,
                       struct hostent *hent,
                       uint16_t port)
 {
@@ -186,7 +186,7 @@ static status_t
     /* activate the socket in the select loop */
     mgr_io_activate_session(scb->fd);
 
-    /* set the NETCONF agent address */
+    /* set the NETCONF server address */
     memset(&targ, 0x0, sizeof(targ));
     targ.sin_family = AF_INET;
     memcpy((char *)&targ.sin_addr.s_addr,
@@ -225,7 +225,7 @@ static status_t
 
     return ERR_NCX_CONNECT_FAILED;
 
-}  /* connect_to_agent */
+}  /* connect_to_server */
 
 
 /********************************************************************
@@ -233,7 +233,10 @@ static status_t
 *
 * Setup the SSH2 session and channel
 * Connection MUST already established
-
+*
+* The pubkeyfile and privkeyfile parameters will be used first.
+* If this fails, the password parameter will be checked
+*
 * INPUTS:
 *   scb == session control block
 *   hent == host entry struct
@@ -249,7 +252,10 @@ static status_t
 static status_t
     ssh2_setup (ses_cb_t *scb,
                 const char *user,
-                const char *password)
+                const char *password,
+                const char *pubkeyfile,
+                const char *privkeyfile)
+                
 {
     mgr_scb_t  *mscb;
     const char *fingerprint;
@@ -305,17 +311,17 @@ static status_t
 
 
     /* get the userauth info by sending an SSH_USERAUTH_NONE
-     * request to the agent, hoping it will fail, and the
+     * request to the server, hoping it will fail, and the
      * list of supported auth methods will be returned
      */
     userauthlist = libssh2_userauth_list(mscb->session,
                                          user, 
                                          strlen(user));
     if (!userauthlist) {
-        /* check if the agent accepted NONE as an auth method */
+        /* check if the server accepted NONE as an auth method */
         if (libssh2_userauth_authenticated(mscb->session)) {
             if (LOGINFO) {
-                log_info("\nmgr_ses: agent accepted SSH_AUTH_NONE");
+                log_info("\nmgr_ses: server accepted SSH_AUTH_NONE");
             }
             authdone = TRUE;
         } else {
@@ -327,33 +333,134 @@ static status_t
     }
 
     if (LOGDEBUG2) {
-        log_debug2("\nmgr_ses: Got agent authentication methods: %s\n", 
+        log_debug2("\nmgr_ses: Got server authentication methods: %s\n", 
                    userauthlist);
     }
 
     if (!authdone) {
+        if (strstr(userauthlist, "publickey") != NULL &&
+            pubkeyfile != NULL &&
+            privkeyfile != NULL) {
+            boolean keyauthdone = FALSE;
+            while (!keyauthdone) {
+                ret = libssh2_userauth_publickey_fromfile(mscb->session, 
+                                                          user, 
+                                                          pubkeyfile, 
+                                                          privkeyfile, 
+                                                          password);
+                if (ret) {
+                    if (ret == LIBSSH2_ERROR_EAGAIN) {
+                        if (LOGDEBUG2) {
+                            log_debug2("\nlibssh2 public key connect EAGAIN");
+                        }
+                        usleep(10);
+                        continue;
+                    } else {
+                        keyauthdone = TRUE;
+                    }
+                    if ((LOGINFO && password == NULL) || LOGDEBUG2) {
+                        const char *logstr = NULL;
 
-        if (strstr(userauthlist, "publickey") != NULL) {
-            ; /***/
-        }
-
-        if (!authdone && strstr(userauthlist, "password") != NULL) {
-            ret = libssh2_userauth_password(mscb->session, user, password);
-            if (ret) {
-                if (LOGINFO) {
-                    log_info("\nmgr_ses: SSH2 password authentication failed");
+                        switch (ret) {
+                        case LIBSSH2_ERROR_ALLOC:
+                            logstr = "libssh2 internal memory error";
+                            break;
+                        case LIBSSH2_ERROR_SOCKET_SEND:
+                            logstr = "libssh2 unable to send data on socket";
+                            break;
+                        case LIBSSH2_ERROR_SOCKET_TIMEOUT:
+                            logstr = "libssh2 socket timeout";
+                            break;
+                        case LIBSSH2_ERROR_PUBLICKEY_UNRECOGNIZED:
+                            logstr = "libssh2 username/public key invalid";
+                            break;
+                        case LIBSSH2_ERROR_PUBLICKEY_UNVERIFIED:
+                            logstr = "libssh2 username/public key invalid";
+                            break;
+                        case LIBSSH2_ERROR_FILE:
+                            logstr = "libssh2 password file needed";
+                            break;
+                        default:
+                            logstr = "libssh2 general error";
+                        }
+                        log_info("\nmgr_ses: SSH2 publickey authentication "
+                                 "failed:\n  %s\n  key file was '%s'\n", 
+                                 logstr,
+                                 pubkeyfile);
+                        if (password == NULL) {
+                            return ERR_NCX_AUTH_FAILED;
+                        }
+                    }
+                } else {
+                    if (LOGDEBUG2) {
+                        log_debug2("\nmgr_ses: public key login succeeded");
+                    }
+                    authdone = TRUE;
+                    keyauthdone = TRUE;
                 }
-                return ERR_NCX_AUTH_FAILED;
-            } else {
-                authdone = TRUE;
             }
         }
 
+        if (!authdone && 
+            password != NULL &&
+            strstr(userauthlist, "password") != NULL) {
+            boolean passauthdone = FALSE;
+            while (!passauthdone) {
+                ret = libssh2_userauth_password(mscb->session, 
+                                                user, 
+                                                password);
+                if (ret) {
+                    if (ret == LIBSSH2_ERROR_EAGAIN) {
+                        if (LOGDEBUG2) {
+                            log_debug2("\nlibssh2 password connect EAGAIN");
+                        }
+                        usleep(10);
+                        continue;
+                    } else {
+                        passauthdone = TRUE;
+                    }
+                    if (LOGINFO) {
+                        const char *logstr = NULL;
+
+                        switch (ret) {
+                        case LIBSSH2_ERROR_ALLOC:
+                            logstr = "libssh2 internal memory error";
+                            break;
+                        case LIBSSH2_ERROR_SOCKET_SEND:
+                            logstr = "libssh2 unable to send data on socket";
+                            break;
+                        case LIBSSH2_ERROR_PASSWORD_EXPIRED:
+                            logstr = "libssh2 password expired";
+                            break;
+                        case LIBSSH2_ERROR_AUTHENTICATION_FAILED:
+                            logstr = "libssh2 username/password invalid";
+                            break;
+                        default:
+                            logstr = "libssh2 general error";
+                        }
+                        log_info("\nmgr_ses: SSH2 password authentication "
+                                 "failed: %s", 
+                                 logstr);
+                    }
+                    return ERR_NCX_AUTH_FAILED;
+                } else {
+                    if (LOGDEBUG2) {
+                        log_debug2("\nmgr_ses: password login succeeded");
+                    }
+                    authdone = TRUE;
+                    passauthdone = TRUE;
+                }
+            }
+        }
     }
 
     if (!authdone) {
-        if (LOGINFO) {
-            log_info("\nmgr_ses: No supported authentication methods found!\n");
+        if (password == NULL) {
+            log_error("\nError: New session failed: no password "
+                      "provided\n");
+        } else {
+            log_error("\nError: New session failed: authentication "
+                      "failed!\n");
         }
         return ERR_NCX_AUTH_FAILED;
     }
@@ -531,15 +638,20 @@ void
 * FUNCTION mgr_ses_new_session
 *
 * Create a new session control block and
-* start a NETCONF session with to the specified agent
+* start a NETCONF session with to the specified server
 *
 * After this functions returns OK, the session state will
-* be in HELLO_WAIT state. An agent <hello> must be received
+* be in HELLO_WAIT state. An server <hello> must be received
 * before any <rpc> requests can be sent
+*
+* The pubkeyfile and privkeyfile parameters will be used first.
+* If this fails, the password parameter will be checked
 *
 * INPUTS:
 *   user == user name
 *   password == user password
+*   pubkeyfile == filespec for client public key
+*   privkeyfile == filespec for client private key
 *   target == ASCII IP address or DNS hostname of target
 *   port == NETCONF port number to use, or 0 to use defaults
 *   progcb == temp program instance control block,
@@ -560,6 +672,8 @@ void
 status_t
     mgr_ses_new_session (const xmlChar *user,
                          const xmlChar *password,
+                         const char *pubkeyfile,
+                         const char *privkeyfile,
                          const xmlChar *target,
                          uint16 port,
                          ncxmod_temp_progcb_t *progcb,
@@ -574,7 +688,7 @@ status_t
     uint       i, slot;
 
 #ifdef DEBUG
-    if (!user || !password || !target || !retsid) {
+    if (user == NULL || target == NULL || retsid == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
@@ -659,8 +773,8 @@ status_t
     /* get the hostname for the specified target */
     hent = gethostbyname((const char *)target);
     if (hent) {
-        /* entry OK, try to get a TCP connection to agent */
-        res = connect_to_agent(scb, hent, port);
+        /* entry OK, try to get a TCP connection to server */
+        res = connect_to_server(scb, hent, port);
     } else {
         res = ERR_NCX_UNKNOWN_HOST;
     } 
@@ -669,7 +783,9 @@ status_t
     if (res == NO_ERR) {
         res = ssh2_setup(scb, 
                          (const char *)user,
-                         (const char *)password);
+                         (const char *)password,
+                         pubkeyfile,
+                         privkeyfile);
     }
 
     if (res != NO_ERR) {
@@ -679,7 +795,7 @@ status_t
         return res;
     }
 
-    /* do not have a session-ID from the agent yet 
+    /* do not have a session-ID from the server yet 
      * so use the address of the scb in the ready blocks
      */
     scb->sid = slot;
@@ -695,7 +811,7 @@ status_t
         res = val_set_ses_protocols_parm(scb, protocols_parent);
     }
 
-    /* send the manager hello to the agent */
+    /* send the manager hello to the server */
     if (res == NO_ERR) {
         res = mgr_hello_send(scb);
     }
@@ -1281,7 +1397,7 @@ status_t
 * Retrieve the session control block
 *
 * INPUTS:
-*   sid == manager session ID (not agent assigned ID)
+*   sid == manager session ID (not server assigned ID)
 *
 * RETURNS:
 *   pointer to session control block or NULL if invalid

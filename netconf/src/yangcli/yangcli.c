@@ -2231,6 +2231,30 @@ static status_t
         }
     }
 
+    /* get the --private-key parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_PRIVATE_KEY);
+    if (parm && parm->res == NO_ERR) {
+        /* save to the connect_valset parmset */
+        res = add_clone_parm(parm, connect_valset);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    /* get the --public-key parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_PUBLIC_KEY);
+    if (parm && parm->res == NO_ERR) {
+        /* save to the connect_valset parmset */
+        res = add_clone_parm(parm, connect_valset);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
     /* get the run-script parameter */
     runscript = get_strparm(mgr_cli_valset, 
                             YANGCLI_MOD, 
@@ -2275,6 +2299,7 @@ static status_t
     if (parm && parm->res == NO_ERR) {
         versionmode = TRUE;
     }
+
 
     return NO_ERR;
 
@@ -4154,23 +4179,43 @@ val_value_t *
 status_t
     replace_connect_valset (const val_value_t *valset)
 {
-    val_value_t   *replaceval;
+    val_value_t   *findval, *replaceval;
+
 #ifdef DEBUG
-    if (!valset) {
+    if (valset == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    replaceval = val_clone(valset);
-    if (!replaceval) {
-        return ERR_INTERNAL_MEM;
+    if (connect_valset == NULL) {
+        connect_valset = val_clone(valset);
+        if (connect_valset == NULL) {
+            return ERR_INTERNAL_MEM;
+        } else {
+            return NO_ERR;
+        }
     }
 
-    if (connect_valset) {
-        val_free_value(connect_valset);
+    /* go through the connect value set passed in and compare
+     * to the existing connect_valset; only replace the
+     * parameters that are not already set
+     */
+    for (findval = val_get_first_child(valset);
+         findval != NULL;
+         findval = val_get_next_child(findval)) {
+
+        replaceval = val_find_child(connect_valset,
+                                    val_get_mod_name(findval),
+                                    findval->name);
+        if (replaceval == NULL) {
+            replaceval = val_clone(findval);
+            if (replaceval == NULL) {
+                return ERR_INTERNAL_MEM;
+            }
+            val_add_child(replaceval, connect_valset);
+        }
     }
 
-    connect_valset = replaceval;
     return NO_ERR;
 
 }  /* replace_connect_valset */

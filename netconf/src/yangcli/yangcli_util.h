@@ -472,6 +472,31 @@ extern ncx_var_t *
 extern ncx_module_t *
     get_netconf_mod (server_cb_t *server_cb);
 
+
+/********************************************************************
+* FUNCTION clone_old_parm
+* 
+*  Clone a parameter value from the 'old' value set
+*  if it exists there, and add it to the 'new' value set
+*  only if the new value set does not have this parm
+*
+* The old and new pvalue sets must be complex types 
+*  NCX_BT_LIST, NCX_BT_CONTAINER, or NCX_BT_ANYXML
+*
+* INPUTS:
+*   oldvalset == value set to copy from
+*   newvalset == value set to copy into
+*   parm == object template to find and copy
+*
+* RETURNS:
+*  status
+*********************************************************************/
+extern status_t
+    clone_old_parm (val_value_t *oldvalset,
+                    val_value_t *newvalset,
+                    obj_template_t *parm);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

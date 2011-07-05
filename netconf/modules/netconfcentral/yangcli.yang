@@ -50,6 +50,11 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2011-07-05 {
+       description 
+         "Add PublicKeyParms grouping.";
+    }
+
     revision 2011-06-27 {
        description 
           "Added --urltarget=<url> parameter to FillParms grouping
@@ -330,6 +335,36 @@ module yangcli {
           type nt:Timeout;
         }
  
+        leaf public-key {
+          type string {
+            length "1 .. max";
+          }
+          description
+            "Contains the file path specification
+             for the file containing the client-side public key.
+             If both 'public-key' and 'private-key' files are
+             present, the client will attempt to connect
+             to the server using these keys.  If this fails,
+             or not done, then password authentication will
+             be attempted.";
+          default "$HOME/.ssh/id_rsa.pub";
+        }
+
+        leaf private-key {
+          type string {
+            length "1 .. max";
+          }
+          description
+            "Contains the file path specification
+             for the file containing the client-side private key.
+             If both 'public-key' and 'private-key' files are
+             present, the client will attempt to connect
+             to the server using these keys.  If this fails,
+             or not done, then password authentication will
+             be attempted.";
+          default "$HOME/.ssh/id_rsa";
+        }
+
         uses ncxapp:ProtocolsParm;
     }
 
@@ -360,6 +395,7 @@ module yangcli {
              or numeric/string constants.";
         }
     }
+
 
     /*************************************************************
      *
@@ -600,13 +636,11 @@ module yangcli {
           refine user {
     	    mandatory true;
           }
-
           refine server {
   	    mandatory true;
           }
-
           refine password {
-            mandatory true;
+  	    mandatory true;
           }
         }
       }

@@ -209,6 +209,8 @@ extern "C" {
 #define YANGCLI_ORDER       (const xmlChar *)"order"
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PROTOCOLS   (const xmlChar *)"protocols"
+#define YANGCLI_PRIVATE_KEY (const xmlChar *)"private-key"
+#define YANGCLI_PUBLIC_KEY  (const xmlChar *)"public-key"
 #define YANGCLI_RESTART_OK  (const xmlChar *)"restart-ok"
 #define YANGCLI_RETRY_INTERVAL (const xmlChar *)"retry-interval"
 #define YANGCLI_RUN_COMMAND (const xmlChar *)"run-command"
@@ -399,6 +401,8 @@ typedef struct server_cb_t_ {
     xmlChar             *name;
     xmlChar             *address;
     xmlChar             *password;
+    xmlChar             *publickey;
+    xmlChar             *privatekey;
     const xmlChar       *default_target;
     val_value_t         *connect_valset; 
 
@@ -453,7 +457,7 @@ typedef struct server_cb_t_ {
      * modules are checked out, and the results are stored in
      * this Q of ncxmod_search_result_t 
      */
-    dlq_hdr_t            searchresultQ;
+    dlq_hdr_t            searchresultQ; /* Q of ncxmod_search_result_t */
     ncxmod_search_result_t  *cursearchresult;
 
     /* contains only the modules that the server is using
@@ -491,8 +495,6 @@ typedef struct server_cb_t_ {
     completion_state_t   completion_state;
     boolean              climore;
     xmlChar              clibuff[YANGCLI_BUFFLEN];
-
-
 } server_cb_t;
 
 

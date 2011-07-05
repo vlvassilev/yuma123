@@ -1786,14 +1786,23 @@ static status_t
 
         if ((!server_cb->get_optional && !iswrite) ||
             !need_get_parm(parm)) {
+            if (oldvalset != NULL) {
+                res = clone_old_parm(oldvalset, valset, parm);
+            }
             continue;
         }
 
         if (!server_cb->get_optional) {
             if (!obj_is_mandatory(parm)) {
+                if (oldvalset != NULL) {
+                    res = clone_old_parm(oldvalset, valset, parm);
+                }
                 continue;
             }
             if (!iswrite && !obj_is_key(parm)) {
+                if (oldvalset != NULL) {
+                    res = clone_old_parm(oldvalset, valset, parm);
+                }
                 continue;
             }
         }
@@ -2008,6 +2017,7 @@ static void
     create_session (server_cb_t *server_cb)
 {
     const xmlChar          *server, *username, *password;
+    const char             *publickey, *privatekey;
     modptr_t               *modptr;
     ncxmod_search_result_t *searchresult;
     val_value_t            *val;
@@ -2053,6 +2063,7 @@ static void
     }
 
     /* retrieving the parameters should not fail */
+    username = NULL;
     val =  val_find_child(server_cb->connect_valset, 
                           YANGCLI_MOD, 
                           YANGCLI_USER);
@@ -2063,6 +2074,7 @@ static void
         return;
     }
 
+    server = NULL;
     val = val_find_child(server_cb->connect_valset,
                          YANGCLI_MOD, 
                          YANGCLI_SERVER);
@@ -2073,14 +2085,12 @@ static void
         return;
     }
 
+    password = NULL;
     val = val_find_child(server_cb->connect_valset,
                          YANGCLI_MOD, 
                          YANGCLI_PASSWORD);
     if (val && val->res == NO_ERR) {
         password = VAL_STR(val);
-    } else {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
     }
 
     port = 0;
@@ -2089,6 +2099,22 @@ static void
                          YANGCLI_NCPORT);
     if (val && val->res == NO_ERR) {
         port = VAL_UINT16(val);
+    }
+
+    publickey = NULL;
+    val = val_find_child(server_cb->connect_valset,
+                         YANGCLI_MOD, 
+                         YANGCLI_PUBLIC_KEY);
+    if (val && val->res == NO_ERR) {
+        publickey = (const char *)VAL_STR(val);
+    }
+
+    privatekey = NULL;
+    val = val_find_child(server_cb->connect_valset,
+                         YANGCLI_MOD, 
+                         YANGCLI_PRIVATE_KEY);
+    if (val && val->res == NO_ERR) {
+        privatekey = (const char *)VAL_STR(val);
     }
 
     log_info("\nyangcli: Starting NETCONF session for %s on %s",
@@ -2103,6 +2129,8 @@ static void
      */
     res = mgr_ses_new_session(username, 
                               password, 
+                              publickey,
+                              privatekey,
                               server, 
                               port, 
                               server_cb->temp_progcb,
@@ -7664,9 +7692,11 @@ xmlChar *
  *   start == byte offset from 'line' where the parse RPC method
  *            left off.  This is eiother empty or contains some 
  *            parameters from the user
- *   climode == TRUE if starting from CLI and should try
+ *   startupmode == TRUE if starting from init and should try
  *              to connect right away if the mandatory parameters
- *              are present
+ *              are present.
+ *               == FALSE to check --optional and add parameters
+ *                  if set or any missing mandatory parms
  *
  * OUTPUTS:
  *   connect_valset parms may be set 
@@ -7680,7 +7710,7 @@ status_t
                 obj_template_t *rpc,
                 const xmlChar *line,
                 uint32 start,
-                boolean climode)
+                boolean startupmode)
 {
     obj_template_t        *obj;
     val_value_t           *connect_valset;
@@ -7689,16 +7719,15 @@ status_t
     boolean                s1, s2, s3;
 
 #ifdef DEBUG
-    if (!server_cb) {
+    if (server_cb == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* retrieve the 'connect' RPC template, if not done already */
-    if (!rpc) {
-        rpc = ncx_find_object(get_yangcli_mod(), 
-                              YANGCLI_CONNECT);
-        if (!rpc) {
+    if (rpc == NULL) {
+        rpc = ncx_find_object(get_yangcli_mod(), YANGCLI_CONNECT);
+        if (rpc == NULL) {
             server_cb->state = MGR_IO_ST_IDLE;
             log_write("\nError finding the 'connect' RPC method");
             return ERR_NCX_DEF_NOT_FOUND;
@@ -7706,7 +7735,7 @@ status_t
     }            
 
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    if (!obj) {
+    if (obj == NULL) {
         server_cb->state = MGR_IO_ST_IDLE;
         log_write("\nError finding the connect RPC 'input' node");        
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -7718,7 +7747,7 @@ status_t
 
     /* process any parameters entered on the command line */
     valset = NULL;
-    if (line) {
+    if (line != NULL) {
         while (line[start] && xml_isspace(line[start])) {
             start++;
         }
@@ -7727,7 +7756,7 @@ status_t
                                    rpc, 
                                    &line[start], 
                                    &res);
-            if (!valset || res != NO_ERR) {
+            if (valset == NULL || res != NO_ERR) {
                 if (valset) {
                     val_free_value(valset);
                 }
@@ -7740,18 +7769,18 @@ status_t
         }
     }
 
-    if (!valset) {
-        if (climode) {
+    if (valset == NULL) {
+        if (startupmode) {
             /* just clone the connect valset to start with */
             valset = val_clone(connect_valset);
-            if (!valset) {
+            if (valset == NULL) {
                 server_cb->state = MGR_IO_ST_IDLE;
                 log_write("\nError: malloc failed");
                 return ERR_INTERNAL_MEM;
             }
         } else {
             valset = val_new_value();
-            if (!valset) {
+            if (valset == NULL) {
                 log_write("\nError: malloc failed");
                 server_cb->state = MGR_IO_ST_IDLE;
                 return ERR_INTERNAL_MEM;
@@ -7778,7 +7807,7 @@ status_t
      * try to get any missing params in valset 
      */
     if (interactive_mode()) {
-        if (climode && s1 && s2 && s3) {
+        if (startupmode && s1 && s2 && s3) {
             if (LOGDEBUG3) {
                 log_debug3("\nyangcli: CLI direct connect mode");
             }

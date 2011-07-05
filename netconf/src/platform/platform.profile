@@ -29,6 +29,13 @@ CINC +=-I. -I../agt -I../mgr \
     -I$(DESTDIR)$(PREFIX)/include/libxml2 \
     -I$(DESTDIR)$(PREFIX)/include/libxml2/libxml
 
+ifdef FREEBSD
+FPATH=-L/usr/local/lib
+CINC += -I/usr/local/include \
+    -I/usr/local/include/libxml2 \
+    -I/usr/local/include/libxml2/libxml
+endif
+
 
 # added /sw/include for MacOSX
 ifdef MAC
@@ -50,7 +57,7 @@ endif
 #
 # platform.profile.cmn
 #
-
+ifndef OWNER
 ifdef DESTDIR
 OWNER=
 else
@@ -64,6 +71,7 @@ ifdef CYGWIN
 OWNER=
 else
 OWNER= --owner=root
+endif
 endif
 endif
 endif
@@ -93,6 +101,14 @@ ifdef WINDOWS
 CDEFS=-DDEBUG=1 -DWINDOWS=1 -DGCC=1
 else
 CDEFS=-DDEBUG=1 -DLINUX=1 -DGCC=1
+endif
+
+ifdef FREEBSD
+CDEFS += -DFREEBSD
+endif
+
+ifdef KEY
+  CDEFS += -DKEY=$(KEY)
 endif
 
 ifndef NOFLOAT
@@ -125,7 +141,7 @@ ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
 endif
 
-
+ifndef GRP
 ifdef MAC
    GRP=
 else
@@ -139,6 +155,7 @@ ifdef CYGWIN
    GRP=
 else
    GRP=--group=root
+endif
 endif
 endif
 endif

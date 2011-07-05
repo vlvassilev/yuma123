@@ -3645,8 +3645,10 @@ xmlChar *
 *
 *  1) $YUMA_HOME/target/lib directory 
 *  2) $YUMA_RUNPATH environment variable
-*  3) $YUMA_INSTALL/lib   
-*  4) /usr/lib/yuma directory
+*  3) $YUMA_INSTALL/lib
+*  4) $YUMA_INSTALL/lib/yuma
+*  5) /usr/lib64/yuma directory (LIB64 only)
+*  5 or 6) /usr/lib/yuma directory
 *
 * INPUTS:
 *   fname == SIL file name with extension
@@ -3725,19 +3727,21 @@ xmlChar *
         if (test_file(buff, 
                       bufflen, 
                       ncxmod_env_install,
-                      (const xmlChar *)"lib/",
+                      (const xmlChar *)"lib",
                       fname)) {
             return buff;
         }
     }
 
-    /* 4) /usr/lib/yuma directory */
-    if (test_file(buff, 
-                  bufflen, 
-                  NCXMOD_DEFAULT_YUMALIB,
-                  NULL,
-                  fname)) {
-        return buff;
+    /* 4) YUMA_INSTALL/lib/yuma directory */
+    if (ncxmod_env_install) {
+        if (test_file(buff, 
+                      bufflen, 
+                      ncxmod_env_install,
+                      (const xmlChar *)"lib/yuma",
+                      fname)) {
+            return buff;
+        }
     }
 
 #ifdef LIB64
@@ -3750,6 +3754,15 @@ xmlChar *
         return buff;
     }
 #endif
+
+    /* 5 or 6) /usr/lib/yuma directory */
+    if (test_file(buff, 
+                  bufflen, 
+                  NCXMOD_DEFAULT_YUMALIB,
+                  NULL,
+                  fname)) {
+        return buff;
+    }
 
     if (generrors) {
         log_error("\nError: SIL file (%s) not found.\n", fname);

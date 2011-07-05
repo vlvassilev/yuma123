@@ -38,6 +38,11 @@ CINC = -I. -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx \
      -I$(CINCBASE)/yuma/agt -I$(CINCBASE) -I$(CINCBASE)/libxml2 \
      -I$(CINCBASE)/libxml2/libxml
 
+ifdef FREEBSD
+CINC += -I/usr/local/include -I/usr/local/include/libxml2 \
+     -I/usr/local/include/libxml2/libxml
+endif
+
 # added /sw/include for MacOSX
 ifdef MAC
 # MACOSX version
@@ -248,8 +253,14 @@ superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
+ifdef FREEBSD
+ADD_DL=
+else
+ADD_DL=-ldl
+endif
+
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl $(LAGT)
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) $(ADD_DL) $(LAGT)
 
 
 $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)

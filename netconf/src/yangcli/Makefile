@@ -41,7 +41,7 @@ endif
 
 DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L../../../libtecla -ltecla \
-	$(LFIRST) -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
+	$(LFIRST) -L$(PREFIX)/lib -L/usr/local/lib -lxml2 -lncurses -lssh2 \
 	-L$(PREFIX)/lib -lz 
 ifndef FREEBSD
 DLIBS += -ldl

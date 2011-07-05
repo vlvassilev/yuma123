@@ -20,9 +20,9 @@ rm -rf ~/rpmprep/*
 cd ~/rpmprep
 
 if [ $1 ]; then
-  svn export -r$1 http://svn.netconfcentral.org/svn/yuma/trunk yuma-$VER
+  svn export -r$1 https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$VER
 else
-  svn export http://svn.netconfcentral.org/svn/yuma/trunk yuma-$VER
+  svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$VER
 fi
 
 tar cvf yuma_$VER.tar yuma-$VER/

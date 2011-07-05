@@ -81,10 +81,12 @@ ifndef MAC
 	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
 endif
+ifndef FREEBSD
 ifndef DESTDIR
 ifndef MAC
-# skip in MacOsX, RPM, and rest of debian fakeroot builds
+# skip in MacOsX, RPM, FreeBSD and rest of debian fakeroot builds
 	ldconfig
+endif
 endif
 endif
 endif

@@ -48,7 +48,8 @@ cd ..
 
 echo "Making yuma tarball for yuma-$VER-$REL"
 
-svn export http://svn.netconfcentral.org/svn/yuma/trunk
+svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1
+
 TAGSTR=$VER-"$REL"."$OS"."$ARCH"
 
 if [ "$OS" = "fc12"  ]; then

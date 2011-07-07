@@ -2475,10 +2475,11 @@ static void
         log_write("<candidate>");
         break;
     case NCX_AGT_TARG_RUNNING:
-        server_cb->default_target = NCX_EL_RUNNING;     
+        server_cb->default_target = NCX_EL_RUNNING;
         log_write("<running>");
         break;
     case NCX_AGT_TARG_CAND_RUNNING:
+        server_cb->default_target = NCX_EL_CANDIDATE;
         log_write("<candidate> (<running> also supported)");
         break;
     case NCX_AGT_TARG_LOCAL:

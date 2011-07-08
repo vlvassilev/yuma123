@@ -758,6 +758,35 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION agt_add_top_container
+*
+* make a val_value_t struct for a specified 
+* top-level container data node.  This is used
+* by SIL functions to create a top-level container
+* which may have virtual nodes within in it
+*
+* TBD: fine-control over SIL C code generation to
+* allow mix of container virtual callback plus
+* child node virtual node callbacks
+*
+INPUTS:
+*   obj == object node of the container data node to create
+*   val == address of return val pointer
+*
+* OUTPUTS:
+*   *val == pointer to node created in the database
+*           this is not live memory! It will be freed
+*           by the database management code
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_add_top_container (obj_template_t *obj,
+                           val_value_t **val);
+
+
+/********************************************************************
 * FUNCTION agt_init_cache
 *
 * init a cache pointer during the init2 callback

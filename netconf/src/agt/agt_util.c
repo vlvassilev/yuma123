@@ -2097,6 +2097,13 @@ val_value_t *
 {
     obj_template_t  *leafobj;
     val_value_t     *leafval;
+
+#ifdef DEBUG
+    if (parentobj == NULL || leafname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
     
     leafobj = obj_find_child(parentobj,
                              obj_get_mod_name(parentobj),
@@ -2144,6 +2151,13 @@ val_value_t *
 {
     xmlChar numbuff[NCX_MAX_NUMLEN];
 
+#ifdef DEBUG
+    if (parentobj == NULL || leafname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     sprintf((char *)numbuff, "%u", leafval);
 
     return agt_make_leaf(parentobj,
@@ -2179,6 +2193,13 @@ val_value_t *
 {
     xmlChar numbuff[NCX_MAX_NUMLEN];
 
+#ifdef DEBUG
+    if (parentobj == NULL || leafname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     sprintf((char *)numbuff, "%d", leafval);
 
     return agt_make_leaf(parentobj,
@@ -2212,6 +2233,13 @@ val_value_t *
 {
     obj_template_t  *listobj;
     val_value_t     *listval;
+
+#ifdef DEBUG
+    if (parentobj == NULL || listname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
     
     listobj = obj_find_child(parentobj,
                              obj_get_mod_name(parentobj),
@@ -2264,6 +2292,16 @@ val_value_t *
 {
     obj_template_t  *leafobj;
     val_value_t     *leafval;
+
+#ifdef DEBUG
+    if (parentobj == NULL || 
+        leafname == NULL ||
+        callbackfn == NULL ||
+        res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
     
     leafobj = obj_find_child(parentobj,
                              obj_get_mod_name(parentobj),
@@ -2309,6 +2347,12 @@ status_t
 {
     val_value_t     *rootval, *nodeval;
 
+#ifdef DEBUG
+    if (obj == NULL || callbackfn == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     rootval = cfg_get_root(NCX_CFGID_RUNNING);
     if (rootval == NULL) {
         return ERR_NCX_OPERATION_FAILED;
@@ -2323,6 +2367,61 @@ status_t
     return NO_ERR;
 
 }  /* agt_add_top_virtual */
+
+
+/********************************************************************
+* FUNCTION agt_add_top_container
+*
+* make a val_value_t struct for a specified 
+* top-level container data node.  This is used
+* by SIL functions to create a top-level container
+* which may have virtual nodes within in it
+*
+* TBD: fine-control over SIL C code generation to
+* allow mix of container virtual callback plus
+* child node virtual node callbacks
+*
+INPUTS:
+*   obj == object node of the container data node to create
+*   val == address of return val pointer
+*
+* OUTPUTS:
+*   *val == pointer to node created in the database
+*           this is not live memory! It will be freed
+*           by the database management code
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_add_top_container (obj_template_t *obj,
+                           val_value_t **val)
+{
+    val_value_t     *rootval, *nodeval;
+
+#ifdef DEBUG
+    if (obj == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    rootval = cfg_get_root(NCX_CFGID_RUNNING);
+    if (rootval == NULL) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    nodeval = val_new_value();
+    if (!nodeval) {
+        return ERR_INTERNAL_MEM;
+    }
+    val_init_from_template(nodeval, obj);
+    val_add_child(nodeval, rootval);
+    if (val != NULL) {
+        *val = nodeval;
+    }
+    return NO_ERR;
+
+}  /* agt_add_top_container */
 
 
 /********************************************************************

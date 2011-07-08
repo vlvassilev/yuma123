@@ -1151,6 +1151,8 @@ static void
 *   scb == session control block to use for writing
 *   mod == module in progress
 *   cp == conversion parameters to use
+*   fullmode == TRUE for full function
+*               FALSE for just C statement guts
 *   obj == object struct for the database object
 *   objnameQ == Q of c_define_t structs to search for this object
 *********************************************************************/
@@ -1159,6 +1161,7 @@ static void
                     ncx_module_t *mod,
                     const yangdump_cvtparms_t *cp,
                     obj_template_t *obj,
+                    boolean fullmode,
                     dlq_hdr_t *objnameQ)
 {
     const xmlChar   *modname;
@@ -1177,44 +1180,46 @@ static void
     }
 
     /* generate function banner comment */
-    ses_putstr(scb, FN_BANNER_START);
-    ses_putstr(scb, cdef->idstr);
-    ses_putstr(scb, MRO_SUFFIX);
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, (const xmlChar *)"Make read-only child nodes");
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, (const xmlChar *)"Path: ");
-    ses_putstr(scb, cdef->valstr);
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, FN_BANNER_INPUT);
-    ses_putstr(scb, 
-               (const xmlChar *)"    parentval == the parent struct to "
-               "use for new child nodes");
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, FN_BANNER_RETURN_STATUS);
-    ses_putstr(scb, FN_BANNER_END);
+    if (fullmode) {
+        ses_putstr(scb, FN_BANNER_START);
+        ses_putstr(scb, cdef->idstr);
+        ses_putstr(scb, MRO_SUFFIX);
+        ses_putstr(scb, FN_BANNER_LN);
+        ses_putstr(scb, FN_BANNER_LN);
+        ses_putstr(scb, (const xmlChar *)"Make read-only child nodes");
+        ses_putstr(scb, FN_BANNER_LN);
+        ses_putstr(scb, (const xmlChar *)"Path: ");
+        ses_putstr(scb, cdef->valstr);
+        ses_putstr(scb, FN_BANNER_LN);
+        ses_putstr(scb, FN_BANNER_INPUT);
+        ses_putstr(scb, 
+                   (const xmlChar *)"    parentval == the parent struct to "
+                   "use for new child nodes");
+        ses_putstr(scb, FN_BANNER_LN);
+        ses_putstr(scb, FN_BANNER_RETURN_STATUS);
+        ses_putstr(scb, FN_BANNER_END);
 
-    /* generate the function prototype lines */
-    ses_putstr(scb, (const xmlChar *)"\nstatic status_t");
-    ses_putstr_indent(scb, cdef->idstr, indent);
-    ses_putstr(scb, MRO_SUFFIX);
-    ses_putstr(scb, (const xmlChar *)" (val_value_t *parentval)");
-    ses_putstr(scb, (const xmlChar *)"\n{");
+        /* generate the function prototype lines */
+        ses_putstr(scb, (const xmlChar *)"\nstatic status_t");
+        ses_putstr_indent(scb, cdef->idstr, indent);
+        ses_putstr(scb, MRO_SUFFIX);
+        ses_putstr(scb, (const xmlChar *)" (val_value_t *parentval)");
+        ses_putstr(scb, (const xmlChar *)"\n{");
 
-    /* generate static vars */
-    ses_putstr_indent(scb, 
-                      (const xmlChar *)"status_t res;",
-                      indent);
-    ses_putstr_indent(scb, 
-                      (const xmlChar *)"val_value_t *childval;",
-                      indent);
+        /* generate static vars */
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"status_t res = NO_ERR;",
+                          indent);
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"val_value_t *childval;",
+                          indent);
 
-    /* initialize the static vars */
-    ses_putchar(scb, '\n');
-    ses_putstr_indent(scb,
-                      (const xmlChar *)"res = NO_ERR;",
-                      indent);
+        /* initialize the static vars */
+        ses_putchar(scb, '\n');
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"res = NO_ERR;",
+                          indent);
+    }
 
     /* create read-only child nodes as needed */
     for (childobj = obj_first_child(obj);
@@ -1306,19 +1311,30 @@ static void
 
             ses_indent(scb, indent);
             ses_putchar(scb, '}');
+        } else {
+            /* treat as not-handled flag!!! */
+            ses_putstr_indent(scb, 
+                              (const xmlChar *)"/* ",
+                              indent);
+            ses_putstr(scb, obj_get_typestr(obj));
+            ses_putchar(scb, ' ');
+            ses_putstr(scb, obj_get_name(obj));
+            ses_putstr(scb, (const xmlChar *)" not handled!!! */");
         }
     }
 
-    /* return result */
-    ses_putchar(scb, '\n');
-    ses_indent(scb, indent);
-    ses_putstr(scb, (const xmlChar *)"return res;");
+    if (fullmode) {
+        /* return result */
+        ses_putchar(scb, '\n');
+        ses_indent(scb, indent);
+        ses_putstr(scb, (const xmlChar *)"return res;");
 
-    /* end the function */
-    ses_putstr(scb, (const xmlChar *)"\n\n} /* ");
-    ses_putstr(scb, cdef->idstr);
-    ses_putstr(scb, MRO_SUFFIX);
-    ses_putstr(scb, (const xmlChar *)" */\n");
+        /* end the function */
+        ses_putstr(scb, (const xmlChar *)"\n\n} /* ");
+        ses_putstr(scb, cdef->idstr);
+        ses_putstr(scb, MRO_SUFFIX);
+        ses_putstr(scb, (const xmlChar *)" */\n");
+    }
 
 } /* write_c_mro_fn */
 
@@ -1387,6 +1403,14 @@ static void
     ses_putstr(scb, (const xmlChar *)"\n{");
 
     /* generate static vars */
+
+    if (obj_is_np_container(obj)) {
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)
+                          "val_value_t *parentval = NULL, "
+                          "*childval = NULL;",
+                          indent);
+    }
     ses_putstr_indent(scb, 
                       (const xmlChar *)"status_t res;",
                       indent);
@@ -1398,17 +1422,38 @@ static void
                       indent);
     ses_putstr(scb, cdef->valstr);
     ses_putstr(scb, (const xmlChar *)" */");
-    ses_putstr_indent(scb, 
-                      (const xmlChar *)"res = agt_add_top_virtual(",
-                      indent);
-    ses_indent(scb, indent+indent);
-    write_c_safe_str(scb, obj_get_name(obj));
-    ses_putstr(scb, (const xmlChar *)"_obj,");
-    ses_indent(scb, indent+indent);
-    ses_putstr(scb, cdef->idstr);
-    ses_putstr(scb, GET_SUFFIX);
-    ses_putstr(scb, (const xmlChar *)");");
 
+    if (obj_is_np_container(obj)) {
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)
+                          "res = agt_add_top_container(",
+                          indent);
+        write_c_safe_str(scb, obj_get_name(obj));
+        ses_putstr(scb, (const xmlChar *)"_obj, &parentval);");
+        write_if_res(scb, cp, indent);
+        write_c_mro_fn(scb, mod, cp, obj, FALSE, objnameQ);
+    } else if (obj_is_leafy(obj)) {
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)
+                          "res = agt_add_top_virtual(",
+                          indent);
+        ses_indent(scb, indent+indent);
+        write_c_safe_str(scb, obj_get_name(obj));
+        ses_putstr(scb, (const xmlChar *)"_obj,");
+        ses_indent(scb, indent+indent);
+        ses_putstr(scb, cdef->idstr);
+        ses_putstr(scb, GET_SUFFIX);
+        ses_putstr(scb, (const xmlChar *)");");
+    } else {
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)
+                          "/* add code to generate top-level "
+                          "node here */",
+                          indent);
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"res = NO_ERR;",
+                          indent);
+    }
     /* return result */
     ses_putchar(scb, '\n');
     ses_indent(scb, indent);
@@ -1475,7 +1520,7 @@ static void
         if (obj_get_config_flag(obj)) {
             /* check if this node has any non-config children */
             if (obj_has_ro_children(obj)) {
-                write_c_mro_fn(scb, mod, cp, obj, objnameQ);
+                write_c_mro_fn(scb, mod, cp, obj, TRUE, objnameQ);
             }
 
             /* generate the foo_edit function */
@@ -1484,6 +1529,14 @@ static void
             if (obj_is_leafy(obj)) {
                 /* generate the foo_get function */
                 write_c_get_cbfn(scb, mod, cp, obj, objnameQ);
+            } else if (obj_is_np_container(obj)) {
+                ;
+            } else {
+                log_warn("\nWarning: no get-CB generated "
+                         "for top-level operational "
+                         "%s '%s'",
+                         obj_get_typestr(obj),
+                         obj_get_name(obj));
             }
             if (obj_is_top(obj)) {
                 write_c_top_mro_fn(scb, mod, cp, obj, objnameQ);
@@ -2536,10 +2589,13 @@ static void
 
         /* check if this is a top-level config=false node */
         if (!obj_get_config_flag(cdef->obj)) {
-            if (obj_is_leafy(cdef->obj)) {
-                /* OBJ_TYP_LEAF or OBJ_TYP_LEAFLIST so create a
+            if (obj_is_leafy(cdef->obj) ||
+                obj_is_np_container(cdef->obj)) {
+                /* OBJ_TYP_CONTAINER(NP) or OBJ_TYP_LEAF
+                 * or OBJ_TYP_LEAFLIST so create a
                  * top-level virtual leaf for this node
-                 * TBD: support _mro functions for complex types
+                 * TBD: support _mro functions for more 
+                 * complex types
                  */
                 ses_putchar(scb, '\n');
                 ses_putstr_indent(scb, 

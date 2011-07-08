@@ -11,6 +11,7 @@ endif
 
 SUBDIR_NM=modules
 SUBDIR_CPP=
+YANGDUMP=../target/bin/yangdump
 
 ############### TARGET PROFILE ##############################
 
@@ -119,11 +120,11 @@ test:
 	mkdir -p $(HOME)/modtest
 	rm -rf $(HOME)/modtest/*
 	for i in $(MODFORMATS); do\
-	    echo "yangdump subtree=ietf subtree=netconfcentral \
+	    echo "$(YANGDUMP) subtree=ietf subtree=netconfcentral \
 	    subtree=yang subtree=test/pass output=$(HOME)/modtest \
 	    format=$$i defnames=true log=$(HOME)/modtest/test-$$i.log \
 	    log-level=debug";\
-	    yangdump subtree=ietf subtree=netconfcentral\
+	    $(YANGDUMP) subtree=ietf subtree=netconfcentral\
 	    subtree=yang subtree=test/pass output=$(HOME)/modtest\
 	    format=$$i defnames=true log=$(HOME)/modtest/test-$$i.log\
 	    log-level=debug;\

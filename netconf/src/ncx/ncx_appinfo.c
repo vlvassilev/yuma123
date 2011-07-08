@@ -790,5 +790,32 @@ status_t
 }  /* ncx_resolve_appinfoQ */
 
 
+/********************************************************************
+* FUNCTION ncx_get_appinfo_value
+* 
+* Get the value string from an appinfo struct
+*
+* INPUTS:
+*    appinfo ==  ncx_appinfo_t data structure to use
+*
+* RETURNS:
+*    pointer to the string value if name
+*    NULL if no value
+*********************************************************************/
+const xmlChar *
+    ncx_get_appinfo_value (const ncx_appinfo_t *appinfo)
+{
+#ifdef DEBUG
+    if (appinfo == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return appinfo->value;
+
+}  /* ncx_get_appinfo_value */
+
+
 /* END file ncx_appinfo.c */
 

@@ -29,6 +29,7 @@
 date	     init     comment
 ----------------------------------------------------------------------
 30-dec-07    abb      Begun
+06-jul-11    abb      add wildcard match support
 
 */
 
@@ -147,6 +148,10 @@ extern "C" {
 #define XP_OP_OR                   (const xmlChar *)"or"
 #define XP_OP_DIV                  (const xmlChar *)"div"
 #define XP_OP_MOD                  (const xmlChar *)"mod"
+
+
+/* Special URL to XPath translation */
+#define XP_URL_ESC_WILDCARD     '-'
 
 /* XPath control block flag definitions */
 
@@ -1163,6 +1168,11 @@ extern void
 *
 * INPUTS:
 *    urlpath == URL path string to convert to XPath
+*    match_names == enum for selected match names mode
+*    alt_naming == TRUE if alt-name and cli-drop-node-name
+*      containers should be checked
+*    wildcards == TRUE if wildcards allowed instead of key values
+*                 FALSE if the '-' wildcard mechanism not allowed
 *    res == address of return status
 *
 * OUTPUTS:
@@ -1174,8 +1184,10 @@ extern void
 *********************************************************************/
 extern xmlChar *
     xpath_convert_url_to_path (const xmlChar *urlpath,
+                               ncx_name_match_t match_names,
+                               boolean alt_naming,
+                               boolean wildcards,
                                status_t *res);
-
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

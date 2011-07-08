@@ -52,7 +52,8 @@ module yangcli {
 
     revision 2011-07-05 {
        description 
-         "Add PublicKeyParms grouping.";
+         "Add PublicKeyParms grouping.
+          Added MatchParms (--match-names and --alt-names)";
     }
 
     revision 2011-06-27 {
@@ -117,10 +118,138 @@ module yangcli {
        }
     }
 
+    typedef NameMatchMode {
+      description
+        "Defines the search mode that should be used
+         when resolving YANG node names in leafs and
+         leaf-lists using the UrlPath data type.";
+      type enumeration {
+        enum exact {
+          description
+            "The name must exactly match the node name
+             for all characters in both name strings.";
+        }
+        enum exact-nocase {
+          description
+            "The name must match the node name
+             for all characters in both name strings.
+             Strings are not case-sensitive.";
+        }
+        enum one {
+          description
+            "The name must exactly match the first N
+             characters of just one node name, which
+             must be the only partial name match found.";
+        }
+        enum one-nocase {
+          description
+            "The name must exactly match the first N
+             characters of just one node name, which
+             must be the only partial name match found.
+             Strings are not case-sensitive.";
+        }
+        enum first {
+          description
+            "The name must exactly match the first N
+             characters of any node name. The first one
+             found will be used.";
+        }
+        enum first-nocase {
+          description
+            "The name must exactly match the first N
+             characters of any node name. The first one
+             found will be used. Strings are not 
+             case-sensitive.";
+        }
+      }
+    }
+
+    typedef AltNameMode {
+      description
+        "Defines the alternate name search mode that 
+         should be used when resolving YANG node names
+         in leafs or leaflists using the UrlPath data type.
+
+         If 'true' then nodes with an 'alt-name' defined
+         will be considered a match if the YANG name or the
+         alternative name matches the search string.
+
+         If 'false' then only the YANG node name will
+         be used in node name searches.";
+      type boolean;
+    }
+   
     typedef UrlPath {
        description 
-         "URL encoded path expression.
-          Encoding Rules: docs TBD.";
+         "Special URL encoded path expression.
+
+          Normal Encoding Rules:
+
+            - Normal content is encoded as an absolute path.
+            - Keys are encoded as a path step within the URL,
+              instead of a predicate expression like XPath.
+            - The first character must be a forward slash '/'.
+            - Each identifier or key encoded in the URL string
+              is separated by a single forward slash '/' character.
+            - Escaped character sequences are allowed, such
+              as '%20' for the space ' ' character.
+            - If any descendant nodes of a list are included,
+              then all key leafs for that list must be encoded
+              in the URL (or escaped with the dash '-' character
+              to skip that key).
+            - Only key leafs can be encoded within the URL string,
+              similar to a YANG instance-identifier or 
+              schema-instance-identifier string.  Other leafs
+              are not allowed.
+
+            Example URL and XPath strings:
+
+                XPath:  /foo/bar[id='fred'][id2='barney]/baz
+
+              UrlPath:  /foo/bar/fred/barney/baz
+
+            Example showing the 'id2' key leaf escaped:
+
+                XPath:  /foo/bar[id='fred']/baz
+
+              UrlPath:  /foo/bar/fred/-/baz            
+
+         Special Encoding Rules
+ 
+            Since these escaped characters are usually decoded
+            by the time an HTTP gateway program will get them,
+            the forward slash '/' character needs to be treated
+            differently.  To use this character within key leaf
+            content, it must be escaped with another forward
+            slash character. 
+
+            Example showing escaped forward slash in content:
+
+              XPath: /interfaces/interface[name='1/0/22']/mtu
+
+            URLPath: /interfaces/interface/1//0//22/mtu
+
+         Name Matching
+
+            A parameter using the 'NameMatchMode' data type
+            can be used to control how name node searches
+            are done for nodes using this data type.
+
+         Alternate Naming
+
+            A parameter using the 'AltNameMode' data type
+            can be used to control whether alternative
+            node names can be used when name searches
+            are done for nodes using this data type.
+            
+         Exceptions:
+
+            XML namespaces are not ignored, but if multiple
+            sibling nodes have the same local-name, then
+            the first node found will be used.
+
+         ";
+            
        type string {
           length "1..max";
        }
@@ -131,6 +260,22 @@ module yangcli {
      *     Groupings for parameters used in multiple commands
      *
      *************************************************************/
+
+    grouping MatchParms {
+      leaf match-names {
+        description
+          "Match mode to use for UrlPath name searches.";
+        type NameMatchMode;
+        //default exact;
+      }
+
+      leaf alt-names {
+        description
+          "Match mode to use for UrlPath name searches.";
+        type AltNameMode;
+        //default false;
+      }
+    }
 
     grouping FillParms {
        choice target-parm {
@@ -194,6 +339,12 @@ module yangcli {
             An error will be reported if the global or local
             variable does not reference the same object type
             as the target parameter.";
+       }
+
+       uses MatchParms {
+         description
+          "These parameters are ignored unless the
+           'urltarget' parameter is also present.";
        }
     }
 
@@ -288,6 +439,12 @@ module yangcli {
         }
 
         uses ncxapp:CliWithDefaultsParm;
+
+        uses MatchParms {
+          description
+            "These parameters are ignored unless the
+             'urltarget' parameter is also present.";
+        }
     }
 
     grouping ConnectParms {
@@ -414,6 +571,8 @@ module yangcli {
       uses ncxapp:SubdirsParm;
 
       uses ConnectParms;
+
+      uses MatchParms;
 
       leaf autocomp {
         description

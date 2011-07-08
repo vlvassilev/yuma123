@@ -95,14 +95,6 @@ date         init     comment
 
 
 /********************************************************************
-*                                                                   *
-*                         V A R I A B L E S                         *
-*                                                                   *
-*********************************************************************/
-
-
-
-/********************************************************************
 * FUNCTION do_errmsg
 * 
 * Generate the errormsg
@@ -1484,14 +1476,15 @@ static status_t
             if (writeptr != NULL) {
                 *writeptr = 0;
             }
-            *cnt = outlen;
-            return NO_ERR;
+            done = TRUE;
+            continue;
         }
         ch = 0;
         if (*instr == '%') {
             /* hex encoded char */
             instr++;
-            if (++inlen >= 2) {
+            inlen++;
+            if (inlen + 2 <= urlstrlen) {
                 numbuff[0] = instr[0];
                 numbuff[1] = instr[1];
                 numbuff[2] = 0;
@@ -1505,6 +1498,7 @@ static status_t
                 }
                 ch = (xmlChar)num.u;
                 ncx_clean_num(NCX_BT_UINT8, &num);
+                instr += 2;
                 inlen += 2;
             } else {
                 /* invalid escaped char found */
@@ -1512,7 +1506,7 @@ static status_t
             }
         } else {
             /* normal char */
-            ch = *urlstr++;
+            ch = *instr++;
             inlen++;
         }
 
@@ -1533,6 +1527,116 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION decode_url_esc_string
+* 
+* Fill buffer with a plain string from a
+* yangcli escaped URL content string
+*
+* INPUTS:
+*    urlstr == string to convert, must be 0-terminated
+*    buffer == buffer to fill; may be NULL to get count
+*    incnt == address of return cnt of bytes used in urlstr
+*    outcnt == address of return cnt of bytes written to buffer
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *incnt = number bytes used in urlstr
+*      *outcnt = number bytes required for buffer write
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    decode_url_esc_string (const xmlChar *urlstr,
+                           xmlChar *buffer,
+                           uint32 *incnt,
+                           uint32 *outcnt)
+{
+    const xmlChar   *instr;
+    xmlChar         *writeptr, ch, numbuff[4];
+    uint32           outlen;
+    boolean          done;
+    ncx_num_t        num;
+    status_t         res;
+
+    *incnt = 0;
+    *outcnt = 0;
+    instr = urlstr;
+    writeptr = buffer;
+    outlen = 0;
+    done = FALSE;
+    ncx_init_num(&num);
+    res = NO_ERR;
+
+    /* normal case, there is some top-level node next */
+    while (!done) {
+        if (*instr == 0) {
+            done = TRUE;
+            continue;
+        }
+
+        ch = 0;
+
+        /* check end of input string */
+        if (*instr == '/' && instr[1] != '/') {
+            /* reached the end of the content string */
+            if (writeptr != NULL) {
+                *writeptr = 0;
+            }
+            done = TRUE;
+            continue;
+        } else if (*instr == '/' && instr[1] == '/') {
+            /* found an escaped forward slash */
+            outlen++;
+            if (writeptr != NULL) {
+                ch = '/';
+            }
+            instr += 2;
+        } else if (*instr == '%') {
+            /* hex encoded char */
+            instr++;
+            if (instr[0] && instr[1]) {
+                numbuff[0] = instr[0];
+                numbuff[1] = instr[1];
+                numbuff[2] = 0;
+                res = ncx_convert_num(numbuff,
+                                      NCX_NF_HEX,
+                                      NCX_BT_UINT8,
+                                      &num);
+                if (res != NO_ERR) {
+                    ncx_clean_num(NCX_BT_UINT8, &num);
+                    return res;
+                }
+                ch = (xmlChar)num.u;
+                ncx_clean_num(NCX_BT_UINT8, &num);
+                instr += 2;
+            } else {
+                /* invalid escaped char found */
+                return ERR_NCX_INVALID_VALUE;
+            }
+        } else {
+            /* normal char */
+            ch = *instr++;
+        }
+
+        if (ch == 0) {
+            return ERR_NCX_INVALID_VALUE;
+        } else {
+            outlen++;
+            if (writeptr != NULL) {
+                *writeptr++ = ch;
+            }
+        }
+    }
+
+    *incnt = (uint32)(instr - urlstr);
+    *outcnt = outlen;
+    return NO_ERR;
+
+}  /* decode_url_esc_string */
+
+
+/********************************************************************
 * FUNCTION fill_xpath_string
 * 
 * Fill buffer with an XPath string from a URL string
@@ -1540,6 +1644,11 @@ static status_t
 * INPUTS:
 *    urlpath == string to convert
 *    buff == buffer to fill; may be NULL to get count
+*    match_names == enum for selected match names mode
+*    alt_naming == TRUE if alt-name and cli-drop-node-name
+*      containers should be checked
+*    wildcards == TRUE if 'skip key wildcard' allowed
+*                 FALSE if not allowed
 *    cnt == address of return cnt
 *
 * OUTPUTS:
@@ -1552,15 +1661,20 @@ static status_t
 static status_t
     fill_xpath_string (const xmlChar *urlpath,
                        xmlChar *buffer,
+                       ncx_name_match_t match_names,
+                       boolean alt_naming,
+                       boolean wildcards,
                        uint32 *cnt)
 {
     const xmlChar   *startstr, *p;
     obj_template_t  *targobj;
     obj_key_t       *objkey;
-    xmlChar         *writeptr, namebuff[MAX_FILL+1];
+    xmlChar         *writeptr, *tempbuff, *usebuff;
     uint32           inlen, outlen, outtotal;
     boolean          done, expectnode;
     status_t         res;
+    xmlChar          namebuff[MAX_FILL+1];
+
     *cnt = 0;
 
     if (*urlpath != '/') {
@@ -1585,6 +1699,8 @@ static status_t
     inlen = 0;
     outlen = 0;
     objkey = NULL;
+    tempbuff = NULL;
+    usebuff = NULL;
 
     /* account for output of starting '/' */
     outtotal = 1;
@@ -1593,53 +1709,100 @@ static status_t
         *writeptr++ = '/';
     }
 
+    /* check corner-case: URL starts with // - not allowed */
+    if (*startstr == '/') {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
     /* keep getting nodes until string ends or error out */
     done = FALSE;
     while (!done) {
-        /* get the chars that represent the content */
-        p = startstr;
-        while (*p != 0 && *p != '/') {
-            p++;
-        }
-
-        /* check // in the url path; not allowed */
-        if (p == startstr) {
-            return ERR_NCX_INVALID_VALUE;
-        }
-
-        /* got some string content; convert to plain string */
-        inlen = (uint32)(p - startstr);
+        /* get the next string token to process */
         if (expectnode) {
-            if (inlen >= MAX_FILL) {
-                return ERR_NCX_TOO_BIG;
+            /* get the chars that represent the content
+             * in this mode just skip to the end or the next '/'
+             */
+            p = startstr;
+            while (*p != 0 && *p != '/') {
+                p++;
+            }
+            inlen = (uint32)(p - startstr);
+            if (inlen == 0) {
+                /* invalid URL probably out of synch
+                 * empty identifier string
+                 */
+                return ERR_NCX_INVALID_VALUE;
             }
 
+            /* check corner-case wildcard in wrong place */
+            if (inlen == 1 && *startstr == XP_URL_ESC_WILDCARD) {
+                return ERR_NCX_INVALID_VALUE;
+            }
+
+            /* got some string content; convert to plain string */
+            if (inlen >= MAX_FILL) {
+                tempbuff = m__getMem(inlen + 1);
+                if (tempbuff == NULL) {
+                    return ERR_INTERNAL_MEM;
+                }
+                usebuff = tempbuff;
+            } else {
+                usebuff = namebuff;
+            }
+            
             /* get the identifier into the name buffer first */
             outlen = 0;
             res = decode_url_string(startstr,
                                     inlen,
-                                    namebuff,
+                                    usebuff,
                                     &outlen);
-            if (res != NO_ERR) {
-                return res;
+            if (res == NO_ERR) {
+                const xmlChar *testname;
+
+                /* get the target database object to use */
+                if (targobj == NULL) {
+                    /* find a top-level data node object */
+                    targobj = ncx_match_any_object(usebuff, 
+                                                   match_names,
+                                                   alt_naming);
+                } else {
+                    targobj = obj_find_child_ex(targobj, 
+                                                NULL,   /* match any module */
+                                                usebuff,
+                                                match_names,
+                                                alt_naming,
+                                                TRUE);  /* dataonly */
+                }
+                if (targobj != NULL) {
+                    testname = obj_get_name(targobj);
+                    if (writeptr != NULL) {
+                        writeptr += xml_strcpy(writeptr, testname);
+                    }
+                    outtotal += xml_strlen(testname);
+                }
             }
 
-            if (writeptr != NULL) {
-                writeptr += xml_strncpy(writeptr, namebuff, outlen);
-            }
-            outtotal += outlen;
-
-            /* get the target database object to use */
-            if (targobj == NULL) {
-                targobj = ncx_find_any_object(namebuff);
-            } else {
-                targobj = obj_find_child(targobj, NULL, namebuff);
-            }
-            if (targobj == NULL) {
-                return ERR_NCX_INVALID_VALUE;
+            /* cleanup temp buff */
+            if (tempbuff != NULL) {
+                m__free(tempbuff);
+                tempbuff = NULL;
             }
 
-            /* skip the rpc input node if needed */
+            /* check error exit */
+            if (targobj == NULL || res != NO_ERR) {
+                if (res == NO_ERR) {
+                    return ERR_NCX_INVALID_VALUE;
+                } else {
+                    return res;
+                }
+            }
+
+            /* skip to the rpc input node if needed
+             * this code does not yet support
+             * custom RPC operations; just data tree access
+             * this code will not be reached for a custom RPC
+             * if dataonly is set to TRUE above
+             */
             if (targobj->objtype == OBJ_TYP_RPC) {
                 targobj = obj_find_child(targobj, 
                                          NULL, 
@@ -1669,36 +1832,52 @@ static status_t
                 return SET_ERROR(ERR_INTERNAL_VAL);
             }
 
-            /* account for [foo='val'] predicate
-             * first the [foo=' part
-             */
-            outtotal += (1 + xml_strlen(namestr) + 2);
-            if (writeptr != NULL) {
-                *writeptr++ = '[';
-                writeptr += xml_strcpy(writeptr, namestr);
-                *writeptr++ = '=';
-                *writeptr++ = '\'';
-            }
+            /* check if this key is being skipped */
+            if (startstr[0] == XP_URL_ESC_WILDCARD &&
+                startstr[1] == '/' &&
+                startstr[2] != '/') {
+                if (wildcards) {
+                    /* skip this key in the output */
+                    p = &startstr[1];
+                } else {
+                    return ERR_NCX_INVALID_VALUE;
+                }
+            } else {
+                /* treat whatever string that is present
+                 * as a key content node 
+                 * account for [foo='val'] predicate
+                 * first the [foo=' part
+                 */
+                outtotal += (1 + xml_strlen(namestr) + 2);
+                if (writeptr != NULL) {
+                    *writeptr++ = '[';
+                    writeptr += xml_strcpy(writeptr, namestr);
+                    *writeptr++ = '=';
+                    *writeptr++ = '\'';
+                }
 
-            /* get the decoded value into the real buffer if used */
-            outlen = 0;
-            res = decode_url_string(startstr,
-                                    inlen,
-                                    writeptr,
-                                    &outlen);
-            if (res != NO_ERR) {
-                return res;
-            }
-            outtotal += outlen;
-            if (writeptr != NULL) {
-                writeptr += outlen;
-            }
+                /* get the decoded value into the real buffer if used */
+                inlen = 0;
+                outlen = 0;
+                res = decode_url_esc_string(startstr,
+                                            writeptr,
+                                            &inlen,
+                                            &outlen);
+                if (res != NO_ERR) {
+                    return res;
+                }
+                outtotal += outlen;
+                if (writeptr != NULL) {
+                    writeptr += outlen;
+                }
 
-            /* account for the '] part */
-            outtotal += 2;
-            if (writeptr != NULL) {
-                *writeptr++ = '\'';
-                *writeptr++ = ']';
+                /* account for the '] part */
+                outtotal += 2;
+                if (writeptr != NULL) {
+                    *writeptr++ = '\'';
+                    *writeptr++ = ']';
+                }
+                p = &startstr[inlen];
             }
 
             /* set up next key if any 
@@ -3294,6 +3473,11 @@ void
 *
 * INPUTS:
 *    urlpath == URL path string to convert to XPath
+*    match_names == enum for selected match names mode
+*    alt_naming == TRUE if alt-name and cli-drop-node-name
+*      containers should be checked
+*    wildcards == TRUE if wildcards allowed instead of key values
+*                 FALSE if the '-' wildcard mechanism not allowed
 *    res == address of return status
 *
 * OUTPUTS:
@@ -3305,6 +3489,9 @@ void
 *********************************************************************/
 xmlChar *
     xpath_convert_url_to_path (const xmlChar *urlpath,
+                               ncx_name_match_t match_names,
+                               boolean alt_naming,
+                               boolean wildcards,
                                status_t *res)
 {
     xmlChar *buff;
@@ -3318,14 +3505,24 @@ xmlChar *
 #endif
 
     buff = NULL;
-    *res = fill_xpath_string(urlpath, NULL, &cnt);
+    *res = fill_xpath_string(urlpath, 
+                             NULL, 
+                             match_names, 
+                             alt_naming, 
+                             wildcards,
+                             &cnt);
     if (*res == NO_ERR) {
         buff = m__getMem(cnt+1);
         if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
             return NULL;
         }
-        *res = fill_xpath_string(urlpath, buff, &cnt);
+        *res = fill_xpath_string(urlpath, 
+                                 buff, 
+                                 match_names,
+                                 alt_naming,
+                                 wildcards,
+                                 &cnt);
         if (*res != NO_ERR) {
             m__free(buff);
             buff = NULL;

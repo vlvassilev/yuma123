@@ -4494,8 +4494,9 @@ static val_value_t *
     xmlChar               *fromurl;
     var_type_t             vartype;
     boolean                isvarref, iscli, isselect, saveopt;
-    boolean                isextern, keepexterntop;
+    boolean                isextern, keepexterntop, alt_names;
     status_t               res;
+    ncx_name_match_t       match_names;
 
     /* init locals */
     targobj = NULL;
@@ -4513,6 +4514,30 @@ static val_value_t *
 
     *valroot = NULL;
     *retres = NO_ERR;
+
+    /* look for the 'match-names' parameter */
+    parm = val_find_child(valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_MATCH_NAMES);
+    if (parm != NULL) {
+        match_names = ncx_get_name_match_enum(VAL_ENUM_NAME(parm));
+        if (match_names == NCX_MATCH_NONE) {
+            *retres = ERR_NCX_INVALID_VALUE;
+            return NULL;
+        }
+    } else {
+        match_names = server_cb->match_names;
+    }
+
+    /* look for the 'alt-names' parameter */
+    parm = val_find_child(valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_ALT_NAMES);
+    if (parm != NULL) {
+        alt_names = VAL_BOOL(parm);
+    } else {
+        alt_names = server_cb->alt_names;
+    }
 
     /* look for the 'from' parameter variant */
     parm = val_find_child(valset, 
@@ -4543,7 +4568,11 @@ static val_value_t *
                               YANGCLI_MOD, 
                               NCX_EL_URLTARGET);
         if (parm != NULL) {
-            fromurl = xpath_convert_url_to_path(VAL_STR(parm), &res);
+            fromurl = xpath_convert_url_to_path(VAL_STR(parm),
+                                                match_names,
+                                                alt_names,
+                                                !iswrite,  /* wildcards */
+                                                &res);
             if (fromurl == NULL || res != NO_ERR) {
                 log_error("\nError: urltarget '%s' has "
                           "invalid format (%s)",
@@ -4582,7 +4611,11 @@ static val_value_t *
                                   NCX_EL_URLTARGET);
             if (parm != NULL) {
                 res = NO_ERR;
-                fromurl = xpath_convert_url_to_path(VAL_STR(parm), &res);
+                fromurl = xpath_convert_url_to_path(VAL_STR(parm),
+                                                    match_names,
+                                                    alt_names,
+                                                    !iswrite,
+                                                    &res);
                 if (fromurl == NULL || res != NO_ERR) {
                     log_error("\nError: urltarget '%s' has "
                               "invalid format (%s)",

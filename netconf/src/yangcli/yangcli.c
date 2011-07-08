@@ -356,8 +356,14 @@ static int32            defindent;
 /* default echo-replies */
 static boolean echo_replies;
 
-/* default time-rpc */
+/* default time-rpcs */
 static boolean time_rpcs;
+
+/* default match-names */
+static ncx_name_match_t match_names;
+
+/* default alt-names */
+static boolean alt_names;
 
 
 /********************************************************************
@@ -730,7 +736,8 @@ static server_cb_t *
     server_cb->defindent = defindent;
     server_cb->echo_replies = echo_replies;
     server_cb->time_rpcs = time_rpcs;
-
+    server_cb->match_names = match_names;
+    server_cb->alt_names = alt_names;
     return server_cb;
 
 }  /* new_server_cb */
@@ -765,6 +772,8 @@ static void
     server_cb->defindent = defindent;
     server_cb->echo_replies = echo_replies;
     server_cb->time_rpcs = time_rpcs;
+    server_cb->match_names = match_names;
+    server_cb->alt_names = alt_names;
 
 }  /* update_server_cb_vars */
 
@@ -927,6 +936,29 @@ static status_t
         } else if (ncx_is_false(usestr)) {
             server_cb->time_rpcs = FALSE;
             time_rpcs = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_MATCH_NAMES)) {
+        ncx_name_match_t match = ncx_get_name_match_enum(usestr);
+
+        if (match == NCX_MATCH_NONE) {
+            log_error("\nError: value must be 'exact', "
+                      "'exact-nocase', 'one', 'one-nocase', "
+                      "'first', or 'first-nocase'");
+            res = ERR_NCX_INVALID_VALUE;
+        } else {
+            server_cb->match_names = match;
+            match_names = match;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_ALT_NAMES)) {
+        if (ncx_is_true(usestr)) {
+            server_cb->alt_names = TRUE;
+            alt_names = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            server_cb->alt_names = FALSE;
+            alt_names = FALSE;
         } else {
             log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
@@ -1105,6 +1137,9 @@ static status_t
         }
     }
 
+    if (res == NO_ERR) {
+        log_info("\nSystem variable set\n");
+    }
     return res;
 
 } /* handle_config_assign */
@@ -1856,6 +1891,22 @@ static status_t
         return res;
     }
 
+    /* $$ match-names = enum */
+    res = create_config_var(server_cb,
+                            YANGCLI_MATCH_NAMES, 
+                            ncx_get_name_match_string(match_names));
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* $$ alt-names = boolean */
+    res = create_config_var(server_cb,
+                            YANGCLI_ALT_NAMES, 
+                            (alt_names) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* $$user = string */
     strval = NULL;
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
@@ -2300,6 +2351,28 @@ static status_t
         versionmode = TRUE;
     }
 
+    /* get the match-names parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_MATCH_NAMES);
+    if (parm && parm->res == NO_ERR) {
+        match_names = ncx_get_name_match_enum(VAL_ENUM_NAME(parm));
+        if (match_names == NCX_MATCH_NONE) {
+            return ERR_NCX_INVALID_VALUE;
+        }
+    } else {
+        match_names = NCX_MATCH_EXACT;
+    }
+
+    /* get the alt-names parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_ALT_NAMES);
+    if (parm && parm->res == NO_ERR) {
+        alt_names = VAL_BOOL(parm);
+    } else {
+        alt_names = FALSE;
+    }
 
     return NO_ERR;
 

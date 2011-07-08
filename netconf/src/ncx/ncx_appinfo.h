@@ -310,6 +310,22 @@ extern status_t
 			  dlq_hdr_t *appinfoQ);
 
 
+
+/********************************************************************
+* FUNCTION ncx_get_appinfo_value
+* 
+* Get the value string from an appinfo struct
+*
+* INPUTS:
+*    appinfo ==  ncx_appinfo_t data structure to use
+*
+* RETURNS:
+*    pointer to the string value if name
+*    NULL if no value
+*********************************************************************/
+extern const xmlChar *
+    ncx_get_appinfo_value (const ncx_appinfo_t *appinfo);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

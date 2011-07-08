@@ -2140,6 +2140,90 @@ obj_template_t *
 
 
 /********************************************************************
+* FUNCTION ncx_match_any_object
+*
+* Check if an obj_template_t in in any module that
+* matches the object name string
+*
+* INPUTS:
+*   objname == object name to match
+*   name_match == name match mode enumeration
+*   alt_names == TRUE if alternate names should be checked
+*                after regular names; FALSE if not
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    ncx_match_any_object (const xmlChar *objname,
+                          ncx_name_match_t name_match,
+                          boolean alt_names)
+{
+    obj_template_t *obj;
+    ncx_module_t   *mod;
+    boolean         useses;
+
+#ifdef DEBUG
+    if (!objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    obj = NULL;
+    mod = NULL;
+    useses = FALSE;
+
+    /* find a queue of modules to use; get first entry */
+    if (ncx_sesmodQ != NULL) {
+        mod = (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
+        if (mod != NULL) {
+            useses = TRUE;
+        }
+    }
+    if (mod == NULL) {
+        mod = ncx_get_first_module();
+    }
+
+    /* always check exact match first */
+    for (;
+         mod != NULL;
+         mod =  ncx_get_next_module(mod)) {
+
+        obj = obj_find_template_top_ex(mod, 
+                                       ncx_get_modname(mod), 
+                                       objname,
+                                       name_match,
+                                       alt_names,
+                                       TRUE);  /* dataonly */
+        if (obj) {
+            return obj;
+        }
+    }
+
+    if (useses) {
+        /* make 1 more loop trying the main moduleQ */
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod = ncx_get_next_module(mod)) {
+
+            obj = obj_find_template_top_ex(mod, 
+                                           ncx_get_modname(mod), 
+                                           objname,
+                                           name_match,
+                                           alt_names,
+                                           TRUE);  /* dataonly */
+            if (obj) {
+                return obj;
+            }
+        }
+    }
+
+    return NULL;
+
+}   /* ncx_match_any_object */
+
+
+/********************************************************************
 * FUNCTION ncx_find_any_object_que
 *
 * Check if an obj_template_t in in any module that
@@ -7702,6 +7786,85 @@ void
     }
 
 }  /* ncx_delete_all_obsolete_objects */
+
+
+/********************************************************************
+* FUNCTION ncx_get_name_match_enum
+* 
+* Get the enum for the string name of a ncx_name_match_t enum
+* 
+* INPUTS:
+*   str == string name of the enum value 
+*
+* RETURNS:
+*   enum value
+*********************************************************************/
+ncx_name_match_t
+    ncx_get_name_match_enum (const xmlChar *str)
+{
+#ifdef DEBUG
+    if (str == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_CVTTYP_NONE;
+    }
+#endif
+
+    if (!xml_strcmp(NCX_EL_EXACT, str)) {
+        return NCX_MATCH_EXACT;
+    } else if (!xml_strcmp(NCX_EL_EXACT_NOCASE, str)) {
+        return NCX_MATCH_EXACT_NOCASE;
+    } else if (!xml_strcmp(NCX_EL_ONE, str)) {
+        return NCX_MATCH_ONE;
+    } else if (!xml_strcmp(NCX_EL_ONE_NOCASE, str)) {
+        return NCX_MATCH_ONE_NOCASE;
+    } else if (!xml_strcmp(NCX_EL_FIRST, str)) {
+        return NCX_MATCH_FIRST;
+    } else if (!xml_strcmp(NCX_EL_FIRST_NOCASE, str)) {
+        return NCX_MATCH_FIRST_NOCASE;
+    } else {
+        return NCX_MATCH_NONE;
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_get_name_match_enum */
+
+
+/********************************************************************
+* FUNCTION ncx_get_name_match_string
+* 
+* Get the string for the ncx_name_match_t enum
+* 
+* INPUTS:
+*   match == enum value 
+*
+* RETURNS:
+*   string value
+*********************************************************************/
+const xmlChar *
+    ncx_get_name_match_string (ncx_name_match_t match)
+{
+    switch (match) {
+    case NCX_MATCH_NONE:
+        return NCX_EL_NONE;
+    case NCX_MATCH_EXACT:
+        return NCX_EL_EXACT;
+    case NCX_MATCH_EXACT_NOCASE:
+        return NCX_EL_EXACT_NOCASE;
+    case NCX_MATCH_ONE:
+        return NCX_EL_ONE;
+    case NCX_MATCH_ONE_NOCASE:
+        return NCX_EL_ONE_NOCASE;
+    case NCX_MATCH_FIRST:
+        return NCX_EL_FIRST;
+    case NCX_MATCH_FIRST_NOCASE:
+        return NCX_EL_FIRST_NOCASE;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_EL_NONE;
+    }
+    /*NOTREACHED*/
+
+}  /* ncx_get_name_match_string */
 
 
 /* END file ncx.c */

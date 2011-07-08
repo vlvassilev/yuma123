@@ -699,6 +699,39 @@ extern obj_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_find_template_top_ex
+*
+* Check if an obj_template_t in the mod->datadefQ or any
+* of the include files visible to this module
+*
+* Top-level access is not tracked, so the 'test' variable
+* is hard-wired to FALSE
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   modname == module name for the object (needed for augments)
+*              (may be NULL to match any 'objname' instance)
+*   objname == object name to find
+*   match_names == enum for selected match names mode
+*   alt_names == TRUE if alt-name should be checked in addition
+*                to the YANG node name
+*             == FALSE to check YANG names only
+*   dataonly == TRUE to check just data nodes
+*               FALSE to check all nodes
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+extern obj_template_t *
+    obj_find_template_top_ex (ncx_module_t *mod,
+                              const xmlChar *modname,
+                              const xmlChar *objname,
+                              ncx_name_match_t match_names,
+                              boolean alt_names,
+                              boolean dataonly);
+
+
+/********************************************************************
 * FUNCTION obj_find_template_all
 *
 * Check if an obj_template_t in the mod->datadefQ or any
@@ -745,6 +778,41 @@ extern obj_template_t *
     obj_find_child (obj_template_t  *obj,
 		    const xmlChar *modname,
 		    const xmlChar *objname);
+
+
+/********************************************************************
+* FUNCTION obj_find_child_ex
+* 
+* Find a child object with the specified Qname
+* extended match modes
+*
+* !!! This function checks for accessible names only!!!
+* !!! That means child nodes of choice->case will be
+* !!! present instead of the choice name or case name
+*
+* INPUTS:
+*    obj == obj_template_t to check
+*    modname == module name that defines the obj_template_t
+*            == NULL and first match will be done, and the
+*               module ignored (Name instead of QName)
+*    objname == object name to find
+*    match_names == enum for selected match names mode
+*    alt_names == TRUE if alt-name should be checked in addition
+*                to the YANG node name
+*             == FALSE to check YANG names only
+*    dataonly == TRUE to check just data nodes
+*                FALSE to check all nodes
+*
+* RETURNS:
+*    pointer to obj_template_t or NULL if not found
+*********************************************************************/
+extern obj_template_t *
+    obj_find_child_ex (obj_template_t  *obj,
+                       const xmlChar *modname,
+                       const xmlChar *objname,
+                       ncx_name_match_t match_names,
+                       boolean alt_names,
+                       boolean dataonly);
 
 
 /********************************************************************
@@ -3539,6 +3607,21 @@ extern const xmlChar *
 *********************************************************************/
 extern void
     obj_delete_obsolete (dlq_hdr_t  *objQ);
+
+
+/********************************************************************
+* FUNCTION obj_get_altname
+*
+* Get the alt-name for this object, if any
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to alt-name of NULL if none
+*********************************************************************/
+extern const xmlChar *
+    obj_get_altname (const obj_template_t *obj);
 
 
 #ifdef __cplusplus

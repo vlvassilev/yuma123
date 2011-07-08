@@ -1929,8 +1929,15 @@ static void
 *             == FALSE to match choice/case names right away
 *    match == TRUE if a strncmp test desired
 *             FALSE if a normal strcmp (full match) test desired
+*    usecase == TRUE if case-sensitive
+*               FALSE if case-insensitive 
+*    altnames == TRUE if altnames allowed
+*                FALSE if normal names only
+*   dataonly == TRUE to check just data nodes
+*               FALSE to check all nodes
 *    matchcount == address of return parameter match count
 *                  (may be NULL)
+
 * OUTPUTS:
 *   if non-NULL:
 *    *matchcount == number of parameters that matched
@@ -1945,6 +1952,9 @@ static obj_template_t *
                    const xmlChar *objname,
                    boolean lookdeep,
                    boolean match,
+                   boolean usecase,
+                   boolean altnames,
+                   boolean dataonly,
                    uint32 *matchcount)
 {
     obj_template_t *obj, *chobj, *casobj, *matchobj;
@@ -1953,6 +1963,9 @@ static obj_template_t *
     uint32          len;
     int             ret;
 
+    if (matchcount != NULL) {
+        *matchcount = 0;
+    }
     matchobj = NULL;
     len = 0;
 
@@ -1970,14 +1983,44 @@ static obj_template_t *
             continue;
         }
 
-        name = obj_get_name(obj);
+        if (dataonly) {
+            if (obj_is_top(obj)) {
+                if (obj_is_rpc(obj) || obj_is_notif(obj)) {
+                    continue;
+                }
+            } else {
+                if (obj_in_rpc(obj) || obj_in_notif(obj)) {
+                    continue;
+                }
+            }
+        }
+
+        if (altnames) {
+            name = obj_get_altname(obj);
+            if (name == NULL) {
+                continue;
+            }
+        } else {
+            name = obj_get_name(obj);
+        }
         mname = obj_get_mod_name(obj);
 
+        ret = 0;
+        
         if (match) {
-            ret = xml_strncmp(objname, name, len);
+            if (usecase) {
+                ret = xml_strncmp(objname, name, len);
+            } else {
+                ret = xml_strnicmp(objname, name, len);
+            }
         } else {
-            ret = xml_strcmp(objname, name);
+            if (usecase) {
+                ret = xml_strcmp(objname, name);
+            } else {
+                ret = xml_stricmp(objname, name);
+            }
         }
+
 
         if (!lookdeep) {
             /* if lookdeep == TRUE then look past
@@ -1999,7 +2042,9 @@ static obj_template_t *
                         if (matchcount) {
                             (*matchcount)++;
                         }
-                        matchobj = obj;
+                        if (matchobj == NULL) {
+                            matchobj = obj;
+                        }
                     }
                 } else {
                     return obj;
@@ -2024,10 +2069,15 @@ static obj_template_t *
                                       objname,
                                       lookdeep, 
                                       match, 
+                                      usecase,
+                                      altnames,
+                                      dataonly,
                                       matchcount);
                 if (chobj) {
                     if (match) {
-                        matchobj = chobj;
+                        if (matchobj == NULL) {
+                            matchobj = chobj;
+                        }
                     } else {
                         return chobj;
                     }
@@ -2048,10 +2098,15 @@ static obj_template_t *
                                   objname,
                                   lookdeep, 
                                   match, 
+                                  usecase,
+                                  altnames,
+                                  dataonly,
                                   matchcount);
             if (chobj) {
                 if (match) {
-                    matchobj = chobj;
+                    if (matchobj == NULL) {
+                        matchobj = chobj;
+                    }
                 } else {
                     return chobj;
                 }
@@ -2075,7 +2130,9 @@ static obj_template_t *
                         if (matchcount) {
                             (*matchcount)++;
                         }
-                        matchobj = obj;
+                        if (matchobj == NULL) {
+                            matchobj = obj;
+                        }
                     } else {
                         return obj;
                     }
@@ -2969,6 +3026,140 @@ static boolean
 }  /* test_one_pfnode */
 
 
+/********************************************************************
+* FUNCTION find_template_top
+*
+* Check if an obj_template_t in the mod->datadefQ or any
+* of the include files visible to this module
+*
+* Top-level access is not tracked, so the 'test' variable
+* is hard-wired to FALSE
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   modname == module name for the object (needed for augments)
+*              (may be NULL to match any 'objname' instance)
+*   objname == object name to find
+*   match == TRUE to partial-length match node names
+*            FALSE to find exact-length match only
+*   altnames == TRUE if alt-name should be checked
+*   usecase == TRUE if case-sensitive; 
+*              FALSE if allow case-insensitive match
+*   onematch == TRUE if only 1 match allowed
+*               FALSE if first match of N allowed
+*   dataonly == TRUE to check just data nodes
+*               FALSE to check all nodes
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+static obj_template_t *
+    find_template_top (ncx_module_t *mod,
+                       const xmlChar *modname,
+                       const xmlChar *objname,
+                       boolean match,
+                       boolean altnames,
+                       boolean usecase,
+                       boolean onematch,
+                       boolean dataonly)
+{
+    obj_template_t *obj;
+    yang_node_t    *node;
+    ncx_include_t  *inc;
+    dlq_hdr_t      *que;
+    uint32          matchcount;
+
+    matchcount = 0;
+
+    /* check the [sub]module datadefQ */
+    obj = find_template(&mod->datadefQ, 
+                        modname, 
+                        objname, 
+                        FALSE, /* lookdeep*/
+                        match,
+                        usecase,
+                        altnames,
+                        dataonly,
+                        &matchcount);
+    if (obj) {
+        if (match && onematch && matchcount > 1) {
+            return NULL;
+        }
+        return obj;
+    }
+
+    /* Q of all includes this [sub]module has seen */
+    que = ncx_get_allincQ(mod);
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule
+     */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+        /* get the real submodule struct */
+        if (inc->submod == NULL) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (inc->submod == NULL) {
+                /* include not found, skip this one */
+                continue;
+            }
+        }
+
+        /* check the type Q in this submodule */
+        obj = find_template(&inc->submod->datadefQ,
+                            modname, 
+                            objname,
+                            FALSE, /* lookdeep */
+                            match, 
+                            usecase,
+                            altnames,
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            if (match && onematch && matchcount > 1) {
+                return NULL;
+            }
+            return obj;
+        }
+    }
+
+    /* if this is a submodule, then still need to check
+     * the datadefQ of the main module
+     */
+    if (!mod->ismod) {
+        ncx_module_t  *mainmod = ncx_get_parent_mod(mod);
+        obj = NULL;
+        if (mainmod != NULL) {
+            /* check the [sub]module datadefQ */
+            obj = find_template(&mainmod->datadefQ, 
+                                modname, 
+                                objname, 
+                                FALSE, /* lookdeep */
+                                match, 
+                                usecase,
+                                altnames,
+                                dataonly,
+                                &matchcount);
+        }
+        if (obj != NULL && match && onematch && matchcount > 1) {
+            return NULL;
+        }
+        return obj;
+    }
+
+    return NULL;
+
+}   /* find_template_top */
+
+
+
 /**************** E X T E R N A L    F U N C T I O N S    **********/
 
 
@@ -3239,13 +3430,21 @@ obj_template_t *
 {
 
 #ifdef DEBUG
-    if (!que || !objname) {
+    if (que == NULL || objname == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    return find_template(que, modname, objname, FALSE, FALSE, NULL);
+    return find_template(que, 
+                         modname, 
+                         objname, 
+                         FALSE, /* lookdeep */
+                         FALSE, /* match */
+                         TRUE,  /* usecase */
+                         FALSE, /* altnames */
+                         FALSE, /* dataonly */
+                         NULL);
 
 }  /* obj_find_template */
 
@@ -3273,13 +3472,21 @@ const obj_template_t *
 {
 
 #ifdef DEBUG
-    if (!que || !objname) {
+    if (que == NULL || objname == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    return find_template(que, modname, objname, FALSE, FALSE, NULL);
+    return find_template(que, 
+                         modname, 
+                         objname, 
+                         FALSE, /* lookdeep */
+                         FALSE, /* match */
+                         TRUE,  /* usecase */
+                         FALSE, /* altnames */
+                         FALSE, /* dataonly */
+                         NULL);
 
 }  /* obj_find_template_con */
 
@@ -3306,13 +3513,21 @@ obj_template_t *
 {
 
 #ifdef DEBUG
-    if (!que || !objname) {
+    if (que == NULL || objname == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    return find_template(que, modname, objname, TRUE, FALSE, NULL);
+    return find_template(que,
+                         modname,
+                         objname,
+                         TRUE, /* lookdeep */
+                         FALSE, /* match */
+                         TRUE,  /* usecase */
+                         FALSE, /* altnames */
+                         FALSE, /* dataonly */
+                         NULL);
 
 }  /* obj_find_template_test */
 
@@ -3340,86 +3555,200 @@ obj_template_t *
                            const xmlChar *modname,
                            const xmlChar *objname)
 {
-    obj_template_t *obj;
-    yang_node_t    *node;
-    ncx_include_t  *inc;
-    dlq_hdr_t      *que;
+    return obj_find_template_top_ex(mod,
+                                    modname,
+                                    objname,
+                                    NCX_MATCH_EXACT,
+                                    FALSE,
+                                    FALSE);
+
+}   /* obj_find_template_top */
+
+
+/********************************************************************
+* FUNCTION obj_find_template_top_ex
+*
+* Check if an obj_template_t in the mod->datadefQ or any
+* of the include files visible to this module
+*
+* Top-level access is not tracked, so the 'test' variable
+* is hard-wired to FALSE
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   modname == module name for the object (needed for augments)
+*              (may be NULL to match any 'objname' instance)
+*   objname == object name to find
+*   match_names == enum for selected match names mode
+*   alt_names == TRUE if alt-name should be checked in addition
+*                to the YANG node name
+*             == FALSE to check YANG names only
+*   dataonly == TRUE to check just data nodes
+*               FALSE to check all nodes
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    obj_find_template_top_ex (ncx_module_t *mod,
+                              const xmlChar *modname,
+                              const xmlChar *objname,
+                              ncx_name_match_t match_names,
+                              boolean alt_names,
+                              boolean dataonly)
+{
+    obj_template_t  *obj;
 
 #ifdef DEBUG
-    if (!mod || !objname) {
+    if (mod == NULL || objname == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    /* check the [sub]module datadefQ */
-    obj = find_template(&mod->datadefQ, 
-                        modname, 
-                        objname, 
-                        FALSE, 
-                        FALSE, 
-                        NULL);
+    /* 1) try an exact match */
+    obj = find_template_top(mod,
+                            modname, 
+                            objname, 
+                            FALSE,       /* match */
+                            FALSE,    /* altnames */
+                            TRUE,      /* usecase */
+                            FALSE,   /* onematch */
+                            dataonly);
     if (obj) {
         return obj;
     }
 
-    /* Q of all includes this [sub]module has seen */
-    que = ncx_get_allincQ(mod);
-
-    /* check all the submodules, but only the ones visible
-     * to this module or submodule
-     */
-    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-         inc != NULL;
-         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
-
-        /* get the real submodule struct */
-        if (inc->submod == NULL) {
-            node = yang_find_node(que, 
-                                  inc->submodule,
-                                  inc->revision);
-            if (node) {
-                inc->submod = node->submod;
-            }
-            if (inc->submod == NULL) {
-                /* include not found, skip this one */
-                continue;
-            }
-        }
-
-        /* check the type Q in this submodule */
-        obj = find_template(&inc->submod->datadefQ,
-                            modname, 
-                            objname,
-                            FALSE, 
-                            FALSE, 
-                            NULL);
+    /* 2) try an case-insensitive exact-length match */
+    if (match_names >= NCX_MATCH_EXACT_NOCASE) {
+        obj = find_template_top(mod,
+                                modname, 
+                                objname, 
+                                FALSE,       /* match */
+                                FALSE,    /* altnames */
+                                FALSE,     /* usecase */
+                                FALSE,    /* onematch */
+                                dataonly);
         if (obj) {
             return obj;
         }
+    } else if (!alt_names) {
+        /* NCX_MATCH_EXACT mode */
+        return NULL;
     }
 
-    /* if this is a submodule, then still need to check
-     * the datadefQ of the main module
-     */
-    if (!mod->ismod) {
-        ncx_module_t  *mainmod = ncx_get_parent_mod(mod);
-        obj = NULL;
-        if (mainmod != NULL) {
-            /* check the [sub]module datadefQ */
-            obj = find_template(&mainmod->datadefQ, 
+    /* 3) try an case-sensitive partial-name match */
+    if (match_names >= NCX_MATCH_ONE) {
+        obj = find_template_top(mod,
                                 modname, 
                                 objname, 
-                                FALSE, 
-                                FALSE, 
-                                NULL);
+                                TRUE,       /* match */
+                                FALSE,   /* altnames */
+                                TRUE,     /* usecase */
+                                (match_names < NCX_MATCH_FIRST),
+                                dataonly);
+        if (obj) {
+            return obj;
         }
+    } else if (!alt_names) {
+        /* NCX_MATCH_EXACT_NOCASE mode */
+        return NULL;
+    }
+
+    /* 4) try an case-insensitive partial-name match */
+    if (match_names == NCX_MATCH_ONE_NOCASE ||
+        match_names == NCX_MATCH_FIRST_NOCASE) {
+        obj = find_template_top(mod,
+                                modname, 
+                                objname, 
+                                TRUE,       /* match */
+                                FALSE,   /* altnames */
+                                TRUE,     /* usecase */
+                                (match_names < NCX_MATCH_FIRST),
+                                dataonly);
+        if (obj) {
+            return obj;
+        }
+    } else if (!alt_names) {
+        /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        return NULL;
+    }
+
+    if (!alt_names) {
+        return NULL;
+    }
+
+    /* 5) try an exact match on alt-name */
+    obj = find_template_top(mod,
+                            modname, 
+                            objname, 
+                            FALSE,       /* match */
+                            TRUE,     /* altnames */
+                            TRUE,      /* usecase */
+                            FALSE,    /* onematch */
+                            dataonly);
+    if (obj) {
         return obj;
+    }
+
+    /* 6) try an case-insensitive exact-length match on alt-name */
+    if (match_names >= NCX_MATCH_EXACT_NOCASE) {
+        obj = find_template_top(mod,
+                                modname, 
+                                objname, 
+                                FALSE,       /* match */
+                                TRUE,     /* altnames */
+                                FALSE,     /* usecase */
+                                FALSE,    /* onematch */
+                                dataonly);
+        if (obj) {
+            return obj;
+        }
+    } else {
+        /* NCX_MATCH_EXACT mode + alt_names */
+        return NULL;
+    }
+
+    /* 7) try an case-sensitive partial-name match on alt-name */
+    if (match_names >= NCX_MATCH_ONE) {
+        obj = find_template_top(mod,
+                                modname, 
+                                objname, 
+                                TRUE,       /* match */
+                                TRUE,    /* altnames */
+                                TRUE,     /* usecase */
+                                (match_names < NCX_MATCH_FIRST),
+                                dataonly);
+        if (obj) {
+            return obj;
+        }
+    } else {
+        /* NCX_MATCH_EXACT_NOCASE mode + alt_names */
+        return NULL;
+    }
+
+    /* 8) try an case-insensitive partial-name match on alt-name */
+    if (match_names == NCX_MATCH_ONE_NOCASE ||
+        match_names == NCX_MATCH_FIRST_NOCASE) {
+        obj = find_template_top(mod,
+                                modname, 
+                                objname, 
+                                TRUE,      /* match */
+                                TRUE,   /* altnames */
+                                TRUE,    /* usecase */
+                                (match_names < NCX_MATCH_FIRST),
+                                dataonly);
+        if (obj) {
+            return obj;
+        }
+    } else {
+        /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        return NULL;
     }
 
     return NULL;
 
-}   /* obj_find_template_top */
+}   /* obj_find_template_top_ex */
 
 
 /********************************************************************
@@ -3450,7 +3779,7 @@ obj_template_t *
     dlq_hdr_t      *que;
 
 #ifdef DEBUG
-    if (!mod || !objname) {
+    if (mod == NULL || objname == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -3460,8 +3789,11 @@ obj_template_t *
     obj = find_template(&mod->datadefQ, 
                         modname, 
                         objname, 
-                        FALSE, 
-                        FALSE, 
+                        FALSE, /* lookdeep */
+                        FALSE,    /* match */
+                        TRUE,   /* usecase */
+                        FALSE, /* altnames */
+                        FALSE, /* dataonly */
                         NULL);
     if (obj) {
         return obj;
@@ -3481,8 +3813,11 @@ obj_template_t *
             obj = find_template(&node->submod->datadefQ,
                                 modname, 
                                 objname,
-                                FALSE, 
-                                FALSE, 
+                                FALSE,  /* lookdeep */
+                                FALSE,     /* match */
+                                TRUE,    /* usecase */
+                                FALSE,  /* altnames */
+                                FALSE, /* dataonly */
                                 NULL);
             if (obj) {
                 return obj;
@@ -3522,25 +3857,250 @@ obj_template_t *
     dlq_hdr_t  *que;
 
 #ifdef DEBUG
-    if (!obj || !objname) {
+    if (obj == NULL || objname == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
     que = obj_get_datadefQ(obj);
-    if (que) {
+    if (que != NULL) {
         return find_template(que, 
                              modname, 
                              objname, 
-                             TRUE, 
-                             FALSE, 
+                             TRUE,  /* lookdeep */
+                             FALSE,    /* match */
+                             TRUE,   /* usecase */
+                             FALSE, /* altnames */
+                             FALSE, /* dataonly */
                              NULL);
     }
 
     return NULL;
 
 }  /* obj_find_child */
+
+
+/********************************************************************
+* FUNCTION obj_find_child_ex
+* 
+* Find a child object with the specified Qname
+* extended match modes
+*
+* !!! This function checks for accessible names only!!!
+* !!! That means child nodes of choice->case will be
+* !!! present instead of the choice name or case name
+*
+* INPUTS:
+*    obj == obj_template_t to check
+*    modname == module name that defines the obj_template_t
+*            == NULL and first match will be done, and the
+*               module ignored (Name instead of QName)
+*    objname == object name to find
+*    match_names == enum for selected match names mode
+*    alt_names == TRUE if alt-name should be checked in addition
+*                to the YANG node name
+*             == FALSE to check YANG names only
+*    dataonly == TRUE to check just data nodes
+*                FALSE to check all nodes
+*
+* RETURNS:
+*    pointer to obj_template_t or NULL if not found
+*********************************************************************/
+obj_template_t *
+    obj_find_child_ex (obj_template_t  *obj,
+                       const xmlChar *modname,
+                       const xmlChar *objname,
+                       ncx_name_match_t match_names,
+                       boolean alt_names,
+                       boolean dataonly)
+{
+    dlq_hdr_t  *que;
+    uint32      matchcount;
+
+#ifdef DEBUG
+    if (obj == NULL || objname == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    que = obj_get_datadefQ(obj);
+    if (que == NULL) {
+        return NULL;
+    }
+
+    /* 1) try an exact match */
+    obj = find_template(que,
+                        modname, 
+                        objname, 
+                        TRUE,     /* loopdeep */
+                        FALSE,       /* match */
+                        TRUE,      /* usecase */
+                        FALSE,   /* alt_names */
+                        dataonly,
+                        &matchcount);
+    if (obj) {
+        return obj;
+    }
+
+    /* 2) try an case-insensitive exact-length match */
+    if (match_names >= NCX_MATCH_EXACT_NOCASE) {
+        obj = find_template(que,
+                            modname, 
+                            objname, 
+                            TRUE,      /* loopdeep */
+                            FALSE,        /* match */
+                            FALSE,      /* usecase */
+                            FALSE,     /* altnames */
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            return obj;
+        }
+    } else if (!alt_names) {
+        /* NCX_MATCH_EXACT mode */
+        return NULL;
+    }
+
+    /* 3) try an case-sensitive partial-name match */
+    if (match_names >= NCX_MATCH_ONE) {
+        obj = find_template(que,
+                            modname, 
+                            objname, 
+                            TRUE,     /* loopdeep */
+                            TRUE,        /* match */
+                            TRUE,      /* usecase */
+                            FALSE,    /* altnames */
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            if (match_names <= NCX_MATCH_ONE_NOCASE &&
+                matchcount > 1) {
+                return NULL;
+            }
+            return obj;
+        }
+    } else if (!alt_names) {
+        /* NCX_MATCH_EXACT_NOCASE mode */
+        return NULL;
+    }
+
+    /* 4) try an case-insensitive partial-name match */
+    if (match_names == NCX_MATCH_ONE_NOCASE ||
+        match_names == NCX_MATCH_FIRST_NOCASE) {
+        obj = find_template(que,
+                            modname, 
+                            objname, 
+                            TRUE,     /* loopdeep */
+                            TRUE,        /* match */
+                            FALSE,     /* usecase */
+                            FALSE,    /* altnames */
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            if (match_names <= NCX_MATCH_ONE_NOCASE &&
+                matchcount > 1) {
+                return NULL;
+            }
+            return obj;
+        }
+    } else if (!alt_names) {
+        /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        return NULL;
+    }
+
+    if (!alt_names) {
+        return NULL;
+    }
+
+    /* 5) try an exact match on alt-name */
+    obj = find_template(que,
+                        modname, 
+                        objname, 
+                        TRUE,      /* loopdeep */
+                        FALSE,        /* match */
+                        TRUE,       /* usecase */
+                        TRUE,      /* altnames */
+                        dataonly,
+                        &matchcount);
+    if (obj) {
+        return obj;
+    }
+
+    /* 6) try an case-insensitive exact-length match on alt-name */
+    if (match_names >= NCX_MATCH_EXACT_NOCASE) {
+        obj = find_template(que,
+                            modname, 
+                            objname, 
+                            TRUE,       /* loopdeep */
+                            FALSE,         /* match */
+                            FALSE,       /* usecase */
+                            TRUE,       /* altnames */
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            if (match_names <= NCX_MATCH_ONE_NOCASE &&
+                matchcount > 1) {
+                return NULL;
+            }
+            return obj;
+        }
+    } else {
+        /* NCX_MATCH_EXACT mode + alt_names */
+        return NULL;
+    }
+
+    /* 7) try an case-sensitive partial-name match on alt-name */
+    if (match_names >= NCX_MATCH_ONE) {
+        obj = find_template(que,
+                            modname, 
+                            objname, 
+                            TRUE,       /* loopdeep */
+                            TRUE,          /* match */
+                            TRUE,        /* usecase */
+                            TRUE,       /* altnames */
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            if (match_names <= NCX_MATCH_ONE_NOCASE &&
+                matchcount > 1) {
+                return NULL;
+            }
+            return obj;
+        }
+    } else {
+        /* NCX_MATCH_EXACT_NOCASE mode + alt_names */
+        return NULL;
+    }
+
+    /* 8) try an case-insensitive partial-name match on alt-name */
+    if (match_names == NCX_MATCH_ONE_NOCASE ||
+        match_names == NCX_MATCH_FIRST_NOCASE) {
+        obj = find_template(que,
+                            modname, 
+                            objname, 
+                            TRUE,       /* loopdeep */
+                            TRUE,          /* match */
+                            FALSE,       /* usecase */
+                            TRUE,       /* altnames */
+                            dataonly,
+                            &matchcount);
+        if (obj) {
+            if (match_names <= NCX_MATCH_ONE_NOCASE &&
+                matchcount > 1) {
+                return NULL;
+            }
+            return obj;
+        }
+    } else {
+        /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        return NULL;
+    }
+
+    return NULL;
+
+}  /* obj_find_child_ex */
 
 
 /********************************************************************
@@ -3588,8 +4148,11 @@ obj_template_t *
             template = find_template(que, 
                                      modname, 
                                      buff, 
-                                     TRUE, 
-                                     FALSE, 
+                                     TRUE,   /* lookdeep */
+                                     FALSE,     /* match */
+                                     TRUE,    /* usecase */
+                                     FALSE,  /* altnames */
+                                     FALSE,  /* dataonly */
                                      NULL);
             m__free(buff);
             return template;
@@ -3658,8 +4221,11 @@ obj_template_t *
             template = find_template(que, 
                                      modname, 
                                      buff, 
-                                     TRUE, 
-                                     TRUE, 
+                                     TRUE,   /* lookdeep */
+                                     TRUE,      /* match */
+                                     TRUE,    /* usecase */
+                                     FALSE,  /* altnames */
+                                     FALSE,  /* dataonly */
                                      matchcount);
             m__free(buff);
             return template;
@@ -11039,6 +11605,43 @@ void
     }
 
 }  /* obj_delete_obsolete */
+
+
+/********************************************************************
+* FUNCTION obj_get_altname
+*
+* Get the alt-name for this object, if any
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to alt-name of NULL if none
+*********************************************************************/
+const xmlChar *
+    obj_get_altname (const obj_template_t *obj)
+{
+    const ncx_appinfo_t *appinfo;
+    const xmlChar *altname;
+
+#ifdef DEBUG 
+    if (obj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    altname = NULL;
+    appinfo = ncx_find_const_appinfo(&obj->appinfoQ,
+                                     NULL, /* any module */
+                                     NCX_EL_ALT_NAME);
+    if (appinfo != NULL) {
+        altname = ncx_get_appinfo_value(appinfo);
+    }
+
+    return altname;
+
+}   /* obj_get_altname */
 
 
 /* END obj.c */

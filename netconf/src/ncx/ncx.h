@@ -474,6 +474,26 @@ extern obj_template_t *
 
 
 /********************************************************************
+* FUNCTION ncx_match_any_object
+*
+* Check if an obj_template_t in in any module that
+* matches the object name string
+*
+* INPUTS:
+*   objname == object name to match
+*   name_match == name match mode enumeration
+*   alt_names == TRUE if alternate names should be checked
+*                after regular names; FALSE if not
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+extern obj_template_t *
+    ncx_match_any_object (const xmlChar *objname,
+                          ncx_name_match_t name_match,
+                          boolean alt_names);
+
+
+/********************************************************************
 * FUNCTION ncx_find_any_object_que
 *
 * Check if an obj_template_t in in any module that
@@ -2790,6 +2810,36 @@ extern void
 *********************************************************************/
 extern void
     ncx_delete_all_obsolete_objects (void);
+
+
+/********************************************************************
+* FUNCTION ncx_get_name_match_enum
+* 
+* Get the enum for the string name of a ncx_name_match_t enum
+* 
+* INPUTS:
+*   str == string name of the enum value 
+*
+* RETURNS:
+*   enum value
+*********************************************************************/
+extern ncx_name_match_t
+    ncx_get_name_match_enum (const xmlChar *str);
+
+
+/********************************************************************
+* FUNCTION ncx_get_name_match_string
+* 
+* Get the string for the ncx_name_match_t enum
+* 
+* INPUTS:
+*   match == enum value 
+*
+* RETURNS:
+*   string value
+*********************************************************************/
+extern const xmlChar *
+    ncx_get_name_match_string (ncx_name_match_t match);
 
 
 #ifdef __cplusplus

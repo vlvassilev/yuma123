@@ -3204,7 +3204,7 @@ status_t
              * retval is not used by that fn.  After the module is
              * registered, the un->typ field should be set
              */
-            if (!testbtyp != NCX_BT_UNION) {
+            if (testbtyp != NCX_BT_UNION) {
                 retval->btyp = typ_get_basetype(undef);
             }
             done = TRUE;

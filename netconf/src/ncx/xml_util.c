@@ -1833,6 +1833,49 @@ int
 
 
 /********************************************************************
+* FUNCTION xml_stricmp
+* 
+* Case insensitive string compare for xmlChar
+* INPUTS:
+*   s1 == zero-terminated xmlChar string to compare
+*   s2 == zero-terminated xmlChar string to compare
+*
+* RETURNS:
+*   == -1 : string 1 is less than string 2
+*   == 0  : strings are equal
+*   == 1  : string 1 is greater than string 2
+*********************************************************************/
+int 
+    xml_stricmp (const xmlChar *s1, 
+                 const xmlChar *s2)
+{
+    xmlChar s1char, s2char;
+
+#ifdef DEBUG
+    if (s1 == NULL || s2 == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    for (;;) {
+        s1char = (xmlChar)tolower((int)*s1);
+        s2char = (xmlChar)tolower((int)*s2);
+        if (s1char < s2char) {
+            return -1;
+        } else if (s1char > s2char) {
+            return 1;
+        } else if (s1char == 0 && s2char == 0) {
+            return 0;
+        }
+        s1++;
+        s2++;
+    }
+    /*NOTREACHED*/
+}  /* xml_stricmp */
+
+
+/********************************************************************
 * FUNCTION xml_strncmp
 * 
 * String compare for xmlChar for at most 'maxlen' xmlChars
@@ -1874,6 +1917,55 @@ int
     return 0;
 
 }  /* xml_strncmp */
+
+
+/********************************************************************
+* FUNCTION xml_strnicmp
+* 
+* Case insensitive string compare for xmlChar for at 
+* most 'maxlen' xmlChars
+*
+* INPUTS:
+*   s1 == zero-terminated xmlChar string to compare
+*   s2 == zero-terminated xmlChar string to compare
+*   maxlen == max number of xmlChars to compare
+*
+* RETURNS:
+*   == -1 : string 1 is less than string 2
+*   == 0  : strings are equal
+*   == 1  : string 1 is greater than string 2
+*********************************************************************/
+int 
+    xml_strnicmp (const xmlChar *s1, 
+                  const xmlChar *s2,
+                  uint32 maxlen)
+{
+    uint32  i;
+    xmlChar s1char, s2char;
+
+#ifdef DEBUG
+    if (s1 == NULL || s2 == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    for (i=0; i<maxlen; i++) {
+        s1char = (xmlChar)tolower((int)*s1);
+        s2char = (xmlChar)tolower((int)*s2);
+        if (s1char < s2char) {
+            return -1;
+        } else if (s1char > s2char) {
+            return 1;
+        } else if (s1char == 0 && s2char == 0) {
+            return 0;
+        }
+        s1++;
+        s2++;
+    }
+    return 0;
+
+}  /* xml_strnicmp */
 
 
 /********************************************************************

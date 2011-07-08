@@ -155,7 +155,7 @@ extern "C" {
 #define DEF_FALSE_PROMPT  (const xmlChar *)"yangcli[F]> "
 #define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
 #define MORE_PROMPT    (const xmlChar *)"   more> "
-#define FALSE_PROMPT (const xmlChar *)"[F]"
+#define FALSE_PROMPT   (const xmlChar *)"[F]"
 
 #define YESNO_NODEF  0
 #define YESNO_CANCEL 0
@@ -166,6 +166,7 @@ extern "C" {
  * matches parm clauses in yangcli container in yangcli.yang
  */
 
+#define YANGCLI_ALT_NAMES   (const xmlChar *)"alt-names"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
 #define YANGCLI_AUTOHISTORY (const xmlChar *)"autohistory"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
@@ -198,6 +199,7 @@ extern "C" {
 #define YANGCLI_LOCK_TIMEOUT (const xmlChar *)"lock-timeout"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
+#define YANGCLI_MATCH_NAMES (const xmlChar *)"match-names"
 #define YANGCLI_MODULE      (const xmlChar *)"module"
 #define YANGCLI_MODULES     (const xmlChar *)"modules"
 #define YANGCLI_NCPORT      (const xmlChar *)"ncport"
@@ -429,6 +431,8 @@ typedef struct server_cb_t_ {
     int32                defindent;
     boolean              echo_replies;
     boolean              time_rpcs;
+    ncx_name_match_t     match_names;
+    boolean              alt_names;
 
     /* session support */
     mgr_io_state_t       state;

@@ -401,6 +401,19 @@ typedef enum ncx_xpath_axis_t_ {
 } ncx_xpath_axis_t;
 
 
+/* Node name match modes */
+typedef enum ncx_name_match_t_ {
+    NCX_MATCH_NONE,
+    NCX_MATCH_EXACT,
+    NCX_MATCH_EXACT_NOCASE,
+    NCX_MATCH_ONE,
+    NCX_MATCH_ONE_NOCASE,
+    NCX_MATCH_FIRST,
+    NCX_MATCH_FIRST_NOCASE
+} ncx_name_match_t;
+
+
+
 typedef struct ncx_dec64_t_ {
     int64  val;        /* adjusted number to fit in 64 bits */
     uint8  digits;      /* number of decimal digits 1 .. 18 */

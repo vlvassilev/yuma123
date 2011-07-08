@@ -820,6 +820,24 @@ extern int
 
 
 /********************************************************************
+* FUNCTION xml_stricmp
+* 
+* Case insensitive string compare for xmlChar
+* INPUTS:
+*   s1 == zero-terminated xmlChar string to compare
+*   s2 == zero-terminated xmlChar string to compare
+*
+* RETURNS:
+*   == -1 : string 1 is less than string 2
+*   == 0  : strings are equal
+*   == 1  : string 1 is greater than string 2
+*********************************************************************/
+extern int 
+    xml_stricmp (const xmlChar *s1, 
+                 const xmlChar *s2);
+
+
+/********************************************************************
 * FUNCTION xml_strncmp
 * 
 * String compare for xmlChar for at most 'maxlen' xmlChars
@@ -837,6 +855,28 @@ extern int
     xml_strncmp (const xmlChar *s1, 
 		 const xmlChar *s2,
 		 uint32 maxlen);
+
+
+/********************************************************************
+* FUNCTION xml_strnicmp
+* 
+* Case insensitive string compare for xmlChar for at 
+* most 'maxlen' xmlChars
+*
+* INPUTS:
+*   s1 == zero-terminated xmlChar string to compare
+*   s2 == zero-terminated xmlChar string to compare
+*   maxlen == max number of xmlChars to compare
+*
+* RETURNS:
+*   == -1 : string 1 is less than string 2
+*   == 0  : strings are equal
+*   == 1  : string 1 is greater than string 2
+*********************************************************************/
+extern int 
+    xml_strnicmp (const xmlChar *s1, 
+                  const xmlChar *s2,
+                  uint32 maxlen);
 
 
 /********************************************************************

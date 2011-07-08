@@ -678,6 +678,23 @@ static void
                       (const xmlChar *)"errorstr = NULL;",
                       indent);
 
+    /* print an enter fn DEBUG trace */
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"if (LOGDEBUG) {",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"log_debug(\"\\nEnter ",
+                      indent+indent);
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, EDIT_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" callback for %s phase\",");
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"agt_cbtype_name(cbtyp));",
+                      indent*3);
+    ses_putstr_indent(scb, (const xmlChar *)"}", indent);
+
+
+    /* lines warning to remove (void)foo; lines */
     if (!obj_is_top(obj)) {
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb,
@@ -812,12 +829,9 @@ static void
     /* generate check on read-only child nodes */
     if (obj_has_ro_children(obj)) {
         ses_putstr_indent(scb,
-                          (const xmlChar *)"if (res == NO_ERR &&",
+                          (const xmlChar *)
+                          "if (res == NO_ERR && curval == NULL) {",
                           indent+indent);
-        ses_putstr_indent(scb,
-                          (const xmlChar *)"(editop == OP_EDITOP_LOAD || "
-                          "editop == OP_EDITOP_CREATE)) {",
-                          indent*3);
         ses_putstr_indent(scb,
                           (const xmlChar *)"res = ",
                           indent*3);
@@ -968,6 +982,19 @@ static void
                       (const xmlChar *)"res = NO_ERR;",
                       indent);
 
+    /* print an enter fn DEBUG trace */
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"if (LOGDEBUG) {",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"log_debug(\"\\nEnter ",
+                      indent+indent);
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, GET_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" callback\");");
+    ses_putstr_indent(scb, (const xmlChar *)"}", indent);
+
+    /* print message about removing (void)foo; line */
     ses_putchar(scb, '\n');
     ses_putstr_indent(scb,
                       (const xmlChar *)"/* remove the next line "

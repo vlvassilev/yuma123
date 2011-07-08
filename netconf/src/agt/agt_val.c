@@ -163,7 +163,7 @@ date         init     comment
 #endif
 
 
-/* recursive callback function foward decl */
+/* recursive callback function foward decls */
 static status_t
     invoke_btype_cb (agt_cbtyp_t cbtyp,
                      op_editop_t editop,
@@ -173,6 +173,16 @@ static status_t
                      val_value_t  *newval,
                      val_value_t  *curval,
                      boolean done);
+
+
+static status_t
+    handle_user_callback (agt_cbtyp_t cbtyp,
+                          op_editop_t editop,
+                          ses_cb_t  *scb,
+                          rpc_msg_t  *msg,
+                          val_value_t *newnode,
+                          val_value_t *curnode,
+                          boolean lookparent);
 
 
 /********************************************************************
@@ -250,6 +260,184 @@ static void
 } /* handle_audit_record */
 
 
+
+/********************************************************************
+* FUNCTION handle_subtree_node_callback
+* 
+* Compare current node if 
+* functions and invoke them
+*
+* INPUTS:
+*    scb == session control block invoking the callback
+*    msg == RPC message in progress
+*    cbtyp == agent callback type
+*    editop == edit operation applied to newnode oand/or curnode
+*    newnode == new node in operation
+*    curnode == current node in operation
+*
+* RETURNS:
+*   status of the operation (usually returned from the callback)
+*   NO USER CALLBACK FOUND == NO_ERR
+*********************************************************************/
+static status_t
+    handle_subtree_node_callback (agt_cbtyp_t cbtyp,
+                                  op_editop_t editop,
+                                  ses_cb_t  *scb,
+                                  rpc_msg_t  *msg,
+                                  val_value_t *newnode,
+                                  val_value_t *curnode)
+{
+    const xmlChar     *name;
+    int                retval;
+    status_t           res;
+
+    if (editop != OP_EDITOP_REPLACE) {
+        return NO_ERR;
+    }
+
+    if (newnode == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (newnode != NULL) {
+        name = newnode->name;
+    } else if (curnode != NULL) {
+        name = curnode->name;
+    } else {
+        name = NULL;
+    }
+
+    if (newnode && curnode) {
+        retval = val_compare_ex(newnode, curnode, TRUE);
+        if (retval == 0) {
+            /* apply here but nothing to do,
+             * so skip this entire subtree
+             */
+            if (LOGDEBUG && cbtyp != AGT_CB_COMMIT_CHECK) {
+                log_debug("\napply_write_val: "
+                          "Skipping replace node "
+                          "'%s', no changes",
+                          (name) ? name : (const xmlChar *)"--");
+            }
+        } else {
+            retval = val_compare_for_replace(newnode, curnode);
+            if (retval == 0) {
+                if (LOGDEBUG2 && cbtyp != AGT_CB_COMMIT_CHECK) {
+                    log_debug2("\napply_write_val: "
+                               "Skip replace node '%s'",
+                               (name) ? name : (const xmlChar *)"--");
+                }
+            }
+        }
+        if (retval == 0) {
+            return NO_ERR;
+        }
+    }
+
+    res = handle_user_callback(cbtyp,
+                               editop,
+                               scb,
+                               msg,
+                               newnode,
+                               curnode,
+                               FALSE);
+
+    return res;
+
+} /* handle_subtree_node_callback */        
+
+
+/********************************************************************
+* FUNCTION handle_subtree_callback
+* 
+* Search the subtrees and find the correct user callback 
+* functions and invoke them
+*
+* INPUTS:
+*    scb == session control block invoking the callback
+*    msg == RPC message in progress
+*    cbtyp == agent callback type
+*    editop == edit operation applied to newnode oand/or curnode
+*    newnode == new node in operation
+*    curnode == current node in operation
+*
+* RETURNS:
+*   status of the operation (usually returned from the callback)
+*   NO USER CALLBACK FOUND == NO_ERR
+*********************************************************************/
+static status_t
+    handle_subtree_callback (agt_cbtyp_t cbtyp,
+                             op_editop_t editop,
+                             ses_cb_t  *scb,
+                             rpc_msg_t  *msg,
+                             val_value_t *newnode,
+                             val_value_t *curnode)
+{
+    val_value_t  *newchild, *curchild;
+    status_t      res;
+
+    if (editop != OP_EDITOP_REPLACE) {
+        return NO_ERR;
+    }
+    if (newnode == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    for (newchild = val_get_first_child(newnode);
+         newchild != NULL;
+         newchild = val_get_next_child(newchild)) {
+
+        if (!obj_is_config(newchild->obj)) {
+            continue;
+        }
+
+        if (curnode != NULL) {
+            curchild = val_first_child_match(curnode, newchild);
+        } else {
+            curchild = NULL;
+        }
+
+        res = handle_subtree_node_callback(cbtyp,
+                                           editop,
+                                           scb,
+                                           msg,
+                                           newchild,
+                                           curchild);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (curnode == NULL) {
+        return NO_ERR;
+    }
+
+    for (curchild = val_get_first_child(curnode);
+         curchild != NULL;
+         curchild = val_get_next_child(curchild)) {
+
+        if (!obj_is_config(curchild->obj)) {
+            continue;
+        }
+
+        newchild = val_first_child_match(newnode, curchild);
+        if (newchild == NULL) {
+            res = handle_subtree_node_callback(cbtyp,
+                                               OP_EDITOP_DELETE,
+                                               scb,
+                                               msg,
+                                               NULL,
+                                               curchild);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+    }
+
+    return res;
+
+} /* handle_subtree_callback */
+
+
 /********************************************************************
 * FUNCTION handle_user_callback
 * 
@@ -262,7 +450,8 @@ static void
 *    msg == RPC message in progress
 *    newnode == new node in operation
 *    curnode == current node in operation
-*
+*    lookparent == TRUE if the parent should be checked for
+*                  a callback function; FALSE otherwise
 * RETURNS:
 *   status of the operation (usually returned from the callback)
 *   NO USER CALLBACK FOUND == NO_ERR
@@ -273,7 +462,8 @@ static status_t
                           ses_cb_t  *scb,
                           rpc_msg_t  *msg,
                           val_value_t *newnode,
-                          val_value_t *curnode)
+                          val_value_t *curnode,
+                          boolean lookparent)
 {
     agt_cb_fnset_t    *cbset;
     val_value_t       *val;
@@ -336,7 +526,7 @@ static status_t
                 val->res = res;
             }
 
-            if (LOGDEBUG2 && res != NO_ERR) {
+            if (LOGDEBUG && res != NO_ERR) {
                 log_debug("\n%s user callback failed (%s) for %s on %s:%s",
                           agt_cbtype_name(cbtyp),
                           get_error_string(res),
@@ -344,7 +534,17 @@ static status_t
                           val_get_mod_name(val),
                           val->name);
             }
+            if (res == NO_ERR && editop == OP_EDITOP_REPLACE) {
+                res = handle_subtree_callback(cbtyp,
+                                              editop,
+                                              scb,
+                                              msg,
+                                              newnode,
+                                              curnode);
+            }
             return res;
+        } else if (!lookparent) {
+            done = TRUE;
         } else if (val->parent != NULL &&
                    !obj_is_root(val->parent->obj) &&
                    val_get_nsid(val) == val_get_nsid(val->parent)) {
@@ -1076,7 +1276,8 @@ static status_t
                                    scb, 
                                    msg, 
                                    newval, 
-                                   curval);
+                                   curval,
+                                   TRUE);
         if (res != NO_ERR) {
             return res;
         }
@@ -1687,7 +1888,8 @@ static status_t
                                        scb, 
                                        msg, 
                                        newval, 
-                                       curval);
+                                       curval,
+                                       TRUE);
             if (res != NO_ERR) {
                 errdone = TRUE;
             }
@@ -1896,7 +2098,8 @@ static status_t
                                        scb, 
                                        msg, 
                                        newval, 
-                                       curval);
+                                       curval,
+                                       TRUE);
         }
 
         if (res != NO_ERR) {
@@ -2163,7 +2366,8 @@ static void
                                    scb, 
                                    msg, 
                                    undo->newnode, 
-                                   curval);
+                                   curval,
+                                   TRUE);
 
         /* delete the node from the tree
          * unless it is a default leaf
@@ -2186,7 +2390,8 @@ static void
                                    scb,
                                    msg, 
                                    undo->newnode,
-                                   curval);
+                                   curval,
+                                   TRUE);
 
         /* the node is still in the tree,
          * do not need to do anything to undo a delete
@@ -2200,7 +2405,8 @@ static void
                                    scb,
                                    msg, 
                                    undo->newnode,
-                                   curval);
+                                   curval,
+                                   TRUE);
 
         /* check if the old node needs to be swapped back
          * of if the new node is just removed
@@ -2284,7 +2490,8 @@ static void
                                        scb, 
                                        msg, 
                                        undo->newnode, 
-                                       undo->curnode);
+                                       undo->curnode,
+                                       TRUE);
         } else {
             /* rollback the edit operation */
             process_undo_entry(undo, scb, msg, target);

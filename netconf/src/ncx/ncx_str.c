@@ -120,11 +120,12 @@ int32
         SET_ERROR(ERR_INTERNAL_PTR);
         return 0;
     }
+#endif
+
     if (!typ_is_string(btyp)) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return 0;
     }   
-#endif
 
     return xml_strcmp(*str1, *str2);
 
@@ -161,10 +162,10 @@ status_t
     if (!str1 || !str2) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(typ_is_string(btyp) || btyp==NCX_BT_BITS)) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }   
 #endif
+    if (!(typ_is_string(btyp) || btyp==NCX_BT_BITS)) {
+        return ERR_NCX_INVALID_VALUE;
+    }   
 
     if (*str1) {
         *str2 = xml_strdup(*str1);

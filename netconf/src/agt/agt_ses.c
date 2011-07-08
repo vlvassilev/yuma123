@@ -905,11 +905,8 @@ boolean
     ses_ready_t  *rdy;
     ses_msg_t    *msg;
     status_t      res;
-
-#ifdef AGT_SES_DEBUG
-    xmlChar       buff[32];
     uint32        cnt;
-#endif
+    xmlChar       buff[32];
 
     rdy = ses_msg_get_first_inready();
     if (!rdy) {
@@ -949,7 +946,6 @@ boolean
         return TRUE;
     }
 
-#ifdef AGT_SES_DEBUG
     /* make sure a message is really there */
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (!msg || !msg->ready) {
@@ -970,7 +966,6 @@ boolean
         sprintf((char *)(&buff[cnt]), "%u", scb->sid);
         ses_msg_dump(msg, buff);
     }
-#endif
 
     /* setup the XML parser */
     if (scb->reader) {

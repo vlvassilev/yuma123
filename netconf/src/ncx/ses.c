@@ -161,7 +161,7 @@ static status_t
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
     if (!msg || msg->ready) {
         /* need a new message */
-        res = ses_msg_new_msg(scb, &msg);
+        res = ses_msg_new_msg(&msg);
         if (res != NO_ERR) {
             ses_msg_free_buff(scb, buff);
             return res;
@@ -245,7 +245,7 @@ static status_t
                             /* get a new message header for buff2 
                              * but do not add buff2 to msg2 yet 
                              */
-                            res = ses_msg_new_msg(scb, &msg2);
+                            res = ses_msg_new_msg(&msg2);
                             if (res == NO_ERR) {
                                 /* put msg2 in the msg Q and
                                  * copy the rest of buff into buff2 
@@ -490,7 +490,7 @@ static status_t
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
     if (msg == NULL || msg->ready) {
         /* need a new message */
-        res = ses_msg_new_msg(scb, &msg);
+        res = ses_msg_new_msg(&msg);
         if (res != NO_ERR) {
             ses_msg_free_buff(scb, buff);
             return res;
@@ -796,7 +796,7 @@ static status_t
                  * the EOCh string, check any left over bytes
                  * to start a new message
                  */
-                res = ses_msg_new_msg(scb, &msg2);
+                res = ses_msg_new_msg(&msg2);
                 if (res == NO_ERR) {
                     /* put msg2 in the msg Q */
                     dlq_enque(msg2, &scb->msgQ);

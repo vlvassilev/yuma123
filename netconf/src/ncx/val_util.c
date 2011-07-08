@@ -205,7 +205,7 @@ static status_t
     }
 
     /* check if any objects from other cases are present */
-    testval = val_get_choice_next_set(val, choicobj, chval);
+    testval = val_get_choice_next_set(choicobj, chval);
     while (testval) {
         if ((testval->casobj != chval->casobj) &&
             (testval->casobj->parent == chval->casobj->parent)) {
@@ -218,7 +218,7 @@ static status_t
                       obj_get_name(chval->casobj));
             ncx_print_errormsg(NULL, NULL, retres);
         }
-        testval = val_get_choice_next_set(val, choicobj, testval);
+        testval = val_get_choice_next_set(choicobj, testval);
     }
     return retres;
 
@@ -1537,14 +1537,13 @@ val_value_t *
 *   pointer to first value struct or NULL if choice not set
 *********************************************************************/
 val_value_t *
-    val_get_choice_next_set (val_value_t *val,
-                             const obj_template_t *obj,
+    val_get_choice_next_set (const obj_template_t *obj,
                              val_value_t *curchild)
 {
     val_value_t  *chval;
 
 #ifdef DEBUG
-    if (!val || !obj || !curchild) {
+    if (!obj || !curchild) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }

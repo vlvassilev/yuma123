@@ -1688,11 +1688,12 @@ typ_sval_t *
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
+#endif
+
     if (!typ_is_string(btyp)) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
-#endif
 
     sv = m__getObj(typ_sval_t);
     if (!sv) {

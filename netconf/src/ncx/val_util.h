@@ -314,7 +314,6 @@ extern val_value_t *
 * specified choice, afvter 'curval'
 *
 * INPUTS:
-*   val == val_value_t to check
 *   obj == choice object to check
 *   curchild == current child selected from this choice (obj)
 *
@@ -322,8 +321,7 @@ extern val_value_t *
 *   pointer to first value struct or NULL if choice not set
 *********************************************************************/
 extern val_value_t *
-    val_get_choice_next_set (val_value_t *val,
-			     const obj_template_t *obj,
+    val_get_choice_next_set (const obj_template_t *obj,
 			     val_value_t *curchild);
 
 

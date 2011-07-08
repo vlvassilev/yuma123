@@ -3180,8 +3180,7 @@ static status_t
      * if target == /foo/bar/baz then
      * valroot --> /foo and targobj --> /foo/bar/baz
      */
-    valroot = get_instanceid_parm(server_cb,
-                                  target,
+    valroot = get_instanceid_parm(target,
                                   TRUE,
                                   TRUE,
                                   &targobj,
@@ -4607,8 +4606,7 @@ static val_value_t *
             return NULL;
         }
 
-        *valroot = get_instanceid_parm(server_cb,
-                                       target,
+        *valroot = get_instanceid_parm(target,
                                        TRUE,
                                        iswrite,
                                        &targobj,

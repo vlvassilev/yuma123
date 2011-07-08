@@ -3374,7 +3374,7 @@ static status_t
     }
 
     /* check if any objects from other cases are present */
-    testval = val_get_choice_next_set(val, choicobj, chval);
+    testval = val_get_choice_next_set(choicobj, chval);
     while (testval) {
         if (testval->casobj != chval->casobj) {
             /* error: extra case object in this choice */
@@ -3391,7 +3391,7 @@ static status_t
                                  testval);
             }
         }
-        testval = val_get_choice_next_set(val, choicobj, testval);
+        testval = val_get_choice_next_set(choicobj, testval);
     }
 
     if (val->res == NO_ERR) {

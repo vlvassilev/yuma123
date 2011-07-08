@@ -209,7 +209,6 @@ void
 * Malloc a new session message control header
 *
 * INPUTS:
-*   scb == session control block to malloc a new message for
 *   msg == address of ses_msg_t pointer that will be set
 *
 * OUTPUTS:
@@ -219,13 +218,12 @@ void
 *   status
 *********************************************************************/
 status_t
-    ses_msg_new_msg (ses_cb_t *scb, 
-                     ses_msg_t **msg)
+    ses_msg_new_msg (ses_msg_t **msg)
 {
     ses_msg_t *newmsg;
 
 #ifdef DEBUG
-    if (!scb || !msg) {
+    if (!msg) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif

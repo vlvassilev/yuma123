@@ -323,7 +323,6 @@ extern status_t
  * all the predicate assignments in the stance identifier
  *
  * INPUTS:
- *    server_cb == server control block to use (NULL if none)
  *    target == XPath expression for the instance-identifier
  *    schemainst == TRUE if ncx:schema-instance string
  *                  FALSE if instance-identifier
@@ -349,8 +348,7 @@ extern status_t
  *    NULL, check *retres
  *********************************************************************/
 extern val_value_t *
-    get_instanceid_parm (server_cb_t *server_cb,
-			 const xmlChar *target,
+    get_instanceid_parm (const xmlChar *target,
 			 boolean schemainst,
                          boolean configonly,
 			 obj_template_t **targobj,

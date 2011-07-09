@@ -2051,7 +2051,22 @@ val_value_t *
             }
             continue;
         }
-        val_init_from_template(childval, childobj);
+
+        /* if this is the last node, then treat it as a select
+         * node since no value will be set; force type empty
+         */
+        if (tk_next_typ(pcb->tkc) == TK_TT_NONE &&
+            obj_get_datadefQ(childobj) == NULL) {
+            /* terminal leaf or leaf-list, create an empty node */
+            const xmlChar *name = obj_get_name(childobj);
+
+            val_init_from_template(childval,
+                                   ncx_get_gen_empty());
+            val_set_name(childval, name, xml_strlen(name));
+            val_change_nsid(childval, obj_get_nsid(childobj));
+        } else {
+            val_init_from_template(childval, childobj);
+        }
 
         if (curtop) {
             val_add_child(childval, curtop);

@@ -374,7 +374,7 @@ static status_t
                              val_value_t *curnode)
 {
     val_value_t  *newchild, *curchild;
-    status_t      res;
+    status_t      res = NO_ERR;
 
     if (editop != OP_EDITOP_REPLACE) {
         return NO_ERR;

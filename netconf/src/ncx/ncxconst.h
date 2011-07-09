@@ -513,6 +513,7 @@ extern "C" {
 #define NCX_EL_IMPORTS         (const xmlChar *)"imports"
 #define NCX_EL_INCLUDE         (const xmlChar *)"include"
 #define NCX_EL_INDENT          (const xmlChar *)"indent"
+#define NCX_EL_INFO            (const xmlChar *)"info"
 #define NCX_EL_INPUT           (const xmlChar *)"input"
 #define NCX_EL_INSTANCE_IDENTIFIER \
                                (const xmlChar *)"instance-identifier"

@@ -266,14 +266,12 @@ module yangcli {
         description
           "Match mode to use for UrlPath name searches.";
         type NameMatchMode;
-        //default exact;
       }
 
       leaf alt-names {
         description
           "Match mode to use for UrlPath name searches.";
         type AltNameMode;
-        //default false;
       }
     }
 
@@ -572,7 +570,14 @@ module yangcli {
 
       uses ConnectParms;
 
-      uses MatchParms;
+      uses MatchParms {
+        refine match-names {
+          default one-nocase;
+        }
+        refine alt-names {
+          default true;
+        }
+      }
 
       leaf autocomp {
         description
@@ -1068,7 +1073,10 @@ module yangcli {
           }
           leaf object {
             description "Show help for the specified object";
-            type nt:NcxIdentifier;
+            type union {
+              type nt:NcxIdentifier;
+              type UrlPath;
+            }
           }
           leaf type {
             description "Show help for the specified type";

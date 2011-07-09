@@ -1646,6 +1646,8 @@ static status_t
 *      containers should be checked
 *    wildcards == TRUE if 'skip key wildcard' allowed
 *                 FALSE if not allowed
+*    withkeys == TRUE if keys are expected
+*                FALSE if just nodes are expected
 *    cnt == address of return cnt
 *
 * OUTPUTS:
@@ -1661,6 +1663,7 @@ static status_t
                        ncx_name_match_t match_names,
                        boolean alt_naming,
                        boolean wildcards,
+                       boolean withkeys,
                        uint32 *cnt)
 {
     const xmlChar   *startstr, *p;
@@ -1809,11 +1812,15 @@ static status_t
                 }
             }
 
-            /* check list keys to follow */
-            objkey = obj_first_key(targobj);
-            if (objkey != NULL) {
-                expectnode = FALSE;
-            } else {
+            objkey = NULL;
+            if (withkeys) {
+                /* check list keys to follow */
+                objkey = obj_first_key(targobj);
+                if (objkey != NULL) {
+                    expectnode = FALSE;
+                }
+            }
+            if (objkey == NULL) {
                 if (*p == '/') {
                     outtotal++;
                     if (writeptr != NULL) {
@@ -3475,6 +3482,8 @@ void
 *      containers should be checked
 *    wildcards == TRUE if wildcards allowed instead of key values
 *                 FALSE if the '-' wildcard mechanism not allowed
+*    withkeys == TRUE if keys are expected
+*                FALSE if just nodes are expected
 *    res == address of return status
 *
 * OUTPUTS:
@@ -3489,6 +3498,7 @@ xmlChar *
                                ncx_name_match_t match_names,
                                boolean alt_naming,
                                boolean wildcards,
+                               boolean withkeys,
                                status_t *res)
 {
     xmlChar *buff;
@@ -3507,6 +3517,7 @@ xmlChar *
                              match_names, 
                              alt_naming, 
                              wildcards,
+                             withkeys,
                              &cnt);
     if (*res == NO_ERR) {
         buff = m__getMem(cnt+1);
@@ -3519,6 +3530,7 @@ xmlChar *
                                  match_names,
                                  alt_naming,
                                  wildcards,
+                                 withkeys,
                                  &cnt);
         if (*res != NO_ERR) {
             m__free(buff);

@@ -256,7 +256,7 @@ void
         return;
     }
 
-    if (mode==HELP_MODE_NONE) {
+    if (mode == HELP_MODE_NONE) {
         return;
     }
 
@@ -309,7 +309,7 @@ void
 
         if (mode != HELP_MODE_BRIEF) {
             val = obj_get_default(obj);
-            if (val) {
+            if (val != NULL) {
                 help_write_lines((const xmlChar *)" [d:", 0, FALSE); 
                 help_write_lines(val, 0, FALSE);
                 help_write_lines((const xmlChar *)"]", 0, FALSE); 
@@ -324,7 +324,10 @@ void
 
     if (normalpass) {
         val = obj_get_description(obj);
-        if (val) {
+        if (val == NULL) {
+            val = obj_get_alt_description(obj);
+        }
+        if (val != NULL) {
             switch (mode) {
             case HELP_MODE_BRIEF:
                 if (obj->objtype == OBJ_TYP_RPC || 
@@ -336,13 +339,10 @@ void
                 }
                 break;
             case HELP_MODE_NORMAL:
-                if (obj->objtype == OBJ_TYP_RPC || 
-                    obj->objtype == OBJ_TYP_NOTIF) {
-                    help_write_lines_max(val, 
-                                         indent+NCX_DEF_INDENT,
-                                         TRUE, 
-                                         HELP_MODE_NORMAL_MAX); 
-                }
+                help_write_lines_max(val, 
+                                     indent+NCX_DEF_INDENT,
+                                     TRUE, 
+                                     HELP_MODE_NORMAL_MAX); 
                 break;
             case HELP_MODE_FULL:
                 help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 

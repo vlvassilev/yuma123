@@ -1173,6 +1173,8 @@ extern void
 *      containers should be checked
 *    wildcards == TRUE if wildcards allowed instead of key values
 *                 FALSE if the '-' wildcard mechanism not allowed
+*    withkeys == TRUE if keys are expected
+*                FALSE if just nodes are expected
 *    res == address of return status
 *
 * OUTPUTS:
@@ -1187,7 +1189,9 @@ extern xmlChar *
                                ncx_name_match_t match_names,
                                boolean alt_naming,
                                boolean wildcards,
+                               boolean withkeys,
                                status_t *res);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

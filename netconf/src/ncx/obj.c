@@ -7526,6 +7526,55 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_alt_description
+* 
+* Get the alternate description field for this obj
+* Check if any 'info', then 'help' appinfo nodes present
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   YANG description string for this object
+*********************************************************************/
+const xmlChar *
+    obj_get_alt_description (const obj_template_t *obj)
+{
+    const ncx_appinfo_t *appinfo;
+    const xmlChar *altdescr;
+
+#ifdef DEBUG 
+    if (obj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    altdescr = NULL;
+    appinfo = ncx_find_const_appinfo(&obj->appinfoQ,
+                                     NULL, /* any module */
+                                     NCX_EL_INFO);
+    if (appinfo != NULL) {
+        altdescr = ncx_get_appinfo_value(appinfo);
+    }
+
+    if (altdescr != NULL) {
+        return altdescr;
+    }
+
+    appinfo = ncx_find_const_appinfo(&obj->appinfoQ,
+                                     NULL, /* any module */
+                                     NCX_EL_HELP);
+    if (appinfo != NULL) {
+        altdescr = ncx_get_appinfo_value(appinfo);
+    }
+
+    return altdescr;
+
+}  /* obj_get_alt_description */
+
+
+/********************************************************************
 * FUNCTION obj_get_description_addr
 * 
 * Get the address of the description field for this obj

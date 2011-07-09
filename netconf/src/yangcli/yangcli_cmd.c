@@ -2317,7 +2317,6 @@ static status_t
 }  /* do_mgrload */
 
 
-
 /********************************************************************
  * FUNCTION do_help_commands (sub-mode of local RPC)
  * 
@@ -2571,16 +2570,47 @@ static status_t
                           YANGCLI_MOD, 
                           NCX_EL_OBJECT);
     if (parm && parm->res == NO_ERR) {
-        res = NO_ERR;
-        dtyp = NCX_NT_OBJ;
-        obj = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        xmlChar *valstr = VAL_STR(parm);
+
+
+        obj = NULL;
+        if (valstr && *valstr == '/') {
+            /* union matched UrlPath type */
+            xmlChar *urlpath;
+
+            urlpath = xpath_convert_url_to_path(valstr,
+                                                server_cb->match_names,
+                                                server_cb->alt_names,
+                                                FALSE,  /* wildcards */
+                                                FALSE,   /* withkeys */
+                                                &res);
+            if (urlpath != NULL && res == NO_ERR) {
+                res = xpath_find_schema_target_int(urlpath, &obj);
+            }
+            if (urlpath != NULL) {
+                m__free(urlpath);
+            }
+        } else {
+            /* union match NcxIdentifier type */
+            res = NO_ERR;
+            dtyp = NCX_NT_OBJ;
+            obj = parse_def(server_cb, 
+                            &dtyp, 
+                            valstr,
+                            &dlen,
+                            &res);
+        }
+
         if (obj) {
             if (obj_is_data(obj) && !obj_is_hidden(obj)) {
                 help_object(obj, mode);
+                if (obj_is_leafy(obj)) {
+                    if (imode) {
+                        log_stdout("\n");
+                    } else {
+                        log_write("\n");
+                    }
+                }
             } else {
                 if (imode) {
                     log_stdout("\nError: object definition (%s) not found",
@@ -4572,6 +4602,7 @@ static val_value_t *
                                                 match_names,
                                                 alt_names,
                                                 !iswrite,  /* wildcards */
+                                                TRUE,       /* withkeys */
                                                 &res);
             if (fromurl == NULL || res != NO_ERR) {
                 log_error("\nError: urltarget '%s' has "
@@ -4615,6 +4646,7 @@ static val_value_t *
                                                     match_names,
                                                     alt_names,
                                                     !iswrite,
+                                                    TRUE, /* withkeys */
                                                     &res);
                 if (fromurl == NULL || res != NO_ERR) {
                     log_error("\nError: urltarget '%s' has "

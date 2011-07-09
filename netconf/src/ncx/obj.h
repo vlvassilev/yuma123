@@ -2023,6 +2023,22 @@ extern const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_alt_description
+* 
+* Get the alternate description field for this obj
+* Check if any 'info', then 'help' appinfo nodes present
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   YANG description string for this object
+*********************************************************************/
+extern const xmlChar *
+    obj_get_alt_description (const obj_template_t *obj);
+
+
+/********************************************************************
 * FUNCTION obj_get_description_addr
 * 
 * Get the address of the description field for this obj

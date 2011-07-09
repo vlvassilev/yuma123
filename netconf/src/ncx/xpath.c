@@ -1587,10 +1587,7 @@ static status_t
             continue;
         } else if (*instr == '/' && instr[1] == '/') {
             /* found an escaped forward slash */
-            outlen++;
-            if (writeptr != NULL) {
-                ch = '/';
-            }
+            ch = '/';
             instr += 2;
         } else if (*instr == '%') {
             /* hex encoded char */

@@ -307,10 +307,6 @@ static status_t
     int                retval;
     status_t           res;
 
-    if (editop != OP_EDITOP_REPLACE) {
-        return NO_ERR;
-    }
-
     if (newnode == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -392,9 +388,6 @@ static status_t
     val_value_t  *newchild, *curchild;
     status_t      res = NO_ERR;
 
-    if (editop != OP_EDITOP_REPLACE) {
-        return NO_ERR;
-    }
     if (newnode == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -550,7 +543,9 @@ static status_t
                           val_get_mod_name(val),
                           val->name);
             }
-            if (res == NO_ERR && editop == OP_EDITOP_REPLACE) {
+            if (res == NO_ERR && 
+                (editop == OP_EDITOP_REPLACE ||
+                 editop == OP_EDITOP_LOAD)) {
                 res = handle_subtree_callback(cbtyp,
                                               editop,
                                               scb,

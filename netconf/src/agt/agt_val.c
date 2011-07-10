@@ -184,6 +184,22 @@ static status_t
                           val_value_t *curnode,
                           boolean lookparent);
 
+static status_t
+    apply_commit_deletes (ses_cb_t  *scb,
+                          rpc_msg_t  *msg,
+                          cfg_template_t *target,
+                          val_value_t *candval,
+                          val_value_t *runval,
+                          boolean toponly);
+
+
+static status_t
+    check_commit_deletes (ses_cb_t  *scb,
+                          rpc_msg_t  *msg,
+                          val_value_t *candval,
+                          val_value_t *runval,
+                          boolean toponly);
+
 
 /********************************************************************
 *                                                                   *
@@ -1101,7 +1117,7 @@ static status_t
     rpc_undo_rec_t   *undo;
     status_t          res;
     op_editop_t       cur_editop;
-    boolean           applyhere, freenew, add_defs_done;
+    boolean           applyhere, topreplace, freenew, add_defs_done;
     int               retval;
     uint32            lockid;
 
@@ -1120,6 +1136,14 @@ static status_t
     } else {
         *done = TRUE;
         return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (newval != NULL && 
+        obj_is_root(newval->obj) && 
+        cur_editop == OP_EDITOP_REPLACE) {
+        topreplace = TRUE;
+    } else {
+        topreplace = FALSE;
     }
 
 #ifdef AGT_VAL_DEBUG
@@ -1441,6 +1465,15 @@ static status_t
             SET_ERROR(ERR_INTERNAL_VAL);
             freenew = TRUE;
         }
+    }
+
+    if (res == NO_ERR && topreplace) {
+        res = apply_commit_deletes(scb,
+                                   msg,
+                                   target,
+                                   newval,
+                                   curval,
+                                   TRUE);  /* toponly */
     }
 
     if (res == NO_ERR && 
@@ -1995,11 +2028,13 @@ static status_t
     status_t          res, retres;
     ncx_iqual_t       iqual;
     op_editop_t       cur_editop;
-    boolean           initialdone;
+    boolean           initialdone, topreplace;
     uint32            lockid;
 
+    res = NO_ERR;
     retres = NO_ERR;
     initialdone = done;
+    topreplace = FALSE;
     cur_editop = OP_EDITOP_NONE;
     curparent = NULL;
 
@@ -2030,9 +2065,14 @@ static status_t
         }
 
         if (res == NO_ERR) {
-            res = check_insert_attr(scb, msg, newval);
-            CHK_EXIT(res, retres);
-            res = NO_ERR;   /* any error already recorded */
+            if (obj_is_root(newval->obj) && 
+                newval->editvars->editop == OP_EDITOP_REPLACE) {
+                topreplace = TRUE;
+            } else if (newval->editvars->editop != OP_EDITOP_LOAD) {
+                res = check_insert_attr(scb, msg, newval);
+                CHK_EXIT(res, retres);
+                res = NO_ERR;   /* any error already recorded */
+            }
         }
 
         if (res != NO_ERR) {
@@ -2102,15 +2142,25 @@ static status_t
                                        TRUE);
         }
 
+        if (res == NO_ERR && topreplace) {
+            res = check_commit_deletes(scb,
+                                       msg,
+                                       newval,
+                                       curval,
+                                       TRUE);
+        }
         if (res != NO_ERR) {
             retres = res;
         }
         break;
     case AGT_CB_TEST_APPLY:
-        retres = test_apply_write_val(newval->editvars->curparent, 
-                                      newval, 
-                                      curval, 
-                                      &done);
+        res = test_apply_write_val(newval->editvars->curparent, 
+                                   newval, 
+                                   curval, 
+                                   &done);
+        if (res != NO_ERR) {
+            retres = res;
+        }
         break;
     case AGT_CB_APPLY:
     case AGT_CB_COMMIT_CHECK:
@@ -2121,19 +2171,22 @@ static status_t
             cur_editop = editop;
             curparent = curval->parent;
         } else {
-            retres = SET_ERROR(ERR_INTERNAL_VAL);
+            res = SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-        if (retres == NO_ERR) {
-            retres = apply_write_val(cbtyp,
-                                     cur_editop, 
-                                     scb, 
-                                     msg, 
-                                     target,
-                                     curparent, 
-                                     newval, 
-                                     curval, 
-                                     &done);
+        if (res == NO_ERR) {
+            res = apply_write_val(cbtyp,
+                                  cur_editop, 
+                                  scb, 
+                                  msg, 
+                                  target,
+                                  curparent, 
+                                  newval, 
+                                  curval, 
+                                  &done);
+        }
+        if (res != NO_ERR) {
+            retres = res;
         }
         break;
     case AGT_CB_COMMIT:
@@ -4135,7 +4188,8 @@ static status_t
 *   target == target database (NCX_CFGID_RUNNING)
 *   candval == value struct from the candidate config
 *   runval == value struct from the running config
-*
+*   toponly == TRUE if checking top-level only
+*              FALSE to check entire subtree for deletes
 * OUTPUTS:
 *   rpc_err_rec_t structs may be malloced and added 
 *   to the msg->mhsr.errQ
@@ -4148,7 +4202,8 @@ static status_t
                           rpc_msg_t  *msg,
                           cfg_template_t *target,
                           val_value_t *candval,
-                          val_value_t *runval)
+                          val_value_t *runval,
+                          boolean toponly)
 {
     val_value_t      *curval, *nextval, *matchval;
     status_t          res;
@@ -4183,7 +4238,7 @@ static status_t
                                       target, 
                                       NULL, 
                                       curval);
-            } else {
+            } else if (!toponly) {
                 /* else keep this node in target config
                  * but check any child nodes for deletion
                  */
@@ -4191,7 +4246,8 @@ static status_t
                                            msg, 
                                            target,
                                            matchval, 
-                                           curval);
+                                           curval,
+                                           toponly);
             }
         }  /* else skip non-config database node */
     }
@@ -4209,10 +4265,10 @@ static status_t
 * INPUTS:
 *   scb == session control block
 *   msg == incoming commit rpc_msg_t in progress
-*   target == target database (NCX_CFGID_RUNNING)
 *   candval == value struct from the candidate config
 *   runval == value struct from the running config
-*
+*   toponly == TRUE if checking top-level only
+*              FALSE to check entire subtree for deletes
 * OUTPUTS:
 *   rpc_err_rec_t structs may be malloced and added 
 *   to the msg->mhsr.errQ
@@ -4223,9 +4279,9 @@ static status_t
 static status_t
     check_commit_deletes (ses_cb_t  *scb,
                           rpc_msg_t  *msg,
-                          cfg_template_t *target,
                           val_value_t *candval,
-                          val_value_t *runval)
+                          val_value_t *runval,
+                          boolean toponly)
 {
     val_value_t      *curval, *nextval, *matchval;
     status_t          res;
@@ -4268,15 +4324,15 @@ static status_t
                                      NCX_NT_VAL, 
                                      curval);
                 }
-            } else {
+            } else if (!toponly) {
                 /* else keeping this node in target config
                  * but check any child nodes for deletion
                  */
                 res = check_commit_deletes(scb, 
                                            msg, 
-                                           target,
                                            matchval, 
-                                           curval);
+                                           curval,
+                                           toponly);
             }
         }  /* else skip non-config database node */
     }
@@ -4284,6 +4340,8 @@ static status_t
     return res;
 
 }   /* check_commit_deletes */
+
+
 
 
 /******************* E X T E R N   F U N C T I O N S ***************/
@@ -4953,14 +5011,15 @@ status_t
                                   pducfg,
                                   target->root);
         } else {
+            status_t  res2;
             /* rollback the operation */
-            res = handle_callback(AGT_CB_ROLLBACK,
-                                  editop,
-                                  scb, 
-                                  msg,
-                                  target,
-                                  pducfg,
-                                  target->root);
+            res2 = handle_callback(AGT_CB_ROLLBACK,
+                                   editop,
+                                   scb, 
+                                   msg,
+                                   target,
+                                   pducfg,
+                                   target->root);
         }
     }
 
@@ -5084,7 +5143,8 @@ status_t
                                msg, 
                                target,
                                source->root,
-                               target->root);
+                               target->root,
+                               FALSE);
 
     /* check if any config nodes have been changed in the target */
     for (newval = val_get_first_child(source->root);
@@ -5214,9 +5274,9 @@ status_t
     /* check if any config nodes have been deleted in the target */
     res = check_commit_deletes(scb, 
                                msg, 
-                               target,
                                source->root,
-                               target->root);
+                               target->root,
+                               FALSE);  /* toponly */
     if (res != NO_ERR) {
         /* error already recorded */
         return res;
@@ -5235,3 +5295,4 @@ status_t
 
 
 /* END file agt_val.c */
+

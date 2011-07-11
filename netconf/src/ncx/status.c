@@ -668,6 +668,8 @@ const char *
         return "base:1.1 protocol not enabled";
     case ERR_NCX_CC_NOT_ACTIVE:
         return "persistent confirmed commit not active";
+    case ERR_NCX_MULTIPLE_MATCHES:
+        return "multiple matches found";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

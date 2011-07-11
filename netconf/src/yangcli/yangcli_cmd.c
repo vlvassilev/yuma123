@@ -4650,7 +4650,7 @@ static val_value_t *
                                                     &res);
                 if (fromurl == NULL || res != NO_ERR) {
                     log_error("\nError: urltarget '%s' has "
-                              "invalid format (%s)",
+                              "invalid format (%s)\n",
                               VAL_STR(parm),
                               get_error_string(res));
                     server_cb->get_optional = saveopt;

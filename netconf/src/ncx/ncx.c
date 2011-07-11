@@ -2150,20 +2150,26 @@ obj_template_t *
 *   name_match == name match mode enumeration
 *   alt_names == TRUE if alternate names should be checked
 *                after regular names; FALSE if not
+*   retres == address of return status
+*
+* OUTPUTS:
+*   *retres set to return status
+*
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
 obj_template_t *
     ncx_match_any_object (const xmlChar *objname,
                           ncx_name_match_t name_match,
-                          boolean alt_names)
+                          boolean alt_names,
+                          status_t *retres)
 {
     obj_template_t *obj;
     ncx_module_t   *mod;
     boolean         useses;
 
 #ifdef DEBUG
-    if (!objname) {
+    if (objname == NULL || retres == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -2194,9 +2200,13 @@ obj_template_t *
                                        objname,
                                        name_match,
                                        alt_names,
-                                       TRUE);  /* dataonly */
+                                       TRUE,     /* dataonly */
+                                       retres);
         if (obj) {
             return obj;
+        }
+        if (*retres == ERR_NCX_MULTIPLE_MATCHES) {
+            return NULL;
         }
     }
 
@@ -2211,9 +2221,13 @@ obj_template_t *
                                            objname,
                                            name_match,
                                            alt_names,
-                                           TRUE);  /* dataonly */
+                                           TRUE,    /* dataonly */
+                                           retres);
             if (obj) {
                 return obj;
+            }
+            if (*retres == ERR_NCX_MULTIPLE_MATCHES) {
+                return NULL;
             }
         }
     }

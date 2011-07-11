@@ -1764,14 +1764,16 @@ static status_t
                     /* find a top-level data node object */
                     targobj = ncx_match_any_object(usebuff, 
                                                    match_names,
-                                                   alt_naming);
+                                                   alt_naming,
+                                                   &res);
                 } else {
                     targobj = obj_find_child_ex(targobj, 
                                                 NULL,   /* match any module */
                                                 usebuff,
                                                 match_names,
                                                 alt_naming,
-                                                TRUE);  /* dataonly */
+                                                TRUE,  /* dataonly */
+                                                &res);
                 }
                 if (targobj != NULL) {
                     testname = obj_get_name(targobj);

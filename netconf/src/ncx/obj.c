@@ -3049,6 +3049,10 @@ static boolean
 *               FALSE if first match of N allowed
 *   dataonly == TRUE to check just data nodes
 *               FALSE to check all nodes
+*   retres == address of return status
+*
+* OUTPUTS:
+*   if retres not NULL, *retres set to return status
 *
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
@@ -3061,13 +3065,18 @@ static obj_template_t *
                        boolean altnames,
                        boolean usecase,
                        boolean onematch,
-                       boolean dataonly)
+                       boolean dataonly,
+                       status_t *retres)
 {
     obj_template_t *obj;
     yang_node_t    *node;
     ncx_include_t  *inc;
     dlq_hdr_t      *que;
     uint32          matchcount;
+
+    if (retres) {
+        *retres = NO_ERR;
+    }
 
     matchcount = 0;
 
@@ -3083,6 +3092,9 @@ static obj_template_t *
                         &matchcount);
     if (obj) {
         if (match && onematch && matchcount > 1) {
+            if (retres != NULL) {
+                *retres = ERR_NCX_MULTIPLE_MATCHES;
+            }
             return NULL;
         }
         return obj;
@@ -3124,6 +3136,9 @@ static obj_template_t *
                             &matchcount);
         if (obj) {
             if (match && onematch && matchcount > 1) {
+                if (retres != NULL) {
+                    *retres = ERR_NCX_MULTIPLE_MATCHES;
+                }
                 return NULL;
             }
             return obj;
@@ -3149,11 +3164,18 @@ static obj_template_t *
                                 &matchcount);
         }
         if (obj != NULL && match && onematch && matchcount > 1) {
+            if (retres != NULL) {
+                *retres = ERR_NCX_MULTIPLE_MATCHES;
+            }
             return NULL;
         }
         return obj;
     }
 
+    if (retres != NULL) {
+        *retres = ERR_NCX_DEF_NOT_FOUND;
+    }
+    
     return NULL;
 
 }   /* find_template_top */
@@ -3555,12 +3577,14 @@ obj_template_t *
                            const xmlChar *modname,
                            const xmlChar *objname)
 {
+    status_t  res;
     return obj_find_template_top_ex(mod,
                                     modname,
                                     objname,
                                     NCX_MATCH_EXACT,
                                     FALSE,
-                                    FALSE);
+                                    FALSE,
+                                    &res);
 
 }   /* obj_find_template_top */
 
@@ -3585,6 +3609,10 @@ obj_template_t *
 *             == FALSE to check YANG names only
 *   dataonly == TRUE to check just data nodes
 *               FALSE to check all nodes
+*   retres == address of return status
+*
+* OUTPUTS:
+*   *retres set to return status
 *
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
@@ -3595,12 +3623,14 @@ obj_template_t *
                               const xmlChar *objname,
                               ncx_name_match_t match_names,
                               boolean alt_names,
-                              boolean dataonly)
+                              boolean dataonly,
+                              status_t *retres)
 {
     obj_template_t  *obj;
+    boolean          multmatches = FALSE;
 
 #ifdef DEBUG
-    if (mod == NULL || objname == NULL) {
+    if (mod == NULL || objname == NULL || retres == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -3614,7 +3644,8 @@ obj_template_t *
                             FALSE,    /* altnames */
                             TRUE,      /* usecase */
                             FALSE,   /* onematch */
-                            dataonly);
+                            dataonly,
+                            retres);
     if (obj) {
         return obj;
     }
@@ -3628,7 +3659,8 @@ obj_template_t *
                                 FALSE,    /* altnames */
                                 FALSE,     /* usecase */
                                 FALSE,    /* onematch */
-                                dataonly);
+                                dataonly,
+                                retres);
         if (obj) {
             return obj;
         }
@@ -3646,14 +3678,18 @@ obj_template_t *
                                 FALSE,   /* altnames */
                                 TRUE,     /* usecase */
                                 (match_names < NCX_MATCH_FIRST),
-                                dataonly);
+                                dataonly,
+                                retres);
         if (obj) {
             return obj;
+        }
+        if (*retres == ERR_NCX_MULTIPLE_MATCHES) {
+            multmatches = TRUE;
         }
     } else if (!alt_names) {
         /* NCX_MATCH_EXACT_NOCASE mode */
         return NULL;
-    }
+    } 
 
     /* 4) try an case-insensitive partial-name match */
     if (match_names == NCX_MATCH_ONE_NOCASE ||
@@ -3665,16 +3701,19 @@ obj_template_t *
                                 FALSE,   /* altnames */
                                 TRUE,     /* usecase */
                                 (match_names < NCX_MATCH_FIRST),
-                                dataonly);
+                                dataonly,
+                                retres);
         if (obj) {
             return obj;
         }
+        if (*retres == ERR_NCX_MULTIPLE_MATCHES) {
+            multmatches = TRUE;
+        }
     } else if (!alt_names) {
         /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
-        return NULL;
-    }
-
-    if (!alt_names) {
+        if (multmatches) {
+            *retres = ERR_NCX_MULTIPLE_MATCHES;
+        }
         return NULL;
     }
 
@@ -3686,8 +3725,12 @@ obj_template_t *
                             TRUE,     /* altnames */
                             TRUE,      /* usecase */
                             FALSE,    /* onematch */
-                            dataonly);
+                            dataonly,
+                            retres);
     if (obj) {
+        if (retres) {
+            *retres = NO_ERR;
+        }
         return obj;
     }
 
@@ -3700,12 +3743,16 @@ obj_template_t *
                                 TRUE,     /* altnames */
                                 FALSE,     /* usecase */
                                 FALSE,    /* onematch */
-                                dataonly);
+                                dataonly,
+                                retres);
         if (obj) {
             return obj;
         }
     } else {
         /* NCX_MATCH_EXACT mode + alt_names */
+        if (multmatches) {
+            *retres = ERR_NCX_MULTIPLE_MATCHES;
+        }
         return NULL;
     }
 
@@ -3718,12 +3765,16 @@ obj_template_t *
                                 TRUE,    /* altnames */
                                 TRUE,     /* usecase */
                                 (match_names < NCX_MATCH_FIRST),
-                                dataonly);
+                                dataonly,
+                                retres);
         if (obj) {
             return obj;
         }
     } else {
         /* NCX_MATCH_EXACT_NOCASE mode + alt_names */
+        if (multmatches) {
+            *retres = ERR_NCX_MULTIPLE_MATCHES;
+        }
         return NULL;
     }
 
@@ -3737,15 +3788,22 @@ obj_template_t *
                                 TRUE,   /* altnames */
                                 TRUE,    /* usecase */
                                 (match_names < NCX_MATCH_FIRST),
-                                dataonly);
+                                dataonly,
+                                retres);
         if (obj) {
             return obj;
         }
     } else {
         /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        if (multmatches) {
+            *retres = ERR_NCX_MULTIPLE_MATCHES;
+        }
         return NULL;
     }
 
+    if (multmatches) {
+        *retres = ERR_NCX_MULTIPLE_MATCHES;
+    }
     return NULL;
 
 }   /* obj_find_template_top_ex */
@@ -3903,6 +3961,10 @@ obj_template_t *
 *             == FALSE to check YANG names only
 *    dataonly == TRUE to check just data nodes
 *                FALSE to check all nodes
+*    retres == address of return status
+*
+* OUTPUTS:
+*   if retres not NULL, *retres set to return status
 *
 * RETURNS:
 *    pointer to obj_template_t or NULL if not found
@@ -3913,17 +3975,25 @@ obj_template_t *
                        const xmlChar *objname,
                        ncx_name_match_t match_names,
                        boolean alt_names,
-                       boolean dataonly)
+                       boolean dataonly,
+                       status_t *retres)
 {
     dlq_hdr_t  *que;
     uint32      matchcount;
 
 #ifdef DEBUG
     if (obj == NULL || objname == NULL) {
+        if (retres != NULL) {
+            *retres = ERR_INTERNAL_PTR;
+        }
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
+
+    if (retres != NULL) {
+        *retres = NO_ERR;
+    }
 
     que = obj_get_datadefQ(obj);
     if (que == NULL) {
@@ -3940,7 +4010,7 @@ obj_template_t *
                         FALSE,   /* alt_names */
                         dataonly,
                         &matchcount);
-    if (obj) {
+    if (obj != NULL) {
         return obj;
     }
 
@@ -3960,6 +4030,9 @@ obj_template_t *
         }
     } else if (!alt_names) {
         /* NCX_MATCH_EXACT mode */
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
@@ -3977,12 +4050,18 @@ obj_template_t *
         if (obj) {
             if (match_names <= NCX_MATCH_ONE_NOCASE &&
                 matchcount > 1) {
+                if (retres != NULL) {
+                    *retres = ERR_NCX_MULTIPLE_MATCHES;
+                }
                 return NULL;
             }
             return obj;
         }
     } else if (!alt_names) {
         /* NCX_MATCH_EXACT_NOCASE mode */
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
@@ -4001,16 +4080,25 @@ obj_template_t *
         if (obj) {
             if (match_names <= NCX_MATCH_ONE_NOCASE &&
                 matchcount > 1) {
+                if (retres != NULL) {
+                    *retres = ERR_NCX_MULTIPLE_MATCHES;
+                }
                 return NULL;
             }
             return obj;
         }
     } else if (!alt_names) {
         /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
     if (!alt_names) {
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
@@ -4042,12 +4130,18 @@ obj_template_t *
         if (obj) {
             if (match_names <= NCX_MATCH_ONE_NOCASE &&
                 matchcount > 1) {
+                if (retres != NULL) {
+                    *retres = ERR_NCX_MULTIPLE_MATCHES;
+                }
                 return NULL;
             }
             return obj;
         }
     } else {
         /* NCX_MATCH_EXACT mode + alt_names */
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
@@ -4065,12 +4159,18 @@ obj_template_t *
         if (obj) {
             if (match_names <= NCX_MATCH_ONE_NOCASE &&
                 matchcount > 1) {
+                if (retres != NULL) {
+                    *retres = ERR_NCX_MULTIPLE_MATCHES;
+                }
                 return NULL;
             }
             return obj;
         }
     } else {
         /* NCX_MATCH_EXACT_NOCASE mode + alt_names */
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
@@ -4095,9 +4195,15 @@ obj_template_t *
         }
     } else {
         /* NCX_MATCH_ONE mode or NCX_MATCH_FIRST mode */
+        if (retres != NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        }
         return NULL;
     }
 
+    if (retres != NULL) {
+        *retres = ERR_NCX_DEF_NOT_FOUND;
+    }
     return NULL;
 
 }  /* obj_find_child_ex */

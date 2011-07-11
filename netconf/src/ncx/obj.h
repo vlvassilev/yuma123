@@ -718,6 +718,10 @@ extern obj_template_t *
 *             == FALSE to check YANG names only
 *   dataonly == TRUE to check just data nodes
 *               FALSE to check all nodes
+*   retres == address of return status
+*
+* OUTPUTS:
+*   if retres not NULL, *retres set to return status
 *
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
@@ -728,7 +732,8 @@ extern obj_template_t *
                               const xmlChar *objname,
                               ncx_name_match_t match_names,
                               boolean alt_names,
-                              boolean dataonly);
+                              boolean dataonly,
+                              status_t *retres);
 
 
 /********************************************************************
@@ -802,6 +807,10 @@ extern obj_template_t *
 *             == FALSE to check YANG names only
 *    dataonly == TRUE to check just data nodes
 *                FALSE to check all nodes
+*    retres == address of return status
+*
+* OUTPUTS:
+*   if retres not NULL, *retres set to return status
 *
 * RETURNS:
 *    pointer to obj_template_t or NULL if not found
@@ -812,7 +821,8 @@ extern obj_template_t *
                        const xmlChar *objname,
                        ncx_name_match_t match_names,
                        boolean alt_names,
-                       boolean dataonly);
+                       boolean dataonly,
+                       status_t *retres);
 
 
 /********************************************************************

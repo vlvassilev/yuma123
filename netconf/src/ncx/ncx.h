@@ -484,13 +484,19 @@ extern obj_template_t *
 *   name_match == name match mode enumeration
 *   alt_names == TRUE if alternate names should be checked
 *                after regular names; FALSE if not
+*   retres == address of return status
+*
+* OUTPUTS:
+*   if retres not NULL, *retres set to return status
+*
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
 extern obj_template_t *
     ncx_match_any_object (const xmlChar *objname,
                           ncx_name_match_t name_match,
-                          boolean alt_names);
+                          boolean alt_names,
+                          status_t *retres);
 
 
 /********************************************************************

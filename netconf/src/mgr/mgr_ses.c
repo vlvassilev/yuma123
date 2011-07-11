@@ -362,24 +362,36 @@ static status_t
                         const char *logstr = NULL;
 
                         switch (ret) {
+#ifdef LIBSSH2_ERROR_ALLOC
                         case LIBSSH2_ERROR_ALLOC:
                             logstr = "libssh2 internal memory error";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_SOCKET_SEND
                         case LIBSSH2_ERROR_SOCKET_SEND:
                             logstr = "libssh2 unable to send data on socket";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_SOCKET_TIMEOUT
                         case LIBSSH2_ERROR_SOCKET_TIMEOUT:
                             logstr = "libssh2 socket timeout";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_PUBLICKEY_UNRECOGNIZED
                         case LIBSSH2_ERROR_PUBLICKEY_UNRECOGNIZED:
                             logstr = "libssh2 username/public key invalid";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_PUBLICKEY_UNVERIFIED
                         case LIBSSH2_ERROR_PUBLICKEY_UNVERIFIED:
                             logstr = "libssh2 username/public key invalid";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_FILE
                         case LIBSSH2_ERROR_FILE:
                             logstr = "libssh2 password file needed";
                             break;
+#endif
                         default:
                             logstr = "libssh2 general error";
                         }
@@ -423,18 +435,26 @@ static status_t
                         const char *logstr = NULL;
 
                         switch (ret) {
+#ifdef LIBSSH2_ERROR_ALLOC
                         case LIBSSH2_ERROR_ALLOC:
                             logstr = "libssh2 internal memory error";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_SOCKET_SEND
                         case LIBSSH2_ERROR_SOCKET_SEND:
                             logstr = "libssh2 unable to send data on socket";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_PASSWORD_EXPIRED
                         case LIBSSH2_ERROR_PASSWORD_EXPIRED:
                             logstr = "libssh2 password expired";
                             break;
+#endif
+#ifdef LIBSSH2_ERROR_AUTHENTICATION_FAILED
                         case LIBSSH2_ERROR_AUTHENTICATION_FAILED:
                             logstr = "libssh2 username/password invalid";
                             break;
+#endif
                         default:
                             logstr = "libssh2 general error";
                         }

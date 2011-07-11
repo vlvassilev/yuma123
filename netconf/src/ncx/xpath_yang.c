@@ -175,7 +175,7 @@ static status_t
                     if (modname) {
                         targmod = ncx_find_module(modname, NULL);
                     }
-                } else if (temp_modQ) {
+                } else if (temp_modQ != NULL) {
                     /* try the temp Q first */
                     targmod = ncx_find_module_que_nsid(temp_modQ, 
                                                        nsid);
@@ -187,7 +187,7 @@ static status_t
                         }
                     }
                 }
-                if (!targmod) {
+                if (targmod == NULL) {
                     res = ERR_NCX_DEF_NOT_FOUND;
                     if (pcb->logerrors) {
                         log_error("\nError: module not found in expr '%s'",
@@ -206,7 +206,7 @@ static status_t
                                                pcb->tkerr.mod,
                                                &targmod);
             if (res != NO_ERR) {
-                if (!prefix && laxnamespaces) {
+                if (prefix == NULL && laxnamespaces) {
                     res = NO_ERR;
                 } else if (pcb->logerrors) {
                     log_error("\nError: Module for prefix '%s' not found",
@@ -220,16 +220,18 @@ static status_t
      * the request, check any top-level object, if allowed
      * by the laxnamespaces parameter
      */
-    if (!targmod && laxnamespaces && 
-        res == NO_ERR && (!nsid || !prefix)) {
+    if (targmod == NULL &&
+        laxnamespaces && 
+        res == NO_ERR && 
+        (nsid == 0 || prefix == NULL)) {
 
-        if (!pcb->targobj) {
+        if (pcb->targobj == NULL) {
             pcb->targobj = pcb->obj;
         }
 
-        if (pcb->targobj) {
+        if (pcb->targobj != NULL) {
             if (obj_is_root(pcb->targobj)) {
-                if (temp_modQ) {
+                if (temp_modQ != NULL) {
                     foundobj = 
                         ncx_find_any_object_que(temp_modQ,
                                                 nodename);
@@ -239,8 +241,8 @@ static status_t
                 } else {
                     foundobj = ncx_find_any_object(nodename);
                 }
-                if (foundobj && 
-                    nsid && 
+                if (foundobj != NULL && 
+                    nsid != 0 && 
                     obj_get_nsid(foundobj) != nsid) {
                     /* did not match the specified namespace ID */
                     foundobj = NULL;
@@ -251,11 +253,11 @@ static status_t
                 foundobj = NULL;
 
                 /* find an RPC method with the nodename */
-                if (prefix && nsid == 0) {
+                if (prefix != NULL && nsid == 0) {
                     nsid = xmlns_find_ns_by_prefix(prefix);
                 }
                 if (nsid == 0) {
-                    if (temp_modQ) {
+                    if (temp_modQ != NULL) {
                         foundobj = 
                             ncx_find_any_object_que(temp_modQ,
                                                     nodename);
@@ -274,23 +276,31 @@ static status_t
                             targmod = ncx_find_module(modname, NULL);
                         }
                     }
-                    if (targmod) {
+                    if (targmod != NULL) {
                             foundobj = ncx_find_object(targmod,
                                                        nodename);
                     }
                 }
 
-                if (foundobj && foundobj->objtype != OBJ_TYP_RPC) {
+                if (foundobj != NULL && 
+                    foundobj->objtype != OBJ_TYP_RPC) {
                     foundobj = NULL;
                 }
             } else {
                 foundobj = obj_find_child(pcb->targobj,
                                           obj_get_mod_name(pcb->targobj),
                                           nodename);
+                if (foundobj == NULL && 
+                    laxnamespaces &&
+                    prefix == NULL) {
+                    foundobj = obj_find_child(pcb->targobj,
+                                              NULL,
+                                              nodename);
+                }
             }
         }
 
-        if (!foundobj) {
+        if (foundobj == NULL) {
             res = ERR_NCX_DEF_NOT_FOUND;
             if (pcb->logerrors) {
                 log_error("\nError: No object match for node '%s' "
@@ -309,29 +319,41 @@ static status_t
     }
 
     /* get the object from the module (if not already done) */
-    if (foundobj) {
+    if (foundobj != NULL) {
         /* already set in the wildcard search above */  ;
-    } else if (*useobj) {
+    } else if (*useobj != NULL) {
         if (obj_is_root(*useobj)) {
-            foundobj = 
-                obj_find_template_top(targmod,
-                                      ncx_get_modname(targmod),
-                                      nodename);
+            if (targmod != NULL) {
+                foundobj = 
+                    obj_find_template_top(targmod,
+                                          ncx_get_modname(targmod),
+                                          nodename);
+            }
         } else if (obj_get_nsid(*useobj) == xmlns_nc_id() &&
                    !xml_strcmp(obj_get_name(*useobj), NCX_EL_RPC)) {
-            foundobj = 
-                obj_find_template_top(targmod,
-                                      ncx_get_modname(targmod),
-                                      nodename);
-            if (foundobj && foundobj->objtype != OBJ_TYP_RPC) {
-                foundobj = NULL;
+            if (targmod != NULL) {
+                foundobj = 
+                    obj_find_template_top(targmod,
+                                          ncx_get_modname(targmod),
+                                          nodename);
+                if (foundobj && foundobj->objtype != OBJ_TYP_RPC) {
+                    foundobj = NULL;
+                }
             }
         } else {
             /* get child node of this object */
-            foundobj = 
-                obj_find_child(*useobj,
-                               ncx_get_modname(targmod),
-                               nodename);
+            if (targmod != NULL) {
+                foundobj = 
+                    obj_find_child(*useobj,
+                                   ncx_get_modname(targmod),
+                                   nodename);
+            }
+            if (foundobj == NULL && 
+                laxnamespaces &&
+                targmod == NULL &&
+                prefix == NULL) {
+                foundobj = obj_find_child(*useobj, NULL, nodename);
+            }
         }
     } else if (pcb->curmode == XP_CM_KEYVAR ||
                pcb->curmode == XP_CM_ALT) {
@@ -339,7 +361,7 @@ static status_t
         /* setting object for the first time
          * get child node of the current context object
          */
-        if (pcb->targobj) {
+        if (pcb->targobj != NULL && targmod != NULL) {
             foundobj = 
                 obj_find_child(pcb->targobj,
                                ncx_get_modname(targmod),
@@ -349,10 +371,12 @@ static status_t
         /* setting object for the first time
          * get top-level object from object module 
          */
-        foundobj = 
-            obj_find_template_top(targmod,
-                                  ncx_get_modname(targmod),
-                                  nodename);
+        if (targmod != NULL) {
+            foundobj = 
+                obj_find_template_top(targmod,
+                                      ncx_get_modname(targmod),
+                                      nodename);
+        }
     } else {
         /* setting object for the first time
          * but the context node is a leaf, so there
@@ -361,7 +385,7 @@ static status_t
         ;
     }
 
-    if (!foundobj) {
+    if (foundobj == NULL) {
         res = ERR_NCX_DEF_NOT_FOUND;
         if (pcb->logerrors) {
             if (prefix) {

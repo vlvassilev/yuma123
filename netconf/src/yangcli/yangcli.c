@@ -914,7 +914,7 @@ static status_t
             display_mode = dmode;
             server_cb->display_mode = dmode;
         } else {
-            log_error("\nError: value must be 'plain', 'prefixed' "
+            log_error("\nError: value must be 'plain', 'prefix' "
                       "'xml' or 'xml-nons'");
             res = ERR_NCX_INVALID_VALUE;
         }

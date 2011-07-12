@@ -7935,22 +7935,34 @@ boolean
 ncx_access_t
     obj_get_max_access (const obj_template_t *obj)
 {
-    boolean      setflag;
+    boolean      retval, setflag, done;
 
 #ifdef DEBUG
-    if (!obj) {
+    if (obj == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NCX_ACCESS_NONE;
     }
 #endif
 
-    if (!get_config_flag(obj, &setflag)) {
-        return NCX_ACCESS_RO;
+    done = FALSE;
+    while (!done) {
+        setflag = FALSE;
+        retval = get_config_flag(obj, &setflag);
+        if (setflag) {
+            done = TRUE;
+        } else {
+            obj = obj->parent;
+            if (obj == NULL || obj_is_root(obj)) {
+                done = TRUE;
+            }
+        }
+    }
+    if (setflag) {
+        return (retval) ? NCX_ACCESS_RC : NCX_ACCESS_RO;
     } else {
+        /* top-level not set defaults to config */
         return NCX_ACCESS_RC;
     }
-
-    /*** !!! no support for read-write at this time !!! ***/
 
 }   /* obj_get_max_access */
 

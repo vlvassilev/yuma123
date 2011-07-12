@@ -132,6 +132,7 @@ extern "C" {
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
+*   rpcmsg == RPC msg header for audit purposes
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   rpcinput == RPC input node conceptually under rpcroot
@@ -156,6 +157,7 @@ extern "C" {
 *********************************************************************/
 extern status_t 
     agt_val_rpc_xpath_check (ses_cb_t *scb,
+                             rpc_msg_t *rpcmsg,
 			     xml_msg_hdr_t *msg,
 			     val_value_t *rpcinput,
 			     obj_template_t *rpcroot);

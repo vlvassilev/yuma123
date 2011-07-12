@@ -836,6 +836,7 @@ static status_t
          * as unexpected-element errors
          */
         res = agt_val_rpc_xpath_check(scb,
+                                      msg,
                                       &msg->mhdr,
                                       msg->rpc_input,
                                       msg->rpc_method);

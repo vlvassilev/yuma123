@@ -3821,6 +3821,7 @@ static status_t
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
+*   rpcmsg == rpc msg header for audit purposes
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   root == val_value_t or the target database root to validate
@@ -3849,6 +3850,7 @@ static status_t
 *********************************************************************/
 static status_t 
     when_stmt_check (ses_cb_t *scb,
+                     rpc_msg_t *rpcmsg,
                      xml_msg_hdr_t *msg,
                      val_value_t *root,
                      val_value_t *curval,
@@ -3859,8 +3861,9 @@ static status_t
 {
     obj_template_t        *obj;
     val_value_t           *chval, *nextchild;
+    cfg_template_t        *cfg;
     status_t               res, retres;
-    boolean                deletechild, condresult;
+    boolean                deletechild, condresult, isrunning;
     uint32                 whencount;
 
     *deleteme = FALSE;
@@ -3868,6 +3871,13 @@ static status_t
 
     if (configmode != obj_is_config(obj)) {
         return NO_ERR;
+    }
+
+    cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (cfg && cfg->root && cfg->root == root) {
+        isrunning = TRUE;
+    } else {
+        isrunning = FALSE;
     }
 
     retres = NO_ERR;
@@ -3938,6 +3948,7 @@ static status_t
 
         deletechild = FALSE;
         res = when_stmt_check(scb, 
+                              rpcmsg,
                               msg, 
                               root, 
                               chval, 
@@ -3947,6 +3958,18 @@ static status_t
                               rpcmode);
         CHK_EXIT(res, retres);
         if (res == NO_ERR && deletechild) {
+            if (LOGDEBUG) {
+                log_debug("\nagt_val: deleting false "
+                          "when node '%s:%s'",
+                          obj_get_mod_name(chval->obj),
+                          chval->name);
+            }
+            if (isrunning) {
+                handle_audit_record(OP_EDITOP_DELETE, 
+                                    scb, 
+                                    rpcmsg,
+                                    chval);
+            }
             val_remove_child(chval);
             dlq_enque(chval, deleteQ);
         }
@@ -3965,6 +3988,7 @@ static status_t
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
+*   rpcmsg == RPC message fheader for audit purposes
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   root == val_value_t or the target database root to validate
@@ -3987,6 +4011,7 @@ static status_t
 *********************************************************************/
 static void
     delete_empty_npcontainers (ses_cb_t *scb,
+                               rpc_msg_t *rpcmsg,
                                xml_msg_hdr_t *msg,
                                val_value_t *root,
                                val_value_t *curval,
@@ -3997,7 +4022,8 @@ static void
     obj_template_t  *obj;
     agt_profile_t   *profile;
     val_value_t     *chval, *nextchild;
-    boolean         deletechild;
+    cfg_template_t  *cfg;
+    boolean         deletechild, isrunning;
 
     *deleteme = FALSE;
 
@@ -4006,6 +4032,13 @@ static void
     if (!profile->agt_delete_empty_npcontainers) {
         /* --delete-empty-npcontainers=false */
         return;
+    }
+
+    cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (cfg && cfg->root && cfg->root == root) {
+        isrunning = TRUE;
+    } else {
+        isrunning = FALSE;
     }
 
     obj = curval->obj;
@@ -4030,6 +4063,7 @@ static void
         nextchild = val_get_next_child(chval);
 
         delete_empty_npcontainers(scb, 
+                                  rpcmsg,
                                   msg, 
                                   root, 
                                   chval, 
@@ -4037,6 +4071,20 @@ static void
                                   deleteQ, 
                                   &deletechild);
         if (deletechild) {
+            if (LOGDEBUG) {
+                log_debug("\nagt_val: deleting empty NP "
+                          "container node '%s:%s'",
+                          obj_get_mod_name(chval->obj),
+                          chval->name);
+            }
+
+            if (isrunning) {
+                handle_audit_record(OP_EDITOP_DELETE, 
+                                    scb, 
+                                    rpcmsg,
+                                    chval);
+            }
+
             val_remove_child(chval);
             dlq_enque(chval, deleteQ);
         }
@@ -4073,25 +4121,18 @@ static status_t
                        boolean configmode,
                        boolean npcontainers)
 {
-    cfg_template_t  *cfg;
     val_value_t     *deleteval;
     dlq_hdr_t        deleteQ;
-    boolean          deleteme, done, isrunning;
+    boolean          deleteme, done;
     status_t         res;
 
     dlq_createSQue(&deleteQ);
     res = NO_ERR;
     done = FALSE;
 
-    cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    if (cfg && cfg->root && cfg->root == root) {
-        isrunning = TRUE;
-    } else {
-        isrunning = FALSE;
-    }
-
     if (npcontainers) {
         delete_empty_npcontainers(scb, 
+                                  msg,
                                   (msg) ? &msg->mhdr : NULL,
                                   root, 
                                   root, 
@@ -4105,21 +4146,6 @@ static status_t
              **** INSTEAD OF REALLY DELETING THESE NODES
              ****/
             deleteval = (val_value_t *)dlq_deque(&deleteQ);
-
-            if (LOGDEBUG) {
-                log_debug("\nagt_val: deleting empty NP "
-                          "container node '%s:%s'",
-                          obj_get_mod_name(deleteval->obj),
-                          deleteval->name);
-            }
-
-            if (isrunning) {
-                handle_audit_record(OP_EDITOP_DELETE, 
-                                    scb, 
-                                    msg,
-                                    deleteval);
-            }
-
             val_free_value(deleteval);
         }
     }
@@ -4128,6 +4154,7 @@ static status_t
 
         /* keep checking the root until no more deletes */
         res = when_stmt_check(scb, 
+                              msg,
                               (msg) ? &msg->mhdr : NULL,
                               root, 
                               root, 
@@ -4142,21 +4169,6 @@ static status_t
                  **** INSTEAD OF REALLY DELETING THESE NODES
                  ****/
                 deleteval = (val_value_t *)dlq_deque(&deleteQ);
-
-                if (LOGDEBUG) {
-                    log_debug("\nagt_val: deleting false "
-                              "when node '%s:%s'",
-                              obj_get_mod_name(deleteval->obj),
-                              deleteval->name);
-                }
-
-                if (isrunning) {
-                    handle_audit_record(OP_EDITOP_DELETE, 
-                                        scb, 
-                                        msg,
-                                        deleteval);
-                }
-
                 val_free_value(deleteval);
             }
         } else {
@@ -4362,6 +4374,7 @@ static status_t
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
+*   rpcmsg == RPC msg header for audit purposes
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   rpcinput == RPC input node conceptually under rpcroot
@@ -4386,6 +4399,7 @@ static status_t
 *********************************************************************/
 status_t 
     agt_val_rpc_xpath_check (ses_cb_t *scb,
+                             rpc_msg_t *rpcmsg,
                              xml_msg_hdr_t *msg,
                              val_value_t *rpcinput,
                              obj_template_t *rpcroot)
@@ -4433,6 +4447,7 @@ status_t
 
         /* keep checking the root until no more deletes */
         res = when_stmt_check(scb, 
+                              rpcmsg,
                               msg, 
                               method, 
                               rpcinput, 

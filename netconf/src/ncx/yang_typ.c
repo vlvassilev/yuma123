@@ -3265,7 +3265,7 @@ static status_t
 {
     typ_unionnode_t *un;
     status_t         res, retres;
-    ncx_btype_t      btyp;
+    ncx_btype_t      btyp = NCX_BT_NONE;
     boolean          needtest, defvaldone, hasdefval;
 
     if (defval == NULL) {

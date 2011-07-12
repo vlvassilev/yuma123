@@ -302,16 +302,48 @@ status_t
     case NCX_AGT_TARG_NONE:
         log_stdout("\nWarning: No writable targets supported on this server");
         break;
-    case NCX_AGT_TARG_CANDIDATE:
     case NCX_AGT_TARG_CAND_RUNNING:
+        if (!xml_strcmp(server_cb->default_target, NCX_EL_CANDIDATE)) {
+            line = xml_strdup(NCX_EL_COMMIT);
+            if (line) {
+                res = conn_command(server_cb, line);
+                m__free(line);
+            } else {
+                res = ERR_INTERNAL_MEM;
+                log_stdout("\nError: Malloc failed");
+            }
+            if (res == NO_ERR &&
+                mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                /* need 2 operations so set the command mode and the 
+                 * reply handler will initiate the 2nd command
+                 * if the first one worked
+                 */
+                server_cb->command_mode = CMD_MODE_SAVE;
+            }
+        } else {
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                res = send_copy_config_to_server(server_cb);
+                if (res != NO_ERR) {
+                    log_stdout("\nError: send copy-config failed (%s)",
+                               get_error_string(res));
+                }
+            } else {
+                log_stdout("\nWarning: No distinct save operation needed "
+                           "for this server");
+            }
+        }
+        break;
+    case NCX_AGT_TARG_CANDIDATE:
         line = xml_strdup(NCX_EL_COMMIT);
         if (line) {
             res = conn_command(server_cb, line);
             m__free(line);
         } else {
+            res = ERR_INTERNAL_MEM;
             log_stdout("\nError: Malloc failed");
         }
-        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+        if (res == NO_ERR &&
+            mscb->starttyp == NCX_AGT_START_DISTINCT) {
             /* need 2 operations so set the command mode and the 
              * reply handler will initiate the 2nd command
              * if the first one worked

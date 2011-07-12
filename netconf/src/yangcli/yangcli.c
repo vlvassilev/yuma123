@@ -365,6 +365,8 @@ static ncx_name_match_t match_names;
 /* default alt-names */
 static boolean alt_names;
 
+/* default force-target */
+static const xmlChar *force_target;
 
 /********************************************************************
 * FUNCTION get_line_timeout
@@ -2374,6 +2376,16 @@ static status_t
         alt_names = FALSE;
     }
 
+    /* get the force-target parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_FORCE_TARGET);
+    if (parm && parm->res == NO_ERR) {
+        force_target = VAL_ENUM_NAME(parm);
+    } else {
+        force_target = NULL;
+    }
+
     return NO_ERR;
 
 } /* process_cli_input */
@@ -2552,8 +2564,16 @@ static void
         log_write("<running>");
         break;
     case NCX_AGT_TARG_CAND_RUNNING:
-        server_cb->default_target = NCX_EL_CANDIDATE;
-        log_write("<candidate> (<running> also supported)");
+        if (force_target != NULL &&
+            !xml_strcmp(force_target, NCX_EL_RUNNING)) {
+            /* set to running */
+            server_cb->default_target = NCX_EL_RUNNING;
+            log_write("<running> (<candidate> also supported)");
+        } else {
+            /* set to candidate */
+            server_cb->default_target = NCX_EL_CANDIDATE;
+            log_write("<candidate> (<running> also supported)");
+        }
         break;
     case NCX_AGT_TARG_LOCAL:
         server_cb->default_target = NULL;
@@ -2577,9 +2597,18 @@ static void
         break;
     case NCX_AGT_TARG_CANDIDATE:
     case NCX_AGT_TARG_CAND_RUNNING:
-        log_write("commit");
-        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-            log_write(" + copy-config <running> <startup>");
+        if (!xml_strcmp(server_cb->default_target,
+                        NCX_EL_CANDIDATE)) {
+            log_write("commit");
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_write(" + copy-config <running> <startup>");
+            }
+        } else {
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_write("copy-config <running> <startup>");
+            } else {
+                log_write("none");
+            }
         }
         break;
     case NCX_AGT_TARG_RUNNING:

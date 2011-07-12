@@ -53,7 +53,8 @@ module yangcli {
     revision 2011-07-05 {
        description 
          "Add PublicKeyParms grouping.
-          Added MatchParms (--match-names and --alt-names)";
+          Added MatchParms (--match-names and --alt-names).
+          Added --force-target parameter.";
     }
 
     revision 2011-06-27 {
@@ -722,6 +723,25 @@ module yangcli {
 	   be used";
         type boolean;
 	default true;
+      }
+
+      leaf force-target {
+        description
+          "Controls whether the candidate or running
+           configuration datastore will be used as
+           the default edit target, when both are supported
+           by the server.";
+        type enumeration {
+          enum candidate {
+            description 
+              "Force default edit target to be candidate.";
+          }
+          enum running {
+            description 
+              "Force default edit target to be running.";
+          }
+        }
+	default candidate;
       }
 
       uses ncxapp:ModuleParm;

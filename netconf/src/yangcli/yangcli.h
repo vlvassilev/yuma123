@@ -191,6 +191,7 @@ extern "C" {
 #define YANGCLI_FILES       (const xmlChar *)"files"
 #define YANGCLI_FIXORDER    (const xmlChar *)"fixorder"
 #define YANGCLI_FROM_CLI    (const xmlChar *)"from-cli"
+#define YANGCLI_FORCE_TARGET (const xmlChar *)"force-target"
 #define YANGCLI_FULL        (const xmlChar *)"full"
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"

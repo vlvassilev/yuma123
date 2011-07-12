@@ -133,6 +133,7 @@ extern "C" {
 
 #define YANGCLI_DEF_HISTORY_LINES  25
 
+#define YANGCLI_RECALL_CHAR  '!'
 
 #ifdef MACOSX
 #define ENV_HOST        (const char *)"HOST"

@@ -6645,17 +6645,10 @@ static status_t
 {
     val_value_t        *valset, *parm;
     status_t            res;
-    boolean             imode, done;
-    help_mode_t         mode;
 
-    done = FALSE;
     res = NO_ERR;
-    imode = interactive_mode();
-
     valset = get_valset(server_cb, rpc, &line[len], &res);
     if (valset && res == NO_ERR) {
-        mode = HELP_MODE_NORMAL;
-
         /* find the mandatory index */
         parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_INDEX);
         if (parm) {
@@ -8415,6 +8408,91 @@ val_value_t *
     return valset;
 
 }  /* get_valset */
+
+
+/********************************************************************
+ * FUNCTION do_line_recall_string
+ * 
+ * bang recall support
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    line  == command line to recall
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t
+    do_line_recall_string (server_cb_t *server_cb,
+                           const xmlChar *line)
+{
+    GlHistoryLine   history_line;
+    GlHistoryRange  history_range;
+    int             glstatus;
+    uint32          len;
+    unsigned long   curindex;
+    boolean         done;
+
+    len = xml_strlen(line);
+    if (len == 0) {
+        log_error("\nError: missing recall string\n");
+        return ERR_NCX_MISSING_PARM;
+    }
+
+    server_cb->history_line_active = FALSE;
+    memset(&history_line, 0x0, sizeof(GlHistoryLine));
+    memset(&history_range, 0x0, sizeof(GlHistoryRange));
+
+    gl_range_of_history(server_cb->cli_gl, &history_range);
+
+    if (history_range.nlines == 0) {
+        log_error("\nError: no command line history found\n");
+        return ERR_NCX_OPERATION_FAILED; 
+    }
+
+    /* look backwards through history buffer */
+    done = FALSE;
+    for (curindex = history_range.newest;
+         curindex >= history_range.oldest && !done;
+         curindex--) {
+
+        glstatus = gl_lookup_history(server_cb->cli_gl,
+                                     curindex,
+                                     &history_line);
+        if (glstatus == 0) {
+            continue;
+        }
+        if (!xml_strnicmp((const xmlChar *)history_line.line,
+                          line,
+                          len)) {
+            done = TRUE;
+            continue;
+        }
+
+        if (curindex == history_range.oldest) {
+            log_error("\nError: command line '%s' not found\n", line);
+            return ERR_NCX_OPERATION_FAILED; 
+        }
+    }
+
+    if (server_cb->history_line != NULL) {
+        m__free(server_cb->history_line);
+    }
+
+    /* save the line in the server_cb for next call
+     * to get_line
+     */
+
+    server_cb->history_line = 
+        xml_strdup((const xmlChar *)history_line.line);
+    if (server_cb->history_line == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    server_cb->history_line_active = TRUE;
+
+    return NO_ERR;
+
+} /* do_line_recall_string */
 
 
 /* END yangcli_cmd.c */

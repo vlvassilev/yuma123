@@ -3099,6 +3099,42 @@ static xmlChar *
 
 
 /********************************************************************
+ * FUNCTION do_bang_recall (local !string)
+ * 
+ * Do Command line history support operations
+ *
+ * !sget-config target=running
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    line == CLI input in progress
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_bang_recall (server_cb_t *server_cb,
+                    const xmlChar *line)
+{
+    status_t            res;
+
+    res = NO_ERR;
+
+    if (line && 
+        *line == YANGCLI_RECALL_CHAR && 
+        line[1] != 0) {
+        res = do_line_recall_string(server_cb, &line[1]);
+    } else {
+        res = ERR_NCX_MISSING_PARM;
+        log_error("\nError: missing recall string\n");
+    }
+
+    return res;
+
+}  /* do_bang_recall */
+
+
+/********************************************************************
 * yangcli_stdin_handler
 *
 * Temp: Calling readline which will block other IO while the user
@@ -3414,6 +3450,12 @@ static mgr_io_state_t
     if (res != NO_ERR) {
         return server_cb->state;
     }        
+
+    /* check bang recall statement */
+    if (*line == YANGCLI_RECALL_CHAR) {
+        res = do_bang_recall(server_cb, line);
+        return server_cb->state;
+    }
 
     /* check if this is an assignment statement */
     res = check_assign_statement(server_cb, 

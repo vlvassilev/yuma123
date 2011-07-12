@@ -275,6 +275,24 @@ extern val_value_t *
 		const xmlChar *line,
 		status_t  *res);
 
+
+
+/********************************************************************
+ * FUNCTION do_line_recall_string
+ * 
+ * bang recall support
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    line  == command line to recall
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+extern status_t
+    do_line_recall_string (server_cb_t *server_cb,
+                           const xmlChar *line);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

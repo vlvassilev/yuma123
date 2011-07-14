@@ -2,6 +2,12 @@ submodule test1a {
 
     belongs-to test1 { prefix t1a; }
 
+    revision 2011-07-14 {
+        description 
+         "Fix bug in relative path. Choice and case nodes
+          are not supposed to be included in path-stmts.";
+    }
+
     revision 2008-10-12 {
         description "Initial revision.";
     }
@@ -22,7 +28,7 @@ submodule test1a {
            leaf g { type int32; mandatory true; }
            leaf h { type int32; config false; }
          }
-         leaf i { type leafref { path ../../../a; } }
+         leaf i { type leafref { path ../a; } }
          leaf j { type t1a:X; }
        }
     }

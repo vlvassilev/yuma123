@@ -61,6 +61,10 @@ date         init     comment
 #include  "agt_not.h"
 #endif
 
+#ifndef _H_agt_rpc
+#include  "agt_rpc.h"
+#endif
+
 #ifndef _H_agt_ses
 #include  "agt_ses.h"
 #endif
@@ -425,7 +429,7 @@ status_t
                      * Need to have the xmlreader for this session
                      */
                     scb = def_reg_find_scb(i);
-                    if (scb) {
+                    if (scb != NULL) {
                         res = ses_accept_input(scb);
                         if (res != NO_ERR) {
                             if (i >= maxrdnum) {
@@ -438,12 +442,22 @@ status_t
                                              scb->sid, 
                                              get_error_string(res));
                                 }
+                                /* send an error reply instead of
+                                 * killing the session right now
+                                 */
+                                agt_rpc_send_error_reply(scb, res);
+                                agt_ses_request_close(scb, 
+                                                      0, 
+                                                      SES_TR_OTHER);
+                            } else {
+                                /* connection already closed
+                                 * so kill session right now
+                                 */
+                                agt_ses_kill_session(scb,
+                                                     scb->sid,
+                                                     SES_TR_DROPPED);
                             }
-                            agt_ses_kill_session(scb,
-                                                 scb->sid,
-                                                 SES_TR_DROPPED);
-
-                        } 
+                        }
                     }
                 }
             }

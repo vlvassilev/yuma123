@@ -343,6 +343,23 @@ extern val_value_t *
 extern status_t
     agt_rpc_fill_rpc_error (const rpc_err_rec_t *err,
 			    val_value_t *rpcerror);
+
+
+/********************************************************************
+* FUNCTION agt_rpc_send_error_reply
+*
+* Operation failed or was never attempted
+* Return an <rpc-reply> with an <rpc-error>
+* 
+* INPUTS:
+*   scb == session control block
+*   retres == error number for termination  reason
+*
+*********************************************************************/
+extern void
+    agt_rpc_send_error_reply (ses_cb_t *scb,
+                              status_t retres);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

@@ -188,7 +188,7 @@ static boolean agt_rpc_init_done = FALSE;
 * 
 * INPUTS:
 *   scb == session control block
-*   msg == rpc_msg_t in progress
+*   msg == xml_msg_hdr_t in progress
 *   err == error record to use for an error_info Q
 *   indent == indent amount
 *
@@ -197,7 +197,7 @@ static boolean agt_rpc_init_done = FALSE;
 *********************************************************************/
 static void
     send_rpc_error_info (ses_cb_t *scb,
-                         rpc_msg_t  *msg,
+                         xml_msg_hdr_t  *msg,
                          const rpc_err_rec_t *err,
                          int32  indent)
 {
@@ -218,7 +218,7 @@ static void
 
     /* generate the <error-info> start tag */
     xml_wr_begin_elem_ex(scb, 
-                         &msg->mhdr, 
+                         msg, 
                          ncid, 
                          ncid, 
                          NCX_EL_ERROR_INFO, 
@@ -244,7 +244,7 @@ static void
             if (errinfo->v.strval) {
                 if (errinfo->isqname) {
                     xml_wr_qname_elem(scb,
-                                      &msg->mhdr, 
+                                      msg, 
                                       errinfo->val_nsid, 
                                       errinfo->v.strval, 
                                       ncid, 
@@ -255,7 +255,7 @@ static void
                                       indent);
                 } else {
                     xml_wr_string_elem(scb, 
-                                       &msg->mhdr, 
+                                       msg, 
                                        errinfo->v.strval, 
                                        ncid, 
                                        errinfo->name_nsid, 
@@ -284,7 +284,8 @@ static void
                                   &len);
             if (res == NO_ERR) {
                 xml_wr_string_elem(scb, 
-                                   &msg->mhdr, numbuff,
+                                   msg,
+                                   numbuff,
                                    ncid, 
                                    errinfo->name_nsid,
                                    errinfo->name, 
@@ -313,7 +314,7 @@ static void
                 SET_ERROR(ERR_INTERNAL_VAL);
             } else if (errinfo->v.cpxval) {
                 xml_wr_full_val(scb,
-                                &msg->mhdr, 
+                                msg, 
                                 errinfo->v.cpxval,
                                 indent);
             } else {
@@ -328,7 +329,7 @@ static void
 
     /* generate the <error-info> end tag */
     xml_wr_end_elem(scb, 
-                    &msg->mhdr, 
+                    msg, 
                     ncid, 
                     NCX_EL_ERROR_INFO, 
                     indent);
@@ -343,7 +344,7 @@ static void
 * 
 * INPUTS:
 *   scb == session control block
-*   msg == rpc_msg_t in progress
+*   msg == xml_msg_hdr_t in progress
 *   err == error record to send
 *   indent == starting indent count
 *
@@ -352,7 +353,7 @@ static void
 *********************************************************************/
 static status_t
     send_rpc_error (ses_cb_t *scb,
-                    rpc_msg_t  *msg,
+                    xml_msg_hdr_t *msg,
                     const rpc_err_rec_t *err,
                     int32 indent)
 {
@@ -374,12 +375,12 @@ static status_t
              dlq_firstEntry(&err->error_info);
          errinfo != NULL;
          errinfo = (rpc_err_info_t *)dlq_nextEntry(errinfo)) {
-        res = xml_msg_check_xmlns_attr(&msg->mhdr,
+        res = xml_msg_check_xmlns_attr(msg,
                                        errinfo->name_nsid,
                                        errinfo->badns,
                                        &attrs);
         if (res == NO_ERR) {
-            res = xml_msg_check_xmlns_attr(&msg->mhdr, 
+            res = xml_msg_check_xmlns_attr(msg, 
                                            errinfo->val_nsid,
                                            errinfo->badns,
                                            &attrs);
@@ -392,7 +393,7 @@ static status_t
 
     /* generate the <rpc-error> start tag */
     xml_wr_begin_elem_ex(scb, 
-                         &msg->mhdr, 
+                         msg, 
                          ncid, 
                          ncid, 
                          NCX_EL_RPC_ERROR, 
@@ -409,7 +410,7 @@ static status_t
 
     /* generate the <error-type> field */
     xml_wr_string_elem(scb, 
-                       &msg->mhdr, 
+                       msg, 
                        ncx_get_layer(err->error_type),
                        ncid, 
                        ncid, 
@@ -420,7 +421,7 @@ static status_t
 
     /* generate the <error-tag> field */
     xml_wr_string_elem(scb, 
-                       &msg->mhdr, 
+                       msg, 
                        err->error_tag, 
                        ncid, 
                        ncid, 
@@ -431,7 +432,7 @@ static status_t
 
     /* generate the <error-severity> field */
     xml_wr_string_elem(scb, 
-                       &msg->mhdr, 
+                       msg, 
                        rpc_err_get_severity(err->error_severity), 
                        ncid,
                        ncid, 
@@ -443,7 +444,7 @@ static status_t
     /* generate the <error-app-tag> field */
     if (err->error_app_tag) {
         xml_wr_string_elem(scb, 
-                           &msg->mhdr, 
+                           msg, 
                            err->error_app_tag, 
                            ncid,
                            ncid, 
@@ -457,7 +458,7 @@ static status_t
         sprintf((char *)buff, "%u", err->error_res);
         if (*buff) {
             xml_wr_string_elem(scb, 
-                               &msg->mhdr, 
+                               msg, 
                                buff, 
                                ncid, 
                                ncid,
@@ -471,7 +472,7 @@ static status_t
     /* generate the <error-path> field */
     if (err->error_path) {
         xml_wr_string_elem(scb, 
-                           &msg->mhdr, 
+                           msg, 
                            err->error_path, 
                            ncid,
                            ncid, 
@@ -495,7 +496,7 @@ static status_t
             }
         }
         xml_wr_string_elem(scb, 
-                           &msg->mhdr, 
+                           msg, 
                            err->error_message,
                            ncid,
                            ncid,
@@ -518,7 +519,7 @@ static status_t
 
     /* generate the <rpc-error> end tag */
     xml_wr_end_elem(scb, 
-                    &msg->mhdr, 
+                    msg, 
                     ncid, 
                     NCX_EL_RPC_ERROR, 
                     indent);
@@ -623,7 +624,7 @@ static void
              err != NULL;
              err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
 
-            res = send_rpc_error(scb, msg, err, indent);
+            res = send_rpc_error(scb, &msg->mhdr, err, indent);
             if (res != NO_ERR) {
                 SET_ERROR(res);
             }
@@ -657,8 +658,8 @@ static void
                 agtcb = (agt_rpc_data_cb_t)msg->rpc_datacb;
                 res = (*agtcb)(scb, msg, indent);
                 if (res != NO_ERR) {
-                    /*** need to generate operation failed error ***/
-                    /*** TBD ***/
+                    log_error("\nError: SIL data callback failed (%s)",
+                              get_error_string(res));
                 }
             } else {
                 /* just write the contents of the rpc <data> varQ */
@@ -1929,7 +1930,110 @@ status_t
 }  /* agt_rpc_fill_rpc_error */
 
 
+/********************************************************************
+* FUNCTION agt_rpc_send_error_reply
+*
+* Operation failed or was never attempted
+* Return an <rpc-reply> with an <rpc-error>
+* 
+* INPUTS:
+*   scb == session control block
+*   retres == error number for termination  reason
+*
+*********************************************************************/
+void
+    agt_rpc_send_error_reply (ses_cb_t *scb,
+                              status_t retres)
+{
+    rpc_err_rec_t       *err;
+    ses_total_stats_t   *agttotals;
+    xmlChar             *error_path;
+    xml_attrs_t          attrs;
+    xml_msg_hdr_t        mhdr;
+    status_t             res;
+    xmlns_id_t           ncid;
+    int32                indent;
+    ncx_layer_t          layer;
 
+    res = ses_start_msg(scb);
+    if (res != NO_ERR) {
+        return;
+    }
+
+    if (retres == ERR_NCX_INVALID_FRAMING) {
+        layer = NCX_LAYER_TRANSPORT;
+        error_path = NULL;
+    } else {
+        layer = NCX_LAYER_RPC;
+        error_path = xml_strdup(RPC_ROOT);
+        /* ignore malloc error; send as much as possible */
+    }
+        
+    err = agt_rpcerr_gen_error(layer,
+                               retres,
+                               NULL,
+                               NCX_NT_NONE,
+                               NULL,
+                               error_path);
+    if (err == NULL) {
+        m__free(error_path);
+        error_path = NULL;
+    }
+        
+    agttotals = ses_get_total_stats();
+
+    xml_init_attrs(&attrs);
+    xml_msg_init_hdr(&mhdr);
+    res = xml_msg_gen_xmlns_attrs(&mhdr, &attrs, TRUE);
+    if (res != NO_ERR) {
+        if (err != NULL) {
+            rpc_err_free_record(err);
+        }
+        ses_finish_msg(scb);
+        return;
+    }
+
+    ncid = xmlns_nc_id();
+    indent = ses_indent_count(scb);
+
+    /* generate the <rpc-reply> start tag */
+    xml_wr_begin_elem_ex(scb, 
+                         &mhdr, 
+                         0, 
+                         ncid, 
+                         NCX_EL_RPC_REPLY, 
+                         &attrs, 
+                         ATTRQ, 
+                         0, 
+                         START);
+
+    if (err != NULL) {
+        res = send_rpc_error(scb, &mhdr, err, indent);
+    } else {
+        log_error("\nError: could not send error reply for session %u",
+                  SES_MY_SID(scb));
+    }
+
+    /* generate the <rpc-reply> end tag */
+    xml_wr_end_elem(scb, 
+                    &mhdr, 
+                    ncid, 
+                    NCX_EL_RPC_REPLY, 
+                    0);
+
+    /* finish the message */
+    ses_finish_msg(scb);
+
+    scb->stats.inBadRpcs++;
+    agttotals->stats.inBadRpcs++;
+    scb->stats.outRpcErrors++;
+    agttotals->stats.outRpcErrors++;
+
+    if (err != NULL) {
+        rpc_err_free_record(err);
+    }
+
+}  /* agt_rpc_send_error_reply */
 
 
 /* END file agt_rpc.c */

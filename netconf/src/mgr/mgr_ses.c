@@ -1297,16 +1297,18 @@ ssize_t
      */
     if (mscb->closed == FALSE && ret > 0) {
         if (check_channel_eof(scb, mscb)) {
-            ret = 0;
             mscb->closed = TRUE;
 
-            if (LOGDEBUG2) {
-                log_debug2("\nmgr_ses: tossing final buffer with EOF "
-                           "on session %u (a:%u)\n%s",
-                           scb->sid,
-                           mscb->agtsid,
-                           buff);
+            if (LOGINFO) {
+                /* buffer is not a z-terminated string */
+                size_t maxlen = min(bufflen-1, (size_t)ret);
+                buff[maxlen] = 0;
+                log_info("\nDiscarding final buffer with EOF "
+                         "on session %u\n%s",
+                         mscb->agtsid,
+                         buff);
             }
+            ret = 0;
         }
     }
 

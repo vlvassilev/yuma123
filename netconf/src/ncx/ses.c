@@ -399,7 +399,7 @@ static status_t
 * are very small and more than SES_MAX_BUFF_CHUNKS
 * per buffer are received
 *
-* RFC 4742bis, 4.2.  Chunked Framing Mechanism
+* RFC 6242, sec 4.2.  Chunked Framing Mechanism
 
    This mechanism encodes all NETCONF messages with a chunked framing.
    Specifically, the message follows the ABNF [RFC5234] rule Chunked-

@@ -667,7 +667,7 @@ void
     /* check if the reply template is already cached */
     rpyobj = NULL;
     mod = ncx_find_module(NC_MODULE, NULL);
-    if (mod) {
+    if (mod != NULL) {
         rpyobj = ncx_find_object(mod, NC_RPC_REPLY_TYPE);
     }
     if (rpyobj == NULL) {
@@ -683,9 +683,9 @@ void
     if (attr && attr->attr_val) {
         msg_id = xml_strdup(attr->attr_val);
     }
-    if (!msg_id) {
+    if (msg_id == NULL) {
         mgr_xml_skip_subtree(scb->reader, top);
-        log_error("\nError: mgr_rpc: skipping incoming message");
+        log_info("\nmgr_rpc: incoming message with no message-id");
         return;
     }       
 
@@ -693,7 +693,7 @@ void
      * First get a new RPC reply struct
      */
     rpy = new_reply();
-    if (!rpy) {
+    if (rpy == NULL) {
         m__free(msg_id);
         log_error("\nError: mgr_rpc: skipping incoming message");
         mgr_xml_skip_subtree(scb->reader, top);
@@ -712,18 +712,21 @@ void
     }
 
     /* find the request that goes with this reply */
-    req = find_request(scb, rpy->msg_id);
-    if (!req) {
+    if (rpy->msg_id != NULL) {
+        req = find_request(scb, rpy->msg_id);
+        if (req == NULL) {
 #ifdef MGR_RPC_DEBUG
-        log_debug("\nmgr_rpc: got request found for msg (%s) on session %d", 
-                  rpy->msg_id, 
-                  scb->sid);
+            log_debug("\nmgr_rpc: got request found for msg (%s) "
+                      "on session %d", 
+                      rpy->msg_id, 
+                      scb->sid);
 #endif
-        mgr_xml_skip_subtree(scb->reader, top);
-        mgr_rpc_free_reply(rpy);
-        return;
-    } else {
-        dlq_remove(req);
+            mgr_xml_skip_subtree(scb->reader, top);
+            mgr_rpc_free_reply(rpy);
+            return;
+        } else {
+            dlq_remove(req);
+        }
     }
 
     /* have a request/reply pair, so parse the reply 
@@ -731,7 +734,8 @@ void
      */
     rpy->res = mgr_val_parse_reply(scb, 
                                    rpyobj, 
-                                   req->rpc, 
+                                   (req != NULL) ?
+                                   req->rpc : ncx_get_gen_anyxml(),
                                    top, 
                                    rpy->reply);
     if (rpy->res != NO_ERR && LOGINFO) {
@@ -747,8 +751,10 @@ void
     }
 
     /* invoke the reply handler */
-    handler = (mgr_rpc_cbfn_t)req->replycb;
-    (*handler)(scb, req, rpy);
+    if (req != NULL) { 
+        handler = (mgr_rpc_cbfn_t)req->replycb;
+        (*handler)(scb, req, rpy);
+    }
 
     /* only reset the session state to idle if was not changed
      * to SES_ST_SHUTDOWN_REQ during this RPC call

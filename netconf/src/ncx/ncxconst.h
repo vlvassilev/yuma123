@@ -92,6 +92,9 @@ extern "C" {
 
 #define INVALID_URN    (const xmlChar *)"INVALID"
 
+/* base:1.1 subtree wildcard URN */
+#define WILDCARD_URN   (const xmlChar *)""
+    
 /* max number len to use for static buffer allocation only */
 #define NCX_MAX_NUMLEN   47
 

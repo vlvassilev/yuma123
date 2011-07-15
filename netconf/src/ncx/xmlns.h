@@ -395,6 +395,21 @@ extern xmlns_id_t
 
 
 /********************************************************************
+* FUNCTION xmlns_wildcard_id
+*
+* Get the ID for the base:1.1 wildcard namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    Wildcard ID or 0 if not found
+*********************************************************************/
+extern xmlns_id_t 
+    xmlns_wildcard_id (void);
+
+
+/********************************************************************
 * FUNCTION xmlns_get_module
 *
 * get the module name of the namespace ID

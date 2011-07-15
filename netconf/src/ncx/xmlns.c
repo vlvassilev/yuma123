@@ -131,6 +131,9 @@ static xmlns_id_t xmlns_yangid;
 /* YIN namespace ID */
 static xmlns_id_t xmlns_yinid;
 
+/* Wildcard namespace ID */
+static xmlns_id_t xmlns_wildcardid;
+
 /* next ID to allocate */
 static xmlns_id_t xmlns_next_id;
 
@@ -239,6 +242,7 @@ static void
     xmlns_ncnid = 0;
     xmlns_yangid = 0;
     xmlns_yinid = 0;
+    xmlns_wildcardid = 0;
     xmlns_next_id = 1;
     xmlns_init_done = FALSE;
 
@@ -350,7 +354,7 @@ status_t
     }
 
 #ifdef DEBUG
-    if (!nlen || !mlen || !plen) {
+    if (!mlen || !plen) {
         return ERR_NCX_WRONG_LEN;
     }
 #endif
@@ -429,6 +433,8 @@ status_t
         xmlns_yangid = xmlns_next_id;
     } else if (!xml_strcmp(ns, YIN_URN)) {
         xmlns_yinid = xmlns_next_id;
+    } else if (!xml_strcmp(ns, WILDCARD_URN)) {
+        xmlns_wildcardid = xmlns_next_id;
     }
 
     if (LOGDEBUG2) {
@@ -805,6 +811,24 @@ xmlns_id_t
 {
     return xmlns_yinid;
 }  /* xmlns_yin_id */
+
+
+/********************************************************************
+* FUNCTION xmlns_wildcard_id
+*
+* Get the ID for the base:1.1 wildcard namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    Wildcard ID or 0 if not found
+*********************************************************************/
+xmlns_id_t 
+    xmlns_wildcard_id (void)
+{
+    return xmlns_wildcardid;
+}  /* xmlns_wildcard_id */
 
 
 /********************************************************************

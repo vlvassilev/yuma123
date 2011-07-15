@@ -243,10 +243,6 @@ static status_t
     uint32 h;
     def_topnode_t *top;
 
-    if (!*key) {
-        return SET_ERROR(ERR_INTERNAL_VAL);  /* zero key len */
-    }
-
     h = 0;
 
     /* check if the entry already exists */

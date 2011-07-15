@@ -2280,7 +2280,7 @@ status_t
 
     /* check the namespace associated with this node */
     str = xmlTextReaderConstNamespaceUri(reader);
-    if (str && *str) {
+    if (str != NULL) {
         ns = def_reg_find_ns(str);
         if (ns) {
             *id = ns->ns_id;

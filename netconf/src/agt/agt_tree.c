@@ -506,7 +506,7 @@ static status_t
     val_index_t      *valindex;
     ncx_filptr_t     *filptr;
     boolean           test, anycon, anycm, anysel, mykeepempty;
-    xmlns_id_t        ncid;
+    xmlns_id_t        ncid, wildid;
     status_t          res;
 
     res = NO_ERR;
@@ -519,6 +519,17 @@ static status_t
      * the top level, and uses it for everything
      */
     ncid = xmlns_nc_id();
+
+    /* base:1.1 subtree filtering allows 
+     * wildcard namespace ID xmlns=""
+     *
+     * !!! Note that libxml2 does not actually return
+     * !!! anything for the namespace "".  This still works
+     * !!! with yuma filtering so it is ignored.
+     * !!! This wildid nsid code is in case a different
+     * !!! xml parser is used.
+     */
+    wildid = xmlns_wildcard_id();
 
     /* The filval is the same level as the curval
      *
@@ -560,10 +571,21 @@ static status_t
             /* no content in NETCONF namespace, so assume
              * that no namespace was used and the filter NSID
              * has been passed down to this point
-             *
              * only use this for <get*>, not <notification>
              */
             filchild->nsid = 0;
+        }
+
+        if (!isnotif && filchild->nsid == wildid) {
+            /* For base:1.1 filtering, wildcard namespace 
+             * gets reset to 0 to match all namespaces
+             * only use this for <get*>, not <notification>
+             */
+            if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
+                filchild->nsid = 0;
+            } else {
+                return ERR_NCX_PROTO11_NOT_ENABLED;
+            }
         }
 
         /* skip all but content match nodes */
@@ -578,14 +600,13 @@ static status_t
             anycon = TRUE;
             continue;
         default:
-            SET_ERROR(ERR_INTERNAL_VAL);
+            return SET_ERROR(ERR_INTERNAL_VAL);
         }
 
         /* check corner case not caught by XML parser */
         if (val_all_whitespace(VAL_STR(filchild))) {
             /* should not happen! */
-            SET_ERROR(ERR_INTERNAL_VAL);
-            continue;
+            return SET_ERROR(ERR_INTERNAL_VAL);
         }
 
         /* This is a valid content select node 
@@ -747,7 +768,7 @@ static status_t
                 }
                 break;
             default:
-                SET_ERROR(ERR_INTERNAL_VAL);
+                return SET_ERROR(ERR_INTERNAL_VAL);
             }
 
             if (filptr && 

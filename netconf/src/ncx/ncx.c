@@ -169,6 +169,7 @@ date         init     comment
 *********************************************************************/
 
 #define INV_PREFIX  ((const xmlChar *)"inv")
+#define WILDCARD_PREFIX  ((const xmlChar *)"___")
 
 
 /* this flag will cause debug3 trace statements to be printed
@@ -1059,6 +1060,16 @@ status_t
     /* Initialize the INVALID namespace to help filter handling */
     res = xmlns_register_ns(INVALID_URN, 
                             INV_PREFIX, 
+                            NCX_MODULE, 
+                            NULL, 
+                            &nsid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Initialize the Wildcard namespace for base:1.1 filter handling */
+    res = xmlns_register_ns(WILDCARD_URN, 
+                            WILDCARD_PREFIX, 
                             NCX_MODULE, 
                             NULL, 
                             &nsid);

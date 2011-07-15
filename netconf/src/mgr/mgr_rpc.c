@@ -655,6 +655,7 @@ void
     /* init local vars */
     res = NO_ERR;
     msg_id = NULL;
+    req = NULL;
 
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {

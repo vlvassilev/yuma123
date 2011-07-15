@@ -4692,19 +4692,32 @@ status_t
     status_t       res;
 
 #ifdef DEBUG
-    if (!server_cb) {
+    if (server_cb == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = NO_ERR;
 
-    if (server_cb->result_filename) {
+    if (resultvar != NULL) {
+        /* force the name strings to be
+         * malloced instead of backptrs to
+         * the object name
+         */
+        res = val_force_dname(resultvar);
+        if (res != NO_ERR) {
+            val_free_value(resultvar);
+        }
+    }
+
+    if (res != NO_ERR) {
+        ;
+    } else if (server_cb->result_filename != NULL) {
         res = output_file_result(server_cb, resultvar, resultstr);
         if (resultvar) {
             val_free_value(resultvar);
         }
-    } else if (server_cb->result_name) {
+    } else if (server_cb->result_name != NULL) {
         if (server_cb->result_vartype == VAR_TYP_CONFIG) {
             configvar = var_get(server_cb->runstack_context,
                                 server_cb->result_name,
@@ -4720,7 +4733,7 @@ status_t
                     log_info("\nOK\n");
                 }                    
             }
-        } else if (resultvar) {
+        } else if (resultvar != NULL) {
             /* save the filled in value
              * hand off the malloced 'resultvar' here
              */

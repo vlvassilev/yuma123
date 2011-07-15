@@ -1764,6 +1764,54 @@ void
 
 
 /********************************************************************
+* FUNCTION val_force_dname
+* 
+* Set (or reset) the name of a value struct
+* Set all descendent nodes as well
+* Force dname to be used, not object name backptr
+*
+* INPUTS:
+*    val == val_value_t data structure to check
+*    name == name string to set
+*    namelen == length of name string
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_force_dname (val_value_t *val)
+{
+    val_value_t  *chval;
+    status_t      res = NO_ERR;
+
+#ifdef DEBUG
+    if (val == NULL || val->name == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (val->dname == NULL) {
+        val->dname = xml_strdup(val->name);
+        if (val->dname == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+        val->name = val->dname;
+    }
+
+    for (chval = val_get_first_child(val);
+         chval != NULL;
+         chval = val_get_next_child(chval)) {
+        res = val_force_dname(chval);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+    return res;
+
+}  /* val_force_dname */
+
+
+/********************************************************************
 * FUNCTION val_set_qname
 * 
 * Set (or reset) the name and namespace ID of a value struct
@@ -9764,6 +9812,11 @@ void
 * object definition (which goes away when the
 * session is terminated)
 *
+* !!! Need to assume the val->obj pointer is already
+* !!! invalid.  This can happen to yangcli when a 
+* !!! session is dropped and there are vars that
+* !!! reference YANG objects from the session
+*
 * INPUTS:
 *    val == val_value_t struct to convert to generic
 *
@@ -9781,7 +9834,7 @@ status_t
     boolean        haschildren;
 
 #ifdef DEBUG
-    if (!val) {
+    if (val == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -9791,21 +9844,8 @@ status_t
         return NO_ERR;
     }
 
-    if (obj_is_abstract(val->obj) || obj_is_cli(val->obj)) {
-        /* ignore values for abstract and CLI objects */
-        return NO_ERR;
-    }
-
     res = NO_ERR;
     haschildren = typ_has_children(val->btyp);
-
-    if (val->dname == NULL) {
-        val->dname = xml_strdup(val->name);
-        if (val->dname == NULL) {
-            return ERR_INTERNAL_MEM;
-        }
-        val->name = val->dname;
-    }
 
     if (typ_is_string(val->btyp)) {
         val->obj = ncx_get_gen_string();
@@ -9813,7 +9853,10 @@ status_t
             xpath_free_pcb(val->xpathpcb);
             val->xpathpcb = NULL;
         }
-    } else if (val->obj->objtype == OBJ_TYP_ANYXML) {
+    } else if (val->btyp == NCX_BT_ANY) {
+        /* !!! this should not happen if agt/mgr_val_parse used
+         * !!! parse_any will set the val->btyp to container
+         */
         val->obj = ncx_get_gen_anyxml();
     } else {
         switch (val->btyp) {

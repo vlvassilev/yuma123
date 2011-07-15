@@ -564,6 +564,25 @@ extern void
 
 
 /********************************************************************
+* FUNCTION val_force_dname
+* 
+* Set (or reset) the name of a value struct
+* Set all descendent nodes as well
+* Force dname to be used, not object name backptr
+*
+* INPUTS:
+*    val == val_value_t data structure to check
+*    name == name string to set
+*    namelen == length of name string
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_force_dname (val_value_t *val);
+
+
+/********************************************************************
 * FUNCTION val_set_qname
 * 
 * Set (or reset) the name and namespace ID of a value struct
@@ -3291,6 +3310,11 @@ extern void
 * variable in yangcli from the server-specific
 * object definition (which goes away when the
 * session is terminated)
+*
+* !!! Need to assume the val->obj pointer is already
+* !!! invalid.  This can happen to yangcli when a 
+* !!! session is dropped and there are vars that
+* !!! reference YANG objects from the session
 *
 * INPUTS:
 *    val == val_value_t struct to convert to generic

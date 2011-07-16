@@ -50,18 +50,15 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-07-05 {
+    revision 2011-07-16 {
        description 
          "Add PublicKeyParms grouping.
           Added MatchParms (--match-names and --alt-names).
-          Added --force-target parameter.";
-    }
-
-    revision 2011-06-27 {
-       description 
-          "Added --urltarget=<url> parameter to FillParms grouping
-           to allow REST encoded requests to be converted to XPath
-           before use.";
+          Added --force-target parameter.
+          Added show session command.
+          Added --urltarget=<url> parameter to FillParms grouping
+          to allow URL encoded requests to be converted to XPath
+          before use.";
     }
 
     revision 2011-06-05 {
@@ -1540,49 +1537,67 @@ module yangcli {
     }
 
     rpc show {
-      description "Local show command for yangcli info.";
+      description 
+        "Local show command for yangcli session info.";
       input {
         choice showtype {
           mandatory true;
 
           leaf cli {
-            description "Show the yangcli CLI parameters";
+            description 
+              "Show the yangcli CLI parameters.";
             type empty;
           }
 
           leaf module {
-            description "Show full info for one module";
+            description 
+              "Show full info for one module loaded 
+               within the current session.";
             type nt:NcxIdentifier;
           }
 
           leaf modules {
-            description "Show info for all modules";
+            description 
+              "Show info for all modules loaded within the 
+               current session.";
             type empty;
           }
 
           leaf local {
-            description "Show info for one local user variable";
+            description 
+              "Show info for one local user variable.";
             type nt:NcxName;
           }
 
           leaf locals {
-            description "Show info for all local user variables";
+            description 
+              "Show info for all local user variables.";
             type empty;
           }
 
           leaf global {
-            description "Show full info for one global user variable";
+            description 
+              "Show full info for one global user variable.";
             type nt:NcxName;
           }
 
           leaf globals {
-            description "Show info for all global user variables";
+            description 
+              "Show info for all global user variables.";
             type empty;
           }
 
           leaf objects {
             description 
-              "Show config database objects available at this time";
+              "Show config database objects loaded within the 
+               current session.";
+            type empty;
+          }
+
+          leaf session {
+            description 
+              "Show the current session info, including the initial
+               server capabilities for the session.";
             type empty;
           }
 
@@ -1594,17 +1609,20 @@ module yangcli {
           }
 
           leaf var {
-            description "Show info for one local or global variable";
+            description 
+              "Show info for one local or global variable.";
             type nt:NcxName;
           }
          
           leaf vars {
-            description "Show truncated info for all program variables";
+            description 
+              "Show truncated info for all program variables";
             type empty;
           }
 
           leaf version {
-            description "Show yangcli version info";
+            description 
+              "Show yangcli version info.";
             type empty;
           }
         }

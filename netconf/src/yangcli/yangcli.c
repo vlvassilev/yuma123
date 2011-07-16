@@ -2484,175 +2484,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION report_capabilities
-* 
-* Generate a start session report, listing the capabilities
-* of the NETCONF server
-* 
-* INPUTS:
-*  server_cb == server control block to use
-*  scb == session control block
-*
-*********************************************************************/
-static void
-    report_capabilities (server_cb_t *server_cb,
-                         const ses_cb_t *scb)
-{
-    const mgr_scb_t    *mscb;
-    const xmlChar      *server;
-    const val_value_t  *parm;
-
-    if (!LOGINFO) {
-        /* skip unless log level is INFO or higher */
-        return;
-    }
-
-    mscb = (const mgr_scb_t *)scb->mgrcb;
-
-    parm = val_find_child(server_cb->connect_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_SERVER);
-    if (parm && parm->res == NO_ERR) {
-        server = VAL_STR(parm);
-    } else {
-        server = (const xmlChar *)"--";
-    }
-
-    log_write("\n\nNETCONF session established for %s on %s",
-              scb->username, 
-              mscb->target ? mscb->target : server);
-
-
-    log_write("\n\nClient Session Id: %u", scb->sid);
-    log_write("\nServer Session Id: %u", mscb->agtsid);
-
-    log_write("\n\nServer Protocol Capabilities");
-    cap_dump_stdcaps(&mscb->caplist);
-
-    log_write("\n\nServer Module Capabilities");
-    cap_dump_modcaps(&mscb->caplist);
-
-    log_write("\n\nServer Enterprise Capabilities");
-    cap_dump_entcaps(&mscb->caplist);
-    log_write("\n");
-
-    log_write("\nProtocol version set to: ");
-    switch (ses_get_protocol(scb)) {
-    case NCX_PROTO_NETCONF10:
-        log_write("RFC 4741 (base:1.0)");
-        break;
-    case NCX_PROTO_NETCONF11:
-        log_write("RFC 6241 (base:1.1)");
-        break;
-    default:
-        log_write("unknown");
-    }
-
-    log_write("\nDefault target set to: ");
-
-    switch (mscb->targtyp) {
-    case NCX_AGT_TARG_NONE:
-        server_cb->default_target = NULL;
-        log_write("none");
-        break;
-    case NCX_AGT_TARG_CANDIDATE:
-        server_cb->default_target = NCX_EL_CANDIDATE;
-        log_write("<candidate>");
-        break;
-    case NCX_AGT_TARG_RUNNING:
-        server_cb->default_target = NCX_EL_RUNNING;
-        log_write("<running>");
-        break;
-    case NCX_AGT_TARG_CAND_RUNNING:
-        if (force_target != NULL &&
-            !xml_strcmp(force_target, NCX_EL_RUNNING)) {
-            /* set to running */
-            server_cb->default_target = NCX_EL_RUNNING;
-            log_write("<running> (<candidate> also supported)");
-        } else {
-            /* set to candidate */
-            server_cb->default_target = NCX_EL_CANDIDATE;
-            log_write("<candidate> (<running> also supported)");
-        }
-        break;
-    case NCX_AGT_TARG_LOCAL:
-        server_cb->default_target = NULL;
-        log_write("none -- local file");        
-        break;
-    case NCX_AGT_TARG_REMOTE:
-        server_cb->default_target = NULL;
-        log_write("none -- remote file");       
-        break;
-    default:
-        server_cb->default_target = NULL;
-        SET_ERROR(ERR_INTERNAL_VAL);
-        log_write("none -- unknown (%d)", mscb->targtyp);
-        break;
-    }
-
-    log_write("\nSave operation mapped to: ");
-    switch (mscb->targtyp) {
-    case NCX_AGT_TARG_NONE:
-        log_write("none");
-        break;
-    case NCX_AGT_TARG_CANDIDATE:
-    case NCX_AGT_TARG_CAND_RUNNING:
-        if (!xml_strcmp(server_cb->default_target,
-                        NCX_EL_CANDIDATE)) {
-            log_write("commit");
-            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-                log_write(" + copy-config <running> <startup>");
-            }
-        } else {
-            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-                log_write("copy-config <running> <startup>");
-            } else {
-                log_write("none");
-            }
-        }
-        break;
-    case NCX_AGT_TARG_RUNNING:
-        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-            log_write("copy-config <running> <startup>");
-        } else {
-            log_write("none");
-        }           
-        break;
-    case NCX_AGT_TARG_LOCAL:
-    case NCX_AGT_TARG_REMOTE:
-        /* no way to assign these enums from the capabilities alone! */
-        if (cap_std_set(&mscb->caplist, CAP_STDID_URL)) {
-            log_write("copy-config <running> <url>");
-        } else {
-            log_write("none");
-        }           
-        break;
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        log_write("none");
-        break;
-    }
-
-    log_write("\nDefault with-defaults behavior: ");
-    if (mscb->caplist.cap_defstyle) {
-        log_write("%s", mscb->caplist.cap_defstyle);
-    } else {
-        log_write("unknown");
-    }
-
-    log_write("\nAdditional with-defaults behavior: ");
-    if (mscb->caplist.cap_supported) {
-        log_write("%s", mscb->caplist.cap_supported);
-    } else {
-        log_write("unknown");
-    }
-
-    log_write("\n");
-    
-} /* report_capabilities */
-
-
-/********************************************************************
 * FUNCTION check_module_capabilities
 * 
 * Check the modules reported by the server
@@ -3295,7 +3126,7 @@ static mgr_io_state_t
                    && dlq_empty(&scb->outQ)) {
             /* incoming hello OK and outgoing hello is sent */
             server_cb->state = MGR_IO_ST_CONN_IDLE;
-            report_capabilities(server_cb, scb);
+            report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
             check_module_capabilities(server_cb, scb);
             mscb = (mgr_scb_t *)scb->mgrcb;
             ncx_set_temp_modQ(&mscb->temp_modQ);
@@ -4773,6 +4604,201 @@ status_t
     return res;
 
 }  /* finish_result_assign */
+
+
+/********************************************************************
+* FUNCTION report_capabilities
+* 
+* Generate a start session report, listing the capabilities
+* of the NETCONF server
+* 
+* INPUTS:
+*  server_cb == server control block to use
+*  scb == session control block
+*  isfirst == TRUE if first call when session established
+*             FALSE if this is from show session command
+*  mode == help mode; ignored unless first == FALSE
+*********************************************************************/
+void
+    report_capabilities (server_cb_t *server_cb,
+                         const ses_cb_t *scb,
+                         boolean isfirst,
+                         help_mode_t mode)
+{
+    const mgr_scb_t    *mscb;
+    const xmlChar      *server;
+    const val_value_t  *parm;
+
+    if (!LOGINFO) {
+        /* skip unless log level is INFO or higher */
+        return;
+    }
+
+    mscb = (const mgr_scb_t *)scb->mgrcb;
+
+    parm = val_find_child(server_cb->connect_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_SERVER);
+    if (parm && parm->res == NO_ERR) {
+        server = VAL_STR(parm);
+    } else {
+        server = (const xmlChar *)"--";
+    }
+
+    log_write("\n\nNETCONF session established for %s on %s",
+              scb->username, 
+              mscb->target ? mscb->target : server);
+
+
+    log_write("\n\nClient Session Id: %u", scb->sid);
+    log_write("\nServer Session Id: %u", mscb->agtsid);
+
+    if (isfirst || mode > HELP_MODE_BRIEF) {
+        log_write("\n\nServer Protocol Capabilities");
+        cap_dump_stdcaps(&mscb->caplist);
+
+        log_write("\n\nServer Module Capabilities");
+        cap_dump_modcaps(&mscb->caplist);
+
+        log_write("\n\nServer Enterprise Capabilities");
+        cap_dump_entcaps(&mscb->caplist);
+        log_write("\n");
+    }
+
+    log_write("\nProtocol version set to: ");
+    switch (ses_get_protocol(scb)) {
+    case NCX_PROTO_NETCONF10:
+        log_write("RFC 4741 (base:1.0)");
+        break;
+    case NCX_PROTO_NETCONF11:
+        log_write("RFC 6241 (base:1.1)");
+        break;
+    default:
+        log_write("unknown");
+    }
+
+    if (!isfirst && (mode <= HELP_MODE_BRIEF)) {
+        return;
+    }
+
+    log_write("\nDefault target set to: ");
+
+    switch (mscb->targtyp) {
+    case NCX_AGT_TARG_NONE:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        log_write("none");
+        break;
+    case NCX_AGT_TARG_CANDIDATE:
+        if (isfirst) {
+            server_cb->default_target = NCX_EL_CANDIDATE;
+        }
+        log_write("<candidate>");
+        break;
+    case NCX_AGT_TARG_RUNNING:
+        if (isfirst) {
+            server_cb->default_target = NCX_EL_RUNNING;
+        }
+        log_write("<running>");
+        break;
+    case NCX_AGT_TARG_CAND_RUNNING:
+        if (force_target != NULL &&
+            !xml_strcmp(force_target, NCX_EL_RUNNING)) {
+            /* set to running */
+            if (isfirst) {
+                server_cb->default_target = NCX_EL_RUNNING;
+            }
+            log_write("<running> (<candidate> also supported)");
+        } else {
+            /* set to candidate */
+            if (isfirst) {
+                server_cb->default_target = NCX_EL_CANDIDATE;
+            }
+            log_write("<candidate> (<running> also supported)");
+        }
+        break;
+    case NCX_AGT_TARG_LOCAL:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        log_write("none -- local file");        
+        break;
+    case NCX_AGT_TARG_REMOTE:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        log_write("none -- remote file");       
+        break;
+    default:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        SET_ERROR(ERR_INTERNAL_VAL);
+        log_write("none -- unknown (%d)", mscb->targtyp);
+        break;
+    }
+
+    log_write("\nSave operation mapped to: ");
+    switch (mscb->targtyp) {
+    case NCX_AGT_TARG_NONE:
+        log_write("none");
+        break;
+    case NCX_AGT_TARG_CANDIDATE:
+    case NCX_AGT_TARG_CAND_RUNNING:
+        if (!xml_strcmp(server_cb->default_target,
+                        NCX_EL_CANDIDATE)) {
+            log_write("commit");
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_write(" + copy-config <running> <startup>");
+            }
+        } else {
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_write("copy-config <running> <startup>");
+            } else {
+                log_write("none");
+            }
+        }
+        break;
+    case NCX_AGT_TARG_RUNNING:
+        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+            log_write("copy-config <running> <startup>");
+        } else {
+            log_write("none");
+        }           
+        break;
+    case NCX_AGT_TARG_LOCAL:
+    case NCX_AGT_TARG_REMOTE:
+        /* no way to assign these enums from the capabilities alone! */
+        if (cap_std_set(&mscb->caplist, CAP_STDID_URL)) {
+            log_write("copy-config <running> <url>");
+        } else {
+            log_write("none");
+        }           
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        log_write("none");
+        break;
+    }
+
+    log_write("\nDefault with-defaults behavior: ");
+    if (mscb->caplist.cap_defstyle) {
+        log_write("%s", mscb->caplist.cap_defstyle);
+    } else {
+        log_write("unknown");
+    }
+
+    log_write("\nAdditional with-defaults behavior: ");
+    if (mscb->caplist.cap_supported) {
+        log_write("%s", mscb->caplist.cap_supported);
+    } else {
+        log_write("unknown");
+    }
+
+    log_write("\n");
+    
+} /* report_capabilities */
 
 
 /********************************************************************

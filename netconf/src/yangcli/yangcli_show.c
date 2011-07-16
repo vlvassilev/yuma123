@@ -266,6 +266,35 @@ static void
 
 
 /********************************************************************
+ * FUNCTION do_show_session (sub-mode of local RPC)
+ * 
+ * show session startup screen
+ *
+ * INPUTS:
+ *  server_cb == server control block to use
+ *  mode == help mode
+ *********************************************************************/
+static void
+    do_show_session (server_cb_t *server_cb,
+                     help_mode_t mode)
+{
+    ses_cb_t     *scb;
+
+    scb = mgr_ses_get_scb(server_cb->mysid);
+    if (scb == NULL) {
+        /* session was dropped */
+        log_write("\nError: No session available."
+                  " Not connected to any server.\n");
+        return;
+    }
+
+    report_capabilities(server_cb, scb, FALSE, mode);
+    log_write("\n");
+
+}  /* do_show_session */
+
+
+/********************************************************************
  * FUNCTION do_show_system (sub-mode of local RPC)
  * 
  * show system parms
@@ -863,6 +892,8 @@ status_t
             
         /* get the 1 of N 'showtype' choice */
         done = FALSE;
+
+        /* show cli */
         parm = val_find_child(valset, 
                               YANGCLI_MOD,
                               YANGCLI_CLI);
@@ -871,19 +902,22 @@ status_t
             done = TRUE;
         }
 
-        done = FALSE;
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD,
-                              YANGCLI_LOCAL);
-        if (parm) {
-            res = do_show_var(server_cb,
-                              VAL_STR(parm), 
-                              VAR_TYP_LOCAL, 
-                              FALSE, 
-                              mode);
-            done = TRUE;
+        /* show local <foo> */
+        if (!done) {
+            parm = val_find_child(valset, 
+                                  YANGCLI_MOD,
+                                  YANGCLI_LOCAL);
+            if (parm) {
+                res = do_show_var(server_cb,
+                                  VAL_STR(parm), 
+                                  VAR_TYP_LOCAL, 
+                                  FALSE, 
+                                  mode);
+                done = TRUE;
+            }
         }
 
+        /* show locals */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -898,6 +932,7 @@ status_t
             }
         }
 
+        /* show objects */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -908,6 +943,7 @@ status_t
             }
         }
 
+        /* show global */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -922,6 +958,7 @@ status_t
             }
         }
 
+        /* show globals */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -936,7 +973,16 @@ status_t
             }
         }
 
-        done = FALSE;
+        /* show session */
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD,
+                              YANGCLI_SESSION);
+        if (parm) {
+            do_show_session(server_cb, mode);
+            done = TRUE;
+        }
+
+        /* show system */
         parm = val_find_child(valset, 
                               YANGCLI_MOD,
                               YANGCLI_SYSTEM);
@@ -945,6 +991,7 @@ status_t
             done = TRUE;
         }
 
+        /* show var <foo> */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -959,6 +1006,7 @@ status_t
             }
         }
 
+        /* show vars */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -973,6 +1021,7 @@ status_t
             }
         }
 
+        /* show module <foo> */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -994,6 +1043,7 @@ status_t
             }
         }
 
+        /* show modules */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,
@@ -1004,6 +1054,7 @@ status_t
             }
         }
 
+        /* show version */
         if (!done) {
             parm = val_find_child(valset, 
                                   YANGCLI_MOD,

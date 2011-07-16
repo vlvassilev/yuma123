@@ -222,6 +222,7 @@ extern "C" {
 #define YANGCLI_START       (const xmlChar *)"start"
 #define YANGCLI_SCRIPTS     (const xmlChar *)"scripts"
 #define YANGCLI_SERVER      (const xmlChar *)"server"
+#define YANGCLI_SESSION     (const xmlChar *)"session"
 #define YANGCLI_SYSTEM      (const xmlChar *)"system"
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
@@ -687,6 +688,27 @@ extern status_t
     finish_result_assign (server_cb_t *server_cb,
 			  val_value_t *resultvar,
 			  const xmlChar *resultstr);
+
+
+/********************************************************************
+* FUNCTION report_capabilities
+* 
+* Generate a start session report, listing the capabilities
+* of the NETCONF server
+* 
+* INPUTS:
+*  server_cb == server control block to use
+*  scb == session control block
+*  isfirst == TRUE if first call when session established
+*             FALSE if this is from show session command
+*  mode == help mode; ignored unless first == FALSE
+*********************************************************************/
+extern void
+    report_capabilities (server_cb_t *server_cb,
+                         const ses_cb_t *scb,
+                         boolean isfirst,
+                         help_mode_t mode);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

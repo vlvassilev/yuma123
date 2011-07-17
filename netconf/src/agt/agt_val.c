@@ -1762,6 +1762,61 @@ static status_t
 }  /* test_apply_write_val */
 
 
+
+/********************************************************************
+* FUNCTION check_withdef_default
+* 
+* Check the wd:default node for correctness
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming rpc_msg_t in progress
+*   newval == val_value_t from the PDU
+*   
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_withdef_default (ses_cb_t  *scb,
+                           rpc_msg_t  *msg,
+                           val_value_t  *newval)
+{
+    status_t  res = NO_ERR;
+
+    /* check object is a leaf */
+    if (newval->obj->objtype != OBJ_TYP_LEAF) {
+        res = ERR_NCX_WRONG_NODETYP;
+    } else {
+        /* check leaf has a schema default */
+        const xmlChar *defstr = obj_get_default(newval->obj);
+        if (defstr == NULL) {
+            res = ERR_NCX_NO_DEFAULT;
+        } else {
+            /* check value provided is the same as the default */
+            int ret = val_compare_to_string(newval, defstr, &res);
+            if (res == NO_ERR && ret != 0) {
+                res = ERR_NCX_INVALID_VALUE;
+            }
+        }
+    }
+
+    if (res != NO_ERR) {
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_CONTENT, 
+                         res, 
+                         NULL, 
+                         NCX_NT_VAL, 
+                         newval, 
+                         NCX_NT_VAL, 
+                         newval);
+    }
+
+    return res;
+
+}  /* check_withdef_default */
+
+
 /********************************************************************
 * FUNCTION invoke_simval_cb
 * 
@@ -1898,6 +1953,17 @@ static status_t
         if (res == NO_ERR) {
             res = check_insert_attr(scb, msg, newval);
             /* any errors already recorded */
+            if (res != NO_ERR) {
+                errdone = TRUE;
+            }
+        }
+
+        /* check if the wd:default attribute is present and if so,
+         * that it is used properly; this needs to be done
+         * after the effective operation is set for newval
+         */
+        if (newval != NULL && val_has_withdef_default(newval)) {
+            res = check_withdef_default(scb, msg, newval);
             if (res != NO_ERR) {
                 errdone = TRUE;
             }
@@ -2083,6 +2149,15 @@ static status_t
             CHK_EXIT(res, retres);
         }
 
+        /* check if the wd:default attribute is present and if so,
+         * it will be an error
+         */
+        if (res == NO_ERR) {
+            if (newval != NULL && val_has_withdef_default(newval)) {
+                res = check_withdef_default(scb, msg, newval);
+            }
+        }
+
         /* make sure the node is not partial locked
          * by another session; there is a corner case where
          * all the PDU nodes are OP_EDITOP_NONE, and
@@ -2232,16 +2307,6 @@ static status_t
                 chval->res = res;
             }
             CHK_EXIT(res, retres);
-        }
-    }
-
-    if (retres == NO_ERR) {
-        if (newval) {
-            cur_editop = newval->editvars->editop;
-        } else if (curval) {
-            cur_editop = editop;
-        } else {
-            retres = SET_ERROR(ERR_INTERNAL_VAL);
         }
     }
 

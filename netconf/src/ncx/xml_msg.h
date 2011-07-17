@@ -278,6 +278,26 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION xml_msg_finish_prefix_map
+*
+* Finish the queue of xmlns_pmap_t records for the current message
+* 
+* INPUTS:
+*    msg == message in progrss
+*    attrs == the top-level attrs list (e;g, rpc_in_attrs)
+* OUTPUTS:
+*   msg->prefixQ will be populated as needed,
+*   could be partially populated if some error returned
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    xml_msg_finish_prefix_map (xml_msg_hdr_t *msg,
+                               xml_attrs_t *attrs);
+
+
+/********************************************************************
 * FUNCTION xml_msg_check_xmlns_attr
 *
 * Check the default NS and the prefix map in the msg;

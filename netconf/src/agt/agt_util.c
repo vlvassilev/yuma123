@@ -190,6 +190,7 @@ static boolean
 
     switch (withdef) {
     case NCX_WITHDEF_REPORT_ALL:
+    case NCX_WITHDEF_REPORT_ALL_TAGGED:
         break;
     case NCX_WITHDEF_TRIM:
         retval = val_is_default(val);
@@ -239,6 +240,7 @@ static boolean
         }
         break;
     case NCX_WITHDEF_REPORT_ALL:
+    case NCX_WITHDEF_REPORT_ALL_TAGGED:
     case NCX_WITHDEF_TRIM:
     case NCX_WITHDEF_EXPLICIT:
         if (is_default(withdef, node)) {
@@ -1322,7 +1324,7 @@ status_t
 *    see ncx/val_util.h   (val_nodetest_fn_t)
 *
 * RETURNS:
-*    status
+*    TRUE if config; FALSE if non-config
 *********************************************************************/
 boolean
     agt_check_config (ncx_withdefaults_t withdef,
@@ -1474,6 +1476,7 @@ status_t
     case OP_FILTER_NONE:
         switch (msg->mhdr.withdef) {
         case NCX_WITHDEF_REPORT_ALL:
+        case NCX_WITHDEF_REPORT_ALL_TAGGED:
             /* return everything */
             if (getop) {
                 /* all config and state data */
@@ -2895,7 +2898,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-
+    (void)methnode;
     res = NO_ERR;
 
     /* check the with-defaults parameter */
@@ -2915,23 +2918,8 @@ status_t
         return parm->res;
     }
 
-    /* for now, report-all-tagged is not supported */
-    if (!xml_strcmp(VAL_ENUM_NAME(parm),
-                    NCX_EL_REPORT_ALL_TAGGED)) {
-        res = ERR_NCX_INVALID_VALUE;
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res,
-                         methnode,
-                         NCX_NT_NONE, 
-                         NULL, 
-                         NCX_NT_VAL, 
-                         parm);
-    } else {
-        msg->mhdr.withdef = 
-            ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
-    }
+    msg->mhdr.withdef = 
+        ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
 
     return res;
 

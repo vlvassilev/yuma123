@@ -118,6 +118,12 @@ extern "C" {
 /* URN for NETCONF standard modules */
 #define NC_URN1         (const xmlChar *)"urn:netconf:params:xml:ns:"
 
+
+/* URN for with-defaults 'default' XML attribute */
+#define NC_WD_ATTR_URN (const xmlChar *)\
+    "urn:ietf:params:xml:ns:netconf:default:1.0"
+#define NC_WD_ATTR_PREFIX (const xmlChar *)"wda"
+
 /* URN for NCX extensions */
 #define NCX_URN    (const xmlChar *)"http://netconfcentral.org/ns/yuma-ncx"
 #define NCX_MOD    (const xmlChar *)"yuma-ncx"

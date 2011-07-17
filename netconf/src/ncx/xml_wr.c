@@ -621,7 +621,7 @@ static void
     const xmlChar       *pfix,  *elname;
     const dlq_hdr_t     *attrQ;
     const xpath_pcb_t   *xpathpcb;
-    boolean              xneeded, empty, xmlcontent;
+    boolean              xneeded, empty, xmlcontent, isdefault;
     xmlns_id_t           nsid, parent_nsid;
     status_t             res;
     uint32               retcount;
@@ -631,6 +631,10 @@ static void
     nsid = val->nsid;
     attrQ = &val->metaQ;
     xpathpcb = NULL;
+    isdefault = FALSE;
+    if (typ_is_simple(val->btyp)) {
+        isdefault = val_is_default(val);
+    }
 
     if (val->parent) {
         parent_nsid = val->parent->nsid;
@@ -669,6 +673,29 @@ static void
 
     /* write the element name */
     ses_putstr(scb, elname);
+
+    /* write the wda:default element if needed
+     * hack: bypass usual checking for xmlns needed because the
+     * xml_msg_build_prefix_map function added the wda
+     * namespace attribute already if it was needed
+     */
+    if (isdefault && msg->withdef == NCX_WITHDEF_REPORT_ALL_TAGGED) {
+        const xmlChar *wpfix;
+        boolean xneeded2;
+
+        wpfix = xml_msg_get_prefix(msg, 
+                                   parent_nsid,
+                                   xmlns_wda_id(), 
+                                   NULL, 
+                                   &xneeded2);
+        if (wpfix) {
+            ses_putchar(scb, ' ');
+            ses_putstr(scb, wpfix);
+            ses_putchar(scb, ':');
+            ses_putstr(scb, NCX_EL_DEFAULT);
+            ses_putstr(scb, (const xmlChar *)"=\"true\"");
+        }
+    }
 
     if (xneeded || xmlcontent || (attrQ && !dlq_empty(attrQ))) {
 
@@ -1087,7 +1114,8 @@ static void
 *         == FALSE for start node
 *    qname_nsid == namespace ID if the content is a QName
 *       and an xmlns with a prefix is needed
-*
+*   isdefault == TRUE if the XML value node represents a default leaf
+*             == FALSE otherwise
 * RETURNS:
 *   none
 *********************************************************************/
@@ -1101,7 +1129,8 @@ static void
                    boolean isattrq,
                    int32 indent,
                    boolean empty,
-                   xmlns_id_t  qname_nsid)
+                   xmlns_id_t  qname_nsid,
+                   boolean isdefault)
 {
     const xmlChar       *pfix, *qname_pfix;
     boolean              xneeded;
@@ -1129,6 +1158,29 @@ static void
 
     /* write the element name */
     ses_putstr(scb, elname);
+
+    /* write the wda:default element if needed
+     * hack: bypass usual checking for xmlns needed because the
+     * xml_msg_build_prefix_map function added the wda
+     * namespace attribute already if it was needed
+     */
+    if (isdefault && msg->withdef == NCX_WITHDEF_REPORT_ALL_TAGGED) {
+        const xmlChar *wpfix;
+        boolean xneeded2;
+
+        wpfix = xml_msg_get_prefix(msg, 
+                                   parent_nsid,
+                                   xmlns_wda_id(), 
+                                   NULL, 
+                                   &xneeded2);
+        if (wpfix) {
+            ses_putchar(scb, ' ');
+            ses_putstr(scb, wpfix);
+            ses_putchar(scb, ':');
+            ses_putstr(scb, NCX_EL_DEFAULT);
+            ses_putstr(scb, (const xmlChar *)"=\"true\" ");
+        }
+    }
 
     if (xneeded || qname_nsid || (attrQ && !dlq_empty(attrQ))) {
         if (indent >= 0) {
@@ -1270,7 +1322,8 @@ void
                   isattrq,
                   indent,
                   empty,
-                  0);
+                  0,
+                  FALSE);
 
 }  /* xml_wr_begin_elem_ex */
 
@@ -1317,7 +1370,8 @@ void
                   FALSE,
                   indent,
                   FALSE,
-                  0);
+                  0,
+                  FALSE);
 
 } /* xml_wr_begin_elem */
 
@@ -1364,7 +1418,8 @@ void
                   FALSE, 
                   indent,
                   TRUE,
-                  0);
+                  0,
+                  FALSE);
 
 } /* xml_wr_empty_elem */
 
@@ -1488,7 +1543,8 @@ void
                   isattrq, 
                   indent,
                   FALSE,
-                  0);
+                  0,
+                  FALSE);
     ses_putstr(scb, str);
     xml_wr_end_elem(scb, 
                     msg, 
@@ -1522,6 +1578,8 @@ void
 *   indent == number of chars to indent after a newline
 *           == -1 means no newline or indent
 *           == 0 means just newline
+*   isdefault == TRUE if the XML value node represents a default leaf
+*             == FALSE otherwise
 * RETURNS:
 *   none
 *********************************************************************/
@@ -1535,7 +1593,8 @@ void
                        const xmlChar *elname,
                        const dlq_hdr_t *attrQ,
                        boolean isattrq,
-                       int32 indent)
+                       int32 indent,
+                       boolean isdefault)
 {
     const xmlChar  *pfix;
 
@@ -1555,7 +1614,8 @@ void
                   isattrq, 
                   indent,
                   FALSE,
-                  val_nsid);
+                  val_nsid,
+                  isdefault);
 
     pfix = xml_msg_get_prefix_xpath(msg, val_nsid);
     if (pfix) {
@@ -1694,7 +1754,7 @@ void
     typ_def_t         *realtypdef;
     xml_msg_authfn_t   cbfn;
     status_t           res;
-    boolean            acmtest;
+    boolean            acmtest, isdefault;
     ncx_btype_t        btyp;
 
 #ifdef DEBUG
@@ -1739,6 +1799,11 @@ void
         if (!acmtest) {
             return;  /* skip this entry: access-denied */
         }
+    }
+
+    isdefault = FALSE;
+    if (typ_is_simple(out->btyp)) {
+        isdefault = val_is_default(val);
     }
 
     if (out->btyp == NCX_BT_LEAFREF) {
@@ -1795,7 +1860,8 @@ void
                           out->name,
                           &out->metaQ, 
                           FALSE, 
-                          indent);
+                          indent,
+                          isdefault);
     } else if (val_has_content(out)) {
         /* write the top-level start node */
         begin_elem_val(scb, 
@@ -1998,7 +2064,8 @@ status_t
                               val->name,
                               attrs, 
                               TRUE, 
-                              startindent);
+                              startindent,
+                              FALSE);
         } else {
             /* print start normal string node element */
             xml_wr_begin_elem_ex(scb, 

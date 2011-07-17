@@ -1147,6 +1147,16 @@ status_t
         return res;
     }
 
+    /* Initialize the XML namespace for wd:default attribute support */
+    res = xmlns_register_ns(NC_WD_ATTR_URN, 
+                            NC_WD_ATTR_PREFIX,
+                            (const xmlChar *)"wd:default Attribute",
+                            NULL, 
+                            &nsid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* load the basetypes into the definition registry */
     res = typ_load_basetypes();
     if (res != NO_ERR) {

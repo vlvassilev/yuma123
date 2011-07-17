@@ -134,6 +134,10 @@ static xmlns_id_t xmlns_yinid;
 /* Wildcard namespace ID */
 static xmlns_id_t xmlns_wildcardid;
 
+/* with-defaults wd:default attribute namespace ID */
+static xmlns_id_t xmlns_wdaid;
+
+
 /* next ID to allocate */
 static xmlns_id_t xmlns_next_id;
 
@@ -243,6 +247,7 @@ static void
     xmlns_yangid = 0;
     xmlns_yinid = 0;
     xmlns_wildcardid = 0;
+    xmlns_wdaid = 0;
     xmlns_next_id = 1;
     xmlns_init_done = FALSE;
 
@@ -435,6 +440,8 @@ status_t
         xmlns_yinid = xmlns_next_id;
     } else if (!xml_strcmp(ns, WILDCARD_URN)) {
         xmlns_wildcardid = xmlns_next_id;
+    } else if (!xml_strcmp(ns, NC_WD_ATTR_URN)) {
+        xmlns_wdaid = xmlns_next_id;
     }
 
     if (LOGDEBUG2) {
@@ -829,6 +836,24 @@ xmlns_id_t
 {
     return xmlns_wildcardid;
 }  /* xmlns_wildcard_id */
+
+
+/********************************************************************
+* FUNCTION xmlns_wda_id
+*
+* Get the ID for the wd:default XML attribute namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    with-defaults default attribute namespace ID or 0 if not found
+*********************************************************************/
+xmlns_id_t 
+    xmlns_wda_id (void)
+{
+    return xmlns_wdaid;
+}  /* xmlns_wda_id */
 
 
 /********************************************************************

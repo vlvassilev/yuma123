@@ -2372,13 +2372,14 @@ static status_t
     typ_def_t            *metadef;
     xml_attr_t           *attr;
     val_value_t          *metaval;
-    xmlns_id_t            ncid, yangid;
+    xmlns_id_t            ncid, yangid, wdaid;
     status_t              res, retres;
 
 
     retres = NO_ERR;
     ncid =  xmlns_nc_id();
     yangid =  xmlns_yang_id();
+    wdaid = xmlns_wda_id();
 
     /* go through all the attributes in the node and convert
      * to val_value_t structs
@@ -2451,6 +2452,15 @@ static status_t
             } else {
                 /* insert and key both entered */
                 res = ERR_NCX_EXTRA_ATTR;
+            }
+        } else if (val_match_metaval(attr, wdaid, YANG_K_DEFAULT)) {
+            if (ncx_is_true(attr->attr_val)) {
+                val_set_withdef_default(retval);
+                continue;
+            } else if (ncx_is_false(attr->attr_val)) {
+                continue;
+            } else {
+                res = ERR_NCX_INVALID_VALUE;
             }
         } else {
             /* find the attribute definition in this typdef */

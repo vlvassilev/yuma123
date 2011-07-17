@@ -9717,7 +9717,7 @@ const typ_def_t *
 *
 * RETURNS:
 *   TRUE if set by default
-*   FALSE if set explicitly by some user or the ctartup config
+*   FALSE if set explicitly by some user or the startup config
 *********************************************************************/
 boolean
     val_set_by_default (const val_value_t *val)
@@ -9729,9 +9729,61 @@ boolean
     }
 #endif
 
-    return (val->flags & VAL_FL_DEFSET) ? TRUE : FALSE;
+    return (val->flags & (VAL_FL_DEFSET | VAL_FL_WITHDEF))
+        ? TRUE : FALSE;
 
 }  /* val_set_by_default */
+
+
+/********************************************************************
+* FUNCTION val_has_withdef_default
+* 
+* Check if the value contained the wd:default attribute
+*
+* INPUTS:
+*    val == val_value_t struct to check
+*
+* RETURNS:
+*   TRUE if wd:default was set to true
+*   FALSE if wd:default attribute was not set to true
+*********************************************************************/
+boolean
+    val_has_withdef_default (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (val->flags & VAL_FL_WITHDEF) ? TRUE : FALSE;
+
+}  /* val_has_withdef_default */
+
+
+/********************************************************************
+* FUNCTION val_set_withdef_default
+* 
+* Set the value flags as having the wd:default attribute
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*
+*********************************************************************/
+void
+    val_set_withdef_default (val_value_t *val)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    val->flags |= VAL_FL_WITHDEF;
+
+}  /* val_set_withdef_default */
 
 
 /********************************************************************

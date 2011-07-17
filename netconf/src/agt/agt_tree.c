@@ -869,6 +869,9 @@ static void
              *
              * If there are only content match nodes then
              * the entire filval node is supposed to be output
+             *
+             * Do not need to check for the wd:default attribute
+             * in a complex node, only leafs
              */
              
             if (retval) {

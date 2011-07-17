@@ -252,7 +252,8 @@ static void
                                       errinfo->name, 
                                       NULL, 
                                       FALSE, 
-                                      indent);
+                                      indent,
+                                      FALSE);
                 } else {
                     xml_wr_string_elem(scb, 
                                        msg, 
@@ -1031,25 +1032,22 @@ static status_t
      * be done by now,
      * Also set the canonical order for the root node
      */
-    if (res == NO_ERR) {
-        testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
-        if (testval) {
-            val_purge_errors_from_root(testval);
-            /* val_set_canonical_order(testval); */
+    testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
+    if (testval) {
+        val_purge_errors_from_root(testval);
+        //val_set_canonical_order(testval);
 
-            if (justval) {
-                /* remove this node and return it */
-                val_remove_child(testval);
-                *configval = testval;
-            }
+        if (justval) {
+            /* remove this node and return it */
+            val_remove_child(testval);
+            *configval = testval;
         }
     }
 
     /* call all the object invoke callbacks, only callbacks for valid
      * subtrees will be called; skip if valonly mode
      */
-    if (res == NO_ERR &&
-        !justval &&
+    if (!justval &&
         valdone && 
         cbset->acb[AGT_RPC_PH_INVOKE]) {
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
@@ -1659,6 +1657,14 @@ void
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
         res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
     }
+
+
+    /* make sure the prefix map is correct for report-all-tagged mode */
+    if (res == NO_ERR) {
+        res = xml_msg_finish_prefix_map(&msg->mhdr, 
+                                        msg->rpc_in_attrs);
+    }
+
 
     /* always send an <rpc-reply> element in response to an <rpc> */
     msg->rpc_agt_state = AGT_RPC_PH_REPLY;

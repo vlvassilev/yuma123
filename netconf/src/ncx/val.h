@@ -190,6 +190,10 @@ extern "C" {
  */
 #define VAL_FL_DEFVAL    bit7
 
+/* if set, PDU value had the with-defaults wd:attribute
+ * set to true
+ */
+#define VAL_FL_WITHDEF   bit8
 
 /* set the virtualval lifetime to 3 seconds */
 #define VAL_VIRTUAL_CACHE_TIME   3
@@ -3268,6 +3272,35 @@ extern const typ_def_t *
 *********************************************************************/
 extern boolean
     val_set_by_default (const val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_has_withdef_default
+* 
+* Check if the value contained the wd:default attribute
+*
+* INPUTS:
+*    val == val_value_t struct to check
+*
+* RETURNS:
+*   TRUE if wd:default was set to true
+*   FALSE if wd:default attribute was not set to true
+*********************************************************************/
+extern boolean
+    val_has_withdef_default (const val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_set_withdef_default
+* 
+* Set the value flags as having the wd:default attribute
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*
+*********************************************************************/
+extern void
+    val_set_withdef_default (val_value_t *val);
 
 
 /********************************************************************

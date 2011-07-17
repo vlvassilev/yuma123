@@ -324,7 +324,8 @@ typedef enum status_t_
     ERR_NCX_PROTO11_NOT_ENABLED,        /* 379 */
     ERR_NCX_CC_NOT_ACTIVE,              /* 380 */
     ERR_NCX_MULTIPLE_MATCHES,           /* 381 */
-    ERR_LAST_USR_ERR,                   /* 382 -- not really used */
+    ERR_NCX_NO_DEFAULT,                 /* 382 */
+    ERR_LAST_USR_ERR,                   /* 383 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

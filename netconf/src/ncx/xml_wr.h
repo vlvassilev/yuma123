@@ -309,6 +309,8 @@ extern void
 *   indent == number of chars to indent after a newline
 *           == -1 means no newline or indent
 *           == 0 means just newline
+*   isdefault == TRUE if the XML value node represents a default leaf
+*             == FALSE otherwise
 * RETURNS:
 *   none
 *********************************************************************/
@@ -322,7 +324,9 @@ extern void
 		       const xmlChar *elname,
 		       const dlq_hdr_t *attrQ,
 		       boolean isattrq,
-		       int32 indent);
+		       int32 indent,
+                       boolean isdefault);
+
 
 /********************************************************************
 * FUNCTION xml_wr_check_val

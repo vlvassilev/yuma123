@@ -670,6 +670,8 @@ const char *
         return "persistent confirmed commit not active";
     case ERR_NCX_MULTIPLE_MATCHES:
         return "multiple matches found";
+    case ERR_NCX_NO_DEFAULT:
+        return "no schema default for this node";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

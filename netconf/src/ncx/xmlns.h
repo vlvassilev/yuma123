@@ -410,6 +410,21 @@ extern xmlns_id_t
 
 
 /********************************************************************
+* FUNCTION xmlns_wda_id
+*
+* Get the ID for the wd:default XML attribute namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    with-defaults default attribute namespace ID or 0 if not found
+*********************************************************************/
+extern xmlns_id_t 
+    xmlns_wda_id (void);
+
+
+/********************************************************************
 * FUNCTION xmlns_get_module
 *
 * get the module name of the namespace ID

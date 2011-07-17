@@ -1420,17 +1420,23 @@ status_t
     case NCX_WITHDEF_REPORT_ALL:
         str += xml_strcpy(str, NCX_EL_TRIM);
         *str++ = ',';
-        xml_strcpy(str, NCX_EL_EXPLICIT);
+        str += xml_strcpy(str, NCX_EL_EXPLICIT);
+        *str++ = ',';
+        xml_strcpy(str, NCX_EL_REPORT_ALL_TAGGED);
         break;
     case NCX_WITHDEF_TRIM:
+        str += xml_strcpy(str, NCX_EL_EXPLICIT);
+        *str++ = ',';
         str += xml_strcpy(str, NCX_EL_REPORT_ALL);
         *str++  = ',';
-        xml_strcpy(str, NCX_EL_EXPLICIT);
+        xml_strcpy(str, NCX_EL_REPORT_ALL_TAGGED);
         break;
     case NCX_WITHDEF_EXPLICIT:
+        str += xml_strcpy(str, NCX_EL_TRIM);
+        *str++ = ',';
         str += xml_strcpy(str, NCX_EL_REPORT_ALL);
         *str++ = ',';
-        xml_strcpy(str, NCX_EL_TRIM);
+        xml_strcpy(str, NCX_EL_REPORT_ALL_TAGGED);
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);

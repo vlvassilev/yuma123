@@ -633,7 +633,7 @@ status_t
                 xml_strcpy(buff, defpfix);
                 return NO_ERR;
             } else {
-                return SET_ERROR(ERR_BUFF_OVFL);
+                return ERR_BUFF_OVFL;
             }
         }
     }
@@ -641,11 +641,11 @@ status_t
     /* default already in use for something else so generate a prefix */
     nlen = sprintf((char *)numbuff, "%u", (uint32)nsid);
     if (nlen < 0) {
-        return SET_ERROR(ERR_NCX_INVALID_NUM);
+        return ERR_NCX_INVALID_NUM;
     }
 
     if ((uint32)(nlen+2) >= buffsize) {
-        return SET_ERROR(ERR_BUFF_OVFL);
+        return ERR_BUFF_OVFL;
     }
 
     /* copy the number to the prefix buffer w/ trailing zero */
@@ -738,7 +738,7 @@ status_t
 
         /* find the namespace associated with the prefix */
         nsrec = def_reg_find_ns(attr->attr_val);
-        if (!nsrec) {
+        if (nsrec == NULL) {
             /* this is not an error to have extra xmlns decls
              * in the <rpc> element; still need to make sure
              * not to reuse the prefix anyway
@@ -813,7 +813,7 @@ status_t
             /* create a new prefix map */
             newpmap = xmlns_new_pmap(0);
             if (!newpmap) {
-                res = SET_ERROR(ERR_INTERNAL_MEM);
+                res = ERR_INTERNAL_MEM;
             } else {
                 newpmap->nm_id = ncid;
                 newpmap->nm_pfix = buff;
@@ -841,9 +841,77 @@ status_t
             /* create a new prefix map */
             newpmap = xmlns_new_pmap(0);
             if (!newpmap) {
-                res = SET_ERROR(ERR_INTERNAL_MEM);
+                res = ERR_INTERNAL_MEM;
             } else {
                 newpmap->nm_id = ncxid;
+                newpmap->nm_pfix = buff;
+                newpmap->nm_topattr = TRUE;
+                add_pmap(msg, newpmap);
+            }
+        }
+        if (res != NO_ERR) {
+            retres = res;
+        }
+    }
+
+    return retres;
+
+}  /* xml_msg_build_prefix_map */
+
+
+/********************************************************************
+* FUNCTION xml_msg_finish_prefix_map
+*
+* Finish the queue of xmlns_pmap_t records for the current message
+* 
+* INPUTS:
+*    msg == message in progrss
+*    attrs == the top-level attrs list (e;g, rpc_in_attrs)
+* OUTPUTS:
+*   msg->prefixQ will be populated as needed,
+*   could be partially populated if some error returned
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xml_msg_finish_prefix_map (xml_msg_hdr_t *msg,
+                               xml_attrs_t *attrs)
+
+{
+    xmlns_pmap_t    *newpmap;
+    xmlChar         *buff;
+    xmlns_id_t       wdaid;
+    status_t         res;
+
+#ifdef DEBUG
+    if (msg == NULL || attrs == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    wdaid = xmlns_wda_id();
+
+    /* make sure XMLNS decl for wd:default is in the map 
+     * if the report-all-tagged mode is active
+     */
+    if (msg->withdef == NCX_WITHDEF_REPORT_ALL_TAGGED && 
+        !find_prefix(msg, wdaid)) {
+
+        /* add a prefix an xmlns attr for WD */
+        buff = NULL;
+        res = xml_msg_gen_new_prefix(msg, wdaid, &buff, 0);
+        if (res == NO_ERR) {
+            res = xml_add_xmlns_attr(attrs, wdaid, buff);
+        }
+        if (res == NO_ERR) {
+            /* create a new prefix map */
+            newpmap = xmlns_new_pmap(0);
+            if (newpmap == NULL) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                newpmap->nm_id = wdaid;
                 newpmap->nm_pfix = buff;
                 newpmap->nm_topattr = TRUE;
                 add_pmap(msg, newpmap);
@@ -853,7 +921,7 @@ status_t
 
     return res;
 
-}  /* xml_msg_build_prefix_map */
+}  /* xml_msg_finish_prefix_map */
 
 
 /********************************************************************

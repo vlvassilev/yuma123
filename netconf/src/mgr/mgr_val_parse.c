@@ -1754,7 +1754,7 @@ static status_t
     typ_def_t         *metadef;
     xml_attr_t        *attr;
     val_value_t       *metaval;
-    xmlns_id_t         ncid, yangid, xmlid;
+    xmlns_id_t         ncid, yangid, xmlid, wdaid;
     status_t           res, retres;
     boolean            iskey, isvalue, islang;
 
@@ -1762,6 +1762,7 @@ static status_t
     ncid =  xmlns_nc_id();
     yangid =  xmlns_yang_id();
     xmlid = xmlns_xml_id();
+    wdaid = xmlns_wda_id();
 
     /* go through all the attributes in the node and convert
      * to val_value_t structs
@@ -1792,17 +1793,15 @@ static status_t
         if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
             retval->editvars->editop = op_editop_id(attr->attr_val);
             if (retval->editvars->editop == OP_EDITOP_NONE) {
-                res = ERR_NCX_INVALID_VALUE;
-            } else {
-                continue;
+                retres = ERR_NCX_INVALID_VALUE;
             }
+            continue;
         } else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
             retval->editvars->insertop = op_insertop_id(attr->attr_val);
             if (retval->editvars->insertop == OP_INSOP_NONE) {
-                res = ERR_NCX_INVALID_VALUE;
-            } else {
-                continue;
+                retres = ERR_NCX_INVALID_VALUE;
             }
+            continue;
         } else if (val_match_metaval(attr, yangid, YANG_K_KEY)) {
             iskey = TRUE;
         } else if (val_match_metaval(attr, yangid, YANG_K_VALUE)) {
@@ -1810,6 +1809,18 @@ static status_t
         } else if (val_match_metaval(attr, xmlid, 
                                      (const xmlChar *)"lang")) {
             islang = TRUE;
+        } else if (val_match_metaval(attr, wdaid, YANG_K_DEFAULT)) {
+            if (ncx_is_true(attr->attr_val)) {
+                val_set_withdef_default(retval);
+            } else if (ncx_is_false(attr->attr_val)) {
+                ;
+            } else {
+                log_error("\nError: wd:default attribute has "
+                          "invalid value '%s'\n",
+                          attr->attr_val);
+                res = ERR_NCX_INVALID_VALUE;
+            }
+            continue;
         } else {
             /* find the attribute definition in this typdef */
             meta = obj_find_metadata(obj, attr->attr_name);

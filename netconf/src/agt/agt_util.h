@@ -436,7 +436,7 @@ extern status_t
 *    see ncx/val_util.h   (val_nodetest_fn_t)
 *
 * RETURNS:
-*    status
+*    TRUE if config; FALSE if non-config
 *********************************************************************/
 extern boolean
     agt_check_config (ncx_withdefaults_t withdef,

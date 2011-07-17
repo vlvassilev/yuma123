@@ -321,10 +321,6 @@ static status_t
     int                retval;
     status_t           res;
 
-    if (newnode == NULL) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
     if (newnode != NULL) {
         name = newnode->name;
     } else if (curnode != NULL) {
@@ -4757,18 +4753,6 @@ status_t
     ncxid = xmlns_ncx_id();
     obj = root->obj;
 
-    /* first need to delete all the false when-stmt
-     * config objects and empty NP containers
-     * and then see if the config is valid
-     */
-    res = delete_dead_nodes(scb, 
-                            msg, 
-                            root, 
-                            TRUE, 
-                            FALSE);
-    CHK_EXIT(res, retres);
-    
-
     /* check the instance counts for the subtrees that are present */
     res = agt_val_instance_check(scb, 
                                  (msg) ? &msg->mhdr : NULL,
@@ -5109,13 +5093,18 @@ status_t
                                    target,
                                    pducfg,
                                    target->root);
+            if (res2 != NO_ERR) {
+                log_error("\nagt_val: Callback failed '%s'\n",
+                          get_error_string(res2));
+            }
         }
     }
 
-
-    /* first need to delete all the false when-stmt
+    /* need to delete all the false when-stmt
      * config objects and empty NP containers
      * and then see if the config is valid
+     *
+     * !!! not sure if OK to do this last !!!
      */
     if (res == NO_ERR) {
         res = delete_dead_nodes(scb, 

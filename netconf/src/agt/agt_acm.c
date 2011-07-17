@@ -1928,10 +1928,18 @@ static status_t
 
 #ifdef AGT_ACM_DEBUG
     if (LOGDEBUG2) {
+        val_value_t *useval = NULL;
+        if (newval != NULL) {
+            useval = newval;
+        } else if (curval != NULL) {
+            useval = curval;
+        }
+
         log_debug2("\nServer %s callback: t: %s:%s, op:%s\n", 
                    agt_cbtype_name(cbtyp),
-                   val_get_mod_name(newval),
-                   newval->name,
+                   (useval != NULL) ? 
+                   val_get_mod_name(useval) : NCX_EL_NONE,
+                   (useval != NULL) ? useval->name : NCX_EL_NONE,
                    op_editop_name(editop));
     }
 #endif
@@ -1949,7 +1957,7 @@ static status_t
         case OP_EDITOP_MERGE:
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_CREATE:
-            if (VAL_BOOL(newval)) {
+            if (newval != NULL && VAL_BOOL(newval)) {
                 if (acmode != AGT_ACMOD_ENFORCING) {
                     if (LOGDEBUG) {
                         log_debug("\nEnabling NACM");
@@ -1963,6 +1971,8 @@ static status_t
             break;
         case OP_EDITOP_DELETE:
         case OP_EDITOP_REMOVE:
+            log_warn("\nWarning: Disabling NACM");
+            acmode = AGT_ACMOD_OFF;
             break;
         default:
             res = SET_ERROR(ERR_INTERNAL_VAL);

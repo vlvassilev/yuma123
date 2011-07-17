@@ -885,6 +885,7 @@ static status_t
         *condresult = FALSE;
     } else {
         whentest = xpath_cvt_boolean(result);
+        *condresult = whentest;
         if (!whentest) {
             if (LOGDEBUG3) {
                 log_debug3("\nval: when test '%s' failed "
@@ -901,7 +902,7 @@ static status_t
                                val->name);
                 }
             }
-            *condresult = FALSE;
+
         }
         xpath_free_result(result);
     }

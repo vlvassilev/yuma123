@@ -392,7 +392,8 @@ extern "C" {
 #define NCX_EL_ACCESS_RC       (const xmlChar *)"read-create"
 #define NCX_EL_ACCESS_RO       (const xmlChar *)"read-only"
 #define NCX_EL_ACCESS_RW       (const xmlChar *)"read-write"
-
+#define NCX_EL_AUDIT_LOG       (const xmlChar *)"audit-log"
+#define NCX_EL_AUDIT_LOG_APPEND (const xmlChar *)"audit-log-append"
 #define NCX_AUGHOOK_START      (const xmlChar *)"__"
 #define NCX_AUGHOOK_END        (const xmlChar *)".A__"
 

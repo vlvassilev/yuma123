@@ -96,7 +96,7 @@ static val_value_t *cli_val = NULL;
 
 
 /********************************************************************
-* FUNCTION set_agent_profile
+* FUNCTION set_server_profile
 * 
 * Get the initial agent profile variables for now
 * Set the agt_profile data structure
@@ -108,11 +108,9 @@ static val_value_t *cli_val = NULL;
 * OUTPUTS:
 *   *agt_profile is filled in with params of defaults
 *
-* RETURNS:
-*   none
 *********************************************************************/
 static void
-    set_agent_profile (val_value_t *valset,
+    set_server_profile (val_value_t *valset,
                        agt_profile_t *agt_profile)
 {
     val_value_t  *val;
@@ -120,7 +118,7 @@ static void
     boolean       done;
 
     /* check if there is any CLI data to read */
-    if (!valset) {
+    if (valset == NULL) {
         /* assumes agt_profile already has default values */
         return;
     }
@@ -348,7 +346,7 @@ static void
         agt_profile->agt_usevalidate = VAL_BOOL(val);
     }
 
-} /* set_agent_profile */
+} /* set_server_profile */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -388,6 +386,7 @@ status_t
     val_value_t           *valset, *val;
     FILE                  *fp;
     status_t               res;
+    boolean                test;
 
 #ifdef DEBUG
     if (!argv || !agt_profile || !showver || !showhelpmode) {
@@ -430,9 +429,9 @@ status_t
         }
     }
 
-    if (valset) {
+    if (valset != NULL) {
         /* transfer the parmset values */
-        set_agent_profile(valset, agt_profile);
+        set_server_profile(valset, agt_profile);
 
         /* next get any params from the conf file */
         val = val_find_child(valset, 
@@ -451,7 +450,7 @@ status_t
                     return res;
                 } else {
                     /* transfer the parmset values again */
-                    set_agent_profile(valset, agt_profile);
+                    set_server_profile(valset, agt_profile);
                 }
             }
         } else {
@@ -469,13 +468,48 @@ status_t
                     return res;
                 } else {
                     /* transfer the parmset values again */
-                    set_agent_profile(valset, agt_profile);
+                    set_server_profile(valset, agt_profile);
                 }
             }
         }
 
         /* set the logging control parameters */
         val_set_logging_parms(valset);
+
+        /* audit-log-append param */
+        val = val_find_child(valset, 
+                             AGT_CLI_MODULE, 
+                             NCX_EL_AUDIT_LOG_APPEND);
+        if (val && val->res == NO_ERR) {
+            test = TRUE;
+        } else {
+            test = FALSE;
+        }
+
+        /* audit-log param */
+        val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_AUDIT_LOG);
+        if (val && val->res == NO_ERR) {
+            xmlChar *filespec = ncx_get_source(VAL_STR(val), &res);
+            if (filespec == NULL) {
+                log_error("\nError: get source for audit log failed");
+                return res;
+            }
+            res = log_audit_open((const char *)filespec, test, TRUE);
+            if (res == NO_ERR) {
+                if (LOGDEBUG) {
+                    log_debug("\nAudit log '%s' opened for %s",
+                              filespec,
+                              (test) ? "append" : "write");
+                }
+            } else {
+                log_error("\nError: open audit log '%s' failed",
+                          filespec);
+            }
+            m__free(filespec);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
 
         /* set the file search path parms */
         val_set_path_parms(valset);

@@ -72,11 +72,13 @@ date         init     comment
  */
 static log_debug_t   debug_level = LOG_DEBUG_NONE;
 
-static boolean       use_tstamps;
+static boolean       use_tstamps, use_audit_tstamps;
 
 static FILE *logfile = NULL;
 
 static FILE *altlogfile = NULL;
+
+static FILE *auditlogfile = NULL;
 
 
 /********************************************************************
@@ -163,6 +165,108 @@ void
     logfile = NULL;
 
 }  /* log_close */
+
+
+/********************************************************************
+* FUNCTION log_audit_open
+*
+*   Open the audit logfile for writing
+*   DO NOT use this function to send log entries to STDOUT
+*   Leave the audit_logfile NULL instead.
+*
+* INPUTS:
+*   fname == full filespec string for audit logfile
+*   append == TRUE if the log should be appended
+*          == FALSE if it should be rewriten
+*   tstamps == TRUE if the datetime stamp should be generated
+*             at log-open and log-close time
+*          == FALSE if no open and close timestamps should be generated
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    log_audit_open (const char *fname,
+                    boolean append,
+                    boolean tstamps)
+{
+    const char *str;
+    xmlChar buff[TSTAMP_MIN_SIZE];
+
+#ifdef DEBUG
+    if (fname == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (auditlogfile != NULL) {
+        return ERR_NCX_DATA_EXISTS;
+    }
+
+    if (append) {
+        str="a";
+    } else {
+        str="w";
+    }
+
+    auditlogfile = fopen(fname, str);
+    if (auditlogfile == NULL) {
+        return ERR_FIL_OPEN;
+    }
+
+    use_audit_tstamps = tstamps;
+    if (tstamps) {
+        tstamp_datetime(buff);
+        fprintf(auditlogfile, "\n*** audit log open at %s ***\n", buff);
+    }
+
+    return NO_ERR;
+
+}  /* log_audit_open */
+
+
+/********************************************************************
+* FUNCTION log_audit_close
+*
+*   Close the audit_logfile
+*
+* RETURNS:
+*    none
+*********************************************************************/
+void
+    log_audit_close (void)
+{
+    xmlChar buff[TSTAMP_MIN_SIZE];
+
+    if (auditlogfile == NULL) {
+        return;
+    }
+
+    if (use_audit_tstamps) {
+        tstamp_datetime(buff);
+        fprintf(auditlogfile, "\n*** audit log close at %s ***\n", buff);
+    }
+
+    fclose(auditlogfile);
+    auditlogfile = NULL;
+
+}  /* log_audit_close */
+
+
+/********************************************************************
+* FUNCTION log_audit_is_open
+*
+*   Check if the audit log is open
+*
+* RETURNS:
+*   TRUE if audit log is open; FALSE if not
+*********************************************************************/
+boolean
+    log_audit_is_open (void)
+{
+    return (auditlogfile == NULL) ? FALSE : TRUE;
+
+}  /* log_audit_is_open */
 
 
 /********************************************************************
@@ -287,6 +391,33 @@ void
     va_end(args);
 
 }  /* log_write */
+
+
+/********************************************************************
+* FUNCTION log_audit_write
+*
+*   Generate an audit log entry, regardless of log level
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
+void 
+    log_audit_write (const char *fstr, ...)
+{
+    va_list args;
+
+    va_start(args, fstr);
+
+    if (auditlogfile != NULL) {
+        vfprintf(auditlogfile, fstr, args);
+        fflush(auditlogfile);
+    }
+
+    va_end(args);
+
+}  /* log_audit_write */
 
 
 /********************************************************************

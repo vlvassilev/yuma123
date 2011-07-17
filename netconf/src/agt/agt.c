@@ -946,6 +946,7 @@ void
 
         print_errors();
 
+        log_audit_close();
         log_close();
 
         agt_init_done = FALSE;

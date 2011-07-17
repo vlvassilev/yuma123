@@ -129,6 +129,54 @@ extern void
 
 
 /********************************************************************
+* FUNCTION log_audit_open
+*
+*   Open the audit logfile for writing
+*   DO NOT use this function to send log entries to STDOUT
+*   Leave the audit_logfile NULL instead.
+*
+* INPUTS:
+*   fname == full filespec string for audit logfile
+*   append == TRUE if the log should be appended
+*          == FALSE if it should be rewriten
+*   tstamps == TRUE if the datetime stamp should be generated
+*             at log-open and log-close time
+*          == FALSE if no open and close timestamps should be generated
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    log_audit_open (const char *fname,
+                    boolean append,
+                    boolean tstamps);
+
+
+/********************************************************************
+* FUNCTION log_audit_close
+*
+*   Close the audit_logfile
+*
+* RETURNS:
+*    none
+*********************************************************************/
+extern void
+    log_audit_close (void);
+
+
+/********************************************************************
+* FUNCTION log_audit_is_open
+*
+*   Check if the audit log is open
+*
+* RETURNS:
+*   TRUE if audit log is open; FALSE if not
+*********************************************************************/
+extern boolean
+    log_audit_is_open (void);
+
+
+/********************************************************************
 * FUNCTION log_alt_open
 *
 *   Open an alternate logfile for writing
@@ -185,6 +233,20 @@ extern void
 *********************************************************************/
 extern void 
     log_write (const char *fstr, ...);
+
+
+/********************************************************************
+* FUNCTION log_audit_write
+*
+*   Generate an audit log entry, regardless of log level
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
+extern void 
+    log_audit_write (const char *fstr, ...);
 
 
 /********************************************************************

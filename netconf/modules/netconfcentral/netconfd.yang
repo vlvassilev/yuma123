@@ -23,6 +23,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-07-17 {
+       description 
+         "Add --audit-log and --audit-log-append CLI parameters.";
+    }
+
     revision 2011-05-29 {
        description 
          "Removed superuser YANG default to disable by default,
@@ -131,6 +136,22 @@ module netconfd {
            }
         }
         default enforcing;
+      }
+
+      leaf audit-log {
+        description
+         "Filespec for the server audit log file to use in addition
+          to the normal log file or STDOUT.";
+        type string;
+      }
+
+      leaf audit-log-append {
+        description
+          "If present, the audit log will be appended not over-written.
+           If not, the audit log will be over-written.
+           Only meaningful if the 'audit-log' parameter is
+           also present.";
+        type empty;
       }
 
       leaf default-style {

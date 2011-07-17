@@ -251,7 +251,7 @@ static void
     if (LOGINFO) {
         log_info("\nedit-config: operation %s on session %d by %s@%s"
                  "\n  at %s on target 'running'"
-                 "\n  data: %s",
+                 "\n  data: %s\n",
                  op_editop_name(editop),
                  scb->sid, 
                  (scb->username) ? 
@@ -260,6 +260,20 @@ static void
                  scb->peeraddr : (const xmlChar *)"localhost",
                  tbuff,
                  (ibuff) ? (const char *)ibuff : "??");
+    }
+
+    if (log_audit_is_open()) {
+        log_audit_write("\nedit-config: operation %s on session %d by %s@%s"
+                        "\n  at %s on target 'running'"
+                        "\n  data: %s\n",
+                        op_editop_name(editop),
+                        scb->sid, 
+                        (scb->username) ? 
+                        scb->username : (const xmlChar *)"nobody",
+                        (scb->peeraddr) ? 
+                        scb->peeraddr : (const xmlChar *)"localhost",
+                        tbuff,
+                        (ibuff) ? (const char *)ibuff : "??");
     }
 
     /* generate a sysConfigChange notification */

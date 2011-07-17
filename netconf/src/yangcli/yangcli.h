@@ -436,6 +436,7 @@ typedef struct server_cb_t_ {
     boolean              time_rpcs;
     ncx_name_match_t     match_names;
     boolean              alt_names;
+    boolean              overwrite_filevars;
 
     /* session support */
     mgr_io_state_t       state;

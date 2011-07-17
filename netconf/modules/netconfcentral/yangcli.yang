@@ -772,21 +772,20 @@ module yangcli {
              length "1 .. 4095";
            }
         }
-
-        leaf time-rpcs {
-          description 
-           "Measure the round-trip time of each <rpc> request and
-            <rpc-reply> at the session level.
-            Echo the elapsed time value to screen if in
-            interactive mode, as well as the log if the
-            log is a file instead of stdout.
-            The $$time-rpcs system variable is derived from this
-            parameter.";
-          type boolean;
-          default false;
-        }
       }
 
+      leaf time-rpcs {
+        description 
+         "Measure the round-trip time of each <rpc> request and
+          <rpc-reply> at the session level.
+          Echo the elapsed time value to screen if in
+          interactive mode, as well as the log if the
+          log is a file instead of stdout.
+          The $$time-rpcs system variable is derived from this
+          parameter.";
+        type boolean;
+        default false;
+      }
     }
 
     /*************************************************************

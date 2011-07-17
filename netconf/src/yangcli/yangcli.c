@@ -740,6 +740,10 @@ static server_cb_t *
     server_cb->time_rpcs = time_rpcs;
     server_cb->match_names = match_names;
     server_cb->alt_names = alt_names;
+
+    /* TBD: add user config for this knob */
+    server_cb->overwrite_filevars = TRUE;
+
     return server_cb;
 
 }  /* new_server_cb */
@@ -1238,14 +1242,16 @@ static status_t
                    server_cb->result_filename);
     }
 
-    /* see if file already exists */
-    statresult = stat((const char *)server_cb->result_filename,
-                      &statbuf);
-    if (statresult == 0) {
-        log_error("\nError: assignment file '%s' already exists",
-                  server_cb->result_filename);
-        clear_result(server_cb);
-        return ERR_NCX_DATA_EXISTS;
+    /* see if file already exists, unless overwrite_filevars is set */
+    if (!server_cb->overwrite_filevars) {
+        statresult = stat((const char *)server_cb->result_filename,
+                          &statbuf);
+        if (statresult == 0) {
+            log_error("\nError: assignment file '%s' already exists",
+                      server_cb->result_filename);
+            clear_result(server_cb);
+            return ERR_NCX_DATA_EXISTS;
+        }
     }
     
     if (resultval) {

@@ -1849,11 +1849,18 @@ static status_t
     (void)curval;
 
 #ifdef AGT_ACM_DEBUG
+    val_value_t *useval = NULL;
+    if (newval != NULL) {
+        useval = newval;
+    } else if (curval != NULL) {
+        useval = curval;
+    }
+
     if (LOGDEBUG2) {
         log_debug2("\nServer %s callback: t: %s:%s, op:%s\n", 
                    agt_cbtype_name(cbtyp),
-                   val_get_mod_name(newval),
-                   newval->name,
+                   (useval) ? val_get_mod_name(useval) : NCX_EL_NONE,
+                   (useval) ? useval->name : NCX_EL_NONE,
                    op_editop_name(editop));
     }
 #endif
@@ -2216,7 +2223,7 @@ boolean
     boolean                  retval, done;
 
 #ifdef DEBUG
-    if (!msg || !user || !rpcobj) {
+    if (msg == NULL || user == NULL || rpcobj == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
@@ -2355,7 +2362,7 @@ boolean
     boolean                  retval, done;
 
 #ifdef DEBUG
-    if (!user || !notifobj) {
+    if (user == NULL || notifobj == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
@@ -2475,7 +2482,6 @@ boolean
 }   /* agt_acm_notif_allowed */
 
 
-
 /********************************************************************
 * FUNCTION agt_acm_val_write_allowed
 *
@@ -2562,7 +2568,10 @@ boolean
     boolean  retval;
 
 #ifdef DEBUG
-    if (!msg || !msg->acm_cache || !user || !val) {
+    if (msg == NULL || 
+        msg->acm_cache == NULL || 
+        user == NULL || 
+        val == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
@@ -2596,7 +2605,10 @@ boolean
                               const val_value_t *val)
 {
 #ifdef DEBUG
-    if (!msg || !msg->acm_cache || !user || !val) {
+    if (msg == NULL || 
+        msg->acm_cache == NULL || 
+        user == NULL || 
+        val == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
@@ -2632,7 +2644,7 @@ status_t
                             xml_msg_hdr_t *msg)
 {
 #ifdef DEBUG
-    if (!msg) {
+    if (scb == NULL || msg == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2654,7 +2666,7 @@ status_t
         msg->acm_cache = scb->acm_cache;
     }
 
-    if (!msg->acm_cache) {
+    if (msg->acm_cache == NULL) {
         return ERR_INTERNAL_MEM;
     } else {
         return NO_ERR;
@@ -2792,7 +2804,7 @@ boolean
     agt_acm_session_is_superuser (const ses_cb_t *scb)
 {
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }

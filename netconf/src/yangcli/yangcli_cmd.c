@@ -4380,7 +4380,8 @@ static status_t
                 break;
             case NCX_WITHDEF_TRIM:
             case NCX_WITHDEF_EXPLICIT:
-                /*** !!! NEED TO CHECK IF TRIM / EXPLICT 
+            case NCX_WITHDEF_REPORT_ALL_TAGGED:
+                /*** !!! NEED TO CHECK IF TRIM / EXPLICT / TAGGED
                  *** !!! REALLY SUPPORTED IN THE caplist
                  ***/
                 /* fall through */
@@ -4389,14 +4390,14 @@ static status_t
                 withdefobj = obj_find_child(input, 
                                             NULL,
                                             NCX_EL_WITH_DEFAULTS);
-                if (!withdefobj) {
+                if (withdefobj == NULL) {
                     SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
                 } else {
                     withdefval = val_make_simval_obj
                         (withdefobj,
                          ncx_get_withdefaults_string(withdef),
                          &res);
-                    if (withdefval) {
+                    if (withdefval != NULL) {
                         val_add_child(withdefval, reqdata);
                     }
                 }
@@ -5959,7 +5960,7 @@ static status_t
                           YANGCLI_MOD, 
                           NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
-        withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+        withdef = ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
     } else {
         withdef = server_cb->withdefaults;
     }

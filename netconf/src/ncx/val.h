@@ -1650,6 +1650,11 @@ extern status_t
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node
+*   Simply makes a new last child!!!
+*   Does not check siblings!!!  
+*   Relies on val_set_canonical_order
+*
+*   To modify existing extries, use val_add_child_sorted instead!!
 *
 * INPUTS:
 *    child == node to store in the parent
@@ -1659,6 +1664,22 @@ extern status_t
 extern void
     val_add_child (val_value_t *child,
 		   val_value_t *parent);
+
+
+/********************************************************************
+* FUNCTION val_add_child_sorted
+* 
+*   Add a child value node to a parent value node
+*   in the proper place
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
+extern void
+    val_add_child_sorted (val_value_t *child,
+                          val_value_t *parent);
 
 
 /********************************************************************
@@ -2401,6 +2422,26 @@ extern uint32
 extern boolean
     val_index_match (val_value_t *val1,
 		     val_value_t *val2);
+
+
+/********************************************************************
+* FUNCTION val_index_compare
+* 
+* Check 2 val_value structs for the same instance ID
+* 
+* The node data types must match, and must be
+*    NCX_BT_LIST
+*
+* INPUTS:
+*    val1 == first value to index match
+*    val2 == second value to index match
+*
+* RETURNS:
+*   -1 , - or 1 for compare value
+*********************************************************************/
+extern int
+    val_index_compare (val_value_t *val1,
+                       val_value_t *val2);
 
 
 /********************************************************************

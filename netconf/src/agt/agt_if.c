@@ -806,7 +806,7 @@ status_t
 	    val_init_from_template(interfacesval, interfacesobj);
 
 	    /* handing off the malloced memory here */
-	    val_add_child(interfacesval, runningcfg->root);
+	    val_add_child_sorted(interfacesval, runningcfg->root);
 	}
 
         res = add_interface_entries(interfacesval);

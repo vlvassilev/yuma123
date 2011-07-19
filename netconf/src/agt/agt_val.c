@@ -1191,7 +1191,6 @@ static status_t
                         return res;
                     }
                     add_defs_done = TRUE;
-                    val_set_canonical_order(newval);
                 }
 
                 retval = val_compare_ex(newval, curval, TRUE);
@@ -1369,10 +1368,6 @@ static status_t
                                (msg->rpc_need_undo) ?
                                undo : NULL);
             }
-
-            if (!freenew) {
-                val_set_canonical_order(parent);
-            }
             break;
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_COMMIT:
@@ -1385,7 +1380,6 @@ static status_t
                                     (msg->rpc_need_undo) ?
                                     undo : NULL);
                 } else {
-                    val_set_canonical_order(newval);
                     val_swap_child(newval, curval);
 
                     if (target->cfg_id == NCX_CFGID_RUNNING) {
@@ -1400,7 +1394,6 @@ static status_t
                                parent, 
                                (msg->rpc_need_undo) ?
                                undo : NULL);
-                val_set_canonical_order(parent);
             }
             break;
         case OP_EDITOP_CREATE:
@@ -1414,7 +1407,6 @@ static status_t
                                parent, 
                                (msg->rpc_need_undo) ?
                                undo : NULL);
-                val_set_canonical_order(parent);
             }
             break;
         case OP_EDITOP_LOAD:
@@ -1427,7 +1419,10 @@ static status_t
                      * instead of actually deleting it
                      */
                     res = val_delete_default_leaf(curval);
-                    /* NEED TO RECORD ERROR !!! */
+                    /* NEED TO RECORD ERROR !!!
+                     * ONLY PROGRAMMING ERRORS (NULL ptrs)
+                     * CAN CAUSE AN ERROR
+                     */
                 } else {
                     /* need to really remove the deleted
                      * node so that any commit validation
@@ -1486,7 +1481,6 @@ static status_t
         obj_is_root(newval->obj) &&
         editop == OP_EDITOP_LOAD) {
         val_remove_child(newval);
-        /* val_set_canonical_order(newval); */
         res = cfg_apply_load_root(target, newval);
         if (res != NO_ERR) {
             freenew = TRUE;
@@ -1597,7 +1591,6 @@ static status_t
                         val_free_value(testval);
                         return res;
                     }
-                    val_set_canonical_order(testval);
                     retval = val_compare_ex(testval, curval, TRUE);
                     if (retval == 0) {
                         /* apply here but nothing to do,
@@ -1667,10 +1660,6 @@ static status_t
                     freetest = FALSE;
                 }
             }
-
-            if (!freetest) {
-                ; /* val_set_canonical_order(parent); */
-            }
             break;
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_COMMIT:
@@ -1689,7 +1678,6 @@ static status_t
                                         NULL);
                         freetest = FALSE;
                     } else {
-                        /* val_set_canonical_order(testval); */
                         testval->parent = curval->parent;
                         testval->getcb = curval->getcb;
                         dlq_insertAhead(testval, curval);
@@ -1699,7 +1687,6 @@ static status_t
                     }
                 } else {
                     add_child_node(testval, parent, NULL);
-                    /* val_set_canonical_order(parent); */
                     freetest = FALSE;
                 }
             }
@@ -1715,7 +1702,6 @@ static status_t
                 freetest = val_merge(testval, curval);
             } else {
                 add_child_node(testval, parent, NULL);
-                /* val_set_canonical_order(parent); */
                 freetest = FALSE;
             }
             break;

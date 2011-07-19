@@ -526,6 +526,12 @@ status_t
         /* check the protocols parameter */
         res = val_set_protocols_parm(valset);
 
+        /* check the system-sorted param */
+        val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_SYSTEM_SORTED);
+        if (val && val->res == NO_ERR) {
+            agt_profile->agt_system_sorted = VAL_BOOL(val);
+        }
+
         /* version param handled externally */
 
         /* check if version mode requested */

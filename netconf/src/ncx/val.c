@@ -5231,6 +5231,11 @@ status_t
 * FUNCTION val_add_child
 * 
 *   Add a child value node to a parent value node
+*   Simply makes a new last child!!!
+*   Does not check siblings!!!  
+*   Relies on val_set_canonical_order
+*
+*   To modify existing extries, use val_add_child_sorted instead!!
 *
 * INPUTS:
 *    child == node to store in the parent
@@ -5242,7 +5247,7 @@ void
                    val_value_t *parent)
 {
 #ifdef DEBUG
-    if (!child || !parent) {
+    if (child == NULL || parent == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
@@ -5252,6 +5257,212 @@ void
     dlq_enque(child, &parent->v.childQ);
 
 }   /* val_add_child */
+
+
+/********************************************************************
+* FUNCTION val_add_child_sorted
+* 
+*   Add a child value node to a parent value node
+*   in the proper place
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
+void
+    val_add_child_sorted (val_value_t *child,
+                          val_value_t *parent)
+{
+    dlq_hdr_t       *childQ;
+    val_value_t     *curval;
+    obj_template_t  *newobj, *testobj;
+    xmlns_id_t       parentid, childid;
+    boolean          sysorder;
+    int              ret;
+
+#ifdef DEBUG
+    if (child == NULL || parent == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    child->parent = parent;
+    childQ = &parent->v.childQ;
+
+    /* check new first entry */
+    if (dlq_empty(childQ)) {
+        dlq_enque(child, childQ);
+        return;
+    }
+
+    newobj = child->obj;
+    sysorder = obj_is_system_ordered(newobj);
+    childid = val_get_nsid(child);
+    parentid = val_get_nsid(parent);
+
+    /* The current set of sibling nodes needs to
+     * be searched to determine where to insert this child
+     */
+    if (obj_is_root(parent->obj)) {
+        /* adding objects to the root is different; need
+         * to use alphabetical order, not schema order
+         * since submodules blur the top-level object
+         * order within a module namespace
+         */
+        for (curval = val_get_first_child(parent);
+             curval != NULL;
+             curval = val_get_next_child(curval)) {
+
+            /* check same type of sibling cornercase
+             * should only happen if the child is
+             * type list or leaf-list
+             */
+            if (newobj == curval->obj) {
+                /* make a new last one of these entries */
+                val_value_t  *nextchild;
+                boolean syssorted = ncx_get_system_sorted();
+
+                nextchild = val_get_next_child(curval);
+                while (nextchild != NULL && 
+                       nextchild->obj == child->obj) {
+
+                    if (sysorder && syssorted) {
+                        if (newobj->objtype == OBJ_TYP_LIST) {
+                            ret = val_index_compare(child, curval);
+                        } else {
+                            ret = val_compare(child, curval);
+                        }
+                        if (ret < 0) {
+                            dlq_insertAhead(child, curval);
+                            return;
+                        }
+                    }
+
+                    curval = nextchild;
+                    nextchild = val_get_next_child(curval);
+                }
+                dlq_insertAfter(child, curval);
+                return;
+            }
+
+            ret = xml_strcmp(child->name, curval->name);
+            if (ret < 0) {
+                dlq_insertAhead(child, curval);
+                return;
+            } else if (ret == 0) {
+                ret = xml_strcmp(val_get_mod_name(child),
+                                 val_get_mod_name(curval));
+                if (ret < 0) {
+                    dlq_insertAhead(child, curval);
+                    return;
+                    /* same name, insert in module alphabetical order */
+                }
+            }
+        }
+
+        /* make new last entry */
+        dlq_enque(child, childQ);
+    } else if (parent->obj->objtype == OBJ_TYP_ANYXML) {
+        /* there is no schema order to check, so see if this
+         * child already exists
+         */
+        curval = val_find_child(parent,
+                                val_get_mod_name(child),
+                                child->name);
+        if (curval != NULL) {
+            /* make new last instance of this child node */
+            val_value_t *saveval = NULL;
+            while (curval != NULL) {
+                saveval = curval;
+                curval = val_find_next_child(parent,
+                                             val_get_mod_name(child),
+                                             child->name,
+                                             curval);
+            }
+            dlq_insertAfter(child, saveval);
+        } else {
+            /* make new last child; first one of these */
+            dlq_enque(child, childQ);
+        }
+    } else {
+        /* normal container or list */
+        for (curval = val_get_first_child(parent);
+             curval != NULL;
+             curval = val_get_next_child(curval)) {
+
+            /* check same type of sibling cornercase
+             * should only happen if the child is
+             * type list or leaf-list
+             */
+            if (newobj == curval->obj) {
+                /* make a new last one of these entries */
+                val_value_t  *nextchild;
+                boolean syssorted = ncx_get_system_sorted();
+
+                nextchild = val_get_next_child(curval);
+                while (nextchild != NULL && 
+                       nextchild->obj == child->obj) {
+
+                    if (sysorder && syssorted) {
+                        if (newobj->objtype == OBJ_TYP_LIST) {
+                            ret = val_index_compare(child, curval);
+                        } else {
+                            ret = val_compare(child, curval);
+                        }
+                        if (ret < 0) {
+                            dlq_insertAhead(child, curval);
+                            return;
+                        }
+                    }
+
+                    curval = nextchild;
+                    nextchild = val_get_next_child(curval);
+                }
+
+                /* make a new last instance of this node type */
+                dlq_insertAfter(child, curval);
+                return;
+            }
+
+            /* simple test; since native children
+             * will be before external augmented children;
+             * any native node will insert ahead of such 
+             * an augment node
+             */
+            if (val_get_nsid(curval) != parentid &&
+                childid == parentid) {
+                dlq_insertAhead(child, curval);
+                return;
+            }
+
+            /* new node and current node are different so
+             * check if the current object is after the
+             * new object in the schema order.  If so,
+             * then insert ahead of this node
+             *
+             * the object siblings are not numbered, so
+             * a linear search is used here
+             */
+            for (testobj = obj_next_child_deep(child->obj);
+                 testobj != NULL;
+                 testobj = obj_next_child_deep(testobj)) {
+                if (testobj == curval->obj) {
+                    /* insert child ahead of this node
+                     * which occurs after it in schema order
+                     */
+                    dlq_insertAhead(child, curval);
+                    return;
+                }
+            }
+        }
+
+        /* make a new last entry */
+        dlq_enque(child, childQ);
+    }
+
+}   /* val_add_child_sorted */
 
 
 /********************************************************************
@@ -5288,7 +5499,7 @@ void
                          dlq_hdr_t *cleanQ)
 {
 #ifdef DEBUG
-    if (!child || !parent || !cleanQ) {
+    if (child == NULL || parent == NULL || cleanQ == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
@@ -5342,7 +5553,10 @@ void
     boolean       doins, islist;
 
 #ifdef DEBUG
-    if (!editvars || !child || !parent || !cleanQ) {
+    if (editvars == NULL || 
+        child == NULL || 
+        parent == NULL || 
+        cleanQ == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
@@ -5389,12 +5603,12 @@ void
             if (testval) {
                 dlq_insertAhead(child, testval);
             } else {
-                dlq_enque(child, &parent->v.childQ);
+                val_add_child_sorted(child, parent);
             }
             break;
         case OP_INSOP_LAST:
         case OP_INSOP_NONE:
-            dlq_enque(child, &parent->v.childQ);
+            val_add_child_sorted(child, parent);
             break;
         case OP_INSOP_BEFORE:
         case OP_INSOP_AFTER:
@@ -5414,20 +5628,20 @@ void
                     }
                 } else {
                     SET_ERROR(ERR_NCX_INSERT_MISSING_INSTANCE);
-                    dlq_enque(child, &parent->v.childQ);
+                    val_add_child_sorted(child, parent);
                 }
             } else {
                 /* wrong object type */
                 SET_ERROR(ERR_INTERNAL_VAL);
-                dlq_enque(child, &parent->v.childQ);
+                val_add_child_sorted(child, parent);
             }
             break;
         default:
             SET_ERROR(ERR_INTERNAL_VAL);
-            dlq_enque(child, &parent->v.childQ);
+            val_add_child_sorted(child, parent);
         }
     } else {
-        dlq_enque(child, &parent->v.childQ);
+        val_add_child_sorted(child, parent);
     }
 
 }   /* val_add_child_clean_editvars */
@@ -5451,7 +5665,7 @@ void
                       val_value_t *parent)
 {
 #ifdef DEBUG
-    if (!child || !parent) {
+    if (child == NULL || parent == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
@@ -5461,7 +5675,7 @@ void
     if (current) {
         dlq_insertAfter(child, current);
     } else {
-        dlq_insertAfter(child, &parent->v.childQ);
+        val_add_child_sorted(child, parent);
     }
 
 }   /* val_insert_child */
@@ -7127,6 +7341,40 @@ boolean
     return (ret) ? FALSE : TRUE;
 
 }  /* val_index_match */
+
+
+/********************************************************************
+* FUNCTION val_index_compare
+* 
+* Check 2 val_value structs for the same instance ID
+* 
+* The node data types must match, and must be
+*    NCX_BT_LIST
+*
+* INPUTS:
+*    val1 == first value to index match
+*    val2 == second value to index match
+*
+* RETURNS:
+*   -1 , - or 1 for compare value
+*********************************************************************/
+int
+    val_index_compare (val_value_t *val1,
+                       val_value_t *val2)
+{
+    int32 ret;
+
+#ifdef DEBUG
+    if (val1 == NULL || val2 == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    ret = index_match(val1, val2);
+    return ret;
+
+}  /* val_index_compare */
 
 
 /********************************************************************

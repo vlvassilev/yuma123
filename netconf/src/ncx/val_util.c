@@ -968,17 +968,19 @@ void
 {
     obj_template_t        *chobj;
     const obj_key_t       *key;
-    val_value_t           *chval, *rootval, *nextrootval;
+    val_value_t           *chval;
     dlq_hdr_t              tempQ;
-    uint32                 count;
-
 
 #ifdef DEBUG
-    if (!val || !val->obj) {
+    if (val == NULL || val->obj == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
 #endif
+
+    if (val_is_virtual(val)) {
+        return;
+    }
 
 #ifdef VAL_UTIL_DEBUG
     if (LOGDEBUG3) {
@@ -1019,47 +1021,20 @@ void
         /* fall through to do the rest of the child nodes */
     case OBJ_TYP_CONTAINER:
         if (obj_is_root(val->obj)) {
-            for (rootval = val_get_first_child(val);
-                 rootval != NULL;
-                 rootval = nextrootval) {
+            dlq_hdr_t  rootQ;
 
-                count = 0;
-                chobj = rootval->obj;
-                chval = rootval;
+            /* remove all the entries then add then back sorted */
+            dlq_createSQue(&rootQ);
+            dlq_block_enque(&val->v.childQ, &rootQ);
 
-                while (chval) {
-                    if (chval != rootval) {
-                        dlq_remove(chval);
-                        dlq_enque(chval, &tempQ);
-                        count++;
-                    }
-
-                    switch (chval->obj->objtype) {
-                    case OBJ_TYP_LEAF:
-                    case OBJ_TYP_LEAF_LIST:
-                        break;
-                    case OBJ_TYP_CONTAINER:
-                    case OBJ_TYP_LIST:
-                        val_set_canonical_order(chval);
-                        break;
-                    default:
-                        ;
-                    }
-
-                    chval = val_find_next_child(val,
-                                                val_get_mod_name(chval),
-                                                chval->name,
-                                                rootval);
-                }
-
-                nextrootval = val_get_next_child(rootval);
-                if (count) {
-                    dlq_block_insertAfter(&tempQ, rootval);
-                }
+            while (!dlq_empty(&rootQ)) {
+                chval = (val_value_t *)dlq_deque(&rootQ);
+                val_add_child_sorted(chval, val);
+                val_set_canonical_order(chval);
             }
             break;
         }
-        /* else fall through to normal container case */
+        /* else fall through to normal container or list case */
     case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
         for (chobj = obj_first_child_deep(val->obj);

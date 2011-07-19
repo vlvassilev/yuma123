@@ -301,6 +301,10 @@ boolean             cwd_subdirs;
 /* bitmask of protocols to match ncx_protocol_t enum */
 uint32              protocols_enabled;
 
+/* flag to indicate whether ordered-by system is sorted or not */
+boolean             system_sorted;
+
+
 /********************************************************************
 * FUNCTION check_moddef
 * 
@@ -1021,6 +1025,7 @@ status_t
     /* no CLI parameters for these 2 parms yet */
     use_prefix = FALSE;
     cwd_subdirs = FALSE;
+    system_sorted = FALSE;
 
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
@@ -7675,6 +7680,41 @@ void
     use_prefix = val;
 
 }   /* ncx_set_useprefix */
+
+
+/********************************************************************
+* FUNCTION ncx_get_system_sorted
+*
+* Get the system_sorted value
+*
+* RETURNS:
+*   TRUE if system ordered objects should be sorted
+*   FALSE if system ordered objects should not be sorted
+*********************************************************************/
+boolean
+    ncx_get_system_sorted (void)
+{
+    return system_sorted;
+
+}   /* ncx_get_system_sorted */
+
+
+/********************************************************************
+* FUNCTION ncx_set_system_sorted
+*
+* Set the system_sorted value
+*
+* INPUTS:
+*   val == 
+*     TRUE if system ordered objects should be sorted
+*     FALSE if system ordered objects should not be sorted
+*********************************************************************/
+void
+    ncx_set_system_sorted (boolean val)
+{
+    system_sorted = val;
+
+}   /* ncx_set_system_sorted */
 
 
 /********************************************************************

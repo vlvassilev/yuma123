@@ -650,6 +650,7 @@ extern "C" {
 #define NCX_EL_SUBTREE         (const xmlChar *)"subtree"
 #define NCX_EL_SUPERUSER       (const xmlChar *)"superuser"
 #define NCX_EL_SYNTAX          (const xmlChar *)"syntax"
+#define NCX_EL_SYSTEM_SORTED   (const xmlChar *)"system-sorted"
 #define NCX_EL_TABLE           (const xmlChar *)"table"
 #define NCX_EL_TARGET          (const xmlChar *)"target"
 #define NCX_EL_TESTONLY        (const xmlChar *)"test-only"

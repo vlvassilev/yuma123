@@ -368,7 +368,7 @@ static status_t
     if (res != NO_ERR) {
         val_free_value(new_parm);
     } else {
-        val_add_child(new_parm, val);
+        val_add_child_sorted(new_parm, val);
     }
 
     return res;

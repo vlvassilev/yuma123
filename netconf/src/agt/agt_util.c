@@ -2366,7 +2366,7 @@ status_t
         return ERR_INTERNAL_MEM;
     }
     val_init_virtual(nodeval, callbackfn, obj);
-    val_add_child(nodeval, rootval);
+    val_add_child_sorted(nodeval, rootval);
     return NO_ERR;
 
 }  /* agt_add_top_virtual */
@@ -2418,7 +2418,7 @@ status_t
         return ERR_INTERNAL_MEM;
     }
     val_init_from_template(nodeval, obj);
-    val_add_child(nodeval, rootval);
+    val_add_child_sorted(nodeval, rootval);
     if (val != NULL) {
         *val = nodeval;
     }

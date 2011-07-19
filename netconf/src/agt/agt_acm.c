@@ -2083,6 +2083,7 @@ status_t
     cfg_template_t        *runningcfg;
     val_value_t           *nacmval, *childval;
     status_t               res;
+    boolean                nacmfound;
 
     if (!agt_acm_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -2091,6 +2092,7 @@ status_t
     res = NO_ERR;
     profile = agt_get_profile();
     superuser = profile->agt_superuser;
+    nacmfound = FALSE;
 
     if (profile->agt_accesscontrol_enum != AGT_ACMOD_NONE) {
         acmode = profile->agt_accesscontrol_enum;
@@ -2131,11 +2133,13 @@ status_t
             val_init_from_template(nacmval, nacmobj);
             
             /* handing off the malloced memory here */
-            val_add_child(nacmval, runningcfg->root);
+            val_add_child_sorted(nacmval, runningcfg->root);
 
             /* add /nacm/noRuleDefault */
             res = val_add_defaults(nacmval, FALSE);
         }
+    } else {
+        nacmfound = TRUE;
     }
 
     /* add read-only virtual leafs to the nacm value node */
@@ -2146,7 +2150,7 @@ status_t
                                          get_deniedRpcs,
                                          &res);
         if (childval != NULL) {
-            val_add_child(childval, nacmval);
+            val_add_child_sorted(childval, nacmval);
         }
     }
 
@@ -2157,11 +2161,11 @@ status_t
                                          get_deniedDataWrites,
                                          &res);
         if (childval != NULL) {
-            val_add_child(childval, nacmval);
+            val_add_child_sorted(childval, nacmval);
         }
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && !nacmfound) {
         val_set_canonical_order(nacmval);
     }
 

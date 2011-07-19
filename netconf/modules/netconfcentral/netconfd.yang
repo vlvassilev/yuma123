@@ -23,9 +23,10 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
-    revision 2011-07-17 {
+    revision 2011-07-18 {
        description 
-         "Add --audit-log and --audit-log-append CLI parameters.";
+         "Add --audit-log and --audit-log-append CLI parameters.
+          Add --system-sorted CLI parameter.";
     }
 
     revision 2011-05-29 {
@@ -308,6 +309,14 @@ module netconfd {
             type nt:NcxName;
             type string { length 0; }
         }
+      }
+
+      leaf system-sorted {
+        description
+          "Indicates whether ordered-by system leaf-lists 
+           and lists will be lept in sorted order.";
+        type boolean;
+        default true;
       }
 
       leaf target {

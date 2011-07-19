@@ -210,7 +210,8 @@ static void
     agt_profile.agt_useurl = TRUE;
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_EXPLICIT;
     agt_profile.agt_accesscontrol_enum = AGT_ACMOD_ENFORCING;
-    
+    agt_profile.agt_system_sorted = AGT_DEF_SYSTEM_SORTED;
+
 } /* init_server_profile */
 
 
@@ -537,6 +538,9 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
+
+    /* set the 'ordered-by system' sorted/not-sorted flag */
+    ncx_set_system_sorted(agt_profile.agt_system_sorted);
 
     /*** All Server profile parameters should be set by now ***/
 

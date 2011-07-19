@@ -1437,7 +1437,7 @@ status_t
     val_init_from_template(topval, topobj);
 
     /* handing off the malloced memory here */
-    val_add_child(topval, runningcfg->root);
+    val_add_child_sorted(topval, runningcfg->root);
 
     /* add /ietf-netconf-state/capabilities virtual node */
     capsval = val_new_value();

@@ -621,6 +621,9 @@ static status_t
     }
 
     if (res == NO_ERR && val != NULL && val->res == NO_ERR) {
+        /* first set the config node to canonical order */
+        val_set_canonical_order(val);
+
         /* validate the <config> element (wrt/ embedded operation
          * attributes) against the existing data model.
          * <rpc-error> records will be added as needed 

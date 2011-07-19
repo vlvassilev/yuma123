@@ -702,7 +702,7 @@ status_t
     val_init_from_template(myprocval, myprocobj);
 
     /* handing off the malloced memory here */
-    val_add_child(myprocval, runningcfg->root);
+    val_add_child_sorted(myprocval, runningcfg->root);
 
     res = add_cpuinfo(myprocval);
 

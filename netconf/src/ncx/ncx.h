@@ -2748,6 +2748,33 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ncx_get_system_sorted
+*
+* Get the system_sorted value
+*
+* RETURNS:
+*   TRUE if system ordered objects should be sorted
+*   FALSE if system ordered objects should not be sorted
+*********************************************************************/
+extern boolean
+    ncx_get_system_sorted (void);
+
+
+/********************************************************************
+* FUNCTION ncx_set_system_sorted
+*
+* Set the system_sorted value
+*
+* INPUTS:
+*   val == 
+*     TRUE if system ordered objects should be sorted
+*     FALSE if system ordered objects should not be sorted
+*********************************************************************/
+extern void
+    ncx_set_system_sorted (boolean val);
+
+
+/********************************************************************
 * FUNCTION ncx_inc_warnings
 *
 * Increment the module warning count

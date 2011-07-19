@@ -154,6 +154,9 @@ extern "C" {
 /* this behavior used to set to TRUE, before 1.15-1 */
 #define AGT_DEF_DELETE_EMPTY_NP   FALSE
 
+/* this is over-ridden by the --system-sorted CLI parameter */
+#define AGT_DEF_SYSTEM_SORTED     FALSE
+
 #define AGT_USER_VAR        (const xmlChar *)"user"
 
 #define AGT_URL_SCHEME_LIST (const xmlChar *)"file"
@@ -220,6 +223,7 @@ typedef struct agt_profile_t_ {
     int32               agt_indent;
     boolean             agt_usevalidate;          /* --with-validate */
     boolean             agt_useurl;                    /* --with-url */
+    boolean             agt_system_sorted;
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;
     uint16              agt_ports[AGT_MAX_PORTS];

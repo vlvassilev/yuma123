@@ -1035,7 +1035,7 @@ static status_t
     testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
     if (testval) {
         val_purge_errors_from_root(testval);
-        //val_set_canonical_order(testval);
+        val_set_canonical_order(testval);
 
         if (justval) {
             /* remove this node and return it */

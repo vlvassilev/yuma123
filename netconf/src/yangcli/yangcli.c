@@ -2970,6 +2970,7 @@ static xmlChar *
  * Do Command line history support operations
  *
  * !sget-config target=running
+ * !42
  *
  * INPUTS:
  *    server_cb == server control block to use
@@ -2989,7 +2990,24 @@ static status_t
     if (line && 
         *line == YANGCLI_RECALL_CHAR && 
         line[1] != 0) {
-        res = do_line_recall_string(server_cb, &line[1]);
+        if (isdigit(line[1])) {
+            /* assume the form is !42 to recall by line number */
+            ncx_num_t num;
+            ncx_init_num(&num);
+            res = ncx_decode_num(&line[1], NCX_BT_UINT64, &num);
+            if (res != NO_ERR) {
+                log_error("\nError: invalid number '%s'", 
+                          get_error_string(res));
+            } else {
+                res = do_line_recall(server_cb, num.ul);
+            }
+            ncx_clean_num(NCX_BT_UINT64, &num);
+        } else {
+            /* assume form is !command string and recall by
+             * most recent match of the partial command line given
+             */
+            res = do_line_recall_string(server_cb, &line[1]);
+        }
     } else {
         res = ERR_NCX_MISSING_PARM;
         log_error("\nError: missing recall string\n");

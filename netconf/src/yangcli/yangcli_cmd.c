@@ -6573,56 +6573,6 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION do_line_recall (execute the recall local RPC)
- * 
- * recall n 
- *
- * INPUTS:
- *    server_cb == server control block to use
- *    num == entry number of history entry entry to recall
- * 
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t
-    do_line_recall (server_cb_t *server_cb,
-                    unsigned long num)
-{
-    GlHistoryLine   history_line;
-    int             glstatus;
-
-    server_cb->history_line_active = FALSE;
-    memset(&history_line, 0x0, sizeof(GlHistoryLine));
-    glstatus = gl_lookup_history(server_cb->cli_gl,
-                                 num,
-                                 &history_line);
-
-    if (glstatus == 0) {
-        log_error("\nError: lookup command line history failed");
-        return ERR_NCX_OPERATION_FAILED; 
-    }
-
-    if (server_cb->history_line) {
-        m__free(server_cb->history_line);
-    }
-
-    /* save the line in the server_cb for next call
-     * to get_line
-     */
-
-    server_cb->history_line = 
-        xml_strdup((const xmlChar *)history_line.line);
-    if (!server_cb->history_line) {
-        return ERR_INTERNAL_MEM;
-    }
-    server_cb->history_line_active = TRUE;
-
-    return NO_ERR;
-
-} /* do_line_recall */
-
-
-/********************************************************************
  * FUNCTION do_recall (local RPC)
  * 
  * Do Command line history support operations
@@ -8409,6 +8359,56 @@ val_value_t *
     return valset;
 
 }  /* get_valset */
+
+
+/********************************************************************
+ * FUNCTION do_line_recall (execute the recall local RPC)
+ * 
+ * recall n 
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    num == entry number of history entry entry to recall
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t
+    do_line_recall (server_cb_t *server_cb,
+                    unsigned long num)
+{
+    GlHistoryLine   history_line;
+    int             glstatus;
+
+    server_cb->history_line_active = FALSE;
+    memset(&history_line, 0x0, sizeof(GlHistoryLine));
+    glstatus = gl_lookup_history(server_cb->cli_gl,
+                                 num,
+                                 &history_line);
+
+    if (glstatus == 0) {
+        log_error("\nError: lookup command line history failed");
+        return ERR_NCX_OPERATION_FAILED; 
+    }
+
+    if (server_cb->history_line) {
+        m__free(server_cb->history_line);
+    }
+
+    /* save the line in the server_cb for next call
+     * to get_line
+     */
+
+    server_cb->history_line = 
+        xml_strdup((const xmlChar *)history_line.line);
+    if (!server_cb->history_line) {
+        return ERR_INTERNAL_MEM;
+    }
+    server_cb->history_line_active = TRUE;
+
+    return NO_ERR;
+
+} /* do_line_recall */
 
 
 /********************************************************************

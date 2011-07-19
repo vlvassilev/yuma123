@@ -276,6 +276,22 @@ extern val_value_t *
 		status_t  *res);
 
 
+/********************************************************************
+ * FUNCTION do_line_recall (execute the recall local RPC)
+ * 
+ * recall n 
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    num == entry number of history entry entry to recall
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+extern status_t
+    do_line_recall (server_cb_t *server_cb,
+                    unsigned long num);
+
 
 /********************************************************************
  * FUNCTION do_line_recall_string

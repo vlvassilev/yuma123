@@ -50,7 +50,7 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-07-16 {
+    revision 2011-07-19 {
        description 
          "Add PublicKeyParms grouping.
           Added MatchParms (--match-names and --alt-names).
@@ -58,7 +58,9 @@ module yangcli {
           Added show session command.
           Added --urltarget=<url> parameter to FillParms grouping
           to allow URL encoded requests to be converted to XPath
-          before use.";
+          before use.
+          Added --use-xmlheader=<boolean> parameter to control
+          how XML file variables are generated when written.";
     }
 
     revision 2011-06-05 {
@@ -786,6 +788,16 @@ module yangcli {
         type boolean;
         default false;
       }
+
+      leaf use-xmlheader {
+        description
+          "Specifies how file result variables will be written
+           for XML files.  Controls whether the XML preamble
+           header will be written or not.";
+        type boolean;
+        default true;
+      }
+
     }
 
     /*************************************************************

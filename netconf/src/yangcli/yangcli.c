@@ -368,6 +368,10 @@ static boolean alt_names;
 /* default force-target */
 static const xmlChar *force_target;
 
+/* default use-xmlheader */
+static boolean use_xmlheader;
+
+
 /********************************************************************
 * FUNCTION get_line_timeout
 * 
@@ -744,6 +748,8 @@ static server_cb_t *
     /* TBD: add user config for this knob */
     server_cb->overwrite_filevars = TRUE;
 
+    server_cb->use_xmlheader = use_xmlheader;
+
     return server_cb;
 
 }  /* new_server_cb */
@@ -780,6 +786,7 @@ static void
     server_cb->time_rpcs = time_rpcs;
     server_cb->match_names = match_names;
     server_cb->alt_names = alt_names;
+    server_cb->use_xmlheader = use_xmlheader;
 
 }  /* update_server_cb_vars */
 
@@ -965,6 +972,17 @@ static status_t
         } else if (ncx_is_false(usestr)) {
             server_cb->alt_names = FALSE;
             alt_names = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_USE_XMLHEADER)) {
+        if (ncx_is_true(usestr)) {
+            server_cb->use_xmlheader = TRUE;
+            use_xmlheader = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            server_cb->use_xmlheader = FALSE;
+            use_xmlheader = FALSE;
         } else {
             log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
@@ -1281,7 +1299,7 @@ static status_t
                               resultval,
                               &attrs, 
                               XMLMODE, 
-                              WITHHDR,
+                              server_cb->use_xmlheader,
                               (server_cb->display_mode 
                                == NCX_DISPLAY_MODE_XML_NONS) 
                               ? FALSE : TRUE,
@@ -1915,6 +1933,14 @@ static status_t
         return res;
     }
 
+    /* $$ use-xmlheader = boolean */
+    res = create_config_var(server_cb,
+                            YANGCLI_USE_XMLHEADER, 
+                            (use_xmlheader) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* $$user = string */
     strval = NULL;
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
@@ -2390,6 +2416,16 @@ static status_t
         force_target = VAL_ENUM_NAME(parm);
     } else {
         force_target = NULL;
+    }
+
+    /* get the use-xmlheader parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_USE_XMLHEADER);
+    if (parm && parm->res == NO_ERR) {
+        use_xmlheader = VAL_BOOL(parm);
+    } else {
+        use_xmlheader = TRUE;
     }
 
     return NO_ERR;

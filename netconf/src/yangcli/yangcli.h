@@ -227,6 +227,7 @@ extern "C" {
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_TIME_RPCS   (const xmlChar *)"time-rpcs"
+#define YANGCLI_USE_XMLHEADER (const xmlChar *)"use-xmlheader"
 #define YANGCLI_USER        (const xmlChar *)"user"
 #define YANGCLI_VALUE       (const xmlChar *)"value"
 #define YANGCLI_VAR         (const xmlChar *)"var"
@@ -437,6 +438,7 @@ typedef struct server_cb_t_ {
     ncx_name_match_t     match_names;
     boolean              alt_names;
     boolean              overwrite_filevars;
+    boolean              use_xmlheader;
 
     /* session support */
     mgr_io_state_t       state;

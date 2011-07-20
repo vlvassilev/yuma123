@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangcli 1 "April 17, 2011" Linux "yangcli 1.15-1"
+.TH yangcli 1 "July 20, 2011" Linux "yangcli 2.0"
 .SH NAME
 yangcli \- YANG-based NETCONF-over-SSH client application
 
@@ -22,7 +22,7 @@ is a Command Line Interface for the NETCONF protocol.
 It uses the YANG data modeling language to manage
 the NETCONF content layer.
 This version of yangcli supports the YANG data modeling language
-defined in \fBdraft-ietf-netmod-yang-12.txt\fP.
+defined in \fBRFC 6020\fP.
 
 .nf
 
@@ -177,6 +177,14 @@ to STDOUT or a log file.
        xml-nons(4)
           XML format, but without any namespace (xmlns) attributes.
 .fi
+.IP --\fBecho-replies\fP=boolean
+Allow RPC replies to be echoes to the log or STDOUT.
+
+If true, <rpc-reply> messages containing data
+will be output to the log, if log-level is  'info' or higher.
+If false, <rpc-reply> messages containing data
+will not be output to the log, regardless of
+the value of log-level.
 .IP --\fBfeature-disable\fP=module:feature
 Identifies a feature which should be considered disabled.
 Zero or more entries are allowed.
@@ -193,13 +201,26 @@ correct order.
 If true, then canonical order will be used.
 This is the default value.
 If false, the specified order will be used. 
+
+.IP --\fBforce-target\fP=enum
+Controls whether the candidate or running
+configuration datastore will be used as
+the default edit target, when both are supported
+by the server.
+.nf
+      enum values:
+        candidate(0)
+          Force default edit target to be candidate.
+        running(1)
+          Force default edit target to be running.
+.fi
 .IP --\fBhelp\fP
 Print this help text and exit.
 The help-mode choice (--brief, --normal, or --full) may also be present
 to control the amount of help text printed.
 .IP --\fBindent\fP=number
 Number of spaces to indent (0..9) in formatted output.
-The default is 3 spaces.
+The default is 2 spaces.
 .IP --\fBlog\fP=filespec
 Filespec for the log file to use instead of STDOUT.
 If this string begins with a '~' character,
@@ -214,6 +235,47 @@ Only meaningful if the \fBlog\fP parameter is
 also present.
 .IP --\fBlog-level\fP=enum
 Sets the debug logging level for the program.
+.nf
+      enum values:
+        off(0)
+        error(1)
+        warn(2)
+        info(3)
+        debug(4)
+        debug2(5)
+        debug3(6)
+        debug4(7)
+.fi
+.IP --\fBmatch-names\fP=enum
+Match mode to use for UrlPath name searches.
+.nf
+      enum values:
+        exact(0)
+          The name must exactly match the node name
+          for all characters in both name strings.
+        exact-nocase(1)
+          The name must match the node name
+          for all characters in both name strings.
+          Strings are not case-sensitive.
+        one(2)
+          The name must exactly match the first N
+          characters of just one node name, which
+          must be the only partial name match found.
+        one-nocase(3)
+          The name must exactly match the first N
+          characters of just one node name, which
+          must be the only partial name match found.
+          Strings are not case-sensitive.
+        first(4)
+          The name must exactly match the first N
+          characters of any node name. The first one
+          found will be used.
+        first-nocase(5)
+          The name must exactly match the first N
+          characters of any node name. The first one
+          found will be used. Strings are not
+          case-sensitive.
+.fi
 .IP --\fBmodpath\fP=list
 Directory search path for YANG and YIN files.
 Overrides the YUMA_MODPATH environment variable.
@@ -240,12 +302,50 @@ name is expected to follow.
 
       $workdir/some/path ==> <workdir-env-var>/some/path
 .fi
+.IP --\fBncport\fP=number
+The NETCONF port number to use for starting sessions.
+If not present, then port 830, followed by port 22, will be tried.
 .IP --\fBpassword\fP=string
 User password to use for NETCONF sessions.
 If none, then user will be prompted before connecting.
-.IP --\fBport\fP=number
-The NETCONF port number to use for starting sessions.
-If not present, then port 830, followed by port 22, will be tried.
+.IP --\fBprivate-key\fP=string
+Contains the file path specification
+for the file containing the client-side private key.
+If both 'public-key' and 'private-key' files are
+present, the client will attempt to connect
+to the server using these keys.  If this fails,
+or not done, then password authentication will
+be attempted.
+.IP --\fBprotocols\fP=bits
+Specifies which protocol versions the program or session
+will attempt to use. Empty set is not allowed.
+Default is to enable all protocols.
+.nf
+      bit values:
+        netconf1.0(0)
+          RFC 4741 base:1.0
+        netconf1.1(1)
+          RFC xxxx base:1.1
+.fi
+.IP --\fBpublic-key\fP=string
+Contains the file path specification
+for the file containing the client-side public key.
+If both 'public-key' and 'private-key' files are
+present, the client will attempt to connect
+to the server using these keys.  If this fails,
+or not done, then password authentication will
+be attempted.
+.IP --\fBrun-command\fP=string
+The specified command will be invoked upon startup.
+If the auto-connect parameters are provided, then
+a session will be established before running the
+command.
+.IP --\fBrun-script\fP=string
+The specified script will be invoked upon startup.
+If the auto-connect parameters are provided, then
+a session will be established before running the
+script.  If a quoted string is used, then any parameters
+after the script name will be passed to the script.
 .IP --\fBrunpath\fP=list
 Internal file search path for script files.
 Overrides the YUMA_RUNPATH environment variable.
@@ -262,10 +362,20 @@ If true, then these file search paths will include
 sub-directories, if present.  Any directory name beginning
 with a dot (\fB.\fP) character, or named \fBCVS\fP, will be ignored.
 This is the default mode.
+.IP --\fBtime-rpcs\fP=boolean
+Measure the round-trip time of each <rpc> request and
+<rpc-reply> at the session level.
+Echo the elapsed time value to screen if in
+interactive mode, as well as the log if the
+log is a file instead of stdout.
 .IP --\fBtimeout\fP=number
 The number of seconds to wait for a response
 from the server before declaring a timeout.
 Zero means do not timeout at all.
+.IP --\fBuse-xmlheader\fP=
+Specifies how file result variables will be written
+for XML files.  Controls whether the XML preamble
+header will be written or not.
 .IP --\fBuser\fP=string
 User name to use for NETCONF sessions.
 This value will be used in auto-startup mode,
@@ -350,6 +460,7 @@ log-levels are additive:
      debug:  print general debugging trace info
      debug2: print verbose debugging trace info
      debug3: print very verbose debugging trace info
+     debug4: print maximum debugging trace info
 
 .fi
 

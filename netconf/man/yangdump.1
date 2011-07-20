@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangdump 1 "April 17, 2011" Linux "yangdump 1.15-1"
+.TH yangdump 1 "July 20, 2011" Linux "yangdump 2.0"
 .SH NAME
 yangdump \- validate YANG modules and convert them to different formats
 
@@ -220,7 +220,7 @@ and have object identifiers as well as configuration
 and state data..
 .IP --\fBindent\fP=number
 Number of spaces to indent (0..9) in formatted output.
-The default is 3 spaces.
+The default is 2 spaces.
 .IP --\fBlog\fP=filespec
 Filespec for the log file to use instead of STDOUT.
 If this string begins with a '~' character,
@@ -618,6 +618,7 @@ log-levels are additive:
      debug:  print general debugging trace info
      debug2: print verbose debugging trace info
      debug3: print very verbose debugging trace info
+     debug4: print maximum debugging trace info
 
 .fi
 

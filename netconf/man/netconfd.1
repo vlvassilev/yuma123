@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "April 17, 2011" Linux "netconfd 1.15-1"
+.TH netconfd 1 "July 20, 2011" Linux "netconfd 2.0"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -91,6 +91,13 @@ be enforced during server operation.
       All access control enforcement is disabled.
       Use this mode with extreme caution.
 .fi
+.IP --\fBaudit-log\fP=filespec
+Filespec for the server audit log file to use in addition
+to the normal log file or STDOUT.
+.IP --\fBaudit-log-append\fP
+If present, the audit log will be appended not over-written.
+If not, the audit log will be over-written.
+Only meaningful if the 'audit-log' parameter is also present.
 .IP --\fBconfig\fP=filespec
 The name of the configuration file to use.
 Any parameter except this one can be set in the config file.
@@ -185,7 +192,7 @@ will never drop a session because it is idle.
 3600 seconds (1 hour).
 .IP --\fBindent\fP=number
 Number of spaces to indent (0..9) in formatted output.
-The default is 3 spaces.
+The default is 2 spaces.
 .IP --\fBlog\fP=filespec
 Filespec for the log file to use instead of STDOUT.
 If this string begins with a '~' character,
@@ -284,10 +291,11 @@ The user name to use as the superuser account.
 Any session associated with this user name 
 will bypass all access control enforcement.
 See yuma-nacm.yang for more details.
-
-To disable the superuser account completely,
-set this parameter to the empty string.
-The default value is 'superuser'.
+There is no default value.
+.IP --\fBsystem-sorted\fP=boolean
+Indicates whether ordered-by system leaf-lists 
+and lists will be kept in sorted order.
+The default is true.
 .IP --\fBtarget\fP=enum
 Specifies the database to use as the target of edit-config
 operations.
@@ -403,6 +411,7 @@ log-levels are additive:
      debug:  print general debugging trace info
      debug2: print verbose debugging trace info
      debug3: print very verbose debugging trace info
+     debug4: print maximum debugging trace info
 
 .fi
 

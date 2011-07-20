@@ -12,8 +12,6 @@ module netconfd {
 
     import ietf-inet-types { prefix inet; }
 
-    import ietf-netconf-with-defaults { prefix wd; }
-
     organization  "Netconf Central";
 
     contact "Andy Bierman <support@netconfcentral.org>.";
@@ -23,10 +21,12 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
-    revision 2011-07-18 {
+    revision 2011-07-20 {
        description 
          "Add --audit-log and --audit-log-append CLI parameters.
-          Add --system-sorted CLI parameter.";
+          Add --system-sorted CLI parameter.
+          Make with-defaults enum local to prevent report-all-tagged
+          from being accepted as a basic mode.";
     }
 
     revision 2011-05-29 {
@@ -165,8 +165,15 @@ module netconfd {
 
             Also, when saving a configuration to NV-storage,
             this value will be used for filtering defaults
-            from the saved configuration.";
-         type wd:with-defaults-mode;
+            from the saved configuration.
+
+            See wd:with-defaults leaf for enumeration details.";
+
+         type enumeration {
+           enum report-all;
+           enum trim;
+           enum explicit;
+         }
          default explicit;
       }
 
@@ -314,7 +321,7 @@ module netconfd {
       leaf system-sorted {
         description
           "Indicates whether ordered-by system leaf-lists 
-           and lists will be lept in sorted order.";
+           and lists will be kept in sorted order.";
         type boolean;
         default true;
       }

@@ -79,7 +79,7 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Thu July 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-1 [1248]
+* Thu Jul 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-1 [1253]
   * initial 2.0 release
     * contains all yuma 1.15 features, plus major features
 	* NETCONF base:1.1 support (RFC 6241 and RFC 6242)

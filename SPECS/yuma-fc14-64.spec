@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.0
-Release:        0%{?dist}
+Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -29,11 +29,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 LIB64=1 RELEASE=0 %{?_smp_mflags}
+make STATIC=1 LIB64=1 RELEASE=1 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 LIB64=1 RELEASE=0 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id STATIC=1 LIB64=1 RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -79,7 +79,7 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Thu July 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-0 [1245]
+* Thu July 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-1 [1248]
   * initial 2.0 release
     * contains all yuma 1.15 features, plus major features
 	* NETCONF base:1.1 support (RFC 6241 and RFC 6242)

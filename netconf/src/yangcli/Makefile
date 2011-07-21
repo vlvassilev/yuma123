@@ -55,15 +55,15 @@ SLIBS = -L../../target/lib -lmgr -lncx \
 	-L$(PREFIX)/lib -lgcrypt \
 	-L$(PREFIX)/lib -lgpg-error \
 	-l:../../../libtecla/libtecla.a \
-	-l:$(PREFIX)/lib/libncurses.a
+	-L$(PREFIX)/lib -lncurses
 else
 SLIBS = -L../../target/lib -lmgr -lncx \
 	-L$(PREFIX)/lib -lxml2 \
 	-l:$(PREFIX)/lib/libssh2.a \
 	-l:/lib/libgcrypt.a \
-	-l:/lib/libgpg-error.a \
+	-L$(PREFIX)/lib -lgpg-error \
 	-l:../../../libtecla/libtecla.a \
-	-l:$(PREFIX)/lib/libncurses.so
+	-L$(PREFIX)/lib -lncurses
 endif
 
 # set FULL_STATIC=1 to force complete shared libraries
@@ -71,9 +71,9 @@ endif
 # this does not work yet for fedora 12; a libtecla
 # file is not resolving a few symbols from libncurses.a
 ifdef FULL_STATIC
-LIBS=$(SLIBS)
+MYLIBS=$(SLIBS)
 else
-LIBS=$(DLIBS)
+MYLIBS=$(DLIBS)
 endif
 
 
@@ -116,7 +116,7 @@ distclean: superclean uninstall
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files
 yangcli: $(OBJS) $(LIBTARGS)
-	$(LINK) $(LN_EXTRA) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	$(LINK) $(LN_EXTRA) $(CFLAGS) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(MYLIBS)
 
 
 

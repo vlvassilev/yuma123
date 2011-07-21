@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.0
-Release:        dev%{?dist}
+Release:        0%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -79,6 +79,10 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Sun May 25 2011 Andy Bierman <andy at netconfcentral.org> 2.0-0 dev [1151]
-  - starting 2.0 development branch
+* Thu July 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-0 [1245]
+  * initial 2.0 release
+    * contains all yuma 1.15 features, plus major features
+	* NETCONF base:1.1 support (RFC 6241 and RFC 6242)
+	* with-defaults 'report-all-tagged' mode (RFC 6243)
+	* --urltarget path selection mechanism (UrlPath)
 

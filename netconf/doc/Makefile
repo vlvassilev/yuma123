@@ -28,6 +28,7 @@ else
 ifdef CLIENT
 # install the client user documentation in debian CLIENT build
 install:
+	sh ./make_pdfs.sh
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-user-cmn-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-yangcli-manual.pdf $(DOC_INSTALL)
@@ -37,6 +38,7 @@ else
 ifdef SHLIBS
 # install the base license documentation in debian SHLIBS build
 install:
+	sh ./make_pdfs.sh
 	mkdir -p $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
@@ -47,12 +49,14 @@ else
 ifdef DEVELOPER
 # install the developer documentation in debian DEVELOPER build
 install:
+	sh ./make_pdfs.sh
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/server-call-chain.txt $(DOC_INSTALL)
 else
 # install everything
 install:
+	sh ./make_pdfs.sh
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-installation-guide.pdf $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-quickstart-guide.pdf $(DOC_INSTALL)

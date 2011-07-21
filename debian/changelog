@@ -1,5 +1,9 @@
-yuma (2.0-dev) unstable; urgency=low
+yuma (2.0-0) unstable; urgency=low
 
-  - starting 2.0 development branch
+  * initial 2.0 release
+    * contains all yuma 1.15 features, plus major features
+	* NETCONF base:1.1 support (RFC 6241 and RFC 6242)
+	* with-defaults 'report-all-tagged' mode (RFC 6243)
+	* --urltarget path selection mechanism (UrlPath)
 
- -- Andy Bierman <andy@netconfcentral.org> Sun, 29 Jan 2011 11:26:17 -0700
+ -- Andy Bierman <andy@netconfcentral.org> Wed, 20 Jul 2011 19:00:00 -0700

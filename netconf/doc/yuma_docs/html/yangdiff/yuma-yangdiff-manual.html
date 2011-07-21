@@ -11,7 +11,7 @@
     <meta content="" name="DC.subject" />
     <meta content="" name="DC.description" />
     <meta content="Andy Bierman" name="DC.creator" />
-    <meta content="2011-06-19T11:15:00" name="DC.date" />
+    <meta content="2011-07-20T17:53:15" name="DC.date" />
     <meta content="" name="DC.language" />
     <style media="all" type="text/css">
       body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
@@ -47,9 +47,9 @@
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">YANG Module Compare Tool</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.15</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 2.0</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated:  June 19, 2011</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated:  July 20, 2011</p>
     <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
     <div id="TableofContents1" style="background-color:transparent">
       <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma yangdiff Manual</p>
@@ -234,8 +234,11 @@
     <p class="Textbody" dir="ltr" lang="en-US" style="font-family:Arial,sans-serif" xml:lang="en-US"> Yuma yangdump Manual</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span> Developer Manual</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To obtain additional support you may send email to this e-mail address:</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> andy<span class="Internetlink">@netconfcentral.org</span></p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To obtain additional support you may join the yuma-users group on sourceforge.net and send email to this e-mail address:<br /></p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink"> </span>
+      <span class="Internetlink">yuma-users@lists.sourceforge.net</span>
+    </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
       <span class="Internetlink">The SourceForge.net Support Page for Yuma can be found at this WEB page:</span>
@@ -1515,7 +1518,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">3</p>
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">2</p>
         </td>
       </tr>
       <tr>
@@ -2126,12 +2129,13 @@
     <h2 dir="ltr" id="toc35"><span class="SectionNumber">3.18</span> --version</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--version</span> parameter causes the program version string to be printed, and then the program will exit instead of running as normal. </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">All Yuma version strings use the same format:</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> &lt;major&gt;.&lt;minor&gt;.&lt;yang-draft-version&gt;.&lt;svn-build-version&gt;</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> DEBUG: &lt;major&gt;.&lt;minor&gt;.&lt;svn-build-version&gt;</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">or</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> NON-DEBUG: &lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">An example version number that may be printed:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> yangdiff  0.9.6.390</p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> yangdiff  2.0-0</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This indicates that the <span style="font-weight:bold">yangdump</span> program version is '0.9', it supports YANG draft version '-06', and the subversion build identifier is '390'.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter can be combined with the <span style="font-weight:bold">--help </span>parameter.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--version parameter</p>

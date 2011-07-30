@@ -77,6 +77,7 @@ date         init     comment
 
 /* clear buffers before use */
 /* #define SES_MSG_CLEAR_INIT_BUFFERS 1 */
+/* #define SES_MSG_DEBUG_CACHE 1 */
 
 /* max number of buffers a session is allowed to cache in its freeQ */
 #define MAX_FREE_MSGS  32
@@ -402,17 +403,21 @@ void
         dlq_enque(buff, &scb->freeQ);
         scb->freecnt++;
 
+#ifdef SES_MSG_DEBUG_CACHE
         if (LOGDEBUG4) {
             log_debug4("\nses_msg: cache buff %p for s %u", 
                        buff,
                        scb->sid);
         }
+#endif
     } else {
+#ifdef SES_MSG_DEBUG_CACHE
         if (LOGDEBUG4) {
             log_debug4("\nses_msg: free buff %p for s %u", 
                        buff,
                        scb->sid);
         }
+#endif
         m__free(buff);
         scb->buffcnt--;
     }

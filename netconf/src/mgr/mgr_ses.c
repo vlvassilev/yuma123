@@ -115,6 +115,7 @@ date         init     comment
 #ifdef DEBUG
 #define MGR_SES_DEBUG 1
 #define MGR_SES_SSH2_TRACE 1
+/* #define MGR_SES_DEBUG_EOF 1 */
 #endif
 
 /* maximum number of concurrent outbound sessions 
@@ -583,11 +584,13 @@ static int
 
     ret = libssh2_channel_eof(mscb->channel);
 
+#ifdef MGR_SES_DEBUG_EOF
     if (LOGDEBUG4) {
         log_debug4("\nmgr_ses: test channel EOF: ses(%u) ret(%d)", 
                    scb->sid,
                    ret);
     }
+#endif
     if (LOGDEBUG && ret) {
         log_debug("\nmgr_ses: channel closed by server: ses(%u)", 
                   scb->sid);

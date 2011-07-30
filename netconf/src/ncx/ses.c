@@ -442,7 +442,7 @@ static status_t
     ses_msg_buff_t *buff2;
     const char     *chunkmatch;
     status_t        res;
-    uint32          chunkidx;
+    uint32          chunkidx, saveinpos;
     boolean         done, qbuffdone, inframing;
     xmlChar         ch;
     size_t          chunkleft, buffleft, copylen;
@@ -458,6 +458,7 @@ static status_t
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3 && scb->state != SES_ST_INIT) {
+        buff->buff[buff->bufflen] = 0;
         log_debug3("\nses: accept base:1.1 buffer (%u):\n%s\n", 
                    buff->bufflen, 
                    buff->buff);
@@ -736,6 +737,7 @@ static status_t
             break;
         case SES_INST_INBETWEEN:
             inframing = TRUE;
+            chunkmatch = NC_SSH_END_CHUNKS;
             if (scb->inendpos == 0) {
                 if (ch == '\n') {
                     scb->inendpos++;
@@ -754,6 +756,7 @@ static status_t
                 if (ch == '#') {
                     scb->inendpos++;
                     scb->instate = SES_INST_INEND;
+                    chunkmatch = NC_SSH_END_CHUNKS;
                 } else if (ch >= '1' && ch <= '9') {
                     /* back up and process this char in start state
                      * account for first 2 chars \n#
@@ -768,6 +771,7 @@ static status_t
             break;
         case SES_INST_INEND:
             inframing = TRUE;
+            chunkmatch = NC_SSH_END_CHUNKS;
 
             /* expect to match 4 char \n##\n sequence */
             if (ch != chunkmatch[scb->inendpos]) {
@@ -787,10 +791,12 @@ static status_t
 
             /* reset reader state */
             scb->instate = SES_INST_IDLE;
+            saveinpos = scb->inendpos;
             scb->inendpos = 0;
             inframing = FALSE;
-
-            if (buff != NULL && buff->buffpos < buff->bufflen) {
+            chunkmatch = NC_SSH_START_CHUNK;
+            if (buff != NULL && 
+                ((buff->buffpos + saveinpos) < buff->bufflen)) {
                 /*
                  * buff->buffpos points to the first char after
                  * the EOCh string, check any left over bytes
@@ -1829,6 +1835,9 @@ int
                 scb->inchunkidx = 0;
                 buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
                 if (buff == NULL) {
+                    done = TRUE;
+                    continue;
+                } else if (buff->inchunks[0].chunklen == 0) {
                     done = TRUE;
                     continue;
                 } else {

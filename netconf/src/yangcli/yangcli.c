@@ -3314,6 +3314,10 @@ static mgr_io_state_t
              * If not, 2nd loop through this fn will hit get_input_line
              */
             return server_cb->state;            
+        } else if (batchmode) {
+            /* run command is done at this point */
+            mgr_request_shutdown();
+            return server_cb->state;
         }
     }
 

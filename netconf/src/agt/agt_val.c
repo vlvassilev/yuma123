@@ -2360,7 +2360,7 @@ static status_t
             SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-        /* check if allowed acces to this node */
+        /* check if allowed access to this node */
         if (!agt_acm_val_write_allowed(&msg->mhdr, 
                                        scb->username, 
                                        useval,

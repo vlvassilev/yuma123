@@ -1463,7 +1463,19 @@ static val_value_t *
     /* v_ union: copy the actual value or children for complex types */
     switch (val->btyp) {
     case NCX_BT_ENUM:
-        copy->v.enu.name = val->v.enu.name;
+        if (val->v.enu.dname != NULL) {
+            /* make sure clone does not point at malloced name
+             * that will get deleted, so this pointer will
+             * point at garbage
+             */
+            copy->v.enu.dname = xml_strdup(val->v.enu.dname);
+            copy->v.enu.name = copy->v.enu.dname;
+            if (copy->v.enu.dname == NULL) {
+                *res = ERR_INTERNAL_MEM;
+            }
+        } else {
+            copy->v.enu.name = val->v.enu.name;
+        }
         VAL_ENUM(copy) = VAL_ENUM(val);
         break;
     case NCX_BT_EMPTY:

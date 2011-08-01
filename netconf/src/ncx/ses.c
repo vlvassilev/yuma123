@@ -1906,7 +1906,7 @@ status_t
             }
 
             if (res != NO_ERR || 
-                ret < scb->readbuffsize || 
+                ((uint32)ret < scb->readbuffsize) || 
                 scb->rdfn == NULL) {
 #ifdef SES_DEBUG_TRACE
                 if (LOGDEBUG3) {

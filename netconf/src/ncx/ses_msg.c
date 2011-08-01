@@ -103,6 +103,32 @@ static dlq_hdr_t outreadyQ;
 
 
 /********************************************************************
+* FUNCTION trace_buff
+*
+* Log the specified buffer for debugging
+*
+* INPUTS:
+*   scb == session control block to use
+*   buff == buffer to send
+*
+*********************************************************************/
+static void
+    trace_buff (ses_msg_buff_t *buff)
+{
+    size_t  pos;
+    xmlChar buf[2];
+
+    if (LOGDEBUG2) {
+        buf[1] = 0;
+        for (pos = buff->buffpos; pos < buff->bufflen; pos++) {
+            buf[0] = buff->buff[pos];
+            log_debug2("%s", buf);
+        }
+    }
+
+} /* trace_buff */
+
+/********************************************************************
 * FUNCTION do_send_buff
 *
 * Send the specified buffer.
@@ -124,19 +150,39 @@ static status_t
     if (scb->framing11) {
         ses_msg_add_framing(scb, buff);
         /* bufflen has been adjusted for buffstart */
+        if (LOGDEBUG3) {
+            log_debug3("\nses_msg send 1.1 buff:%u\n",
+                       buff->bufflen - buff->buffpos);
+            if (LOGDEBUG4) {
+                trace_buff(buff);
+            }
+        }
+
         if (buff->bufflen > 0) {
             res = send_buff(scb->fd, 
                             (const char *)&buff->buff[buff->buffstart], 
                             buff->bufflen);
+        } else if (LOGDEBUG2) {
+            log_debug2("\nses: skip sending empty 1.1 buffer on sesion '%d'",
+                       scb->sid);
         }
-    } else if (buff->bufflen > buff->buffstart) {
-        /* send with base:1.0 framing; EOM markers in the buffer */
-        res = send_buff(scb->fd, 
-                        (const char *)buff->buff, 
-                        buff->bufflen);
-    } else if (LOGDEBUG2) {
-        log_debug2("\nses: skip sending empty buffer on sesion '%d'",
-                  scb->sid);
+    } else {
+        if (buff->bufflen > buff->buffstart) {
+            /* send with base:1.0 framing; EOM markers in the buffer */
+            if (LOGDEBUG3) {
+                log_debug3("\nses_msg send 1.0 buff:%u\n",
+                           buff->bufflen - buff->buffpos);
+                if (LOGDEBUG4) {
+                    trace_buff(buff);
+                }
+            }
+            res = send_buff(scb->fd, 
+                            (const char *)buff->buff, 
+                            buff->bufflen);
+        } else if (LOGDEBUG2) {
+            log_debug2("\nses: skip sending empty 1.0 buffer on sesion '%d'",
+                       scb->sid);
+        }
     }
 
     return res;
@@ -316,7 +362,7 @@ status_t
     ses_msg_buff_t *newbuff;
 
 #ifdef DEBUG
-    if (!scb || !buff) {
+    if (scb == NULL || buff == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -494,7 +540,7 @@ status_t
     uint32           buffleft, total;
     ssize_t          retcnt;
     int              i, cnt;
-    boolean          done, dologmsg;
+    boolean          done;
     status_t         res;
     struct iovec     iovs[SES_MAX_BUFFSEND];
 
@@ -504,34 +550,26 @@ status_t
     }
 #endif
 
-    dologmsg = LOGDEBUG2;
-
     if (LOGDEBUG) {
         log_debug("\nses got send request on session %d", 
                   scb->sid);
     }
 
-    if (dologmsg) {
+    /* log message trace here only for base 1.0 or mgr */
+    if (LOGDEBUG2 && (scb->wrfn != NULL || scb->framing11 == FALSE)) {
         buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
         if (buff) {
             if (LOGDEBUG3) {
-                log_debug3("\nses_msg_send full msg:\n%s",
-                           &buff->buff[buff->buffpos]);
+                log_debug3("\nses_msg_send full msg:\n");
+                trace_buff(buff);
                 buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
                 while (buff != NULL) {
-                    log_debug3("%s",
-                               &buff->buff[buff->buffpos]);
+                    trace_buff(buff);
                     buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
                 }
             } else {
-                size_t  pos;
-                xmlChar buf[2];
-                buf[1] = 0;
                 log_debug2("\nses_msg_send first buffer:\n");
-                for (pos = buff->buffpos; pos < buff->bufflen; pos++) {
-                    buf[0] = buff->buff[pos];
-                    log_debug2("%s", buf);
-                }
+                trace_buff(buff);
             }
         }
     }
@@ -558,11 +596,13 @@ status_t
             iovs[i].iov_len = buffleft;
             buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
 
+#ifdef SES_MSG_FULL_TRACE
             if (LOGDEBUG3) {
                 log_debug3("\nses_msg: setup send buff %d\n%s\n", 
                            i,
                            iovs[i].iov_base);
             }
+#endif
             cnt++;
         }
     }
@@ -604,7 +644,7 @@ status_t
         log_info("\nses msg write failed for session %d", scb->sid);
         return errno_to_status();
     } else {
-        if (dologmsg) {
+        if (LOGDEBUG2) {
             log_debug2("\nses wrote %d of %d bytes on session %d\n", 
                        retcnt, 
                        total, 
@@ -983,7 +1023,6 @@ void
         buff->buffstart = 0;
     }
     buff->bufflen = buff->buffstart;
-    memset(buff->inchunks, 0x0, sizeof(buff->inchunks));
 
     /* do not clear mem in buffer buff->buff */
 

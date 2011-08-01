@@ -82,7 +82,7 @@ extern "C" {
 #define SES_NULL_SID  0
 
 /* controls the size of each buffer chuck */
-#define SES_MSG_BUFFSIZE  1000   /* 2000 */
+#define SES_MSG_BUFFSIZE  1024
 
 /* max number of buffer chunks a session can have allocated at once  */
 #define SES_MAX_BUFFERS  4096
@@ -113,11 +113,10 @@ extern "C" {
 /* leave enough room at the end for EOChunks */
 #define SES_ENDCHUNK_PAD  4
 
-/* max number of chunks an incoming buffer will allow to
- * be threaded in base:1.1 buffer processing
- */
-#define SES_MAX_BUFF_CHUNKS 4
+/* default read buffer size */
+#define SES_READBUFF_SIZE  1000
 
+    
 /********************************************************************
 *                                                                   *
 *                             T Y P E S                             *
@@ -166,8 +165,7 @@ typedef enum ses_instate_t_ {
     SES_INST_INMSG,
     SES_INST_INSTART,
     SES_INST_INBETWEEN,
-    SES_INST_INEND,
-    SES_INST_FINMSG
+    SES_INST_INEND
 } ses_instate_t;
 
 
@@ -236,13 +234,6 @@ typedef struct ses_total_stats_t_ {
 } ses_total_stats_t;
 
 
-/* Incoming base:1.1 buffer chunk map */
-typedef struct ses_msg_chunk_t_ {
-    size_t           chunkstart;      /* chunk start pos */
-    size_t           chunklen;       /* chunk data size */
-} ses_msg_chunk_t;
-
-
 /* Session Message Buffer */
 typedef struct ses_msg_buff_t_ {
     dlq_hdr_t        qhdr;
@@ -250,7 +241,6 @@ typedef struct ses_msg_buff_t_ {
     size_t           bufflen;        /* buff actual size */
     size_t           buffpos;       /* buff cur position */
     boolean          islast;      /* T: last buff in msg */
-    ses_msg_chunk_t  inchunks[SES_MAX_BUFF_CHUNKS];
     xmlChar          buff[SES_MSG_BUFFSIZE];   
 } ses_msg_buff_t;
 
@@ -267,7 +257,6 @@ typedef struct ses_ready_t_ {
 typedef struct ses_msg_t_ {
     dlq_hdr_t        qhdr;        /* Q header for buffcb->msgQ */
     boolean          ready;               /* ready for parsing */
-    boolean          deferred;          /* framing not set yet */
     ses_msg_buff_t  *curbuff;         /* cur position in buffQ */
     dlq_hdr_t        buffQ;             /* Q of ses_msg_buff_t */
     ses_prolog_state_t prolog_state;      /* for insert prolog */
@@ -302,7 +291,6 @@ typedef struct ses_cb_t_ {
     xmlChar         *start_time;         /* dateTime start time */
     xmlChar         *username;                       /* user ID */
     xmlChar         *peeraddr;           /* Inet address string */
-    boolean          eomdone;            /* SSH EOM established */
     boolean          active;            /* <hello> completed ok */
     boolean          notif_active;       /* subscription active */
     boolean          stream_output;        /* buffer/stream svr */
@@ -332,8 +320,9 @@ typedef struct ses_cb_t_ {
      */
     xmlChar          startchunk[SES_MAX_STARTCHUNK_SIZE+1];
 
-    /* base:1.1 chunk map buff->inchunks[inchunkidx] */
-    uint32           inchunkidx;
+    /* input buffer for session */
+    xmlChar         *readbuff;
+    uint32           readbuffsize;
 
     /*** user preferences ***/
     int32            indent;          /* indent N spaces (0..9) */

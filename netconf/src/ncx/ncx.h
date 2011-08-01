@@ -2875,6 +2875,18 @@ extern const xmlChar *
     ncx_get_name_match_string (ncx_name_match_t match);
 
 
+/********************************************************************
+* FUNCTION ncx_write_tracefile
+* 
+* Write a byte to the tracefile
+* 
+* INPUTS:
+*   buff == buffer to write
+*   count == number of chars to write
+*********************************************************************/
+extern void
+    ncx_write_tracefile (const char *buff, uint32 count);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

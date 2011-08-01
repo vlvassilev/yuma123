@@ -1996,6 +1996,8 @@ void
             rpc_err_free_record(err);
         }
         ses_finish_msg(scb);
+        xml_clean_attrs(&attrs);
+        xml_msg_clean_hdr(&mhdr);
         return;
     }
 
@@ -2038,6 +2040,8 @@ void
     if (err != NULL) {
         rpc_err_free_record(err);
     }
+    xml_clean_attrs(&attrs);
+    xml_msg_clean_hdr(&mhdr);
 
 }  /* agt_rpc_send_error_reply */
 

@@ -84,6 +84,9 @@ date         init     comment
 #ifdef DEBUG
 #define SES_DEBUG 1
 /* #define SES_SSH_DEBUG 1 */
+/* #define SES_DEBUG_TRACE 1 */
+#define SES_DEBUG_XML_TRACE 1
+
 #endif
 
 #define LTSTR     (const xmlChar *)"&lt;"
@@ -126,47 +129,63 @@ static ses_total_stats_t totals;
 *
 * INPUTS:
 *   scb == session control block to accept input for
-*   buff == buffer just read; it is consumed or freed!!!
+*   len  == number of bytes in scb->readbuff just read
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
     accept_buffer_ssh_v10 (ses_cb_t *scb,
-                              ses_msg_buff_t *buff)
+                           size_t len)
 {
-    ses_msg_t      *msg, *msg2;
-    ses_msg_buff_t *buff2, *lastbuff;
+    ses_msg_t      *msg;
+    ses_msg_buff_t *buff;
     const char     *endmatch;
     status_t        res;
     boolean         done;
     xmlChar         ch;
-    uint32          left;
-
-    endmatch = NC_SSH_END;
-    done = FALSE;
-    msg2 = NULL;
-    buff->buffstart = 0;   /* default for netconf10 */
+    uint32          count;
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3 && scb->state != SES_ST_INIT) {
+        scb->readbuff[len] = 0;
         log_debug3("\nses: accept buffer (%u):\n%s\n", 
-                   buff->bufflen, buff->buff);
+                   len, 
+                   scb->readbuff);
     } else if (LOGDEBUG2) {
-        log_debug2("\nses: accept buffer (%u)", buff->bufflen);
+        log_debug2("\nses: accept buffer (%u)", len);
     }
 #endif
 
     /* make sure there is a current message */
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
-    if (!msg || msg->ready) {
+    if (msg == NULL || msg->ready) {
         /* need a new message */
         res = ses_msg_new_msg(&msg);
         if (res != NO_ERR) {
-            ses_msg_free_buff(scb, buff);
             return res;
         }
+        /* add early */
         dlq_enque(msg, &scb->msgQ);
+    }
+
+    /* init local vars */
+    endmatch = NC_SSH_END;
+    done = FALSE;
+    count = 0;
+    res = NO_ERR;
+
+    /* make sure there is a current buffer to use */
+    buff = (ses_msg_buff_t *)dlq_lastEntry(&msg->buffQ);
+    if (buff == NULL || buff->bufflen == SES_MSG_BUFFSIZE) {
+        /* need a new buffer */
+        res = ses_msg_new_buff(scb,
+                               FALSE,  /* outbuff */
+                               &buff);
+        if (res != NO_ERR) {
+            return res;
+        }
+        dlq_enque(buff, &msg->buffQ);
     }
 
     /* check the chars in the buffer for the 
@@ -178,20 +197,49 @@ static status_t
      * session closed, or force the transport to reset somehow
      */
     while (!done) {
-
-        /* check if the internal buffer end has been reached */
-        if (buff->buffpos == buff->bufflen) {
-            /* done checking the current buffer,
-             * add this buffer to the current message and exit 
-             */
-            buff->buffpos = 0;
-            dlq_enque(buff, &msg->buffQ);
+        /* check if the read buffer length has been reached */
+        if (count == (uint32)len) {
             done = TRUE;
             continue;
         }
 
+        /* check if a new message is needed */
+        if (msg == NULL) {
+            res = ses_msg_new_msg(&msg);
+            if (res == NO_ERR) {
+                /* put msg in the msg Q early */
+                dlq_enque(msg, &scb->msgQ);
+            } else {
+                return res;
+            }
+        }
+
+        /* check if a buffer is needed */
+        if (buff == NULL) {
+            /* need new first buff for a message */
+            res = ses_msg_new_buff(scb,
+                                   FALSE,  /* outbuff */
+                                   &buff);
+            if (res != NO_ERR) {
+                return res;
+            }
+            dlq_enque(buff, &msg->buffQ);
+        } else if (buff->buffpos == SES_MSG_BUFFSIZE) {
+            /* current buffer is full; get a new one */
+            buff->buffpos = 0;
+            buff->bufflen = SES_MSG_BUFFSIZE;
+            res = ses_msg_new_buff(scb,
+                                   FALSE,  /* outbuff */
+                                   &buff);
+            if (res != NO_ERR) {
+                return res;
+            }
+            dlq_enque(buff, &msg->buffQ);
+        }
+
         /* get the next char in the input buffer and advance the pointer */
-        ch = buff->buff[buff->buffpos++];
+        ch = scb->readbuff[count++];
+        buff->buff[buff->buffpos++] = ch;
 
         /* handle the char in the buffer based on the input state */
         switch (scb->instate) {
@@ -216,14 +264,8 @@ static status_t
              * try to match the rest of the SSH EOM string 
              */
             if (ch == endmatch[scb->inendpos]) {
-
-                /* init local vars */
-                buff2 = NULL;
-                lastbuff = (ses_msg_buff_t *)dlq_lastEntry(&msg->buffQ);
-
                 /* check message complete */
                 if (++scb->inendpos == NC_SSH_END_LEN) {
-
                     /* completely matched the SSH EOM marker 
                      * finish the current message and put it in the inreadyQ
                      *
@@ -236,125 +278,40 @@ static status_t
                      * is a possibility the new framing will start
                      * right away, because the peer sent a <hello>
                      * and an <rpc> back-to-back
-                     */
-                    if (buff->buffpos < buff->bufflen) {
-
-                        /* get a new buffer to hold the overflow */
-                        res = ses_msg_new_buff(scb, FALSE, &buff2);
-                        if (res == NO_ERR) {
-                            /* get a new message header for buff2 
-                             * but do not add buff2 to msg2 yet 
-                             */
-                            res = ses_msg_new_msg(&msg2);
-                            if (res == NO_ERR) {
-                                /* put msg2 in the msg Q and
-                                 * copy the rest of buff into buff2 
-                                 */
-                                dlq_enque(msg2, &scb->msgQ);
-                                buff2->bufflen = buff->bufflen - buff->buffpos;
-                                memcpy(buff2->buff, 
-                                       &buff->buff[buff->buffpos],
-                                       buff2->bufflen);
-                                buff->bufflen = buff->buffpos;
-                            }
-                        }
-                        if (res != NO_ERR) {
-                            if (buff2) {
-                                ses_msg_free_buff(scb, buff2);
-                                buff2 = NULL;
-                            }
-                            
-                            /* truncate the input and continue */
-                            buff->bufflen = buff->buffpos;
-                            if (LOGINFO) {
-                                log_info("\nses: dropping input "
-                                         "for session %d (%s)",
-                                         scb->sid,
-                                         get_error_string(res));
-                            }
-
-                            /* do not barf on input overflow error */
-                            res = NO_ERR;   
-                        }
-                    }
-
-                    /* save the buffer and make the message ready to parse 
+                     *
+                     * save the buffer and make the message ready to parse 
                      * don't let the xmlreader see the EOM string
                      */
-                    if (buff->bufflen > NC_SSH_END_LEN) {
-                        /* finish message and add to the ready Q */
-                        buff->bufflen -= NC_SSH_END_LEN;
-                        buff->buffpos = 0;
-                        dlq_enque(buff, &msg->buffQ);
-                        msg->curbuff = NULL;
-                        msg->ready = TRUE;
-                        ses_msg_make_inready(scb);
-                    }  else {
-                        /* only thing in the buffer was an EOM string 
-                         * or part of the string, corner-case, need to
-                         * back out the EOM chars in 1 or more previous buffs
-                         */
-                        left = NC_SSH_END_LEN - buff->bufflen;
-                        ses_msg_free_buff(scb, buff);
-
-                        while (left && lastbuff) {
-                            if (lastbuff->bufflen <= left) {
-                                left -= lastbuff->bufflen;
-                                /* zap the last buffer, borrow 'buff' var */
-                                buff = (ses_msg_buff_t *)
-                                    dlq_prevEntry(lastbuff);
-                                dlq_remove(lastbuff);
-                                ses_msg_free_buff(scb, lastbuff);
-                                lastbuff = buff;
-                            } else {
-                                /* just truncate the last buffer */
-                                lastbuff->bufflen -= left;
-                                left = 0;
-                            }
-                        }
-
-                        /* check anything left in the msg */
-                        if (dlq_empty(&msg->buffQ)) {
-                            dlq_remove(msg);
-                            ses_msg_free_msg(scb, msg);
-                            msg = NULL;
-                        } else {
-                            msg->ready = TRUE;
-                            ses_msg_make_inready(scb);
-                        }
-                    }
+                    buff->bufflen = buff->buffpos - NC_SSH_END_LEN;
+                    buff->buffpos = 0;
+                    buff->islast = TRUE;
+                    msg->curbuff = NULL;
+                    msg->ready = TRUE;
+                    ses_msg_make_inready(scb);
 
                     /* reset reader state */
                     scb->instate = SES_INST_IDLE;
                     scb->inendpos = 0;
 
-                    /* check if more work to do */
-                    if (buff2) {
-                        /* check if this is the special corner-case where
-                         * the protocol version has not been set yet
-                         * only allow the old EOM while protocol not set
-                         * for 2 messages <ncx-connect> and <hello>
-                         * Defer any <rpc> messages that follow these
-                         * two initial messages
-                         */
-                        if (scb->protocol == NCX_PROTO_NONE &&
-                            ncx_protocol_enabled(NCX_PROTO_NETCONF11) &&
-                            dlq_count(&scb->msgQ) >= 3) {
-                            /* do not continue processing buff2 and msg2 */
-                            if (LOGDEBUG2) {
-                                log_debug2("\nses: defer msg for s:%d until "
-                                           "protocol framing set",
-                                           scb->sid);
-                            }
-                            dlq_enque(buff2, &msg2->buffQ);
-                            msg2->deferred = TRUE;
-                            done = TRUE;
-                        } else {
-                            buff = buff2;
-                            msg = msg2;
-                        }
-                    } else {
-                        done = TRUE;
+                    /* force a new message and buffer */
+                    msg = NULL;
+                    buff = NULL;
+
+                    /* check corner-case: do not try to handle
+                     * base:1.1 back 2 back messages 
+                     * if protocol not set yet by hello
+                     * an empty message is the last one right now
+                     * error out if a 3rd real message <rpc> is found
+                     */
+                    if (scb->protocol == NCX_PROTO_NONE &&
+                        ncx_protocol_enabled(NCX_PROTO_NETCONF11) &&
+                        dlq_count(&scb->msgQ) >= 4) {
+                        /* do not continue processing readbuff */
+                        log_error("\nses: Message could not "
+                                  "be deferred for s:%d because "
+                                  "protocol framing not set",
+                                  scb->sid);
+                        return ERR_NCX_OPERATION_FAILED; 
                     }
                 }  /* else still more chars in EOM string to match */
             } else {
@@ -367,9 +324,6 @@ static status_t
             break;
         default:
             /* should not happen */
-            if (buff) {
-                ses_msg_free_buff(scb, buff);
-            }
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
     }
@@ -429,63 +383,34 @@ static status_t
 
 * INPUTS:
 *   scb == session control block to accept input for
-*   buff == buffer just read; it is consumed or freed!!!
+*   len  == number of bytes in scb->readbuff just read
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
     accept_buffer_ssh_v11 (ses_cb_t *scb,
-                           ses_msg_buff_t *buff)
+                           size_t len)
 {
-    ses_msg_t      *msg, *msg2;
-    ses_msg_buff_t *buff2;
-    const char     *chunkmatch;
+    ses_msg_t      *msg;
+    ses_msg_buff_t *buff;
     status_t        res;
-    uint32          chunkidx, saveinpos;
-    boolean         done, qbuffdone, inframing;
+    uint32          saveinpos, count;
+    boolean         done;
     xmlChar         ch;
-    size_t          chunkleft, buffleft, copylen;
+    size_t          chunkleft, inbuffleft, outbuffleft, copylen;
     ncx_num_t       num;
-
-    chunkmatch = NC_SSH_START_CHUNK;  /* just first 2 chars \n# */
-    done = FALSE;
-    msg2 = NULL;
-    res = NO_ERR;
-    buff->buffstart = 0;
-    ch = 0;
-    chunkidx = 0;
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3 && scb->state != SES_ST_INIT) {
-        buff->buff[buff->bufflen] = 0;
+        scb->readbuff[len] = 0;
         log_debug3("\nses: accept base:1.1 buffer (%u):\n%s\n", 
-                   buff->bufflen, 
-                   buff->buff);
+                   len, 
+                   scb->readbuff);
     } else if (LOGDEBUG2) {
-        log_debug2("\nses: accept base:1.1 buffer (%u)", buff->bufflen);
+        log_debug2("\nses: accept base:1.1 buffer (%u)", len);
     }
 #endif
-
-    if (!scb->eomdone) {
-        /* first time through ... check for any deferred messaged */
-        for (msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
-             msg != NULL;
-             msg = (ses_msg_t *)dlq_nextEntry(msg)) {
-
-            if (msg->deferred) {
-                /* need to process all the buffs in all the
-                 * deferred messages; if there is more than one,
-                 * it is because the old EOM marker was hit
-                 * start at this first deferred message;
-                 * there may be first 2 messages ahead of this one
-                 * that are supposed to have old framing
-                 */
-                /***/SET_ERROR(ERR_INTERNAL_VAL);
-            }
-        }
-        scb->eomdone = TRUE;
-    }
 
     /* make sure there is a current message */
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
@@ -493,25 +418,29 @@ static status_t
         /* need a new message */
         res = ses_msg_new_msg(&msg);
         if (res != NO_ERR) {
-            ses_msg_free_buff(scb, buff);
             return res;
         }
+        /* add early */
         dlq_enque(msg, &scb->msgQ);
     }
 
-    /* save buffer early for garbage collection or use */
-    dlq_enque(buff, &msg->buffQ); 
-    qbuffdone = TRUE;
+    /* init local vars */
+    done = FALSE;
+    res = NO_ERR;
+    ch = 0;
+    count = 0;
 
-    /* check starting state corner cases */
-    switch (scb->instate) {
-    case SES_INST_INSTART:
-    case SES_INST_INBETWEEN:
-    case SES_INST_INEND:
-        inframing = TRUE;
-        break;
-    default:
-        inframing = FALSE;
+    /* make sure there is a current buffer to use */
+    buff = (ses_msg_buff_t *)dlq_lastEntry(&msg->buffQ);
+    if (buff == NULL || buff->bufflen == SES_MSG_BUFFSIZE) {
+        /* need a new buffer */
+        res = ses_msg_new_buff(scb,
+                               FALSE,  /* outbuff */
+                               &buff);
+        if (res != NO_ERR) {
+            return res;
+        }
+        dlq_enque(buff, &msg->buffQ);
     }
 
     /* check the chars in the buffer for the 
@@ -519,60 +448,69 @@ static status_t
      * the framing breaks will be mixed in with the XML
      */
     while (!done) {
+        /* check if the read buffer length has been reached */
+        if (count == (uint32)len) {
+            done = TRUE;
+            continue;
+        }
 
-        /* check if the internal buffer end has been reached */
-        if (scb->instate != SES_INST_FINMSG) {
-            if (buff->buffpos == buff->bufflen) {
-                /* done checking the current buffer,
-                 * add this buffer to the current message and exit 
-                 */
-                done = TRUE;
-                continue;
+        /* check if a buffer is needed */
+        if (buff == NULL) {
+            /* need new first buff for a message */
+            res = ses_msg_new_buff(scb,
+                                   FALSE,  /* outbuff */
+                                   &buff);
+            if (res != NO_ERR) {
+                return res;
             }
+            dlq_enque(buff, &msg->buffQ);
+        } else if (buff->buffpos == SES_MSG_BUFFSIZE) {
+            /* current buffer is full; get a new one */
+            buff->buffpos = 0;
+            buff->bufflen = SES_MSG_BUFFSIZE;
+            res = ses_msg_new_buff(scb,
+                                   FALSE,  /* outbuff */
+                                   &buff);
+            if (res != NO_ERR) {
+                return res;
+            }
+            dlq_enque(buff, &msg->buffQ);
         }
 
-        switch (scb->instate) {
-        case SES_INST_NONE:
-            break;  /* error handled below */
-        case SES_INST_INMSG:
-        case SES_INST_FINMSG:
-            break;  /* not processing char at a time */
-        case SES_INST_INBETWEEN:
-        case SES_INST_INEND:
-            /* get the next char in the input buffer; no advance  */
-            ch = buff->buff[buff->buffpos + scb->inendpos];
-            break;
-        default:
-            /* get the next char in the input buffer 
-             * and advance the pointer 
-             */
-            ch = buff->buff[buff->buffpos++];
-        }
+        /* get the next char in the input buffer and advance the pointer */
+        ch = scb->readbuff[count++];
 
         /* handle the char in the buffer based on the input state */
         switch (scb->instate) {
         case SES_INST_IDLE:
             /* expecting start of the first chunk of a message */
-            if (ch == *chunkmatch) {
+            if (ch == '\n') {
                 /* matched the \n to start a chunk */
                 scb->instate = SES_INST_INSTART;
                 scb->inendpos = 1;
             } else {
                 /* return framing error */
+                if (LOGDEBUG) {
+                    log_debug("\nses: invalid base:1;1 framing "
+                              "(idle: expect first newline)");
+                }
                 done = TRUE;
                 res = ERR_NCX_INVALID_FRAMING;
             }
             break;
         case SES_INST_INSTART:
-            inframing = TRUE;
             if (scb->inendpos == 1) {
-                if (ch == chunkmatch[1]) {
+                if (ch == '#') {
                     /* matched first hash mark # */
                     scb->inendpos++;
                 } else {
                     /* return framing error; 
                      * save buff for garbage collection 
                      */
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(instart: expect '#')");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 }
@@ -583,6 +521,10 @@ static status_t
                     scb->inendpos++;  /* == 3 now */
                 } else {
                     /* return framing error */
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(instart: expect digit)");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 }
@@ -592,6 +534,10 @@ static status_t
                  */
                 if (scb->inendpos == SES_MAX_STARTCHUNK_SIZE) {
                     /* invalid number -- too long error */
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(instart: number too long)");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 } else if (ch == '\n') {
@@ -609,13 +555,12 @@ static status_t
                     if (res == NO_ERR) {
                         msg->expchunksize = num.u;
                         msg->curchunksize = 0;
-                        buff->inchunks[chunkidx].chunkstart 
-                            = buff->buffpos;
-                        if (chunkidx == 0) {
-                            buff->buffstart = buff->buffpos;
-                        }
                         scb->instate = SES_INST_INMSG;
                     } else {
+                        if (LOGDEBUG) {
+                            log_debug("\nses: invalid base:1;1 framing "
+                                      "(instart: invalid number)");
+                        }
                         done = TRUE;
                         res = ERR_NCX_INVALID_FRAMING;
                     }
@@ -623,125 +568,90 @@ static status_t
                 } else if (ch >= '0' && ch <= '9') {
                     /* continue collecting digits */
                     scb->startchunk[scb->inendpos - 2] = ch;
-                    scb->inendpos++;                    
+                    scb->inendpos++;
                 } else {
                     /* return framing error; invalid char */
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(instart: expect digit char)");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 }
             }
             break;
         case SES_INST_INMSG:
-            inframing = FALSE;
-
             /* expecting first part or Nth part of a chunk */
+            count--;   /* back up count */
             chunkleft = msg->expchunksize - msg->curchunksize;
-            buffleft = buff->bufflen - buff->buffpos;
+            inbuffleft = len - count;
+            outbuffleft = SES_MSG_BUFFSIZE - buff->buffpos;
+            copylen = min(inbuffleft, chunkleft);
 
-            if (buffleft < chunkleft) {
-                /* finish off the buffer; chunk not done
-                 * wait for the next buffer to finish the chunk
-                 */
-                msg->curchunksize += buffleft;
-                buff->buffpos = buff->bufflen;
-                buff->inchunks[chunkidx++].chunklen = buffleft;
-            } else {
-                /* buffer >= remainder of chunk
-                 * buffer may not be done; 
-                 * move to next inchunk map or split into new buffer
-                 */
-                chunkmatch = NC_SSH_END_CHUNKS;
+            /* account for the amount copied above */
+            msg->curchunksize += copylen;
+            if (msg->curchunksize == msg->expchunksize) {
+                /* finished this chunk */
                 scb->inendpos = 0;
-                buff->buffpos += chunkleft;
-                buff->inchunks[chunkidx++].chunklen = chunkleft;
+                scb->instate = SES_INST_INBETWEEN;
+            } /* else finished the input buffer */
 
-                copylen = buff->bufflen;
-
-                /* check common case; message and EoChunks
-                 * fits into the same buffer
-                 * If bufflen big enough, check EoCh now
+            /* copy the required input bytes to 1 or more buffers */
+            if (outbuffleft >= copylen) {
+                /* rest of chunk or input fits in rest of current buffer */
+                xml_strncpy(&buff->buff[buff->buffpos],
+                            &scb->readbuff[count],
+                            copylen);
+                buff->buffpos += copylen;
+                count += copylen;
+            } else {
+                /* rest of the current buffer not big enough;
+                 * split input across N buffers;
+                 * first finish current buffer
                  */
-                if ((buffleft >= (chunkleft + NC_SSH_END_CHUNKS_LEN)) &&
-                    !strncmp((const char *)&buff->buff[buff->buffpos],
-                             chunkmatch,
-                             NC_SSH_END_CHUNKS_LEN)) {
-                    /* process EoChunks here; make msg ready */
-                    scb->instate = SES_INST_FINMSG;
+                xml_strncpy(&buff->buff[buff->buffpos],
+                            &scb->readbuff[count],
+                            outbuffleft);
+                buff->buffpos = 0;
+                buff->bufflen = SES_MSG_BUFFSIZE;
+                copylen -= outbuffleft;
+                count += outbuffleft;
 
-                    if (buffleft > (chunkleft + NC_SSH_END_CHUNKS_LEN)) {
-                        if (chunkidx < SES_MAX_BUFF_CHUNKS) {
-                            /* skip over EoChunks and loop to next chunk */
-                            buff->buffpos += NC_SSH_END_CHUNKS_LEN;
-                        } else {
-                            /* shorten the buffer length to the chunk size */
-                            buff->bufflen = buff->buffpos;
+                /* fill N-2 full buffers and possibly
+                 * 1 final partial buffer
+                 */
+                while (copylen > 0) {
+                    size_t copy2len;
 
-                            /* get a new buffer to hold the overflow */
-                            res = ses_msg_new_buff(scb, FALSE, &buff2);
-                            if (res == NO_ERR) {
-                                buff2->bufflen = copylen 
-                                    - (buff->buffpos + NC_SSH_END_CHUNKS_LEN);
-                                memcpy(buff2->buff, 
-                                       &buff->buff[buff->buffpos + 
-                                                   NC_SSH_END_CHUNKS_LEN],
-                                       buff2->bufflen);
-                                if (!qbuffdone) {
-                                    dlq_enque(buff, &msg->buffQ);
-                                }
-                                qbuffdone = FALSE;
-                                buff = buff2;
-                                buff2 = NULL;
-                                chunkidx = 0;
-                            } else {
-                                done = TRUE;
-                            }
-                        }
-                    } else {
-                        /* buffer exactly chunk-part+EoChunks */
-                        if (!qbuffdone) {
-                            dlq_enque(buff, &msg->buffQ);
-                            qbuffdone = TRUE;
-                        }
-                        buff = NULL;
+                    /* get new buffer */
+                    res = ses_msg_new_buff(scb,
+                                           FALSE,  /* outbuff */
+                                           &buff);
+                    if (res != NO_ERR) {
+                        return res;
                     }
-                } else {
-                    scb->instate = SES_INST_INBETWEEN;
+                    dlq_enque(buff, &msg->buffQ);
 
-                    if (buffleft > chunkleft) {
-                        if (chunkidx < SES_MAX_BUFF_CHUNKS) {
-                            ;
-                        } else {
-                            /* get a new buffer to hold the overflow */
-                            res = ses_msg_new_buff(scb, FALSE, &buff2);
-                            if (res == NO_ERR) {
-                                buff2->bufflen = copylen - buff->buffpos;
-                                memcpy(buff2->buff, 
-                                       &buff->buff[buff->buffpos],
-                                       buff2->bufflen);
-                                if (!qbuffdone) {
-                                    dlq_enque(buff, &msg->buffQ);
-                                }
-                                qbuffdone = FALSE;
-                                buff = buff2;
-                                buff2 = NULL;
-                                chunkidx = 0;
-                            } else {
-                                done = TRUE;
-                            }
-                        }
-                    } else {
-                        done = TRUE;
-                    }
+                    copy2len = min(SES_MSG_BUFFSIZE, copylen);
+                    xml_strncpy(&buff->buff[buff->buffpos],
+                                &scb->readbuff[count],
+                                copy2len);
+                    buff->buffpos += copy2len;
+                    buff->bufflen = copy2len;
+                    copylen -= copy2len;
+                    count += copy2len;
                 }
             }
             break;
         case SES_INST_INBETWEEN:
-            inframing = TRUE;
-            chunkmatch = NC_SSH_END_CHUNKS;
             if (scb->inendpos == 0) {
                 if (ch == '\n') {
                     scb->inendpos++;
                 } else {
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(inbetween: expect newline)");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 }
@@ -749,6 +659,10 @@ static status_t
                 if (ch == '#') {
                     scb->inendpos++;
                 } else {
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(inbetween: expect '#')");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 }
@@ -756,89 +670,89 @@ static status_t
                 if (ch == '#') {
                     scb->inendpos++;
                     scb->instate = SES_INST_INEND;
-                    chunkmatch = NC_SSH_END_CHUNKS;
                 } else if (ch >= '1' && ch <= '9') {
                     /* back up and process this char in start state
                      * account for first 2 chars \n#
                      */
-                    buff->buffpos += 2;  
+                    count--;
                     scb->instate = SES_INST_INSTART;
                 } else {
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(inbetween: expect digit or '#')");
+                    }
                     done = TRUE;
                     res = ERR_NCX_INVALID_FRAMING;
                 }
             }
             break;
         case SES_INST_INEND:
-            inframing = TRUE;
-            chunkmatch = NC_SSH_END_CHUNKS;
-
             /* expect to match 4 char \n##\n sequence */
-            if (ch != chunkmatch[scb->inendpos]) {
-                done = TRUE;
-                res = ERR_NCX_INVALID_FRAMING;
-            } else if (++scb->inendpos == NC_SSH_END_CHUNKS_LEN) {
-                scb->instate = SES_INST_FINMSG;
-            }  /* else still more chars in EOM string to match */
-            break;
-        case SES_INST_FINMSG:
-            /* completely matched the SSH End of Chunks marker
-             * finish the current message and put it in the inreadyQ
-             */
-            msg->curbuff = NULL;
-            msg->ready = TRUE;
-            ses_msg_make_inready(scb);
-
-            /* reset reader state */
-            scb->instate = SES_INST_IDLE;
-            saveinpos = scb->inendpos;
-            scb->inendpos = 0;
-            inframing = FALSE;
-            chunkmatch = NC_SSH_START_CHUNK;
-            if (buff != NULL && 
-                ((buff->buffpos + saveinpos) < buff->bufflen)) {
-                /*
-                 * buff->buffpos points to the first char after
-                 * the EOCh string, check any left over bytes
-                 * to start a new message
-                 */
-                res = ses_msg_new_msg(&msg2);
-                if (res == NO_ERR) {
-                    /* put msg2 in the msg Q */
-                    dlq_enque(msg2, &scb->msgQ);
-                    msg = msg2;
+            if (scb->inendpos == 2) {
+                if (ch == '#') {
+                    scb->inendpos++;
                 } else {
-                    if (!qbuffdone) {
-                        ses_msg_free_buff(scb, buff);
-                        buff = NULL;
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(inend: expect '#')");
                     }
                     done = TRUE;
+                    res = ERR_NCX_INVALID_FRAMING;
+                }
+            } else if (scb->inendpos == 3) {
+                if (ch == '\n') {
+                    /* completely matched the SSH End of Chunks marker
+                     * finish the current message and put it in the inreadyQ
+                     */
+                    msg->curbuff = NULL;
+                    msg->ready = TRUE;
+                    ses_msg_make_inready(scb);
+                    
+                    /* reset reader state */
+                    scb->instate = SES_INST_IDLE;
+                    saveinpos = scb->inendpos;
+                    scb->inendpos = 0;
+                    buff->bufflen = buff->buffpos;
+                    buff->buffpos = 0;
+
+                    if (count < len) {
+                        /* need a new message */
+                        res = ses_msg_new_msg(&msg);
+                        if (res != NO_ERR) {
+                            return res;
+                        }
+                        /* add early */
+                        dlq_enque(msg, &scb->msgQ);
+
+                        /* get a new buffer */
+                        res = ses_msg_new_buff(scb,
+                                               FALSE,  /* outbuff */
+                                               &buff);
+                        if (res != NO_ERR) {
+                            return res;
+                        }
+                        dlq_enque(buff, &msg->buffQ);
+                    } else {
+                        buff = NULL;
+                    }
+                } else {
+                    if (LOGDEBUG) {
+                        log_debug("\nses: invalid base:1;1 framing "
+                                  "(inend: expect newline)");
+                    }
+                    done = TRUE;
+                    res = ERR_NCX_INVALID_FRAMING;
                 }
             } else {
-                /* end of buffer; create message next time */
+                /* should not happen */
                 done = TRUE;
+                res = SET_ERROR(ERR_INTERNAL_VAL);
             }
             break;
         default:
             /* should not happen */
-            if (buff && !qbuffdone) {
-                ses_msg_free_buff(scb, buff);
-            }
-            return SET_ERROR(ERR_INTERNAL_VAL);
-        }
-
-    }
-
-    if (buff != NULL && !qbuffdone) {
-        if (inframing || msg == NULL) {
-            /* do not save if just framing chars */
-            if (LOGDEBUG2) {
-                log_debug2("\nses: dropping buff w/ framing only");
-            }
-            ses_msg_free_buff(scb, buff);
-        } else {
-            /* was buff2 now saved in msg2 */
-            dlq_enque(buff, &msg->buffQ);
+            done = TRUE;
+            res = SET_ERROR(ERR_INTERNAL_VAL);
         }
     }
 
@@ -916,8 +830,6 @@ static void
     char    tempbuff[4];
     int     i, j, k;
 
-    memset(tempbuff, 0x0, 4);
-
     switch (msg->prolog_state) {
     case SES_PRST_NONE:
         if ((endpos - buff->buffpos) < 3) {
@@ -950,6 +862,7 @@ static void
             msg->prolog_state = SES_PRST_DONE;
 
             /* save the first 3 chars in the temp buffer */
+            memset(tempbuff, 0x0, 4);
             strncpy(tempbuff, buffer, *retlen);
             for (i = *retlen, j=buff->buffpos; i <= 3; i++, j++) {
                 tempbuff[i] = (char)buff->buff[j];
@@ -1032,18 +945,31 @@ ses_cb_t *
     xmlChar   *now;
     
     now = m__getMem(TSTAMP_MIN_SIZE);
-    if (!now) {
+    if (now == NULL) {
         return NULL;
     }
     tstamp_datetime(now);
 
     scb = m__getObj(ses_cb_t);
-    if (!scb) {
+    if (scb == NULL) {
         m__free(now);
         return NULL;
     }
-
     memset(scb, 0x0, sizeof(ses_cb_t));
+
+    /* TBD: make session read buff size configurable */
+    scb->readbuffsize = SES_READBUFF_SIZE;
+
+    /* make sure the debug log trace code never writes a zero byte
+     * past the end of a full read buffer by adding 2 pad bytes
+     */
+    scb->readbuff = m__getMem(scb->readbuffsize + 2);
+    if (scb->readbuff == NULL) {
+        m__free(now);
+        m__free(scb);
+        return NULL;
+    }
+
     scb->start_time = now;
     dlq_createSQue(&scb->msgQ);
     dlq_createSQue(&scb->freeQ);
@@ -1105,7 +1031,7 @@ void
     ses_msg_buff_t *buff;
 
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
@@ -1156,6 +1082,10 @@ void
     while (!dlq_empty(&scb->freeQ)) {
         buff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
         ses_msg_free_buff(scb, buff);
+    }
+
+    if (scb->readbuff != NULL) {
+        m__free(scb->readbuff);
     }
 
     if (scb->buffcnt) {
@@ -1628,7 +1558,7 @@ status_t
 {
 
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -1661,7 +1591,7 @@ void
 {
 
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
@@ -1726,9 +1656,8 @@ int
     ses_cb_t         *scb;
     ses_msg_t        *msg;
     ses_msg_buff_t   *buff;
-    size_t            endpos;
     int               retlen;
-    boolean           done, usechunks;
+    boolean           done;
 
     if (len == 0) {
         return 0;
@@ -1756,13 +1685,9 @@ int
 
     retlen = 0;
 
-    usechunks = (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) 
-        ? TRUE : FALSE;
-
     /* check if this is the first read for this message */
     buff = msg->curbuff;
     if (buff == NULL) {
-        scb->inchunkidx = 0;
         buff = (ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
         if (buff == NULL) {
             return 0;
@@ -1772,42 +1697,23 @@ int
         }
     }
 
-    if (usechunks) {
-        endpos = buff->inchunks[scb->inchunkidx].chunkstart +
-            buff->inchunks[scb->inchunkidx].chunklen;
-    } else {
-        endpos = buff->bufflen;
-    }
-
     /* check current buffer end has been reached */
-    if (buff->buffpos == endpos) {
-        if (usechunks &&
-            (scb->inchunkidx < (SES_MAX_BUFF_CHUNKS-1) &&
-             buff->inchunks[scb->inchunkidx+1].chunkstart != 0)) {
-
-            scb->inchunkidx++;
-            buff->buffpos = buff->inchunks[scb->inchunkidx].chunkstart;
-            endpos = buff->buffpos +
-                buff->inchunks[scb->inchunkidx].chunklen;
+    if (buff->buffpos == buff->bufflen) {
+        buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+        if (buff == NULL) {
+            return 0;
         } else {
-            scb->inchunkidx = 0;
-            buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
-            if (buff == NULL) {
-                return 0;
-            } else {
-                buff->buffpos = buff->buffstart;
-                msg->curbuff = buff;
-                if (usechunks) {
-                    endpos = buff->buffstart +
-                        buff->inchunks[0].chunklen;
-                } else {
-                    endpos = buff->bufflen;
-                }
-            }
+            buff->buffpos = buff->buffstart;
+            msg->curbuff = buff;
         }
     }
 
-    handle_prolog_state(msg, buffer, len, buff, endpos, &retlen);
+    handle_prolog_state(msg, 
+                        buffer, 
+                        len, 
+                        buff, 
+                        buff->bufflen,
+                        &retlen);
 
     /* start transferring bytes to the return buffer */
     done = FALSE;
@@ -1822,44 +1728,28 @@ int
         }
 
         /* check current buffer end has been reached */
-        if (buff->buffpos == endpos) {
-            if (usechunks &&
-                (scb->inchunkidx < (SES_MAX_BUFF_CHUNKS-1) &&
-                 buff->inchunks[scb->inchunkidx+1].chunkstart != 0)) {
-
-                scb->inchunkidx++;
-                buff->buffpos = buff->inchunks[scb->inchunkidx].chunkstart;
-                endpos = buff->buffpos +
-                    buff->inchunks[scb->inchunkidx].chunklen;
+        if (buff->buffpos == buff->bufflen) {
+            buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+            if (buff == NULL) {
+                done = TRUE;
+                continue;
             } else {
-                scb->inchunkidx = 0;
-                buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
-                if (buff == NULL) {
-                    done = TRUE;
-                    continue;
-                } else if (buff->inchunks[0].chunklen == 0) {
-                    done = TRUE;
-                    continue;
-                } else {
-                    buff->buffpos = buff->buffstart;
-                    msg->curbuff = buff;
-                    if (usechunks) {
-                        endpos = buff->buffstart +
-                            buff->inchunks[0].chunklen;
-                    } else {
-                        endpos = buff->bufflen;
-                    }
+                buff->buffpos = buff->buffstart;
+                msg->curbuff = buff;
 
-                    handle_prolog_state(msg, 
-                                        buffer, 
-                                        len, 
-                                        buff, 
-                                        endpos, 
-                                        &retlen);
-                }
+                handle_prolog_state(msg, 
+                                    buffer, 
+                                    len, 
+                                    buff, 
+                                    buff->bufflen, 
+                                    &retlen);
             }
         }
     }
+
+#ifdef SES_DEBUG_XML_TRACE
+    ncx_write_tracefile(buffer, retlen);
+#endif
 
     return retlen;
 
@@ -1888,22 +1778,20 @@ int
 status_t
     ses_accept_input (ses_cb_t *scb)
 {
-    ses_msg_buff_t *buff;
     status_t        res;
     ssize_t         ret;
     boolean         done, readdone, erragain;
     uint32          readtries;
 
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3) {
-        log_debug3("\nses_accept_input on session %d", 
-                   scb->sid);
+        log_debug3("\nses_accept_input on session %d", scb->sid);
     }
 #endif
 
@@ -1911,16 +1799,10 @@ status_t
     done = FALSE;
     readdone = FALSE;
     ret = 0;
- 
+
     while (!done) {
         if (scb->state >= SES_ST_SHUTDOWN_REQ) {
             return ERR_NCX_SESSION_CLOSED;
-        }
-
-        /* get a new buffer */
-        res = ses_msg_new_buff(scb, FALSE, &buff);
-        if (res != NO_ERR) {
-            return res;
         }
 
         /* loop until 1 buffer is read OK or retry count hit */
@@ -1938,13 +1820,13 @@ status_t
             if (scb->rdfn) {
                 erragain = FALSE;
                 ret = (*scb->rdfn)(scb, 
-                                   (char *)buff->buff, 
-                                   SES_MSG_BUFFSIZE,
+                                   (char *)scb->readbuff, 
+                                   scb->readbuffsize,
                                    &erragain);
             } else {
                 ret = read(scb->fd, 
-                           buff->buff, 
-                           SES_MSG_BUFFSIZE);
+                           scb->readbuff, 
+                           scb->readbuffsize);
             }
 
             if (ret < 0) {
@@ -1974,7 +1856,6 @@ status_t
         }
 
         if (res != NO_ERR) {
-            ses_msg_free_buff(scb, buff);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -1988,7 +1869,6 @@ status_t
                 log_info("\nses: session %d shut by remote peer", 
                          scb->sid);
             }
-            ses_msg_free_buff(scb, buff);
             return ERR_NCX_SESSION_CLOSED;
         } else {
             if (LOGDEBUG2) {
@@ -1997,11 +1877,15 @@ status_t
                            scb->sid);
             }
 
-            buff->bufflen = (size_t)ret;
+            /* increment session byte counters */
             scb->stats.in_bytes += (uint32)ret;
             totals.stats.in_bytes += (uint32)ret;
 
-            if (buff->buff[buff->buffpos] == '\0') {
+            /* adjust length if read was z-terminated
+             * should not be needed; zero not a valid
+             * char to appear in an XML document
+             */
+            if (scb->readbuff[ret - 1] == '\0') {
                 /* don't barf if the client sends a 
                  * zero-terminated string instead of
                  * just the contents of the string
@@ -2009,19 +1893,29 @@ status_t
                 if (LOGDEBUG3) {
                     log_debug3("\nses: dropping zero byte at EObuff");
                 }
-                buff->bufflen--;
+                ret--;
             }
 
             /* hand off the malloced buffer in 1 of these functions
              * to handle the buffer framing
              */
             if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
-                res = accept_buffer_ssh_v11(scb, buff);
+                res = accept_buffer_ssh_v11(scb, ret);
             } else {
-                res = accept_buffer_ssh_v10(scb, buff);
+                res = accept_buffer_ssh_v10(scb, ret);
             }
 
-            if (res != NO_ERR || ret < SES_MSG_BUFFSIZE || !scb->rdfn) {
+            if (res != NO_ERR || 
+                ret < scb->readbuffsize || 
+                scb->rdfn == NULL) {
+#ifdef SES_DEBUG_TRACE
+                if (LOGDEBUG3) {
+                    log_debug3("\nbail exit %u:%u (%s)", 
+                               ret, 
+                               scb->readbuffsize,
+                               get_error_string(res));
+                }
+#endif
                 done = TRUE;
             } /* else the SSH2 channel probably has more bytes to read */
         }
@@ -2084,7 +1978,7 @@ ncx_withdefaults_t
     ses_withdef (const ses_cb_t *scb)
 {
 #ifdef DEBUG
-    if (!scb) {
+    if (scb == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NCX_WITHDEF_NONE;
     }

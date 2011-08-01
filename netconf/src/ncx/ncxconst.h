@@ -69,10 +69,6 @@ extern "C" {
 #define NC_SSH_END "]]>]]>"
 #define NC_SSH_END_LEN 6
 
-/* NETCONF SSH Start of Chunks Marker */
-#define NC_SSH_START_CHUNK "\n#"
-
-
 /* NETCONF SSH End of Chunks Marker */
 #define NC_SSH_END_CHUNKS "\n##\n"
 #define NC_SSH_END_CHUNKS_LEN 4

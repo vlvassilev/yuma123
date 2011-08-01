@@ -172,11 +172,12 @@ date         init     comment
 #define WILDCARD_PREFIX  ((const xmlChar *)"___")
 
 
-/* this flag will cause debug3 trace statements to be printed
+#ifdef DEBUG
+/* this flag will cause debug4 trace statements to be printed
  * to the log during operation for module alloc and free operations
  */
-#ifdef DEBUG
 /* #define NCX_DEBUG_MOD_MEMORY  1 */
+/* #define WITH_TRACEFILE 1 */
 #endif
 
 /********************************************************************
@@ -304,6 +305,7 @@ uint32              protocols_enabled;
 /* flag to indicate whether ordered-by system is sorted or not */
 boolean             system_sorted;
 
+static FILE *tracefile;
 
 /********************************************************************
 * FUNCTION check_moddef
@@ -1027,6 +1029,12 @@ status_t
     cwd_subdirs = FALSE;
     system_sorted = FALSE;
 
+    tracefile = NULL;
+
+#ifdef WITH_TRACEFILE
+    tracefile = fopen("tracefile.xml", "w");
+#endif
+
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
 
@@ -1284,6 +1292,10 @@ void
     }
 
     log_close();
+
+    if (tracefile != NULL) {
+        fclose(tracefile);
+    }
 
     ncx_init_done = FALSE;
 
@@ -7940,6 +7952,28 @@ const xmlChar *
     /*NOTREACHED*/
 
 }  /* ncx_get_name_match_string */
+
+
+/********************************************************************
+* FUNCTION ncx_write_tracefile
+* 
+* Write a byte to the tracefile
+* 
+* INPUTS:
+*   buff == buffer to write
+*   count == number of chars to write
+*********************************************************************/
+void
+    ncx_write_tracefile (const char *buff, uint32 count)
+{
+    uint32 i;
+
+    if (tracefile != NULL) {
+        for (i = 0; i < count; i++) {
+            fputc((int)buff[i], tracefile);
+        }
+    }
+}  /* ncx_write_tracefile */
 
 
 /* END file ncx.c */

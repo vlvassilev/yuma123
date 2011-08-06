@@ -39,9 +39,6 @@ date             init     comment
 /* used by the agent for the xmlTextReader interface */
 #include <xmlreader.h>
 
-/* for myaddr field in ses_cb_t */
-#include <sys/socket.h>
-
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -319,7 +316,6 @@ typedef struct ses_cb_t_ {
     ses_ready_t      outready;          /* header for outreadyQ */
     ses_stats_t      stats;           /* per-session statistics */
     void            *mgrcb;    /* if manager session, mgr_scb_t */
-    struct sockaddr  myaddr;            /* local socket address */
 
     /* base:1.1 chunk state handling;
      * need to store number part of incoming chunk markers

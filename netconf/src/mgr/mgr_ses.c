@@ -39,6 +39,7 @@ date         init     comment
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -222,10 +223,6 @@ static status_t
     }
 
     if (done) {
-        socklen_t  socklen = sizeof(scb->myaddr);
-        ret = getsockname(scb->fd,
-                          &scb->myaddr,
-                          &socklen);
         return NO_ERR;
     }
 
@@ -545,13 +542,33 @@ static void
                const xmlChar *user)
 {
     const char *str;
-    char        buffer[32];
+    char        buffer[64];
 
     /* send the tail-f TCP startup message */
     ses_putchar(scb, '[');
     ses_putstr(scb, user);
     ses_putchar(scb, ';');
-    ses_putstr(scb, (const xmlChar *)scb->myaddr.sa_data);
+
+#if 0
+    char addrbuff[16];
+    socklen_t  socklen = 16;
+    int ret = getsockname(scb->fd,
+                          addrbuff,
+                          &socklen);
+    inet_ntop(AF_INET, 
+              addrbuff,
+              buffer,
+              64);
+    ses_putstr(scb, (const xmlChar *)buffer);
+#else
+    /* use bogus address for now */
+    ses_putstr(scb, (const xmlChar *)"10.0.0.0");
+#endif
+
+    ses_putchar(scb, '/');
+    /* print bogus port number for now */
+    ses_putstr(scb, (const xmlChar *)"10000");
+
     ses_putstr(scb, (const xmlChar *)";tcp;");
     sprintf(buffer, "%d;", getuid());
     ses_putstr(scb, (const xmlChar *)buffer);
@@ -575,7 +592,7 @@ static void
     ses_putchar(scb, ']');
     ses_putchar(scb, '\n');
 
-    ses_finish_msg(scb);
+    ses_msg_finish_outmsg(scb);
 
 }  /* tcp_setup */
 

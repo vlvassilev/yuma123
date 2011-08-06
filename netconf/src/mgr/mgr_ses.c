@@ -36,10 +36,9 @@ date         init     comment
 #include <string.h>
 #include <sys/types.h>
 */
-#ifdef FREEBSD
+
 #include <sys/socket.h>
 #include <netinet/in.h>
-#endif
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -169,7 +168,7 @@ static status_t
 {
     struct sockaddr_in  targ;
     int                 ret;
-    boolean             userport;
+    boolean             userport, done;
 
     /* get a file descriptor for the new socket */
     scb->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -195,6 +194,7 @@ static status_t
            (size_t)hent->h_length);
 
     /* try to connect to user-provided port or port 830 */
+    done = FALSE;
     if (port) {
         userport = TRUE;
     } else {
@@ -206,19 +206,27 @@ static status_t
                   (struct sockaddr *)&targ,
                   sizeof(struct sockaddr_in));
     if (!ret) {
-        return NO_ERR;
+        done = TRUE;
     }
 
     /* try SSH (port 22) next */
-    if (!userport) {
+    if (!userport && !done) {
         port = NCX_SSH_PORT;
         targ.sin_port = htons(port);
         ret = connect(scb->fd, 
                       (struct sockaddr *)&targ,
                       sizeof(struct sockaddr_in));
         if (!ret) {
-            return NO_ERR;
+            done = TRUE;
         }
+    }
+
+    if (done) {
+        socklen_t  socklen = sizeof(scb->myaddr);
+        ret = getsockname(scb->fd,
+                          &scb->myaddr,
+                          &socklen);
+        return NO_ERR;
     }
 
     /* de-activate the socket in the select loop */
@@ -521,6 +529,58 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION tcp_setup
+*
+* Setup the NETCONF over TCP session
+* Connection MUST already established
+* Sends tail-f session start message
+*
+* INPUTS:
+*   scb == session control block
+*   user == username to connect as
+*
+*********************************************************************/
+static void
+    tcp_setup (ses_cb_t *scb,
+               const xmlChar *user)
+{
+    const char *str;
+    char        buffer[32];
+
+    /* send the tail-f TCP startup message */
+    ses_putchar(scb, '[');
+    ses_putstr(scb, user);
+    ses_putchar(scb, ';');
+    ses_putstr(scb, (const xmlChar *)scb->myaddr.sa_data);
+    ses_putstr(scb, (const xmlChar *)";tcp;");
+    sprintf(buffer, "%d;", getuid());
+    ses_putstr(scb, (const xmlChar *)buffer);
+    sprintf(buffer, "%d;", getgid());
+    ses_putstr(scb, (const xmlChar *)buffer);
+
+    /* additional group IDs is empty */
+    ses_putchar(scb, ';');
+    
+    str = getenv("HOME");
+    if (str != NULL) {
+        ses_putstr(scb, (const xmlChar *)str);
+        ses_putchar(scb, ';');
+    } else {
+        ses_putstr(scb, (const xmlChar *)"/tmp;");
+    }
+
+    /* groups list is empty */
+    ses_putchar(scb, ';');
+
+    ses_putchar(scb, ']');
+    ses_putchar(scb, '\n');
+
+    ses_finish_msg(scb);
+
+}  /* tcp_setup */
+
+
+/********************************************************************
 * FUNCTION log_ssh2_error
 *
 * Get the ssh2 error message and print to error log
@@ -677,6 +737,7 @@ void
 *   privkeyfile == filespec for client private key
 *   target == ASCII IP address or DNS hostname of target
 *   port == NETCONF port number to use, or 0 to use defaults
+*   transport == enum for the transport to use (SSH or TCP)
 *   progcb == temp program instance control block,
 *          == NULL if a session temp files control block is not
 *             needed
@@ -699,6 +760,7 @@ status_t
                          const char *privkeyfile,
                          const xmlChar *target,
                          uint16 port,
+                         ses_transport_t transport,
                          ncxmod_temp_progcb_t *progcb,
                          ses_id_t *retsid,
                          xpath_getvar_fn_t getvar_fn,
@@ -766,13 +828,15 @@ status_t
 
     /* initialize the static fields */
     scb->type = SES_TYP_NETCONF;
-    scb->transport = SES_TRANSPORT_SSH;
+    scb->transport = transport;
     scb->state = SES_ST_INIT;
     scb->mode = SES_MODE_XML;
     scb->state = SES_ST_INIT;
     scb->instate = SES_INST_IDLE;
-    scb->rdfn = mgr_ses_readfn;
-    scb->wrfn = mgr_ses_writefn;
+    if (transport == SES_TRANSPORT_SSH) {
+        scb->rdfn = mgr_ses_readfn;
+        scb->wrfn = mgr_ses_writefn;
+    }
 
     /* get a temp files directory for this session */
     if (progcb != NULL) {
@@ -802,8 +866,8 @@ status_t
         res = ERR_NCX_UNKNOWN_HOST;
     } 
 
-    /* if TCP OK, get an SSH connection and channel */
-    if (res == NO_ERR) {
+    /* if TCP OK, check get an SSH connection and channel */
+    if (res == NO_ERR && transport == SES_TRANSPORT_SSH) {
         res = ssh2_setup(scb, 
                          (const char *)user,
                          (const char *)password,
@@ -830,8 +894,17 @@ status_t
         res = def_reg_add_scb(scb->fd, scb);
     }
 
-    if (res == NO_ERR && protocols_parent != NULL) {
-        res = val_set_ses_protocols_parm(scb, protocols_parent);
+    if (res == NO_ERR) {
+        if (transport == SES_TRANSPORT_TCP) {
+            /* force base:1.0 framing for TCP */
+            ses_set_protocols_requested(scb, NCX_PROTO_NETCONF10);
+        } else if (protocols_parent != NULL) {
+            res = val_set_ses_protocols_parm(scb, protocols_parent);
+        }
+    }
+
+    if (res == NO_ERR && transport == SES_TRANSPORT_TCP) {
+        tcp_setup(scb, user);
     }
 
     /* send the manager hello to the server */

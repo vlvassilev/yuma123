@@ -117,7 +117,7 @@ static ses_total_stats_t totals;
 * FUNCTION accept_buffer_ssh_v10
 *
 * Handle one input buffer within the ses_accept_input function
-* transport is SSH; protocol is NETCONF:base:1.0
+* transport is SSH or TCP; protocol is NETCONF:base:1.0
 *
 * Need to separate the input stream into separate XML instance
 * documents and reset the xmlTextReader each time a new document
@@ -1598,7 +1598,8 @@ void
 #endif
 
     /* add the NETCONF EOM marker */
-    if (scb->transport==SES_TRANSPORT_SSH) {
+    if (scb->transport==SES_TRANSPORT_SSH ||
+        scb->transport==SES_TRANSPORT_TCP) {
         if (scb->framing11) {
             scb->outbuff->islast = TRUE;
         } else {
@@ -2094,6 +2095,8 @@ const xmlChar *
         return (const xmlChar *)"netconf-soap-over-beep";
     case SES_TRANSPORT_TLS:
         return (const xmlChar *)"netconf-tls";
+    case SES_TRANSPORT_TCP:
+        return (const xmlChar *)"netconf-tcp";
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return (const xmlChar *)"none";

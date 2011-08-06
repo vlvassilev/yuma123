@@ -2023,7 +2023,7 @@ static void
     val_value_t            *val;
     status_t                res;
     uint16                  port;
-    boolean                 startedsession;
+    boolean                 startedsession, tcp, portbydefault;
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
@@ -2094,11 +2094,13 @@ static void
     }
 
     port = 0;
+    portbydefault = FALSE;
     val = val_find_child(server_cb->connect_valset,
                          YANGCLI_MOD, 
                          YANGCLI_NCPORT);
     if (val && val->res == NO_ERR) {
         port = VAL_UINT16(val);
+        portbydefault = val_set_by_default(val);
     }
 
     publickey = NULL;
@@ -2117,6 +2119,23 @@ static void
         privatekey = (const char *)VAL_STR(val);
     }
 
+    tcp = FALSE;
+    val = val_find_child(server_cb->connect_valset,
+                         YANGCLI_MOD, 
+                         YANGCLI_TRANSPORT);
+    if (val != NULL && 
+        val->res == NO_ERR && 
+        !xml_strcmp(VAL_ENUM_NAME(val),
+                    (const xmlChar *)"tcp")) {
+        tcp = TRUE;
+    }
+
+    if (tcp) {
+        if (port == 0 || portbydefault) {
+            port = SES_DEF_TCP_PORT;
+        }
+    }
+        
     log_info("\nyangcli: Starting NETCONF session for %s on %s",
              username, 
              server);
@@ -2132,7 +2151,9 @@ static void
                               publickey,
                               privatekey,
                               server, 
-                              port, 
+                              port,
+                              (tcp) ? SES_TRANSPORT_TCP 
+                              : SES_TRANSPORT_SSH,
                               server_cb->temp_progcb,
                               &server_cb->mysid,
                               xpath_getvar_fn,
@@ -7721,9 +7742,9 @@ status_t
 {
     obj_template_t        *obj;
     val_value_t           *connect_valset;
-    val_value_t           *valset;
+    val_value_t           *valset, *testval;
     status_t               res;
-    boolean                s1, s2, s3;
+    boolean                s1, s2, s3, tcp;
 
 #ifdef DEBUG
     if (server_cb == NULL) {
@@ -7749,6 +7770,7 @@ status_t
     }
 
     res = NO_ERR;
+    tcp = FALSE;
 
     connect_valset = get_connect_valset();
 
@@ -7764,7 +7786,7 @@ status_t
                                    &line[start], 
                                    &res);
             if (valset == NULL || res != NO_ERR) {
-                if (valset) {
+                if (valset != NULL) {
                     val_free_value(valset);
                 }
                 log_write("\nError in the parameters for '%s' command (%s)",
@@ -7808,13 +7830,24 @@ status_t
                         YANGCLI_MOD,
                         YANGCLI_PASSWORD) ? TRUE : FALSE;
 
+    /* check the transport parameter */
+    testval = val_find_child(valset, 
+                             YANGCLI_MOD,
+                             YANGCLI_TRANSPORT);
+    if (testval != NULL && 
+        testval->res == NO_ERR && 
+        !xml_strcmp(VAL_ENUM_NAME(testval),
+                    (const xmlChar *)"tcp")) {
+        tcp = TRUE;
+    }
+    
     /* complete the connect valset if needed
      * and transfer it to the server_cb version
      *
      * try to get any missing params in valset 
      */
     if (interactive_mode()) {
-        if (startupmode && s1 && s2 && s3) {
+        if (startupmode && s1 && s2 && (s3 || tcp)) {
             if (LOGDEBUG3) {
                 log_debug3("\nyangcli: CLI direct connect mode");
             }
@@ -7841,12 +7874,11 @@ status_t
         return res;
     }
 
-
     /* passing off valset memory here */
     s1 = s2 = s3 = FALSE;
-    if (valset) {
+    if (valset != NULL) {
         /* save the malloced valset */
-        if (server_cb->connect_valset) {
+        if (server_cb->connect_valset != NULL) {
             val_free_value(server_cb->connect_valset);
         }
         server_cb->connect_valset = valset;
@@ -7864,7 +7896,7 @@ status_t
     }
 
     /* check if all params present yet */
-    if (s1 && s2 && s3) {
+    if (s1 && s2 && (s3 || tcp)) {
         res = replace_connect_valset(server_cb->connect_valset);
         if (res != NO_ERR) {
             log_warn("\nWarning: connection parameters could not be saved");

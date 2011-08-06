@@ -39,6 +39,9 @@ date             init     comment
 /* used by the agent for the xmlTextReader interface */
 #include <xmlreader.h>
 
+/* for myaddr field in ses_cb_t */
+#include <sys/socket.h>
+
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -116,6 +119,8 @@ extern "C" {
 /* default read buffer size */
 #define SES_READBUFF_SIZE  1000
 
+/* port number for NETCONF over TCP */
+#define SES_DEF_TCP_PORT    2023
     
 /********************************************************************
 *                                                                   *
@@ -142,7 +147,8 @@ typedef enum ses_transport_t_ {
     SES_TRANSPORT_BEEP,
     SES_TRANSPORT_SOAP,
     SES_TRANSPORT_SOAPBEEP,
-    SES_TRANSPORT_TLS
+    SES_TRANSPORT_TLS,
+    SES_TRANSPORT_TCP    /* tail-f NETCONF over TCP */
 } ses_transport_t;
 
 
@@ -313,6 +319,7 @@ typedef struct ses_cb_t_ {
     ses_ready_t      outready;          /* header for outreadyQ */
     ses_stats_t      stats;           /* per-session statistics */
     void            *mgrcb;    /* if manager session, mgr_scb_t */
+    struct sockaddr  myaddr;            /* local socket address */
 
     /* base:1.1 chunk state handling;
      * need to store number part of incoming chunk markers

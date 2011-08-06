@@ -125,6 +125,7 @@ extern void
 *   privkeyfile == filespec for client private key
 *   target == ASCII IP address or DNS hostname of target
 *   port == NETCONF port number to use, or 0 to use defaults
+*   transport == enum for the transport to use (SSH or TCP)
 *   progcb == temp program instance control block,
 *          == NULL if a session temp files control block is not
 *             needed
@@ -147,6 +148,7 @@ extern status_t
                          const char *privkeyfile,
                          const xmlChar *target,
                          uint16 port,
+                         ses_transport_t transport,
                          ncxmod_temp_progcb_t *progcb,
                          ses_id_t *retsid,
                          xpath_getvar_fn_t getvar_fn,

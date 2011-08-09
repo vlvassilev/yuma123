@@ -1937,30 +1937,30 @@ agt_not_msg_t *
 * this function is called.
 *
 * INPUTS:
-*    not == agt_not_template_t to delete
+*    notif == agt_not_template_t to delete
 *********************************************************************/
 void 
-    agt_not_free_notification (agt_not_msg_t *not)
+    agt_not_free_notification (agt_not_msg_t *notif)
 {
     val_value_t *val;
 
 #ifdef DEBUG
-    if (!not) {
+    if (!notif) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
 #endif
 
-    while (!dlq_empty(&not->payloadQ)) {
-        val = (val_value_t *)dlq_deque(&not->payloadQ);
+    while (!dlq_empty(&notif->payloadQ)) {
+        val = (val_value_t *)dlq_deque(&notif->payloadQ);
         val_free_value(val);
     }
 
-    if (not->msg) {
-        val_free_value(not->msg);
+    if (notif->msg) {
+        val_free_value(notif->msg);
     }
 
-    m__free(not);
+    m__free(notif);
 
 }  /* agt_not_free_notification */
 

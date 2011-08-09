@@ -288,10 +288,10 @@ extern agt_not_msg_t *
 * this function is called.
 *
 * INPUTS:
-*    not == agt_not_template_t to delete
+*    notif == agt_not_template_t to delete
 *********************************************************************/
 extern void 
-    agt_not_free_notification (agt_not_msg_t *not);
+    agt_not_free_notification (agt_not_msg_t *notif);
 
 
 /********************************************************************

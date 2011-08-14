@@ -74,6 +74,10 @@ date         init     comment
 #include "agt_state.h"
 #endif
 
+#ifndef _H_agt_time_filter
+#include "agt_time_filter.h"
+#endif
+
 #ifndef _H_agt_util
 #include "agt_util.h"
 #endif
@@ -141,6 +145,8 @@ date         init     comment
 *********************************************************************/
 
 #define AGT_NCX_DEBUG 1
+
+#define IF_MODIFIED_SINCE (const xmlChar *)"if-modified-since"
 
 
 /********************************************************************
@@ -339,7 +345,9 @@ static status_t
                   xml_node_t *methnode)
 {
     cfg_template_t     *source;
+    val_value_t        *testval;
     status_t            res, res2;
+    boolean             empty_callback = FALSE;
 
     /* check if the <running> config is ready to read */
     source = cfg_get_config_id(NCX_CFGID_RUNNING);
@@ -375,13 +383,51 @@ static status_t
         return res2;   /* error already recorded */
     }
 
+    testval = val_find_child(msg->rpc_input,
+                             y_yuma_time_filter_M_yuma_time_filter,
+                             IF_MODIFIED_SINCE);
+    if (testval != NULL && testval->res == NO_ERR) {
+        boolean isneg = FALSE;
+        xmlChar *utcstr;
+        int ret;
+        utcstr = tstamp_convert_to_utctime(VAL_STR(testval), &isneg, &res);
+        if (res != NO_ERR || isneg) {
+            if (utcstr) {
+                m__free(utcstr);
+            }
+            if (isneg) {
+                res = ERR_NCX_INVALID_VALUE;
+            }
+
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             methnode, 
+                             NCX_NT_VAL, 
+                             testval, 
+                             NCX_NT_VAL, 
+                             testval);
+            return res;
+        }
+        ret = xml_strcmp(source->last_ch_time, utcstr);
+        if (ret <= 0) {
+            empty_callback = TRUE;
+        }
+        m__free(utcstr);
+    }
+
     /* cache the 2 parameters and the data output callback function 
      * There is no invoke function -- it is handled automatically
      * by the agt_rpc module
      */
     msg->rpc_user1 = source;
     msg->rpc_data_type = RPC_DATA_STD;
-    msg->rpc_datacb = agt_output_filter;
+    if (empty_callback) {
+        msg->rpc_datacb = agt_output_empty;
+    } else {
+        msg->rpc_datacb = agt_output_filter;
+    }
 
     return NO_ERR;
 
@@ -404,6 +450,8 @@ static status_t
                          xml_node_t *methnode)
 {
     cfg_template_t *source;
+    val_value_t    *testval;
+    boolean         empty_callback = FALSE;
     status_t        res, res2;
 
     /* check if the source config database exists */
@@ -444,13 +492,51 @@ static status_t
         return res2;   /* error already recorded */
     }
 
+    testval = val_find_child(msg->rpc_input,
+                             y_yuma_time_filter_M_yuma_time_filter,
+                             IF_MODIFIED_SINCE);
+    if (testval != NULL && testval->res == NO_ERR) {
+        boolean isneg = FALSE;
+        xmlChar *utcstr;
+        int ret;
+        utcstr = tstamp_convert_to_utctime(VAL_STR(testval), &isneg, &res);
+        if (res != NO_ERR || isneg) {
+            if (utcstr) {
+                m__free(utcstr);
+            }
+            if (isneg) {
+                res = ERR_NCX_INVALID_VALUE;
+            }
+
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             methnode, 
+                             NCX_NT_VAL, 
+                             testval, 
+                             NCX_NT_VAL, 
+                             testval);
+            return res;
+        }
+        ret = xml_strcmp(source->last_ch_time, utcstr);
+        if (ret <= 0) {
+            empty_callback = TRUE;
+        }
+        m__free(utcstr);
+    }
+
     /* cache the 2 parameters and the data output callback function 
      * There is no invoke function -- it is handled automatically
      * by the agt_rpc module
      */
     msg->rpc_user1 = source;
     msg->rpc_data_type = RPC_DATA_STD;
-    msg->rpc_datacb = agt_output_filter;
+    if (empty_callback) {
+        msg->rpc_datacb = agt_output_empty;
+    } else {
+        msg->rpc_datacb = agt_output_filter;
+    }
 
     return NO_ERR;
 
@@ -3656,7 +3742,7 @@ status_t
     agt_ncx_cfg_save (cfg_template_t *cfg,
                       boolean bkup)
 {
-    cfg_template_t    *startup, *running;
+    cfg_template_t    *startup;
     val_value_t       *copystartup;
     xmlChar           *filebuffer;
     agt_profile_t     *profile;
@@ -3684,60 +3770,65 @@ status_t
     case CFG_LOC_NONE:   /* candidate config */
     case CFG_LOC_FILE:
         if (bkup) {
-            /* remove any existing backup */
+            /* FIXME: remove any existing backup */
             /****/
 
-            /* rename the current startup to the backup */
+            /* FIXME: rename the current startup to the backup */
             /****/
         } 
 
         /* save the new startup database, if there is one */
-        res = NO_ERR;
-        running = cfg_get_config_id(NCX_CFGID_RUNNING);
-        if (running == NULL) {
-            SET_ERROR(ERR_INTERNAL_VAL);
-        }
         startup = cfg_get_config_id(NCX_CFGID_STARTUP);
         if (startup != NULL) {
+            res = NO_ERR;
             copystartup = val_clone_config_data(cfg->root, &res);
-            if (copystartup == NULL) {
+            if (copystartup == NULL || res != NO_ERR) {
+                if (copystartup) {
+                    val_free_value(copystartup);
+                }
                 return res;
             }
         }
 
-        if (res == NO_ERR) {
-            filebuffer = agt_get_startup_filespec(&res);
-            if (filebuffer != NULL && res == NO_ERR) {
-                if (LOGDEBUG) {
-                    log_debug("\nWriting <%s> config to file '%s'",
-                              cfg->name,
-                              filebuffer);
-                }
-                /* write the new startup config */
-                xml_init_attrs(&attrs);
-
-                /* output to the specified file or STDOUT */
-                res = xml_wr_check_file(filebuffer,
-                                        cfg->root,
-                                        &attrs,
-                                        XMLMODE,
-                                        WITHHDR,
-                                        TRUE,
-                                        0,
-                                        profile->agt_indent,
-                                        agt_check_save);
-
-                xml_clean_attrs(&attrs);
-
-                if (res == NO_ERR && copystartup != NULL) {
-                    /* toss the old startup and save the new one */
-                    if (startup->root) {
-                        val_free_value(startup->root);
-                    }
-                    startup->root = copystartup;
-                    copystartup = NULL;
-                }
+        res = NO_ERR;
+        filebuffer = agt_get_startup_filespec(&res);
+        if (filebuffer != NULL && res == NO_ERR) {
+            if (LOGDEBUG) {
+                log_debug("\nWriting <%s> config to file '%s'",
+                          cfg->name,
+                          filebuffer);
             }
+            /* write the new startup config */
+            xml_init_attrs(&attrs);
+
+            /* output to the specified file or STDOUT */
+            res = xml_wr_check_file(filebuffer,
+                                    cfg->root,
+                                    &attrs,
+                                    XMLMODE,
+                                    WITHHDR,
+                                    TRUE,
+                                    0,
+                                    profile->agt_indent,
+                                    agt_check_save);
+
+            xml_clean_attrs(&attrs);
+
+            if (res == NO_ERR && startup != NULL) {
+                /* toss the old startup and save the new one */
+                if (startup->root) {
+                    val_free_value(startup->root);
+                }
+                startup->root = copystartup;
+                copystartup = NULL;
+                cfg_update_last_ch_time(startup);
+            }
+        }
+        if (filebuffer != NULL) {
+            m__free(filebuffer);
+        }
+        if (copystartup != NULL) {
+            val_free_value(copystartup);
         }
         break;
     case CFG_LOC_NAMED:
@@ -3748,14 +3839,6 @@ status_t
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    if (copystartup) {
-        val_free_value(copystartup);
-    }
-
-    if (filebuffer) {
-        m__free(filebuffer);
     }
 
     return res;

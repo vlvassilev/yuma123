@@ -120,6 +120,10 @@ date         init     comment
 #include  "agt_state.h"
 #endif
 
+#ifndef _H_agt_time_filter
+#include  "agt_time_filter.h"
+#endif
+
 #ifndef _H_agt_util
 #include  "agt_util.h"
 #endif
@@ -612,6 +616,93 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION get_datastore_name
+*
+* Get the datastore name for the virtual
+* timestamp entry that was called from a <get> operation
+*
+* INPUTS:
+*    virval == virtual value
+*    retname== address of return name string pointer
+*
+* OUTPUTS:
+*   *retname == return name string
+
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_datastore_name (const val_value_t *virval,
+                        const xmlChar **retname)
+{
+    const val_value_t  *parentval, *nameval;
+
+    parentval = virval->parent;
+    if (parentval == NULL) {
+        return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    nameval = val_find_child(parentval,
+                             obj_get_mod_name(parentval->obj),
+                             (const xmlChar *)"name");
+
+    if (nameval == NULL) {
+        return ERR_NCX_DEF_NOT_FOUND;        
+    }
+
+    *retname = VAL_STR(nameval);
+    return NO_ERR;
+
+} /* get_datastore_name */
+
+
+/********************************************************************
+* FUNCTION get_last_modified
+*
+* <get> operation handler for the datastore/last-modified timestamp
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_last_modified (ses_cb_t *scb,
+                       getcb_mode_t cbmode,
+                       const val_value_t *virval,
+                       val_value_t  *dstval)
+{
+    const xmlChar  *name = NULL;
+    cfg_template_t *cfg;
+    status_t        res;
+
+    (void)scb;
+
+    if (cbmode != GETCB_GET_VALUE) {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    res = get_datastore_name(virval, &name);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    cfg = cfg_get_config(name);
+    if (cfg == NULL) {
+        return ERR_DB_NOT_FOUND;
+    }
+
+    VAL_STR(dstval) = xml_strdup(cfg->last_ch_time);
+    if (VAL_STR(dstval) == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    return NO_ERR;
+
+} /* get_last_modified */
+
+
+/********************************************************************
 * FUNCTION make_datastore_val
 *
 * make a val_value_t struct for a specified configuration
@@ -675,6 +766,24 @@ static val_value_t *
         return NULL;
     }
     val_init_virtual(leafval, get_locks, testobj);
+    val_add_child(leafval, confval);
+
+    /* create datastore/last-modified */
+    testobj = obj_find_child(confobj, 
+                             y_yuma_time_filter_M_yuma_time_filter, 
+                             NCX_EL_LAST_MODIFIED);
+    if (!testobj) {
+        val_free_value(confval);
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    leafval = val_new_value();
+    if (!leafval) {
+        val_free_value(confval);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+    val_init_virtual(leafval, get_last_modified, testobj);
     val_add_child(leafval, confval);
 
     *res = NO_ERR;

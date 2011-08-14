@@ -95,7 +95,7 @@ extern void
 *
 * Check if the specified string is a valid dateTime or 
 * date-and-time string is valid and if so, convert it
-* to 
+* to UTC time
 *
 * INPUTS:
 *   buff == pointer to buffer to check

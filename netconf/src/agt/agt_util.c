@@ -1608,6 +1608,31 @@ status_t
 
 
 /********************************************************************
+* FUNCTION agt_output_empty
+*
+* output no data for the get or get-config operation
+* because the if-modified-since fileter did not pass
+*
+* INPUTS:
+*    see rpc/agt_rpc.h   (agt_rpc_data_cb_t)
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    agt_output_empty (ses_cb_t *scb,
+                      rpc_msg_t *msg,
+                      int32 indent)
+{
+
+    scb = scb;   /* not used warning */
+    msg = msg;  /* not used warning */
+    indent = indent; /* not used warning */
+    return NO_ERR;
+                
+} /* agt_output_empty */
+
+
+/********************************************************************
 * FUNCTION agt_check_max_access
 * 
 * Check if the max-access for a parameter is exceeded

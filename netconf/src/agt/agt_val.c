@@ -1342,7 +1342,11 @@ static status_t
                 val_set_dirty_flag(parent);
             }
         }
-    
+
+        /* update the last change time
+         * this will only apply here to candidate or running
+         */
+        cfg_update_last_ch_time(target);
 
         /* make sure the node is not a virtual value */
         if (curval && val_is_virtual(curval)) {

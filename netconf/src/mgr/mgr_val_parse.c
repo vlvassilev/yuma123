@@ -1756,7 +1756,7 @@ static status_t
     val_value_t       *metaval;
     xmlns_id_t         ncid, yangid, xmlid, wdaid;
     status_t           res, retres;
-    boolean            iskey, isvalue, islang;
+    boolean            iskey, isvalue, islang, islastmodified;
 
     retres = NO_ERR;
     ncid =  xmlns_nc_id();
@@ -1786,6 +1786,7 @@ static status_t
         iskey = FALSE;
         isvalue = FALSE;
         islang = FALSE;
+        islastmodified = FALSE;
 
         /* check qualified and unqualified operation attribute,
          * then the 'xmlns' attribute, then a defined attribute
@@ -1821,6 +1822,8 @@ static status_t
                 res = ERR_NCX_INVALID_VALUE;
             }
             continue;
+        } else if (val_match_metaval(attr, 0, NCX_EL_LAST_MODIFIED)) {
+            islastmodified = TRUE;
         } else {
             /* find the attribute definition in this typdef */
             meta = obj_find_metadata(obj, attr->attr_name);
@@ -1831,7 +1834,7 @@ static status_t
             }
         }
 
-        if (iskey || isvalue || islang) {
+        if (iskey || isvalue || islang || islastmodified) {
             metadef = typ_get_basetype_typdef(NCX_BT_STRING);
         }
 
@@ -1850,9 +1853,9 @@ static status_t
                 }
             }
         } else {
-            res = ERR_NCX_UNKNOWN_ATTRIBUTE;
-            log_error("\nError: unknown attribute '%s'", 
-                      attr->attr_qname);
+            log_warn("\nWarning: unknown attribute found %s='%s'", 
+                     attr->attr_qname,
+                     attr->attr_val);
         }
         if (res != NO_ERR) {
             retres = res;

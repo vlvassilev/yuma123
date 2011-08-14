@@ -147,33 +147,6 @@ static cfg_template_t  *cfg_arr[CFG_NUM_STATIC];
 
 
 /********************************************************************
-* FUNCTION new_cur_datetime
-*
-* Malloc and set a datetime string to the current time
-*
-* INPUTS:
-*    none
-* RETURNS:
-*    malloced string or NULL if some error
-*    This string needs to be freed by the caller
-*********************************************************************/
-static xmlChar *
-    new_cur_datetime (void)
-{
-    xmlChar *str;
-
-    str = m__getMem(CFG_DATETIME_LEN);
-    if (!str) {
-        return NULL;
-    }
-    *str=0;
-    tstamp_datetime(str);
-    return str;
-
-} /* new_cur_datetime */
-
-
-/********************************************************************
 * FUNCTION get_template
 *
 * Get the config template from its name
@@ -234,9 +207,6 @@ static void
     }
     if (cfg->src_url) {
         m__free(cfg->src_url);
-    }
-    if (cfg->load_time) {
-        m__free(cfg->load_time);
     }
     if (cfg->lock_time) {
         m__free(cfg->lock_time);
@@ -310,9 +280,17 @@ static cfg_template_t *
     if (!cfg->lock_time) {
         free_template(cfg);
         return NULL;
-    } else {
-        memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
     }
+    memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
+
+    cfg->last_ch_time = m__getMem(TSTAMP_MIN_SIZE);
+    if (!cfg->last_ch_time) {
+        free_template(cfg);
+        return NULL;
+    }
+    memset(cfg->last_ch_time, 0x0, TSTAMP_MIN_SIZE);
+    /* give each config a valid last changed time */
+    cfg_update_last_ch_time(cfg);
 
     cfg->cfg_id = cfg_id;
     cfg->cfg_state = CFG_ST_INIT;
@@ -1419,31 +1397,38 @@ status_t
                          val_value_t *newroot)
 {
     if (cfg->root && val_child_cnt(cfg->root)) {
+        /* root already set with child nodes
+         * this function can only be called once
+         */
         return SET_ERROR(ERR_INTERNAL_VAL);
-    } else if (cfg->root) {
-        val_free_value(cfg->root);
-        cfg->root = NULL;
-        cfg->root = newroot;
-    } else {
-        cfg->root = newroot;
     }
 
-    /* set the load_time and last_ch_time timestamps */
-    cfg->load_time = new_cur_datetime();
-    if (cfg->load_time) {
-        cfg->last_ch_time = xml_strdup(cfg->load_time);
-        if (!cfg->last_ch_time) {
-            cfg->root = NULL;
-            return ERR_INTERNAL_MEM;
-        }
-    } else {
-        cfg->root = NULL;
-        return ERR_INTERNAL_MEM;
+    cfg_update_last_ch_time(cfg);
+
+    if (cfg->root) {
+        val_free_value(cfg->root);
     }
+    cfg->root = newroot;
 
     return NO_ERR;
 
 } /* cfg_apply_load_root */
+
+
+/********************************************************************
+* FUNCTION cfg_update_last_ch_time
+*
+* Update the last-modified timestamp
+*
+* INPUTS:
+*    cfg == config target
+*********************************************************************/
+void
+    cfg_update_last_ch_time (cfg_template_t *cfg)
+{
+    tstamp_datetime(cfg->last_ch_time);
+
+} /* cfg_update_last_ch_time */
 
 
 /********************************************************************

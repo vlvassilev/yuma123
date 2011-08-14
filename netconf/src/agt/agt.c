@@ -110,6 +110,10 @@ date         init     comment
 #include "agt_val.h"
 #endif
 
+#ifndef _H_agt_time_filter
+#include "agt_time_filter.h"
+#endif
+
 #ifndef _H_agt_timer
 #include "agt_timer.h"
 #endif
@@ -624,6 +628,13 @@ status_t
         return res;
     }
 
+    /* load the yuma-time-filter module */
+    res = y_yuma_time_filter_init
+        (y_yuma_time_filter_M_yuma_time_filter, NULL);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* check the module parameter set from CLI or conf file
      * for any modules to pre-load
      */
@@ -787,9 +798,16 @@ status_t
         return res;
     }
 
-
     /* load the interface monitoring callback functions and data */
     res = agt_if_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* TBD: load the time filter callbacks
+     * this currently does not do anything
+     */
+    res = y_yuma_time_filter_init2();
     if (res != NO_ERR) {
         return res;
     }
@@ -940,6 +958,7 @@ void
         agt_proc_cleanup();
         y_ietf_netconf_partial_lock_cleanup();
         agt_if_cleanup();
+        y_yuma_time_filter_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();
         agt_rpc_cleanup();

@@ -175,7 +175,6 @@ typedef struct cfg_template_t_ {
     cfg_state_t    cfg_state;
     xmlChar       *name;
     xmlChar       *src_url;
-    xmlChar       *load_time;
     xmlChar       *lock_time;
     xmlChar       *last_ch_time;
     uint32         flags;
@@ -623,6 +622,18 @@ extern void
 extern status_t
     cfg_apply_load_root (cfg_template_t *cfg,
 			 val_value_t *newroot);
+
+
+/********************************************************************
+* FUNCTION cfg_update_last_ch_time
+*
+* Update the last-modified timestamp
+*
+* INPUTS:
+*    cfg == config target
+*********************************************************************/
+extern void
+    cfg_update_last_ch_time (cfg_template_t *cfg);
 
 
 /********************************************************************

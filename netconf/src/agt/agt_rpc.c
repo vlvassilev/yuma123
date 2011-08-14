@@ -531,6 +531,74 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION check_add_changed_since_attr
+*
+* Check if the changed-since attribute should be added to the
+* message attributes
+* 
+* INPUTS:
+*   msg == rpc_msg_t in progress
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_add_changed_since_attr (rpc_msg_t *msg)
+{
+    const xmlChar *rpcname;
+    xmlns_id_t   ncid = xmlns_nc_id();
+
+    if (msg->rpc_method == NULL) {
+        return NO_ERR;
+    }
+
+    if (obj_get_nsid(msg->rpc_method) != ncid) {
+        /* not the NETCONF module */
+        return NO_ERR;
+    }
+
+    rpcname = obj_get_name(msg->rpc_method);
+
+    /* check if <get> or <get-config> */
+    if (!xml_strcmp(rpcname, NCX_EL_GET) ||
+        !xml_strcmp(rpcname, NCX_EL_GET_CONFIG)) {
+
+        cfg_template_t *cfg;
+        xml_attr_t     *attr;
+        status_t        res;
+
+        /* !!! this code is coupled to agt_ncx.c get_validate
+         * !!! and get_config_validate. Those functions set
+         * !!! the rpc_user1 field to the config target if
+         * !!! everything went well.  Only add last-modified
+         * !!! if rpc_user1 is set
+         */
+        if (msg->rpc_user1 == NULL) {
+            return NO_ERR;
+        }
+        cfg = (cfg_template_t *)msg->rpc_user1;
+
+        /* check if this attr already present in rpc_in_attrs */
+        attr = xml_find_attr_q(msg->rpc_in_attrs, 0, NCX_EL_LAST_MODIFIED);
+        if (attr != NULL) {
+            return NO_ERR;
+        }
+
+        /* make a new attr and add it to rpc_in_attrs */
+        res = xml_add_attr(msg->rpc_in_attrs,
+                           0,
+                           NCX_EL_LAST_MODIFIED,
+                           cfg->last_ch_time);
+
+        return res;
+    }
+
+    return NO_ERR;
+
+}  /* check_add_changed_since_attr */
+
+
+/********************************************************************
 * FUNCTION send_rpc_reply
 *
 * Operation succeeded or failed
@@ -564,14 +632,17 @@ static void
     errsend = !dlq_empty(&msg->mhdr.errQ);
 
     res = xml_msg_clean_defns_attr(msg->rpc_in_attrs);
-    if (res != NO_ERR) {
-        ses_finish_msg(scb);
-        return;
+
+    if (res == NO_ERR) {
+        res = check_add_changed_since_attr(msg);
     }
-    
-    res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
-                                  msg->rpc_in_attrs,
-                                  errsend);
+
+    if (res == NO_ERR) { 
+        res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
+                                      msg->rpc_in_attrs,
+                                      errsend);
+    }
+
     if (res != NO_ERR) {
         ses_finish_msg(scb);
         return;

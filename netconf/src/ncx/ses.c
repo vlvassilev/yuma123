@@ -777,7 +777,7 @@ static void
 {
     xmlChar     numbuff[NCX_MAX_NUMLEN];
 
-    sprintf((char *)numbuff, "%u", (uint32)ch);
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%u", (uint32)ch);
 
     ses_putchar(scb, '&');
     ses_putchar(scb, '#');
@@ -903,7 +903,7 @@ static void
             /* copy the prolog string inline
              * to make libxml2 happy
              */
-            strcpy(&buffer[i], (const char *)XML_START_MSG);
+            strncpy(&buffer[i], (const char *)XML_START_MSG, bufflen-i);
 
             if (tempbuff[0]) {
                 for (j = XML_START_MSG_SIZE+i, k = 0; 
@@ -1680,7 +1680,7 @@ int
      * is not hard-wired into the code, though.
      */
     if (len == 4) {
-        strcpy(buffer, "\n<?x");
+        strncpy(buffer, "\n<?x", len);
         return 4;
     }
 
@@ -1709,12 +1709,7 @@ int
         }
     }
 
-    handle_prolog_state(msg, 
-                        buffer, 
-                        len, 
-                        buff, 
-                        buff->bufflen,
-                        &retlen);
+    handle_prolog_state(msg, buffer, len, buff, buff->bufflen, &retlen);
 
     /* start transferring bytes to the return buffer */
     done = FALSE;
@@ -1737,13 +1732,8 @@ int
             } else {
                 buff->buffpos = buff->buffstart;
                 msg->curbuff = buff;
-
-                handle_prolog_state(msg, 
-                                    buffer, 
-                                    len, 
-                                    buff, 
-                                    buff->bufflen, 
-                                    &retlen);
+                handle_prolog_state(msg, buffer, len, buff, 
+                                    buff->bufflen, &retlen);
             }
         }
     }
@@ -1897,7 +1887,7 @@ status_t
                 ret--;
             }
 
-            /* hand off the malloced buffer in 1 of these functions
+            /* pass the read buffer in 1 of these functions
              * to handle the buffer framing
              */
             if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
@@ -1911,7 +1901,7 @@ status_t
                 scb->rdfn == NULL) {
 #ifdef SES_DEBUG_TRACE
                 if (LOGDEBUG3) {
-                    log_debug3("\nbail exit %u:%u (%s)", 
+                    log_debug3("\nses: bail exit %u:%u (%s)", 
                                ret, 
                                scb->readbuffsize,
                                get_error_string(res));

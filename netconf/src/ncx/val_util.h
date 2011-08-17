@@ -719,9 +719,9 @@ extern void
 
 /********************************************************************
 * FUNCTION val_set_subdirs_parm
-*   --subdirs
+*   --subdirs=<boolean>
 *
-* Check the specified value set for the subdirs boolean
+* Handle the --subdirs parameter
 *
 * INPUTS:
 *   parentval == CLI container to check for the subdirs parm

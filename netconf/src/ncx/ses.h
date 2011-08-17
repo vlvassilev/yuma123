@@ -82,7 +82,7 @@ extern "C" {
 #define SES_NULL_SID  0
 
 /* controls the size of each buffer chuck */
-#define SES_MSG_BUFFSIZE  1024
+#define SES_MSG_BUFFSIZE  2000   // 1024
 
 /* max number of buffer chunks a session can have allocated at once  */
 #define SES_MAX_BUFFERS  4096

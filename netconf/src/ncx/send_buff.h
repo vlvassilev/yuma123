@@ -30,6 +30,8 @@ date	     init     comment
 20-jan-07    abb      begun
 */
 
+#include <stdlib.h>
+
 #ifndef _H_status
 #include "status.h"
 #endif

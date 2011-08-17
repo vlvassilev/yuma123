@@ -795,6 +795,7 @@ static void
  * FUNCTION handle_config_assign
  * 
  * handle a user assignment of a config variable
+ * consume memory 'newval' if it is non-NULL
  *
  * INPUTS:
  *   server_cb == server control block to use
@@ -828,9 +829,11 @@ static status_t
     res = NO_ERR;
     if (newval) {
         if (!typ_is_string(newval->btyp)) {
+            val_free_value( newval );
             return ERR_NCX_WRONG_TYPE;
         }
         if (VAL_STR(newval) == NULL) {
+            val_free_value( newval );
             return ERR_NCX_INVALID_VALUE;
         }
         usestr = VAL_STR(newval);
@@ -1631,8 +1634,10 @@ static status_t
              */
             if (vartype == VAR_TYP_CONFIG) {
                 if (curval==NULL) {
+                    val_free_value(val);
                     res = SET_ERROR(ERR_INTERNAL_VAL);
                 } else {
+                    /* hand off 'val' memory here */
                     res = handle_config_assign(server_cb,
                                                curval, 
                                                val,
@@ -1647,9 +1652,9 @@ static status_t
                                    nlen, 
                                    vartype, 
                                    val);
-            }
-            if (res != NO_ERR) {
-                val_free_value(val);
+                if (res != NO_ERR) {
+                    val_free_value(val);
+                }
             }
         }
     } else if (res==NO_ERR) {
@@ -2060,7 +2065,7 @@ static status_t
 static status_t
     process_cli_input (server_cb_t *server_cb,
                        int argc,
-                       const char *argv[])
+                       char *argv[])
 {
     obj_template_t        *obj;
     val_value_t           *parm;
@@ -3512,7 +3517,6 @@ static void
 {
     server_cb_t   *server_cb;
     mgr_scb_t    *mgrcb;
-    uint32        usesid;
 
 #ifdef DEBUG
     if (!scb || !msg || !consumed) {
@@ -3524,10 +3528,7 @@ static void
     *consumed = FALSE;
     mgrcb = scb->mgrcb;
     if (mgrcb) {
-        usesid = mgrcb->agtsid;
         ncx_set_temp_modQ(&mgrcb->temp_modQ);
-    } else {
-        usesid = 0;
     }
 
     /***  TBD: multi-session support ***/
@@ -3578,12 +3579,12 @@ static void
  *********************************************************************/
 static status_t 
     yangcli_init (int argc,
-              const char *argv[])
+                  char *argv[])
 {
     obj_template_t       *obj;
     server_cb_t          *server_cb;
     val_value_t          *parm, *modval;
-    xmlChar              *savestr, *revision, savechar;
+    xmlChar              *savestr, *revision;
     status_t              res;
     uint32                modlen;
     log_debug_t           log_level;
@@ -3816,12 +3817,10 @@ static status_t
 
             revision = NULL;
             savestr = NULL;
-            savechar = '\0';
             modlen = 0;
 
             if (yang_split_filename(VAL_STR(modval), &modlen)) {
                 savestr = &(VAL_STR(modval)[modlen]);
-                savechar = *savestr;
                 *savestr = '\0';
                 revision = savestr + 1;
             }
@@ -3830,9 +3829,6 @@ static status_t
                                      revision,
                                      &savedevQ,
                                      NULL);
-            if (savestr != NULL) {
-                savechar = *savestr;
-            }
             if (res != NO_ERR) {
                 log_error("\n load module failed (%s)", 
                           get_error_string(res));
@@ -4882,9 +4878,7 @@ void
 *                       FUNCTION main                               *
 *                                                                   *
 *********************************************************************/
-int 
-    main (int argc, 
-          const char *argv[])
+int main (int argc, char *argv[])
 {
     status_t   res;
 

@@ -92,6 +92,8 @@ date         init     comment
 12-oct-07    abb      add dlq_count
 */
 
+#include "procdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

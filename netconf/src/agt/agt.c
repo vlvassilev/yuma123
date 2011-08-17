@@ -417,7 +417,7 @@ static void
 *********************************************************************/
 status_t 
     agt_init1 (int argc,
-               const char *argv[],
+               char *argv[],
                boolean *showver,
                help_mode_t *showhelpmode)
 {

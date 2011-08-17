@@ -319,9 +319,7 @@ extern "C" {
 #define RPC_ERR_APPTAG_RECOVER_FAILED   (const xmlChar *)"recover-failed"
 #define RPC_ERR_APPTAG_NO_SUPPORT       (const xmlChar *)"no-support"
 
-
 #define RPC_ERR_LAST_ERROR RPC_ERR_MALFORMED_MESSAGE
-
 
 /********************************************************************
 *                                                                   *

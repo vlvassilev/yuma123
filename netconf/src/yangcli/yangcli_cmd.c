@@ -262,37 +262,37 @@ static boolean
 *    pointer to malloced value set or NULL if none created,
 *    may have errors, check *res
 *********************************************************************/
-static val_value_t *
-    parse_rpc_cli (server_cb_t *server_cb,
-                   obj_template_t *rpc,
-                   const xmlChar *args,
-                   status_t  *res)
+static val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
+                                    obj_template_t *rpc,
+                                    const xmlChar *args,
+                                    status_t  *res )
 {
     obj_template_t   *obj;
-    const char       *myargv[2];
+    char             *myargv[2];
+    val_value_t      *retval = NULL;
 
-    /* construct an argv array, 
-     * convert the CLI into a parmset 
-     */
+    /* construct an argv array, convert the CLI into a parmset */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (obj) {
-        myargv[0] = (const char *)obj_get_name(rpc);
-        myargv[1] = (const char *)args;
-        return cli_parse(server_cb->runstack_context,
-                         2, 
-                         myargv, 
-                         obj, 
-                         VALONLY, 
-                         SCRIPTMODE,
-                         get_autocomp(), 
-                         CLI_MODE_COMMAND,
-                         res);
+        myargv[0] = (char*)xml_strdup( obj_get_name(rpc) );
+        if ( myargv[0] ) {
+            myargv[1] = (char*)xml_strdup( args );
+            if ( myargv[1] ) {
+                retval = cli_parse( server_cb->runstack_context, 2, myargv, obj,
+                                    VALONLY, SCRIPTMODE, get_autocomp(), 
+                                    CLI_MODE_COMMAND, res );
+                m__free( myargv[1] );
+            } else {
+                *res = ERR_INTERNAL_MEM;
+            }
+            m__free( myargv[0] );
+        } else {
+            *res = ERR_INTERNAL_MEM;
+        }
     } else {
         *res = SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
     }
-    /*NOTREACHED*/
-
+    return retval;
 }  /* parse_rpc_cli */
 
 
@@ -776,7 +776,6 @@ static status_t
               val_value_t *oldvalset)
 {
     const xmlChar    *def, *parmname, *str;
-    typ_def_t        *typdef;
     val_value_t      *oldparm, *newparm;
     xmlChar          *line, *start, *objbuff, *buff;
     xmlChar          *line2, *start2, *saveline;
@@ -784,7 +783,6 @@ static status_t
     ncx_btype_t       btyp;
     boolean           done, ispassword, iscomplex;
     uint32            len;
-    int               glstatus;
 
     if (!obj_is_mandatory(parm) && !server_cb->get_optional) {
         return NO_ERR;
@@ -836,7 +834,6 @@ static status_t
     }
 
     parmname = obj_get_name(parm);
-    typdef = obj_get_typdef(parm);
     btyp = obj_get_basetype(parm);
     res = NO_ERR;
     oldparm = NULL;
@@ -915,13 +912,15 @@ static status_t
          * but don't echo if this is a password parm
          */
         if (ispassword) {
-            glstatus = gl_echo_mode(server_cb->cli_gl, 0);
+            /* ignore return value which is previous mode */
+            (void)gl_echo_mode(server_cb->cli_gl, 0);
         }
                                 
         line = get_cmd_line(server_cb, &res);
 
         if (ispassword) {
-            glstatus = gl_echo_mode(server_cb->cli_gl, 1);
+            /* ignore return value which is previous mode */
+            (void)gl_echo_mode(server_cb->cli_gl, 1);
         }
 
         if (!line) {
@@ -2448,7 +2447,7 @@ static status_t
     val_value_t          *valset, *parm;
     status_t              res;
     help_mode_t           mode;
-    boolean               imode, done;
+    boolean               imode;
     ncx_node_t            dtyp;
     uint32                dlen;
 
@@ -2462,7 +2461,6 @@ static status_t
         return res;
     }
 
-    done = FALSE;
     mode = HELP_MODE_NORMAL;
 
     /* look for the 'brief' parameter */
@@ -5183,14 +5181,12 @@ static status_t
     obj_template_t       *operobj;
     const xmlChar        *insopstr;
     val_value_t          *metaval;
-    ncx_node_t            dtyp;
     status_t              res;
     xmlns_id_t            yangid;
 
     yangid = xmlns_yang_id();
 
     /* get the internal nc:operation object */
-    dtyp = NCX_NT_OBJ;
     operobj = ncx_get_gen_string();
     if (!operobj) {
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -6157,7 +6153,7 @@ static status_t
                           YANGCLI_MOD, 
                           NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
-        withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
+        withdef = ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
     } else {
         withdef = server_cb->withdefaults;
     }
@@ -6299,7 +6295,7 @@ static status_t
     FILE          *outputfile;
     const char    *format;
     int            glstatus;
-
+    status_t       res = NO_ERR;
 
     outputfile = log_get_logfile();
     if (!outputfile) {
@@ -6318,10 +6314,13 @@ static status_t
                                format,
                                1,
                                maxlines);
-
+    if (glstatus) {
+        log_error("\nError: show history failed");
+        res = ERR_NCX_OPERATION_FAILED;
+    }
     fputc('\n', outputfile);
 
-    return NO_ERR;
+    return res;
 
 } /* do_history_show */
 
@@ -6476,12 +6475,11 @@ static status_t
 {
     val_value_t        *valset, *parm;
     status_t            res;
-    boolean             imode, done;
+    boolean             done;
     help_mode_t         mode;
 
     done = FALSE;
     res = NO_ERR;
-    imode = interactive_mode();
 
     valset = get_valset(server_cb, rpc, &line[len], &res);
     if (valset && res == NO_ERR) {

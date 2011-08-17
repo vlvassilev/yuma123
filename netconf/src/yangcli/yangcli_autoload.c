@@ -174,7 +174,6 @@ static status_t
     obj_template_t        *rpc, *input, *parmobj;
     val_value_t           *reqdata, *parmval;
     mgr_rpc_req_t         *req;
-    mgr_scb_t             *mscb;
     status_t               res;
     xmlns_id_t             nsid;
 
@@ -183,7 +182,6 @@ static status_t
     res = NO_ERR;
     input = NULL;
     nsid = 0;
-    mscb = (mgr_scb_t *)scb->mgrcb;
     mod = ncx_find_module(NCXMOD_IETF_NETCONF_STATE, NULL);
     if (mod == NULL) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);

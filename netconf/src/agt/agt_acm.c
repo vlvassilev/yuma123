@@ -387,8 +387,8 @@ static void
 * create a data rule cache entry
 *
 * INPUTS:
-*   pcb == parser control block to cache
-*   result == XPath result to cache
+*   pcb == parser control block to cache  (live memory freed later)
+*   result == XPath result to cache   (live memory freed later)
 *   rule == back-ptr to dataRule entry
 *
 * RETURNS:
@@ -1141,15 +1141,13 @@ static boolean
         /* this moduleRule is for the specified node
          * check if any of the groups in the usergroups
          * list for this user match any of the groups in
-         * the allowedGroup leaf-list
+         * the allowedGroup leaf-list. Note granted is only set to
+         * TRUE if check_access_bit succeeds.
          */
         granted = check_access_bit(modrule_cache->modrule,
                                    access,
                                    usergroups,
                                    done);
-        if (!*done) {
-            granted = FALSE;
-        }
     }
 
     if (res != NO_ERR) {
@@ -1293,6 +1291,135 @@ static boolean
 
 }  /* get_default_data_response */
 
+/********************************************************************
+* FUNCTION cache_data_rules
+*
+* Cache the data rules.
+* -- If there is a failure partway through caching the items
+*    all the new datarules will be deleted
+* -- Do not set the flag unless the entire operation succeeds
+* -- On failure remove all added datarules
+*
+* INPUTS:
+*    cache == agt_acm cache to use
+*    rulesval == /nacm/rules node, pre-fetched
+*
+* OUTPUTS:
+*    *cache is modified with the cached datarules items.
+*
+* RETURNS:
+*    NO_ERR on success or an error if the operation failed.
+*
+*********************************************************************/
+static status_t
+    cache_data_rules( agt_acm_cache_t *cache,
+                      val_value_t *rulesval,
+                      val_value_t *nacmroot )
+{
+    status_t             res = NO_ERR;
+    val_value_t         *datarule;
+    val_value_t         *valroot;
+    dlq_hdr_t            holdQ;
+
+    if ( ( cache->flags & FL_ACM_DATARULES_SET ) ) 
+    {
+        // datarules have already been already cached, return no error
+        return NO_ERR;
+    }
+
+    /* the /nacm node is supposed to be a child of <config> */
+    valroot = nacmroot->parent;
+    if (!valroot || !obj_is_root(valroot->obj)) 
+    {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* save data rules in this hold queue until all OK */
+    dlq_createSQue(&holdQ);
+
+    /* check all the dataRule entries */
+    for ( datarule = val_find_child( rulesval, AGT_ACM_MODULE, 
+                                     nacm_N_dataRule );
+          datarule != NULL;
+          datarule = val_find_next_child( rulesval, AGT_ACM_MODULE,
+                                          nacm_N_dataRule, datarule ) ) 
+    {
+        val_value_t         *path;
+        xpath_pcb_t         *pcb;
+        xpath_result_t      *result;
+
+        /* get the XPath expression leaf */
+        path = val_find_child( datarule, AGT_ACM_MODULE, nacm_N_path );
+        if ( !path || !path->xpathpcb ) 
+        {
+            res = SET_ERROR( ERR_INTERNAL_VAL );
+            break;
+        }
+
+        pcb = xpath_clone_pcb( path->xpathpcb );
+        if ( !pcb ) 
+        {
+            res = ERR_INTERNAL_MEM;
+            break;
+        }
+
+        /* make sure the source is not XML so the defunct reader
+         * does not get accessed; the clone should save the
+         * NSID bindings in all the tokens
+         */
+        pcb->source = XP_SRC_YANG;
+        result = xpath1_eval_expr( pcb, valroot, valroot, FALSE,
+                                   TRUE, &res );
+        if ( !result ) 
+        {
+            res = ERR_INTERNAL_MEM;
+            xpath_free_pcb(pcb);
+            break;
+        }
+
+        if ( res == NO_ERR) 
+        {
+            agt_acm_datarule_t  *datarule_cache;
+            datarule_cache = new_datarule(pcb, result, datarule);
+            if ( datarule_cache ) 
+            {
+                /* pass off 'pcb' and 'result' memory here */
+                dlq_enque( datarule_cache, &holdQ );
+            }
+            else 
+            {
+                res = ERR_INTERNAL_MEM;
+            }
+        }
+
+        if ( res != NO_ERR )
+        {
+            xpath_free_pcb( pcb );
+            xpath_free_result( result );
+            break;
+        }
+    }
+
+    if (res == NO_ERR) {
+        cache->flags |= FL_ACM_DATARULES_SET;
+        dlq_block_enque(&holdQ, &cache->dataruleQ);
+    } else {
+        agt_acm_datarule_t  *freerule;        
+        while (!dlq_empty(&holdQ)) {
+            freerule = (agt_acm_datarule_t *)dlq_deque(&holdQ);
+            if (freerule) {
+                free_datarule(freerule);
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        log_error("\nError: cache NACM data rules failed! (%s)",
+                  get_error_string(res));
+    }
+
+    return res;
+}
+
 
 /********************************************************************
 * FUNCTION check_data_rules
@@ -1329,128 +1456,55 @@ static boolean
                       agt_acm_usergroups_t *usergroups,
                       boolean *done)
 {
-    xpath_pcb_t         *pcb;
-    xpath_result_t      *result;
     dlq_hdr_t           *resnodeQ;
     agt_acm_datarule_t  *datarule_cache;
-    val_value_t         *datarule, *path, *valroot;
-    boolean              granted, nodefound;
-    status_t             res;
+    boolean              granted = FALSE;
+    status_t             res = NO_ERR;
 
     *done = FALSE;
-    granted = FALSE;
-    pcb = NULL;
-    res = NO_ERR;
-
-    /* the /nacm node is supposed to be a child of <config> */
-    valroot = nacmroot->parent;
-    if (!valroot || !obj_is_root(valroot->obj)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return FALSE;
-    }
 
     /* fill the dataruleQ in the cache if needed */
-    if (!(cache->flags & FL_ACM_DATARULES_SET)) {
-        cache->flags |= FL_ACM_DATARULES_SET;
+    if (!(cache->flags & FL_ACM_DATARULES_SET)) 
+    {
+        res = cache_data_rules( cache, rulesval, nacmroot );
+    }
 
-        /* check all the dataRule entries */
-        for (datarule = val_find_child(rulesval, 
-                                       AGT_ACM_MODULE, 
-                                       nacm_N_dataRule);
-             datarule != NULL && res == NO_ERR;
-             datarule = val_find_next_child(rulesval,
-                                            AGT_ACM_MODULE,
-                                            nacm_N_dataRule,
-                                            datarule)) {
-
-            /* get the XPath expression leaf */
-            path = val_find_child(datarule,
-                                  AGT_ACM_MODULE,
-                                  nacm_N_path);
-            if (!path || !path->xpathpcb) {
+    if ( res == NO_ERR )
+    {
+        /* go through the cache and exit if any matches are found */
+        for ( datarule_cache = (agt_acm_datarule_t *) 
+                  dlq_firstEntry(&cache->dataruleQ);
+              datarule_cache != NULL && !*done;
+              datarule_cache = (agt_acm_datarule_t *) 
+                  dlq_nextEntry(datarule_cache)) 
+        {
+            resnodeQ = xpath_get_resnodeQ(datarule_cache->result);
+            if (!resnodeQ) 
+            {
                 res = SET_ERROR(ERR_INTERNAL_VAL);
-                continue;
+                break;
             }
 
-            pcb = xpath_clone_pcb(path->xpathpcb);
-            if (pcb == NULL) {
-                res = ERR_INTERNAL_MEM;
-                continue;
-            }
-
-            /* make sure the source is not XML so the defunct reader
-             * does not get accessed; the clone should save the
-             * NSID bindings in all the tokens
-             */
-            pcb->source = XP_SRC_YANG;
-            res = NO_ERR;
-            result = xpath1_eval_expr(pcb,
-                                      valroot,
-                                      valroot,
-                                      FALSE,
-                                      TRUE,
-                                      &res);
-            if (!result) {
-                xpath_free_pcb(pcb);
-                pcb = NULL;
-                continue;
-            }
-
-            if (res == NO_ERR) {
-                datarule_cache = new_datarule(pcb, result, datarule);
-                if (!datarule_cache) {
-                    res = ERR_INTERNAL_MEM;
-                    xpath_free_pcb(pcb);
-                    xpath_free_result(result);
-                    pcb = NULL;
-                    result = NULL;
-                    continue;
-                } else {
-                    /* pass off 'pcb' and 'result' memory here */
-                    result = NULL;
-                    dlq_enque(datarule_cache, &cache->dataruleQ);
-                }
+            if ( xpath1_check_node_exists_slow( datarule_cache->pcb,
+                                                resnodeQ, val ) )
+            {
+                /* this dataRule is for the specified node
+                 * check if any of the groups in the usergroups
+                 * list for this user match any of the groups in
+                 * the allowedGroup leaf-list
+                 */
+                granted = check_access_bit( datarule_cache->datarule,
+                                            access,
+                                            usergroups,
+                                            done );
             }
         }
     }
 
-    /* go through the cache and exit if any matches are found */
-    for (datarule_cache = (agt_acm_datarule_t *)
-             dlq_firstEntry(&cache->dataruleQ);
-         datarule_cache != NULL && res == NO_ERR && !*done;
-         datarule_cache = (agt_acm_datarule_t *)
-             dlq_nextEntry(datarule_cache)) {
-
-        resnodeQ = xpath_get_resnodeQ(datarule_cache->result);
-        if (!resnodeQ) {
-            res = SET_ERROR(ERR_INTERNAL_VAL);
-            continue;
-        }
-
-        nodefound = xpath1_check_node_exists_slow(datarule_cache->pcb,
-                                                  resnodeQ,
-                                                  val);
-        if (nodefound) {
-            /* this dataRule is for the specified node
-             * check if any of the groups in the usergroups
-             * list for this user match any of the groups in
-             * the allowedGroup leaf-list
-             */
-            granted = check_access_bit(datarule_cache->datarule,
-                                       access,
-                                       usergroups,
-                                       done);
-            if (!*done) {
-                granted = FALSE;
-            }
-        }
-    }
-
-    if (res != NO_ERR) {
-        granted = FALSE;
+    if ( res != NO_ERR )
+    {
         *done = TRUE;
-    }
-
+    } 
     return granted;
 
 } /* check_data_rules */
@@ -2536,6 +2590,7 @@ boolean
     }
 
     /* !!! TBD: support standard NACM with CRUD, not R/W privs !!! */
+
     retval = valnode_access_allowed(msg->acm_cache,
                                     user,
                                     val,

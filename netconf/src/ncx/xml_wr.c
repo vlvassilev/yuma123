@@ -363,7 +363,7 @@ static status_t
                             int32 indent,
                             uint32 *retcount)
 {
-    const xmlChar       *defpfix, *msgpfix;
+    const xmlChar       *defpfix;
     uint32               num_nsids, i;
     xmlns_id_t           cur_nsid;
     xmlns_id_t           nsid_array[XML_WR_MAX_NAMESPACES];
@@ -371,7 +371,6 @@ static status_t
 
     *retcount = 0;
     num_nsids = 0;
-    msgpfix = NULL;
 
     res = xpath_yang_get_namespaces(xpathpcb,
                                     nsid_array,

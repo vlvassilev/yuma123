@@ -807,12 +807,8 @@ status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
-*   errinfo == address of pointer to get the malloced 
-*              ncx_errinfo_t struct, if value is NULL
-*              the new initialized struct will be used if
-*              value is not NULL.  Either way, the
-*              struct will be filled in by this fn
-*              
+*   errinfo == pointer to valid ncx_errinfo_t struct
+*              The struct will be filled in by this fn
 *   appinfoQ == Q to hold any extensions found
 *
 * OUTPUTS:
@@ -825,44 +821,26 @@ status_t
 status_t 
     yang_consume_error_stmts (tk_chain_t  *tkc,
                               ncx_module_t *mod,
-                              ncx_errinfo_t  **errinfo,
+                              ncx_errinfo_t  *errinfo,
                               dlq_hdr_t *appinfoQ)
 {
     const xmlChar *val;
-    const char    *expstr;
-    ncx_errinfo_t *err;
+    const char    *expstr = 
+        "description, reference, error-app-tag, or error-message keyword";
+    ncx_errinfo_t *err = errinfo;
     tk_type_t      tktyp;
-    status_t       res, retres;
-    boolean        done, desc, ref, etag, emsg;
+    status_t       res = NO_ERR;
+    boolean        done = FALSE;
+    boolean        desc = FALSE;
+    boolean        ref = FALSE;
+    boolean        etag = FALSE;
+    boolean        emsg = FALSE;
 
 #ifdef DEBUG
     if (!tkc || !errinfo) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-
-    expstr = "description, reference, error-app-tag, "
-        "or error-message keyword";
-    done = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    etag = FALSE;
-    emsg = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
-
-    if (*errinfo) {
-        err = *errinfo;
-    } else {
-        err = ncx_new_errinfo();
-        if (!err) {
-            res = ERR_INTERNAL_MEM;
-            ncx_print_errormsg(tkc, mod, res);
-            return res;
-        } else {
-            *errinfo = err;
-        }
-    }
 
     while (!done) {
 
@@ -882,59 +860,56 @@ status_t
             res = ERR_NCX_EOF;
             ncx_print_errormsg(tkc, mod, res);
             return res;
+
         case TK_TT_MSTRING:
             /* vendor-specific clause found instead */
             res = ncx_consume_appinfo(tkc, mod, appinfoQ);
-            CHK_EXIT(res, retres);
-            continue;
+            if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) || 
+                 res == ERR_NCX_EOF ) {
+                return res;
+            }
+            break;
+
         case TK_TT_RBRACE:
             done = TRUE;
-            continue;
-        case TK_TT_TSTRING:
-            break;  /* YANG clause assumed */
-        default:
-            retres = ERR_NCX_WRONG_TKTYPE;
-            ncx_mod_exp_err(tkc, mod, retres, expstr);
-            continue;
-        }
+            break;
 
-        /* Got a token string so check the value */
-        if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-            /* Optional 'description' field is present */
-            res = yang_consume_descr(tkc, 
-                                     mod, 
-                                     &err->descr,
-                                     &desc, 
-                                     appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-            /* Optional 'description' field is present */
-            res = yang_consume_descr(tkc, 
-                                     mod, 
-                                     &err->ref,
-                                     &ref, 
-                                     appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_ERROR_APP_TAG)) {
-            /* Optional 'error-app-tag' field is present */
-            res = yang_consume_strclause(tkc, 
-                                         mod,
-                                         &err->error_app_tag,
-                                         &etag, 
-                                         appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_ERROR_MESSAGE)) {
-            /* Optional 'error-app-tag' field is present */
-            res = yang_consume_strclause(tkc, 
-                                         mod,
-                                         &err->error_message,
-                                         &emsg, 
-                                         appinfoQ);
-        } else {
-            res = ERR_NCX_WRONG_TKVAL;
-            ncx_mod_exp_err(tkc, mod, res, expstr);         
+        case TK_TT_TSTRING:
+            /* Got a token string so check the value */
+            if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+                /* Optional 'description' field is present */
+                res = yang_consume_descr( tkc, mod, &err->descr, 
+                                          &desc, appinfoQ );
+            } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+                /* Optional 'description' field is present */
+                res = yang_consume_descr( tkc, mod, &err->ref, 
+                                          &ref, appinfoQ );
+            } else if (!xml_strcmp(val, YANG_K_ERROR_APP_TAG)) {
+                /* Optional 'error-app-tag' field is present */
+                res = yang_consume_strclause( tkc, mod, &err->error_app_tag, 
+                                              &etag, appinfoQ );
+            } else if (!xml_strcmp(val, YANG_K_ERROR_MESSAGE)) {
+                /* Optional 'error-app-tag' field is present */
+                res = yang_consume_strclause( tkc, mod, &err->error_message, 
+                                              &emsg, appinfoQ );
+            } else {
+                res = ERR_NCX_WRONG_TKVAL;
+                ncx_mod_exp_err(tkc, mod, res, expstr);         
+            }
+            if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) || 
+                 res == ERR_NCX_EOF ) {
+                return res;
+            }
+            break;  /* YANG clause assumed */
+
+        default:
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            break;
         }
-        CHK_EXIT(res, retres);
     }
 
-    return retres;
+    return res;
 
 }  /* yang_consume_error_stmts */
 
@@ -1566,6 +1541,7 @@ status_t
             retres = ERR_NCX_WRONG_TKTYPE;
             ncx_mod_exp_err(tkc, mod, retres, expstr);
             xpath_free_pcb(must);
+            done = TRUE;
             continue;
         }
 
@@ -1607,7 +1583,7 @@ status_t
             retres = res;
             if (NEED_EXIT(res)) {
                 xpath_free_pcb(must);
-                return retres;
+                done = TRUE;
             }
         }
     }
@@ -1768,6 +1744,7 @@ status_t
         default:
             retres = ERR_NCX_WRONG_TKTYPE;
             ncx_mod_exp_err(tkc, mod, retres, expstr);
+            done = TRUE;
             continue;
         }
 
@@ -1793,7 +1770,7 @@ status_t
         if (res != NO_ERR) {
             retres = res;
             if (NEED_EXIT(res)) {
-                return retres;
+                done = TRUE;
             }
         }
     }

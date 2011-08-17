@@ -1555,19 +1555,15 @@ uint32
 {
     agt_not_subscription_t  *sub, *nextsub;
     agt_not_msg_t           *not;
-    const agt_profile_t     *agt_profile;
     xmlChar                  nowbuff[TSTAMP_MIN_SIZE];
     status_t                 res;
     int                      ret;
     uint32                   notcount;
-    boolean                  dosend;
-
 
     if (!anySubscriptions) {
         return 0;
     }
 
-    agt_profile = agt_get_profile();
     notcount = 0;
     tstamp_datetime(nowbuff);
 
@@ -1577,7 +1573,6 @@ uint32
          sub = nextsub) {
 
         nextsub = (agt_not_subscription_t *)dlq_nextEntry(sub);
-        dosend = TRUE;
 
         switch (sub->state) {
         case AGT_NOT_STATE_NONE:

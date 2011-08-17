@@ -1445,12 +1445,12 @@ static status_t
                    val_value_t  *retval)
 {
     obj_template_t       *chobj, *curchild, *curtop;
-    obj_template_t       *nextchobj, *outchobj;
+    obj_template_t       *outchobj;
     mgr_scb_t            *mscb;
     val_value_t          *chval;
     dlq_hdr_t            *force_modQ;
     xml_node_t            chnode;
-    status_t              res, res2, retres;
+    status_t              res, retres;
     boolean               done, empty, errmode;
     ncx_btype_t           chbtyp;
 
@@ -1458,10 +1458,8 @@ static status_t
     chobj = NULL;
     curtop = NULL;
     curchild = NULL;
-    nextchobj = NULL;
     outchobj = NULL;
     res = NO_ERR;
-    res2 = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
     empty = FALSE;
@@ -1514,7 +1512,6 @@ static status_t
     /* go through each child node until the parent end node */
     while (!done) {
         /* init per-loop vars */
-        res2 = NO_ERR;
         empty = FALSE;
         chval = NULL;
         errmode = FALSE;

@@ -241,7 +241,7 @@ extern cli_rawparm_t *
 *********************************************************************/
 extern status_t
     cli_parse_raw (int argc, 
-		   const char *argv[],
+		   char *argv[],
 		   dlq_hdr_t *rawparmQ);
 
 
@@ -340,7 +340,7 @@ extern status_t
 extern val_value_t *
     cli_parse (runstack_context_t *rcxt,
                int argc, 
-	       const char *argv[],
+	       char *argv[],
 	       obj_template_t *obj,
 	       boolean valonly,
 	       boolean script,

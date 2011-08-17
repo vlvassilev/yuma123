@@ -1649,9 +1649,6 @@ status_t
                           ncx_access_t acc,
                           boolean cur_exists)
 {
-    status_t  res;
-    
-    res = NO_ERR;
     switch (op) {
     case OP_EDITOP_NONE:
         return NO_ERR;
@@ -2030,15 +2027,12 @@ status_t
 
     ncx_module_t   *mod;
     ncx_feature_t  *feature;
-    status_t        res;
 
 #ifdef DEBUG
     if (!modname || !featurename) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-
-    res = NO_ERR;
 
     mod = ncx_find_module(modname, NULL);
     if (!mod) {
@@ -2622,9 +2616,9 @@ xpath_pcb_t *
 
     varbindQ = xpath_get_varbindQ(pcb);
 
+    /* pass off userval memory here, even if error returned */
     *res = var_set_move_que(varbindQ, AGT_USER_VAR, userval);
     if (*res != NO_ERR) {
-        val_free_value(userval);
         xpath_free_pcb(pcb);
         pcb = NULL;
     } /* else userval memory stored in varbindQ now */

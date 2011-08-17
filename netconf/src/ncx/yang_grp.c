@@ -281,7 +281,6 @@ status_t
     typ_template_t  *testtyp;
     const xmlChar   *val;
     const char      *expstr;
-    xmlChar         *str;
     yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, stat, desc, ref;
@@ -297,7 +296,6 @@ status_t
     testgrp = NULL;
     val = NULL;
     expstr = "keyword";
-    str = NULL;
     done = FALSE;
     stat = FALSE;
     desc = FALSE;

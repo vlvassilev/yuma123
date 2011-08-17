@@ -209,9 +209,7 @@ static status_t
                        int *namelen)
 {
     xmlChar      *name, *str;
-    status_t      res;
 
-    res = NO_ERR;
     *nameptr = NULL;
     *namelen = 0;
 

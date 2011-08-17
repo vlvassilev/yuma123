@@ -592,6 +592,297 @@ static status_t
 
 }  /* add_new_token */
 
+/********************************************************************
+* FUNCTION consume_escaped_char
+* 
+* Consume and format an escaped character encountered by add_new_qtoken.
+* INPUTS:
+*    dest == the destination buffer
+*    src  == the source buffer
+*    endstr == the end of the source buffer
+*
+* RETURNS:
+*    TRUE if source type is TK_SOURCE_XPATH
+*********************************************************************/
+static void
+    consume_escaped_char( xmlChar **dest, const xmlChar **src, const xmlChar *endstr )
+{
+    const xmlChar* instr = *src;
+    xmlChar* outstr = *dest;
+
+    if (instr+1 != endstr )
+    {
+        switch (instr[1]) {
+        case 'n':
+            *outstr++ = '\n';
+            break;
+        case 't':
+            *outstr++ = '\t';
+            break;
+        case '"':
+            *outstr++ = '"';
+            break;
+        case '\\':
+            *outstr++ = '\\';
+            break;
+        case '\0':
+            /* let the next loop exit on EO-buffer */
+            break;
+        default:
+            /* pass through the escape sequence */
+            *outstr++ = '\\';
+            *outstr++ = instr[1];
+        }
+        
+        /* adjust the in pointer if not EO-buffer */
+        if (instr[1]) {
+            instr += 2;
+        } else {
+            ++instr;
+        }
+    }
+
+    *src = instr;
+    *dest = outstr;
+}
+
+/********************************************************************
+* FUNCTION is_xpath_string
+* 
+* Helper function that helps improve code clarity. It simply returns 
+* true if sourceType is TK_SOURCE_XPATH. 
+*
+* Note: This function is likely to be inlined by the compiler.
+*
+* INPUTS:
+*    sourceType == the source type to test.
+*
+* RETURNS:
+*    TRUE if source type is TK_SOURCE_XPATH
+*********************************************************************/
+static boolean is_xpath_string( const tk_source_t sourceType ) 
+{
+    return TK_SOURCE_XPATH == sourceType; 
+}
+
+/********************************************************************
+* FUNCTION is_newline_char
+* 
+* Helper function that helps improve code clarity. It simply returns 
+* true if ch is a newline character. 
+*
+* Note: This function is likely to be inlined by the compiler.
+*
+* INPUTS:
+*    ch == the character to test.
+*
+* RETURNS:
+*    TRUE if ch is '\n'
+*********************************************************************/
+static boolean is_newline_char( const xmlChar ch ) 
+{
+    return '\n' == ch; 
+}
+
+/********************************************************************
+* FUNCTION is_space_or_tab
+* 
+* Helper function that helps improve code clarity. It simply returns 
+* true if ch is a space or tab character. 
+*
+* Note: This function is likely to be inlined by the compiler.
+*
+* INPUTS:
+*    ch == the character to test.
+*
+* RETURNS:
+*    TRUE if ch is '\n'
+*********************************************************************/
+static boolean is_space_or_tab( const xmlChar ch ) 
+{
+    return '\t' == ch || ' ' == ch;
+}
+
+/********************************************************************
+* FUNCTION trim_trailing_whitespace
+* 
+* Helper function that removes any whitespace from the end of a buffer.
+*
+* INPUTS:
+*    buffer == the destination buffer to trim
+*    endbuffer  == the end of the destination buffer, this should be one 
+*                  past the newline character at the end of the buffer
+*
+* RETURNS:
+*    The new end of the destination buffer
+*********************************************************************/
+static xmlChar* 
+    trim_trailing_whitespace( xmlChar *buffer, xmlChar *endbuffer )
+{
+    --endbuffer;
+    if ( *endbuffer != '\n' ) {
+        return ++endbuffer; // nothing to trim
+    }
+    --endbuffer;           // skip back to first character before the newline 
+
+    while ( endbuffer >= buffer && is_space_or_tab( *endbuffer) ) {  //xml_isspace( *endbuffer )  ) {
+        --endbuffer;
+    }
+    ++endbuffer;           // skip non whitespace character
+    *endbuffer++ = '\n';   // add a newline
+    return endbuffer;
+}
+
+/********************************************************************
+* FUNCTION skip_leading_whitespace_src
+* 
+* Skip leading whitespace in the supplied buffer
+*
+* INPUTS:
+*    buffer == the buffer to skip space from
+*    endstr  == the end of the buffer, this should be one 
+*                  past the newline character at the end of the buffer
+*
+* RETURNS:
+*    The number of characters skipped.
+*********************************************************************/
+static uint32
+    skip_leading_whitespace_src( const xmlChar **src, 
+                                 const xmlChar *endstr ) 
+{
+    const xmlChar* instr = *src;
+
+    uint32 count = 0;
+
+    while ( instr < endstr ) {
+        if ( ' ' == *instr ) {
+            ++count;
+        } else if ( '\t' == *instr ) {
+            count += NCX_TABSIZE;
+        }
+        else {
+            break;
+        }
+        ++instr;
+    }
+
+    *src = instr;
+    return count;
+}
+
+/********************************************************************
+* FUNCTION format_leading_whitespace
+* 
+* Add leading whitespace to a destination buffer after a newline was
+* encountered during a copy operation.
+*
+* INPUTS:
+*    destptr == the destination buffer 
+*    srcptr == the source buffer 
+*    endstr  == the end of the buffer, this should be one 
+*                  past the newline character at the end of the buffer
+*    indent == line position where this token started
+*********************************************************************/
+static void
+    format_leading_whitespace( xmlChar **destptr,
+                               const xmlChar **srcptr,
+                               const xmlChar  *endstr,
+                               const uint32    indent )
+{
+    uint32 numLeadingSpaceChars = 0;
+    const xmlChar* instr = *srcptr;
+    xmlChar* outstr = *destptr;
+
+    // get the number of leading whitespaces on the next line
+    numLeadingSpaceChars = skip_leading_whitespace_src( &instr, 
+            endstr );
+
+    // linepos is the indent total for the next line subtract 
+    // the start position and indent the rest
+    if ( numLeadingSpaceChars > indent ) {
+        uint32 totReqSpaces = numLeadingSpaceChars - indent;
+        uint32 numTabs = totReqSpaces / NCX_TABSIZE;
+        uint32 numSpaces = totReqSpaces % NCX_TABSIZE;
+        uint32 numConsumedChars = instr - *srcptr;
+
+        /* make sure not to write more chars than were read E.g: do not replace
+         * 2 tabs with 7 spaces and over flow the buffer */
+        if ( numTabs + numSpaces > numConsumedChars ) {
+            if ( numTabs > numConsumedChars ) {
+                numTabs = numConsumedChars;
+                numSpaces = 0;
+            }
+            else {
+                numSpaces = numConsumedChars - numTabs;
+            }
+        }
+
+        while ( numTabs ) {
+            *outstr++ = '\t';
+            --numTabs;
+        }
+
+        while ( numSpaces ) {
+            *outstr++ = ' ';
+            --numSpaces;
+        }
+    }
+    *destptr = outstr;
+    *srcptr = instr;
+}
+
+
+/********************************************************************
+* FUNCTION copy_and_format_token_str
+* 
+* Copy the supplied TK_TT_QSTRING token, converting any escaped chars 
+* in the source buffer. 
+*
+* Adjust the leading and trailing whitespace around newline characters
+*
+* INPUTS:
+*    dest == A buffer large enough to store the copy characters. 
+*            This must be at least as long as the source string.
+*    src  == The source string to copy
+*    endstr == pointer to the first char after the last char in the value
+*              src string.
+*    is_xpath == flag indicating of this is an xpath
+*    indent == line position where this token started
+*********************************************************************/
+static void
+    copy_and_format_token_str( xmlChar          *dest, 
+                               const xmlChar    *src, 
+                               const xmlChar    *endstr,
+                               const boolean     is_xpath,
+                               const uint32      indent )
+{
+    xmlChar *outstr = dest;
+    const xmlChar *instr = src;
+
+    while (instr < endstr) {
+    
+        /* translate escape char or copy regular char */
+        if (*instr == '\\') {
+            consume_escaped_char( &outstr, &instr, endstr );
+        } else {
+            *outstr++ = *instr++;
+        }
+    
+        /* check if last char written was a newline,
+         * DO NOT ADJUST XPATH STRINGS */
+        if ( !is_xpath ) {
+            if ( is_newline_char( *(outstr-1) ) ) {
+                // skip back to the first character before the newline
+                outstr = trim_trailing_whitespace( dest, outstr );
+
+                format_leading_whitespace( &outstr, &instr, endstr, indent );
+            }
+        }
+    }
+
+    /* finish the string */
+    *outstr = 0;
+}
 
 /********************************************************************
 * FUNCTION add_new_qtoken
@@ -622,181 +913,56 @@ static status_t
 *    status
 *********************************************************************/
 static status_t
-    add_new_qtoken (tk_chain_t *tkc,
-                    boolean isdouble,
-                    xmlChar *tkbuff,
-                    const xmlChar *endstr,
-                    uint32 startline,
-                    uint32 startpos)
+    add_new_qtoken ( tk_chain_t *tkc,
+                     boolean isdouble,
+                     xmlChar *tkbuff,
+                     const xmlChar *endstr,
+                     uint32 startline,
+                     uint32 startpos )
 {
-    tk_token_t    *tk;
-    xmlChar       *buff, *outstr, *teststr, *origbuff;
-    const xmlChar *instr, *spstr;
-    uint32         total, linepos, cnt, tcnt, scnt, chcnt;
-    boolean        done;
-
-    tk = NULL;
-    buff = NULL;
-    origbuff = NULL;
-
-    total = (endstr) ? (uint32)(endstr - tkbuff) : 0;
+    tk_token_t    *tk = NULL;
+    xmlChar *origbuff = NULL; 
+    uint32         total = (endstr) ? (uint32)(endstr - tkbuff) : 0;
     
     if (total > NCX_MAX_STRLEN) {
         return ERR_NCX_LEN_EXCEEDED;
-    } else if (total == 0) {
+    } 
+
+    if (total == 0) {
         /* zero length value strings are allowed */
-        tk = new_token((isdouble) ? TK_TT_QSTRING : TK_TT_SQSTRING,
-                       NULL, 
-                       0);
+        tk = (isdouble) ? new_token( TK_TT_QSTRING,  NULL, 0) 
+                        : new_token( TK_TT_SQSTRING, NULL, 0);
     } else if (!isdouble) {
         /* single quote string */
-        tk = new_token(TK_TT_SQSTRING, tkbuff, total);
+        tk = new_token( TK_TT_SQSTRING, tkbuff, total );
     } else {
-        /* double quote normal case -- non-zero length QSTRING
-         * fill the buffer, while converting escaped chars
-         */
-        buff = (xmlChar *)m__getMem(total+1);
+        /* double quote normal case -- non-zero length QSTRING fill the buffer, 
+         * while converting escaped chars */
+        xmlChar *buff = (xmlChar *)m__getMem(total+1);
         if (!buff) {
             return ERR_INTERNAL_MEM;
         }
 
-        /* if --format=html or --format=yang then the
-         * original double quoted string needs to be saved
-         * instead of altered according to the YANG spec
-         */
+        copy_and_format_token_str( buff, tkbuff, endstr, 
+                                   is_xpath_string( tkc->source), startpos );
+
+        /* if --format=html or --format=yang then a copy of the original double 
+         * quoted string needs to be saved unaltered according to the YANG spec */
         if (TK_DOCMODE(tkc)) {
             origbuff = xml_strndup(tkbuff, total);
-            if (origbuff == NULL) {
-                m__free(buff);
+            if ( !origbuff ) {
                 return ERR_INTERNAL_MEM;
             }
         }
 
-        instr = tkbuff;  /* points to next char to be read */
-        outstr = buff;   /* points to next char to be filled */
-
-        while (instr < endstr) {
-
-            /* translate escape char or copy regular char */
-            if (*instr == '\\') {
-                switch (instr[1]) {
-                case 'n':
-                    *outstr++ = '\n';
-                    break;
-                case 't':
-                    *outstr++ = '\t';
-                    break;
-                case '"':
-                    *outstr++ = '"';
-                    break;
-                case '\\':
-                    *outstr++ = '\\';
-                    break;
-                case '\0':
-                    /* let the next loop exit on EO-buffer */
-                    break;
-                default:
-                    /* pass through the escape sequence */
-                    *outstr++ = '\\';
-                    *outstr++ = instr[1];
-                }
-
-                /* adjust the in pointer if not EO-buffer */
-                if (instr[1]) {
-                    instr += 2;
-                } else {
-                    instr++;
-                }
-            } else {
-                *outstr++ = *instr++;
-            }
-
-            /* check if last char written was a newline 
-             * DO NOT ADJUST XPATH STRINGS
-             */
-            if (*(outstr-1) == '\n' && (tkc->source != TK_SOURCE_XPATH)) {
-                /* trim any trailing whitespace */
-                if (outstr-2 >= tkbuff) {
-                    teststr = outstr-2;
-                    while ((*teststr != '\n') && 
-                           xml_isspace(*teststr) && (teststr > tkbuff)) {
-                        teststr--;
-                    }
-                    teststr[1] = '\n';
-                    outstr = &teststr[2];
-                }
-
-                /* find end of leading whitespace */
-                spstr = instr;
-                linepos = 0;
-                chcnt = 0;
-                done = FALSE;
-                while (!done) {
-                    if (*spstr == ' ') {
-                        chcnt++;
-                        linepos++;
-                        spstr++;
-                    } else if (*spstr == '\t') {
-                        chcnt++;
-                        linepos += NCX_TABSIZE;
-                        spstr++;
-                    } else {
-                        done = TRUE;
-                    }
-                }
-
-                /* linepos is the indent total for the next line
-                 * subtract the start position and indent the rest
-                 */
-                if (linepos > startpos) {
-                    cnt = linepos - startpos;
-                    tcnt = cnt / NCX_TABSIZE;
-                    scnt = cnt % NCX_TABSIZE;
-
-                    /* make sure not to write more chars than
-                     * were read.  E.g., do not replace 2 tabs
-                     * with 7 spaces and over flow the buffer
-                     */
-                    if (tcnt+scnt <= chcnt) {
-                        /* do correct indent count */
-                        while (tcnt) {
-                            *outstr++ = '\t';
-                            tcnt--;
-                        }
-                        while (scnt) {
-                            *outstr++ = ' ';
-                            scnt--;
-                        }
-                    } else {
-                        /* indent as many chars as possible */
-                        tcnt = min(tcnt, chcnt);
-                        while (tcnt) {
-                            *outstr++ = '\t';
-                            tcnt--;
-                            chcnt--;
-                        }
-                        scnt = min(scnt, chcnt);
-                        while (scnt) {
-                            *outstr++ = ' ';
-                            scnt--;
-                        }
-                    }
-                }
-
-                /* skip over whitespace that was just processed */
-                instr = spstr;
-            }
-        }
-
-        /* finish the string */
-        *outstr = 0;
         tk = new_mtoken(TK_TT_QSTRING, buff);
+        if ( !tk ) {
+            m__free(buff);
+            m__free(origbuff);
+        }
     }
 
     if (!tk) {
-        if (buff) {
-            m__free(buff);
-        }
         return ERR_INTERNAL_MEM;
     }
 
@@ -806,7 +972,6 @@ static status_t
     dlq_enque(tk, &tkc->tkQ);
 
     return NO_ERR;
-
 }  /* add_new_qtoken */
 
 
@@ -1485,7 +1650,7 @@ static status_t
 
     res = add_new_token(tkc, TK_TT_STRING, str, startpos);
     tkc->bptr = str;    /* advance the buffer pointer */
-    return NO_ERR;
+    return res;
 
 }  /* finish_string */
 
@@ -3061,16 +3226,14 @@ status_t
 {
     tk_token_t   *tk;
 
-#ifdef DEBUG
-    if (tkc == NULL || valstr == NULL) {
+    if ( !tkc ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-#endif
 
     /* hack for YIN input, no XML line numbers */
     tkc->linenum++;
 
-    if (valstr == NULL) {
+    if ( !valstr ) {
         tk = new_token(TK_TT_TSTRING, NULL, 0);
     } else {
         /* normal case string -- non-zero length */
@@ -3087,7 +3250,6 @@ status_t
     dlq_enque(tk, &tkc->tkQ);
 
     return NO_ERR;
-    
 }  /* tk_add_id_token */
 
 
@@ -3160,22 +3322,18 @@ status_t
 {
     tk_token_t   *tk;
     tk_type_t     tktyp;
-    uint32        tklen;
 
-#ifdef DEBUG
-    if (tkc == NULL || valstr == NULL) {
+    if ( !tkc ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-#endif
 
     /* hack for YIN input, no XML line numbers */
     tkc->linenum++;
 
-    if (valstr == NULL) {
+    if ( !valstr ) {
         tk = new_token(TK_TT_QSTRING, NULL, 0);
     } else {
-
-        tklen = xml_strlen(valstr);
+        uint32 tklen = xml_strlen(valstr);
 
         if (val_need_quotes(valstr)) {
             tktyp = TK_TT_QSTRING;

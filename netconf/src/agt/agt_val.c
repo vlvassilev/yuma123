@@ -2456,7 +2456,7 @@ static void
                         cfg_template_t *target)
 {
     val_value_t  *curval;
-    status_t      res;
+    status_t      res = NO_ERR;
 
     (void)target;
 
@@ -2555,6 +2555,18 @@ static void
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    if ( NO_ERR != res )
+    {
+       /* FIXME: errors returned by handle_user_callback() are
+        * currently ignored, if this is intentional get rid of the
+        * variable 'res' and cast the call to handle_user_callback()
+        * to void, otherwise handle these errors correctly. */
+       log_info( "\nhandle_user_callback() returned error %d "
+                 "while processing edit operation %d",
+                 res,
+                 undo->editop );
+    }
+
     /***** !!!!!  ****
     handle_undo_audit_record(undo->editop,
                              scb, target,
@@ -2605,6 +2617,16 @@ static void
                                        undo->newnode, 
                                        undo->curnode,
                                        TRUE);
+            if ( NO_ERR != res )
+            {
+               /* FIXME: errors returned by handle_user_callback() are
+                * currently ignored, if this is intentional get rid of the
+                * variable 'res' and cast the call to handle_user_callback()
+                * to void, otherwise handle these errors correctly. */
+               log_info( "\nhandle_user_callback() returned error %d "
+                         "while processing AGT_CB_COMMIT operation",
+                         res );
+            }
         } else {
             /* rollback the edit operation */
             process_undo_entry(undo, scb, msg, target);
@@ -2641,17 +2663,12 @@ static status_t
                      val_value_t  *newval,
                      val_value_t  *curval)
 {
-    val_value_t  *useval;
     status_t      res;
 
     res = NO_ERR;
 
     /* get the node to check */
-    if (newval != NULL) {
-        useval = newval;
-    } else if (curval != NULL) {
-        useval = curval;
-    } else {
+    if (newval == NULL && curval == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -3263,7 +3280,6 @@ static status_t
 {
     val_value_t         *errval;
     xmlChar             *instbuff;
-    const ncx_errinfo_t *errinfo;
     ncx_iqual_t          iqual;
     uint32               cnt, i, minelems, maxelems;
     boolean              minset, maxset, minerr, maxerr, cond;
@@ -3316,7 +3332,6 @@ static status_t
                                        
     res = NO_ERR;
     res2 = NO_ERR;
-    errinfo = NULL;
     iqual = val_get_cond_iqualval(val, valroot, obj);
     minerr = FALSE;
     maxerr = FALSE;
@@ -4721,7 +4736,7 @@ status_t
                         val_value_t *root)
 {
     ncx_module_t          *mod;
-    obj_template_t        *obj, *chobj;
+    obj_template_t        *chobj;
     val_value_t           *chval;
     status_t               res, retres;
     xmlns_id_t             ncxid;
@@ -4741,7 +4756,6 @@ status_t
 
     retres = NO_ERR;
     ncxid = xmlns_ncx_id();
-    obj = root->obj;
 
     /* check the instance counts for the subtrees that are present */
     res = agt_val_instance_check(scb, 

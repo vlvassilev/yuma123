@@ -152,7 +152,7 @@ extern status_t
 	      boolean logtstamps,
 	      const char *startmsg,
 	      int argc,
-	      const char *argv[]);
+	      char *argv[]);
 
 
 /********************************************************************

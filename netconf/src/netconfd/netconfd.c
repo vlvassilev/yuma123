@@ -38,49 +38,17 @@ date         init     comment
 
 #define _C_main 1
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
 #include  "agt.h"
-#endif
-
-#ifndef _H_agt_ncxserver
 #include  "agt_ncxserver.h"
-#endif
-
-#ifndef _H_agt_util
 #include  "agt_util.h"
-#endif
-
-#ifndef _H_help
 #include  "help.h"
-#endif
-
-#ifndef _H_log
 #include  "log.h"
-#endif
-
-#ifndef _H_ncx
 #include  "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include  "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include  "ncxmod.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_xmlns
 #include  "xmlns.h"
-#endif
 
 
 /********************************************************************
@@ -88,24 +56,10 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#ifdef DEBUG
-#define NETCONFD_DEBUG   1
-/* #define NETCONFD_DEBUG_LOAD_TEST 1 */
-#endif
-
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
 #define NETCONFD_CLI       (const xmlChar *)"netconfd"
 
-#define MAX_FILESPEC_LEN  1023
-
 #define START_MSG          "Starting netconfd...\n"
-
-#define TESTMOD             (const xmlChar *)"test"
-#define TESTFEATURE1        (const xmlChar *)"feature1"
-#define TESTFEATURE2        (const xmlChar *)"feature2"
-#define TESTFEATURE3        (const xmlChar *)"feature3"
-#define TESTFEATURE4        (const xmlChar *)"feature4"
-
 
 /********************************************************************
  * FUNCTION load_base_schema 
@@ -113,71 +67,46 @@ date         init     comment
  * RETURNS:
  *     status
  *********************************************************************/
-static status_t
-    load_base_schema (void)
+static status_t load_base_schema (void)
 {
     status_t res;
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_YUMA_NETCONF, 
-                             NULL, 
-                             NULL,
-                             NULL);
+    res = ncxmod_load_module( NCXMOD_YUMA_NETCONF, NULL, NULL, NULL );
     if (res != NO_ERR) {
         return res;
     }
 
     /* load in the server boot parameter definition file */
-    res = ncxmod_load_module(NCXMOD_NETCONFD, 
-                             NULL, 
-                             NULL,
-                             NULL);
+    res = ncxmod_load_module( NCXMOD_NETCONFD, NULL, NULL, NULL );
     if (res != NO_ERR) {
         return res;
     }
 
     return res;
-
 }   /* load_base_schema */
 
-
+#ifdef NETCONFD_DEBUG_LOAD_TEST
 /********************************************************************
- * FUNCTION load_core_schema 
+ * FUNCTION load_debug_test_module 
  * 
  * RETURNS:
  *     status
  *********************************************************************/
-static status_t
-    load_core_schema (agt_profile_t *profile)
+static status_t load_debug_test_module( agt_profile_t* profile )
 {
-    status_t   res;
+#define TESTMOD             (const xmlChar *)"test"
+#define TESTFEATURE1        (const xmlChar *)"feature1"
+#define TESTFEATURE2        (const xmlChar *)"feature2"
+#define TESTFEATURE3        (const xmlChar *)"feature3"
+#define TESTFEATURE4        (const xmlChar *)"feature4"
 
-#ifdef NETCONFD_DEBUG
-    if (LOGDEBUG2) {
-        log_debug2("\nnetconfd: Loading NCX Module");
-    }
-#endif
-
-    /* load in the with-defaults extension module */
-    res = ncxmod_load_module(NCXMOD_WITH_DEFAULTS,
-                             NULL,
-                             &profile->agt_savedevQ,
-                             NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-
-#ifdef NETCONFD_DEBUG_LOAD_TEST
-    if (LOGDEBUG2) {
-        log_debug2("\nnetconfd: Loading Debug Test Module");
-    }
+    log_debug2("\nnetconfd: Loading Debug Test Module");
 
     /* Load test module */
-    res = ncxmod_load_module(TESTMOD,
-                             NULL,
-                             &profile->agt_savedevQ,
-                             NULL);
+    status_t res = ncxmod_load_module( TESTMOD, NULL, 
+                                       &profile->agt_savedevQ, NULL );
+
     if (res != NO_ERR) {
         return res;
     } else {
@@ -186,9 +115,32 @@ static status_t
         agt_enable_feature(TESTMOD, TESTFEATURE3);
         agt_disable_feature(TESTMOD, TESTFEATURE4);
     }
+}
 #endif
 
-    return NO_ERR;
+/********************************************************************
+ * FUNCTION load_core_schema 
+ * 
+ * RETURNS:
+ *     status
+ *********************************************************************/
+static status_t load_core_schema ( agt_profile_t *profile )
+{
+    log_debug2("\nnetconfd: Loading NCX Module");
+
+    /* load in the with-defaults extension module */
+    status_t res = ncxmod_load_module( NCXMOD_WITH_DEFAULTS, NULL, 
+                                      &profile->agt_savedevQ, NULL );
+    if (res != NO_ERR) {
+        return res;
+    }
+
+
+#ifdef NETCONFD_DEBUG_LOAD_TEST
+    res = load_debug_test_module( profile );
+#endif
+
+    return res;
 
 }  /* load_core_schema */
 
@@ -199,11 +151,8 @@ static status_t
  * 
  * 
  *********************************************************************/
-static status_t 
-    cmn_init (int argc,
-              const char *argv[],
-              boolean *showver,
-              help_mode_t *showhelpmode)
+static status_t cmn_init ( int argc, char *argv[], boolean *showver,
+                           help_mode_t *showhelpmode)
 {
 #define BUFFLEN 256
 
@@ -215,10 +164,9 @@ static status_t
     /* set the default debug output level */
     dlevel = LOG_DEBUG_INFO;
 
-    /* initialize the NCX Library first to allow NCX modules
-     * to be processed.  No module can get its internal config
-     * until the NCX module parser and definition registry is up
-     */
+    /* initialize the NCX Library first to allow NCX modules to be processed.  
+     * No module can get its internal config until the NCX module parser and 
+     * definition registry is up */
     len = strlen(START_MSG) + strlen(COPYRIGHT_STRING) + 2;
 
     if (len < BUFFLEN) {
@@ -228,26 +176,16 @@ static status_t
         return ERR_BUFF_OVFL;
     }
 
-    res = ncx_init(FALSE, 
-                   dlevel, 
-                   TRUE,
-                   buff,
-                   argc, 
-                   argv);
+    res = ncx_init( FALSE, dlevel, TRUE, buff, argc, argv);
 
     if (res != NO_ERR) {
         return res;
     }
 
-#ifdef NETCONFD_DEBUG
-    if (LOGDEBUG2) {
-        log_debug2("\nnetconfd: Loading Netconf Server Library");
-    }
-#endif
+    log_debug2("\nnetconfd: Loading Netconf Server Library");
 
-    /* at this point, modules that need to read config
-     * params can be initialized
-     */
+    /* at this point, modules that need to read config params can be 
+     * initialized */
 
     /* Load the core modules (netconfd and netconf) */
     res = load_base_schema();
@@ -255,9 +193,8 @@ static status_t
         return res;
     }
 
-    /* Initialize the Netconf Server Library
-     * with command line and conf file parameters 
-     */
+    /* Initialize the Netconf Server Library with command line and conf file 
+     * parameters */
     res = agt_init1(argc, argv, showver, showhelpmode);
     if (res != NO_ERR) {
         return res;
@@ -280,11 +217,7 @@ static status_t
         return res;
     }
 
-#ifdef NETCONFD_DEBUG
-    if (LOGDEBUG) {
-        log_debug("\nnetconfd init OK, ready for sessions\n");
-    }
-#endif
+    log_debug("\nnetconfd init OK, ready for sessions\n");
 
     return NO_ERR;
 
@@ -297,8 +230,7 @@ static status_t
  * Show startup server string
  * 
  *********************************************************************/
-static void
-    show_server_banner (void)
+static void show_server_banner (void)
 {
 #define BANNER_BUFFLEN 32
 
@@ -323,9 +255,8 @@ static void
  * Startup and run the NCX server loop
  * 
  * RETURNS:
- *    status:  NO_ERR if startup OK and then run OK
- *             this will be a delayed return code
- *             some error if server startup failed
+ *    status:  NO_ERR if startup OK and then run OK this will be a delayed 
+ *             return code some error if server startup failed
  *             e.g., socket already in use
  *********************************************************************/
 static status_t
@@ -336,8 +267,7 @@ static status_t
     show_server_banner();
     res = agt_ncxserver_run();
     if (res != NO_ERR) {
-        log_error("\nncxserver failed (%s)",
-                  get_error_string(res));
+        log_error("\nncxserver failed (%s)", get_error_string(res));
     }
     return res;
     
@@ -346,12 +276,8 @@ static status_t
 
 /********************************************************************
  * FUNCTION netconfd_cleanup
- * 
- * 
- * 
  *********************************************************************/
-static void
-    netconfd_cleanup (void)
+static void netconfd_cleanup (void)
 {
 
     if (LOGINFO) {
@@ -366,59 +292,53 @@ static void
 
 }  /* netconfd_cleanup */
 
+/********************************************************************
+ * FUNCTION show_version
+ *********************************************************************/
+static void show_version(void)
+{
+    xmlChar versionbuffer[NCX_VERSION_BUFFSIZE];
+
+    status_t res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
+    if (res == NO_ERR) {
+        log_write( "\nnetconfd version %s\n", versionbuffer );
+    } else {
+        SET_ERROR( res );
+    }
+    agt_request_shutdown(NCX_SHUT_EXIT);
+}
 
 /********************************************************************
 *                                                                   *
 *                       FUNCTION main                               *
 *                                                                   *
 *********************************************************************/
-int 
-    main (int argc, 
-          const char *argv[])
+int main (int argc, char *argv[])
 {
     status_t           res;
-    boolean            showver, stdlog, done;
+    boolean            showver = FALSE;
+    boolean            done = FALSE;
     help_mode_t        showhelpmode;
-    ncx_shutdowntyp_t  shutmode;
-    xmlChar            versionbuffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
 
-    done = FALSE;
-
-    /* this loop is used to implement the restart command
-     * the sw image is not reloaded; instead
-     * everything is cleaned up and re-initialized from scrath
-     * if the shutdown operation (or Ctl-C exit) is used instead
-     * of restart, then the loop will only be executed once
-     */
+    /* this loop is used to implement the restart command the sw image is not 
+     * reloaded; instead everything is cleaned up and re-initialized from 
+     * scratch. If the shutdown operation (or Ctl-C exit) is used instead of 
+     * restart, then the loop will only be executed once */
     while (!done) {
-
-        res = cmn_init(argc, argv, &showver, &showhelpmode);
-
-        stdlog = !log_is_open();
+        res = cmn_init( argc, argv, &showver, &showhelpmode );
     
         if (res != NO_ERR) {
-            log_error("\nnetconfd: init returned (%s)", 
-                      get_error_string(res));
+            log_error( "\nnetconfd: init returned (%s)", get_error_string(res) );
             agt_request_shutdown(NCX_SHUT_EXIT);
         } else {
             if (showver) {
-                res = ncx_get_version(versionbuffer,
-                                      NCX_VERSION_BUFFSIZE);
-                if (res == NO_ERR) {
-                    log_write("\nnetconfd version %s\n", 
-                              versionbuffer);
-                } else {
-                    SET_ERROR(res);
-                }
-                agt_request_shutdown(NCX_SHUT_EXIT);
+                show_version();
             } else if (showhelpmode != HELP_MODE_NONE) {
-                help_program_module(NETCONFD_MOD,
-                                    NETCONFD_CLI,
-                                    showhelpmode);
+                help_program_module( NETCONFD_MOD, NETCONFD_CLI, showhelpmode );
                 agt_request_shutdown(NCX_SHUT_EXIT);
             } else {
                 res = netconfd_run();
@@ -428,22 +348,18 @@ int
             }
         }
 
-        shutmode = agt_shutdown_mode_requested();
-
         netconfd_cleanup();
-
         print_error_count();
 
-        if (shutmode == NCX_SHUT_EXIT) {
+        if ( NCX_SHUT_EXIT == agt_shutdown_mode_requested() ) {
             done = TRUE;
         }
     }
 
     print_errors();
-
     print_error_count();
 
-    if (stdlog) {
+    if ( !log_is_open() ) {
         printf("\n");
     }
 
@@ -452,7 +368,6 @@ int
 #endif
 
     return 0;
-
 } /* main */
 
 /* END netconfd.c */

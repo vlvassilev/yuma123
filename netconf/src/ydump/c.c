@@ -124,6 +124,16 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+static void logFuncEntry( ses_cb_t* scb, 
+                          int32 indent, 
+                          const xmlChar* name,
+                          const xmlChar* suffix )
+{
+    ses_putstr_indent(scb, (const xmlChar*)"log_info( \"\\n", indent );
+    write_identifier(scb, (const xmlChar*)"", NULL, name);
+    ses_putstr(scb, suffix);
+    ses_putstr( scb,  (const xmlChar*)"() - called\\n\" );\n" );
+}
 
 
 /********************************************************************
@@ -593,20 +603,18 @@ static void
                        obj_template_t *obj,
                        dlq_hdr_t *objnameQ)
 {
-    const xmlChar   *modname;
     c_define_t      *cdef;
     int32            indent;
-    boolean          toplevel;
 
-    modname = ncx_get_modname(mod);
+    mod = mod; /* Warning Suppression */
     indent = cp->indent;
-    toplevel = obj_is_top(obj);
 
     cdef = find_path_cdefine(objnameQ, obj);
     if (cdef == NULL) {
         SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         return;
     }
+
 
     /* generate function banner comment */
     ses_putstr(scb, FN_BANNER_START);
@@ -665,6 +673,8 @@ static void
     ses_putstr_indent(scb, 
                       (const xmlChar *)"const xmlChar *errorstr;",
                       indent);
+
+    logFuncEntry( scb, indent, cdef->idstr, EDIT_SUFFIX );
 
     /* initialize the static vars */
     ses_putchar(scb, '\n');
@@ -906,13 +916,13 @@ static void
                       obj_template_t *obj,
                       dlq_hdr_t *objnameQ)
 {
-    const xmlChar   *modname, *defval;
+    const xmlChar   *defval;
     c_define_t      *cdef;
     typ_enum_t      *typ_enum;
     int32            indent;
     ncx_btype_t      btyp;
 
-    modname = ncx_get_modname(mod);
+    mod = mod; /* Warning Suppression */
     indent = cp->indent;
 
     cdef = find_path_cdefine(objnameQ, obj);
@@ -978,6 +988,9 @@ static void
 
     /* initialize the static vars */
     ses_putchar(scb, '\n');
+
+    logFuncEntry( scb, indent, cdef->idstr, GET_SUFFIX );
+
     ses_putstr_indent(scb,
                       (const xmlChar *)"res = NO_ERR;",
                       indent);
@@ -1248,6 +1261,8 @@ static void
                           indent);
     }
 
+    logFuncEntry( scb, indent, cdef->idstr, MRO_SUFFIX );
+
     /* create read-only child nodes as needed */
     for (childobj = obj_first_child(obj);
          childobj != NULL;
@@ -1386,9 +1401,10 @@ static void
                         obj_template_t *obj,
                         dlq_hdr_t *objnameQ)
 {
-    const xmlChar   *modname;
     c_define_t      *cdef;
     int32            indent;
+
+    mod = mod; // Warning suppression 
 
     switch (obj->objtype) {
     case OBJ_TYP_CHOICE:
@@ -1399,7 +1415,6 @@ static void
         ;
     }
 
-    modname = ncx_get_modname(mod);
     indent = cp->indent;
 
     cdef = find_path_cdefine(objnameQ, obj);
@@ -1449,6 +1464,8 @@ static void
                       indent);
     ses_putstr(scb, cdef->valstr);
     ses_putstr(scb, (const xmlChar *)" */");
+
+    logFuncEntry( scb, indent, cdef->idstr, MRO_SUFFIX );
 
     if (obj_is_np_container(obj)) {
         ses_putstr_indent(scb, 
@@ -1596,10 +1613,10 @@ static void
                     boolean is_validate,
                     dlq_hdr_t *objnameQ)
 {
-    obj_template_t  *inputobj, *outputobj, *obj;
+    obj_template_t  *inputobj, *obj;
     const xmlChar   *modname;
     int32            indent;
-    boolean          hasinput, hasoutput;
+    boolean          hasinput;
 
     modname = ncx_get_modname(mod);
     indent = cp->indent;
@@ -1607,11 +1624,6 @@ static void
     inputobj = obj_find_child(rpcobj, NULL, YANG_K_INPUT);
     hasinput = 
         (inputobj != NULL && obj_has_children(inputobj)) ?
-        TRUE : FALSE;
-
-    outputobj = obj_find_child(rpcobj, NULL, YANG_K_OUTPUT);
-    hasoutput = 
-        (outputobj != NULL && obj_has_children(outputobj)) ?
         TRUE : FALSE;
 
     /* generate function banner comment */
@@ -1720,6 +1732,10 @@ static void
             write_c_objtype_ex(scb, obj, objnameQ, ';', TRUE, FALSE);
         }
     }
+
+    // Logging Function call entry...
+    is_validate ?  logFuncEntry( scb, indent, obj_get_name(rpcobj), (const xmlChar*)"_validate" )
+                :  logFuncEntry( scb, indent, obj_get_name(rpcobj), (const xmlChar*)"_invoke" );
 
     ses_putchar(scb, '\n');
     ses_putstr_indent(scb,

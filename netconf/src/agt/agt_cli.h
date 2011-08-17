@@ -105,7 +105,7 @@ extern "C" {
 *********************************************************************/
 extern status_t
     agt_cli_process_input (int argc,
-			   const char *argv[],
+			   char *argv[],
 			   agt_profile_t *agt_profile,
 			   boolean *showver,
 			   help_mode_t *showhelpmode);

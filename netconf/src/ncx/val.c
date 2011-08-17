@@ -1190,7 +1190,14 @@ static status_t
     if (val->editvars) {
         if (!copy->editvars) {
             res = new_editvars(copy);
-            if (res != NO_ERR) {
+            if (res != NO_ERR || !copy->editvars ) {
+                if ( NO_ERR == res ) {
+                    res = ERR_INTERNAL_PTR;
+                }
+
+                if ( copy->editvars ) {
+                    free_editvars( copy );
+                }
                 return res;
             }
         }
@@ -4768,12 +4775,10 @@ val_value_t *
 {
     val_value_t  *val;
 
-#ifdef DEBUG
-    if (!typdef || !valname || !res) {
+    if (!typdef || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
-#endif
 
     val = val_new_value();
     if (!val) {
@@ -5562,7 +5567,7 @@ void
                                   dlq_hdr_t *cleanQ)
 {
     val_value_t  *testval, *nextval;
-    boolean       doins, islist;
+    boolean       doins;
 
 #ifdef DEBUG
     if (editvars == NULL || 
@@ -5600,10 +5605,8 @@ void
     doins = FALSE;
     if (child->obj->objtype == OBJ_TYP_LIST) {
         doins = TRUE;
-        islist = TRUE;
     } else if (child->obj->objtype == OBJ_TYP_LEAF_LIST) {
         doins = TRUE;
-        islist = FALSE;
     }
 
     if (doins) {
@@ -7660,26 +7663,23 @@ int32
 {
 #define MYBUFFSIZE  64
 
-    xmlChar      buff[MYBUFFSIZE], *mbuff;
+    xmlChar      buff[MYBUFFSIZE];
+    xmlChar     *mbuff = NULL;
     status_t     myres;
-    uint32       len;
+    uint32       len = 0;
     int32        retval;
 
-#ifdef DEBUG
-    if (!val1 || !strval2) {
+    if (!val1 || !strval2 || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return -1;
     }
-#endif
 
     len = 0;
     mbuff = NULL;
 
     myres = val_sprintf_simval_nc(NULL, val1, &len);
     if (myres != NO_ERR) {
-        if (res) {
-            *res = myres;
-        }
+        *res = myres;
         return -2;
     }
     if (len < MYBUFFSIZE) {
@@ -7687,32 +7687,26 @@ int32
     } else {
         mbuff =m__getMem(len+1);
         if (!mbuff) {
-            if (res) {
-                *res = ERR_INTERNAL_MEM;
-            }
+            *res = ERR_INTERNAL_MEM;
             return -2;
         }
         myres = val_sprintf_simval_nc(mbuff, val1, &len);
     }
 
     if (myres != NO_ERR) {
-        if (res) {
-            *res = myres;
-        }
-        return -2;
-    }
-
-    if (mbuff) {
+        *res = myres;
+        retval = -2;
+    } else if (mbuff) {
         retval = xml_strcmp(mbuff, strval2);
-        m__free(mbuff);
     } else {
         retval = xml_strcmp(buff, strval2);
     }
 
-    if (res) {
-        *res = NO_ERR;
+    if ( mbuff ) {
+        m__free(mbuff);
     }
 
+    *res = NO_ERR;
     return retval;
 
 }  /* val_compare_to_string */
@@ -10374,16 +10368,22 @@ status_t
 {
     status_t   res;
 
-#ifdef DEBUG
-    if (val == NULL) {
+    if ( !val ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-#endif
 
     val->flags |= VAL_FL_DEFSET;
-    if (val->editvars == NULL) {
+    if (!val->editvars) {
         res = new_editvars(val);
-        if (res != NO_ERR) {
+        if (res != NO_ERR || !val->editvars ) {
+            if ( NO_ERR == res ) {
+                res = ERR_INTERNAL_MEM;
+            }
+
+            if ( val->editvars ) {
+                free_editvars( val );
+            }
+
             return res;
         }
     }

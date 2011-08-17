@@ -291,7 +291,7 @@ typedef struct agt_dynlib_cb_t_ {
 *********************************************************************/
 extern status_t 
     agt_init1 (int argc,
-	       const char *argv[],
+	       char *argv[],
 	       boolean *showver,
 	       help_mode_t *showhelpmode);
 

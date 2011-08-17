@@ -327,7 +327,6 @@ void
     mgr_not_msg_t           *msg;
     ncx_module_t            *mod;
     val_value_t             *child;
-    status_t                 res;
     boolean                  consumed;
 
 #ifdef DEBUG
@@ -336,9 +335,6 @@ void
         return;
     }
 #endif
-
-    /* init local vars */
-    res = NO_ERR;
 
     /* check if the notification template is already cached */
     if (notification_obj) {

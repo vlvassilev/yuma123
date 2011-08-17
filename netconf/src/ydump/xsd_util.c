@@ -2558,7 +2558,7 @@ val_value_t *
     const xmlChar    *def, *leafdef;
     xmlChar           numbuff[NCX_MAX_NUMLEN];
     ncx_btype_t       btyp;
-    boolean           isleaf, mandatory;
+    boolean           isleaf;
     status_t          res;
 
     if (obj->objtype == OBJ_TYP_LEAF) {
@@ -2570,7 +2570,6 @@ val_value_t *
         isleaf = FALSE;
         typdef = obj->def.leaflist->typdef;
         leafdef = NULL;
-        mandatory = FALSE;
         def = NULL;
     }
 

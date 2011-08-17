@@ -1343,7 +1343,7 @@ status_t
                   ncx_num_t *num2,
                   ncx_btype_t  btyp2)
 {
-    int64      testbase, testfrac;
+    int64      testbase /*, testfrac */;
     status_t   res;
 
 #ifdef DEBUG
@@ -1515,7 +1515,7 @@ status_t
              * not sure if this will ever be used
              */
             testbase = num1->dec.val / (10 * num1->dec.digits);
-            testfrac = num1->dec.val % (10 * num1->dec.digits);
+            /* testfrac = num1->dec.val % (10 * num1->dec.digits); */
 
             switch (btyp2) {
             case NCX_BT_INT8:
@@ -2141,7 +2141,7 @@ status_t
         ilen = sprintf((char *)buff, "%d", num->i);
         break;
     case NCX_BT_INT64:
-        ilen = sprintf((char *)buff, "%lld", num->l);
+        ilen = sprintf((char *)buff, "%lld", (long long)num->l);
         break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
@@ -2149,7 +2149,7 @@ status_t
         ilen = sprintf((char *)buff, "%u", num->u);
         break;
     case NCX_BT_UINT64:
-        ilen = sprintf((char *)buff, "%llu", num->ul);
+        ilen = sprintf((char *)buff, "%llu", (unsigned long long)num->ul);
         break;
     case NCX_BT_DECIMAL64:
         if (num->dec.val == 0) {
@@ -2161,7 +2161,7 @@ status_t
                 buff[ilen++] = '0';
                 i++;
             }
-            ilen += sprintf((char *)&buff[ilen], "%lld", num->dec.val);
+            ilen += sprintf((char *)&buff[ilen], "%lld", (long long)num->dec.val);
         } else {
             if (num->dec.digits == 0) {
                 return SET_ERROR(ERR_INTERNAL_VAL);
@@ -2169,7 +2169,7 @@ status_t
                 /* get the encoded number in the temp buffer */
                 pos = sprintf((char *)decbuff, 
                               "%lld", 
-                              num->dec.val);
+                              (long long)num->dec.val);
 
                 if (pos <= num->dec.digits) {
                     return SET_ERROR(ERR_INTERNAL_VAL);

@@ -1193,7 +1193,6 @@ static status_t
     obj_leaflist_t  *llist;
     const xmlChar   *val;
     const char      *expstr;
-    xmlChar         *str;
     tk_type_t        tktyp;
     boolean          done, when, typ, units, conf;
     boolean          minel, maxel, ord, stat, desc, ref, typeok, flagset;
@@ -1203,7 +1202,6 @@ static status_t
     llist = NULL;
     val = NULL;
     expstr = "keyword";
-    str = NULL;
     done = FALSE;
     when = FALSE;
     typ = FALSE;
@@ -1439,7 +1437,6 @@ static status_t
     obj_unique_t    *objuniq;
     const xmlChar   *val;
     const char      *expstr;
-    xmlChar         *str;
     tk_type_t        tktyp;
     boolean          done, when, key, conf;
     boolean          minel, maxel, ord, stat, desc, ref, flagset, ingrp;
@@ -1450,7 +1447,6 @@ static status_t
     list = NULL;
     val = NULL;
     expstr = "keyword";
-    str = NULL;
     done = FALSE;
     when = FALSE;
     key = FALSE;
@@ -1725,7 +1721,7 @@ static status_t
     const xmlChar   *val, *namestr;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, when, stat, desc, ref, anydone;
+    boolean          done, when, stat, desc, ref;
     status_t         res, retres;
 
     obj = NULL;
@@ -1736,7 +1732,6 @@ static status_t
     stat = FALSE;
     desc = FALSE;
     ref = FALSE;
-    anydone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
 
@@ -1765,8 +1760,7 @@ static status_t
         res = consume_semi_lbrace(tkc, mod, obj, &done);
         CHK_OBJ_EXIT(obj, res, retres);
     } else {
-        /* shoarthand version, just 1 data-def-stmt per case */
-        anydone = TRUE;
+        /* shorthand version, just 1 data-def-stmt per case */
         res = consume_case_datadef(pcb,
                                    tkc, 
                                    mod,
@@ -2245,7 +2239,7 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, targ, desc, ref, pres, def;
+    boolean          done, desc, ref, pres, def;
     boolean          conf, mand, minel, maxel, flagset;
     status_t         res, retres;
 
@@ -2254,7 +2248,6 @@ static status_t
     val = NULL;
     expstr = "refine target";
     done = FALSE;
-    targ = FALSE;
     desc = FALSE;
     ref = FALSE;
     pres = FALSE;
@@ -2483,7 +2476,6 @@ static status_t
     grp_template_t  *impgrp;
     const xmlChar   *val;
     const char      *expstr;
-    xmlChar         *str;
     yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, when, stat, desc, ref;
@@ -2493,7 +2485,6 @@ static status_t
     uses = NULL;
     val = NULL;
     expstr = "keyword";
-    str = NULL;
     done = FALSE;
     when = FALSE;
     stat = FALSE;
@@ -2697,7 +2688,7 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     tk_type_t        tktyp;
-    boolean          done, anydone;
+    boolean          done;
     status_t         res, retres;
 
     obj = NULL;
@@ -2705,7 +2696,6 @@ static status_t
     val = NULL;
     expstr = "typedef, grouping, or data-def keyword";
     done = FALSE;
-    anydone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
 
@@ -2967,25 +2957,20 @@ static status_t
     obj_augment_t   *aug;
     const xmlChar   *val;
     const char      *expstr;
-    xmlChar         *str;
     yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, when, stat, desc, ref;
-    boolean          rpcin, rpcout;
     status_t         res, retres;
 
     obj = NULL;
     aug = NULL;
     val = NULL;
     expstr = "keyword";
-    str = NULL;
     done = FALSE;
     when = FALSE;
     stat = FALSE;
     desc = FALSE;
     ref = FALSE;
-    rpcin = FALSE;
-    rpcout = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
 
@@ -4134,13 +4119,11 @@ static status_t
                                  ncx_module_t *mod)
 {
     obj_deviation_t    *deviation;
-    obj_template_t     *parentobj, *targobj;
     status_t            res, retres;
     boolean             deleted;
 
     res = NO_ERR;
     retres = NO_ERR;
-    targobj = NULL;
 
     for (deviation = (obj_deviation_t *)
              dlq_firstEntry(&mod->deviationQ);
@@ -4162,7 +4145,6 @@ static status_t
          * have been moved to the object deviate Q
          */
          deleted = FALSE;
-         parentobj = deviation->targobj->parent;
          res = apply_object_deviations(pcb,
                                        tkc, 
                                        mod,
@@ -7919,7 +7901,6 @@ static status_t
     obj_deviate_t     *devi, *nextdevi;
     obj_template_t    *targobj;
     const xmlChar     *curval;
-    tk_token_t        *curtk;
     xpath_pcb_t       *must, *targmust;
     obj_unique_t      *unique, *targunique;
     dlq_hdr_t         *targQ;
@@ -7929,7 +7910,6 @@ static status_t
     retres = NO_ERR;
     targobj = NULL;
     instancetest = FALSE;
-    curtk = NULL;
 
     /* find schema-nodeid target
      * the node being augmented MUST exist to be valid
@@ -9895,7 +9875,6 @@ status_t
     obj_deviation_t  *dev;
     const xmlChar    *val;
     const char       *expstr;
-    xmlChar          *str;
     yang_stmt_t      *stmt;
     tk_type_t         tktyp;
     boolean           done, desc, ref;
@@ -9917,7 +9896,6 @@ status_t
 
     val = NULL;
     expstr = "absolute schema node";
-    str = NULL;
     done = FALSE;
     desc = FALSE;
     ref = FALSE;

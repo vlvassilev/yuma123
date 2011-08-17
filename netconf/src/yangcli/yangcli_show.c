@@ -401,7 +401,6 @@ static status_t
 
 {
     ncx_var_t    *var;
-    val_value_t  *mgrset;
     dlq_hdr_t    *que;
     logfn_t       logfn;
     boolean       first, imode;
@@ -412,8 +411,6 @@ static status_t
     } else {
         logfn = log_write;
     }
-
-    mgrset = get_mgr_cli_valset();
 
     if (mode > HELP_MODE_BRIEF && !shortmode) {
         /* CLI Parameters */
@@ -602,10 +599,9 @@ static status_t
     do_show_one_module (ncx_module_t *mod,
                         help_mode_t mode)
 {
-    boolean        anyout, imode;
+    boolean        imode;
 
     imode = interactive_mode();
-    anyout = FALSE;
 
     if (mode == HELP_MODE_BRIEF) {
         if (imode) {

@@ -563,7 +563,6 @@ void
 {
     ncx_lmem_t      *lmem, *dest_lmem;
 
-#ifdef DEBUG
     if (!src || !dest) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
@@ -572,7 +571,6 @@ void
         SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }
-#endif
 
     /* get rid of dups in the src list if duplicates not allowed */
     if (!allow_dups) {
@@ -606,10 +604,12 @@ void
             SET_ERROR(ERR_INTERNAL_VAL);
             return;
         }
-        dlq_remove(lmem);
+        if (lmem) {
+            dlq_remove(lmem);
 
-        /* merge lmem into the dest list */
-        ncx_insert_lmem(dest, lmem, mergetyp);
+            /* merge lmem into the dest list */
+            ncx_insert_lmem(dest, lmem, mergetyp);
+        } /* else should not happen since dlq_empty is false */
     }
 
 }  /* ncx_merge_list */
@@ -675,39 +675,56 @@ status_t
                   const xmlChar *strval,
                   ncx_list_t  *list)
 {
-    const xmlChar     *str1, *str2;
+    const xmlChar     *str1 = strval;
+    const xmlChar     *str2 = NULL;
     ncx_lmem_t        *lmem;
     uint32             len;
-    status_t           res;
-    boolean            done, checkexists;
+    boolean            done = FALSE;
+    boolean            checkexists;
 
-#ifdef DEBUG
     if (!strval || !list) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-#endif
+    if (!*strval) {
+        return NO_ERR;
+    }
 
     /* probably already set but make sure */
     list->btyp = btyp;
 
     checkexists = !dlq_empty(&list->memQ);
-
-    if (!*strval) {
-        return NO_ERR;
-    }
-
-    str1 = strval;
-    str2 = NULL;
-    done = FALSE;
-
     while (!done) {
         /* skip any leading whitespace */
-        while (xml_isspace(*str1)) {
-            str1++;
+        while( xml_isspace( *str1 ) ) {
+            ++str1;
         }
         if (!*str1) {
             done = TRUE;
             continue;
+        }
+
+        /* if str1 starts with a double quote, parse the string as 
+         * a whitespace-allowed string */
+        if (NCX_STR_START == *str1) {
+            ++str1;
+            str2 = str1;
+            while (*str2 && (NCX_STR_END != *str2 )) {
+                str2++;
+            }
+            len = (uint32)( str2 - str1 );
+            if (*str2) {
+                str2++;
+            } else {
+                log_info("\nncx_set_list: missing EOS marker\n  (%s)", str1);
+            }
+        } else {
+            /* consume string until a WS, str-start, or EOS seen */
+            str2 = str1+1;
+            while (*str2 && !xml_isspace(*str2) && 
+                   (NCX_STR_START != *str2 )) {
+                str2++;
+            }
+            len = (uint32)(str2-str1);
         }
 
         /* set up a new list string struct */
@@ -716,56 +733,17 @@ status_t
             return ERR_INTERNAL_MEM;
         }
 
-        /* parse the string either as whitespace-allowed
-         * or whitespace-not-allowed string
-         */
-        if (*str1==NCX_STR_START) {
-            /* The XML string starts with a double quote
-             * so interpret the string as whitespace-allowed
-             * do not save the double quote char 
-             */
-            str2 = ++str1;
-            while (*str2 && (*str2 != NCX_STR_END)) {
-                str2++;
-            }
-            len = (uint32)(str2-str1);
-            if (*str2) {
-                str2++;
-            } else {
-                log_info("\nncx_set_list: missing EOS marker\n  (%s)",
-                          str1);
-            }
-        } else {
-            /* consume string until a WS, str-start, or EOS seen */
-            str2 = str1+1;
-            while (*str2 && !xml_isspace(*str2) && 
-                   (*str2 != NCX_STR_START)) {
-                str2++;
-            }
-            len = (uint32)(str2-str1);
-        }
-
-        /* copy the string just parsed 
-         * for now just separate into strings and do not
-         * validate or parse into enums or numbers
-         */
-        res = NO_ERR;
+        /* copy the string just parsed for now just separate into strings and 
+         * do not validate or parse into enums or numbers */
         lmem->val.str = xml_strndup(str1, len);
         if (!lmem->val.str) {
-            res = ERR_INTERNAL_MEM;
-        }
-
-        if (res != NO_ERR) {
             ncx_free_lmem(lmem, NCX_BT_STRING);
-            return res;
+            return ERR_INTERNAL_MEM;
         }
 
         if (checkexists &&
             ncx_string_in_list(lmem->val.str, list)) {
-            /* just toss this existing entry 
-             * this mode is rarely used, so do not care
-             * that it is non-optimal
-             */
+            /* The entry is already present, discard it */
             ncx_free_lmem(lmem, NCX_BT_STRING);
         } else {            
             /* save the list member in the Q */

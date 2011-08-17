@@ -78,7 +78,7 @@ extern "C" {
  *********************************************************************/
 extern status_t 
     ydump_init (int argc,
-                const char *argv[],
+                char *argv[],
                 boolean allowcode,
                 yangdump_cvtparms_t *cvtparms);
 

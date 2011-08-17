@@ -354,6 +354,137 @@ static ncx_var_t *
 
 }  /* find_var */
 
+/********************************************************************
+* FUNCTION modify_str
+* 
+* helper function to modify an existing stri.
+*
+* INPUTS:
+*   val == the new value to set
+*   var == variable to modify 
+*   vartype == variable type
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    modify_str( val_value_t *val,
+                ncx_var_t* var,
+                var_type_t vartype )
+{
+   status_t res = NO_ERR;
+
+   if (var->vartype == VAR_TYP_SYSTEM) {
+       log_error("\nError: system variables cannot be changed");
+       val_free_value( val );
+       return ERR_NCX_VAR_READ_ONLY;
+   }
+
+   /* only allow user vars to change the data type */
+   if ( (vartype == VAR_TYP_CONFIG) &&
+        (val->btyp != var->val->btyp) ) {
+       log_error("\nError: cannot change the variable data type");
+       val_free_value( val );
+       return ERR_NCX_WRONG_TYPE;
+   }
+
+   if (vartype == VAR_TYP_CONFIG && var->val->typdef != NULL) {
+       uint32        len;
+       xmlChar      *buffer;
+
+       /* do not replace this typdef since it might
+        * not be generic like all the user variables
+        */
+       res = val_sprintf_simval_nc(NULL, val, &len);
+       if ( NO_ERR == res ) {
+           buffer = m__getMem(len+1);
+           if (buffer == NULL) {
+               res = ERR_INTERNAL_MEM;
+           } 
+           else {
+               res = val_sprintf_simval_nc(buffer, val, &len);
+
+               if (res == NO_ERR) {
+                   res = val_set_simval(var->val,
+                                        var->val->typdef,
+                                        var->val->nsid,
+                                        var->val->name,
+                                        buffer);
+               }
+               m__free(buffer);
+           }
+       }
+       val_free_value( val );
+   } else {
+       val_value_t  *tempval;
+
+       /* swap out the value structs and free the old one */
+       tempval = var->val;
+       var->val = val;
+       var->val->nsid = tempval->nsid;
+
+       /* make sure the name stays the same */
+       val_set_name(var->val, 
+                    tempval->name, 
+                    xml_strlen(tempval->name));
+       val_free_value(tempval);
+   }
+
+   return res;
+}
+
+/********************************************************************
+* FUNCTION insert_new_str
+* 
+* helper fucntion to insert a new stri.
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   varQ == queue to use or NULL if not known yet
+*   name == var name to set
+*   namelen == length of name
+*   val == var value to set
+*   vartype == variable type
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    insert_new_str( runstack_context_t *rcxt,
+                    dlq_hdr_t *varQ,
+                    const xmlChar *name,
+                    uint32 namelen,
+                    val_value_t *val,
+                    var_type_t vartype )
+{
+    ncx_var_t    *var;
+    status_t      res;
+
+    if (!varQ) {
+        varQ = get_que(rcxt, vartype, name);
+        if (!varQ) {
+            val_free_value( val );
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
+
+    /* create a new value */
+    var = new_var(name, namelen, val, vartype, &res);
+    if (!var ) {
+        val_free_value( val );
+        return ERR_INTERNAL_MEM;
+    }
+
+    if ( NO_ERR == res  ) {
+        res = insert_var(var, varQ);
+    }
+
+    if (res != NO_ERR) {
+        free_var(var);
+    }
+
+    return res;
+}
 
 /********************************************************************
 * FUNCTION set_str
@@ -361,7 +492,9 @@ static ncx_var_t *
 * Find and set (or create a new) global user variable
 * Common portions only!!!
 *
-* Force caller to deallocate var if there is an error
+* This function takes responsibility for managing 'val'. The parameter
+* passed into this function as 'val' should not be used or freed after 
+* calling this function
 *
 * INPUTS:
 *   rcxt == runstack context to use
@@ -382,13 +515,12 @@ static status_t
              val_value_t *val,
              var_type_t vartype)
 {
-    val_value_t  *tempval;
-    xmlChar      *buffer;
     ncx_var_t    *var;
     status_t      res;
-    uint32        len;
 
-    res = NO_ERR;
+    if ( !val ) {
+        return ERR_INTERNAL_PTR;
+    }
 
     if (!val->name) {
         val_set_name(val, name, namelen);
@@ -397,80 +529,12 @@ static status_t
     /* try to find this var */
     var = find_var(rcxt, varQ, name, namelen, 0, vartype);
     if (var) {
-        if (var->vartype == VAR_TYP_SYSTEM) {
-            log_error("\nError: system variables cannot be changed");
-            return ERR_NCX_VAR_READ_ONLY;
-        }
-
-        /* only allow user vars to change the data type */
-        if ((vartype == VAR_TYP_CONFIG) &&
-            (val->btyp != var->val->btyp)) {
-            log_error("\nError: cannot change the variable data type");
-            return ERR_NCX_WRONG_TYPE;
-        }
-
-        if (vartype == VAR_TYP_CONFIG && var->val->typdef != NULL) {
-            /* do not replace this typdef since it might
-             * not be generic like all the user variables
-             */
-            res = val_sprintf_simval_nc(NULL, val, &len);
-            if (res == NO_ERR) {
-                buffer = m__getMem(len+1);
-                if (buffer == NULL) {
-                    res = ERR_INTERNAL_MEM;
-                } else {
-                    res = val_sprintf_simval_nc(buffer, val, &len);
-
-                    if (res == NO_ERR) {
-                        res = val_set_simval(var->val,
-                                             var->val->typdef,
-                                             var->val->nsid,
-                                             var->val->name,
-                                             buffer);
-                    }
-
-                    m__free(buffer);
-                }
-            }
-            val_free_value(val);
-        } else {
-            /* swap out the value structs and free the old one */
-            tempval = var->val;
-            var->val = val;
-            var->val->nsid = tempval->nsid;
-
-            /* make sure the name stays the same */
-            val_set_name(var->val, 
-                         tempval->name, 
-                         xml_strlen(tempval->name));
-            val_free_value(tempval);
-        }
+       res = modify_str( val, var, vartype );
     } else {
-        if (!varQ) {
-            varQ = get_que(rcxt, vartype, name);
-            if (!varQ) {
-                return SET_ERROR(ERR_INTERNAL_VAL);
-            }
-        }
-
-        /* create a new value */
-        var = new_var(name, namelen, val, vartype, &res);
-        if (!var || res != NO_ERR) {
-            if (var) {
-                var->val = NULL;
-                free_var(var);
-            }
-            return res;
-        }
-
-        res = insert_var(var, varQ);
-        if (res != NO_ERR) {
-            var->val = NULL;
-            free_var(var);
-        }
+       res = insert_new_str( rcxt, varQ, name, namelen, val, vartype );
     }
-    return res;
 
+    return res;
 }  /* set_str */
 
 
@@ -724,7 +788,6 @@ status_t
                  var_type_t vartype)
 {
     val_value_t  *val;
-    status_t      res;
 
 #ifdef DEBUG
     if (!name || !value) {
@@ -744,12 +807,7 @@ status_t
         return ERR_INTERNAL_MEM;
     }
 
-    res = set_str(rcxt, NULL, name, namelen, val, vartype);
-    if (res != NO_ERR) {
-        val_free_value(val);
-    }
-    return res;
-
+    return set_str(rcxt, NULL, name, namelen, val, vartype);
 }  /* var_set_str */
 
 
@@ -809,7 +867,6 @@ status_t
                      const val_value_t *value)
 {
     val_value_t  *val;
-    status_t      res;
 
 #ifdef DEBUG
     if (!varQ || !name || !value) {
@@ -825,12 +882,7 @@ status_t
         return ERR_INTERNAL_MEM;
     }
 
-    res = set_str(NULL, varQ, name, namelen, val, VAR_TYP_QUEUE);
-    if (res != NO_ERR) {
-        val_free_value(val);
-    }
-    return res;
-
+    return set_str(NULL, varQ, name, namelen, val, VAR_TYP_QUEUE);
 }  /* var_set_str_que */
 
 
@@ -881,22 +933,20 @@ status_t
                       const xmlChar *name,
                       val_value_t *value)
 {
-    status_t      res;
+    if ( !value ) {
+        return ERR_INTERNAL_PTR;
+    }
 
 #ifdef DEBUG
     if (!varQ || !name) {
+        val_free_value( value );
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = set_str(NULL,
-                  varQ, 
-                  name, 
-                  xml_strlen(name), 
+    return set_str(NULL, varQ, name, xml_strlen(name), 
                   value,   /* pass off value memory here */
                   VAR_TYP_QUEUE);
-    return res;
-
 }  /* var_set_move_que */
 
 
@@ -924,16 +974,23 @@ status_t
                   var_type_t vartype,
                   val_value_t *value)
 {
+    if ( !value ) {
+        return ERR_INTERNAL_PTR;
+    }
+
 #ifdef DEBUG
-    if (!name || !value) {
+    if (!name ) {
+        val_free_value( value );
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!namelen) {
+        val_free_value( value );
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     if (vartype == VAR_TYP_NONE || vartype > VAR_TYP_SYSTEM) {
+        val_free_value( value );
         return ERR_NCX_INVALID_VALUE;
     }
 
@@ -1055,9 +1112,6 @@ status_t
                   xml_strlen(name), 
                   val, 
                   vartype);
-    if (res != NO_ERR) {
-        val_free_value(val);
-    }
 
     return res;
 
@@ -1750,9 +1804,8 @@ val_value_t *
     val_value_t           *newval, *useval, *fillcopy;
     xmlChar               *fname, *intbuff, *sourcefile;
     uint32                 namelen, len;
-    boolean                isvarref;
     var_type_t             vartype;
-    boolean                usefillval, simtyp;
+    boolean                simtyp;
 #ifdef DEBUG
     if (!obj || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1761,21 +1814,13 @@ val_value_t *
 #endif
 
     newval = NULL;
-    isvarref = FALSE;
     useval = NULL;
-    usefillval = FALSE;
     *res = NO_ERR;
-
-    /* get a new value struct if one is not provided */
-    if (strval != NULL && *strval == NCX_VAR_CH) {
-        isvarref = TRUE;
-    }
 
     simtyp = typ_is_simple(obj_get_basetype(obj));
 
     if (fillval != NULL && simtyp) {
         useval = NULL;
-        usefillval = TRUE;
         /* must not pre-allocate and replace with fillval */
         if (val != NULL) {
             *res = ERR_NCX_OPERATION_NOT_SUPPORTED;

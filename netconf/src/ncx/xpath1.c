@@ -4259,12 +4259,17 @@ static xpath_result_t *
 
     *res = NO_ERR;
 
-    /* check at least 2 strings to concat */
-    parmcnt = dlq_count(parmQ);
-
     parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
     parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
     parm3 = (xpath_result_t *)dlq_nextEntry(parm2);
+
+    /* check at least 3 parameters */
+    parmcnt = dlq_count(parmQ);
+    if (parmcnt < 3)
+    {
+        *res = ERR_NCX_MISSING_PARM;
+        return NULL;
+    }
 
     if (parm1->restype != XP_RT_STRING) {
         *res = xpath_cvt_string(pcb, parm1, &p1str);
@@ -6257,10 +6262,10 @@ static status_t
                     testnode = (xpath_resnode_t *)
                         dlq_deque(&dummy->r.nodeQ);
 
+                    /* It is assumed that testnode cannot NULL because the call 
+                     * to dlq_empty returned false. */
                     if (find_resnode(pcb, &resnodeQ,
-                                     (testnode) ?
-                                     (const void *)testnode->node.valptr :
-                                     (const void *)testnode->node.objptr)) {
+                                     (const void *)testnode->node.valptr)) {
                         free_resnode(pcb, testnode);
                     } else {
                         dlq_enque(testnode, &resnodeQ);
@@ -6341,16 +6346,13 @@ static status_t
                      ncx_xpath_axis_t axis,
                      xpath_result_t **result)
 {
-    xpath_result_t    *val1;
-    const xmlChar     *literal, *name;
+    const xmlChar     *name;
     tk_type_t          nexttyp;
     xpath_nodetype_t   nodetyp;
     status_t           res;
     xmlns_id_t         nsid;
     boolean            emptyresult, textmode;
 
-    val1 = NULL;
-    literal = NULL;
     nsid = 0;
     name = NULL;
     textmode = FALSE;
@@ -6431,8 +6433,6 @@ static status_t
                 if (res != NO_ERR) {
                     return res;
                 }
-
-                literal = TK_CUR_VAL(pcb->tkc);
             }
         }
 
@@ -9326,7 +9326,7 @@ xpath_result_t *
     }
 
     if (configonly ||
-        (pcb->source == XP_SRC_YANG && obj_is_config(val->obj))) {
+        (pcb->source == XP_SRC_YANG && val && obj_is_config(val->obj))) {
         pcb->flags |= XP_FL_CONFIGONLY;
     }
 
@@ -9692,7 +9692,7 @@ status_t
 {
     status_t                   res;
     uint32                     cnt;
-    boolean                    cfgonly, fnresult;
+    boolean                    cfgonly;
     xpath_stringwalkerparms_t  walkerparms;
 
 #ifdef DEBUG
@@ -9736,17 +9736,20 @@ status_t
         walkerparms.buffpos = 0;
         walkerparms.res = NO_ERR;
 
-        /* first walk to get the buffer size */
-        fnresult = val_find_all_descendants(stringify_walker_fn,
-                                            pcb,
-                                            &walkerparms,
-                                            val,
-                                            NULL,
-                                            NULL,
-                                            cfgonly,
-                                            FALSE,
-                                            TRUE,
-                                            TRUE);
+        /* first walk to get the buffer size
+         * don't care about result; just need to check
+         * walkerparms.res
+         */
+        (void)val_find_all_descendants(stringify_walker_fn,
+                                       pcb,
+                                       &walkerparms,
+                                       val,
+                                       NULL,  /* modname */
+                                       NULL,  /* name */
+                                       cfgonly,
+                                       FALSE,  /* textmode */
+                                       TRUE,   /* orself */
+                                       TRUE);  /* forceall */
         if (walkerparms.res != NO_ERR) {
             return walkerparms.res;
         }
@@ -9758,17 +9761,20 @@ status_t
         walkerparms.buffsize = walkerparms.buffpos+2;
         walkerparms.buffpos = 0;
 
-        /* second walk to fill in the buffer */
-        fnresult = val_find_all_descendants(stringify_walker_fn,
-                                            pcb,
-                                            &walkerparms,
-                                            val,
-                                            NULL,
-                                            NULL,
-                                            cfgonly,
-                                            FALSE,
-                                            TRUE,
-                                            TRUE);
+        /* second walk to fill in the buffer
+         * don't care about result; just need to check
+         * walkerparms.res
+         */
+        (void)val_find_all_descendants(stringify_walker_fn,
+                                       pcb,
+                                       &walkerparms,
+                                       val,
+                                       NULL,  /* modname */
+                                       NULL,  /* name */
+                                       cfgonly,
+                                       FALSE,  /* textmode */
+                                       TRUE,   /* orself */
+                                       TRUE);  /* forceall */
         if (walkerparms.res != NO_ERR) {
             m__free(walkerparms.buffer);
             return walkerparms.res;

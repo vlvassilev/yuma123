@@ -343,7 +343,7 @@ xmlChar *
 
         utime = mktime(&convertedtime);
         if (utime == (utime)-1) {
-            *res = ERR_INTERNAL_VAL;
+            *res = ERR_NCX_INVALID_VALUE;
             m__free(buffer);
             return NULL;
         }

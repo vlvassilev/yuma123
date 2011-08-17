@@ -505,7 +505,7 @@ static status_t
     val_value_t      *filchild, *curchild, *useval, *virtualval;
     val_index_t      *valindex;
     ncx_filptr_t     *filptr;
-    boolean           test, anycon, anycm, anysel, mykeepempty;
+    boolean           test, anycon, anysel, mykeepempty;
     xmlns_id_t        ncid, wildid;
     status_t          res;
 
@@ -539,7 +539,6 @@ static status_t
      * and save ncx_filptr_t structs for those nodes
      */
     anycon = FALSE;
-    anycm = FALSE;
     anysel = FALSE;
 
     /* check if this is a real or a virtual value */
@@ -591,7 +590,6 @@ static status_t
         /* skip all but content match nodes */
         switch (filchild->btyp) {
         case NCX_BT_STRING:
-            anycm = TRUE;
             break;
         case NCX_BT_EMPTY:
             anysel = TRUE;

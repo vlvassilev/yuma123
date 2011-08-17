@@ -2391,7 +2391,6 @@ static void
                             int32 startindent)
 {
     const ext_template_t *ext;
-    int32              indent;
 
     if (dlq_empty(extensionQ)) {
         return;
@@ -2400,8 +2399,6 @@ static void
     write_cyang_banner_cmt(scb, mod, cp,
                            (const xmlChar *)"extensions", 
                            startindent);
-
-    indent = startindent + ses_indent_count(scb);
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
          ext != NULL;
@@ -2514,7 +2511,6 @@ static void
                             int32 startindent)
 {
     const ncx_identity_t *identity;
-    int32                 indent;
 
     if (dlq_empty(identityQ)) {
         return;
@@ -2523,8 +2519,6 @@ static void
     write_cyang_banner_cmt(scb, mod, cp,
                            (const xmlChar *)"identities", 
                            startindent);
-
-    indent = startindent + ses_indent_count(scb);
 
     for (identity = (const ncx_identity_t *)
              dlq_firstEntry(identityQ);

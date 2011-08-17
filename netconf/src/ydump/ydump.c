@@ -315,7 +315,7 @@ static void
 *********************************************************************/
 static status_t
     process_cli_input (int argc,
-                       const char *argv[],
+                       char *argv[],
                        yangdump_cvtparms_t  *cp)
 {
     obj_template_t        *obj;
@@ -1934,7 +1934,7 @@ static status_t
  *********************************************************************/
 status_t 
     ydump_init (int argc,
-                const char *argv[],
+                char *argv[],
                 boolean allowcode,
                 yangdump_cvtparms_t *cvtparms)
 {

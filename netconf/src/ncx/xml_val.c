@@ -126,9 +126,43 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+/************ L O C A L F U N C T I O N S   ******/
+
+/********************************************************************
+* FUNCTION new_string_attr
+* 
+*   Set up a new string val 
+*
+* INPUTS:
+*    name == attr name
+*    nsid == namespace ID of attr
+*    str  == the string value to use
+*
+* RETURNS:
+*   A newly created string value or NULL
+*********************************************************************/
+static val_value_t*
+    new_string_attr( const xmlChar    *name, 
+                     const xmlns_id_t  nsid,
+                     xmlChar          *strval )
+{
+    val_value_t *newval;
+
+    newval = val_new_value();
+    if (!newval) {
+        return NULL;
+    }   
+
+    newval->btyp = NCX_BT_STRING;
+    newval->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
+    newval->name = name;
+    newval->nsid = nsid;
+    newval->v.str = strval;
+
+    return newval;
+}
 
 /************ E X T E R N A L    F U N C T I O N S   ******/
-
 
 /********************************************************************
 * FUNCTION xml_val_make_qname
@@ -275,20 +309,18 @@ status_t
 {
     val_value_t *newval;
 
-    /* create a new value to hold the attribute name value pair */
-    newval = val_new_value();
     if (!val) {
         return ERR_INTERNAL_MEM;
     }
-    newval->btyp = NCX_BT_STRING;
-    newval->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
-    newval->name = name;
-    newval->nsid = nsid;
-    newval->v.str = attrval;    /* will get freed later !!! */
+
+    /* create a new value to hold the attribute name value pair */
+    newval = new_string_attr( name, nsid, attrval );
+    if (!newval) {
+        return ERR_INTERNAL_MEM;
+    }
 
     dlq_enque(newval, &val->metaQ);
     return NO_ERR;
-
 }   /* xml_val_add_attr */
 
 
@@ -313,28 +345,19 @@ status_t
                        const xmlChar *cattrval,
                        val_value_t *val)
 {
-    val_value_t *newval;
-
-    /* const value version of xml_val_add_attr */
-    newval = val_new_value();
-    if (!val) {
-        return ERR_INTERNAL_MEM;
-    }
-    newval->btyp = NCX_BT_STRING;
-    newval->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
-    newval->name = name;
-    newval->nsid = nsid;
-    newval->v.str = xml_strdup(cattrval);
-    if (!newval->v.str) {
-        val_free_value(newval);
+    xmlChar     *str;
+    status_t     res;
+    str = xml_strdup( cattrval );
+    if (!str) {
         return ERR_INTERNAL_MEM;
     }
 
-    dlq_enque(newval, &val->metaQ);
-    return NO_ERR;
-
+    res = xml_val_add_attr( name, nsid, str, val );
+    if ( NO_ERR != res ) {
+        m__free( str );
+    }
+    return res;
 }   /* xml_val_add_cattr */
-
 
 /********************************************************************
 * FUNCTION xml_val_new_struct
@@ -390,18 +413,12 @@ val_value_t *
 {
     val_value_t *val;
 
-    val = val_new_value();
+    val = new_string_attr( name, nsid, strval );
     if (!val) {
         return NULL;
     }
-    val->btyp = NCX_BT_STRING;
-    val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
-    val->name = name;
-    val->nsid = nsid;
-    val->v.str = strval;  /*** this will be freed later !!! ***/
     val->obj = ncx_get_gen_string();
     return val;
-
 }   /* xml_val_new_string */
 
 
@@ -424,26 +441,20 @@ val_value_t *
                          xmlns_id_t     nsid,
                          const xmlChar *strval)
 {
-    val_value_t *val;
     xmlChar     *str;
-
+    val_value_t *val;
     str = xml_strdup(strval);
     if (!str) {
         return NULL;
     }
-    val = val_new_value();
-    if (!val) {
-        m__free(str);
+
+    val = new_string_attr( name, nsid, str );
+    if ( !val ) {
+        m__free( str );
         return NULL;
     }
-    val->btyp = NCX_BT_STRING;
-    val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
-    val->name = name;
-    val->nsid = nsid;
-    val->v.str = str;  /*** this will be freed later !!! ***/
     val->obj = ncx_get_gen_string();
     return val;
-
 }   /* xml_val_new_cstring */
 
 
@@ -501,16 +512,11 @@ val_value_t *
 {
     val_value_t *val;
 
-    val = val_new_value();
+    val = xml_val_new_flag( name, nsid );
     if (!val) {
         return NULL;
     }
-    val->btyp = NCX_BT_EMPTY;
     val->v.boo = boo;
-    val->typdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
-    val->name = name;
-    val->nsid = nsid;
-    val->obj = ncx_get_gen_empty();
 
     return val;
 

@@ -299,10 +299,10 @@ status_t
 
 #ifdef DEBUG
     if (!inbuff || !retlen) {
-        return ERR_INTERNAL_PTR;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (outbufflen<4 || linesize < 3) {
-        return ERR_INTERNAL_VAL;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -407,10 +407,10 @@ status_t
 
 #ifdef DEBUG
     if (!inbuff || !retlen) {
-        return ERR_INTERNAL_PTR;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!inbufflen || !outbufflen) {
-        return ERR_INTERNAL_VAL;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 

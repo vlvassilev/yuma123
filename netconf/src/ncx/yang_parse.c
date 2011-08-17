@@ -411,13 +411,11 @@ static status_t
 {
     const xmlChar      *val;
     const char         *expstr;
-    xmlChar            *str;
     tk_type_t           tktyp;
     boolean             done, pfixdone;
     status_t            res, retres;
 
     val = NULL;
-    str = NULL;
     expstr = "module name";
     done = FALSE;
     pfixdone = FALSE;
@@ -1249,11 +1247,10 @@ static status_t
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
-    boolean        done, ver, blong;
+    boolean        done, ver;
 
     expstr = "submodule header statement";
     ver = FALSE;
-    blong = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
     done = FALSE;
@@ -1381,7 +1378,6 @@ static status_t
     const char         *expstr;
     yang_node_t        *node;
     yang_import_ptr_t  *impptr;
-    xmlChar            *str;
     ncx_module_t       *testmod;
     tk_type_t           tktyp;
     boolean             done, pfixdone, revdone;
@@ -1389,7 +1385,6 @@ static status_t
     ncx_error_t         tkerr;
 
     val = NULL;
-    str = NULL;
     expstr = "module name";
     done = FALSE;
     pfixdone = FALSE;
@@ -1699,7 +1694,7 @@ static status_t
     /* save or delete the import struct, except in search mode */
     if (retres == NO_ERR && imp->usexsd && !pcb->searchmode) {
         node = yang_new_node();
-        if (node == NULL) {
+        if (!node) {
             retres = ERR_INTERNAL_MEM;
             ncx_print_errormsg(tkc, mod, retres);
             ncx_free_import(imp);
@@ -1707,7 +1702,7 @@ static status_t
             impptr = yang_new_import_ptr(imp->module, 
                                          imp->prefix,
                                          imp->revision);
-            if (impptr == NULL) {
+            if (!impptr) {
                 retres = ERR_INTERNAL_MEM;
                 tkc->curerr = &imp->tkerr;
                 ncx_print_errormsg(tkc, mod, retres);
@@ -1735,7 +1730,7 @@ static status_t
                 dlq_enque(impptr, &pcb->allimpQ);
 
                 /* load the module now instead of later for validation
-                 * it may not get used, but assume it will
+                 * it may not get used, but assume it will 
                  * skip if forcing yuma-netconf override of ietf-netconf
                  * or if searchmode and just finding modname, revision
                  */
@@ -2487,13 +2482,7 @@ static status_t
 {
 #define REVBUFF_SIZE   128
 
-    xmlChar       *str, *p;
-    const char    *expstr;
-    status_t       res;
-
-    str = NULL;
-    expstr = "date-arg-str";
-    res = NO_ERR;
+    status_t       res = NO_ERR;
 
     /* get the mandatory version identifier date string */
     res = TK_ADV(tkc);
@@ -2507,49 +2496,44 @@ static status_t
         if (!*revstring) {
             res = ERR_INTERNAL_MEM;
             ncx_print_errormsg(tkc, mod, res);
-            return res;
         }
     } else if (TK_CUR_TYP(tkc)==TK_TT_DNUM) {
-        /* assume this is an unquoted date string
-         * this code does not detect corner-cases
-         * like 2007 -11 -20 because an unquoted
-         * dateTime string is the same as 3 integers
-         * and if there are spaces between them
-         * this will be parsed ok by tk.c
-         */
+        xmlChar       *str = NULL;
+        xmlChar       *p;
+
+        /* assume this is an unquoted date string this code does not detect 
+         * corner-cases like 2007 -11 -20 because an unquoted dateTime string 
+         * is the same as 3 integers and if there are spaces between them
+         * this will be parsed ok by tk.c */
         str = m__getMem(REVBUFF_SIZE);
         if (!str) {
             res = ERR_INTERNAL_MEM;
             ncx_print_errormsg(tkc, mod, res);
             return res;
-        } else {
-            p = str;
+        } 
+        
+        p = str;
+        p += xml_strcpy(p, TK_CUR_VAL(tkc));
+        res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
+        if ( NO_ERR == res ) {
             p += xml_strcpy(p, TK_CUR_VAL(tkc));
             res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
-            if (res != NO_ERR) {
-                if (NEED_EXIT(res)) {
-                    m__free(str);
-                    return res;
-                }
-            } else {
-                p += xml_strcpy(p, TK_CUR_VAL(tkc));
-                res = ncx_consume_token(tkc, mod, TK_TT_DNUM);
-                if (res != NO_ERR) {
-                    m__free(str);
-                    return res;
-                } else {
-                    xml_strcpy(p, TK_CUR_VAL(tkc));
-                    *revstring = str;
-                }
+            if ( NO_ERR == res ) {
+                xml_strcpy(p, TK_CUR_VAL(tkc));
+                *revstring = str;
             }
         }
+
+        if ( NO_ERR != res ) {
+            m__free(str);
+        }
     } else {
+        const char    *expstr = "date-arg-str";
         res = ERR_NCX_WRONG_TKTYPE;
         ncx_mod_exp_err(tkc, mod, res, expstr);
     }
 
     return res;
-
 }  /* consume_revision_date */
 
 
@@ -2917,12 +2901,11 @@ static status_t
     const xmlChar *val;
     const char    *expstr;
     tk_type_t      tktyp;
-    status_t       res, retres;
+    status_t       res;
     boolean        done;
 
     expstr = "body statement";
     res = NO_ERR;
-    retres = NO_ERR;
     done = FALSE;
 
     while (!done) {
@@ -2949,17 +2932,20 @@ static status_t
         case TK_TT_RBRACE:
             /* found end of module */
             TK_BKUP(tkc);
-            return retres;
+            return res;
         case TK_TT_MSTRING:
             /* vendor-specific clause found instead */
             res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-            CHK_EXIT(res, retres);
+            if ( ERR_NCX_EOF == res 
+                 || ( res < ERR_LAST_SYS_ERR && NO_ERR != res ) ) {
+                done = TRUE;
+            }
             continue;
         case TK_TT_TSTRING:
             break;  /* YANG clause assumed */
         default:
-            retres = ERR_NCX_WRONG_TKTYPE;
-            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
             yang_skip_statement(tkc, mod);
             continue;
         }
@@ -2976,43 +2962,29 @@ static status_t
         } else if (!xml_strcmp(val, YANG_K_IDENTITY)) {
             res = consume_identity(tkc, mod);
         } else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-            res = yang_typ_consume_typedef(pcb,
-                                           tkc, 
-                                           mod, 
-                                           &mod->typeQ);
+            res = yang_typ_consume_typedef( pcb, tkc, mod, &mod->typeQ );
         } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-            res = yang_grp_consume_grouping(pcb,
-                                            tkc, 
-                                            mod,
-                                            &mod->groupingQ, 
-                                            NULL);
+            res = yang_grp_consume_grouping( pcb, tkc, mod, &mod->groupingQ, 
+                                             NULL );
         } else if (!xml_strcmp(val, YANG_K_RPC)) {
-            res = yang_obj_consume_rpc(pcb,
-                                       tkc, 
-                                       mod);
+            res = yang_obj_consume_rpc( pcb, tkc, mod );
         } else if (!xml_strcmp(val, YANG_K_NOTIFICATION)) {
-            res = yang_obj_consume_notification(pcb,
-                                                tkc, 
-                                                mod);
+            res = yang_obj_consume_notification( pcb, tkc, mod );
         } else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-            res = yang_obj_consume_augment(pcb,
-                                           tkc, 
-                                           mod);
+            res = yang_obj_consume_augment( pcb, tkc, mod );
         } else if (!xml_strcmp(val, YANG_K_DEVIATION)) {
-            res = yang_obj_consume_deviation(pcb,
-                                             tkc, 
-                                             mod);
+            res = yang_obj_consume_deviation( pcb, tkc, mod );
         } else {
-            res = yang_obj_consume_datadef(pcb,
-                                           tkc, 
-                                           mod,
-                                           &mod->datadefQ, 
-                                           NULL);
+            res = yang_obj_consume_datadef( pcb, tkc, mod, &mod->datadefQ, 
+                                            NULL );
         }
-        CHK_EXIT(res, retres);
+        if ( ERR_NCX_EOF == res 
+             || ( res < ERR_LAST_SYS_ERR && NO_ERR != res ) ) {
+            done = TRUE;
+        }
     }
 
-    return retres;
+    return res;
 
 }  /* consume_body_stmts */
 
@@ -3576,6 +3548,7 @@ static status_t
         if (LOGDEBUG4) {
             log_debug4("\nyang_parse: resolve xpath");
         }
+
         res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
         CHK_EXIT(res, retres);
 
@@ -3584,22 +3557,19 @@ static status_t
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
 
-            if (node->submod == NULL) {
-                continue;
-            }
+            if (node->submod) {
+                res = yang_obj_top_resolve_final(pcb, 
+                                                 tkc,
+                                                 node->submod,
+                                                 &node->submod->datadefQ);
+                CHK_EXIT(res, retres);
 
-            /* finish list keys, etc. */
-            res = yang_obj_top_resolve_final(pcb, 
-                                             tkc,
+                /* resolve XPath in submodules */
+                res = yang_obj_resolve_xpath(tkc,
                                              node->submod,
                                              &node->submod->datadefQ);
-            CHK_EXIT(res, retres);
-        
-            /* resolve XPath in submodules */
-            res = yang_obj_resolve_xpath(tkc,
-                                         node->submod,
-                                         &node->submod->datadefQ);
-            CHK_EXIT(res, retres);
+                CHK_EXIT(res, retres);
+            }
         }
 
         /* Final augment expand
@@ -3691,7 +3661,7 @@ static status_t
          * !!! only objects expanded from uses will have
          * !!! this final check; unused groupings will not
          * !!! be checked
-         */
+         */        
     }
 
     /* check for loops in any leafref XPath targets */
@@ -3820,6 +3790,117 @@ static void
     
 }  /* set_source */
 
+/********************************************************************
+* FUNCTION load_yang_module
+* 
+* Load a Yang Module
+*
+* INPUTS:
+*
+* OUTPUTS:
+*   res the result of the operation.
+*********************************************************************/
+static status_t
+    load_yang_module ( const xmlChar  *filespec,
+                       const xmlChar  *filename,
+                       tk_chain_t     **tkc )
+{
+    FILE           *fp = NULL;
+
+    log_debug( "\nLoading YANG module from file:\n  %s", filespec );
+    /* open the YANG source file for reading */
+    fp = fopen( (const char *)filename, "r" );
+    if (!fp) {
+        return ERR_NCX_MISSING_FILE;
+    }
+
+    /* setup the token chain to parse this YANG file */
+    /* get a new token chain */
+    *tkc = tk_new_chain();
+    if ( !*tkc ) {
+        log_error("\nyang_parse malloc error");
+        fclose(fp);
+        return ERR_INTERNAL_MEM;
+    }
+    else {
+        // hand off management of fp
+        tk_setup_chain_yang( *tkc, fp, filename );
+    }
+
+    return NO_ERR;
+}
+
+/********************************************************************
+* FUNCTION load_yin_module
+* 
+* Load a Yin Module
+*
+* INPUTS:
+*
+* OUTPUTS:
+*   res the result of the operation.
+*********************************************************************/
+static status_t
+    load_yin_module ( const xmlChar  *filespec,
+                      const xmlChar  *filename,
+                      tk_chain_t     **tkc )
+{
+    status_t res = NO_ERR;
+
+    log_debug( "\nLoading YIN module from file:\n  %s", filespec );
+    /* just make sure the file exists for now */
+    if ( !ncxmod_test_filespec( filename ) ) {
+        return ERR_NCX_MISSING_FILE;
+    }
+
+    /* setup the token chain to parse this YANG file */
+    /* get a new token chain */
+    *tkc = yinyang_convert_token_chain( filename, &res );
+    if ( !*tkc ) {
+        log_error( "\nyang_parse: Invalid YIN file (%s)", 
+                   get_error_string(res) );
+        if ( NO_ERR == res ) {
+            res = ERR_INTERNAL_MEM;
+        }
+    }
+
+    return res;
+}
+/********************************************************************
+* FUNCTION configure_module
+* 
+* Allocate and configre an NCX_Module.
+*
+* INPUTS:
+*     
+*
+* OUTPUTS:
+*   res the result of the operation.
+*********************************************************************/
+static ncx_module_t*
+   configure_module( xmlChar        *filename,
+                     yang_pcb_t     *pcb )
+{
+   ncx_module_t *mod = NULL;
+
+    mod = ncx_new_module();
+    if (mod) {
+        set_source(mod, filename); /* hand off 'str' malloced memory here */
+
+        /* set the back-ptr to Q of all the import files */
+        mod->allimpQ = &pcb->allimpQ;
+
+        /* set the back-ptr to parent of this submodule 
+         * or NULL if this is not a submodule
+         */
+        mod->parent = pcb->parentparm;
+
+        /* set the stmt-track mode flag to the master flag in the PCB */
+        mod->stmtmode = pcb->stmtmode;
+    } 
+
+   return mod;
+}
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
@@ -3861,12 +3942,12 @@ status_t
                               yang_parsetype_t ptyp,
                               boolean isyang)
 {
-    tk_chain_t     *tkc;
-    ncx_module_t   *mod;
-    FILE           *fp;
+    tk_chain_t     *tkc = NULL;
+    ncx_module_t   *mod = NULL;
     xmlChar        *str;
-    status_t        res;
-    boolean         wasadd, keepmod;
+    status_t        res = NO_ERR ;
+    boolean         wasadd = FALSE;
+    boolean         keepmod = FALSE;
 
 #ifdef DEBUG
     if (!filespec || !pcb) {
@@ -3874,281 +3955,218 @@ status_t
     }
 #endif
 
-    fp = NULL;
-    tkc = NULL;
-    mod = NULL;
-    res = NO_ERR;
-    keepmod = FALSE;
-    wasadd = FALSE;
-
     /* expand and copy the filespec */
     str = ncx_get_source(filespec, &res);
-    if (!str) {
+    if ( !str || NO_ERR != res ) {
+        if ( str ) {
+            m__free( str );
+        }
+        else {
+            res = ERR_INTERNAL_MEM;
+        }
         return res;
     }
 
+    res = (isyang) ? load_yang_module( filespec, str, &tkc )
+                   : load_yin_module( filespec, str, &tkc );
+
+    if ( !tkc ) {
+        m__free( str );
+        return ( NO_ERR == res ) ? ERR_INTERNAL_MEM : res;
+    }
+    else if ( NO_ERR != res ) {
+        tk_free_chain(tkc);
+        m__free( str );
+        return res;
+    }
+    
+    if ( pcb->docmode && (ptyp == YANG_PT_TOP || ptyp == YANG_PT_INCLUDE)) {
+        tk_setup_chain_docmode(tkc);
+    }
+
+    mod = configure_module( str, pcb );
+    if ( !mod ) {
+        m__free( str );
+        if ( tkc->fp ) {
+            fclose( tkc->fp );
+        }
+        tk_free_chain(tkc);
+        return  ERR_INTERNAL_MEM;
+    }
+
     if (isyang) {
-        /* open the YANG source file for reading */
-        fp = fopen((const char *)str, "r");
-        if (!fp) {
-            m__free(str);
-            return ERR_NCX_MISSING_FILE;
-        }
-    } else {
-        /* just make sure the file exists for now */
-        if (!ncxmod_test_filespec(str)) {
-            m__free(str);
-            return ERR_NCX_MISSING_FILE;
-        }
-    }            
+        /* serialize the file into language tokens
+         * !!! need to change this later because it may use too
+         * !!! much memory in embedded parsers */
+        res = tk_tokenize_input(tkc, mod);
+        if ( NO_ERR != res ) {
+            ncx_free_module(mod);
 
-    if (LOGDEBUG) {
-        log_debug("\nLoading %s module from file:\n  %s", 
-                   (isyang) ? "YANG" : "YIN",
-                   filespec);
-    }
-
-    /* get a new token chain */
-    if (res == NO_ERR) {
-        if (isyang) {
-            tkc = tk_new_chain();
-            if (tkc == NULL) {
-                res = ERR_INTERNAL_MEM;
-                log_error("\nyang_parse malloc error");
+            if ( tkc->fp ) {
+                fclose( tkc->fp );
             }
-        } else {
-            tkc = yinyang_convert_token_chain(str, &res);
-            if (tkc == NULL) {
-                log_error("\nyang_parse: Invalid YIN file (%s)",
-                          get_error_string(res));
-            }
+            tk_free_chain(tkc);
+            return res;
         }
     }
-
-    /* setup the token chain to parse this YANG file */
-    if (res == NO_ERR) {
-        if (isyang) {
-            tk_setup_chain_yang(tkc, fp, str);
-        }
-
-        if (pcb->docmode && 
-            (ptyp == YANG_PT_TOP ||
-             ptyp == YANG_PT_INCLUDE)) {
-            tk_setup_chain_docmode(tkc);
-        }
-
-
-        /* start a new ncx_module_t struct */
-        mod = ncx_new_module();
-        if (!mod) {
-            res = ERR_INTERNAL_MEM;
-            m__free(str);
-            str = NULL;
-        } else {
-            /* hand off 'str' malloced memory here */
-            set_source(mod, str);
-
-            /* set the back-ptr to Q of all the import files */
-            mod->allimpQ = &pcb->allimpQ;
-
-            /* set the back-ptr to parent of this submodule 
-             * or NULL if this is not a submodule
-             */
-            mod->parent = pcb->parentparm;
-
-            /* set the stmt-track mode flag to the master flag in the PCB */
-            mod->stmtmode = pcb->stmtmode;
-        }
-    }
-
-    if (res == NO_ERR) {
-
-        if (isyang) {
-            /* serialize the file into language tokens
-             * !!! need to change this later because it may use too
-             * !!! much memory in embedded parsers
-             */
-            res = tk_tokenize_input(tkc, mod);
-        }
 
 #ifdef YANG_PARSE_TK_DEBUG
-        tk_dump_chain(tkc);
+     tk_dump_chain(tkc);
 #endif
-    }
 
     /* parse the module and validate it only if a token chain
      * was properly parsed; set this only once for the top module
      */
-    if (res == NO_ERR && pcb->savetkc && !pcb->docmode && pcb->tkc == NULL) {
+    if ( pcb->savetkc && !pcb->docmode && pcb->tkc == NULL) {
         pcb->tkc = tk_clone_chain(tkc);
         if (pcb->tkc == NULL) {
-            res = ERR_INTERNAL_MEM;
+            ncx_free_module(mod);
+            if ( tkc->fp ) {
+                fclose( tkc->fp );
+            }
+            tk_free_chain(tkc);
+            return  ERR_INTERNAL_MEM;
         }
     }
 
-    if (res == NO_ERR) {
-        res = parse_yang_module(tkc, mod, pcb, ptyp, &wasadd);
+    res = parse_yang_module( tkc, mod, pcb, ptyp, &wasadd );
 
-        if (pcb->top == mod) {
-            pcb->topadded = wasadd;
-            pcb->retmod = NULL;
-        } else {
-            pcb->retmod = mod;
-        }
+    if (pcb->top == mod) {
+        pcb->topadded = wasadd;
+        pcb->retmod = NULL;
+    } else {
+        pcb->retmod = mod;
+    }
 
-        if (res != NO_ERR) {
-            /* cleanup in all modes if there was an error */
-            if (pcb->retmod != NULL) {
-                /* got a submodule or import module that is not top 
-                 * make sure this does not end up in the wrong Q
-                 * and get freed incorrectly if import/include mismatch
-                 */
-                if ((res == ERR_NCX_SKIPPED) ||
-                    (ptyp == YANG_PT_IMPORT && !mod->ismod) ||
-                    (ptyp == YANG_PT_INCLUDE && mod->ismod)) {
-                    pcb->retmod = NULL;
-                    ncx_free_module(mod);
-                    mod = NULL;
-                }
-            } 
-
-            if (mod != NULL && !wasadd && !pcb->keepmode) {
-                /* module was not added to registry so it is live
-                 * this will be skipped for an include file
-                 * because wasadd is always set to TRUE for submods
-                 */
-                if (pcb->top == mod) {
-                    /* make sure top is not pointing at garbage */
-                    pcb->top = NULL;
-                }
+    if (res != NO_ERR) {
+        /* cleanup in all modes if there was an error */
+        if (pcb->retmod != NULL) {
+            /* got a submodule or import module that is not top make sure 
+             * this does not end up in the wrong Q and get freed 
+             * incorrectly if import/include mismatch */
+            if ((res == ERR_NCX_SKIPPED) ||
+                (ptyp == YANG_PT_IMPORT && !mod->ismod) ||
+                (ptyp == YANG_PT_INCLUDE && mod->ismod)) {
                 pcb->retmod = NULL;
-
-                /* free the parsed module here */
                 ncx_free_module(mod);
                 mod = NULL;
-            } /* else the module will be freed in ncx_cleanup 
-               * or ncx_free_module for a submodule
-               */
-        } else if (pcb->deviationmode) {
-            /* toss the module even if NO_ERR, not needed since
-             * the savedevQ contains the deviations and annotations
-             */
-            if (pcb->top == mod) {
+            }
+        } 
+
+        if (mod != NULL && !wasadd && !pcb->keepmode) {
+            /* module was not added to registry so it is live this will be 
+             * skipped for an include file because wasadd is always set to 
+             * TRUE for submods */
+            if ( pcb->top == mod) {
                 pcb->top = NULL;
             }
             pcb->retmod = NULL;
             ncx_free_module(mod);
             mod = NULL;
-        } else if (!wasadd) {
-            /* module was not added to the registry which means
-             * it was already there or it is a submodule;
-             * decide if the caller really
-             * wants the return module in this case
-             */
-            if (pcb->parsemode) {
-                /* parse mode for yangcli_autoload
-                 * do not need to keep the duplicate
-                 */
+        } /* else the module will be freed in ncx_cleanup or ncx_free_module
+           * for a submodule */
+    } else if (pcb->deviationmode) {
+        /* toss the module even if NO_ERR, not needed since the savedevQ 
+         * contains the deviations and annotations */
+        if ( pcb->top == mod) {
+            pcb->top = NULL;
+        }
+        pcb->retmod = NULL;
+        ncx_free_module(mod);
+        mod = NULL;
+    } else if (!wasadd) {
+        /* module was not added to the registry which means it was already 
+         * there or it is a submodule; decide if the caller really wants 
+         * the return module in this case */
+        if (pcb->parsemode) {
+            /* parse mode for yangcli_autoload do not need to keep the 
+             * duplicate */
+            if ( pcb->top == mod) {
+                pcb->top = NULL;
+            }
+            pcb->retmod = NULL;
+            ncx_free_module(mod);
+            mod = NULL;
+        } else if (!(pcb->diffmode || pcb->searchmode)) {
+            /* do not swap out diffmode or searchmode for all other modes, 
+             * check if the new module should be returned or a different 
+             * module for the yuma-netconf hack */
+            if (mod->ismod) {
                 if (pcb->top == mod) {
+                    /* hack: make sure netconf-ietf does not get swapped 
+                     * out for netconf.yang; the internal version is used 
+                     * instead of the standard one to fill in the missing 
+                     * pieces */
+                    if (pcb->keepmode) {
+                        keepmod = TRUE;
+                    } else if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+                        /* swap with the real module already done */
+                        pcb->top = ncx_find_module(mod->name, mod->version);
+                        pcb->retmod = NULL;
+                    } else {
+                        keepmod = TRUE;
+                    }
+                }
+            } else {
+                /* this is a submodule, make sure it was included */
+                if (ptyp != YANG_PT_IMPORT) {
+                    if (pcb->keepmode) {
+                        keepmod = TRUE;
+                    }
+                }
+
+                if (!pcb->with_submods) {
+                    /* this is a submodule and they are being processed 
+                     * instead of skipped; sub tree parsing mode can cause 
+                     * top-level to already be loaded into the registry, 
+                     * swap out the new dummy module with the real one */
+                    if (!pcb->keepmode && pcb->top == mod) {
+
+                        /*  !!!! leave this out now !!!
+                        pcb->top = ncx_find_module(mod->belongs,
+                                                   mod->version);
+                        pcb->retmod = mod;
+                        */
+                        pcb->retmod = NULL;
+                    }
+                } else if (pcb->top == mod) {
+                    /* don't care about submods in this mode so clear
+                     * the top pointer so it won't be used */
+                    pcb->retmod = NULL;
                     pcb->top = NULL;
                 }
-                pcb->retmod = NULL;
-                ncx_free_module(mod);
-                mod = NULL;
-            } else if (!(pcb->diffmode || pcb->searchmode)) {
-                /* do not swap out diffmode or searchmode
-                 * for all other modes, check if the new module should
-                 * be returned or a different module for the yuma-netconf
-                 * hack
-                 */
+            }
+            if (!pcb->top && !pcb->with_submods) {
                 if (mod->ismod) {
-                    if (pcb->top == mod) {
-                        /* hack: make sure netconf-ietf does not 
-                         * get swapped out for netconf.yang;
-                         * the internal version is used instead of
-                         * the standard one to fill in the
-                         * missing pieces
-                         */
-                        if (pcb->keepmode) {
-                            keepmod = TRUE;
-                        } else if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
-                            /* swap with the real module already done */
-                            pcb->top = ncx_find_module(mod->name,
-                                                       mod->version);
-                            pcb->retmod = NULL;
-                        } else {
-                            keepmod = TRUE;
-                        }
-                    }
+                    res = ERR_NCX_MOD_NOT_FOUND;
+                } else if (!keepmod) {
+                    res = ERR_NCX_SUBMOD_NOT_LOADED;
                 } else {
-                    /* this is a submodule, make sure it was included */
-                    if (ptyp != YANG_PT_IMPORT) {
-                        if (pcb->keepmode) {
-                            keepmod = TRUE;
-                        }
-                    }
-
-                    if (!pcb->with_submods) {
-                        /* this is a submodule and they are being
-                         * processed instead of skipped;
-                         * sub tree parsing mode can cause top-level to already
-                         * be loaded into the registry, swap out the new dummy
-                         * module with the real one
-                         */
-                        if (!pcb->keepmode && pcb->top == mod) {
-
-                            /*  !!!! leave this out now !!!
-                            pcb->top = ncx_find_module(mod->belongs,
-                                                       mod->version);
-                            pcb->retmod = mod;
-                            */
-                            pcb->retmod = NULL;
-                        }
-                    } else if (pcb->top == mod) {
-                        /* don't care about submods in this mode so clear
-                         * the top pointer so it won't be used
-                         */
-                        pcb->retmod = NULL;
-                        pcb->top = NULL;
-                    }
-                }
-                if (!pcb->top && !pcb->with_submods) {
-                    if (mod->ismod) {
-                        res = ERR_NCX_MOD_NOT_FOUND;
-                    } else if (!keepmod) {
-                        res = ERR_NCX_SUBMOD_NOT_LOADED;
-                    } else {
-                        res = NO_ERR;
-                    }
-                }
-
-                if (!keepmod) {
-                    ncx_free_module(mod);
-                    mod = NULL;
+                    res = NO_ERR;
                 }
             }
-        } else {
-            /* was added */
-            keepmod = (pcb->keepmode && pcb->top == mod) 
-                ? TRUE : FALSE;
+
+            if (!keepmod) {
+                ncx_free_module(mod);
+                mod = NULL;
+            }
         }
+    } else {
+        /* was added */
+        keepmod = (pcb->keepmode && pcb->top == mod) ? TRUE : FALSE;
     }
 
     /* final cleanup */
-    if (fp != NULL) {
-        fclose(fp);
-    }
-    if (tkc) {
+    if ( tkc->fp ) {
+        fclose( tkc->fp );
         tkc->fp = NULL;
-        if (keepmod && pcb->tkc == NULL) {
-            /* this is still NULL because pcb->docmode is TRUE
-             * and the altered token chain is desired, not
-             * the clone like YIN parsing
-             */
-            pcb->tkc = tkc;
-        } else {
-            tk_free_chain(tkc);
-        }
+    }
+    if (keepmod && pcb->tkc == NULL) {
+        /* this is still NULL because pcb->docmode is TRUE and the altered 
+         * token chain is desired, not * the clone like YIN parsing */
+        pcb->tkc = tkc;
+    } else {
+        tk_free_chain(tkc);
     }
 
     return res;

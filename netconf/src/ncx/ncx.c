@@ -340,9 +340,7 @@ static status_t
                   ncx_node_t *dtyp,
                   void **dptr)
 {
-    status_t       res, retres;
-
-    retres = NO_ERR;
+    status_t       res;
 
     /* First find or load the module if it has not already been tried */
     if (imp->res != NO_ERR) {
@@ -358,8 +356,7 @@ static status_t
                                  imp->revision, 
                                  pcb->savedevQ,
                                  &imp->mod);
-        CHK_EXIT(res, retres);
-        if (!imp->mod) {
+        if (!imp->mod || res != NO_ERR) {
             return ERR_NCX_MOD_NOT_FOUND;
         }
     }
@@ -409,7 +406,6 @@ static status_t
     return (*dptr) ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
 
 }  /* check_moddef */
-
 
 
 /********************************************************************
@@ -641,7 +637,7 @@ static void
 *********************************************************************/
 static status_t 
     bootstrap_cli (int argc,
-                   const char *argv[],
+                   char *argv[],
                    log_debug_t dlevel,
                    boolean logtstamps)
 {
@@ -986,7 +982,7 @@ status_t
               boolean logtstamps,
               const char *startmsg,
               int argc,
-              const char *argv[])
+              char *argv[])
 {
     ncx_module_t  *mod;
     status_t       res;

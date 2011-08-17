@@ -322,6 +322,11 @@ static void
         }
     }
 
+    /* check the subdirs parameter */
+    val_set_subdirs_parm(valset);
+
+    /* version param handled externally */
+
     /* get usexmlorder param */
     val = val_find_child(valset, 
                          AGT_CLI_MODULE, 
@@ -376,7 +381,7 @@ static void
 *********************************************************************/
 status_t
     agt_cli_process_input (int argc,
-                           const char *argv[],
+                           char *argv[],
                            agt_profile_t *agt_profile,
                            boolean *showver,
                            help_mode_t *showhelpmode)

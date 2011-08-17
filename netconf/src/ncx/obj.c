@@ -9155,7 +9155,6 @@ status_t
     const xmlChar         *foundmodname;
     ncx_module_t          *foundmod;
     status_t               res;
-    ncx_node_t             dtyp;
     boolean                topdone;
     xmlns_id_t             ncnid, ncid;
 
@@ -9168,7 +9167,6 @@ status_t
     foundobj = NULL;
     foundmodname = NULL;
     foundmod = NULL;
-    dtyp = NCX_NT_OBJ;
     res = NO_ERR;
     topdone = FALSE;
     ncid = xmlns_nc_id();

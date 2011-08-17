@@ -388,12 +388,8 @@ extern status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
-*   errinfo == address of pointer to get the malloced 
-*              ncx_errinfo_t struct, if value is NULL
-*              the new initialized struct will be used if
-*              value is not NULL.  Either way, the
-*              struct will be filled in by this fn
-*              
+*   errinfo == pointer to valid ncx_errinfo_t struct
+*              The struct will be filled in by this fn
 *   appinfoQ == Q to hold any extensions found
 *
 * OUTPUTS:
@@ -406,7 +402,7 @@ extern status_t
 extern status_t 
     yang_consume_error_stmts (tk_chain_t  *tkc,
 			      ncx_module_t *mod,
-			      ncx_errinfo_t **errinfo,
+			      ncx_errinfo_t *errinfo,
 			      dlq_hdr_t *appinfoQ);
 
 

@@ -1731,7 +1731,7 @@ static status_t
 *********************************************************************/
 static status_t
     process_cli_input (int argc,
-                       const char *argv[],
+                       char *argv[],
                        yangdiff_diffparms_t  *cp)
 {
     obj_template_t        *obj;
@@ -1968,7 +1968,7 @@ static status_t
  *********************************************************************/
 static status_t 
     main_init (int argc,
-               const char *argv[])
+               char *argv[])
 {
     status_t       res;
 
@@ -2074,7 +2074,7 @@ static void
 *********************************************************************/
 int 
     main (int argc, 
-          const char *argv[])
+          char *argv[])
 {
     status_t    res;
 

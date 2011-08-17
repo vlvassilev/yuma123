@@ -766,14 +766,12 @@ static val_value_t *
                      const xmlChar *basename)
 {
     val_value_t          *val, *chval, *rval;
-    const xmlChar        *patstr;
     const typ_rangedef_t *rv;
     status_t              res;
     xmlns_id_t            xsd_id;
     uint32                pattern_cnt;
 
     xsd_id = xmlns_xs_id();
-    patstr = NULL;
 
     pattern_cnt = typ_get_pattern_count(typdef);
 

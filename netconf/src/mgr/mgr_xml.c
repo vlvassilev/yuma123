@@ -199,7 +199,7 @@ status_t
                           const xml_node_t *startnode)
 {
     xml_node_t       node;
-    const xmlChar   *qname, *elname, *badns;
+    const xmlChar   *qname, *badns;
     uint32           len;
     int              ret, depth, nodetyp;
     xmlns_id_t       nsid;
@@ -278,9 +278,6 @@ status_t
              */
             nsid = 0;
             (void)xml_check_ns(reader, qname, &nsid, &len, &badns);
-
-            /* set the element name to the char after the prefix */
-            elname = qname+len;
         } else {
             qname = (const xmlChar *)"";
         }

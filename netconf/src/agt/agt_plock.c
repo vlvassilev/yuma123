@@ -151,8 +151,6 @@ static status_t
         rpc_msg_t *msg,
         xml_node_t *methnode)
 {
-    val_value_t *errorval;
-    const xmlChar *errorstr;
     plock_cb_t *plcb;
     cfg_template_t *running;
     val_value_t *select_val, *testval;
@@ -163,8 +161,6 @@ static status_t
 
     res = NO_ERR;
     retres = NO_ERR;
-    errorval = NULL;
-    errorstr = NULL;
     plcb = NULL;
     result = NULL;
 
@@ -202,7 +198,7 @@ static status_t
      */
     res = NO_ERR;
     plcb = plock_cb_new(SES_MY_SID(scb), &res);
-    if (res == ERR_NCX_RESOURCE_DENIED &&
+    if (res == ERR_NCX_RESOURCE_DENIED && !plcb &&
         !cfg_is_partial_locked(running)) {
         /* no partial locks so it is safe to reset the lock index */
         plock_cb_reset_id();
@@ -210,7 +206,10 @@ static status_t
         plcb = plock_cb_new(SES_MY_SID(scb), &res);
     }
 
-    if (res != NO_ERR) {
+    if (res != NO_ERR || !plcb ) {
+        if ( res==NO_ERR && !plcb ) {
+            res = ERR_INTERNAL_MEM;
+        }
         agt_record_error(scb,
                          &msg->mhdr,
                          NCX_LAYER_OPERATION,
@@ -220,6 +219,9 @@ static status_t
                          NULL,
                          NCX_NT_NONE,
                          NULL);
+        if ( plcb ) {
+            plock_cb_free(plcb);
+        }
         return res;
     }
 

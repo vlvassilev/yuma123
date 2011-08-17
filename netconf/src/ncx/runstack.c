@@ -594,14 +594,15 @@ status_t
     rcxt->script_level++;
     rcxt->cur_src = RUNSTACK_SRC_SCRIPT;
 
-    /* ceate a new var entry and add it to the runstack que */
+    /* create a new var entry and add it to the runstack que
+     * pass off 'val' memory here
+     */
     res = var_set_move(rcxt,
                        (const xmlChar *)"0", 
                        1, 
                        VAR_TYP_LOCAL, 
                        val);
     if (res != NO_ERR) {
-        val_free_value(val);
         dlq_remove(se);
         free_stack_entry(se);
         rcxt->script_level--;

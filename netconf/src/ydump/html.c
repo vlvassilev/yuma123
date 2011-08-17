@@ -1963,7 +1963,6 @@ static void
                      int32 startindent)
 {
     grp_template_t          *grp;
-    const xmlChar           *submod;
     boolean                  needed, cooked, first;
 
     if (dlq_empty(groupingQ)) {
@@ -1972,8 +1971,6 @@ static void
 
     cooked = (strcmp(cp->objview, OBJVIEW_COOKED)) ? FALSE : TRUE;
 
-    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
-        
     /* groupings are only generated in cooked mode if they have
      * typedefs, and then just the typedefs are generated
      */

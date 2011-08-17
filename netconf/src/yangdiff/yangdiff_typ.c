@@ -533,7 +533,7 @@ static void
     typ_unionnode_t     *oldval, *newval, *curnew;
     dlq_hdr_t           *oldQ, *newQ;
     typ_def_t           *olddef, *newdef;
-    uint32               chcount, oldid, newid;
+    uint32               oldid, newid;
     boolean              isrev;
     char                 oldnum[NCX_MAX_NUMLEN];
     char                 newnum[NCX_MAX_NUMLEN];
@@ -549,7 +549,6 @@ static void
     }
 
     isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
-    chcount = 0;
     oldid = 0;
     newid = 0;
 

@@ -606,7 +606,7 @@ static int32
 *********************************************************************/
 static char *
     copy_argv_to_buffer (int argc,
-                         const char *argv[],
+                         char *argv[],
                          cli_mode_t mode,
                          int32 *bufflen,
                          status_t *res)
@@ -913,7 +913,7 @@ cli_rawparm_t *
 *********************************************************************/
 status_t
     cli_parse_raw (int argc, 
-                   const char *argv[],
+                   char *argv[],
                    dlq_hdr_t *rawparmQ)
 {
     cli_rawparm_t  *rawparm;
@@ -1182,7 +1182,7 @@ status_t
 val_value_t *
     cli_parse (runstack_context_t *rcxt,
                int argc, 
-               const char *argv[],
+               char *argv[],
                obj_template_t *obj,
                boolean valonly,
                boolean script,

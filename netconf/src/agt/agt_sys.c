@@ -333,12 +333,10 @@ static status_t
 {
     const xmlChar  *loglevelstr;
     log_debug_t     loglevel;
-    int32           dummyval;
     status_t        res;
 
     (void)scb;
     (void)virval;
-    dummyval = 0;
     res = NO_ERR;
 
     if (cbmode == GETCB_GET_VALUE) {

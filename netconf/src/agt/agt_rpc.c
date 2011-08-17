@@ -834,7 +834,6 @@ static status_t
                      xml_node_t  *method)
 {
     obj_template_t  *obj;
-    obj_rpcio_t     *rpcio;
     status_t         res;
 
     res = NO_ERR;
@@ -844,7 +843,6 @@ static status_t
                             NULL, 
                             YANG_K_INPUT);
     if (obj && obj_get_child_count(obj)) {
-        rpcio = obj->def.rpcio;
         msg->rpc_agt_state = AGT_RPC_PH_PARSE;
         res = agt_val_parse_nc(scb, 
                                &msg->mhdr, 

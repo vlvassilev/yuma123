@@ -157,6 +157,7 @@ plock_cb_t *
 
     plcb->plock_final_result = xpath_new_result(XP_RT_NODESET);
     if (plcb->plock_final_result == NULL) {
+        *res = ERR_INTERNAL_MEM;
         m__free(plcb);
         return NULL;
     }

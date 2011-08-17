@@ -2289,7 +2289,6 @@ ncx_iqual_t
                            val_value_t *valroot,
                            obj_template_t *obj)
 {
-    ncx_iqual_t  ret;
     boolean      required;
 
 #ifdef DEBUG
@@ -2299,7 +2298,6 @@ ncx_iqual_t
     }
 #endif
 
-    ret = NCX_IQUAL_NONE;
     required = val_is_mandatory(val, valroot, obj);
 
     return obj_get_iqualval_ex(obj, required);
@@ -2675,7 +2673,7 @@ void
 
 /********************************************************************
 * FUNCTION val_set_subdirs_parm
-*   --subdirs
+*   --subdirs=<boolean>
 *
 * Handle the --subdirs parameter
 *

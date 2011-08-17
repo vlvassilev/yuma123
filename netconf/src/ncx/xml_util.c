@@ -442,7 +442,7 @@ status_t
                                   void *context,
                                   xmlTextReaderPtr  reader)
 {
-    int  ret, options;
+    int  ret;
 
 #ifdef DEBUG
     if (!readfn || !reader) {
@@ -455,7 +455,6 @@ status_t
      * expanded in place and #TEXT nodes such as EOLN will
      * be omitted by the parser
      */
-    options = XML_READER_OPTIONS;
     ret = xmlReaderNewIO(reader, readfn, closefn, context,
                          XML_SES_URL, NULL, XML_READER_OPTIONS);
     if (ret != 0) {
@@ -2188,7 +2187,7 @@ xmlChar
     xml_convert_char_entity (const xmlChar *str, 
                              uint32 *used)
 {
-    xmlChar buff[MAX_CHAR_ENT];
+    xmlChar buff[MAX_CHAR_ENT+1];
     uint32 i;
 
 #ifdef DEBUG

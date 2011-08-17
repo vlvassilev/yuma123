@@ -87,7 +87,7 @@ static yangdump_cvtparms_t   mycvtparms;
 *********************************************************************/
 int 
     main (int argc, 
-          const char *argv[])
+          char *argv[])
 {
     status_t      res;
 

@@ -264,7 +264,7 @@ static status_t
                 
 {
     mgr_scb_t  *mscb;
-    const char *fingerprint;
+    /* const char *fingerprint; */
     char       *userauthlist;
     int         ret;
     boolean     authdone;
@@ -310,8 +310,8 @@ static status_t
      */
 
     /* get the host fingerprint */
-    fingerprint = libssh2_hostkey_hash(mscb->session, 
-                                       LIBSSH2_HOSTKEY_HASH_MD5);
+    /* fingerprint = libssh2_hostkey_hash(mscb->session, 
+                                          LIBSSH2_HOSTKEY_HASH_MD5); */
 
     /* TBD: check fingerprint against known hosts files !!! */
 
@@ -1329,7 +1329,7 @@ ssize_t
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
-    int        ret, errcode;
+    int        ret;
     char      *errormsg;
 
 #ifdef DEBUG
@@ -1339,7 +1339,6 @@ ssize_t
     }
 #endif
 
-    errcode = 0;
     errormsg = NULL;
     *erragain = FALSE;
 

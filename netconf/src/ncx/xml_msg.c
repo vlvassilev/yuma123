@@ -639,7 +639,7 @@ status_t
     }
 
     /* default already in use for something else so generate a prefix */
-    nlen = sprintf((char *)numbuff, "%u", (uint32)nsid);
+    nlen = snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%u", (uint32)nsid);
     if (nlen < 0) {
         return ERR_NCX_INVALID_NUM;
     }
@@ -996,6 +996,8 @@ status_t
         } else {
             res = xml_add_xmlns_attr(attrs, nsid, buff);
         }
+    }
+    if (buff) {
         m__free(buff);
     }
 

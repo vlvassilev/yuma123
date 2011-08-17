@@ -229,12 +229,11 @@ static status_t
 {
     dlq_hdr_t      *rangeQ;
     typ_pattern_t  *pat;
-    status_t        res, retres;
+    status_t        retres;
     ncx_btype_t     btyp;
     boolean         doerr;
     ncx_strrest_t   strrest;
 
-    res = NO_ERR;
     retres = NO_ERR;
     doerr = FALSE;
 
@@ -682,24 +681,22 @@ static status_t
                         typ_def_t *typdef,
                         boolean isrange)
 {
-    const char      *expstr;
-    ncx_errinfo_t   *errinfo;
     typ_range_t     *range;
-    status_t         res, retres;
+    status_t         res = NO_ERR;
     boolean          done;
-    ncx_btype_t      rbtyp, btyp;
+    ncx_btype_t      rbtyp;
+    ncx_btype_t      btyp;
 
-
-    res = NO_ERR;
-    retres = NO_ERR;
-    errinfo = NULL;
     range = typ_get_range_con(typdef);
 
     /* save the range token in case needed for error msg */
-    ncx_set_error(&range->tkerr,
-                  mod,
-                  TK_CUR_LNUM(tkc),
-                  TK_CUR_LPOS(tkc));
+    ncx_set_error( &range->tkerr, mod, TK_CUR_LNUM(tkc), TK_CUR_LPOS(tkc)); 
+
+    if ( !range ) {
+        res = ERR_INTERNAL_PTR;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
+    }
 
     btyp = typ_get_basetype(typdef);
     if (btyp == NCX_BT_NONE) {
@@ -715,10 +712,8 @@ static status_t
         rbtyp = typ_get_range_type(btyp);
     }
 
-    /* move past start-of-range keyword
-     * check token type, which may be in a quoted string
-     * an identifier string, or a series of tokens
-     */
+    /* move past start-of-range keyword check token type, which may be in a 
+     * quoted string * an identifier string, or a series of tokens */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
         ncx_print_errormsg(tkc, mod, res);
@@ -736,16 +731,14 @@ static status_t
             return res;
         }
 
-        /* undo quotes or identifier string into separate tokens 
-         * In YANG there are very few tokens, so all these no-WSP
-         * strings are valid. If quoted, the entire range clause
-         * will be a single string.  If not, many combinations
-         * of valid range clause tokens might be mis-classified
-         * E.g.:
+        /* undo quotes or identifier string into separate tokens. In YANG there
+         * are very few tokens, so all these no-WSP strings are valid. If 
+         * quoted, the entire range clause will be a single string.  If not, 
+         * many combinations of valid range clause tokens might be 
+         * mis-classified * E.g.:
          *  range min..max;  (TSTRING)
          *  range 1..100;    (DNUM, STRING, DNUM)
-         *  range -INF..47.8 (STRING, RNUM)
-         */
+         *  range -INF..47.8 (STRING, RNUM) */
         res = tk_retokenize_cur_string(tkc, mod);
         if (res != NO_ERR) {
             ncx_print_errormsg(tkc, mod, res);
@@ -758,12 +751,12 @@ static status_t
     while (!done) {
         /* get one range spec */
         res = consume_yang_rangedef(tkc, mod, typdef, rbtyp);
-        CHK_EXIT(res, retres);
+        if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) || ERR_NCX_EOF == res ) { 
+	        return res; 
+	    } 
 
-        /* Current token is either a BAR or SEMICOL/LBRACE
-         * Move past it if BAR and keep going
-         * Else exit loop, pointing at this token
-         */
+        /* Current token is either a BAR or SEMICOL/LBRACE. Move past it if 
+         * BAR and keep going * Else exit loop, pointing at this token */
         switch (TK_CUR_TYP(tkc)) {
         case TK_TT_SEMICOL:
         case TK_TT_LBRACE:
@@ -777,25 +770,20 @@ static status_t
             }
             break;
         default:
-            expstr = "semi-colon, left brace, or vertical bar";
-            retres = ERR_NCX_WRONG_TKTYPE;
-            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err( tkc, mod, res, 
+                             "semi-colon, left brace, or vertical bar" );
             continue;
         }
     }
 
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
-        errinfo = &range->range_errinfo;
-        res = yang_consume_error_stmts(tkc, 
-                                       mod, 
-                                       &errinfo,
-                                       &typdef->appinfoQ);
-        CHK_EXIT(res, retres);
+        res = yang_consume_error_stmts( tkc, mod, &range->range_errinfo,
+                                        &typdef->appinfoQ );
     }
 
-    return retres;
-
+    return res;
 }  /* consume_yang_range */
 
 
@@ -818,20 +806,13 @@ static status_t
 *  status
 *********************************************************************/
 static status_t 
-    consume_yang_pattern (tk_chain_t *tkc,
-                          ncx_module_t *mod,
-                          typ_def_t *typdef)
+    consume_yang_pattern ( tk_chain_t *tkc,
+                           ncx_module_t *mod,
+                           typ_def_t *typdef )
 {
-    typ_pattern_t   *pat;
-    ncx_errinfo_t   *errinfo;
-    const char      *expstr;
-    status_t         res, retres;
-    boolean          free_pat;
+    typ_pattern_t   *pat = NULL;
+    status_t         res;
 
-    pat = NULL;
-    retres = NO_ERR;
-    free_pat = FALSE;
-    expstr = "pattern string";
     typ_set_strrest(typdef, NCX_SR_PATTERN);
 
     /* move past pattern keyword to pattern value, get 1 string */
@@ -841,32 +822,56 @@ static status_t
         return res;
     }
 
-    if (TK_CUR_STR(tkc)) {
-        pat = typ_new_pattern(TK_CUR_VAL(tkc));
-        if (!pat) {
+    /* need to accept any token as the pattern string,
+     * even if it was parsed as a non-string token
+     * special case: check for module prefix present, which
+     * is not present in the TK_CUR_VAL() string
+     */
+    if (TK_TT_MSTRING == TK_CUR_TYP(tkc) || 
+        TK_TT_MSSTRING == TK_CUR_TYP(tkc)) {
+
+        /* need to use the entire prefix:value string */
+        xmlChar *buff = m__getMem(TK_CUR_MODLEN(tkc) + 
+                                  TK_CUR_LEN(tkc) + 2);
+        xmlChar *p = buff;
+
+        if (NULL == buff) {
             res = ERR_INTERNAL_MEM;
             ncx_print_errormsg(tkc, mod, res);
             return res;
         }
 
-        /* make sure the pattern is valid */
-        res = typ_compile_pattern(pat);
-        if (res != NO_ERR) {
-            ncx_print_errormsg(tkc, mod, res);
-            retres = res;
-            if (NEED_EXIT(res)) {
-                return res;
-            }
-        }
+        p += xml_strncpy(p, TK_CUR_MOD(tkc), TK_CUR_MODLEN(tkc));
+        *p++ = ':';
+        p += xml_strncpy(p, TK_CUR_VAL(tkc), TK_CUR_LEN(tkc));
+        *p = 0;
 
-        /* save the struct in the patternQ early,
-         * even if it didn't compile
-         */
-        dlq_enque(pat, &typdef->def.simple.patternQ);
+        pat = typ_new_pattern(buff);
+        m__free(buff);
+    } else {
+        pat = typ_new_pattern(TK_CUR_VAL(tkc));
     }
 
+    if (!pat) {
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
+    }
+
+    /* make sure the pattern is valid */
+    res = typ_compile_pattern(pat);
+    if (res != NO_ERR) {
+        ncx_print_errormsg(tkc, mod, res);
+        if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {
+            typ_free_pattern( pat );
+            return res;
+        }
+    }
+
+    /* save the struct in the patternQ early, even if it didn't compile */
+    dlq_enque(pat, &typdef->def.simple.patternQ);
+
     /* move to the next token, which must be ';' or '{' */
-    expstr = "semicolon or left brace";
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
         ncx_print_errormsg(tkc, mod, res);
@@ -875,26 +880,18 @@ static status_t
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
+        break;
     case TK_TT_LBRACE:
+        /* check sub-section for error-app-tag and error-message */
+        res = yang_consume_error_stmts( tkc, mod, &pat->pat_errinfo,
+                                        &typdef->appinfoQ);
         break;
     default:
-        retres = ERR_NCX_WRONG_TKTYPE;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        res = ERR_NCX_WRONG_TKTYPE;
+        ncx_mod_exp_err(tkc, mod, res, "semicolon or left brace" );
     }
 
-    /* check sub-section for error-app-tag and error-message */
-    if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
-        errinfo = &pat->pat_errinfo;
-        res = yang_consume_error_stmts(tkc, 
-                                       mod,
-                                       &errinfo,
-                                       &typdef->appinfoQ);
-        if (res != NO_ERR) {
-            retres = res;
-        }
-    }
-
-    return retres;
+    return res;
 
 }  /* consume_yang_pattern */
 
@@ -2300,10 +2297,9 @@ static status_t
     const char    *expstr;
     tk_type_t      tktyp;
     status_t       res, retres;
-    boolean        done, pathdone, constrained;
+    boolean        done, constrained;
 
     expstr = "require-instance keyword";
-    pathdone = FALSE;
     constrained = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
@@ -2927,14 +2923,12 @@ static status_t
     typdef = typ_get_qual_typdef(intypdef, NCX_SQUAL_RANGE);
     while (typdef && res==NO_ERR) {
 
-        /* have a typdef with a range definition
-         * rangeQ contains the rangedef structs to test
-         * For each parent typdef with a range clause:
+        /* have a typdef with a range definition rangeQ contains the rangedef 
+         * structs to test For each parent typdef with a range clause:
          *    check raneQ contents against prangeQ contents
          *
          * rv is the rangedef to test
-         * checkrv is the rangedef to test against
-         */
+         * checkrv is the rangedef to test against */
         rangeQ = typ_get_rangeQ_con(typdef);
         for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
              rv != NULL && res==NO_ERR;
@@ -2947,9 +2941,8 @@ static status_t
                 while (parentdef && res==NO_ERR) {
                     prangeQ = typ_get_rangeQ_con(parentdef);
 
-                    /* rv rangedef just has to fit within one
-                     * of the checkrv rangedefs to pass the test
-                     */
+                    /* rv rangedef just has to fit within one of the checkrv 
+                     * rangedefs to pass the test */
                     done = FALSE;
                     for (checkrv = (typ_rangedef_t *)dlq_firstEntry(prangeQ);
                          checkrv != NULL && !done;
@@ -2989,10 +2982,8 @@ static status_t
             range = typ_get_range_con(typdef);
             if (range) {
                 tkc->curerr = &range->tkerr;
-            } else if (typdef) {
-                tkc->curerr = &typdef->tkerr;
             } else {
-                tkc->curerr = &intypdef->tkerr;
+                tkc->curerr = &typdef->tkerr;
             }
         }
     }
@@ -3637,8 +3628,7 @@ static status_t
         /* check module-global (exportable) typedef shadowed
          * only check for nested typedefs
          */
-        if (!errtyp && obj && (name || obj->grp || 
-             (obj->parent && !obj_is_root(obj->parent)))) {
+        if (!errtyp && obj ) {
             errtyp = ncx_find_type(mod, name, TRUE);
         }
 
@@ -3920,12 +3910,11 @@ static status_t
     typ_template_t *imptyp;
     typ_def_t      *typdef;
     ncx_btype_t     btyp;
-    boolean         done, extonly, derived;
+    boolean         extonly, derived;
     status_t        res, retres;
 
     expstr = "type name";
     imptyp = NULL;
-    done = FALSE;
     extonly = FALSE;
     derived = FALSE;
     res = NO_ERR;
@@ -4280,7 +4269,6 @@ status_t
     typ_template_t  *typ, *testtyp;
     const xmlChar   *val;
     const char      *expstr;
-    xmlChar         *str;
     yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, typdone, typeok, unit, def, stat, desc, ref;
@@ -4290,7 +4278,6 @@ status_t
     testtyp = NULL;
     val = NULL;
     expstr = "identifier string";
-    str = NULL;
     tktyp = TK_TT_NONE;
     done = FALSE;
     typdone = FALSE;
@@ -4318,11 +4305,18 @@ status_t
 
     /* Get the mandatory type name */
     res = yang_consume_id_string(tkc, mod, &typ->name);
-    CHK_EXIT(res, retres);
+    if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) || res == ERR_NCX_EOF ) {
+        typ_free_template(typ);
+        return res;
+    }
+
 
     /* Get the starting left brace for the sub-clauses */
     res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
-    CHK_EXIT(res, retres);
+    if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) || res == ERR_NCX_EOF ) {
+        typ_free_template(typ);
+        return res;
+    }
 
     /* get the prefix clause and any appinfo extensions */
     while (!done) {
@@ -4356,8 +4350,8 @@ status_t
                 retres = res;
                 if (NEED_EXIT(res)) {
                     typ_free_template(typ);
+                    return res;
                 }
-                return res;
             }
             continue;
         case TK_TT_TSTRING:

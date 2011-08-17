@@ -293,7 +293,6 @@ static status_t
                           int word_end,
                           int parmlen)
 {
-    const xmlChar         *parmname;
     const char            *defaultstr;
     typ_enum_t            *typenum;
     typ_def_t             *typdef, *basetypdef;
@@ -304,7 +303,6 @@ static status_t
     log_debug2("\n*** fill parm %s ***\n", obj_get_name(parmobj));
 #endif
 
-    parmname = obj_get_name(parmobj);
     typdef = obj_get_typdef(parmobj);
     if (typdef == NULL) {
         return NO_ERR;

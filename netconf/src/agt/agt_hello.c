@@ -260,7 +260,6 @@ void
     ncx_module_t          *mod;
     obj_template_t        *obj;
     xml_msg_hdr_t          msg;
-    ncx_node_t             dtyp;
     status_t               res;
 
 #ifdef DEBUG
@@ -296,7 +295,6 @@ void
     /* init local vars */
     res = NO_ERR;
     obj = NULL;
-    dtyp = NCX_NT_OBJ;
     xml_msg_init_hdr(&msg);
 
     /* get a value struct to hold the client hello msg */
@@ -396,7 +394,7 @@ status_t
     status_t      res;
     xml_attrs_t   attrs;
     boolean       anyout;
-    xmlns_id_t    nc_id, ncx_id;
+    xmlns_id_t    nc_id;
     xmlChar       numbuff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
@@ -410,7 +408,6 @@ status_t
     xml_msg_init_hdr(&msg);
     xml_init_attrs(&attrs);
     nc_id = xmlns_nc_id();
-    ncx_id = xmlns_ncx_id();
 
     /* start the hello timeout */
     (void)time(&scb->hello_time);

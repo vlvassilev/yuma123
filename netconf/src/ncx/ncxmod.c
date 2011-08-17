@@ -1283,6 +1283,7 @@ static status_t
         }
     }
 
+    (void)closedir(dp);
     return res;
 
 }  /* list_subdirs */
@@ -1766,6 +1767,142 @@ static status_t
 }  /* search_module_pathlist */
 
 
+
+/********************************************************************
+* FUNCTION is_module_file
+*
+* Determine if the module is a file
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*
+* OUTPUTS:
+
+* RETURNS:
+*   True if the module is a file
+*
+*********************************************************************/
+static boolean
+    is_module_file( const xmlChar *modname )
+{
+    boolean isfile = FALSE;
+
+    /* check which form of input is present, module name or filespec */
+    if ((*modname == '.') || (*modname == NCXMOD_PSCHAR)) {
+        return  TRUE;
+    } else {
+        /* if a dir sep char is in the string it is automatically treated as an 
+         * absolute filespec, even if it doesn't have a file suffix */
+        const xmlChar  *str = modname;
+        while (*str && *str != NCXMOD_PSCHAR) {
+            ++str;
+        }
+
+        if (*str) {
+            isfile = TRUE;
+        }
+    }
+
+    return isfile;
+}
+
+/********************************************************************
+* FUNCTION determine_mode
+*
+* Determine if the module is a YANG or YIN file extension
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*   modlen == length of modname string
+*
+* OUTPUTS:
+*
+* RETURNS:
+*   True if teh module is a file
+*
+*********************************************************************/
+static ncxmod_mode_t
+    determine_mode( const xmlChar* modname, 
+                    const uint32 modlen )
+{
+    ncxmod_mode_t   mode = NCXMOD_MODE_NONE;
+    const xmlChar  *str = modname;
+
+    // find the start of the file suffix, if any
+    str = &modname[modlen];
+    while (str > modname && *str != '.') {
+        --str;
+    }
+
+    /* try to find a .yang file suffix */
+    if (*str == '.') {
+        /* since the dot-char is allowed in YANG identifier names
+         * only treat this string with a dot in it as a file if
+         * it has a YANG file extension
+         */
+        if (!xml_strcmp(str+1, YANG_SUFFIX)) {
+            mode = NCXMOD_MODE_FILEYANG;
+        } else if (!xml_strcmp(str+1, YIN_SUFFIX)) {
+            mode = NCXMOD_MODE_FILEYIN;
+        }
+    }
+
+    if ( NCXMOD_MODE_NONE == mode ) {
+        if ( is_module_file ( modname ) ) {
+            mode = NCXMOD_MODE_FILEYIN;
+        }
+    }
+
+    return mode;
+}
+
+/********************************************************************
+* FUNCTION try_module_filespec
+*
+* try to load a module from a file
+*
+* INPUTS:
+*   mode the file mode (YANG or YIN)
+*
+* OUTPUTS:
+
+* RETURNS:
+*   True if teh module is a file
+*
+*********************************************************************/
+static status_t
+    try_module_filespec( const ncxmod_mode_t  mode,
+                         const xmlChar       *modname,
+                         const uint32         modlen,
+                         yang_pcb_t          *pcb,
+                         yang_parsetype_t     ptyp,
+                         ncx_module_t       **retmod)
+{
+    status_t res = ERR_NCX_MISSING_FILE;
+    xmlChar *buff;
+    boolean         done = FALSE;
+
+    /* the try_module function expects the first parm to be a writable 
+     * buffer, even though in this case there will be nothing altered in the
+     * module name string.  Need to copy it instead of pass it directly :-( */
+    buff = xml_strdup(modname);
+    if ( !buff ) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    res = try_module( buff, modlen, NULL, NULL, NULL, NULL, 
+                      mode, TRUE, &done, pcb, ptyp);
+
+    if ( ERR_NCX_MISSING_FILE == res ) {
+        log_error("\nError: file not found (%s)\n", modname);
+    } else if ( res == NO_ERR && retmod ) {
+        *retmod = pcb->top;
+    }
+
+    m__free(buff);
+    return res;
+}
+ 
 /********************************************************************
 * FUNCTION load_module
 *
@@ -1802,165 +1939,64 @@ static status_t
                  yang_parsetype_t ptyp,
                  ncx_module_t **retmod)
 {
-    const xmlChar  *str;
+    ncxmod_mode_t   mode = NCXMOD_MODE_NONE;
     xmlChar        *buff;
-    ncx_module_t   *testmod;
-    uint32          modlen, bufflen;
-    status_t        res, res2;
-    boolean         done, isfile, try_yin;;
-    ncxmod_mode_t   mode;
+    uint32          modlen;
+    uint32          bufflen = 0;
+    status_t        res = NO_ERR;
+    boolean         done = FALSE;
 
+    if ( !modname || !pcb )
+    {
+        return ERR_INTERNAL_PTR;
+    }
 
     if (LOGDEBUG2) {
         log_debug2("\nAttempting to load module '%s'", modname);
         if (revision) {
             log_debug2(" r:%s", revision);
         }
+    } else if (LOGDEBUG) {
+        log_debug("\nload_module called for '%s'", modname);
     }
 
-    res = NO_ERR;
-    res2 = NO_ERR;
-    isfile = FALSE;
-    bufflen = 0;
-    done = FALSE;
-    try_yin = FALSE;
     modlen = xml_strlen(modname);
-    mode = NCXMOD_MODE_NONE;
 
     if (retmod) {
         *retmod = NULL;
     }
 
-    /* check which form of input is present, module name or filespec */
-    if ((*modname == '.') || (*modname == NCXMOD_PSCHAR)) {
-        isfile = TRUE;
-    } else {
-        /* if a dir sep char is in the string it is automatically
-         * treated as an absolute filespec, even if it doesn't
-         * have a file suffix
-         */
-        str = modname;
-        while (*str && *str != NCXMOD_PSCHAR) {
-            str++;
-        }
-        if (*str) {
-            isfile = TRUE;
-        }
+    /* find the start of the file name extension, expecting .yang or .yin */
+    mode = determine_mode( modname, modlen );
+    if ( NCXMOD_MODE_FILEYANG == mode || NCXMOD_MODE_FILEYIN == mode ) {
+        /* 1) if parameter is a filespec, then try it and exit if it does not 
+         * work, instead of trying other directories */
+        return try_module_filespec( mode, modname, modlen, pcb, ptyp, retmod );
     }
 
-    /* find the start of the file name extension, 
-     * expecting .yang or .yin
-     */
-    str = &modname[modlen];
-    while (str > modname && *str != '.') {
-        str--;
-    }
-
-    /* try to find a .yang file suffix */
-    if (*str == '.') {
-        /* since the dot-char is allowed in YANG identifier names
-         * only treat this string with a dot in it as a file if
-         * it has a YANG file extension
-         */
-        if (!xml_strcmp(str+1, YANG_SUFFIX)) {
-            isfile = TRUE;
-            mode = NCXMOD_MODE_FILEYANG;
-        } else if (!xml_strcmp(str+1, YIN_SUFFIX)) {
-            isfile = TRUE;
-            mode = NCXMOD_MODE_FILEYIN;
-            try_yin = TRUE;
-        }
-    }
-
-
-    /* 1) if parameter is a filespec, then try it and exit
-     *    if it does not work, instead of trying other directories
-     */
-    if (isfile) {
-        /* the try_module function expects the first
-         * parm to be a writable buffer, even though
-         * in this case there will be nothing altered
-         * in the module name string.  Need to copy it
-         * instead of pass it directly :-(
-         */
-        buff = xml_strdup(modname);
-        if (buff == NULL) {
-            return ERR_INTERNAL_MEM;
-        }
-        if (mode == NCXMOD_MODE_NONE) {
-            try_yin = TRUE;
-            mode = NCXMOD_MODE_FILEYANG;
-        }
-
-        if (mode == NCXMOD_MODE_FILEYANG) {
-            res = try_module(buff, 
-                             modlen,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             mode,
-                             TRUE,
-                             &done, 
-                             pcb,
-                             ptyp);
-        } else {
-            res = ERR_NCX_MISSING_FILE;
-        }
-
-        if (res == ERR_NCX_MISSING_FILE && try_yin) {
-            res = try_module(buff, 
-                             modlen,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NULL,
-                             NCXMOD_MODE_FILEYIN,
-                             TRUE,
-                             &done, 
-                             pcb,
-                             ptyp);
-        }
-        if (res == ERR_NCX_MISSING_FILE) {
-            log_error("\nError: file not found (%s)\n", modname);
-        } else if (res == NO_ERR) {
-            if (retmod) {
-                *retmod = pcb->top;
-            }
-        }
-        m__free(buff);
-        return res;
-    }
-
-    /* the module name is not a file;
-     * the revision may be relevant now;
-     * make sure the module name is even valid
-     */
-    if (!ncx_valid_name(modname, modlen)) {
+    /* the module name is not a file; the revision may be relevant now;
+     * make sure the module name is valid */
+    if ( !ncx_valid_name( modname, modlen ) ) {
         log_error("\nError: Invalid module name (%s)\n", modname);
         res = add_failed(modname, revision, pcb, res);
-        if (res != NO_ERR) {
+        if ( NO_ERR != res ) {
             return res;
         } else {
             return ERR_NCX_INVALID_NAME;
         }
     }
 
-    /* check if the module is already loaded (in the 
-     * current ncx_modQ) 
-     * skip if this is yangdump converting a YANG file to a YIN file
-     * of yangcli_autoload parsing a server module 
-     */
+    /* check if the module is already loaded (in the current ncx_modQ) skip if 
+     * this is yangdump converting a YANG file to a YIN file of 
+     * yangcli_autoload parsing a server module */
     if ((ptyp != YANG_PT_INCLUDE) &&
         !(pcb->parsemode && ptyp == YANG_PT_TOP) &&
         !(pcb->savetkc && pcb->tkc == NULL)) {
+        ncx_module_t   *testmod;
 
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
-            if (LOGDEBUG2) {
-                log_debug2("\nncxmod: Using module '%s' already loaded", 
-                           modname);
-            }
+            log_debug2( "\nncxmod: Using module '%s' already loaded", modname );
             if (!pcb->top) {
                 pcb->top = testmod;
                 pcb->topfound = TRUE;
@@ -1976,10 +2012,8 @@ static status_t
                 testmod = ncx_find_module(NCXMOD_YUMA_NETCONF, NULL);
                 if (testmod) {
                     /* use yuma-netconf instead of ietf-netconf */
-                    if (LOGDEBUG) {
-                        log_debug("\nncxmod: cannot load 'ietf-netconf'; "
-                                  "'yuma-netconf' already loaded");
-                    }
+                    log_debug( "\nncxmod: cannot load 'ietf-netconf'; "
+                               "'yuma-netconf' already loaded" );
                     if (!pcb->top) {
                         pcb->top = testmod;
                         pcb->topfound = TRUE;
@@ -2003,106 +2037,52 @@ static status_t
     }
 
     /* 2) try alt_path variable if set; used by yangdiff */
-    if (!done && ncxmod_alt_path) {
-        res = check_module_path(ncxmod_alt_path,
-                                buff,
-                                bufflen,
-                                modname,
-                                revision,
-                                pcb,
-                                ptyp,
-                                TRUE, 
-                                &done);
+    if ( ncxmod_alt_path) {
+        res = check_module_path( ncxmod_alt_path, buff, bufflen, modname, 
+                                 revision, pcb, ptyp, TRUE, &done );
     }
 
     if (ncx_get_cwd_subdirs()) {
         /* CHECK THE CURRENT DIR AND ANY SUBDIRS
-         * 3) try current working directory and subdirs
-         *    if the subdirs parameter is true
-         * check before the modpath, which can cause
-         * the wrong version to be picked, depending
-         * on the CWD used by the application.
-         */
+         * 3) try current working directory and subdirs if the subdirs parameter 
+         *    is true
+         * check before the modpath, which can cause the wrong version to be 
+         * picked, depending * on the CWD used by the application.  */
         if (!done) {
-            res = check_module_pathlist((const xmlChar *)".",
-                                        buff,
-                                        bufflen,
-                                        modname, 
-                                        revision,
-                                        pcb,
-                                        ptyp, 
-                                        &done);
+            res = check_module_pathlist( (const xmlChar *)".", buff, bufflen,
+                                         modname, revision, pcb, ptyp, &done );
         }
     } else {
         /* CHECK THE CURRENT DIR BUT NOT ANY SUBDIRS
-         * 3a) try as module in current dir, YANG format
-         */
+         * 3a) try as module in current dir, YANG format */
         if (!done) {
-            res = try_module(buff, 
-                             bufflen,
-                             NULL,
-                             NULL,
-                             modname, 
-                             revision,
-                             NCXMOD_MODE_YANG,
-                             FALSE,
-                             &done,
-                             pcb,
-                             ptyp);
+            res = try_module( buff, bufflen, NULL, NULL, modname, revision, 
+                              NCXMOD_MODE_YANG, FALSE, &done, pcb, ptyp );
         }
 
         /* 3b) try as module in current dir, YIN format  */
         if (!done) {
-            res = try_module(buff, 
-                             bufflen,
-                             NULL,
-                             NULL,
-                             modname, 
-                             revision,
-                             NCXMOD_MODE_YIN,
-                             FALSE,
-                             &done,
-                             pcb,
-                             ptyp);
+            res = try_module( buff, bufflen, NULL, NULL, modname, revision,
+                              NCXMOD_MODE_YIN, FALSE, &done, pcb, ptyp);
         }
     }
 
     /* 4) try YUMA_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
-        res = check_module_pathlist(ncxmod_mod_path,
-                                    buff,
-                                    bufflen,
-                                    modname, 
-                                    revision,
-                                    pcb,
-                                    ptyp, 
-                                    &done);
+        res = check_module_pathlist( ncxmod_mod_path, buff, bufflen, modname, 
+                                     revision, pcb, ptyp, &done );
     }
 
     /* 5) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
-        res = check_module_path(ncxmod_env_userhome,
-                                buff,
-                                bufflen,
-                                modname,
-                                revision,
-                                pcb,
-                                ptyp,
-                                FALSE, 
-                                &done);
+        res = check_module_path( ncxmod_env_userhome, buff, bufflen, modname,
+                                 revision, pcb, ptyp, FALSE, &done );
     }
 
     /* 6) YUMA_HOME/modules directory */
     if (!done && ncxmod_yuma_home) {
-        res = check_module_path(ncxmod_yuma_home,
-                                buff,
-                                bufflen,
-                                modname, 
-                                revision,
-                                pcb,
-                                ptyp,
-                                FALSE, 
-                                &done);
+        res = check_module_path( ncxmod_yuma_home, buff, bufflen, modname, 
+                                 revision, pcb, ptyp, FALSE, &done );
     }
 
     /* 7) YUMA_INSTALL/modules directory or default install path
@@ -2111,66 +2091,41 @@ static status_t
      */
     if (!done) {
         if (ncxmod_env_install) {
-            res = check_module_path(ncxmod_env_install, 
-                                    buff,
-                                    bufflen,
-                                    modname,
-                                    revision,
-                                    pcb,
-                                    ptyp,
-                                    FALSE, 
-                                    &done);
+            res = check_module_path( ncxmod_env_install, buff, bufflen, modname,
+                                     revision, pcb, ptyp, FALSE, &done );
         } else {
-            res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
-                                    buff,
-                                    bufflen,
-                                    modname, 
-                                    revision,
-                                    pcb,
-                                    ptyp,
-                                    FALSE, 
-                                    &done);
+            res = check_module_path( NCXMOD_DEFAULT_INSTALL, buff, bufflen, 
+                                     modname, revision, pcb, ptyp, FALSE, 
+                                     &done );
         }
     }
 
-    res2 = NO_ERR;
     if (res != NO_ERR || !done) {
         if (!done) {
             res = ERR_NCX_MOD_NOT_FOUND;
         }
 
-        res2 = add_failed(modname, revision, pcb, res);
-    }
-
-    if (res == NO_ERR) {
-        res = res2;
+        ( void ) add_failed(modname, revision, pcb, res);
     }
 
     m__free(buff);
 
     if (done) {
-        if (res == NO_ERR || ptyp == YANG_PT_INCLUDE) {
-            if (retmod != NULL) {
-                if (pcb->retmod != NULL) {
-                    *retmod = pcb->retmod;
-                } else if (ptyp == YANG_PT_TOP) {
-                    *retmod = pcb->top;
-                } 
-            }
-        } else if (res != NO_ERR) {
-            if (pcb->retmod) {
-                log_debug("\nFree retmod import %p (%s)",
-                          pcb->retmod,
-                          pcb->retmod->name);
-                ncx_free_module(pcb->retmod);
-                pcb->retmod = NULL;
-            }
+        if ( ( res == NO_ERR || ptyp == YANG_PT_INCLUDE ) && retmod ) {
+            if (pcb->retmod != NULL) {
+                *retmod = pcb->retmod;
+            } else if (ptyp == YANG_PT_TOP) {
+                *retmod = pcb->top;
+            } 
+        } else if (res != NO_ERR && pcb->retmod) {
+            log_debug( "\nFree retmod import %p (%s)", 
+                       pcb->retmod, pcb->retmod->name);
+            ncx_free_module(pcb->retmod);
+            pcb->retmod = NULL;
         } /* else pcb->top will get deleted in yang_free_pcb */
-        return res;
-    } else {
-        return (res == NO_ERR) ? ERR_NCX_MOD_NOT_FOUND : res;
     }
 
+    return res;
 }  /* load_module */
 
 
@@ -2273,7 +2228,12 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir(buff);
     if (!dp) {
+#if 0
+        log_error("\nError: open directory '%s' failed\n", buff);
+        return ERR_OPEN_DIR_FAILED;
+#else
         return NO_ERR;
+#endif
     }
 
     dirdone = FALSE;
@@ -2296,7 +2256,7 @@ static status_t
                      xml_strlen((const xmlChar *)ep->d_name)) >=  bufflen) {
                     res = ERR_BUFF_OVFL;
                 } else {
-                    strcpy(&buff[pathlen], ep->d_name);
+                    strncpy(&buff[pathlen], ep->d_name, bufflen-pathlen);
                     res = process_subtree(buff, bufflen, callback, cookie);
                     buff[pathlen] = 0;
                 }
@@ -2309,7 +2269,7 @@ static status_t
                      xml_strlen((const xmlChar *)ep->d_name)) >=  bufflen) {
                     res = ERR_BUFF_OVFL;
                 } else {
-                    strcpy(&buff[pathlen], ep->d_name);
+                    strncpy(&buff[pathlen], ep->d_name, bufflen-pathlen);
                     res = (*callback)(buff, cookie);
                 }
             }
@@ -2605,9 +2565,6 @@ static ncxmod_search_result_t *
     make_search_result (ncx_module_t *mod)
 {
     ncxmod_search_result_t   *searchresult;
-    status_t                  res;
-
-    res = NO_ERR;
 
     if (LOGDEBUG2) {
         log_debug2("\nFound %smodule"
@@ -4378,10 +4335,11 @@ status_t
     bufflen = NCXMOD_MAX_FSPEC_LEN+1;
     buff = m__getMem(bufflen);
     if (!buff) {
+        m__free(sourcespec);
         return ERR_INTERNAL_MEM;
     }
 
-    strcpy(buff, (const char *)sourcespec);
+    strncpy(buff, (const char *)sourcespec, bufflen);
     res = process_subtree(buff, bufflen, callback, cookie);
 
     m__free(sourcespec);
@@ -5091,22 +5049,19 @@ ncxmod_temp_progcb_t *
 {
     xmlChar              *buffer, *tempdir_path, *p;
     DIR                  *dp;
-    ncxmod_temp_progcb_t *progcb;
+    ncxmod_temp_progcb_t *progcb = NULL;
     xmlChar               datebuff[TSTAMP_MIN_SIZE];
     xmlChar               numbuff[NCX_MAX_NUMLEN];
     int                   randnum, retcode;
     uint32                fixedlen, numlen;
 
-#ifdef DEBUG
     if (res == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
-#endif
 
     /* setup */
     *res = NO_ERR;
-    progcb = NULL;
     tstamp_datetime_dirname(datebuff);
 
     fixedlen = xml_strlen(ncxmod_yumadir_path) +
@@ -5118,7 +5073,7 @@ ncxmod_temp_progcb_t *
         randnum *= -1;
     }
     randnum &= 0xffff;
-    sprintf((char *)numbuff, "%d", randnum);
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%d", randnum);
     numlen = xml_strlen(numbuff);
 
     /* get a buffer for the constructed directory name */
@@ -5128,10 +5083,8 @@ ncxmod_temp_progcb_t *
         return NULL;
     }
 
-    /* construct the entire dir name string
-     * generate the default directory name
-     * based on the current time + random number
-     */
+    /* construct the entire dir name string generate the default directory name
+     * based on the current time + random number */
     p = buffer;
     p += xml_strcpy(p, ncxmod_yumadir_path);
     p += xml_strcpy(p, NCXMOD_TEMP_DIR);
@@ -5157,6 +5110,7 @@ ncxmod_temp_progcb_t *
     } else {
         /* error! this directory already exists, */
         *res = ERR_NCX_ENTRY_EXISTS;
+        closedir( dp );
     }
 
     if (*res == NO_ERR) {
@@ -5248,7 +5202,7 @@ ncxmod_temp_sescb_t *
     *res = NO_ERR;
     sescb = NULL;
     fixedlen = xml_strlen(progcb->source);
-    sprintf((char *)numbuff, "%u", sidnum);
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%u", sidnum);
     numlen = xml_strlen(numbuff);
 
     /* get a buffer for the constructed directory name */
@@ -5278,6 +5232,7 @@ ncxmod_temp_sescb_t *
         }
     } else {
         /* error! this directory already exists, */
+        (void) closedir( dp );
         *res = ERR_NCX_ENTRY_EXISTS;
     }
 

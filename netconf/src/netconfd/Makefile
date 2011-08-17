@@ -56,6 +56,10 @@ include ../platform/platform.profile
 
 include ../platform/platform.profile.depend
 
+ifneq ($(YUMA_CXX_BUILD),)
+CFLAGS+= -x c++ 
+LFLAGS+= -x none
+endif
 
 clean:
 	rm -f $(OBJS) $(BIN_INST)/$(PROG)

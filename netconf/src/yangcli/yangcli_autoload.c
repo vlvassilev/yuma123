@@ -230,7 +230,7 @@ static status_t
         }
     }
 
-    /* add /get-schema/input/version */
+    /* add /get-schema/input/format */
     if (res == NO_ERR) {
         parmobj = obj_find_child(input,
                                  NCXMOD_IETF_NETCONF_STATE,
@@ -239,7 +239,7 @@ static status_t
             res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         } else {
             parmval = val_make_simval_obj(parmobj,
-                                          (const xmlChar *)"ns:yang",
+                                          (const xmlChar *)"yang",
                                           &res);
             if (parmval != NULL) {
                 val_add_child(parmval, reqdata);
@@ -996,14 +996,17 @@ status_t
         /* found an entry that needs to be retrieved
          * either module not found or wrong version found
          */
-        server_cb->command_mode = CMD_MODE_AUTOLOAD;
-        server_cb->cursearchresult = searchresult;
         done = TRUE;
 
         res = send_get_schema_to_server(server_cb,
                                        scb,
                                        searchresult->module,
                                        searchresult->revision);
+        if (res == NO_ERR) {
+            server_cb->command_mode = CMD_MODE_AUTOLOAD;
+            server_cb->cursearchresult = searchresult;
+        }
+        /* exit loop if we get here */
     }
 
     return res;

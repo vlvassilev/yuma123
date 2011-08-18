@@ -2542,6 +2542,38 @@ static status_t
 }  /* load_core_schema */
 
 
+
+/********************************************************************
+* FUNCTION namespace_mismatch_warning
+* 
+* Issue a namespace mismatch warning
+*
+* INPUTS:
+*  module == module name
+*  revision == revision date (may be NULL)
+*  namespacestr == server expected URI
+*  clientns == client provided URI
+*********************************************************************/
+static void
+    namespace_mismatch_warning (const xmlChar *module,
+                                const xmlChar *revision,
+                                const xmlChar *namespacestr,
+                                const xmlChar *clientns)
+{
+    /* !!! FIXME: need a warning number for suppression */
+    log_warn("\nWarning: module namespace URI mismatch:"
+             "\n   module:    '%s'"
+             "\n   revision:  '%s'"
+             "\n   server ns: '%s'"
+             "\n   client ns: '%s'",
+             module,
+             (revision) ? revision : EMPTY_STRING,
+             namespacestr,
+             clientns);
+
+}  /* namespace_mismatch_warning */
+
+
 /********************************************************************
 * FUNCTION check_module_capabilities
 * 
@@ -2663,16 +2695,11 @@ static void
         if (mod != NULL) {
             /* make sure that the namespace URIs match */
             if (ncx_compare_base_uris(mod->ns, namespacestr)) {
-                /* !!! need a warning number for suppression */
-                log_warn("\nWarning: module namespace URI mismatch:"
-                         "\n   module:    '%s'"
-                         "\n   revision:  '%s'"
-                         "\n   server ns: '%s'"
-                         "\n   client ns: '%s'",
-                         module,
-                         (revision) ? revision : EMPTY_STRING,
-                         namespacestr,
-                         mod->ns);
+                namespace_mismatch_warning(module,
+                                           revision,
+                                           namespacestr,
+                                           mod->ns);
+                /* force a new search or auto-load */
                 mod = NULL;
             }
         }
@@ -2692,13 +2719,18 @@ static void
         }
 
         if (mod == NULL) {
-            /* module was not found already loaded into
-             * this instance of yangcli
+            /* module was not found in the module search path
+             * of this instance of yangcli
              * try to auto-load the module if enabled
              */
             if (server_cb->autoload) {
                 if (libresult) {
                     searchresult = ncxmod_clone_search_result(libresult);
+                    if (searchresult == NULL) {
+                        log_error("\nError: cannot load file, "
+                                  "malloc failed");
+                        return;
+                    }
                 } else {
                     searchresult = ncxmod_find_module(module, revision);
                 }
@@ -2719,18 +2751,12 @@ static void
                                                       namespacestr)) {
                                 /* cannot use this local file because
                                  * it has a different namespace
-                                 * !!! need a warning number for suppression 
                                  */
-                                log_warn("\nWarning: module "
-                                         "namespace URI mismatch:"
-                                         "\n   module:    '%s'"
-                                         "\n   revision:  '%s'"
-                                         "\n   server ns: '%s'"
-                                         "\n   client ns: '%s'",
-                                         module,
-                                         (revision) ? revision : EMPTY_STRING,
-                                         namespacestr,
-                                         searchresult->namespacestr);
+                                namespace_mismatch_warning
+                                    (module,
+                                     revision,
+                                     namespacestr,
+                                     searchresult->namespacestr);
                             } else {
                                 /* can use the local system file found */
                                 searchresult->capmatch = TRUE;
@@ -2753,7 +2779,7 @@ static void
                          */
                         if (!retrieval_supported) {
                             /* no <get-schema> so SOL, do without this module 
-                             * !!! need warning number 
+                             * !!! FIXME: need warning number 
                              */
                             if (revision != NULL) {
                                 log_warn("\nWarning: module '%s' "
@@ -2766,8 +2792,8 @@ static void
                                          module);
                             }
                         } else if (LOGDEBUG) {
-                            log_debug("\nyangcli_autoload: Module '%s' "
-                                      "not available, will try <get-schema>",
+                            log_debug("\nautoload: Module '%s' not available,"
+                                      " will try <get-schema>",
                                       module);
                         }
                     }
@@ -2793,10 +2819,27 @@ static void
                                      "(no revision) not available",
                                      module);
                         }
-                    } else if (LOGDEBUG) {
-                        log_debug("\nyangcli_autoload: Module '%s' "
-                                  "not available, will try <get-schema>",
-                                  module);
+                    } else {
+                        /* setup a blank searchresult so auto-load
+                         * will attempt to retrieve it
+                         */
+                        searchresult = 
+                            ncxmod_new_search_result_str(module, 
+                                                         revision);
+                        if (searchresult) {
+                            searchresult->cap = cap;
+                            dlq_enque(searchresult, &server_cb->searchresultQ);
+                            if (LOGDEBUG) {
+                                log_debug("\nyangcli_autoload: Module '%s' "
+                                          "not available, will try "
+                                          "<get-schema>",
+                                          module);
+                            }
+                        } else {
+                            log_error("\nError: cannot load file, "
+                                      "malloc failed");
+                            return;
+                        }
                     }
                 }
             } else {
@@ -2819,6 +2862,7 @@ static void
             searchresult = ncxmod_new_search_result_ex(mod);
             if (searchresult == NULL) {
                 log_error("\nError: cannot load file, malloc failed");
+                return;
             } else {
                 searchresult->cap = cap;
                 searchresult->capmatch = TRUE;

@@ -1192,6 +1192,22 @@ extern ncxmod_search_result_t *
 
 
 /********************************************************************
+* FUNCTION ncxmod_new_search_result_str
+*
+*  Malloc and initialize a search result struct
+*
+* INPUTS:
+*    modname == module name string to use
+*    revision == revision date to use (may be NULL)
+* RETURNS:
+*   malloced and initialized struct, NULL if ERR_INTERNAL_MEM
+*********************************************************************/
+extern ncxmod_search_result_t *
+    ncxmod_new_search_result_str (const xmlChar *modname,
+                                  const xmlChar *revision);
+
+
+/********************************************************************
 * FUNCTION ncxmod_free_search_result
 *
 *  Clean and free a search result struct

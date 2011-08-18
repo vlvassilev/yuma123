@@ -5445,6 +5445,7 @@ ncxmod_search_result_t *
 * FUNCTION ncxmod_new_search_result_ex
 *
 *  Malloc and initialize a search result struct
+*  from a module source
 *
 * INPUTS:
 *    mod == module struct to use
@@ -5520,6 +5521,55 @@ ncxmod_search_result_t *
     return searchresult;
 
 }  /* ncxmod_new_search_result_ex */
+
+
+/********************************************************************
+* FUNCTION ncxmod_new_search_result_str
+*
+*  Malloc and initialize a search result struct
+*
+* INPUTS:
+*    modname == module name string to use
+*    revision == revision date to use (may be NULL)
+* RETURNS:
+*   malloced and initialized struct, NULL if ERR_INTERNAL_MEM
+*********************************************************************/
+ncxmod_search_result_t *
+    ncxmod_new_search_result_str (const xmlChar *modname,
+                                  const xmlChar *revision)
+{
+    ncxmod_search_result_t *searchresult;
+
+#ifdef DEBUG
+    if (modname == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    searchresult = m__getObj(ncxmod_search_result_t);
+    if (searchresult == NULL) {
+        return NULL;
+    }
+    memset(searchresult, 0x0, sizeof(ncxmod_search_result_t));
+
+    searchresult->module = xml_strdup(modname);
+    if (searchresult->module == NULL) {
+        ncxmod_free_search_result(searchresult);
+        return NULL;
+    }
+
+    if (revision) {
+        searchresult->revision = xml_strdup(revision);
+        if (searchresult->revision == NULL) {
+            ncxmod_free_search_result(searchresult);
+            return NULL;
+        }
+    }
+    searchresult->res = ERR_NCX_MOD_NOT_FOUND;
+    return searchresult;
+
+}  /* ncxmod_new_search_result_str */
 
 
 /********************************************************************

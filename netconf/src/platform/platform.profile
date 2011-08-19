@@ -87,7 +87,7 @@ endif
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
-	-Wwrite-strings -Wbad-function-cast -Wcast-qual -Wcast-align \
+	-Wwrite-strings -Wbad-function-cast -Wcast-qual \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
 	-Wpacked -Winvalid-pch \
@@ -213,7 +213,7 @@ DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
 PLATFORM_CPP=
 
 .PHONY: all superclean clean test install uninstall \
-        distclean depend lint notabs addheader fixcopyright
+        distclean depend lint notabs addheader
 
 ######################### MAKE RULES ######################
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \

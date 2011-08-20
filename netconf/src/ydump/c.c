@@ -124,17 +124,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-static void logFuncEntry( ses_cb_t* scb, 
-                          int32 indent, 
-                          const xmlChar* name,
-                          const xmlChar* suffix )
-{
-    ses_putstr_indent(scb, (const xmlChar*)"log_info( \"\\n", indent );
-    write_identifier(scb, (const xmlChar*)"", NULL, name);
-    ses_putstr(scb, suffix);
-    ses_putstr( scb,  (const xmlChar*)"() - called\\n\" );\n" );
-}
-
 
 /********************************************************************
 * FUNCTION write_if_res
@@ -674,8 +663,6 @@ static void
                       (const xmlChar *)"const xmlChar *errorstr;",
                       indent);
 
-    logFuncEntry( scb, indent, cdef->idstr, EDIT_SUFFIX );
-
     /* initialize the static vars */
     ses_putchar(scb, '\n');
     ses_putstr_indent(scb,
@@ -988,9 +975,6 @@ static void
 
     /* initialize the static vars */
     ses_putchar(scb, '\n');
-
-    logFuncEntry( scb, indent, cdef->idstr, GET_SUFFIX );
-
     ses_putstr_indent(scb,
                       (const xmlChar *)"res = NO_ERR;",
                       indent);
@@ -1261,8 +1245,6 @@ static void
                           indent);
     }
 
-    logFuncEntry( scb, indent, cdef->idstr, MRO_SUFFIX );
-
     /* create read-only child nodes as needed */
     for (childobj = obj_first_child(obj);
          childobj != NULL;
@@ -1464,8 +1446,6 @@ static void
                       indent);
     ses_putstr(scb, cdef->valstr);
     ses_putstr(scb, (const xmlChar *)" */");
-
-    logFuncEntry( scb, indent, cdef->idstr, MRO_SUFFIX );
 
     if (obj_is_np_container(obj)) {
         ses_putstr_indent(scb, 
@@ -1732,10 +1712,6 @@ static void
             write_c_objtype_ex(scb, obj, objnameQ, ';', TRUE, FALSE);
         }
     }
-
-    // Logging Function call entry...
-    is_validate ?  logFuncEntry( scb, indent, obj_get_name(rpcobj), (const xmlChar*)"_validate" )
-                :  logFuncEntry( scb, indent, obj_get_name(rpcobj), (const xmlChar*)"_invoke" );
 
     ses_putchar(scb, '\n');
     ses_putstr_indent(scb,

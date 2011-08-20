@@ -4939,6 +4939,9 @@ boolean
             if (!dlq_empty(&typdef->def.simple.range.rangeQ)) {
                 return TRUE;
             }
+            if (!dlq_empty(&typdef->def.simple.patternQ)) {
+                return TRUE;
+            }
             return !dlq_empty(&typdef->def.simple.valQ);
         case NCX_BT_SLIST:
         case NCX_BT_LEAFREF:

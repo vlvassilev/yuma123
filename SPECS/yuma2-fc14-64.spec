@@ -80,7 +80,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
 * Sun Aug 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-2 [1325]
-* yangcli
+ * yangcli
   * fixed bug where --batchmode is ignored if --run-command
     is also used
   * added support to connect to tailf confd servers over TCP;
@@ -90,7 +90,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
     calls to set_str(). In some paths the function set_str()
   * fixed bugs in autoload procedure
 
-* netconfd
+ * netconfd
   * fixed 2 framing bugs in base:1.1 mode
   * rewrote buffer code to pack incoming message buffers instead
     of using client buffer size as-is
@@ -118,12 +118,12 @@ echo "Check the user manuals in /usr/share/doc/yuma"
   * make logging from netconf-subsystem configurable via command line options
   * updated netconfd user manual
 
-* yangdump
+ * yangdump
   * fix bug in format=html or format=yang where pattern may
     not get generated in the output
   * add support for path links in leafrefs in --format=html
 
-* YANG parse:
+ * YANG parse:
   * fixed bug where val_clone of enum sometimes had static enu.name
     pointing at old.enu.dname so if old was freed, new.enu.name
     would point at garbage in the heap
@@ -134,10 +134,10 @@ echo "Check the user manuals in /usr/share/doc/yuma"
   * fixed bug where unquoted prefixed string (foo:bar) would
     not be saved correctly in the compiled pattern (bar)
 
-* XML parse:
+ * XML parse:
   * add tracefile support to debug input fed to XML textReader
 
-* CLI:
+ * CLI:
   * Change the signature of all instances of main to meet the 'c'
     standard.
 * Thu July 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-1 [1248]

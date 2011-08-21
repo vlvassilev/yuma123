@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -29,7 +29,7 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 LIB64=1 RELEASE=1 %{?_smp_mflags}
+make STATIC=1 LIB64=1 RELEASE=2 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -79,6 +79,67 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Sun Aug 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-2 [1325]
+* yangcli
+  * fixed bug where --batchmode is ignored if --run-command
+    is also used
+  * added support to connect to tailf confd servers over TCP;
+    added --transport=ssh|tcp parameter to connect command
+    and CLI parameter for startup connecting via TCP
+  * Fix potential double calls to free and memory leaks resulting from
+    calls to set_str(). In some paths the function set_str()
+  * fixed bugs in autoload procedure
+
+* netconfd
+  * fixed 2 framing bugs in base:1.1 mode
+  * rewrote buffer code to pack incoming message buffers instead
+    of using client buffer size as-is
+  * fixed memory leak in new support code for malformed-message
+    only occured when malformed-message error generated
+  * Improve logging for debug purposes from netconf-subsys.c
+    (by Mark Pashley)
+  * Many bugfixes and dead code removal detected by Coverity
+    static analysis (from vi-cov branch by Mark Pashley)
+  * Removed potential memory leak in cache_data_rules in NACM
+  * Summary of bugfixes to copy_config_validate():
+    Coverity reported the following issues:
+      DEAD CODE
+      Code with no effect.
+      Use after free
+      Null pointer derference
+      Resource Leaks
+  * sprintf changed to snprintf and strcpy changed to strncpy
+    in some cases, to make sure no buffer overrun can occur
+  * add module yuma-time-filter.yang
+  * add last-modified XML attribute to <rpc-reply> for <get>
+    and <get-config> replies
+  * add if-modified-since parameter to <get> and <get-config>
+    protocol operations
+  * make logging from netconf-subsystem configurable via command line options
+  * updated netconfd user manual
+
+* yangdump
+  * fix bug in format=html or format=yang where pattern may
+    not get generated in the output
+  * add support for path links in leafrefs in --format=html
+
+* YANG parse:
+  * fixed bug where val_clone of enum sometimes had static enu.name
+    pointing at old.enu.dname so if old was freed, new.enu.name
+    would point at garbage in the heap
+  * fixed some memory leaks in error corner-cases
+  * fixed bug where valid patterns parsed as non-strings
+    were not correctly processed and no compiled pattern
+    was created
+  * fixed bug where unquoted prefixed string (foo:bar) would
+    not be saved correctly in the compiled pattern (bar)
+
+* XML parse:
+  * add tracefile support to debug input fed to XML textReader
+
+* CLI:
+  * Change the signature of all instances of main to meet the 'c'
+    standard.
 * Thu July 21 2011 Andy Bierman <andy at netconfcentral.org> 2.0-1 [1248]
   * initial 2.0 release
     * contains all yuma 1.15 features, plus major features

@@ -1987,7 +1987,7 @@ static status_t
     }
 
     /* check if the module is already loaded (in the current ncx_modQ) skip if 
-     * this is yangdump converting a YANG file to a YIN file of 
+     * this is yangdump converting a YANG file to a YIN file or 
      * yangcli_autoload parsing a server module */
     if ((ptyp != YANG_PT_INCLUDE) &&
         !(pcb->parsemode && ptyp == YANG_PT_TOP) &&

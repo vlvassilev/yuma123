@@ -179,6 +179,7 @@ static void
                        const ncx_module_t *mod,
                        const yangdump_cvtparms_t *cp,
                        typ_def_t *typdef,
+                       obj_template_t *obj,
                        int32 startindent);
 
 static void
@@ -486,13 +487,11 @@ static void
 *   scb == session control block to use for writing
 *   strval == string value
 *   quotes == quotes style (0, 1, 2)
-*   indent == current indent count
 *********************************************************************/
 static void
     write_str (ses_cb_t *scb,
                const xmlChar *strval,
-               uint32 quotes,
-               int32 indent)
+               uint32 quotes)
 {
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_str\">");
 
@@ -507,7 +506,6 @@ static void
         ;
     }
 
-    (void)indent;
     ses_puthstr(scb, strval);
 
     switch (quotes) {
@@ -563,7 +561,7 @@ static void
     }
 
     /* write first string at current indent point */
-    write_str(scb, str, numquotes, indent);
+    write_str(scb, str, numquotes);
 
     if (!moreflag) {
         return;
@@ -586,7 +584,7 @@ static void
             } else {
                 ses_putstr(scb, (const xmlChar *)" + ");
             }
-            write_str(scb, str, dquotes ? 2 : 1, indent);
+            write_str(scb, str, numquotes);
         }
     }
 
@@ -685,7 +683,7 @@ static void
 *   idname == identifier name to use in URL and 'a' content
 *   linenum == line number to use in URL
 *   idshow == ID string to show in the href construct
-*
+*             (may be NULL to leave off the content and final </a>
 *********************************************************************/
 static void
     write_a2 (ses_cb_t *scb,
@@ -734,8 +732,10 @@ static void
         }
     }
     ses_putstr(scb, (const xmlChar *)"\">");
-    ses_putstr(scb, idshow);
-    ses_putstr(scb, (const xmlChar *)"</a>");
+    if (idshow) {
+        ses_putstr(scb, idshow);
+        ses_putstr(scb, (const xmlChar *)"</a>");
+    }
 
 }  /* write_a2 */
 
@@ -992,10 +992,11 @@ static void
             indent += ses_indent_count(scb);
             ses_indent(scb, indent);
         }
+
         if (tkptr != NULL) {
-            write_comstr(scb, tkptr, strval, indent);
+            write_comstr(scb, tkptr, strval,  indent);
         } else {
-            write_str(scb, strval, quotes, indent);
+            write_str(scb, strval, quotes);
         }
     }
     if (finsemi) {
@@ -1005,6 +1006,79 @@ static void
     }
 
 }  /* write_complex_str */
+
+
+/********************************************************************
+* FUNCTION write_leafref_path
+* 
+* Generate a leafref path-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   typdef == typdef for the leafref
+*   obj == object pointer if this is from a leaf or leaf-list
+*          NULL if this is froma typedef
+*   startindent == start indent count
+*********************************************************************/
+static void
+    write_leafref_path (ses_cb_t *scb,
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        typ_def_t *typdef,
+                        obj_template_t *obj,
+                        int32 startindent)
+{
+    const xmlChar       *submod, *pathstr;
+    obj_template_t      *targobj = NULL;
+    xpath_pcb_t         *testpath;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+
+    pathstr = typ_get_leafref_path(typdef);
+    if (pathstr == NULL) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    testpath = typ_get_leafref_pcb(typdef);
+    if ((testpath == NULL || testpath->targobj == NULL) && (obj != NULL)) {
+        targobj = obj_get_leafref_targobj(obj);
+    } else {
+        targobj = testpath->targobj;
+    }
+
+    if (targobj == NULL) {
+        write_complex_str(scb, 
+                          cp->tkc,
+                          typ_get_leafref_path_addr(typdef),
+                          YANG_K_PATH, 
+                          pathstr,
+                          startindent, 
+                          2, 
+                          TRUE);
+    } else {
+        ncx_module_t *pathmod = obj_get_mod(targobj);
+
+        ses_indent(scb, startindent);
+        write_kw(scb, YANG_K_PATH);
+        ses_putchar(scb, ' ');
+        write_a2(scb,
+                 cp, 
+                 (pathmod != mod) ? 
+                 ncx_get_modname(pathmod) : NULL,
+                 (pathmod != mod) ? pathmod->version : NULL,
+                 submod,
+                 obj_get_name(targobj),
+                 targobj->tkerr.linenum,
+                 NULL);
+        write_str(scb, pathstr, 2);
+        ses_putstr(scb, (const xmlChar *)"</a>");
+        ses_putchar(scb, ';');
+    }
+
+}  /* write_leafref_path */
 
 
 /********************************************************************
@@ -1366,6 +1440,7 @@ static void
                 fname = appinfo->ext->tkerr.mod->name;
                 fversion = appinfo->ext->tkerr.mod->version;
             }
+            ses_putstr(scb, (const xmlChar *)"<span class=\"yang_kw\">");
             write_a(scb, 
                     cp, 
                     fname, 
@@ -1374,16 +1449,14 @@ static void
                     appinfo->prefix,
                     appinfo->name, 
                     appinfo->ext->tkerr.linenum);
+            ses_putstr(scb, (const xmlChar *)"</span>");
         } else {
             write_extkw(scb, appinfo->prefix, appinfo->name);
         }
 
         if (appinfo->value) {
             ses_putchar(scb, ' ');
-            write_str(scb, 
-                      appinfo->value, 
-                      2,
-                      indent+ses_indent_count(scb));
+            write_str(scb, appinfo->value, 2);
         }
 
         if (!dlq_empty(appinfo->appinfoQ)) {
@@ -1412,6 +1485,8 @@ static void
 *   mod == module in progress
 *   cp == conversion parameters to use
 *   typdef == typ_def_t to use
+*   obj == object template if this is from a leaf or leaf-list
+*          NULL if this is from a typedef
 *   startindent == start indent count
 *
 *********************************************************************/
@@ -1420,11 +1495,11 @@ static void
                          const ncx_module_t *mod,
                          const yangdump_cvtparms_t *cp,
                          typ_def_t *typdef,
+                         obj_template_t *obj,
                          int32 startindent)
 {
     typ_unionnode_t       *un;
     const typ_enum_t      *bit, *enu;
-    const xmlChar         *str;
     const typ_range_t     *range;
     const typ_pattern_t   *pat;
     const typ_idref_t     *idref;
@@ -1454,10 +1529,10 @@ static void
                  un = (typ_unionnode_t *)dlq_nextEntry(un)) {
                 if (un->typdef) {
                     write_type_clause(scb, mod, cp,
-                                      un->typdef, startindent);
+                                      un->typdef, NULL, startindent);
                 } else if (un->typ) {
                     write_type_clause(scb, mod, cp, 
-                                      &un->typ->typdef, startindent);
+                                      &un->typ->typdef, NULL, startindent);
                 } else {
                     SET_ERROR(ERR_INTERNAL_VAL);
                 }
@@ -1636,17 +1711,7 @@ static void
         case NCX_BT_SLIST:
             break;
         case NCX_BT_LEAFREF:
-            str = typ_get_leafref_path(typdef);
-            if (str) {
-                write_complex_str(scb, 
-                                  cp->tkc,
-                                  typ_get_leafref_path_addr(typdef),
-                                  YANG_K_PATH, 
-                                  str,
-                                  startindent, 
-                                  2, 
-                                  TRUE);
-            }
+            write_leafref_path(scb, mod, cp, typdef, obj, startindent);
             break;
         case NCX_BT_INSTANCE_ID:
             constrained_set = typ_get_constrained(typdef);
@@ -1695,6 +1760,8 @@ static void
 *   mod == module in progress
 *   cp == conversion parameters to use
 *   typdef == typ_def_t to use
+*   obj == object template if this is from a leaf or leaf-list
+*          NULL if this is from a typedef
 *   startindent == start indent count
 *
 *********************************************************************/
@@ -1703,6 +1770,7 @@ static void
                        const ncx_module_t *mod,
                        const yangdump_cvtparms_t *cp,
                        typ_def_t *typdef,
+                       obj_template_t *obj,
                        int32 startindent)
 {
     write_type(scb, mod, cp, typdef, startindent);
@@ -1712,6 +1780,7 @@ static void
                             mod, 
                             cp, 
                             typdef,
+                            obj,
                             startindent + ses_indent_count(scb));
         ses_putstr_indent(scb, END_SEC, startindent);
     } else {
@@ -1761,7 +1830,7 @@ static void
     write_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
 
     /* type field */
-    write_type_clause(scb, mod, cp, &typ->typdef, indent);
+    write_type_clause(scb, mod, cp, &typ->typdef, NULL, indent);
 
     /* units field */
     if (typ->units) {
@@ -2570,7 +2639,7 @@ static status_t
         write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, cp, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-        write_type_clause(scb, mod, cp, leaf->typdef, indent);
+        write_type_clause(scb, mod, cp, leaf->typdef, obj, indent);
 
         /* units clause */
         if (leaf->units) {
@@ -2604,7 +2673,7 @@ static status_t
         write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, cp, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-        write_type_clause(scb, mod, cp, leaflist->typdef, indent);
+        write_type_clause(scb, mod, cp, leaflist->typdef, obj, indent);
         if (leaflist->units) {
             write_simple_str(scb,
                              YANG_K_UNITS,
@@ -3458,6 +3527,7 @@ static void
                           mod,
                           cp,
                           deviate->typdef,
+                          NULL,
                           indent);
     }
 

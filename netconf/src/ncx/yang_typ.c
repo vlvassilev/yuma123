@@ -3502,7 +3502,9 @@ static status_t
             if (LOGDEBUG4) {
                 log_debug4("\nyang_typ: postponing default check "
                            "for type '%s'", 
-                           (errname) ? errname : NCX_EL_NONE);
+                           (errname) ? errname : 
+                           (typdef->typenamestr) ? 
+                           typdef->typenamestr : NCX_EL_NONE);
             }
         } else {
             boolean hasdefval = FALSE;

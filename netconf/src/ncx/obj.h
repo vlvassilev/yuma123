@@ -3650,6 +3650,21 @@ extern const xmlChar *
     obj_get_altname (const obj_template_t *obj);
 
 
+/********************************************************************
+* FUNCTION obj_get_leafref_targobj
+* 
+* Get the target object for a leafref leaf or leaf-list
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    pointer to the target object or NULL if this object type does not
+*    have a leafref target object
+*********************************************************************/
+extern obj_template_t *
+    obj_get_leafref_targobj (obj_template_t  *obj);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

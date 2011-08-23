@@ -21,6 +21,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-08-23 {
+       description 
+         "Add --runpath parameter.";
+    }
+
     revision 2011-07-20 {
        description 
          "Add --audit-log and --audit-log-append CLI parameters.
@@ -97,6 +102,8 @@ module netconfd {
       uses ncxapp:SubdirsParm;
 
       uses ncxapp:ProtocolsParm;
+
+      uses ncxapp:RunpathParm;
 
       leaf access-control {
         description

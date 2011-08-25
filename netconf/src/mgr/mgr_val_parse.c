@@ -1466,7 +1466,7 @@ static status_t
     chbtyp = NCX_BT_NONE;
     mscb = (mgr_scb_t *)scb->mgrcb;
 
-    if (dlq_empty(&mscb->temp_modQ)) {
+    if (mscb == NULL || dlq_empty(&mscb->temp_modQ)) {
         force_modQ = NULL;
     } else {
         force_modQ = &mscb->temp_modQ;

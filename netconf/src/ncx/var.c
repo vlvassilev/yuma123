@@ -1598,7 +1598,7 @@ val_value_t *
 * 
 * E.g.,
 *
-*   $foo = get-config filter=@filter.xml
+*   $foo = get-config filter=$myfilter
 *
 * INPUTS:
 *   rcxt == runstack context to use
@@ -1865,7 +1865,7 @@ val_value_t *
             *res = ERR_NCX_WRONG_DATATYP;
         }
     } else if (*strval == NCX_AT_CH) {
-        /* this is a NCX_BT_EXTERNAL value
+        /* this is a NCX_BT_EXTERN value
          * find the file with the raw XML data
          * treat this as a source file name which
          * may need to be expanded (e.g., ~/foo.xml)

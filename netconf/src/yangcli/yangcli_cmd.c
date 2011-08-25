@@ -245,6 +245,80 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION check_external_rpc_input
+* 
+* Check for the foo @parms.xml command form
+* 
+* INPUTS:
+*   rpc == RPC to parse CLI for
+*   line == input line to parse, starting with the parms to parse
+*   res == pointer to status output
+*
+* OUTPUTS: 
+*   *res == status
+*        will be ERR_NCX_SKIPPED if not the external input form
+*
+* RETURNS:
+*    pointer to malloced value set or NULL if none created,
+*    may have errors, check *res
+*    == NULL if *res == ERR_NCX_SKIPPED
+*********************************************************************/
+static val_value_t* 
+   check_external_rpc_input (obj_template_t *rpc,
+                             const xmlChar *args,
+                             status_t  *res)
+{
+    obj_template_t   *obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    const xmlChar    *str = args;
+    xmlChar          *sourcefile = NULL;
+    xmlChar          *fname = NULL;
+    val_value_t      *retval = NULL;
+
+    if (obj == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    if (args == NULL) {
+        *res = ERR_NCX_SKIPPED;
+        return NULL;
+    }
+
+    while (*str && xml_isspace(*str)) {
+        str++;
+    }
+    if (*str != '@') {
+        *res = ERR_NCX_SKIPPED;
+        return NULL;
+    }
+
+    /* stopped on the @ char.  Expecting @filespec
+     * this is a NCX_BT_EXTERN value
+     * find the file with the raw XML data
+     * treat this as a source file name which
+     * may need to be expanded (e.g., @~/filespec.xml)
+     */
+    *res = NO_ERR;
+    sourcefile = ncx_get_source_ex(&str[1], FALSE, res);
+    if (*res == NO_ERR && sourcefile != NULL) {
+        fname = ncxmod_find_data_file(sourcefile, TRUE, res);
+        if (fname != NULL && *res == NO_ERR) {
+            retval = mgr_load_extern_file(fname, obj, res);
+        }
+    }
+    if (sourcefile != NULL) {
+        m__free(sourcefile);
+    }
+    if (fname != NULL) {
+        m__free(fname);
+    }
+
+    return retval;
+
+}  /* check_external_rpc_input */
+
+
+/********************************************************************
 * FUNCTION parse_rpc_cli
 * 
 *  Call the cli_parse for an RPC input value set
@@ -274,6 +348,21 @@ static val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
     /* construct an argv array, convert the CLI into a parmset */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (obj) {
+        /* check if this is the special command form
+         *  foo-command @parms.xml
+         */
+        if (args) {
+            *res = NO_ERR;
+            retval = check_external_rpc_input(rpc, args, res);
+            if (*res != ERR_NCX_SKIPPED) {
+                return retval;
+            }
+            if (retval) {
+                val_free_value(retval);
+                retval = NULL;
+            }
+        }
+
         myargv[0] = (char*)xml_strdup( obj_get_name(rpc) );
         if ( myargv[0] ) {
             myargv[1] = (char*)xml_strdup( args );

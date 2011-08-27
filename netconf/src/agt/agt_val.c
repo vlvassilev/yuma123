@@ -4638,7 +4638,7 @@ status_t
     obj = valset->obj;
 
     if (obj_is_cli(obj) || 
-        obj_is_abstract(obj) ||
+        (obj_is_abstract(obj) && !obj_is_root(obj)) ||
         obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
         return NO_ERR;
     }

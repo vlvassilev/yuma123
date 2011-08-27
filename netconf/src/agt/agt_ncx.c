@@ -1998,7 +1998,7 @@ static status_t
             rootval = child;
         }
 
-        if (res == NO_ERR && !needfullcheck) {
+        if (res == NO_ERR && rootval == NULL) {
             if (target == NULL || target->root == NULL) {
                 res = ERR_NCX_OPERATION_FAILED;
                 errstr = child->name;

@@ -268,16 +268,26 @@ static void
         agt_profile->agt_maxburst = VAL_UINT(val);
     }
 
-    /* start choice: get no-startup startup param choice */
+    /* start choice:
+     * cli module will check that only 1 of the following 3
+     * parms are actually entered
+     * start choice 1: get no-startup param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_NOSTARTUP);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_usestartup = FALSE;
     }
 
-    /* start choice: OR get startup param */
+    /* start choice 2: OR get startup param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_startup = VAL_STR(val);
+    }
+
+    /* start choice 3: OR get factory-startup param */
+    val = val_find_child(valset, AGT_CLI_MODULE, 
+                         AGT_CLI_FACTORY_STARTUP);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_factorystartup = TRUE;
     }
 
     /* startup-error param */

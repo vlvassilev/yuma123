@@ -194,6 +194,7 @@ static void
     agt_profile.agt_loglevel = log_get_debug_level();
     agt_profile.agt_has_startup = FALSE;
     agt_profile.agt_usestartup = TRUE;
+    agt_profile.agt_factorystartup = FALSE;
     agt_profile.agt_startup_error = FALSE;
     agt_profile.agt_logappend = FALSE;
     agt_profile.agt_xmlorder = FALSE;
@@ -747,7 +748,11 @@ status_t
     /************* L O A D   R U N N I N G   C O N F I G ***************/
 
     /* load the NV startup config into the running config if it exists */
-    if (agt_profile.agt_usestartup) {
+    if (agt_profile.agt_factorystartup) {
+        /* force the startup to be the factory startup */
+        log_info("\nagt: Startup configuration skipped due "
+                 "to factory-startup CLI option\n");
+    } else if (agt_profile.agt_usestartup) {
         if (LOGDEBUG2) {
             log_debug2("\nAttempting to load running config from startup");
         }
@@ -760,7 +765,10 @@ status_t
                  "to no-startup CLI option\n");
     }
 
-    /**  P H A S E   2   I N I T  ****  N O N - C O N F I G   D A T A  **/
+    /**  P H A S E   2   I N I T  ****  
+     **  add non-config data
+     **  check existing startup config and add factory default
+     ** nodes as needed  */
 
     /* load the nacm access control DM module */
     res = agt_acm_init2();
@@ -882,6 +890,17 @@ status_t
                            TRUE);
         
         log_debug("\n");
+    }
+
+    /* check to see if factory default startup mode is active */
+    if (agt_profile.agt_factorystartup) {
+        cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+        log_info("\nSaving factory config to startup config");
+        res = agt_ncx_cfg_save(cfg, FALSE);
+        if (res != NO_ERR) {
+            return res;
+        }
+        agt_profile.agt_factorystartup = FALSE;
     }
 
     /* allow users to access the configuration databases now */

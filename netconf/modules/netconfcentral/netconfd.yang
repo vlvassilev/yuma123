@@ -21,9 +21,10 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
-    revision 2011-08-23 {
+    revision 2011-08-27 {
        description 
-         "Add --runpath parameter.";
+         "Add --runpath parameter.
+          Add --factory-startup parameter.";
     }
 
     revision 2011-07-20 {
@@ -69,7 +70,20 @@ module netconfd {
 
         leaf no-startup {
           description
-             "If present, do not load the startup config file.";
+             "If present, do not load the startup config file.
+              Use the factory default settings but do not
+              overwrite the NV-storage startup unless it
+              is altered. This option does not delete the startup
+              config file if it exists.";
+          type empty;
+        }
+
+        leaf factory-startup {
+          description
+             "Force the system to use the factory configuration
+              and delete the startup config file if it exists.
+              Force the NV-storage startup to
+              contain the factory default configuration.";
           type empty;
         }
 

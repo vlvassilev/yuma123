@@ -2139,7 +2139,7 @@ static status_t
     status_t       res, retres;
     boolean        done, pathdone, constrained;
 
-    expstr = "path or require-instance keyword";
+    expstr = "path keyword";
     pathdone = FALSE;
     constrained = FALSE;
     res = NO_ERR;
@@ -2246,7 +2246,7 @@ static status_t
             sim->constrained = TRUE;
         } else {
             retres = ERR_NCX_WRONG_TKTYPE;
-            expstr = "path or require-instance statement";
+            expstr = "path statement";
             ncx_mod_exp_err(tkc, mod, retres, expstr);
         }
     }

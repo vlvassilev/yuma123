@@ -3862,19 +3862,26 @@ static status_t
         }
     }
 
-    /* recurse for every child node until leafs are hit */
-    for (chval = val_get_first_child(curval);
-         chval != NULL && retres == NO_ERR;
-         chval = val_get_next_child(chval)) {
+    /* recurse for every child node until leafs are hit
+     * but only if the parent must test did not fail
+     * will check sibling nodes even if some must-test
+     * already failed; this provides complete errors
+     * during validate and load_running_config
+     */
+    if (res == NO_ERR) {
+        for (chval = val_get_first_child(curval);
+             chval != NULL;
+             chval = val_get_next_child(chval)) {
 
-        if (obj_is_root(chval->obj)) {
-            /* do not dive into <config> parameters and
-             * hit database must-stmts by mistake
-             */
-            continue;
+            if (obj_is_root(chval->obj)) {
+                /* do not dive into <config> parameters and
+                 * hit database must-stmts by mistake
+                 */
+                continue;
+            }
+            res = must_stmt_check(scb, msg, root, chval);
+            CHK_EXIT(res, retres);
         }
-        res = must_stmt_check(scb, msg, root, chval);
-        CHK_EXIT(res, retres);
     }
 
     return retres;

@@ -37,81 +37,25 @@ date         init     comment
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include  "agt.h"
-#endif
-
-#ifndef _H_agt_cb
-#include  "agt_cb.h"
-#endif
-
-#ifndef _H_agt_proc
-#include  "agt_proc.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_util
-#include  "agt_util.h"
-#endif
-
-#ifndef _H_cfg
-#include  "cfg.h"
-#endif
-
-#ifndef _H_getcb
-#include  "getcb.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
-#include  "ncxtypes.h"
-#endif
-
-#ifndef _H_rpc
-#include  "rpc.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
-#include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
+#include "procdefs.h"
+#include "agt.h"
+#include "agt_cb.h"
+#include "agt_proc.h"
+#include "agt_rpc.h"
+#include "agt_util.h"
+#include "cfg.h"
+#include "getcb.h"
+#include "log.h"
+#include "ncxmod.h"
+#include "ncxtypes.h"
+#include "rpc.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_util.h"
 
 
 /********************************************************************
@@ -155,7 +99,6 @@ static ncx_module_t         *procmod;
 static val_value_t          *myprocval;
 
 static obj_template_t       *myprocobj;
-
 
 
 /********************************************************************
@@ -268,7 +211,6 @@ static xmlChar *
     return xml_strndup((const xmlChar *)start, valuelen);
     
 } /* make_proc_value */
-
 
 
 /********************************************************************
@@ -460,8 +402,11 @@ static status_t
             /* force a new CPU entry */
             if (cpuval) {
                 res = val_gen_index_chain(cpuobj, cpuval);
-                if (NO_ERR == val_gen_index_chain(cpuobj, cpuval)) {
+                if (res == NO_ERR) {
                     cpuval = NULL;
+                } else {
+                    log_error("\nError:val_gen_index failed (%s)",
+                              get_error_string(res));
                 }
                 /* else empty line in cpu entry, e.g. arm */
             }

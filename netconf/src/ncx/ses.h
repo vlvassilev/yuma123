@@ -538,6 +538,27 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ses_putjstr
+*
+* write JSON safe content string
+* Write a zero-terminated element content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL JSON CHARS ARE CONVERTED TO ESCAPED CHARS
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*   indent == current indent amount
+*
+*********************************************************************/
+extern void
+    ses_putjstr (ses_cb_t *scb,
+                 const xmlChar *str,
+                 int32 indent);
+
+
+/********************************************************************
 * FUNCTION ses_indent
 *
 * Write the proper newline + indentation to the specified session

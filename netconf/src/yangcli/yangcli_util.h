@@ -357,19 +357,19 @@ extern val_value_t *
 
 
 /********************************************************************
-* FUNCTION file_is_text
+* FUNCTION get_file_result_format
 * 
 * Check the filespec string for a file assignment statement
-* to see if it is text or XML
+* to see if it is text, XML, or JSON
 *
 * INPUTS:
 *    filespec == string to check
 *
 * RETURNS:
-*   TRUE if text file, FALSE otherwise
+*   result format enumeration; RF_NONE if some error
 *********************************************************************/
-extern boolean
-    file_is_text (const xmlChar *filespec);
+extern result_format_t
+    get_file_result_format (const xmlChar *filespec);
 
 
 /********************************************************************

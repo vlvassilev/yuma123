@@ -153,127 +153,6 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION write_extern
-*
-* Write an external file to the session
-*
-* INPUTS:
-*   scb == session control block
-*   val == value to write (NCX_BT_EXTERN)
-*
-* RETURNS:
-*   none
-*********************************************************************/
-static void
-    write_extern (ses_cb_t *scb,
-                  const val_value_t *val)
-{
-    FILE               *fil;
-    boolean             done, inxml, xmldone, firstline;
-    int                 ch, lastch;
-
-    if (val->v.fname == NULL) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-
-    fil = fopen((const char *)val->v.fname, "r");
-    if (fil == NULL) {
-        log_error("\nError: open extern var "
-                  "file '%s' failed",
-                  val->v.fname);
-        return;
-    }
-
-    xmldone = FALSE;
-    inxml = FALSE;
-    done = FALSE;
-    firstline = TRUE;
-    lastch = 0;
-
-    while (!done) {
-        ch = fgetc(fil);
-
-        if (ch == EOF) {
-            if (lastch && !inxml) {
-                ses_putchar(scb, (uint32)lastch);
-            }
-            fclose(fil);
-            done = TRUE;
-            continue;
-        }
-
-        if (firstline) {
-            /* do not match the first char in the file */
-            if (lastch && !inxml) {
-                if (lastch == '<' && ch == '?') {
-                    inxml = TRUE;
-                } else {
-                    /* done with xml checking */
-                    xmldone = TRUE;
-                    firstline = FALSE;
-                }
-            } else if (lastch && ch == '\n') {
-                /* done with xml checking */
-                firstline = FALSE;
-                xmldone = TRUE;
-            } else if (!xmldone && inxml) {
-                /* look for xml declaration and remove it */
-                if (lastch == '?' && ch == '>') {
-                    xmldone = TRUE;
-                }
-            }
-
-            /* first time xmldone is true skip this */
-            if (xmldone && !inxml) {
-                if (lastch) {
-                    ses_putchar(scb, (uint32)lastch);
-                }
-            }
-
-            /* setup 3rd loop to print char after '?>' */
-            if (xmldone && inxml) {
-                if (ch != '>') {
-                    inxml = FALSE;
-                }
-            }
-        } else {
-            if (lastch) {
-                ses_putchar(scb, (uint32)lastch);
-            }
-        }
-
-        lastch = ch;
-    }
-
-    
-}  /* write_extern */
-
-
-/********************************************************************
-* FUNCTION write_intern
-*
-* Write an internal buffer to the session
-*
-* INPUTS:
-*   scb == session control block
-*   val == value to write (NCX_BT_INTERN)
-*
-* RETURNS:
-*   none
-*********************************************************************/
-static void
-    write_intern (ses_cb_t *scb,
-                  const val_value_t *val)
-{
-    if (val->v.intbuff) {
-        ses_putstr(scb, val->v.intbuff);
-    }
-    
-}  /* write_intern */
-
-
-/********************************************************************
 * FUNCTION write_xmlns_decl
 *
 * Write an xmlns declaration
@@ -798,115 +677,53 @@ static void
 {
     const ncx_lmem_t   *listmem;
     const xmlChar      *pfix;
-    typ_def_t          *realtypdef;
-    val_value_t        *realval;
-    val_value_t        *v_val, *chval;
-    val_value_t        *useval;
+    val_value_t        *chval, *out;
     xmlChar            *binbuff;
-    xml_msg_authfn_t    cbfn;
     uint32              len;
-    status_t            res;
-    boolean             first, wspace, xneeded, acmtest;
-    ncx_btype_t         btyp, listbtyp;
+    status_t            res = NO_ERR;
+    boolean             first, wspace, xneeded, malloced = FALSE;
+    ncx_btype_t         listbtyp;
     xmlChar             buff[NCX_MAX_NUMLEN];
 
+    out = val_get_value(scb, msg, val, testfn, acmcheck, &malloced, &res);
 
-    /* check the user filter callback function */
-    if (testfn) {
-        if (!(*testfn)(msg->withdef, TRUE, val)) {
-            return;   /* skip this entry */
-        }
-    }
-
-    if (acmcheck && msg->acm_cbfn) {
-        cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
-        acmtest = (*cbfn)(msg, scb->username, val);
-        if (!acmtest) {
-            return;
-        }
-    }
-                                   
-    /* check if this is an external file to send */
-    if (val->btyp == NCX_BT_EXTERN) {
-        write_extern(scb, val);
-        return;
-    }
-
-    /* check if this is an internal buffer to send */
-    if (val->btyp == NCX_BT_INTERN) {
-        write_intern(scb, val);
-        return;
-    }
-
-    v_val = NULL;
-    realval = NULL;
-
-    if (val_is_virtual(val)) {
-        v_val = val_get_virtual_value(scb, val, &res);
-        if (!v_val) {
-            if (res != ERR_NCX_SKIPPED) {
-                /*** handle inline error ***/
-            }
-            return;
-        }
-    }
-
-    useval = (v_val) ? v_val : val;
-
-    btyp = useval->btyp;
-
-    if (btyp == NCX_BT_LEAFREF) {
-        realtypdef = typ_get_xref_typdef(val->typdef);
-        if (realtypdef) {
+    if (res != NO_ERR) {
+        if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
-            btyp = typ_get_basetype(realtypdef);
+        }
+        if (out && malloced) {
+            val_free_value(out);
+        }
+        /* FIXME: ignore error return */
+        return;
+    } 
 
-            switch (btyp) {
-            case NCX_BT_STRING:
-            case NCX_BT_BINARY:
-            case NCX_BT_BOOLEAN:
-            case NCX_BT_ENUM:
-                break;
-            default:
-                realval = val_make_simval(realtypdef,
-                                          val_get_nsid(useval),
-                                          useval->name,
-                                          VAL_STR(useval),
-                                          &res);
-                if (realval) {
-                    val_move_fields_for_xml(val, 
-                                            realval,
-                                            msg->acm_cbfn == NULL);
-                    useval = realval;
-                } else {
-                    log_error("\nError: write leafref '%s' failed (%s)",
-                              useval->name,
-                              get_error_string(res));
-                }
-            }
+    switch (out->btyp) {
+    case NCX_BT_EXTERN:
+        val_write_extern(scb, out);
+        break;
+    case NCX_BT_INTERN:
+        val_write_intern(scb, out);
+        break;
+    case NCX_BT_ENUM:
+        if (VAL_ENUM_NAME(out)) {
+            ses_putstr(scb, VAL_ENUM_NAME(out));
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
         }
-    }
-
-    switch (btyp) {
-    case NCX_BT_ENUM:
-        if (useval->v.enu.name) {
-            ses_putstr(scb, useval->v.enu.name);
-        }
         break;
     case NCX_BT_EMPTY:
-        if (useval->v.boo) {
+        if (out->v.boo) {
             xml_wr_empty_elem(scb,
                               msg,
-                              val_get_parent_nsid(useval),
-                              useval->nsid,
-                              useval->name,
+                              val_get_parent_nsid(out),
+                              out->nsid,
+                              out->name,
                               -1);
         }
         break;
     case NCX_BT_BOOLEAN:
-        if (useval->v.boo) {
+        if (out->v.boo) {
             ses_putcstr(scb, NCX_EL_TRUE, indent);
         } else {
             ses_putcstr(scb, NCX_EL_FALSE, indent);
@@ -922,10 +739,7 @@ static void
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-        res = ncx_sprintf_num(buff, 
-                              &useval->v.num, 
-                              btyp, 
-                              &len);
+        res = ncx_sprintf_num(buff, &out->v.num, out->btyp, &len);
         if (res == NO_ERR) {
             ses_putstr(scb, buff); 
         } else {
@@ -939,11 +753,11 @@ static void
          * printed all the required xmlns attributes
          * so just print the string value with prefixes and all
          */
-        if (VAL_STR(useval)) {
-            if (!fit_on_line(scb, useval) && (indent>0)) {
+        if (VAL_STR(out)) {
+            if (!fit_on_line(scb, out) && (indent > 0)) {
                 ses_indent(scb, indent);
             }
-            ses_putcstr(scb, VAL_STR(useval), indent);
+            ses_putcstr(scb, VAL_STR(out), indent);
         }
         break;
     case NCX_BT_IDREF:
@@ -951,29 +765,27 @@ static void
          * because the xneeded node is being ignored here
          */
         pfix = xml_msg_get_prefix(msg,
-                                  (useval->parent) 
-                                  ? useval->parent->nsid : 0,
-                                  useval->v.idref.nsid, 
-                                  useval, 
+                                  (out->parent) 
+                                  ? out->parent->nsid : 0,
+                                  out->v.idref.nsid, 
+                                  out, 
                                   &xneeded);
         if (pfix) {
             /* need the prefix all the time on XML content */
             ses_putstr(scb, pfix);
             ses_putchar(scb, XMLNS_SEPCH);
         }
-        ses_putstr(scb, useval->v.idref.name);
+        ses_putstr(scb, out->v.idref.name);
         break;
     case NCX_BT_BINARY:
-        if (useval->v.binary.ustr) {
-            res = val_sprintf_simval_nc(NULL, useval, &len);
+        if (out->v.binary.ustr) {
+            res = val_sprintf_simval_nc(NULL, out, &len);
             if (res == NO_ERR) {
                 binbuff = m__getMem(len);
                 if (!binbuff) {
                     res = ERR_INTERNAL_MEM;
                 } else {
-                    res = val_sprintf_simval_nc(binbuff, 
-                                                useval, 
-                                                &len); 
+                    res = val_sprintf_simval_nc(binbuff, out, &len); 
                     if (res == NO_ERR) {
                         ses_putcstr(scb, binbuff, indent);
                     }
@@ -984,10 +796,10 @@ static void
         break;
     case NCX_BT_BITS:
     case NCX_BT_SLIST:
-        listbtyp = useval->v.list.btyp;
+        listbtyp = out->v.list.btyp;
         first = TRUE;
         for (listmem = (const ncx_lmem_t *)
-                 dlq_firstEntry(&useval->v.list.memQ);
+                 dlq_firstEntry(&out->v.list.memQ);
              listmem != NULL;
              listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
 
@@ -1004,11 +816,9 @@ static void
                  */
                 if (!len) {
                     if (!first) {
-                        ses_putstr(scb, 
-                                   (const xmlChar *)" \"\"");
+                        ses_putstr(scb, (const xmlChar *)" \"\"");
                     } else {
-                        ses_putstr(scb, 
-                                   (const xmlChar *)"\"\"");
+                        ses_putstr(scb, (const xmlChar *)"\"\"");
                         first = FALSE;
                     }
                     continue;
@@ -1068,7 +878,7 @@ static void
     case NCX_BT_LIST:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
-        for (chval = val_get_first_child(useval);
+        for (chval = val_get_first_child(out);
              chval != NULL;
              chval = val_get_next_child(chval)) {
 
@@ -1084,8 +894,8 @@ static void
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (realval) {
-        val_free_value(realval);
+    if (malloced && out) {
+        val_free_value(out);
     }
 
 }  /* write_check_val */
@@ -1747,14 +1557,9 @@ void
                            int32  indent,
                            val_nodetest_fn_t testfn)
 {
-    val_value_t       *vir;
     val_value_t       *out;
-    val_value_t       *realval;
-    typ_def_t         *realtypdef;
-    xml_msg_authfn_t   cbfn;
     status_t           res;
-    boolean            acmtest, isdefault;
-    ncx_btype_t        btyp;
+    boolean            isdefault, malloced;
 
 #ifdef DEBUG
     if (!scb || !msg || !val) {
@@ -1763,92 +1568,34 @@ void
     }
 #endif
 
-    vir = NULL;
-    realval = NULL;
-
-    if (val_is_virtual(val)) {
-        if (testfn) {
-            if (!(*testfn)(msg->withdef, FALSE, val)) {
-                return;
-            }
+    malloced = FALSE;
+    res = NO_ERR;
+    out = val_get_value(scb, msg, val, testfn, TRUE, &malloced, &res);
+    if (res != NO_ERR) {
+        if (res == ERR_NCX_SKIPPED) {
+            res = NO_ERR;
         }
-
-        vir = val_get_virtual_value(scb, val, &res);
-        if (!vir) {
-            if (res != ERR_NCX_SKIPPED) {
-                /*** handle inline error ***/
-            }
-            return;
+        if (out && malloced) {
+            val_free_value(out);
         }
-        out = vir;
-    } else {
-        out = val;
-    }
-
-    /* check the user filter callback function */
-    if (testfn) {
-        if (!(*testfn)(msg->withdef, TRUE, out)) {
-            return;   /* skip this entry: filtered */
-        }
-    }
-
-    if (msg->acm_cbfn) {
-        cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
-        acmtest = (*cbfn)(msg, scb->username, val);
-        if (!acmtest) {
-            return;  /* skip this entry: access-denied */
-        }
+        /* FIXME: error exit ignored */
+        return;
     }
 
     isdefault = FALSE;
     if (typ_is_simple(out->btyp)) {
-        isdefault = val_is_default(val);
-    }
+        isdefault = val_is_default(out);
+   }
 
-    if (out->btyp == NCX_BT_LEAFREF) {
-        realtypdef = typ_get_xref_typdef(out->typdef);
-        if (realtypdef) {
-            res = NO_ERR;
-            btyp = typ_get_basetype(realtypdef);
-
-            switch (btyp) {
-            case NCX_BT_STRING:
-            case NCX_BT_BINARY:
-            case NCX_BT_BOOLEAN:
-            case NCX_BT_ENUM:
-                break;
-            default:
-                realval = val_make_simval(realtypdef,
-                                          val_get_nsid(out),
-                                          out->name,
-                                          VAL_STR(out),
-                                          &res);
-                if (realval) {
-                    val_move_fields_for_xml(val, 
-                                            realval,
-                                            msg->acm_cbfn == NULL);
-                    out = realval;
-                } else {
-                    log_error("\nError: write leafref '%s' failed (%s)",
-                              out->name,
-                              get_error_string(res));
-                }
-            }
-        } else {
-            SET_ERROR(ERR_INTERNAL_VAL);
-        }
-    }
-
-    /* check if this is a false (not present) flag */
-    if (out->btyp==NCX_BT_EMPTY && !VAL_BOOL(out)) {
-        if (realval) {
-            val_free_value(realval);
-        }
-        return;
-    }
-
-    /* write the value node contents or an empty node if none */
-    if (out->btyp == NCX_BT_IDREF) {
+    /* check if this is an external file to send */
+    if (out->btyp == NCX_BT_EXTERN) {
+        val_write_extern(scb, out);
+    } else if (out->btyp == NCX_BT_INTERN) {
+        val_write_intern(scb, out);
+    } else if (out->btyp==NCX_BT_EMPTY && !VAL_BOOL(out)) {
+        /* this is a false (not present) flag */
+        ;
+    } else if (out->btyp == NCX_BT_IDREF) {
         /* write a complete QName element */
         xml_wr_qname_elem(scb, 
                           msg, 
@@ -1890,8 +1637,8 @@ void
                        indent);
     }
 
-    if (realval) {
-        val_free_value(realval);
+    if (malloced && out) {
+        val_free_value(out);
     }
 
 }  /* xml_wr_full_check_val */

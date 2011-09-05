@@ -179,6 +179,8 @@ static status_t
     case VAR_TYP_GLOBAL:
     case VAR_TYP_LOCAL:
     case VAR_TYP_SESSION:
+    case VAR_TYP_SYSTEM:
+    case VAR_TYP_CONFIG:
         if (xml_strcmp(varname, val->name)) {
             doubleindent = 2;
 
@@ -187,11 +189,16 @@ static status_t
             if (val->obj && obj_is_data_db(val->obj)) {
                 res = obj_gen_object_id(val->obj, &objbuff);
                 if (res != NO_ERR) {
-                    (*logfn)("[no object id]");
+                    (*logfn)("[no object id]\n   ");
                 } else {
-                    (*logfn)("[%s]", objbuff);
+                    (*logfn)("[%s]\n   ", objbuff);
                     m__free(objbuff);
                 }
+            }
+        } else if (server_cb->display_mode == NCX_DISPLAY_MODE_JSON) {
+            (*logfn)("\n   %s: ", varname);
+            if (!typ_is_simple(val->btyp)) {
+                (*logfn)("\n");
             }
         }
         break;

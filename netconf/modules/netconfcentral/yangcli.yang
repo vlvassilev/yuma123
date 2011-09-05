@@ -50,6 +50,10 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2011-09-05 {
+       description 
+         "Add 'json' to --display-mode enumerations.";
+    }
 
     revision 2011-08-06 {
        description 
@@ -720,6 +724,10 @@ module yangcli {
              description 
                 "XML format, but no namespace (xmlns) attributes 
                  will be generated.";
+           }
+           enum json {
+             description 
+                "JSON format.";
            }
         }
         default plain;

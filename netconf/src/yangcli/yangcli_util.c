@@ -910,19 +910,19 @@ val_value_t *
 
 
 /********************************************************************
-* FUNCTION file_is_text
+* FUNCTION get_file_result_format
 * 
 * Check the filespec string for a file assignment statement
-* to see if it is text or XML
+* to see if it is text, XML, or JSON
 *
 * INPUTS:
 *    filespec == string to check
 *
 * RETURNS:
-*   TRUE if text file, FALSE otherwise
+*   result format enumeration; RF_NONE if some error
 *********************************************************************/
-boolean
-    file_is_text (const xmlChar *filespec)
+result_format_t
+    get_file_result_format (const xmlChar *filespec)
 {
     const xmlChar *teststr;
     uint32         len;
@@ -930,13 +930,13 @@ boolean
 #ifdef DEBUG
     if (!filespec) {
         SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
+        return RF_NONE;
     }
 #endif
 
     len = xml_strlen(filespec);
     if (len < 5) {
-        return FALSE;
+        return RF_TEXT;
     }
 
     teststr = &filespec[len-1];
@@ -946,30 +946,38 @@ boolean
     }
 
     if (teststr == filespec) {
-        return FALSE;
+        return RF_TEXT;
     }
 
     teststr++;
 
+    if (!xml_strcmp(teststr, NCX_EL_XML)) {
+        return RF_XML;
+    }
+
+    if (!xml_strcmp(teststr, NCX_EL_JSON)) {
+        return RF_JSON;
+    }
+
     if (!xml_strcmp(teststr, NCX_EL_YANG)) {
-        return TRUE;
+        return RF_TEXT;
     }
 
     if (!xml_strcmp(teststr, NCX_EL_TXT)) {
-        return TRUE;
+        return RF_TEXT;
     }
 
     if (!xml_strcmp(teststr, NCX_EL_TEXT)) {
-        return TRUE;
+        return RF_TEXT;
     }
 
     if (!xml_strcmp(teststr, NCX_EL_LOG)) {
-        return TRUE;
+        return RF_TEXT;
     }
 
-    return FALSE;
+    return RF_TEXT;  // default to text instead of error!
 
-}  /* file_is_text */
+}  /* get_file_result_format */
 
 
 /********************************************************************

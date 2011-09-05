@@ -315,7 +315,8 @@ typedef struct modptr_t_ {
 typedef enum result_format_t {
     RF_NONE,
     RF_TEXT,
-    RF_XML
+    RF_XML,
+    RF_JSON
 } result_format_t;
 
 

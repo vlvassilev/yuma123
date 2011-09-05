@@ -751,7 +751,7 @@ void
     }
 
     /* make sure the ncxserver loop does not try
-     * to read from this file desciptor again
+     * to read from this file descriptor again
      */
     agt_ncxserver_clear_fd(scb->fd);
 

@@ -55,149 +55,43 @@ date         init     comment
 
 #define _C_main 1
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_conf
 #include "conf.h"
-#endif
-
-#ifndef _H_help
 #include "help.h"
-#endif
-
-#ifndef _H_log
+#include "json_wr.h"
 #include "log.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_hello
 #include "mgr_hello.h"
-#endif
-
-#ifndef _H_mgr_io
 #include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_not
 #include "mgr_not.h"
-#endif
-
-#ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncx_str
 #include "ncx_str.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
 #include "xml_wr.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
-#endif
-
-#ifndef _H_yangcli_autoload
 #include "yangcli_autoload.h"
-#endif
-
-#ifndef _H_yangcli_autolock
 #include "yangcli_autolock.h"
-#endif
-
-#ifndef _H_yangcli_save
 #include "yangcli_save.h"
-#endif
-
-#ifndef _H_yangcli_tab
 #include "yangcli_tab.h"
-#endif
-
-#ifndef _H_yangcli_util
 #include "yangcli_util.h"
-#endif
 
 
 /********************************************************************
@@ -930,8 +824,8 @@ static status_t
             display_mode = dmode;
             server_cb->display_mode = dmode;
         } else {
-            log_error("\nError: value must be 'plain', 'prefix' "
-                      "'xml' or 'xml-nons'");
+            log_error("\nError: value must be 'plain', 'prefix', "
+                      "'json, 'xml', or 'xml-nons'");
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (!xml_strcmp(configval->name, YANGCLI_ECHO_REPLIES)) {
@@ -1276,7 +1170,10 @@ static status_t
     }
     
     if (resultval) {
-        if (file_is_text(server_cb->result_filename)) {
+        result_format_t rf = 
+            get_file_result_format(server_cb->result_filename);
+        switch (rf) {
+        case RF_TEXT:
             /* output in text format to the specified file */
             res = log_alt_open((const char *)
                                server_cb->result_filename);
@@ -1295,22 +1192,29 @@ static status_t
                                    FALSE);   /* configonly */
                 log_alt_close();
             }
-        } else {
+            break;
+        case RF_XML:
             /* output in XML format to the specified file */
             xml_init_attrs(&attrs);
             res = xml_wr_file(server_cb->result_filename,
-                              resultval,
-                              &attrs, 
-                              XMLMODE, 
+                              resultval, &attrs, XMLMODE, 
                               server_cb->use_xmlheader,
                               (server_cb->display_mode 
                                == NCX_DISPLAY_MODE_XML_NONS) 
-                              ? FALSE : TRUE,
-                              0,
+                              ? FALSE : TRUE, 0,
                               server_cb->defindent);
             xml_clean_attrs(&attrs);
+            break;
+        case RF_JSON:
+            /* output in JSON format to the specified file */
+            res = json_wr_file(server_cb->result_filename,
+                               resultval, 0, server_cb->defindent);
+            break;
+        case RF_NONE:
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
         }
-    } else {
+    } else if (resultstr) {
         fil = fopen((const char *)server_cb->result_filename, "w");
         if (fil == NULL) {
             log_error("\nError: assignment file '%s' could "
@@ -1343,6 +1247,8 @@ static status_t
                 res = errno_to_status();
             }
         }
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     clear_result(server_cb);

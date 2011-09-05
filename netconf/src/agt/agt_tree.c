@@ -38,11 +38,12 @@
          If not, the filter node and all its children are removed
 
        - If access control is requested, then the scb->username
-         will be checked against at 3 levels:
-           - (owner, application)
-           - (owner, application, parmset)
-           - (owner, application, parmset, parm)
-    
+         will be checked against the NACM configuration.
+          - For read operations, an access-denied results in a
+            skipped node.
+          - For notifications, an access-denied results in the
+            entire notification being skipped.
+
        - Each ncx_filptr_t node indicates 1 matching 
          instance at that level.  It should be possible
          to optimize away all the ncx_filptr_t records

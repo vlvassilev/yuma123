@@ -3354,6 +3354,234 @@ void
 }  /* val_check_delete_resnode */
 
 
+/********************************************************************
+* FUNCTION val_write_extern
+*
+* Write an external file to the session
+*
+* INPUTS:
+*   scb == session control block
+*   val == value to write (NCX_BT_EXTERN)
+*
+* RETURNS:
+*   none
+*********************************************************************/
+void
+    val_write_extern (ses_cb_t *scb,
+                      const val_value_t *val)
+{
+    FILE               *fil;
+    boolean             done, inxml, xmldone, firstline;
+    int                 ch, lastch;
+
+    if (val->v.fname == NULL) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    fil = fopen((const char *)val->v.fname, "r");
+    if (fil == NULL) {
+        log_error("\nError: open extern var "
+                  "file '%s' failed",
+                  val->v.fname);
+        return;
+    }
+
+    xmldone = FALSE;
+    inxml = FALSE;
+    done = FALSE;
+    firstline = TRUE;
+    lastch = 0;
+
+    while (!done) {
+        ch = fgetc(fil);
+
+        if (ch == EOF) {
+            if (lastch && !inxml) {
+                ses_putchar(scb, (uint32)lastch);
+            }
+            fclose(fil);
+            done = TRUE;
+            continue;
+        }
+
+        if (firstline) {
+            /* do not match the first char in the file */
+            if (lastch && !inxml) {
+                if (lastch == '<' && ch == '?') {
+                    inxml = TRUE;
+                } else {
+                    /* done with xml checking */
+                    xmldone = TRUE;
+                    firstline = FALSE;
+                }
+            } else if (lastch && ch == '\n') {
+                /* done with xml checking */
+                firstline = FALSE;
+                xmldone = TRUE;
+            } else if (!xmldone && inxml) {
+                /* look for xml declaration and remove it */
+                if (lastch == '?' && ch == '>') {
+                    xmldone = TRUE;
+                }
+            }
+
+            /* first time xmldone is true skip this */
+            if (xmldone && !inxml) {
+                if (lastch) {
+                    ses_putchar(scb, (uint32)lastch);
+                }
+            }
+
+            /* setup 3rd loop to print char after '?>' */
+            if (xmldone && inxml) {
+                if (ch != '>') {
+                    inxml = FALSE;
+                }
+            }
+        } else {
+            if (lastch) {
+                ses_putchar(scb, (uint32)lastch);
+            }
+        }
+
+        lastch = ch;
+    }
+}  /* val_write_extern */
+
+
+/********************************************************************
+* FUNCTION val_write_intern
+*
+* Write an internal buffer to the session
+*
+* INPUTS:
+*   scb == session control block
+*   val == value to write (NCX_BT_INTERN)
+*
+* RETURNS:
+*   none
+*********************************************************************/
+void
+    val_write_intern (ses_cb_t *scb,
+                      const val_value_t *val)
+{
+    if (val->v.intbuff) {
+        ses_putstr(scb, val->v.intbuff);
+    }
+    
+}  /* val_write_intern */
+
+
+/********************************************************************
+* FUNCTION val_get_value
+* 
+* Get the value node for output to a session
+* Checks access control if enabled
+* Checks filtering via testfn if non-NULL
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write (node from system)
+*   acmcheck == TRUE if NACM should be checked; FALSE to skip
+*   testcb == callback function to use, NULL if not used
+*   malloced == address of return malloced flag
+*   res == address of return status
+*
+* OUTPUTS:
+*   *malloced == TRUE if the 
+*   *res == return status
+*
+* RETURNS:
+*   value node to use; this is malloced if *malloced is TRUE
+*   NULL if some error; check *res; 
+*   !!!! check for ERR_NCX_SKIPPED !!!
+*********************************************************************/
+val_value_t *
+    val_get_value (ses_cb_t *scb,
+                   xml_msg_hdr_t *msg,
+                   val_value_t *val,
+                   val_nodetest_fn_t testfn,
+                   boolean acmcheck,
+                   boolean *malloced,
+                   status_t *res)
+{
+    val_value_t       *realval = NULL;
+    val_value_t       *v_val = NULL;
+    val_value_t       *useval;
+
+#ifdef DEBUG
+    if (!scb || !msg || !val || !malloced || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *malloced = FALSE;
+
+    /* check the user filter callback function */
+    if (testfn) {
+        if (!(*testfn)(msg->withdef, TRUE, val)) {
+            *res = ERR_NCX_SKIPPED;
+            return NULL;
+        }
+    }
+
+    if (acmcheck && msg->acm_cbfn) {
+        xml_msg_authfn_t cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
+        boolean acmtest = (*cbfn)(msg, scb->username, val);
+        if (!acmtest) {
+            *res = ERR_NCX_SKIPPED;
+            return NULL;
+        }
+    }
+                                   
+    if (val_is_virtual(val)) {
+        v_val = val_get_virtual_value(scb, val, res);
+        if (!v_val) {
+            return NULL;
+        }
+    }
+
+    useval = (v_val) ? v_val : val;
+
+    if (useval->btyp == NCX_BT_LEAFREF) {
+        typ_def_t *realtypdef = typ_get_xref_typdef(val->typdef);
+        if (realtypdef) {
+            switch (typ_get_basetype(realtypdef)) {
+            case NCX_BT_STRING:
+            case NCX_BT_BINARY:
+            case NCX_BT_BOOLEAN:
+            case NCX_BT_ENUM:
+                break;
+            default:
+                realval = val_make_simval(realtypdef,
+                                          val_get_nsid(useval),
+                                          useval->name,
+                                          VAL_STR(useval),
+                                          res);
+                if (realval) {
+                    *malloced = TRUE;
+                    val_move_fields_for_xml(val, 
+                                            realval,
+                                            msg->acm_cbfn == NULL);
+                    return realval;
+                } else {
+                    return NULL;
+                }
+            }
+        } else {
+            *res = SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
+    }
+
+    return useval;
+
+}  /* val_get_value */
+
+
 /* END file val_util.c */
 
 

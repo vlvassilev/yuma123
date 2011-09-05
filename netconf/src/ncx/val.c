@@ -61,6 +61,10 @@ date         init     comment
 #include "getcb.h"
 #endif
 
+#ifndef _H_json_wr
+#include "json_wr.h"
+#endif
+
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -3839,6 +3843,25 @@ void
                                      startindent,
                                      indent_amount,
                                      NULL);
+        if (res != NO_ERR) {
+            log_error("\nError: dump value '%s' to XML file failed (%s)",
+                      val->name, get_error_string(res));
+        }
+        return;
+    } else if (display_mode == NCX_DISPLAY_MODE_JSON) {
+        outputfile = log_get_logfile();
+        if (!outputfile) {
+            outputfile = stdout;
+        }
+        res = json_wr_check_open_file(outputfile,
+                                      val,
+                                      startindent,
+                                      indent_amount,
+                                      NULL);
+        if (res != NO_ERR) {
+            log_error("\nError: dump value '%s' to JSON file failed (%s)",
+                      val->name, get_error_string(res));
+        }
         return;
     }
 
@@ -4096,8 +4119,8 @@ void
         break;
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
+    case NCX_BT_CHOICE:   // should not happen
+    case NCX_BT_CASE:    // should not happen
         (*dumpfn)("{");
         for (chval = (val_value_t *)dlq_firstEntry(&val->v.childQ);
              chval != NULL;

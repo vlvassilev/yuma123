@@ -912,6 +912,75 @@ extern void
 extern void
     val_check_delete_resnode (val_value_t *curval);
 
+
+/********************************************************************
+* FUNCTION val_write_extern
+*
+* Write an external file to the session
+*
+* INPUTS:
+*   scb == session control block
+*   val == value to write (NCX_BT_EXTERN)
+*
+* RETURNS:
+*   none
+*********************************************************************/
+extern void
+    val_write_extern (ses_cb_t *scb,
+                      const val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_write_intern
+*
+* Write an internal buffer to the session
+*
+* INPUTS:
+*   scb == session control block
+*   val == value to write (NCX_BT_INTERN)
+*
+* RETURNS:
+*   none
+*********************************************************************/
+extern void
+    val_write_intern (ses_cb_t *scb,
+                      const val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_get_value
+* 
+* Get the value node for output to a session
+* Checks access control if enabled
+* Checks filtering via testfn if non-NULL
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write (node from system)
+*   acmcheck == TRUE if NACM should be checked; FALSE to skip
+*   testcb == callback function to use, NULL if not used
+*   malloced == address of return malloced flag
+*   res == address of return status
+*
+* OUTPUTS:
+*   *malloced == TRUE if the 
+*   *res == return status
+*
+* RETURNS:
+*   value node to use; this is malloced if *malloced is TRUE
+*   NULL if some error; check *res; 
+*   !!!! check for ERR_NCX_SKIPPED !!!
+*********************************************************************/
+extern val_value_t *
+    val_get_value (ses_cb_t *scb,
+                   xml_msg_hdr_t *msg,
+                   val_value_t *val,
+                   val_nodetest_fn_t testfn,
+                   boolean acmtest,
+                   boolean *malloced,
+                   status_t *res);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

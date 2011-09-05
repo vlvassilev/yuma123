@@ -1325,10 +1325,6 @@ void
     ses_putcchar (ses_cb_t *scb,
                   uint32    ch)
 {
-    int32  indent;
-
-    indent = ses_indent_count(scb);
-
     if (ch) {
         if (ch == '<') {
             ses_putstr(scb, LTSTR);
@@ -1339,6 +1335,7 @@ void
         } else if ((scb->mode == SES_MODE_XMLDOC
                     || scb->mode == SES_MODE_TEXT) && 
                    ch == '\n') {
+            int32 indent = ses_indent_count(scb);
             if (indent < 0) {
                 ses_putchar(scb, ch);
             } else {
@@ -1406,6 +1403,69 @@ void
 
 
 /********************************************************************
+* FUNCTION ses_putjstr
+*
+* write JSON safe content string
+* Write a zero-terminated element content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL JSON CHARS ARE CONVERTED TO ESCAPED CHARS
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*   indent == current indent amount
+*
+*********************************************************************/
+void
+    ses_putjstr (ses_cb_t *scb,
+                 const xmlChar *str,
+                 int32 indent)
+{
+    ses_indent(scb, indent);
+    while (*str) {
+        switch (*str) {
+        case '"':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, '"');
+            break;
+        case '\\':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, '\\');
+            break;
+        case '/':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, '/');
+            break;
+        case '\b':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, 'b');
+            break;
+        case '\f':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, 'f');
+            break;
+        case '\n':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, 'n');
+            break;
+        case '\r':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, 'r');
+            break;
+        case '\t':
+            ses_putchar(scb, '\\');
+            ses_putchar(scb, 't');
+            break;
+        default:
+            ses_putchar(scb, *str);
+        }
+        ++str;
+    }
+}  /* ses_putjstr */
+
+
+/********************************************************************
 * FUNCTION ses_indent
 *
 * Write the proper newline + indentation to the specified session
@@ -1427,12 +1487,13 @@ void
 {
     int32 i;
 
+    if (indent < 0) {
+        return;
+    }
+
     /* set limit on indentation in case of bug */
     indent = min(indent, 255);
-
-    if (indent >= 0) {
-        ses_putchar(scb, '\n');
-    }
+    ses_putchar(scb, '\n');
     for (i=0; i<indent; i++) {
         ses_putchar(scb, ' ');
     }

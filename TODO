@@ -14,13 +14,7 @@ They should be added to the bug tracker.
    -- ietf validation mode not supported
    -- YANG to xml2rfc not supported
    -- XSD translation:  
-     --'minOccurs not allowed' bug reported by 
-       Martin Bjorklund, 2008-11-20.
-     -- anyxml not supported
    -- HTML generation:
-      -- when-stmt may not be fully supported
-      -- refine-stmt not supported
-      -- deviation-stmt not supported
       -- JQuery menu not supported
    -- SIL code generation not done:
      -- RPC output
@@ -38,9 +32,6 @@ They should be added to the bug tracker.
         parms for this functionality is not done
      -- when-stmt auto-gen code is not done
   -- yangcli to-do:
-     -- fill /a gets the first namespace that matches
-        because none is specified; should print warning
-        like for the command name
      -- replace libtecla with readline
      -- command completion for more data types
      -- command completion based on mirror of database
@@ -72,9 +63,7 @@ They should be added to the bug tracker.
     -- searching for SILL callback handlers is done self-or-ancestor,
        it should be done self-or-descendant, then ancestor
   -- server optimizations not done:
-    -- NACM cache per-msg, not more persistent
-    -- virtual node caching
-    -- mechanisms to bypass must-stmt and when-stmt evaluation
+    -- mechanisms to optimize must-stmt and when-stmt evaluation
        during validation
     -- save to NVstore:
       -- user hook to override output to XML file

@@ -219,7 +219,10 @@ static status_t
             }
         }
     } else {
-        val_value_t *chval, *lastch = NULL, *nextch = NULL;
+        val_value_t *chval;
+        val_value_t *lastch = NULL;
+        val_value_t *nextch = NULL;
+
         int32 indent = (startindent < 0) ? -1 : 
             startindent + ses_indent_count(scb);
 
@@ -284,11 +287,13 @@ static status_t
             }
         }
 
-        ses_indent(scb, indent);
+        if (!obj_is_leafy(val->obj)) {
+            ses_indent(scb, indent);
+        }
         ses_putchar(scb, '}');
 
         if (!justone) {
-            val_value_t *peeknext = val_get_next_child(val);
+            val_value_t *peeknext = val_get_next_child(val);            
             if (!peeknext || xml_strcmp(val->name, peeknext->name)) {
                 ses_putchar(scb, ']');
             }

@@ -287,9 +287,7 @@ static status_t
             }
         }
 
-        if (!obj_is_leafy(val->obj)) {
-            ses_indent(scb, indent);
-        }
+        ses_indent(scb, indent);
         ses_putchar(scb, '}');
 
         if (!justone) {

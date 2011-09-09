@@ -34,117 +34,35 @@ date         init     comment
 #include <dlfcn.h>
 #endif
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_acm
 #include "agt_acm.h"
-#endif
-
-#ifndef _H_agt_cap
 #include "agt_cap.h"
-#endif
-
-#ifndef _H_agt_cb
 #include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_cli
 #include "agt_cli.h"
-#endif
-
-#ifndef _H_agt_connect
 #include "agt_connect.h"
-#endif
-
-#ifndef _H_agt_hello
 #include "agt_hello.h"
-#endif
-
-#ifndef _H_agt_if
 #include "agt_if.h"
-#endif
-
-#ifndef _H_agt_ncx
 #include "agt_ncx.h"
-#endif
-
-#ifndef _H_agt_not
 #include "agt_not.h"
-#endif
-
-#ifndef _H_agt_plock
 #include "agt_plock.h"
-#endif
-
-#ifndef _H_agt_proc
 #include "agt_proc.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_ses
 #include "agt_ses.h"
-#endif
-
-#ifndef _H_agt_signal
 #include "agt_signal.h"
-#endif
-
-#ifndef _H_agt_state
 #include "agt_state.h"
-#endif
-
-#ifndef _H_agt_sys
 #include "agt_sys.h"
-#endif
-
-#ifndef _H_agt_val
 #include "agt_val.h"
-#endif
-
-#ifndef _H_agt_time_filter
 #include "agt_time_filter.h"
-#endif
-
-#ifndef _H_agt_timer
 #include "agt_timer.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_log
+#include "agt_yuma_arp.h"
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_str
 #include "ncx_str.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
 
 
 /********************************************************************
@@ -636,6 +554,12 @@ status_t
         return res;
     }
 
+    /* load the yuma-arp module */
+    res = y_yuma_arp_init(y_yuma_arp_M_yuma_arp, NULL);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* check the module parameter set from CLI or conf file
      * for any modules to pre-load
      */
@@ -820,6 +744,11 @@ status_t
         return res;
     }
 
+    /* load the yuma arp callbacks */
+    res = y_yuma_arp_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
 
 #ifdef STATIC_SERVER
     /* init phase 2 for static modules should be 
@@ -978,6 +907,7 @@ void
         y_ietf_netconf_partial_lock_cleanup();
         agt_if_cleanup();
         y_yuma_time_filter_cleanup();
+        y_yuma_arp_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();
         agt_rpc_cleanup();

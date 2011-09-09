@@ -9,17 +9,18 @@
 # This is an ordered list
 # Put only the directories that build object files in the list
 
-# make all targets
-ifdef NOTOASTER
-DIRS = libtecla netconf
+# S_DIRS == all server dirs
 S_DIRS = netconf
-else
-DIRS = libtecla netconf libtoaster
-S_DIRS = netconf libtoaster
+
+ifndef NOTOASTER
+S_DIRS += libtoaster
 endif
 
+# DIRS = all targets
+DIRS = libtecla $(S_DIRS)
+
+# C_DIRS == all client dirs 
 C_DIRS = libtecla netconf
-L_DIRS = netconf
 
 #################### PLATFORM DEFINITIONS ############
 
@@ -63,11 +64,6 @@ endif
 endif
 
 
-yuma-shlibs:
-	for dir in $(L_DIRS); do\
-	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
-        done
-
 libtecla/Makefile:
 	cd libtecla && ./configure
 
@@ -98,11 +94,6 @@ yumasuperclean: libtecla/Makefile
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
-yuma-shlibs-install:
-	for dir in $(L_DIRS); do\
-          cd $$dir && $(MAKE) install && cd ..;\
-        done
-
 yuma-client-install: libtecla/Makefile
 	for dir in $(C_DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
@@ -127,8 +118,7 @@ yuma-all-install:
 	yumaall yumaclean yumasuperclean yumainstall \
 	yuma-client yuma-server yuma-dev yuma-all \
 	yuma-client-install yuma-server-install \
-	yuma-dev-install yuma-all-install \
-	yuma-shlibs yuma-shlibs-install
+	yuma-dev-install yuma-all-install
 
 
 # prevent the make program from choking on all the symbols

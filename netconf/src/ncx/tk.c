@@ -803,7 +803,7 @@ static void
         uint32 totReqSpaces = numLeadingSpaceChars - indent;
         uint32 numTabs = totReqSpaces / NCX_TABSIZE;
         uint32 numSpaces = totReqSpaces % NCX_TABSIZE;
-        uint32 numConsumedChars = instr - *srcptr;
+        uint32 numConsumedChars = (uint32)(instr - *srcptr);
 
         /* make sure not to write more chars than were read E.g: do not replace
          * 2 tabs with 7 spaces and over flow the buffer */

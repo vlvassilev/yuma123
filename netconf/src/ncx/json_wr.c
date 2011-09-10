@@ -253,7 +253,7 @@ static status_t
             /* JSON ignores XML namespaces, so foo:a and bar:a
              * are both encoded in the same array
              */
-            int32 childcnt = val_instance_count(out, NULL, chval->name);
+            uint32 childcnt = val_instance_count(out, NULL, chval->name);
             boolean firstchild = 
                 (lastch && !xml_strcmp(lastch->name, chval->name)) ?
                 FALSE : TRUE;

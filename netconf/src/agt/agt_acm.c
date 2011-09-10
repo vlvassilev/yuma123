@@ -1532,7 +1532,7 @@ static boolean
                             const val_value_t *val,
                             const xmlChar *access)
 {
-    val_value_t             *nacmroot, *rulesval;
+    val_value_t             *nacmroot = NULL, *rulesval;
     agt_acm_usergroups_t    *usergroups;
     uint32                   groupcnt;
     boolean                  retval, done, iswrite;
@@ -1897,13 +1897,15 @@ static status_t
 {
     status_t   res;
     boolean    clear_cache;
+#ifdef AGT_ACM_DEBUG
+    val_value_t *useval = NULL;
+#endif
 
     (void)scb;
     (void)msg;
     (void)curval;
 
 #ifdef AGT_ACM_DEBUG
-    val_value_t *useval = NULL;
     if (newval != NULL) {
         useval = newval;
     } else if (curval != NULL) {

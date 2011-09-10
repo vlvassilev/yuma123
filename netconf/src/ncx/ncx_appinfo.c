@@ -711,7 +711,7 @@ status_t
                           dlq_hdr_t *appinfoQ)
 {
     ncx_appinfo_t  *appinfo;
-    ext_template_t  *ext;
+    ext_template_t  *ext = NULL;
     status_t         res, retres;
 
 #ifdef DEBUG

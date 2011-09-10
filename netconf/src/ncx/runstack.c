@@ -2008,13 +2008,13 @@ status_t
 boolean
     runstack_get_if_used (runstack_context_t *rcxt)
 {
-    if (rcxt == NULL) {
-        rcxt = &defcxt;
-    }
-
     runstack_entry_t  *se;
     dlq_hdr_t         *useQ;
     runstack_condcb_t *condcb;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
 
     se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
     if (se == NULL) {

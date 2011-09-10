@@ -321,7 +321,7 @@ static void
     const xmlChar     *pfix, *attr_name, *attr_qname;
     xmlChar           *buffer;
     boolean            xneeded;
-    uint32             len, retcount, bufferlen;;
+    uint32             len, retcount, bufferlen;
     xmlns_id_t         ns_id, attr_nsid;
     status_t           res;
 

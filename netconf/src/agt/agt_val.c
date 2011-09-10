@@ -1793,7 +1793,7 @@ static status_t
             res = ERR_NCX_NO_DEFAULT;
         } else {
             /* check value provided is the same as the default */
-            int ret = val_compare_to_string(newval, defstr, &res);
+            int32 ret = val_compare_to_string(newval, defstr, &res);
             if (res == NO_ERR && ret != 0) {
                 res = ERR_NCX_INVALID_VALUE;
             }

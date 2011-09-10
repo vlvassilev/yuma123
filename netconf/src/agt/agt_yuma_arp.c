@@ -87,14 +87,14 @@ static val_value_t *arp_val;
 static int counter;
 static int proc_net_arp_ok;
 
-static void write_file(const char *name, int value) {
+static void write_file(const char *name, uint32 value) {
     FILE *fp;
     if ((fp = fopen(name, "w")) == NULL) {
 	log_debug("\nCould not open the file: %s\n", name);
 	return;
     }
 
-    fprintf(fp, "%d", value);
+    fprintf(fp, "%u", value);
     fclose(fp);
     return;
 }
@@ -222,6 +222,7 @@ static status_t parse_buffer(
 { 
     status_t res;
     xmlChar *startIP, *endIP, *startMAC, *endMAC, *startFlag;
+    int i;
 
     if((ip_address == NULL) || (mac_address == NULL)) {
 	log_debug("\n IP or MAC can not be NULL!");
@@ -258,7 +259,7 @@ static status_t parse_buffer(
      * 2 - spaces and Flags 
      * 3 - spaces before MAC 
      */
-    for (int i = 0; i < 3; i++)
+    for (i = 0; i < 3; i++)
     {
 	while (*currChar && xml_isspace(*currChar)) {
 	    currChar++;
@@ -450,7 +451,7 @@ static status_t
     case AGT_CB_COMMIT:
         /* device instrumentation done here */
 	if(editop != OP_EDITOP_DELETE) {
-	    int val = VAL_UINT(newval);
+	    uint32 val = VAL_UINT(newval);
 	    write_file(TRESH1, val / 8);
 	    write_file(TRESH2, val / 2);
 	    write_file(TRESH3, val);
@@ -565,7 +566,7 @@ static status_t
 
 		snprintf(tmp, 255, "/proc/sys/net/ipv4/neigh/%s/gc_stale_time", 
 			dit->d_name);
-		write_file(tmp, VAL_INT(newval));
+		write_file(tmp, VAL_UINT(newval));
 	    }
 
 	}

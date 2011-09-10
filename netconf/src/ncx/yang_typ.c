@@ -831,9 +831,8 @@ static status_t
         TK_TT_MSSTRING == TK_CUR_TYP(tkc)) {
 
         /* need to use the entire prefix:value string */
-        xmlChar *buff = m__getMem(TK_CUR_MODLEN(tkc) + 
-                                  TK_CUR_LEN(tkc) + 2);
-        xmlChar *p = buff;
+        xmlChar *p, *buff = m__getMem(TK_CUR_MODLEN(tkc) + 
+                                      TK_CUR_LEN(tkc) + 2);
 
         if (NULL == buff) {
             res = ERR_INTERNAL_MEM;
@@ -841,6 +840,7 @@ static status_t
             return res;
         }
 
+        p = buff;
         p += xml_strncpy(p, TK_CUR_MOD(tkc), TK_CUR_MODLEN(tkc));
         *p++ = ':';
         p += xml_strncpy(p, TK_CUR_VAL(tkc), TK_CUR_LEN(tkc));

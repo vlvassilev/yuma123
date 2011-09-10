@@ -4180,6 +4180,27 @@ static status_t
         }
     }
 
+    /* now that all the content is gathered the OBJ_TYP_CHOICE
+     * and OBJ_TYP_CASE place-holder nodes can be deleted
+     * this can only happen if the edit target node requested
+     * is a choice or a case;
+     */
+    if (config_content->btyp == NCX_BT_CHOICE ||
+        config_content->btyp == NCX_BT_CASE) {
+
+        /* insert all of the children of this choice
+         * in place of itself in the parent node
+         */
+        val_move_children(config_content, config_content->parent);
+
+        /* now config_content should be empty with all its child
+         * nodes now siblings; remove it and discard
+         */
+        val_remove_child(config_content);
+        val_free_value(config_content);
+        config_content = NULL;
+    }
+
     /* rearrange the nodes to canonical order if requested */
     if (server_cb->fixorder) {
         /* must set the order of a root container seperately */

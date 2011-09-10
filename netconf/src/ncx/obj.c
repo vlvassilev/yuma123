@@ -9117,7 +9117,9 @@ void *
  * current XML node
  * complex logic for finding the right module namespace
  * and child node, given the current context
- *
+ * !! Will ignore choice and case nodes !!
+ * !! This function called by agt_val_parse and mgr_val_parse
+ * !! Only YANG data nodes are expected 
  *
  * INPUTS:
  *    obj == parent object template
@@ -9214,11 +9216,12 @@ status_t
                 foundmodname = obj_get_mod_name(foundobj);
             }
         }
-
         if (foundobj) {
             if (!obj_is_data_db(foundobj) ||
                 obj_is_abstract(foundobj) ||
-                obj_is_cli(foundobj)) {
+                obj_is_cli(foundobj) ||
+                obj->objtype == OBJ_TYP_CHOICE ||
+                obj->objtype == OBJ_TYP_CASE) {
                 foundobj = NULL;
             }
         }
@@ -9334,7 +9337,8 @@ status_t
         }
     } else {
         /* do not care about XML order, just match any node
-         * within the current parent object
+         * within the current parent object with the same
+         * name as the current element
          */
         if (curnode->nsid) {
             /* find the specified module first */
@@ -9350,20 +9354,34 @@ status_t
                                       NULL,
                                       curnode->elname);
         }
+        if (foundobj && 
+            (foundobj->objtype == OBJ_TYP_CHOICE ||
+             foundobj->objtype == OBJ_TYP_CASE)) {
+            foundobj = NULL;
+        }
     }
 
     if (foundobj) {
+
+        if (foundobj->objtype == OBJ_TYP_CHOICE) {
+            log_debug("\n***CHOICE %s \n", obj_get_name(foundobj));
+        }
+        if (foundobj->objtype == OBJ_TYP_CASE) {
+            log_debug("\n***CASE %s \n", obj_get_name(foundobj));
+        }
+
         *retobj = foundobj;
         if (!topdone) {
             *rettop = foundobj;
         }
         return NO_ERR;
-    } else if (res != NO_ERR) {
-        return res;
-    } else {
-        return ERR_NCX_DEF_NOT_FOUND;
     }
-    /*NOTREACHED*/
+
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    return ERR_NCX_DEF_NOT_FOUND;
 
 }  /* obj_get_child_node */
 

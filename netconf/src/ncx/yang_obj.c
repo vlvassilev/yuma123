@@ -11031,7 +11031,6 @@ status_t
     obj_template_t  *testobj, *nextobj, *lastobj;
     dlq_hdr_t       *childdatadefQ;
     status_t         res, retres;
-    boolean          isleaf;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -11047,11 +11046,8 @@ status_t
          testobj != NULL;
          testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-        isleaf = FALSE;
         switch (testobj->objtype) {
         case OBJ_TYP_LEAF:
-            isleaf = TRUE;
-            /* fall through */
         case OBJ_TYP_LEAF_LIST:
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
@@ -11064,7 +11060,7 @@ status_t
                 }
 #endif
                 
-                if (isleaf) {
+                if (testobj->objtype == OBJ_TYP_LEAF) {
                     nextobj = testobj->def.leaf->leafrefobj;
                 } else {
                     nextobj = testobj->def.leaflist->leafrefobj;
@@ -11084,7 +11080,7 @@ status_t
                             obj_get_basetype(nextobj) == NCX_BT_LEAFREF) {
 
                             lastobj = nextobj;
-                            if (isleaf) {
+                            if (nextobj->objtype == OBJ_TYP_LEAF) {
                                 nextobj = nextobj->def.leaf->leafrefobj;
                             } else {
                                 nextobj = nextobj->def.leaflist->leafrefobj;

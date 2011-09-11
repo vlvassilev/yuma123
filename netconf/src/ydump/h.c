@@ -865,6 +865,7 @@ static void
         }
     }
 
+    ses_putchar(scb, '\n');
 } /* write_h_includes */
 
 

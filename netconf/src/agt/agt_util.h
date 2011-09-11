@@ -804,6 +804,40 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION agt_add_container
+*
+* make a val_value_t struct for a specified 
+* nested container data node.  This is used
+* by SIL functions to create a nested container
+* which may have virtual nodes within it
+*
+* TBD: fine-control over SIL C code generation to
+* allow mix of container virtual callback plus
+* child node virtual node callbacks
+*
+INPUTS:
+*   modname == module name defining objname
+*   objname == name of object node to create
+*   parentval == parent value node to add container to
+*   val == address of return val pointer
+*
+* OUTPUTS:
+*   *val == pointer to node created in the database
+*           this is not live memory! It will be freed
+*           by the database management code
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_add_container (const xmlChar *modname,
+                       const xmlChar *objname,
+                       val_value_t *parentval,
+                       val_value_t **val);
+
+
+
+/********************************************************************
 * FUNCTION agt_init_cache
 *
 * init a cache pointer during the init2 callback

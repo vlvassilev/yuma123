@@ -2397,7 +2397,7 @@ status_t
 * make a val_value_t struct for a specified 
 * top-level container data node.  This is used
 * by SIL functions to create a top-level container
-* which may have virtual nodes within in it
+* which may have virtual nodes within it
 *
 * TBD: fine-control over SIL C code generation to
 * allow mix of container virtual callback plus
@@ -2444,6 +2444,67 @@ status_t
     return NO_ERR;
 
 }  /* agt_add_top_container */
+
+
+/********************************************************************
+* FUNCTION agt_add_container
+*
+* make a val_value_t struct for a specified 
+* nested container data node.  This is used
+* by SIL functions to create a nested container
+* which may have virtual nodes within it
+*
+* TBD: fine-control over SIL C code generation to
+* allow mix of container virtual callback plus
+* child node virtual node callbacks
+*
+INPUTS:
+*   modname == module name defining objname
+*   objname == name of object node to create
+*   parentval == parent value node to add container to
+*   val == address of return val pointer
+*
+* OUTPUTS:
+*   *val == pointer to node created in the database
+*           this is not live memory! It will be freed
+*           by the database management code
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_add_container (const xmlChar *modname,
+                       const xmlChar *objname,
+                       val_value_t *parentval,
+                       val_value_t **val)
+{
+    val_value_t     *nodeval;
+    obj_template_t  *obj;
+
+#ifdef DEBUG
+    if (objname == NULL || parentval == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    obj = obj_find_child(parentval->obj, modname, objname);
+    if (obj == NULL) {
+        return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    nodeval = val_new_value();
+    if (!nodeval) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(nodeval, obj);
+    val_add_child_sorted(nodeval, parentval);
+    if (val != NULL) {
+        *val = nodeval;
+    }
+    return NO_ERR;
+
+}  /* agt_add_container */
 
 
 /********************************************************************

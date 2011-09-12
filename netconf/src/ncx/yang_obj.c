@@ -121,97 +121,30 @@ date         init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
+#include "procdefs.h"
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
-#include  "dlq.h"
-#endif
-
-#ifndef _H_grp
-#include  "grp.h"
-#endif
-
-#ifndef _H_log
+#include "dlq.h"
+#include "grp.h"
 #include "log.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_appinfo
 #include "ncx_appinfo.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include "ncx_feature.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_typ
-#include  "typ.h"
-#endif
-
-#ifndef _H_xml_util
+#include "status.h"
+#include "typ.h"
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yang
 #include "yang.h"
-#endif
-
-#ifndef _H_yang_grp
 #include "yang_grp.h"
-#endif
-
-#ifndef _H_yang_obj
 #include "yang_obj.h"
-#endif
-
-#ifndef _H_yang_typ
 #include "yang_typ.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -554,27 +487,15 @@ static status_t
                     obj_template_t *parent,
                     grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_leaf_t      *leaf;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, conf, flagset, mand, stat, desc, ref;
-    status_t         res, retres;
-
-    obj = NULL;
-    leaf = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    conf = FALSE;
-    mand = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_leaf_t      *leaf = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, conf = FALSE;
+    boolean          flagset = FALSE, mand = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_ANYXML);
@@ -746,27 +667,15 @@ static status_t
                        obj_template_t *parent,
                        grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_container_t *con;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, pres, conf, flagset, stat, desc, ref;
-    status_t         res, retres;
-
-    obj = NULL;
-    con = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    pres = FALSE;
-    conf = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_container_t *con = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, pres = FALSE;
+    boolean          conf = FALSE, flagset = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CONTAINER);
@@ -947,32 +856,16 @@ static status_t
                   obj_template_t *parent,
                   grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_leaf_t      *leaf;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, typ, units, def, conf;
-    boolean          mand, stat, desc, ref, typeok, flagset;
-    status_t         res, retres;
-
-    obj = NULL;
-    leaf = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    typ = FALSE;
-    units = FALSE;
-    def = FALSE;
-    conf = FALSE;
-    mand = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    typeok = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_leaf_t      *leaf = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, typ = FALSE;
+    boolean          units = FALSE, def = FALSE, conf = FALSE;
+    boolean          mand = FALSE, stat = FALSE, desc = FALSE;
+    boolean          ref = FALSE, typeok = FALSE, flagset = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF);
@@ -1189,33 +1082,17 @@ static status_t
                       obj_template_t *parent,
                       grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_leaflist_t  *llist;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, typ, units, conf;
-    boolean          minel, maxel, ord, stat, desc, ref, typeok, flagset;
-    status_t         res, retres;
-
-    obj = NULL;
-    llist = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    typ = FALSE;
-    units = FALSE;
-    conf = FALSE;
-    minel = FALSE;
-    maxel = FALSE;
-    ord = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    typeok = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_leaflist_t  *llist = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, typ = FALSE;
+    boolean          units = FALSE, conf = FALSE;
+    boolean          minel = FALSE, maxel = FALSE, ord = FALSE;
+    boolean          stat = FALSE, desc = FALSE, ref = FALSE;
+    boolean          typeok = FALSE, flagset = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF_LIST);
@@ -1432,33 +1309,17 @@ static status_t
                   obj_template_t *parent,
                   grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_list_t      *list;
-    obj_unique_t    *objuniq;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, key, conf;
-    boolean          minel, maxel, ord, stat, desc, ref, flagset, ingrp;
-    status_t         res, retres;
+    obj_template_t  *obj = NULL;
+    obj_list_t      *list = NULL;
+    obj_unique_t    *objuniq = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, key = FALSE, conf = FALSE;
+    boolean          minel = FALSE, maxel = FALSE, ord = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE, flagset = FALSE, ingrp = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
     ncx_error_t      savetkerr;
-
-    obj = NULL;
-    list = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    key = FALSE;
-    conf = FALSE;
-    minel = FALSE;
-    maxel = FALSE;
-    ord = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LIST);
@@ -1716,24 +1577,15 @@ static status_t
                   obj_template_t *parent,
                   boolean withcase)
 {
-    obj_case_t      *cas, *testcas;
-    obj_template_t  *obj, *testobj, *test2obj, *casobj;
-    const xmlChar   *val, *namestr;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, stat, desc, ref;
-    status_t         res, retres;
-
-    obj = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_case_t      *cas = NULL, *testcas = NULL;
+    obj_template_t  *obj = NULL, *testobj = NULL;
+    obj_template_t  *test2obj = NULL, *casobj = NULL;
+    const xmlChar   *val = NULL, *namestr = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CASE);
@@ -1957,29 +1809,17 @@ static status_t
                     obj_template_t *parent,
                     grp_template_t *grp)
 {
-    obj_template_t  *obj, *testobj, *test2obj, *casobj;
-    obj_choice_t    *choic;
-    obj_case_t      *testcas;
-    const xmlChar   *val, *namestr;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, when, def, mand, conf, stat, desc, ref, flagset;
-    status_t         res, retres;
-
-    obj = NULL;
-    choic = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    def = FALSE;
-    mand = FALSE;
-    conf = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL, *testobj = NULL;
+    obj_template_t  *test2obj = NULL, *casobj = NULL;
+    obj_choice_t    *choic = NULL;
+    obj_case_t      *testcas = NULL;
+    const xmlChar   *val = NULL, *namestr = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, def = FALSE;
+    boolean          mand = FALSE, conf = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE, flagset = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CHOICE);
@@ -2234,30 +2074,16 @@ static status_t
                     dlq_hdr_t *que,
                     obj_template_t *parent)
 {
-    obj_template_t  *obj;
-    obj_refine_t    *refine;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, desc, ref, pres, def;
-    boolean          conf, mand, minel, maxel, flagset;
-    status_t         res, retres;
-
-    obj = NULL;
-    refine = NULL;
-    val = NULL;
-    expstr = "refine target";
-    done = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    pres = FALSE;
-    def = FALSE;
-    conf = FALSE;
-    mand = FALSE;
-    minel = FALSE;
-    maxel = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_refine_t    *refine = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "refine target";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, desc = FALSE, ref = FALSE;
+    boolean          pres = FALSE, def = FALSE, conf = FALSE;
+    boolean          mand = FALSE, minel = FALSE, maxel = FALSE;
+    boolean          flagset = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_REFINE);
@@ -2471,27 +2297,16 @@ static status_t
                   obj_template_t *parent,
                   grp_template_t *grp)
 {
-    obj_template_t  *obj, *testobj;
-    obj_uses_t      *uses;
-    grp_template_t  *impgrp;
-    const xmlChar   *val;
-    const char      *expstr;
-    yang_stmt_t     *stmt;
-    tk_type_t        tktyp;
-    boolean          done, when, stat, desc, ref;
-    status_t         res, retres;
-
-    obj = NULL;
-    uses = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL, *testobj = NULL;
+    obj_uses_t      *uses = NULL;
+    grp_template_t  *impgrp = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    yang_stmt_t     *stmt = NULL;
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_USES);
@@ -2683,21 +2498,13 @@ static status_t
                    dlq_hdr_t  *que,
                    obj_template_t *parent)
 {
-    obj_template_t  *obj, *testobj;
-    obj_rpcio_t     *rpcio;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done;
-    status_t         res, retres;
-
-    obj = NULL;
-    rpcio = NULL;
-    val = NULL;
-    expstr = "typedef, grouping, or data-def keyword";
-    done = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL, *testobj = NULL;
+    obj_rpcio_t     *rpcio = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "typedef, grouping, or data-def keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_RPCIO);
@@ -2845,15 +2652,10 @@ static status_t
                      dlq_hdr_t *que,
                      obj_template_t *parent)
 {
-    const xmlChar   *val;
-    tk_type_t        tktyp;
-    status_t         res;
-    boolean          errdone;
-
-    errdone = TRUE;
-    res = NO_ERR;
-    tktyp = TK_CUR_TYP(tkc);
-    val = TK_CUR_VAL(tkc);
+    const xmlChar   *val = TK_CUR_VAL(tkc);
+    tk_type_t        tktyp = TK_CUR_TYP(tkc);
+    status_t         res = NO_ERR;
+    boolean          errdone = TRUE;
 
     /* check the current token type */
     if (tktyp != TK_TT_TSTRING) {
@@ -2952,27 +2754,15 @@ static status_t
                      obj_template_t *parent,
                      grp_template_t *grp)
 {
-
-    obj_template_t  *obj;
-    obj_augment_t   *aug;
-    const xmlChar   *val;
-    const char      *expstr;
-    yang_stmt_t     *stmt;
-    tk_type_t        tktyp;
-    boolean          done, when, stat, desc, ref;
-    status_t         res, retres;
-
-    obj = NULL;
-    aug = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    when = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_augment_t   *aug = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    yang_stmt_t     *stmt = NULL;
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, when = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_AUGMENT);
@@ -3136,18 +2926,12 @@ static status_t
                           dlq_hdr_t *que,
                           obj_template_t *parent)
 {
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          errdone;
-    status_t         res;
-
-    expstr = "container, leaf, leaf-list, list, uses,"
+    const xmlChar   *val = TK_CUR_VAL(tkc);
+    const char      *expstr = "container, leaf, leaf-list, list, uses,"
         "or augment keyword";
-    errdone = TRUE;
-    res = NO_ERR;
-    tktyp = TK_CUR_TYP(tkc);
-    val = TK_CUR_VAL(tkc);
+    tk_type_t        tktyp = TK_CUR_TYP(tkc);
+    boolean          errdone = TRUE;
+    status_t         res = NO_ERR;
 
     /* check the current token type */
     if (tktyp != TK_TT_TSTRING) {
@@ -3248,25 +3032,15 @@ static status_t
                  obj_template_t *parent,
                  grp_template_t *grp)
 {
-    obj_template_t        *obj, *chobj;
-    const obj_template_t  *testobj;
-    obj_rpc_t             *rpc;
-    const xmlChar         *val;
-    const char            *expstr;
-    tk_type_t              tktyp;
-    boolean                done, stat, desc, ref;
-    status_t               res, retres;
-
-    obj = NULL;
-    rpc = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t        *obj = NULL, *chobj = NULL;
+    const obj_template_t  *testobj = NULL;
+    obj_rpc_t             *rpc = NULL;
+    const xmlChar         *val = NULL;
+    const char            *expstr = "keyword";
+    tk_type_t              tktyp = TK_TT_NONE;
+    boolean                done = FALSE, stat = FALSE;
+    boolean                desc = FALSE, ref = FALSE;
+    status_t               res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_RPC);
@@ -3487,24 +3261,14 @@ static status_t
                    obj_template_t *parent,
                    grp_template_t *grp)
 {
-    obj_template_t  *obj;
-    obj_notif_t     *notif;
-    const xmlChar   *val;
-    const char      *expstr;
-    tk_type_t        tktyp;
-    boolean          done, stat, desc, ref;
-    status_t         res, retres;
-
-    obj = NULL;
-    notif = NULL;
-    val = NULL;
-    expstr = "keyword";
-    done = FALSE;
-    stat = FALSE;
-    desc = FALSE;
-    ref = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    obj_template_t  *obj = NULL;
+    obj_notif_t     *notif = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_NOTIF);
@@ -5405,16 +5169,11 @@ static status_t
         CHK_EXIT(res, retres);
     }
 
-    finish_config_flag(obj);
-
     res = resolve_datadefs(pcb,
                            tkc, 
                            mod, 
                            con->datadefQ, 
                            redo);
-    CHK_EXIT(res, retres);
-
-    res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -5448,12 +5207,11 @@ static status_t
                              obj_template_t *obj,
                              boolean ingrouping)
 {
-    const xmlChar *errstr;
     status_t       res;
-    boolean        ingrp;
+    boolean        ingrp = FALSE;
 
-    res = NO_ERR;
-    ingrp = FALSE;
+    finish_config_flag(obj);
+    res = check_parent(tkc, mod, obj);
 
     if (!ingrouping && 
         !obj_is_abstract(obj) &&
@@ -5464,18 +5222,16 @@ static status_t
         obj_is_mandatory_when_ex(obj, TRUE)) {
         
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
-
-            errstr = (obj_has_when_stmts(obj)) ? 
+            const xmlChar *errstr =
+                (obj_has_when_stmts(obj)) ? 
                 (const xmlChar *)"conditional " : EMPTY_STRING;
 
             log_warn("\nWarning: top-level %sNP container "
                      "'%s' is mandatory",
                      errstr,
                      obj_get_name(obj));
-            res = ERR_NCX_TOP_LEVEL_MANDATORY;
             SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, res);
-            res = NO_ERR;
+            ncx_print_errormsg(tkc, mod, ERR_NCX_TOP_LEVEL_MANDATORY);
         } else if (mod != NULL) {
             ncx_inc_warnings(mod);
         }
@@ -5529,7 +5285,8 @@ static status_t
         CHK_EXIT(res, retres);
     }
 
-    if (!obj_is_refine(obj) || !redo) {
+    /* check for leaf only since anyxml has no type */
+    if (obj->objtype == OBJ_TYP_LEAF &&(!obj_is_refine(obj) || !redo)) {
         res = yang_typ_resolve_type(pcb,
                                     tkc, 
                                     mod, 
@@ -5538,22 +5295,6 @@ static status_t
                                     obj);
         CHK_EXIT(res, retres);
     }
-
-    finish_config_flag(obj);
-
-    if (obj->flags & OBJ_FL_MANDATORY) {
-        if (leaf->defval) {
-            log_error("\nError: both mandatory and default "
-                      "statements present"
-                      "'%s'", obj_get_name(obj));
-            retres = ERR_NCX_INVALID_VALUE;
-            SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, retres);
-        }
-    }
-
-    res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
 
     return retres;
                                     
@@ -5586,12 +5327,22 @@ static status_t
                         obj_template_t *obj,
                         boolean ingrouping)
 {
-    const xmlChar *errstr;
     status_t       res;
-    boolean        ingrp;
+    boolean        ingrp = FALSE;
 
-    res = NO_ERR;
-    ingrp = FALSE;
+    finish_config_flag(obj);
+    res = check_parent(tkc, mod, obj);
+
+    if (obj->flags & OBJ_FL_MANDATORY) {
+        /* if this is an ANYXML idefval will not be set */
+        if (obj->def.leaf->defval) {
+            log_error("\nError: default-stmt not allowed for mandatory leaf "
+                      "'%s'", obj_get_name(obj));
+            res = ERR_NCX_INVALID_VALUE;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, res);
+        }
+    }
 
     if (!ingrouping &&
         !obj_is_abstract(obj) &&
@@ -5601,17 +5352,15 @@ static status_t
          (obj->parent == NULL && obj->grp == NULL))) {
 
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
-
-            errstr = (obj_has_when_stmts(obj)) ? 
+            const xmlChar *errstr =
+                (obj_has_when_stmts(obj)) ? 
                 (const xmlChar *)"conditional " : EMPTY_STRING;
             
             log_warn("\nWarning: top-level %sleaf '%s' is mandatory",
                      errstr,
                      obj_get_name(obj));
-            res = ERR_NCX_TOP_LEVEL_MANDATORY;
             SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, res);
-            res = NO_ERR;
+            ncx_print_errormsg(tkc, mod, ERR_NCX_TOP_LEVEL_MANDATORY);
         } else if (mod != NULL) {
             ncx_inc_warnings(mod);
         }
@@ -5677,25 +5426,52 @@ static status_t
      */
     llist->typdef->iqual = NCX_IQUAL_ZMORE;
 
-    finish_config_flag(obj);
+    return retres;
+                                    
+}  /* resolve_leaflist */
 
+
+/********************************************************************
+* FUNCTION resolve_leaflist_final
+* 
+* Check the leaf-list object type after all modificatins done
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == parent object for 'llist'
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_leaflist_final (tk_chain_t *tkc,
+                            ncx_module_t  *mod,
+                            obj_template_t *obj)
+{
+    obj_leaflist_t *llist = obj->def.leaflist;
+    status_t res;
+
+    finish_config_flag(obj);
     res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
 
     /* check if minelems and maxelems are valid */
     if (llist->minelems && llist->maxelems) {
         if (llist->minelems > llist->maxelems) {
             log_error("\nError: leaf-list '%s' min-elements > max-elements",
                       obj_get_name(obj));
-            retres = ERR_NCX_INVALID_VALUE;
+            res = ERR_NCX_INVALID_VALUE;
             SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, retres);
+            ncx_print_errormsg(tkc, mod, res);
         }
     }
 
-    return retres;
+    return res;
                                     
-}  /* resolve_leaflist */
+}  /* resolve_leaflist_final */
 
 
 /********************************************************************
@@ -5977,28 +5753,12 @@ static status_t
         CHK_EXIT(res, retres);
     }
 
-    finish_config_flag(obj);
-
     res = resolve_datadefs(pcb, 
                            tkc, 
                            mod, 
                            list->datadefQ, 
                            redo);
     CHK_EXIT(res, retres);
-
-    res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
-
-    /* check if minelems and maxelems are valid */
-    if (list->minelems && list->maxelems) {
-        if (list->minelems > list->maxelems) {
-            log_error("\nError: list '%s' min-elements > max-elements",
-                      obj_get_name(obj));
-            retres = ERR_NCX_INVALID_VALUE;
-            SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, retres);
-        }
-    }
 
     return retres;
                                     
@@ -6282,6 +6042,21 @@ static status_t
      * for the augmenting list was not done for the cloned list
      */
 
+    finish_config_flag(obj);
+    res = check_parent(tkc, mod, obj);
+    CHK_EXIT(res, retres);
+
+    /* check if minelems and maxelems are valid */
+    if (list->minelems && list->maxelems) {
+        if (list->minelems > list->maxelems) {
+            log_error("\nError: list '%s' min-elements > max-elements",
+                      obj_get_name(obj));
+            retres = ERR_NCX_INVALID_VALUE;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, retres);
+        }
+    }
+
     /* validate key clause only if this has probably not 
      * been attempted yet 
      */
@@ -6324,7 +6099,6 @@ static status_t
 *   tkc == token chain
 *   mod == module in progress
 *   cas == obj_case_t to check
-*   obj == parent object for 'cas'
 *   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
@@ -6335,22 +6109,43 @@ static status_t
                   tk_chain_t *tkc,
                   ncx_module_t  *mod,
                   obj_case_t *cas,
-                  obj_template_t *obj,
                   boolean redo)
 {
-    status_t res, retres;
-
-    retres = NO_ERR;
+    status_t res;
 
     res = resolve_datadefs(pcb, tkc, mod, cas->datadefQ, redo);
-    CHK_EXIT(res, retres);
-
-    res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
-
-    return retres;
+    return res;
                                     
 }  /* resolve_case */
+
+
+/********************************************************************
+* FUNCTION resolve_case_final
+* 
+* Check the case object type
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == parent object for 'cas'
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_case_final (tk_chain_t *tkc,
+                        ncx_module_t  *mod,
+                        obj_template_t *obj)
+{
+    status_t res;
+
+    res = check_parent(tkc, mod, obj);
+    return res;
+                                    
+}  /* resolve_case_final */
 
 
 /********************************************************************
@@ -6366,7 +6161,6 @@ static status_t
 *   tkc == token chain
 *   mod == module in progress
 *   choic == obj_choice_t to check
-*   obj == parent object for 'choic'
 *   redo == TRUE if this is a 2nd pass due to deviations added
 *
 * RETURNS:
@@ -6377,64 +6171,13 @@ static status_t
                     tk_chain_t *tkc,
                     ncx_module_t  *mod,
                     obj_choice_t *choic,
-                    obj_template_t *obj,
                     boolean redo)
 {
-    obj_case_t *cas;
-    obj_template_t *cobj;
-    status_t res, retres;
-
-    retres = NO_ERR;
-
-    /* not in draft yet !!! */
-    finish_config_flag(obj);
-
-    if ((obj->flags & OBJ_FL_MANDATORY) && choic->defval) {
-        log_error("\nError: both mandatory and default statements present"
-                  "'%s'", 
-                  obj_get_name(obj));
-        retres = ERR_NCX_INVALID_VALUE;
-        SET_OBJ_CURERR(tkc, obj);
-        ncx_print_errormsg(tkc, mod, retres);
-    }
-
-    res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
+    status_t res;
 
     /* finish up the data-def-stmts in each case arm */
     res = resolve_datadefs(pcb, tkc, mod, choic->caseQ, redo);
-    CHK_EXIT(res, retres);
-
-    /* check defval is valid case name */
-    if (choic->defval) {
-        cas = obj_find_case(choic, 
-                            obj_get_mod_name(obj), 
-                            choic->defval);
-        if (!cas) {
-            /* default is not a valid case name */
-            SET_OBJ_CURERR(tkc, obj);
-            retres = ERR_NCX_INVALID_VALUE;
-            log_error("\nError: Choice default '%s' "
-                      "not a valid case name", 
-                      choic->defval);
-            ncx_print_errormsg(tkc, mod, retres);
-        } else {
-            /* valid case name, 
-             * make sure 'cas' contains only optional data nodes
-             */
-            for (cobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
-                 cobj != NULL;
-                 cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
-                if (obj_is_mandatory(cobj)) {
-                    tkc->curerr = &cobj->tkerr;
-                    retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
-                    ncx_print_errormsg(tkc, mod, retres);
-                }
-            }
-        }
-    }
-        
-    return retres;
+    return res;
                                     
 }  /* resolve_choice */
 
@@ -6465,13 +6208,51 @@ static status_t
                           obj_template_t *obj,
                           boolean ingrouping)
 {
-    const xmlChar *errstr;
+    obj_choice_t  *choic = obj->def.choic;
     status_t       res;
-    boolean        ingrp;
+    boolean        ingrp = FALSE;
 
-    res = NO_ERR;
-    ingrp = FALSE;
+    finish_config_flag(obj);
+    res = check_parent(tkc, mod, obj);
 
+    if ((obj->flags & OBJ_FL_MANDATORY) && choic->defval) {
+        log_error("\nError: both mandatory and default statements present"
+                  "'%s'", 
+                  obj_get_name(obj));
+        res = ERR_NCX_INVALID_VALUE;
+        SET_OBJ_CURERR(tkc, obj);
+        ncx_print_errormsg(tkc, mod, res);
+    }
+
+    /* check defval is valid case name */
+    if (choic->defval) {
+        obj_case_t *cas = 
+            obj_find_case(choic, obj_get_mod_name(obj), choic->defval);
+        if (!cas) {
+            /* default is not a valid case name */
+            SET_OBJ_CURERR(tkc, obj);
+            res = ERR_NCX_INVALID_VALUE;
+            log_error("\nError: Choice default '%s' "
+                      "not a valid case name", 
+                      choic->defval);
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            obj_template_t *cobj;
+            /* valid case name, 
+             * make sure 'cas' contains only optional data nodes
+             */
+            for (cobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
+                 cobj != NULL;
+                 cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
+                if (obj_is_mandatory(cobj)) {
+                    tkc->curerr = &cobj->tkerr;
+                    res = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
+        }
+    }
+        
     if (!ingrouping &&
         !obj_is_abstract(obj) &&
         obj_is_mandatory_when(obj) &&
@@ -6480,17 +6261,15 @@ static status_t
          (obj->parent == NULL && obj->grp == NULL))) {
 
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
-
-            errstr = (obj_has_when_stmts(obj)) ? 
+            const xmlChar *errstr = 
+                (obj_has_when_stmts(obj)) ? 
                 (const xmlChar *)"conditional " : EMPTY_STRING;
 
             log_warn("\nWarning: top-level %schoice '%s' is mandatory",
                      errstr,
                      obj_get_name(obj));
-            res = ERR_NCX_TOP_LEVEL_MANDATORY;
             SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, res);
-            res = NO_ERR;
+            ncx_print_errormsg(tkc, mod, ERR_NCX_TOP_LEVEL_MANDATORY);
         } else if (mod != NULL) {
             ncx_inc_warnings(mod);
         }
@@ -6969,8 +6748,6 @@ static status_t
     if (res != NO_ERR) {
         retres = res;
     }
-    res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
 
     /* make sure all the refinements really match a child
      * in the grouping
@@ -7120,6 +6897,36 @@ static status_t
     return retres;
                                     
 }  /* resolve_uses */
+
+
+/********************************************************************
+* FUNCTION resolve_uses_final
+* 
+* Check the uses object type
+* This is done after refines are applied
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == parent object for 'uses'
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_uses_final (tk_chain_t *tkc,
+                        ncx_module_t  *mod,
+                        obj_template_t *obj)
+{
+    status_t        res;
+
+    res = check_parent(tkc, mod, obj);
+    return res;
+                                    
+}  /* resolve_uses_final */
 
 
 /********************************************************************
@@ -8747,20 +8554,10 @@ static status_t
                            redo);
         break;
     case OBJ_TYP_CHOICE:
-        res = resolve_choice(pcb,
-                             tkc, 
-                             mod,
-                             testobj->def.choic, 
-                             testobj, 
-                             redo);
+        res = resolve_choice(pcb, tkc, mod, testobj->def.choic, redo);
         break;
     case OBJ_TYP_CASE:
-        res = resolve_case(pcb,
-                           tkc, 
-                           mod,
-                           testobj->def.cas, 
-                           testobj, 
-                           redo);
+        res = resolve_case(pcb,tkc, mod, testobj->def.cas, redo);
         break;
     case OBJ_TYP_USES:
         if (!redo) {
@@ -10345,7 +10142,7 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
 
-    /* only need to check the top-level obkects because only
+    /* only need to check the top-level objects because only
      * top-level augments can be for other modules
      */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
@@ -10569,24 +10366,17 @@ status_t
         
         switch (testobj->objtype) {
         case OBJ_TYP_CONTAINER:
-            res = resolve_container_final(tkc, 
-                                          mod, 
-                                          testobj,
-                                          ingrouping);
+            res = resolve_container_final(tkc, mod, testobj, ingrouping);
             CHK_EXIT(res, retres);
 
             if (notclone) {
                 res = 
-                    yang_grp_resolve_final(pcb,
-                                           tkc, 
-                                           mod,
+                    yang_grp_resolve_final(pcb, tkc, mod,
                                            testobj->def.container->groupingQ);
                 CHK_EXIT(res, retres);
             }
 
-            res = yang_obj_resolve_final(pcb,
-                                         tkc, 
-                                         mod, 
+            res = yang_obj_resolve_final(pcb, tkc, mod, 
                                          testobj->def.container->datadefQ,
                                          ingrouping);
             CHK_EXIT(res, retres);
@@ -10594,8 +10384,7 @@ status_t
             if (notclone) {
                 res = resolve_default_parm(tkc, mod, testobj);
 
-                yang_check_obj_used(tkc, 
-                                    mod,
+                yang_check_obj_used(tkc, mod,
                                     testobj->def.container->typedefQ,
                                     testobj->def.container->groupingQ);
             }
@@ -10604,34 +10393,29 @@ status_t
             res = resolve_leaf_final(tkc, mod, testobj, ingrouping);
             break;
         case OBJ_TYP_ANYXML:
+            break;
         case OBJ_TYP_LEAF_LIST:
+            res = resolve_leaflist_final(tkc, mod, testobj);
             break;
         case OBJ_TYP_LIST:
             if (notclone) {
-                res = yang_grp_resolve_final(pcb,
-                                             tkc, 
-                                             mod, 
+                res = yang_grp_resolve_final(pcb, tkc, mod,
                                              testobj->def.list->groupingQ);
                 CHK_EXIT(res, retres);
             }
 
-            res = yang_obj_resolve_final(pcb,
-                                         tkc, 
-                                         mod, 
+            res = yang_obj_resolve_final(pcb, tkc, mod, 
                                          testobj->def.list->datadefQ,
                                          ingrouping);
             CHK_EXIT(res, retres);
 
             if (notclone) {
-                yang_check_obj_used(tkc, 
-                                    mod,
+                yang_check_obj_used(tkc, mod,
                                     testobj->def.list->typedefQ,
                                     testobj->def.list->groupingQ);
             }
 
-            res = resolve_list_final(pcb,
-                                     tkc, 
-                                     mod, 
+            res = resolve_list_final(pcb, tkc, mod, 
                                      testobj->def.list, 
                                      testobj);
             break;
@@ -10639,35 +10423,32 @@ status_t
             res = resolve_choice_final(tkc, mod, testobj, ingrouping);
             CHK_EXIT(res, retres);
 
-            res = yang_obj_resolve_final(pcb,
-                                         tkc, 
-                                         mod, 
+            res = yang_obj_resolve_final(pcb, tkc, mod, 
                                          testobj->def.choic->caseQ,
                                          ingrouping);
             break;
         case OBJ_TYP_CASE:
-            res = yang_obj_resolve_final(pcb,
-                                         tkc, 
-                                         mod, 
+            res = resolve_case_final(tkc, mod, testobj);
+            CHK_EXIT(res, retres);
+
+            res = yang_obj_resolve_final(pcb, tkc, mod, 
                                          testobj->def.cas->datadefQ,
                                          ingrouping);
             break;
         case OBJ_TYP_USES:
             if (notclone) {
                 res = 
-                    yang_obj_resolve_final(pcb,
-                                           tkc, 
-                                           mod, 
+                    yang_obj_resolve_final(pcb, tkc, mod, 
                                            testobj->def.uses->datadefQ,
                                            ingrouping);
+                CHK_EXIT(res, retres);
             }
+            res = resolve_uses_final(tkc, mod, testobj);
             break;
         case OBJ_TYP_AUGMENT:
             if (notclone) {
                 res = 
-                    yang_obj_resolve_final(pcb,
-                                           tkc, 
-                                           mod, 
+                    yang_obj_resolve_final(pcb, tkc, mod, 
                                            &testobj->def.augment->datadefQ,
                                            ingrouping);
             }
@@ -10675,22 +10456,17 @@ status_t
         case OBJ_TYP_RPC:
             if (notclone) {
                 res = 
-                    yang_grp_resolve_final(pcb,
-                                           tkc, 
-                                           mod, 
+                    yang_grp_resolve_final(pcb, tkc, mod, 
                                            &testobj->def.rpc->groupingQ);
                 CHK_EXIT(res, retres);
             }
 
-            res = yang_obj_resolve_final(pcb,
-                                         tkc, 
-                                         mod, 
+            res = yang_obj_resolve_final(pcb, tkc, mod, 
                                          &testobj->def.rpc->datadefQ,
                                          ingrouping);
 
             if (notclone) {
-                yang_check_obj_used(tkc, 
-                                    mod,
+                yang_check_obj_used(tkc, mod,
                                     &testobj->def.rpc->typedefQ,
                                     &testobj->def.rpc->groupingQ);
             }
@@ -10698,24 +10474,19 @@ status_t
         case OBJ_TYP_RPCIO:
             if (notclone) {
                 res = 
-                    yang_grp_resolve_final(pcb,
-                                           tkc, 
-                                           mod, 
+                    yang_grp_resolve_final(pcb, tkc, mod, 
                                            &testobj->def.rpcio->groupingQ);
                 CHK_EXIT(res, retres);
             }
 
-            res = yang_obj_resolve_final(pcb,
-                                         tkc, 
-                                         mod, 
+            res = yang_obj_resolve_final(pcb, tkc, mod, 
                                          &testobj->def.rpcio->datadefQ,
                                          ingrouping);
             CHK_EXIT(res, retres);
 
             if (notclone) {
                 res = resolve_default_parm(tkc, mod, testobj);
-                yang_check_obj_used(tkc, 
-                                    mod,
+                yang_check_obj_used(tkc, mod,
                                     &testobj->def.rpcio->typedefQ,
                                     &testobj->def.rpcio->groupingQ);
             }
@@ -10723,23 +10494,18 @@ status_t
         case OBJ_TYP_NOTIF:
             if (notclone) {
                 res = 
-                    yang_grp_resolve_final(pcb,
-                                           tkc, 
-                                           mod, 
+                    yang_grp_resolve_final(pcb, tkc, mod, 
                                            &testobj->def.notif->groupingQ);
                 CHK_EXIT(res, retres);
             }
 
             res = 
-                yang_obj_resolve_final(pcb,
-                                       tkc, 
-                                       mod, 
+                yang_obj_resolve_final(pcb, tkc, mod, 
                                        &testobj->def.notif->datadefQ,
                                        ingrouping);
 
             if (notclone) {
-                yang_check_obj_used(tkc,
-                                    mod,
+                yang_check_obj_used(tkc, mod,
                                     &testobj->def.notif->typedefQ,
                                     &testobj->def.notif->groupingQ);
             }

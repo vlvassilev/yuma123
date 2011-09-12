@@ -226,7 +226,7 @@ date         init     comment
 static status_t 
     consume_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      dlq_hdr_t *que,
                      obj_template_t *parent,
                      grp_template_t *grp);
@@ -234,20 +234,20 @@ static status_t
 static status_t 
     consume_case_datadef (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-                          ncx_module_t  *mod,
+                          ncx_module_t *mod,
                           dlq_hdr_t *que,
                           obj_template_t *parent);
 
 static status_t 
     consume_refine (tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     dlq_hdr_t *que,
                     obj_template_t *parent);
 
 static status_t 
     consume_augment (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      dlq_hdr_t *que,
                      obj_template_t *parent,
                      grp_template_t *grp);
@@ -255,28 +255,28 @@ static status_t
 static status_t 
     expand_augment (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     obj_template_t *obj,
                     dlq_hdr_t *datadefQ);
 
 static status_t 
     resolve_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      obj_template_t *testobj,
                      boolean redo);
 
 static status_t 
     resolve_datadefs (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-                      ncx_module_t  *mod,
+                      ncx_module_t *mod,
                       dlq_hdr_t *datadefQ,
                       boolean redo);
 
 static status_t 
     resolve_iffeatureQ (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-                        ncx_module_t  *mod,
+                        ncx_module_t *mod,
                         obj_template_t *obj);
 
 /*************    P A R S E   F U N C T I O N S    *************/
@@ -333,7 +333,7 @@ static void
 *********************************************************************/
 static status_t 
     add_object (tk_chain_t *tkc,
-                ncx_module_t  *mod,
+                ncx_module_t *mod,
                 dlq_hdr_t  *que,
                 obj_template_t *obj)
 {
@@ -423,7 +423,7 @@ OUTPUTS:
 *********************************************************************/
 static status_t 
     consume_semi_lbrace (tk_chain_t *tkc,
-                         ncx_module_t  *mod,
+                         ncx_module_t *mod,
                          obj_template_t *obj,
                          boolean *done)
 {
@@ -482,7 +482,7 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_anyxml (tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     dlq_hdr_t  *que,
                     obj_template_t *parent,
                     grp_template_t *grp)
@@ -662,7 +662,7 @@ static status_t
 static status_t 
     consume_container (yang_pcb_t *pcb,
                        tk_chain_t *tkc,
-                       ncx_module_t  *mod,
+                       ncx_module_t *mod,
                        dlq_hdr_t  *que,
                        obj_template_t *parent,
                        grp_template_t *grp)
@@ -851,7 +851,7 @@ static status_t
 static status_t 
     consume_leaf (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   dlq_hdr_t  *que,
                   obj_template_t *parent,
                   grp_template_t *grp)
@@ -1077,7 +1077,7 @@ static status_t
 static status_t 
     consume_leaflist (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-                      ncx_module_t  *mod,
+                      ncx_module_t *mod,
                       dlq_hdr_t  *que,
                       obj_template_t *parent,
                       grp_template_t *grp)
@@ -1304,7 +1304,7 @@ static status_t
 static status_t 
     consume_list (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   dlq_hdr_t  *que,
                   obj_template_t *parent,
                   grp_template_t *grp)
@@ -1572,7 +1572,7 @@ static status_t
 static status_t 
     consume_case (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   dlq_hdr_t *caseQ,
                   obj_template_t *parent,
                   boolean withcase)
@@ -1804,7 +1804,7 @@ static status_t
 static status_t 
     consume_choice (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     dlq_hdr_t  *que,
                     obj_template_t *parent,
                     grp_template_t *grp)
@@ -2070,7 +2070,7 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_refine (tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     dlq_hdr_t *que,
                     obj_template_t *parent)
 {
@@ -2292,7 +2292,7 @@ static status_t
 static status_t 
     consume_uses (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   dlq_hdr_t  *que,
                   obj_template_t *parent,
                   grp_template_t *grp)
@@ -2494,7 +2494,7 @@ static status_t
 static status_t 
     consume_rpcio (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    dlq_hdr_t  *que,
                    obj_template_t *parent)
 {
@@ -2648,7 +2648,7 @@ static status_t
 static status_t 
     consume_augdata (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      dlq_hdr_t *que,
                      obj_template_t *parent)
 {
@@ -2749,7 +2749,7 @@ static status_t
 static status_t 
     consume_augment (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      dlq_hdr_t *que,
                      obj_template_t *parent,
                      grp_template_t *grp)
@@ -2922,7 +2922,7 @@ static status_t
 static status_t 
     consume_case_datadef (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-                          ncx_module_t  *mod,
+                          ncx_module_t *mod,
                           dlq_hdr_t *que,
                           obj_template_t *parent)
 {
@@ -3027,7 +3027,7 @@ static status_t
 static status_t 
     consume_rpc (yang_pcb_t *pcb,
                  tk_chain_t *tkc,
-                 ncx_module_t  *mod,
+                 ncx_module_t *mod,
                  dlq_hdr_t  *que,
                  obj_template_t *parent,
                  grp_template_t *grp)
@@ -3256,7 +3256,7 @@ static status_t
 static status_t 
     consume_notif (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    dlq_hdr_t  *que,
                    obj_template_t *parent,
                    grp_template_t *grp)
@@ -3419,7 +3419,7 @@ static status_t
 static status_t 
     apply_object_deviations (yang_pcb_t *pcb,
                              tk_chain_t *tkc,
-                             ncx_module_t  *mod,
+                             ncx_module_t *mod,
                              obj_template_t *targobj,
                              obj_deviation_t *deviation,
                              boolean *deleted)
@@ -3952,7 +3952,7 @@ static status_t
 *********************************************************************/
 static status_t 
     check_deviate_collision (tk_chain_t *tkc,
-                             ncx_module_t  *mod,
+                             ncx_module_t *mod,
                              obj_deviate_t *devi,
                              dlq_hdr_t *deviateQ)
 {
@@ -4091,7 +4091,7 @@ static status_t
 *********************************************************************/
 static status_t 
     normalize_deviationQ (tk_chain_t *tkc,
-                          ncx_module_t  *mod)
+                          ncx_module_t *mod)
 {
     obj_deviation_t  *curdev, *checkdev, *nextdev;
     obj_deviate_t    *deviate;
@@ -4183,7 +4183,7 @@ static status_t
 static status_t 
     consume_deviate (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      obj_deviation_t *deviation)
 {
     obj_deviate_t    *devi;
@@ -4707,7 +4707,7 @@ static status_t
 *********************************************************************/
 static status_t 
     check_parent (tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   obj_template_t *obj)
 {
     status_t      res;
@@ -4792,7 +4792,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_default_parm (tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    obj_template_t *obj)
 {
     obj_template_t    *targobj;
@@ -4857,7 +4857,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_mustQ (tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    obj_template_t *obj)
 {
     xpath_pcb_t    *must;
@@ -4924,7 +4924,7 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_when (ncx_module_t  *mod,
+    resolve_when (ncx_module_t *mod,
                   xpath_pcb_t *when,
                   obj_template_t *obj)
 {
@@ -4961,7 +4961,7 @@ static status_t
 static status_t 
     resolve_metadata (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-                      ncx_module_t  *mod,
+                      ncx_module_t *mod,
                       obj_template_t *obj)
 {
     dlq_hdr_t            *que;
@@ -5136,7 +5136,7 @@ static status_t
 static status_t 
     resolve_container (yang_pcb_t *pcb,
                        tk_chain_t *tkc,
-                       ncx_module_t  *mod,
+                       ncx_module_t *mod,
                        obj_container_t *con,
                        obj_template_t *obj,
                        boolean redo)
@@ -5203,7 +5203,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_container_final (tk_chain_t *tkc,
-                             ncx_module_t  *mod,
+                             ncx_module_t *mod,
                              obj_template_t *obj,
                              boolean ingrouping)
 {
@@ -5268,7 +5268,7 @@ static status_t
 static status_t 
     resolve_leaf (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   obj_leaf_t *leaf,
                   obj_template_t *obj,
                   boolean redo)
@@ -5286,7 +5286,7 @@ static status_t
     }
 
     /* check for leaf only since anyxml has no type */
-    if (obj->objtype == OBJ_TYP_LEAF &&(!obj_is_refine(obj) || !redo)) {
+    if (obj->objtype == OBJ_TYP_LEAF && (!obj_is_refine(obj) || !redo)) {
         res = yang_typ_resolve_type(pcb,
                                     tkc, 
                                     mod, 
@@ -5323,7 +5323,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_leaf_final (tk_chain_t *tkc,
-                        ncx_module_t  *mod,
+                        ncx_module_t *mod,
                         obj_template_t *obj,
                         boolean ingrouping)
 {
@@ -5334,7 +5334,7 @@ static status_t
     res = check_parent(tkc, mod, obj);
 
     if (obj->flags & OBJ_FL_MANDATORY) {
-        /* if this is an ANYXML idefval will not be set */
+        /* if this is an ANYXML defval will not be set */
         if (obj->def.leaf->defval) {
             log_error("\nError: default-stmt not allowed for mandatory leaf "
                       "'%s'", obj_get_name(obj));
@@ -5393,7 +5393,7 @@ static status_t
 static status_t 
     resolve_leaflist (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-                      ncx_module_t  *mod,
+                      ncx_module_t *mod,
                       obj_leaflist_t *llist,
                       obj_template_t *obj,
                       boolean redo)
@@ -5449,7 +5449,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_leaflist_final (tk_chain_t *tkc,
-                            ncx_module_t  *mod,
+                            ncx_module_t *mod,
                             obj_template_t *obj)
 {
     obj_leaflist_t *llist = obj->def.leaflist;
@@ -5495,7 +5495,7 @@ static status_t
 static status_t 
     get_list_key (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   obj_list_t    *list,
                   obj_template_t *obj)
 {
@@ -5720,7 +5720,7 @@ static status_t
 static status_t 
     resolve_list (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   obj_list_t *list,
                   obj_template_t *obj,
                   boolean redo)
@@ -5792,7 +5792,7 @@ static status_t
 static status_t 
     get_unique_comps (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-                      ncx_module_t  *mod,
+                      ncx_module_t *mod,
                       obj_list_t *list,
                       obj_template_t *obj,
                       obj_unique_t *uni)
@@ -6014,7 +6014,7 @@ static status_t
 static status_t 
     resolve_list_final (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-                        ncx_module_t  *mod,
+                        ncx_module_t *mod,
                         obj_list_t *list,
                         obj_template_t *obj)
 {
@@ -6107,7 +6107,7 @@ static status_t
 static status_t 
     resolve_case (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   obj_case_t *cas,
                   boolean redo)
 {
@@ -6137,7 +6137,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_case_final (tk_chain_t *tkc,
-                        ncx_module_t  *mod,
+                        ncx_module_t *mod,
                         obj_template_t *obj)
 {
     status_t res;
@@ -6169,7 +6169,7 @@ static status_t
 static status_t 
     resolve_choice (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     obj_choice_t *choic,
                     boolean redo)
 {
@@ -6204,7 +6204,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_choice_final (tk_chain_t *tkc,
-                          ncx_module_t  *mod,
+                          ncx_module_t *mod,
                           obj_template_t *obj,
                           boolean ingrouping)
 {
@@ -6301,7 +6301,7 @@ static status_t
 *********************************************************************/
 static status_t 
     check_refine_allowed (tk_chain_t *tkc,
-                          ncx_module_t  *mod,
+                          ncx_module_t *mod,
                           obj_template_t *refineobj,
                           obj_template_t *targobj)
 {
@@ -6459,7 +6459,7 @@ static status_t
 *********************************************************************/
 static status_t 
     combine_refine_objects (tk_chain_t *tkc,
-                            ncx_module_t  *mod,
+                            ncx_module_t *mod,
                             obj_template_t *keepobj,
                             obj_template_t *mergeobj,
                             obj_template_t *targobj)
@@ -6701,7 +6701,7 @@ static status_t
 static status_t 
     resolve_uses (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   obj_uses_t *uses,
                   obj_template_t *obj)
 {
@@ -6918,7 +6918,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_uses_final (tk_chain_t *tkc,
-                        ncx_module_t  *mod,
+                        ncx_module_t *mod,
                         obj_template_t *obj)
 {
     status_t        res;
@@ -6951,7 +6951,7 @@ static status_t
 static status_t 
     expand_uses (yang_pcb_t *pcb,
                  tk_chain_t *tkc,
-                 ncx_module_t  *mod,
+                 ncx_module_t *mod,
                  obj_template_t *obj,
                  dlq_hdr_t *datadefQ)
 {
@@ -7168,7 +7168,7 @@ static status_t
 static status_t 
     resolve_augment (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      obj_augment_t *aug,
                      obj_template_t *obj)
 {
@@ -7243,7 +7243,7 @@ static status_t
 static status_t 
     expand_augment (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-                    ncx_module_t  *mod,
+                    ncx_module_t *mod,
                     obj_template_t *obj,
                     dlq_hdr_t *datadefQ)
 {
@@ -7634,7 +7634,7 @@ static status_t
 static status_t 
     resolve_augment_final (yang_pcb_t *pcb,
                            tk_chain_t *tkc,
-                           ncx_module_t  *mod,
+                           ncx_module_t *mod,
                            obj_template_t *obj)
 {
     obj_augment_t     *aug;
@@ -7702,7 +7702,7 @@ static status_t
 static status_t 
     resolve_deviation (yang_pcb_t *pcb,
                        tk_chain_t *tkc,
-                       ncx_module_t  *mod,
+                       ncx_module_t *mod,
                        obj_deviation_t *deviation)
 {
     obj_deviate_t     *devi, *nextdevi;
@@ -8310,7 +8310,7 @@ static status_t
 static status_t 
     resolve_rpc (yang_pcb_t *pcb,
                  tk_chain_t *tkc,
-                 ncx_module_t  *mod,
+                 ncx_module_t *mod,
                  obj_rpc_t *rpc,
                  obj_template_t *obj,
                  boolean redo)
@@ -8368,7 +8368,7 @@ static status_t
 static status_t 
     resolve_rpcio (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    obj_rpcio_t *rpcio,
                    obj_template_t *obj,
                    boolean redo)
@@ -8427,7 +8427,7 @@ static status_t
 static status_t 
     resolve_notif (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    obj_notif_t *notif,
                    obj_template_t *obj,
                    boolean redo)
@@ -8490,7 +8490,7 @@ static status_t
 static status_t 
     resolve_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      obj_template_t *testobj,
                      boolean redo)
 {
@@ -8647,7 +8647,7 @@ static status_t
 static status_t 
     resolve_datadefs (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-                      ncx_module_t  *mod,
+                      ncx_module_t *mod,
                       dlq_hdr_t *datadefQ,
                       boolean redo)
 {
@@ -8700,7 +8700,7 @@ static status_t
 static status_t 
     consume_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-                     ncx_module_t  *mod,
+                     ncx_module_t *mod,
                      dlq_hdr_t *que,
                      obj_template_t *parent,
                      grp_template_t *grp)
@@ -8809,7 +8809,7 @@ static status_t
 static status_t 
     resolve_iffeatureQ (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-                        ncx_module_t  *mod,
+                        ncx_module_t *mod,
                         obj_template_t *obj)
 {
     ncx_feature_t    *testfeature;
@@ -8893,7 +8893,7 @@ static status_t
 *********************************************************************/
 static status_t 
     check_iffeature_mismatch (tk_chain_t *tkc,
-                              ncx_module_t  *mod,
+                              ncx_module_t *mod,
                               obj_template_t *ancestor,
                               obj_template_t *testobj,
                               ncx_iffeature_t *iff)
@@ -8940,7 +8940,7 @@ static status_t
 *********************************************************************/
 static status_t 
     check_one_when_mismatch (tk_chain_t *tkc,
-                             ncx_module_t  *mod,
+                             ncx_module_t *mod,
                              obj_template_t *test1,
                              obj_template_t *test2)
 {
@@ -9008,7 +9008,7 @@ static status_t
 *********************************************************************/
 static status_t 
     check_conditional_mismatch (tk_chain_t *tkc,
-                                ncx_module_t  *mod,
+                                ncx_module_t *mod,
                                 obj_template_t *ancestor,
                                 obj_template_t *child)
 {
@@ -9167,7 +9167,7 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_xpath (tk_chain_t *tkc,
-                   ncx_module_t  *mod,
+                   ncx_module_t *mod,
                    dlq_hdr_t *datadefQ)
 {
     obj_template_t        *testobj;
@@ -9431,7 +9431,7 @@ static status_t
 status_t 
     yang_obj_consume_datadef (yang_pcb_t *pcb,
                               tk_chain_t *tkc,
-                              ncx_module_t  *mod,
+                              ncx_module_t *mod,
                               dlq_hdr_t *que,
                               obj_template_t *parent)
 {
@@ -9482,7 +9482,7 @@ status_t
 status_t 
     yang_obj_consume_datadef_grp (yang_pcb_t *pcb,
                                   tk_chain_t *tkc,
-                                  ncx_module_t  *mod,
+                                  ncx_module_t *mod,
                                   dlq_hdr_t *que,
                                   obj_template_t *parent,
                                   grp_template_t *grp)
@@ -9528,7 +9528,7 @@ status_t
 status_t 
     yang_obj_consume_rpc (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-                          ncx_module_t  *mod)
+                          ncx_module_t *mod)
 {
     status_t         res;
 
@@ -9574,7 +9574,7 @@ status_t
 status_t 
     yang_obj_consume_notification (yang_pcb_t *pcb,
                                    tk_chain_t *tkc,
-                                   ncx_module_t  *mod)
+                                   ncx_module_t *mod)
 {
     status_t         res;
 
@@ -9620,7 +9620,7 @@ status_t
 status_t 
     yang_obj_consume_augment (yang_pcb_t *pcb,
                               tk_chain_t *tkc,
-                              ncx_module_t  *mod)
+                              ncx_module_t *mod)
 {
     status_t         res;
 
@@ -9667,7 +9667,7 @@ status_t
 status_t 
     yang_obj_consume_deviation (yang_pcb_t *pcb,
                                 tk_chain_t *tkc,
-                                ncx_module_t  *mod)
+                                ncx_module_t *mod)
 {
     obj_deviation_t  *dev;
     const xmlChar    *val;
@@ -9841,7 +9841,7 @@ status_t
 status_t 
     yang_obj_resolve_datadefs (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-                               ncx_module_t  *mod,
+                               ncx_module_t *mod,
                                dlq_hdr_t *datadefQ)
 {
     status_t    retres;
@@ -9885,7 +9885,7 @@ status_t
 status_t 
     yang_obj_resolve_uses (yang_pcb_t *pcb,
                            tk_chain_t *tkc,
-                           ncx_module_t  *mod,
+                           ncx_module_t *mod,
                            dlq_hdr_t *datadefQ)
 {
     obj_template_t  *testobj, *casobj;
@@ -10180,7 +10180,7 @@ status_t
 status_t 
     yang_obj_resolve_deviations (yang_pcb_t *pcb,
                                  tk_chain_t *tkc,
-                                 ncx_module_t  *mod)
+                                 ncx_module_t *mod)
 {
     obj_deviation_t        *deviation;
     ncx_save_deviations_t  *savedev, *nextdev;
@@ -10326,7 +10326,7 @@ status_t
 status_t 
     yang_obj_resolve_final (yang_pcb_t *pcb,
                             tk_chain_t *tkc,
-                            ncx_module_t  *mod,
+                            ncx_module_t *mod,
                             dlq_hdr_t *datadefQ,
                             boolean ingrouping)
 {
@@ -10390,9 +10390,8 @@ status_t
             }
             break;
         case OBJ_TYP_LEAF:
-            res = resolve_leaf_final(tkc, mod, testobj, ingrouping);
-            break;
         case OBJ_TYP_ANYXML:
+            res = resolve_leaf_final(tkc, mod, testobj, ingrouping);
             break;
         case OBJ_TYP_LEAF_LIST:
             res = resolve_leaflist_final(tkc, mod, testobj);
@@ -10547,7 +10546,7 @@ status_t
 status_t 
     yang_obj_top_resolve_final (yang_pcb_t *pcb,
                                 tk_chain_t *tkc,
-                                ncx_module_t  *mod,
+                                ncx_module_t *mod,
                                 dlq_hdr_t *datadefQ)
 {
     obj_template_t  *testobj;
@@ -10624,7 +10623,7 @@ status_t
 *********************************************************************/
 status_t 
     yang_obj_resolve_xpath (tk_chain_t *tkc,
-                            ncx_module_t  *mod,
+                            ncx_module_t *mod,
                             dlq_hdr_t *datadefQ)
 {
     //ncx_include_t      *inc;

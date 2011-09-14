@@ -1587,12 +1587,7 @@ void
         isdefault = val_is_default(out);
    }
 
-    /* check if this is an external file to send */
-    if (out->btyp == NCX_BT_EXTERN) {
-        val_write_extern(scb, out);
-    } else if (out->btyp == NCX_BT_INTERN) {
-        val_write_intern(scb, out);
-    } else if (out->btyp==NCX_BT_EMPTY && !VAL_BOOL(out)) {
+    if (out->btyp==NCX_BT_EMPTY && !VAL_BOOL(out)) {
         /* this is a false (not present) flag */
         ;
     } else if (out->btyp == NCX_BT_IDREF) {

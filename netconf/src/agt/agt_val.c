@@ -553,15 +553,21 @@ static status_t
                           val_get_mod_name(val),
                           val->name);
             }
-            if (res == NO_ERR && 
-                (editop == OP_EDITOP_REPLACE ||
-                 editop == OP_EDITOP_LOAD)) {
-                res = handle_subtree_callback(cbtyp,
-                                              editop,
-                                              scb,
-                                              msg,
-                                              newnode,
-                                              curnode);
+            if (res == NO_ERR) {
+                switch (editop) {
+                case OP_EDITOP_CREATE:
+                case OP_EDITOP_MERGE:
+                case OP_EDITOP_REPLACE:
+                case OP_EDITOP_LOAD:
+                    res = handle_subtree_callback(cbtyp,
+                                                  editop,
+                                                  scb,
+                                                  msg,
+                                                  newnode,
+                                                  curnode);
+                default:
+                    ;
+                }
             }
             return res;
         } else if (!lookparent) {

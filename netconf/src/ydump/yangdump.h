@@ -254,6 +254,7 @@ typedef struct yangdump_cvtparms_t_ {
     uint32          stat_reports;
     uint32          bufflen;
     boolean         firstdone;
+    boolean         isuser;
     dlq_hdr_t       savedevQ;
     tk_chain_t     *tkc;   /* if docmode for format=html|yang */
 } yangdump_cvtparms_t;

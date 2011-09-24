@@ -710,6 +710,78 @@ extern val_value_t *
 
 
 /********************************************************************
+* FUNCTION agt_make_uint64_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == number value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+extern val_value_t *
+    agt_make_uint64_leaf (obj_template_t *parentobj,
+                          const xmlChar *leafname,
+                          uint64 leafval,
+                          status_t *res);
+
+
+/********************************************************************
+* FUNCTION agt_make_int64_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == integer number value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+extern val_value_t *
+    agt_make_int64_leaf (obj_template_t *parentobj,
+                         const xmlChar *leafname,
+                         int64 leafval,
+                         status_t *res);
+
+
+/********************************************************************
+* FUNCTION agt_make_idref_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == identityref value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+extern val_value_t *
+    agt_make_idref_leaf (obj_template_t *parentobj,
+                         const xmlChar *leafname,
+                         const val_idref_t *leafval,
+                         status_t *res);
+
+
+/********************************************************************
 * FUNCTION agt_make_list
 *
 * make a val_value_t struct for a specified list
@@ -998,6 +1070,31 @@ extern status_t
     agt_set_with_defaults (ses_cb_t *scb,
                            rpc_msg_t *msg,
                            xml_node_t *methnode);
+
+
+/********************************************************************
+* FUNCTION agt_get_key_value
+*
+* Get the next expected key value in the ancestor chain
+* Used in Yuma SIL code to invoke User SIL callbacks with key values
+*
+* INPUTS:
+*   startval == value node to start from
+*   lastkey == address of last key leaf found in ancestor chain
+*              caller maintains this state-var as the anscestor
+*              keys are traversed
+*             *lastkey == NULL to get the first key
+*
+* OUTPUTS:
+*   *lastkey updated with the return value if key found
+*
+* RETURNS:
+*   value node to use (do not free!!!)
+*   NULL if some bad error like no next key found
+*********************************************************************/
+extern val_value_t *
+    agt_get_key_value (val_value_t *startval,
+                       val_value_t **lastkey);
 
 
 #endif	    /* _H_agt_util */

@@ -155,6 +155,54 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION xpath_yang_validate_path_ex
+* 
+* Validate the previously parsed leafref path
+*   - QNames are valid
+*   - object structure referenced is valid
+*   - objects are all 'config true'
+*   - target object is a leaf
+*   - leafref represents a single instance
+* 
+* A 2-pass validation is used in case the path expression
+* is defined within a grouping.  This pass is
+* used only on cooked (real) objects
+*
+* Called after all 'uses' and 'augment' expansion
+* so validation against cooked object tree can be done
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    mod == module containing the 'obj' (in progress)
+*        == NULL if no object in progress
+*    obj == object using the leafref data type
+*    pcb == the leafref parser control block, possibly
+*           cloned from from the typdef
+*    schemainst == TRUE if ncx:schema-instance string
+*               == FALSE to use the pcb->source field 
+*                  to determine the exact parse mode
+*    leafobj == address of the return target object
+*    logerrors == TRUE to log errors, FALSE to suppress errors
+*              val_parse uses FALSE if basetype == NCX_BT_UNION
+*
+* OUTPUTS:
+*   *leafobj == the target leaf found by parsing the path (NO_ERR)
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    xpath_yang_validate_path_ex (ncx_module_t *mod,
+                                 obj_template_t *obj,
+                                 xpath_pcb_t *pcb,
+                                 boolean schemainst,
+                                 obj_template_t **leafobj,
+                                 boolean logerrors);
+
+
+/********************************************************************
 * FUNCTION xpath_yang_validate_xmlpath
 * 
 * Validate an instance-identifier expression

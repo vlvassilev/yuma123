@@ -3182,6 +3182,31 @@ static obj_template_t *
 
 
 
+/********************************************************************
+* FUNCTION count_keys
+* 
+* Count the keys; walker function
+*
+* INPUTS:
+*   obj == the key object
+*   cookie1 == the running count
+*   cookie2 = not used
+* RETURNS:
+*   TRUE to keep walking
+*********************************************************************/
+static boolean
+    count_keys (obj_template_t *obj,
+                void *cookie1,
+                void *cookie2)
+{
+    uint32 *count = (uint32 *)cookie1;
+    (void)obj;
+    (void)cookie2;
+    (*count)++;
+    return TRUE;
+} /* count_keys */
+
+
 /**************** E X T E R N A L    F U N C T I O N S    **********/
 
 
@@ -6776,6 +6801,98 @@ uint32
     return dlq_count(&obj->def.list->keyQ);
 
 }  /* obj_key_count */
+
+
+/********************************************************************
+* FUNCTION obj_key_count_to_root
+* 
+* Check ancestor-or-self nodes until root reached
+* Find all lists; Count the number of keys
+*
+* INPUTS:
+*   obj == object to start check from
+* RETURNS:
+*   number of keys in ancestor-or-self nodes
+*********************************************************************/
+uint32
+    obj_key_count_to_root (obj_template_t *obj)
+{
+    uint32 count = 0;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    if (obj_is_root(obj)) {
+        return 0;
+    }
+
+    obj_traverse_keys(obj, (void *)&count, NULL, count_keys);
+
+    return count;
+    
+}  /* obj_key_count_to_root */
+
+
+/********************************************************************
+* FUNCTION obj_traverse_keys
+* 
+* Check ancestor-or-self nodes until root reached
+* Find all lists; For each list, starting with the
+* closest to root, invoke the callback function
+* for each of the key objects in order
+*
+* INPUTS:
+*   obj == object to start check from
+*   cookie1 == cookie1 to pass to the callback function
+*   cookie2 == cookie2 to pass to the callback function
+*   walkerfn == walker callback function
+*           returns FALSE to terminate traversal
+*
+*********************************************************************/
+void
+    obj_traverse_keys (obj_template_t *obj,
+                       void *cookie1,
+                       void *cookie2,
+                       obj_walker_fn_t walkerfn)
+{
+    obj_key_t *objkey;
+
+#ifdef DEBUG
+    if (!obj || !walkerfn) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (obj_is_root(obj)) {
+        return;
+    }
+
+    if (obj->parent != NULL) {
+        obj_traverse_keys(obj->parent, cookie1, cookie2, walkerfn);
+    }
+
+    if (obj->objtype != OBJ_TYP_LIST) {
+        return;
+    }
+
+    for (objkey = obj_first_key(obj);
+         objkey != NULL;
+         objkey = obj_next_key(objkey)) {
+
+        if (objkey->keyobj) {
+            boolean ret = (*walkerfn)(objkey->keyobj, cookie1, cookie2);
+            if (!ret) {
+                return;
+            }
+        } // else some error; skip this key!!!
+    }
+    
+}  /* obj_traverse_keys */
 
 
 /********************************************************************

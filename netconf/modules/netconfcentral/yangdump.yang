@@ -138,6 +138,12 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
+    revision 2011-09-12 {
+       description 
+          "Add --format=uc and --format=uh to support
+           generation of separate SIL user functions";
+    }
+
     revision 2011-01-28 {
        description 
           "Change output leaf to ncxapp:OutputParm grouping";
@@ -189,12 +195,33 @@ module yangdump {
            }
            enum h {
               description 
-                 "Generate server instrumentation library H file.";
+                 "Generate combined server instrumentation library 
+                  H file. Compatible with version 1 'h' format";
            }
-
            enum c {
               description 
-                 "Generate server instrumentation library C file.";
+                 "Generate combined server instrumentation library 
+                  C file. Compatible with version 1 'c' format";
+           }
+           enum uh {
+              description 
+                 "Generate server instrumentation library 
+                  user callback H file.";
+           }
+           enum uc {
+              description 
+                 "Generate server instrumentation library 
+                  user callback C file.";
+           }
+           enum yh {
+              description 
+                 "Generate split server instrumentation library 
+                  user callback H file.";
+           }
+           enum yc {
+              description 
+                 "Generate server instrumentation library 
+                  user callback H file.";
            }
            enum yin {
               description 

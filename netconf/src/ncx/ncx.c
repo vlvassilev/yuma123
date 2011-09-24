@@ -4751,6 +4751,14 @@ ncx_cvttyp_t
         return NCX_CVTTYP_YIN;
     } else if (!xml_strcmp(NCX_EL_TG2, (const xmlChar *)str)) {
         return NCX_CVTTYP_TG2;
+    } else if (!xml_strcmp(NCX_EL_UC, (const xmlChar *)str)) {
+        return NCX_CVTTYP_UC;
+    } else if (!xml_strcmp(NCX_EL_UH, (const xmlChar *)str)) {
+        return NCX_CVTTYP_UH;
+    } else if (!xml_strcmp(NCX_EL_YC, (const xmlChar *)str)) {
+        return NCX_CVTTYP_YC;
+    } else if (!xml_strcmp(NCX_EL_YH, (const xmlChar *)str)) {
+        return NCX_CVTTYP_YH;
     } else {
         return NCX_CVTTYP_NONE;
     }
@@ -7892,7 +7900,7 @@ ncx_name_match_t
 #ifdef DEBUG
     if (str == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_CVTTYP_NONE;
+        return NCX_MATCH_NONE;
     }
 #endif
 

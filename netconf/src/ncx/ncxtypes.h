@@ -693,7 +693,11 @@ typedef enum ncx_cvttyp_t_ {
     NCX_CVTTYP_H,
     NCX_CVTTYP_C,
     NCX_CVTTYP_YIN,
-    NCX_CVTTYP_TG2
+    NCX_CVTTYP_TG2,
+    NCX_CVTTYP_YH,
+    NCX_CVTTYP_YC,
+    NCX_CVTTYP_UH,
+    NCX_CVTTYP_UC
 } ncx_cvttyp_t;
 
 

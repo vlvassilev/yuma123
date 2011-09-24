@@ -157,7 +157,23 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+#ifdef DEBUG
 #define AGT_UTIL_DEBUG  1
+#endif
+
+
+/********************************************************************
+*								    *
+*			     T Y P E S				    *
+*								    *
+*********************************************************************/
+
+typedef struct agt_keywalker_parms_t_ {
+    val_value_t  *lastkey;
+    val_value_t  *retkey;
+    boolean       usenext;
+    boolean       done;
+}  agt_keywalker_parms_t;
 
 
 /********************************************************************
@@ -301,6 +317,55 @@ static status_t
     return res;
 
 }  /* add_default_leaf */
+
+
+/********************************************************************
+* FUNCTION get_key_value
+*
+* Get the next expected key value in the ancestor chain
+*
+* val_walker_fn prototype
+*
+* INPUTS:
+*   val == value node found in descendant search
+*   cookie1 == cookie1 value passed to start of walk
+*   cookie2 == cookie2 value passed to start of walk
+*
+* RETURNS:
+*   TRUE if walk should continue
+*   FALSE if walk should terminate 
+*/
+static boolean
+    get_key_value (val_value_t *val,
+                   void *cookie1,
+                   void *cookie2)
+{
+    agt_keywalker_parms_t *parms;
+
+#ifdef DEBUG
+    if (val == NULL || cookie1 == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    parms = (agt_keywalker_parms_t *)cookie1;
+    (void)cookie2;
+
+    if (parms->done) {
+        return FALSE;
+    } else if (parms->lastkey == NULL || parms->usenext) {
+        parms->lastkey = val;
+        parms->retkey = val;
+        parms->done = TRUE;
+        return FALSE;
+    } else if (parms->lastkey == val) {
+        parms->usenext = TRUE;
+        return TRUE;
+    }
+    return TRUE;
+
+}  /* get_key_value */
 
 
 /************  E X T E R N A L    F U N C T I O N S    **************/
@@ -2233,6 +2298,163 @@ val_value_t *
 
 
 /********************************************************************
+* FUNCTION agt_make_uint64_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == number value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_uint64_leaf (obj_template_t *parentobj,
+                          const xmlChar *leafname,
+                          uint64 leafval,
+                          status_t *res)
+{
+    xmlChar numbuff[NCX_MAX_NUMLEN];
+
+#ifdef DEBUG
+    if (parentobj == NULL || leafname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    sprintf((char *)numbuff, "%llu", (long long unsigned int)leafval);
+
+    return agt_make_leaf(parentobj,
+                         leafname,
+                         numbuff,
+                         res);
+
+}  /* agt_make_uint64_leaf */
+
+
+/********************************************************************
+* FUNCTION agt_make_int64_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == integer number value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_int64_leaf (obj_template_t *parentobj,
+                         const xmlChar *leafname,
+                         int64 leafval,
+                         status_t *res)
+{
+    xmlChar numbuff[NCX_MAX_NUMLEN];
+
+#ifdef DEBUG
+    if (parentobj == NULL || leafname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    sprintf((char *)numbuff, "%lld", (long long int)leafval);
+
+    return agt_make_leaf(parentobj,
+                         leafname,
+                         numbuff,
+                         res);
+
+}  /* agt_make_int64_leaf */
+
+
+/********************************************************************
+* FUNCTION agt_make_idref_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == identityref value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_idref_leaf (obj_template_t *parentobj,
+                         const xmlChar *leafname,
+                         const val_idref_t *leafval,
+                         status_t *res)
+{
+    obj_template_t *leafobj;
+    val_value_t    *newval;
+
+#ifdef DEBUG
+    if (parentobj == NULL || leafname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    leafobj = obj_find_child(parentobj,
+                             obj_get_mod_name(parentobj),
+                             leafname);
+    if (!leafobj) {
+        *res =ERR_NCX_DEF_NOT_FOUND;
+        return NULL;
+    }
+    if (!(leafobj->objtype == OBJ_TYP_LEAF ||
+          leafobj->objtype == OBJ_TYP_LEAF_LIST)) {
+        *res = ERR_NCX_WRONG_TYPE;
+        return NULL;
+    }
+    if (obj_get_basetype(leafobj) != NCX_BT_IDREF) {
+        *res = ERR_NCX_WRONG_TYPE;
+        return NULL;
+    }
+        
+    newval = val_new_value();
+    if (newval == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    val_init_from_template(newval, leafobj);
+
+    newval->v.idref.name = xml_strdup(leafval->name);
+    if (newval->v.idref.name == NULL) {
+        val_free_value(newval);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    newval->v.idref.nsid = leafval->nsid;
+    newval->v.idref.identity = leafval->identity;
+
+    return newval;
+
+}  /* agt_make_idref_leaf */
+
+
+/********************************************************************
 * FUNCTION agt_make_list
 *
 * make a val_value_t struct for a specified list
@@ -3004,6 +3226,71 @@ status_t
     return res;
 
 }  /* agt_set_with_defaults */
+
+
+/********************************************************************
+* FUNCTION agt_get_key_value
+*
+* Get the next expected key value in the ancestor chain
+* Used in Yuma SIL code to invoke User SIL callbacks with key values
+*
+* INPUTS:
+*   startval == value node to start from
+*   lastkey == address of last key leaf found in ancestor chain
+*              caller maintains this state-var as the anscestor
+*              keys are traversed
+*             *lastkey == NULL to get the first key
+*
+* OUTPUTS:
+*   *lastkey updated with the return value if key found
+*
+* RETURNS:
+*   value node to use (do not free!!!)
+*   NULL if some bad error like no next key found
+*********************************************************************/
+val_value_t *
+    agt_get_key_value (val_value_t *startval,
+                       val_value_t **lastkey)
+{
+    agt_keywalker_parms_t  parms;
+
+#ifdef DEBUG
+    if (startval == NULL || lastkey == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    parms.lastkey = *lastkey;
+    parms.retkey = NULL;
+    parms.usenext = FALSE;
+    parms.done = FALSE;
+
+#ifdef AGT_UTIL_DEBUG
+    if (LOGDEBUG3) {
+        log_debug3("\nStart key walk for %s", startval->name);
+        if (*lastkey) {
+            log_debug3("  lastkey=%s", (*lastkey)->name);
+        }
+    }
+#endif
+
+    val_traverse_keys(startval, (void *)&parms, NULL, get_key_value);
+
+#ifdef AGT_UTIL_DEBUG
+    if (LOGDEBUG3) {
+        log_debug3("\nEnd key walk for %s:", startval->name);
+        if (parms.retkey) {
+            log_debug3("  retkey:\n");
+            val_dump_value(parms.retkey, 2);
+        }
+    }
+#endif
+
+    *lastkey = parms.retkey;
+    return parms.retkey;
+
+}  /* agt_get_key_value */
 
 
 /* END file agt_util.c */

@@ -981,6 +981,30 @@ extern val_value_t *
                    boolean *malloced,
                    status_t *res);
 
+
+/********************************************************************
+* FUNCTION val_traverse_keys
+* 
+* Check ancestor-or-self nodes until root reached
+* Find all lists; For each list, starting with the
+* closest to root, invoke the callback function
+* for each of the key objects in order
+*
+* INPUTS:
+*   val == value node to start check from
+*   cookie1 == cookie1 to pass to the callback function
+*   cookie2 == cookie2 to pass to the callback function
+*   walkerfn == walker callback function
+*           returns FALSE to terminate traversal
+*
+*********************************************************************/
+extern void
+    val_traverse_keys (val_value_t *val,
+                       void *cookie1,
+                       void *cookie2,
+                       val_walker_fn_t walkerfn);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

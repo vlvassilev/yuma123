@@ -222,13 +222,13 @@ extern "C" {
 
 #define VAL_INT(V)     ((V)->v.num.i)
 
-#define VAL_INT8(V)     ((V)->v.num.i)
+#define VAL_INT8(V)    ((int8)((V)->v.num.i))
 
-#define VAL_INT16(V)    ((V)->v.num.i)
+#define VAL_INT16(V)   ((int16)((V)->v.num.i))
 
 #define VAL_STR(V)     ((V)->v.str)
 
-#define VAL_INSTANCE_ID(V)    ((V)->v.str)
+#define VAL_INSTANCE_ID(V) ((V)->v.str)
 
 #define VAL_IDREF(V)    (&(V)->v.idref)
 
@@ -238,9 +238,9 @@ extern "C" {
 
 #define VAL_UINT(V)    ((V)->v.num.u)
 
-#define VAL_UINT8(V)    ((V)->v.num.u)
+#define VAL_UINT8(V)    ((uint8)((V)->v.num.u))
 
-#define VAL_UINT16(V)   ((V)->v.num.u)
+#define VAL_UINT16(V)   ((uint16)((V)->v.num.u))
 
 #define VAL_ULONG(V)   ((V)->v.num.ul)
 
@@ -320,7 +320,7 @@ typedef struct val_value_t_ {
 
     /* value editing variables */
     val_editvars_t  *editvars;              /* edit-in-progress vars */
-    status_t         res;                      /* validationt result */
+    status_t         res;                       /* validation result */
 
     /* Used by Agent only:
      * if this field is non-NULL, then the entire value node
@@ -332,9 +332,7 @@ typedef struct val_value_t_ {
 
     /* if this field is non-NULL, then a malloced value struct
      * representing the real value retrieved by 
-     * val_get_virtual_value, is cached here for XPath filtering
-     * TBD: add timestamp to reuse cached entries for some time
-     * period
+     * val_get_virtual_value, is cached here for <get>/<get-config>
      */
     struct val_value_t_ *virtualval;
     time_t               cachetime;
@@ -441,10 +439,10 @@ typedef boolean
     (*val_test_fn_t) (const val_value_t *val);
 
 
-/* child or descendent node search walker function
+/* child or descendant node search walker function
  *
  * INPUTS:
- *   val == value node found in descendent search
+ *   val == value node found in descendant search
  *   cookie1 == cookie1 value passed to start of walk
  *   cookie2 == cookie2 value passed to start of walk
  *
@@ -571,7 +569,7 @@ extern void
 * FUNCTION val_force_dname
 * 
 * Set (or reset) the name of a value struct
-* Set all descendent nodes as well
+* Set all descendant nodes as well
 * Force dname to be used, not object name backptr
 *
 * INPUTS:
@@ -650,6 +648,36 @@ extern status_t
 			   ncx_btype_t  btyp,
 			   const xmlChar *strval,
 			   ncx_errinfo_t **errinfo);
+
+
+/********************************************************************
+* FUNCTION val_string_ok_ex
+* 
+* retrieve the YANG custom error info if any 
+* Check a string to make sure the value is valid based
+* on the restrictions in the specified typdef
+* Retrieve the configured error info struct if any error
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated string type
+*    btyp == basetype of the string
+*    strval == string value to check
+*    errinfo == address of return errinfo block (may be NULL)
+*    logerrors == TRUE to log errors
+*              == FALSE to not log errors (use for NCX_BT_UNION)
+* OUTPUTS:
+*   if non-NULL: 
+*       *errinfo == error record to use if return error
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    val_string_ok_ex (typ_def_t *typdef,
+                      ncx_btype_t btyp,
+                      const xmlChar *strval,
+                      ncx_errinfo_t **errinfo,
+                      boolean logerrors);
 
 
 /********************************************************************
@@ -985,6 +1013,36 @@ extern status_t
                       const xmlChar *simval,
                       ncx_errinfo_t **errinfo,
                       ncx_module_t *mod);
+
+
+/********************************************************************
+* FUNCTION val_simval_ok_max
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*    errinfo == address of return error struct
+*    mod == module in progress to use for idref and other
+*           strings with prefixes in them
+*    logerrors == TRUE to log errors; FALSE to not log errors
+*                (use FALSE for NCX_BT_UNION)
+* OUTPUTS:
+*   if non-NULL:
+*      *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    val_simval_ok_max (typ_def_t *typdef,
+                       const xmlChar *simval,
+                       ncx_errinfo_t **errinfo,
+                       ncx_module_t *mod,
+                       boolean logerrors);
 
 
 /********************************************************************
@@ -2169,7 +2227,7 @@ extern boolean
 *            == NULL:
 *                 the first match in any namespace will
 *                 be  returned;
-*    name == name of descendent node to find
+*    name == name of descendant node to find
 *              == NULL to match any node name
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
@@ -3512,6 +3570,32 @@ extern void
     val_move_fields_for_xml (val_value_t *srcval,
                              val_value_t *destval,
                              boolean movemeta);
+
+
+/********************************************************************
+* FUNCTION val_get_first_key
+* 
+* Get the first key record if this is a list with a key-stmt
+*
+* INPUTS:
+*   val == value node to check
+*
+*********************************************************************/
+extern val_index_t *
+    val_get_first_key (val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_get_next_key
+* 
+* Get the next key record if this is a list with a key-stmt
+*
+* INPUTS:
+*   curkey == current key node
+*
+*********************************************************************/
+extern val_index_t *
+    val_get_next_key (val_index_t *curkey);
 
 
 #ifdef __cplusplus

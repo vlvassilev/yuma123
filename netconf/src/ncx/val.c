@@ -1790,7 +1790,7 @@ void
 * FUNCTION val_force_dname
 * 
 * Set (or reset) the name of a value struct
-* Set all descendent nodes as well
+* Set all descendant nodes as well
 * Force dname to be used, not object name backptr
 *
 * INPUTS:
@@ -1898,13 +1898,7 @@ status_t
                    ncx_btype_t btyp,
                    const xmlChar *strval)
 {
-#ifdef DEBUG
-    if (!typdef) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    return val_string_ok_errinfo(typdef, btyp, strval, NULL);
+    return val_string_ok_ex(typdef, btyp, strval, NULL, TRUE);
 
 } /* val_string_ok */
 
@@ -1936,11 +1930,44 @@ status_t
                            const xmlChar *strval,
                            ncx_errinfo_t **errinfo)
 {
-    xpath_pcb_t           *xpathpcb;
-    obj_template_t       *leafobj, *objroot;
-    xpath_source_t        xpath_source;
-    status_t               res;
-    ncx_num_t              len;
+    return val_string_ok_ex(typdef, btyp, strval, errinfo, TRUE);
+}
+
+
+/********************************************************************
+* FUNCTION val_string_ok_ex
+* 
+* retrieve the YANG custom error info if any 
+* Check a string to make sure the value is valid based
+* on the restrictions in the specified typdef
+* Retrieve the configured error info struct if any error
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated string type
+*    btyp == basetype of the string
+*    strval == string value to check
+*    errinfo == address of return errinfo block (may be NULL)
+*    logerrors == TRUE to log errors
+*              == FALSE to not log errors (use for NCX_BT_UNION)
+* OUTPUTS:
+*   if non-NULL: 
+*       *errinfo == error record to use if return error
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_string_ok_ex (typ_def_t *typdef,
+                      ncx_btype_t btyp,
+                      const xmlChar *strval,
+                      ncx_errinfo_t **errinfo,
+                      boolean logerrors)
+{
+    xpath_pcb_t      *xpathpcb;
+    obj_template_t   *leafobj, *objroot;
+    xpath_source_t    xpath_source;
+    status_t          res;
+    ncx_num_t         len;
 
 #ifdef DEBUG
     if (!typdef || !strval) {
@@ -2002,22 +2029,24 @@ status_t
             /* do a first pass parsing to resolve all
              * the prefixes and check well-formed XPath
              */
+            xpathpcb->logerrors = logerrors;
             res = xpath_yang_parse_path(NULL, 
                                         NULL,
                                         xpath_source,
                                         xpathpcb);
             if (res == NO_ERR) {
                 leafobj = NULL;
-                res = xpath_yang_validate_path(NULL, 
-                                               ncx_get_gen_root(), 
-                                               xpathpcb, 
-                                               (xpath_source == 
-                                                XP_SRC_INSTANCEID) 
-                                               ? FALSE : TRUE,
-                                               &leafobj);
+                res = xpath_yang_validate_path_ex(NULL, 
+                                                  ncx_get_gen_root(), 
+                                                  xpathpcb, 
+                                                  (xpath_source == 
+                                                   XP_SRC_INSTANCEID) 
+                                                  ? FALSE : TRUE,
+                                                  &leafobj, logerrors);
             }
             xpath_free_pcb(xpathpcb);
         } else {
+            xpathpcb->logerrors = logerrors;
             res = xpath1_parse_expr(NULL, 
                                     NULL,
                                     xpathpcb,
@@ -2889,7 +2918,7 @@ status_t
                            const xmlChar *simval,
                            ncx_errinfo_t **errinfo)
 {
-    return val_simval_ok_ex(typdef, simval, errinfo, NULL);
+    return val_simval_ok_max(typdef, simval, errinfo, NULL, TRUE);
 
 } /* val_simval_ok_errinfo */
 
@@ -2919,6 +2948,40 @@ status_t
                       const xmlChar *simval,
                       ncx_errinfo_t **errinfo,
                       ncx_module_t *mod)
+{
+    return val_simval_ok_max(typdef, simval, errinfo, mod, TRUE);
+
+}  /* val_simval_ok_ex */
+
+
+/********************************************************************
+* FUNCTION val_simval_ok_max
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*    errinfo == address of return error struct
+*    mod == module in progress to use for idref and other
+*           strings with prefixes in them
+*    logerrors == TRUE to log errors; FALSE to not log errors
+*                (use FALSE for NCX_BT_UNION)
+* OUTPUTS:
+*   if non-NULL:
+*      *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_simval_ok_max (typ_def_t *typdef,
+                       const xmlChar *simval,
+                       ncx_errinfo_t **errinfo,
+                       ncx_module_t *mod,
+                       boolean logerrors)
 {
     const xmlChar          *retstr, *name;
     val_value_t            *unval;
@@ -2992,17 +3055,12 @@ status_t
     case NCX_BT_FLOAT64:
         res = ncx_decode_num(simval, btyp, &num);
         if (res == NO_ERR) {
-            res = val_range_ok_errinfo(typdef, 
-                                       btyp, 
-                                       &num, 
-                                       errinfo);
+            res = val_range_ok_errinfo(typdef, btyp, &num, errinfo);
         }
         ncx_clean_num(btyp, &num);
         break;
     case NCX_BT_DECIMAL64:
-        res = ncx_decode_dec64(simval, 
-                               typ_get_fraction_digits(typdef),
-                               &num);
+        res = ncx_decode_dec64(simval, typ_get_fraction_digits(typdef), &num);
         if (res == NO_ERR) {
             res = val_range_ok(typdef, btyp, &num);
         }
@@ -3010,16 +3068,10 @@ status_t
         break;
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-        res = val_string_ok_errinfo(typdef, 
-                                    btyp, 
-                                    simval, 
-                                    errinfo);
+        res = val_string_ok_ex(typdef, btyp, simval, errinfo, logerrors);
         break;
     case NCX_BT_INSTANCE_ID:
-        res = val_string_ok_errinfo(typdef, 
-                                    btyp, 
-                                    simval, 
-                                    errinfo);
+        res = val_string_ok_ex(typdef, btyp, simval, errinfo, logerrors);
         break;
     case NCX_BT_UNION:
         unval = val_new_value();
@@ -3028,11 +3080,7 @@ status_t
         } else {
             unval->btyp = NCX_BT_UNION;
             unval->typdef = typdef;
-            res = val_union_ok_ex(typdef, 
-                                  simval, 
-                                  unval, 
-                                  errinfo,
-                                  mod);
+            res = val_union_ok_ex(typdef, simval, unval, errinfo, mod);
             val_free_value(unval);
         }
         break;
@@ -3043,28 +3091,18 @@ status_t
          */
         realtypdef = typ_get_xref_typdef(typdef);
         if (realtypdef) {
-            res = val_simval_ok_ex(realtypdef, 
-                                   simval, 
-                                   errinfo,
-                                   mod);
+            res = val_simval_ok_max(realtypdef, simval, errinfo, mod,
+                                    logerrors);
         } else {
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
     case NCX_BT_IDREF:
         identity = NULL;
-        res = val_parse_idref(mod, 
-                              simval, 
-                              &nsid, 
-                              &name, 
-                              &identity);
+        res = val_parse_idref(mod, simval, &nsid, &name, &identity);
         if (res == NO_ERR) {
             if (identity == NULL) {
-                res = val_idref_ok(typdef, 
-                                   simval, 
-                                   nsid, 
-                                   &name, 
-                                   &identity);
+                res = val_idref_ok(typdef, simval, nsid, &name, &identity);
             }
         }
         break;
@@ -3074,10 +3112,7 @@ status_t
         if (res == NO_ERR) {
             res = ncx_finish_list(typdef, &list);
             if (res == NO_ERR) {
-                res = val_list_ok_errinfo(typdef, 
-                                          btyp, 
-                                          &list, 
-                                          errinfo);
+                res = val_list_ok_errinfo(typdef, btyp, &list, errinfo);
             }
         }
         ncx_clean_list(&list);
@@ -3090,10 +3125,7 @@ status_t
         if (res == NO_ERR) {
             res = ncx_finish_list(&listtyp->typdef, &list);
             if (res == NO_ERR) {
-                res = val_list_ok_errinfo(typdef, 
-                                          btyp, 
-                                          &list, 
-                                          errinfo);
+                res = val_list_ok_errinfo(typdef, btyp, &list, errinfo);
             }
         }
         ncx_clean_list(&list);
@@ -3111,7 +3143,7 @@ status_t
 
     return res;
 
-} /* val_simval_ok_ex */
+} /* val_simval_ok_max */
 
 
 /********************************************************************
@@ -3261,13 +3293,9 @@ status_t
 
         testbtyp = typ_get_basetype(undef);
         if (testbtyp == NCX_BT_UNION) {
-            res = val_union_ok_ex(undef, 
-                                  strval, 
-                                  retval, 
-                                  errinfo, 
-                                  mod);
+            res = val_union_ok_ex(undef, strval, retval, errinfo, mod);
         } else {
-            res = val_simval_ok_ex(undef, strval, errinfo, mod);
+            res = val_simval_ok_max(undef, strval, errinfo, mod, FALSE);
         }
         if (res == NO_ERR) {
             /* the un->typ field may be NULL for YANG unions in progress
@@ -6620,7 +6648,7 @@ boolean
 *            == NULL:
 *                 the first match in any namespace will
 *                 be  returned;
-*    name == name of descendent node to find
+*    name == name of descendant node to find
 *              == NULL to match any node name
 *    configonly == TRUE to skip over non-config nodes
 *                  FALSE to check all nodes
@@ -10479,6 +10507,58 @@ void
     }
 
 } /* val_move_fields_for_xml */
+
+
+/********************************************************************
+* FUNCTION val_get_first_key
+* 
+* Get the first key record if this is a list with a key-stmt
+*
+* INPUTS:
+*   val == value node to check
+*
+*********************************************************************/
+val_index_t *
+    val_get_first_key (val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+    if (val->btyp != NCX_BT_LIST) {
+        return NULL;
+    }
+
+    return (val_index_t *)dlq_firstEntry(&val->indexQ);
+
+} /* val_get_first_key */
+
+
+/********************************************************************
+* FUNCTION val_get_next_key
+* 
+* Get the next key record if this is a list with a key-stmt
+*
+* INPUTS:
+*   curkey == current key node
+*
+*********************************************************************/
+val_index_t *
+    val_get_next_key (val_index_t *curkey)
+{
+#ifdef DEBUG
+    if (!curkey) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (val_index_t *)dlq_nextEntry(curkey);
+
+} /* val_get_next_key */
+
 
 
 

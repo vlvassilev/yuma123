@@ -535,12 +535,8 @@ static status_t
                            val->name);
             }
 
-            res = (*cbset->cbfn[cbtyp])(scb, 
-                                        msg, 
-                                        cbtyp, 
-                                        editop, 
-                                        newnode, 
-                                        curnode);
+            res = (*cbset->cbfn[cbtyp])(scb, msg, cbtyp, editop, 
+                                        newnode, curnode);
             if (val->res == NO_ERR) {
                 val->res = res;
             }
@@ -559,12 +555,11 @@ static status_t
                 case OP_EDITOP_MERGE:
                 case OP_EDITOP_REPLACE:
                 case OP_EDITOP_LOAD:
-                    res = handle_subtree_callback(cbtyp,
-                                                  editop,
-                                                  scb,
-                                                  msg,
-                                                  newnode,
-                                                  curnode);
+                    if (cbtyp != AGT_CB_VALIDATE) {
+                        res = handle_subtree_callback(cbtyp, editop, scb, msg,
+                                                      newnode, curnode);
+                    }
+                    break;
                 default:
                     ;
                 }
@@ -1305,32 +1300,20 @@ static status_t
             }
         }
 
-        res = handle_user_callback(AGT_CB_APPLY, 
-                                   editop,
-                                   scb, 
-                                   msg, 
-                                   newval, 
-                                   curval,
-                                   TRUE);
+        res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
+                                   newval, curval, TRUE);
         if (res != NO_ERR) {
             return res;
         }
 
-        undo = add_undo_node(msg, 
-                             editop,
-                             newval,
-                             curval, 
-                             parent, 
-                             NO_ERR, 
+        undo = add_undo_node(msg, editop, newval, curval, parent, NO_ERR, 
                              &res);
         if (res != NO_ERR) {
             return res;
         }
 
         if (target->cfg_id == NCX_CFGID_RUNNING) {
-            handle_audit_record(cur_editop, 
-                                scb, 
-                                msg,
+            handle_audit_record(cur_editop, scb, msg, 
                                 (curval) ? curval : newval);
         }
 
@@ -2616,6 +2599,11 @@ static void
     while (!dlq_empty(&msg->rpc_undoQ)) {
         undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
         if (cbtyp==AGT_CB_COMMIT) {
+            if (undo->curnode && undo->curnode->parent == NULL) {
+                /* node was actually removed in delete operation */
+                undo->curnode->parent = undo->parentnode;
+            }
+
             res = handle_user_callback(AGT_CB_COMMIT, 
                                        undo->editop, 
                                        scb, 

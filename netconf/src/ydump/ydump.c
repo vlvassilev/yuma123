@@ -32,121 +32,35 @@ date         init     comment
 #include <string.h>
 #include <unistd.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_c
-#include  "c.h"
-#endif
-
-#ifndef _H_cli
-#include  "cli.h"
-#endif
-
-#ifndef _H_conf
-#include  "conf.h"
-#endif
-
-#ifndef _H_cyang
-#include  "cyang.h"
-#endif
-
-#ifndef _H_h
-#include  "h.h"
-#endif
-
-#ifndef _H_help
-#include  "help.h"
-#endif
-
-#ifndef _H_html
-#include  "html.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_sql
-#include  "sql.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tg2
-#include  "tg2.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_xsd
-#include  "xsd.h"
-#endif
-
-#ifndef _H_xsd_util
-#include  "xsd_util.h"
-#endif
-
-#ifndef _H_yang
-#include  "yang.h"
-#endif
-
-#ifndef _H_yangconst
-#include  "yangconst.h"
-#endif
-
-#ifndef _H_yangdump
-#include  "yangdump.h"
-#endif
-
-#ifndef _H_yangdump_util
-#include  "yangdump_util.h"
-#endif
-
-#ifndef _H_yangstats
-#include  "yangstats.h"
-#endif
-
-#ifndef _H_yangyin
-#include  "yangyin.h"
-#endif
-
-#ifndef _H_ydump
-#include  "ydump.h"
-#endif
+#include "procdefs.h"
+#include "c.h"
+#include "cli.h"
+#include "conf.h"
+#include "cyang.h"
+#include "h.h"
+#include "help.h"
+#include "html.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncxconst.h"
+#include "ncxmod.h"
+#include "sql.h"
+#include "status.h"
+#include "tg2.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_util.h"
+#include "xml_wr.h"
+#include "xsd.h"
+#include "xsd_util.h"
+#include "yang.h"
+#include "yangconst.h"
+#include "yangdump.h"
+#include "yangdump_util.h"
+#include "yangstats.h"
+#include "yangyin.h"
+#include "ydump.h"
 
 
 /********************************************************************
@@ -1404,6 +1318,10 @@ static boolean
     case NCX_CVTTYP_SQLDB:
     case NCX_CVTTYP_H:
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_YH:
+    case NCX_CVTTYP_YC:
+    case NCX_CVTTYP_UH:
+    case NCX_CVTTYP_UC:
     case NCX_CVTTYP_TG2:
         return FALSE;
     default:
@@ -1520,6 +1438,10 @@ static status_t
                   cp->format == NCX_CVTTYP_HTML ||
                   cp->format == NCX_CVTTYP_H ||
                   cp->format == NCX_CVTTYP_C ||
+                  cp->format == NCX_CVTTYP_UC ||
+                  cp->format == NCX_CVTTYP_UH ||
+                  cp->format == NCX_CVTTYP_YC ||
+                  cp->format == NCX_CVTTYP_YH ||
                   cp->format == NCX_CVTTYP_TG2)) {
                 print_score_banner(pcb);
                 bannerdone = TRUE;
@@ -1652,11 +1574,8 @@ static status_t
                 if (res != NO_ERR) {
                     pr_err(res);
                 } else {
-                    if (cp->defnames ||
-                        (cp->output && cp->output_isdir)) {
-
-                        namebuff = xsd_make_output_filename(pcb->top,
-                                                            cp);
+                    if (cp->defnames || (cp->output && cp->output_isdir)) {
+                        namebuff = xsd_make_output_filename(pcb->top, cp);
                         if (!namebuff) {
                             res = ERR_INTERNAL_MEM;
                         } else {
@@ -1757,6 +1676,9 @@ static status_t
             }
             break;
         case NCX_CVTTYP_H:
+        case NCX_CVTTYP_UH:
+        case NCX_CVTTYP_YH:
+            cp->isuser = (cp->format == NCX_CVTTYP_UH) ? TRUE : FALSE;
             if (ncx_any_dependency_errors(pcb->top)) {
                 log_error("\nError: one or more imported modules had errors."
                           "\n       H file conversion of '%s' terminated.",
@@ -1770,10 +1692,13 @@ static status_t
                 }
             }
             break;
+        case NCX_CVTTYP_UC:
         case NCX_CVTTYP_C:
+        case NCX_CVTTYP_YC:
+            cp->isuser = (cp->format == NCX_CVTTYP_UC) ? TRUE : FALSE;
             if (ncx_any_dependency_errors(pcb->top)) {
                 log_error("\nError: one or more imported modules had errors."
-                          "\n       H file conversion of '%s' terminated.",
+                          "\n       C file conversion of '%s' terminated.",
                           pcb->top->sourcefn);
                 res = ERR_NCX_IMPORT_ERRORS;
                 ncx_print_errormsg(NULL, pcb->top, res);
@@ -1909,9 +1834,7 @@ static status_t
 }  /* subtree_callback */
 
 
-
 /************    E X T E R N A L    F U N C T I O N S   ************/
-
 
 
 /********************************************************************
@@ -2064,8 +1987,7 @@ status_t
     /* check if the requested format is allowed */
     if (!format_allowed(cvtparms)) {
         log_error("\nError: The requested conversion format "
-                  "is not supported by yangdump."
-                  "\nUse the yangdumpcode program in the SDK instead.");
+                  "is not supported by yangdump.");
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 

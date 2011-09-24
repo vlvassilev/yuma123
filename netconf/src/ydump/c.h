@@ -92,6 +92,28 @@ extern status_t
 		      const yangdump_cvtparms_t *cp,
 		      ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION c_write_fn_prototypes
+* 
+* Generate the SIL H code for the external function definitions
+* in the specified module, already parsed and H file generation
+* is in progress
+*
+* INPUTS:
+*   pcb == parser control block of module to convert
+*          This is returned from ncxmod_load_module_ex
+*   cp == conversion parms to use
+*   scb == session control block for writing output
+*   objnameQ == Q of c_define_t mapping structs to use
+*
+*********************************************************************/
+extern void
+    c_write_fn_prototypes (ncx_module_t *mod,
+                           const yangdump_cvtparms_t *cp,
+                           ses_cb_t *scb,
+                           dlq_hdr_t *objnameQ);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

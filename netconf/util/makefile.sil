@@ -68,14 +68,14 @@ endif
 
 ### GCC + [LINUX or MACOSX]
 
-ifdef DEBUG
+ifdef USE_WERROR
 WERROR= -Werror
 else
 WERROR=
 endif
 
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
-	-Wswitch-default -Wunused-parameter \
+	-Wswitch-default \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
 	-Wwrite-strings -Wbad-function-cast -Wcast-qual -Wcast-align \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
@@ -176,7 +176,7 @@ DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
 PLATFORM_CPP=
 
 .PHONY: all superclean clean test install uninstall \
-        distclean depend lint
+        distclean depend lint code splitcode
 
 ######################### MAKE DEPENDENCIES ###############
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \
@@ -271,6 +271,12 @@ $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
 code:
 	yangdump format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h
 	yangdump format=c indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).c
+
+splitcode:
+	yangdump format=yh indent=4 module=$(SUBDIR_NM) output=y_$(SUBDIR_NM).h
+	yangdump format=yc indent=4 module=$(SUBDIR_NM) output=y_$(SUBDIR_NM).c
+	yangdump format=uh indent=4 module=$(SUBDIR_NM) output=u_$(SUBDIR_NM).h
+	yangdump format=uc indent=4 module=$(SUBDIR_NM) output=u_$(SUBDIR_NM).c
 
 
 # prevent the make program from choking on all the symbols

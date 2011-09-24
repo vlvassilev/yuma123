@@ -208,7 +208,6 @@ extern "C" {
 
 #define NCX_TABSIZE     8
 
-
 #define NCX_VERSION_BUFFSIZE  24
 
 /* start of comment token in all NCX text */
@@ -231,7 +230,6 @@ extern "C" {
 
 /* start of an NCX or XPath varbind */
 #define NCX_VARBIND_CH    '$'
-
 
 /* Standard 0x0 syntax to indicate a HEX number is specified */
 #define NCX_IS_HEX_CH(c) ((c)=='x' || (c)=='X')
@@ -307,7 +305,6 @@ extern "C" {
 #define NCX_DEF_STREAM_DESCR (const xmlChar *)\
     "default NETCONF event stream"
 
-
 /* String start char:
  * if the XML string starts with a double quote
  * then it will be interpreted as whitespace-allowed
@@ -326,7 +323,9 @@ extern "C" {
 #define NCX_PSTYP_DATA       (const xmlChar *)"data"
 #define NCX_PSTYP_RPC        (const xmlChar *)"rpc"
 
-
+/* file name prefix to use for split SIL files */
+#define NCX_USER_SIL_PREFIX (const xmlChar *)"u_"
+#define NCX_YUMA_SIL_PREFIX (const xmlChar *)"y_"
 
 /* Min and max int */
 #define NCX_MIN_INT   INT_MIN
@@ -663,6 +662,8 @@ extern "C" {
 #define NCX_EL_TRIM            (const xmlChar *)"trim"
 #define NCX_EL_TRUE            (const xmlChar *)"true"
 #define NCX_EL_TYPE            (const xmlChar *)"type"
+#define NCX_EL_UC              (const xmlChar *)"uc"
+#define NCX_EL_UH              (const xmlChar *)"uh"
 #define NCX_EL_UINT8           (const xmlChar *)"uint8"
 #define NCX_EL_UINT16          (const xmlChar *)"uint16"
 #define NCX_EL_UINT32          (const xmlChar *)"uint32"
@@ -709,7 +710,9 @@ extern "C" {
 #define NCX_EL_XSD             (const xmlChar *)"xsd"
 #define NCX_EL_XSDLIST         (const xmlChar *)"xsdlist"
 #define NCX_EL_YANG            (const xmlChar *)"yang"
+#define NCX_EL_YC              (const xmlChar *)"yc"
 #define NCX_EL_YES             (const xmlChar *)"yes"
+#define NCX_EL_YH              (const xmlChar *)"yh"
 #define NCX_EL_YIN             (const xmlChar *)"yin"
 #define NCX_EL_YUMA_HOME       (const xmlChar *)"yuma-home"
 
@@ -748,6 +751,7 @@ extern "C" {
 
 
 #define Y_PREFIX         (const xmlChar *)"y_"
+#define U_PREFIX         (const xmlChar *)"u_"
 #define EDIT_SUFFIX      (const xmlChar *)"_edit"
 #define GET_SUFFIX       (const xmlChar *)"_get"
 #define MRO_SUFFIX       (const xmlChar *)"_mro"

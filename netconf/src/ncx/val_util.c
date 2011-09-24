@@ -3582,6 +3582,64 @@ val_value_t *
 }  /* val_get_value */
 
 
+/********************************************************************
+* FUNCTION val_traverse_keys
+* 
+* Check ancestor-or-self nodes until root reached
+* Find all lists; For each list, starting with the
+* closest to root, invoke the callback function
+* for each of the key objects in order
+*
+* INPUTS:
+*   val == value node to start check from
+*   cookie1 == cookie1 to pass to the callback function
+*   cookie2 == cookie2 to pass to the callback function
+*   walkerfn == walker callback function
+*           returns FALSE to terminate traversal
+*
+*********************************************************************/
+void
+    val_traverse_keys (val_value_t *val,
+                       void *cookie1,
+                       void *cookie2,
+                       val_walker_fn_t walkerfn)
+{
+    val_index_t *valkey;
+
+#ifdef DEBUG
+    if (!val || !val->obj || !walkerfn) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (obj_is_root(val->obj)) {
+        return;
+    }
+
+    if (val->parent != NULL) {
+        val_traverse_keys(val->parent, cookie1, cookie2, walkerfn);
+    }
+
+    if (val->btyp != NCX_BT_LIST) {
+        return;
+    }
+
+    for (valkey = val_get_first_key(val);
+         valkey != NULL;
+         valkey = val_get_next_key(valkey)) {
+
+        if (valkey->val) {
+            boolean ret = (*walkerfn)(valkey->val, cookie1, cookie2);
+            if (!ret) {
+                return;
+            }
+        } // else some error; skip this key!!!
+    }
+    
+}  /* val_traverse_keys */
+
+
 /* END file val_util.c */
 
 

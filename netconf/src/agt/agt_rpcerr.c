@@ -1234,6 +1234,12 @@ rpc_err_rec_t *
     case ERR_NCX_DEF_NOT_FOUND:
         if (parmtyp == NCX_NT_STRING && error_parm) {
             err1 = error_parm;
+        } else if (parmtyp == NCX_NT_VAL && error_parm) {
+            valparm = (const val_value_t *)error_parm;
+            if (valparm) {
+                badnsid1 = val_get_nsid(valparm);
+                err2 = (const void *)valparm->name;
+            }
         }
         break;
     case ERR_NCX_MISSING_ATTR:

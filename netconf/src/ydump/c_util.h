@@ -118,6 +118,9 @@ extern "C" {
 
 #define START_LINE    (const xmlChar *)"\n    "
 
+#define PARM_DSTVAL   (const xmlChar *)"dstval"
+
+#define PARM_ERRORVAL (const xmlChar *)"errorval"
 
 #define FN_BANNER_START (const xmlChar *)\
     "\n\n/********************************************************************\n* FUNCTION "
@@ -134,6 +137,11 @@ extern "C" {
 #define FN_BANNER_END (const xmlChar *)\
     "\n********************************************************************/"
 
+
+#define FN_INIT_STATIC_VARS (const xmlChar *)"init_static_vars"
+
+#define FN_EDIT (const xmlChar *)"edit"
+
 /********************************************************************
 *                                                                   *
 *                             T Y P E S                             *
@@ -144,7 +152,8 @@ typedef enum c_mode_t_ {
     C_MODE_NONE,
     C_MODE_OID,
     C_MODE_TYPEDEF,
-    C_MODE_CALLBACK
+    C_MODE_CALLBACK,
+    C_MODE_VARNAME
 } c_mode_t;
 
 /* ID to name string binding for #define statements */
@@ -152,6 +161,7 @@ typedef struct c_define_t_ {
     dlq_hdr_t        qhdr;
     xmlChar         *idstr;
     xmlChar         *typstr;  /* when c_def for object */
+    xmlChar         *varstr;  /* when c_def for object */
     xmlChar         *valstr;
     obj_template_t  *obj;   /* back-ptr to object for typdef */
 } c_define_t;
@@ -261,15 +271,17 @@ extern void
 * INPUTS:
 *   scb == session control block to use for writing
 *   modname == module name start-string to use
-*   defpart == internal string for deftype part
+*   defpart == internal string for deftype part (may be NULL)
 *   idname == identifier name
-*
+*   isuser == TRUE if USER SIL file
+*             FALSE if YUMA SIL file
 *********************************************************************/
 extern void
     write_identifier (ses_cb_t *scb,
                       const xmlChar *modname,
                       const xmlChar *defpart,
-                      const xmlChar *idname);
+                      const xmlChar *idname,
+                      boolean isuser);
 
 
 /********************************************************************
@@ -305,6 +317,23 @@ extern void
 extern void
     write_ncx_include (ses_cb_t *scb,
                        const xmlChar *modname);
+
+
+/********************************************************************
+* FUNCTION write_cvt_include
+* 
+* Generate an include statement for an NCX split SIL file
+* based on the format type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   modname == module name to include (foo)
+*   cvttyp == format enum to use
+*********************************************************************/
+extern void
+    write_cvt_include (ses_cb_t *scb,
+                       const xmlChar *modname,
+                       ncx_cvttyp_t cvttyp);
 
 
 /********************************************************************
@@ -435,11 +464,12 @@ extern void
 * INPUTS:
 *   scb == session control block to use for writing
 *   mod == module in progress
-*
+*   cp == conversion parameters to use
 *********************************************************************/
 extern void
     write_c_footer (ses_cb_t *scb,
-                    const ncx_module_t *mod);
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp);
 
 
 /*******************************************************************
@@ -458,6 +488,7 @@ extern void
 
 
 
+
 /*******************************************************************
 * FUNCTION write_c_objtype_ex
 * 
@@ -473,6 +504,7 @@ extern void
 *   needstar == TRUE if this object reference is a reference
 *               or a pointer to the data type
 *               FALSE if this is a direct usage of the object data type
+*               !! only affects complex types, not simple types
 **********************************************************************/
 extern void
     write_c_objtype_ex (ses_cb_t *scb,
@@ -481,6 +513,46 @@ extern void
                         xmlChar endchar,
                         boolean isconst,
                         boolean needstar);
+
+
+/*******************************************************************
+* FUNCTION write_c_objtype_max
+* 
+* Generate the C data type for the NCX data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*   cdefQ == Q of c_define_t to check for obj
+*   endchar == char to use at end (semi-colon, comma, right-paren)
+*   isconst == TRUE if a const pointer is needed
+*              FALSE if pointers should not be 'const'
+*   needstar == TRUE if this object reference is a reference
+*               or a pointer to the data type
+*               FALSE if this is a direct usage of the object data type
+*               !! only affects complex types, not simple types
+*   usename == TRUE to use object name as the variable name
+*              FALSE to use the idstr as the variable name
+*   useprefix == TRUE to use object name as the variable name
+*              FALSE to use the idstr as the variable name;
+*              ignored if usename == TRUE
+*   isuser == TRUE if format is NCX_CVTTYP_UC or NCX_CVTTYP_UH
+*             FALSE otherwise;  ignored if useprefix == FALSE
+*   isvar == TRUE if cdef->varstr should be used
+*            FALSE if cdef->idstr should be used;
+*            ignored if usename == TRUE
+**********************************************************************/
+extern void
+    write_c_objtype_max (ses_cb_t *scb,
+                         const obj_template_t *obj,
+                         dlq_hdr_t *cdefQ,
+                         xmlChar endchar,
+                         boolean isconst,
+                         boolean needstar,
+                         boolean usename,
+                         boolean useprefix,
+                         boolean isuser,
+                         boolean isvar);
 
 
 /*******************************************************************
@@ -535,6 +607,93 @@ extern status_t
                     dlq_hdr_t *datadefQ,
                     dlq_hdr_t *savecdefQ,
                     c_mode_t cmode);
+
+
+/********************************************************************
+* FUNCTION save_all_c_objects
+* 
+* save the path name bindings for C typdefs for mod and all submods
+*
+* INPUTS:
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   savecdefQ == Q of c_define_t structs to use
+*   cmode == C code generating mode to use
+*
+* OUTPUTS:
+*   savecdefQ may get new structs added
+*
+* RETURNS:
+*  status
+*********************************************************************/
+extern status_t
+    save_all_c_objects (ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        dlq_hdr_t *savecdefQ,
+                        c_mode_t cmode);
+
+
+/********************************************************************
+* FUNCTION skip_c_top_object
+* 
+* Check if a top-level object should be skipped
+* in C file SIL code generation
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*  TRUE if object should be skipped
+*  FALSE if object should not be skipped
+*********************************************************************/
+extern boolean
+    skip_c_top_object (obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION write_c_key_params
+* 
+* Write all the keys in C function aprameter list format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+extern void
+    write_c_key_params(ses_cb_t *scb,
+                       obj_template_t *obj, 
+                       dlq_hdr_t *objnameQ,
+                       uint32 keycount,
+                       int32 startindent);
+
+
+/********************************************************************
+* FUNCTION write_c_key_values
+* 
+* Write all the keys in call-C-function-to-get-key-value format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   parmname == name of parameter used in C code
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+extern void
+    write_c_key_values (ses_cb_t *scb, 
+                        obj_template_t *obj, 
+                        dlq_hdr_t *objnameQ, 
+                        const xmlChar *parmname,
+                        uint32 keycount,
+                        int32 startindent);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

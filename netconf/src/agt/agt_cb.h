@@ -168,9 +168,6 @@ extern status_t
 			      const agt_cb_fn_t cbfn);
 
 
-
-
-
 /********************************************************************
 * FUNCTION agt_cb_register_callbacks
 * 

@@ -1734,6 +1734,44 @@ extern uint32
 
 
 /********************************************************************
+* FUNCTION obj_key_count_to_root
+* 
+* Check ancestor-or-self nodes until root reached
+* Find all lists; Count the number of keys
+*
+* INPUTS:
+*   obj == object to start check from
+* RETURNS:
+*   number of keys in ancestor-or-self nodes
+*********************************************************************/
+extern uint32
+    obj_key_count_to_root (obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_traverse_keys
+* 
+* Check ancestor-or-self nodes until root reached
+* Find all lists; For each list, starting with the
+* closest to root, invoke the callback function
+* for each of the key objects in order
+*
+* INPUTS:
+*   obj == object to start check from
+*   cookie1 == cookie1 to pass to the callback function
+*   cookie2 == cookie2 to pass to the callback function
+*   walkerfn == walker callback function
+*           returns FALSE to terminate traversal
+*
+*********************************************************************/
+extern void
+    obj_traverse_keys (obj_template_t *obj,
+                       void *cookie1,
+                       void *cookie2,
+                       obj_walker_fn_t walkerfn);
+
+
+/********************************************************************
 * FUNCTION obj_any_rpcs
 * 
 * Check if there are any RPC methods in the datadefQ

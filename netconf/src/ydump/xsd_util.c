@@ -1950,9 +1950,13 @@ xmlChar *
         ext = (const xmlChar *)".xsd";
         break;
     case NCX_CVTTYP_H:
+    case NCX_CVTTYP_UH:
+    case NCX_CVTTYP_YH:
         ext = (const xmlChar *)".h";
         break;
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_UC:
+    case NCX_CVTTYP_YC:
         ext = (const xmlChar *)".c";
         break;
     case NCX_CVTTYP_YANG:
@@ -1984,7 +1988,6 @@ xmlChar *
                     xml_strlen(ext); 
             } else {
                 len += xml_strlen(mod->name) + xml_strlen(ext); 
-
             }
         }
     } else {
@@ -1996,6 +1999,19 @@ xmlChar *
         } else {
             len = xml_strlen(mod->name) + xml_strlen(ext); 
         }
+    }
+
+    switch (cp->format) {
+    case NCX_CVTTYP_UC:
+    case NCX_CVTTYP_UH:
+        len += xml_strlen(NCX_USER_SIL_PREFIX);
+        break;
+    case NCX_CVTTYP_YC:
+    case NCX_CVTTYP_YH:
+        len += xml_strlen(NCX_YUMA_SIL_PREFIX);
+        break;
+    default:
+        ;
     }
 
     buff = m__getMem(len+1);
@@ -2011,23 +2027,34 @@ xmlChar *
             if (*(p-1) != NCXMOD_PSCHAR) {
                 *p++ = NCXMOD_PSCHAR;
             }
-            p += xml_strcpy(p, mod->name);
-            if (cp->versionnames && mod->version) {
-                *p++ = YANG_FILE_SEPCHAR;
-                p += xml_strcpy(p, mod->version);
-            }
-            xml_strcpy(p, ext); 
         } else {
+            /* !!! y_ and u_ not supported here !!!
+             * user has specified the full file name
+             */
             xml_strcpy(p, (const xmlChar *)cp->full_output);
+            return buff;
         }
-    } else {
-        p += xml_strcpy(p, mod->name);
-        if (cp->versionnames && mod->version) {
-            *p++ = YANG_FILE_SEPCHAR;
-            p += xml_strcpy(p, mod->version);
-        }
-        xml_strcpy(p, ext); 
     }
+
+    switch (cp->format) {
+    case NCX_CVTTYP_UC:
+    case NCX_CVTTYP_UH:
+        p += xml_strcpy(p, NCX_USER_SIL_PREFIX);
+        break;
+    case NCX_CVTTYP_YC:
+    case NCX_CVTTYP_YH:
+        p += xml_strcpy(p, NCX_YUMA_SIL_PREFIX);
+        break;
+    default:
+        ;
+    }
+
+    p += xml_strcpy(p, mod->name);
+    if (cp->versionnames && mod->version) {
+        *p++ = YANG_FILE_SEPCHAR;
+        p += xml_strcpy(p, mod->version);
+    }
+    xml_strcpy(p, ext); 
 
     return buff;
 

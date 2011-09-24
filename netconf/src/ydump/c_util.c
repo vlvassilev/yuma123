@@ -30,55 +30,21 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_c_util
-#include  "c_util.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_str
-#include  "ncx_str.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
+#include "procdefs.h"
+#include "c_util.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncx_str.h"
+#include "ncxmod.h"
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_yangconst
+#include "status.h"
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangdump
 #include "yangdump.h"
-#endif
-
-#ifndef _H_yangdump_util
 #include "yangdump_util.h"
-#endif
 
 
 /********************************************************************
@@ -86,6 +52,28 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
+#ifdef DEBUG
+/* #define C_UTIL_DEBUG 1 */
+#endif
+
+
+/********************************************************************
+*								    *
+*			     T Y P E S				    *
+*								    *
+*********************************************************************/
+
+/* used by write_key_parm */
+typedef struct c_keywalker_parms_t_ {
+    ses_cb_t    *scb;
+    dlq_hdr_t   *objnameQ;
+    const xmlChar *parmname;
+    uint32       keycount;
+    uint32       keynum;
+    int32        startindent;
+    boolean      done;
+} c_keywalker_parms_t;
+
 
 /********************************************************************
 *                                                                   *
@@ -112,11 +100,22 @@ static xmlChar *
                    c_mode_t cmode)
 {
     xmlChar     *buffer, *p;
-    uint32       len;
+    uint32       len = 0;
 
     /* get the idstr length */
-    len = xml_strlen(Y_PREFIX);
-    len += xml_strlen(modname);
+    switch (cmode) {
+    case  C_MODE_CALLBACK:
+        break;
+    case C_MODE_VARNAME:
+        len++;
+        break;
+    default:
+        len += xml_strlen(Y_PREFIX);
+    }
+
+    if (cmode != C_MODE_VARNAME) {
+        len += xml_strlen(modname);
+    }
 
     switch (cmode) {
     case C_MODE_OID:
@@ -126,6 +125,7 @@ static xmlChar *
         len += 2;  /* _T */
         break;
     case C_MODE_CALLBACK:
+    case C_MODE_VARNAME:
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -141,8 +141,20 @@ static xmlChar *
 
     /* fill in the idstr buffer */
     p = buffer;
-    p += xml_strcpy(p, Y_PREFIX);
-    p += ncx_copy_c_safe_str(p, modname);
+
+    switch (cmode) {
+    case  C_MODE_CALLBACK:
+        break;
+    case C_MODE_VARNAME:
+        *p++ = 'k';
+        break;
+    default:
+        p += xml_strcpy(p, Y_PREFIX);
+    }
+
+    if (cmode != C_MODE_VARNAME) {
+        p += ncx_copy_c_safe_str(p, modname);
+    }
 
     switch (cmode) {
     case C_MODE_OID:
@@ -152,11 +164,19 @@ static xmlChar *
         p += xml_strcpy(p, (const xmlChar *)"_T");
         break;
     case C_MODE_CALLBACK:
+    case C_MODE_VARNAME:
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
     }
     p += ncx_copy_c_safe_str(p, defname);    
+
+#ifdef C_UTIL_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nnew-id(%s, %s, %d) = %s",
+                   modname, defname, cmode, buffer);
+    }
+#endif
 
     return buffer;    /* transfer buffer memory here */
 
@@ -179,6 +199,9 @@ static void
     }
     if (cdef->typstr != NULL) {
         m__free(cdef->typstr);
+    }
+    if (cdef->varstr != NULL) {
+        m__free(cdef->varstr);
     }
     if (cdef->valstr != NULL) {
         m__free(cdef->valstr);
@@ -224,6 +247,11 @@ static c_define_t *
             free_c_define(cdef);
             return NULL;
         }
+        cdef->varstr = new_id_string(modname, defname, C_MODE_VARNAME);
+        if (cdef->varstr == NULL) {
+            free_c_define(cdef);
+            return NULL;
+        }
     }
         
     cdef->valstr = xml_strdup(defname);
@@ -236,6 +264,111 @@ static c_define_t *
 
 }  /* new_c_define */
 
+
+/********************************************************************
+* FUNCTION write_key_parm
+* 
+* Write the key parameter; walker function
+*
+* INPUTS:
+*   obj == the key object
+*   cookie1 == the key walker parameter block to use
+*   cookie2 = not used
+* RETURNS:
+*   TRUE to keep walking
+*********************************************************************/
+static boolean
+    write_key_parm (obj_template_t *obj,
+                    void *cookie1,
+                    void *cookie2)
+{
+    c_keywalker_parms_t *parms = (c_keywalker_parms_t *)cookie1;
+    xmlChar              endchar;
+    boolean              isconst = FALSE;
+
+    (void)cookie2;
+
+    if (parms->done) {
+        /* 'done' not used yet -- always walks until the end */
+        return FALSE;
+    }
+
+    if (++parms->keynum == parms->keycount) {
+        endchar = 0;
+    } else {
+        endchar = ',';
+    }
+
+    if (typ_is_string(obj_get_basetype(obj))) {
+        isconst = TRUE;
+    }
+
+    ses_indent(parms->scb, parms->startindent);
+    
+    /* write the data type, name and then endchar */
+    write_c_objtype_max(parms->scb, obj, parms->objnameQ, endchar,
+                        isconst,
+                        FALSE, /* needstar */
+                        FALSE, /* usename */
+                        FALSE, /* useprefix */
+                        FALSE, /* isuser */
+                        TRUE); /* isvar */
+
+    return TRUE;
+} /* write_key_parm */
+
+
+/********************************************************************
+* FUNCTION write_key_value
+* 
+* Write the key value get-function-call; walker function
+*
+* INPUTS:
+*   obj == the key object
+*   cookie1 == the key walker parameter block to use
+*   cookie2 = not used
+* RETURNS:
+*   TRUE to keep walking
+*********************************************************************/
+static boolean
+    write_key_value (obj_template_t *obj,
+                     void *cookie1,
+                     void *cookie2)
+{
+    c_keywalker_parms_t *parms = (c_keywalker_parms_t *)cookie1;
+    xmlChar              endchar;
+    boolean              isfirst = FALSE;
+    boolean              notunion = (obj_get_basetype(obj) != NCX_BT_UNION);
+
+    (void)cookie2;
+
+    if (parms->keynum == 0) {
+        isfirst = TRUE;
+    }
+
+    if (++parms->keynum == parms->keycount) {
+        endchar = 0;
+    } else {
+        endchar = ',';
+    }
+
+    ses_indent(parms->scb, parms->startindent);
+    if (notunion) {
+        write_c_val_macro_type(parms->scb, obj);
+        ses_putchar(parms->scb, '(');
+    }
+    ses_putstr(parms->scb, (const xmlChar *)"agt_get_key_value(");
+    ses_putstr(parms->scb, parms->parmname);
+    ses_putstr(parms->scb, (const xmlChar *)", &lastkey)");
+    if (notunion) {
+        ses_putchar(parms->scb, ')');
+    }
+    if (endchar) {
+        ses_putchar(parms->scb, endchar);
+    }
+
+    return TRUE;
+} /* write_key_value */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -430,17 +563,23 @@ void
 * INPUTS:
 *   scb == session control block to use for writing
 *   modname == module name start-string to use
-*   defpart == internal string for deftype part
+*   defpart == internal string for deftype part (may be NULL)
 *   idname == identifier name
-*
+*   isuser == TRUE if USER SIL file
+*             FALSE if YUMA SIL file
 *********************************************************************/
 void
     write_identifier (ses_cb_t *scb,
                       const xmlChar *modname,
                       const xmlChar *defpart,
-                      const xmlChar *idname)
+                      const xmlChar *idname,
+                      boolean isuser)
 {
-    ses_putstr(scb, Y_PREFIX);
+    if (isuser) {
+        ses_putstr(scb, U_PREFIX);
+    } else {
+        ses_putstr(scb, Y_PREFIX);
+    }
     write_c_safe_str(scb, modname);
     ses_putchar(scb, '_');
     if (defpart != NULL) {
@@ -493,17 +632,52 @@ void
     write_ncx_include (ses_cb_t *scb,
                        const xmlChar *modname)
 {
-    ses_putstr(scb, POUND_IFNDEF);
-    ses_putstr(scb, BAR_H);
-    write_c_safe_str(scb, modname);
     ses_putstr(scb, POUND_INCLUDE);
     ses_putchar(scb, '"');
     ses_putstr(scb, modname);
     ses_putstr(scb, (const xmlChar *)".h\"");
-    ses_putstr(scb, POUND_ENDIF);
-    ses_putchar(scb, '\n');
 
 }  /* write_ncx_include */
+
+
+/********************************************************************
+* FUNCTION write_cvt_include
+* 
+* Generate an include statement for an NCX split SIL file
+* based on the format type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   modname == module name to include (foo)
+*   cvttyp == format enum to use
+*********************************************************************/
+void
+    write_cvt_include (ses_cb_t *scb,
+                       const xmlChar *modname,
+                       ncx_cvttyp_t cvttyp)
+{
+    ses_putstr(scb, POUND_INCLUDE);
+    ses_putchar(scb, '"');
+    switch (cvttyp) {
+    case NCX_CVTTYP_C:
+    case NCX_CVTTYP_H:
+        break;
+    case NCX_CVTTYP_UC:
+    case NCX_CVTTYP_UH:
+        ses_putstr(scb, NCX_USER_SIL_PREFIX);
+        break;
+    case NCX_CVTTYP_YC:
+    case NCX_CVTTYP_YH:
+        ses_putstr(scb, NCX_YUMA_SIL_PREFIX);
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    ses_putstr(scb, modname);
+    ses_putstr(scb, (const xmlChar *)".h\"");
+
+}  /* write_cvt_include */
 
 
 /********************************************************************
@@ -778,6 +952,36 @@ void
     /* generater tag */
     write_banner_session_ex(scb, FALSE);
 
+    /* module format */
+    switch (cp->format) {
+    case NCX_CVTTYP_C:
+        ses_putstr_indent(scb, (const xmlChar *)"Combined SIL module", 
+                          indent);
+        break;
+    case NCX_CVTTYP_H:
+        ses_putstr_indent(scb, (const xmlChar *)"Combined SIL header", 
+                          indent);
+        break;
+    case NCX_CVTTYP_UC:
+        ses_putstr_indent(scb, (const xmlChar *)"User SIL module", 
+                          indent);
+        break;
+    case NCX_CVTTYP_UH:
+        ses_putstr_indent(scb, (const xmlChar *)"User SIL header", 
+                          indent);
+        break;
+    case NCX_CVTTYP_YC:
+        ses_putstr_indent(scb, (const xmlChar *)"Yuma SIL module", 
+                          indent);
+        break;
+    case NCX_CVTTYP_YH:
+        ses_putstr_indent(scb, (const xmlChar *)"Yuma SIL header", 
+                          indent);
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     /* module name */
     if (mod->ismod) {
         ses_putstr_indent(scb, YANG_K_MODULE, indent);
@@ -789,36 +993,20 @@ void
 
     /* version */
     if (mod->version) {
-        write_c_simple_str(scb, 
-                           YANG_K_REVISION,
-                           mod->version, 
-                           indent,
-                           0);
-        ses_putchar(scb, '\n');
+        write_c_simple_str(scb, YANG_K_REVISION,  mod->version,  indent, 0);
     }
 
     /* namespace or belongs-to */
     if (mod->ismod) {
-        write_c_simple_str(scb, 
-                           YANG_K_NAMESPACE, 
-                           mod->ns,
-                           indent,
-                           0);
+        write_c_simple_str(scb, YANG_K_NAMESPACE, mod->ns, indent, 0);
     } else {
-        write_c_simple_str(scb, 
-                           YANG_K_BELONGS_TO, 
-                           mod->belongs,
-                           indent,
-                           0);
+        write_c_simple_str(scb, YANG_K_BELONGS_TO, mod->belongs, indent, 0);
     }
 
     /* organization */
     if (mod->organization) {
-        write_c_simple_str(scb, 
-                           YANG_K_ORGANIZATION,
-                           mod->organization, 
-                           indent,
-                           0);
+        write_c_simple_str(scb, YANG_K_ORGANIZATION,  mod->organization, 
+                           indent, 0);
     }
 
     ses_putchar(scb, '\n');
@@ -837,13 +1025,30 @@ void
 * INPUTS:
 *   scb == session control block to use for writing
 *   mod == module in progress
-*
+*   cp == conversion parameters to use
 *********************************************************************/
 void
     write_c_footer (ses_cb_t *scb,
-                    const ncx_module_t *mod)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp)
 {
     ses_putstr(scb, (const xmlChar *)"\n/* END ");
+    switch (cp->format) {
+    case NCX_CVTTYP_C:
+    case NCX_CVTTYP_H:
+        break;
+    case NCX_CVTTYP_UC:
+    case NCX_CVTTYP_UH:
+        ses_putstr(scb, U_PREFIX);
+        break;
+    case NCX_CVTTYP_YC:
+    case NCX_CVTTYP_YH:
+        ses_putstr(scb, Y_PREFIX);
+        break;
+    default:
+        ;
+    }
+
     write_c_safe_str(scb, ncx_get_modname(mod));
     ses_putstr(scb, (const xmlChar *)".c */\n");
 
@@ -864,7 +1069,8 @@ void
     write_c_objtype (ses_cb_t *scb,
                      const obj_template_t *obj)
 {
-    write_c_objtype_ex(scb, obj, NULL, ';', FALSE, FALSE);
+    write_c_objtype_max(scb, obj, NULL, ';', FALSE, FALSE,
+                        TRUE, FALSE, FALSE, FALSE);
 
 }  /* write_c_objtype */
 
@@ -889,12 +1095,56 @@ void
 void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
-                        dlq_hdr_t  *cdefQ,
+                        dlq_hdr_t *cdefQ,
                         xmlChar endchar,
                         boolean isconst,
                         boolean needstar)
 {
-    const c_define_t *cdef;
+    write_c_objtype_max(scb, obj, cdefQ, endchar, isconst, needstar,
+                        TRUE, FALSE, FALSE, FALSE);
+}  /* write_c_objtype_ex */
+
+
+/*******************************************************************
+* FUNCTION write_c_objtype_max
+* 
+* Generate the C data type for the NCX data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*   cdefQ == Q of c_define_t to check for obj
+*   endchar == char to use at end (semi-colon, comma, right-paren)
+*   isconst == TRUE if a const pointer is needed
+*              FALSE if pointers should not be 'const'
+*   needstar == TRUE if this object reference is a reference
+*               or a pointer to the data type
+*               FALSE if this is a direct usage of the object data type
+*               !! only affects complex types, not simple types
+*   usename == TRUE to use object name as the variable name
+*              FALSE to use the idstr as the variable name
+*   useprefix == TRUE to use object name as the variable name
+*              FALSE to use the idstr as the variable name;
+*              ignored if usename == TRUE
+*   isuser == TRUE if format is NCX_CVTTYP_UC or NCX_CVTTYP_UH
+*             FALSE otherwise;  ignored if useprefix == FALSE
+*   isvar == TRUE if cdef->varstr should be used
+*            FALSE if cdef->idstr should be used;
+*            ignored if usename == TRUE
+**********************************************************************/
+void
+    write_c_objtype_max (ses_cb_t *scb,
+                         const obj_template_t *obj,
+                         dlq_hdr_t *cdefQ,
+                         xmlChar endchar,
+                         boolean isconst,
+                         boolean needstar,
+                         boolean usename,
+                         boolean useprefix,
+                         boolean isuser,
+                         boolean isvar)
+{
+    const c_define_t *cdef = NULL;
     boolean        needspace;
     ncx_btype_t    btyp;
 
@@ -975,7 +1225,8 @@ void
         if (isconst) {
             ses_putstr(scb, (const xmlChar *)"const ");
         }
-        ses_putstr(scb, STRING);
+        ses_putstr(scb, (const xmlChar *)"val_value_t");
+        needstar = TRUE;
         break;
     case NCX_BT_BITS:
         ses_putstr(scb, BITS);
@@ -992,7 +1243,18 @@ void
                 if (cdef->typstr) {
                     ses_putstr(scb, cdef->typstr);
                 } else {
-                    ses_putstr(scb, cdef->idstr);
+                    if (useprefix) {
+                        if (isuser) {
+                            ses_putstr(scb, U_PREFIX);
+                        } else {
+                            ses_putstr(scb, Y_PREFIX);
+                        }
+                    }
+                    if (isvar) {
+                        ses_putstr(scb, cdef->varstr);
+                    } else {
+                        ses_putstr(scb, cdef->idstr);
+                    }
                 }
             }
         }
@@ -1006,13 +1268,40 @@ void
         ses_putchar(scb, '*');
     }
 
-    write_c_safe_str(scb, obj_get_name(obj));
+    if (usename) {
+        write_c_safe_str(scb, obj_get_name(obj));
+    } else {
+        if (cdef == NULL) {
+            if (cdefQ == NULL) {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            } else {
+                cdef = find_path_cdefine(cdefQ, obj);
+                if (cdef == NULL) {
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
+        }
+        if (cdef != NULL) {
+            if (useprefix) {
+                if (isuser) {
+                    ses_putstr(scb, U_PREFIX);
+                } else {
+                    ses_putstr(scb, Y_PREFIX);
+                }
+            }
+            if (isvar) {
+                ses_putstr(scb, cdef->varstr);
+            } else {
+                ses_putstr(scb, cdef->idstr);
+            }
+        } /* else generating a syntax error */
+    }
 
     if (endchar != '\0') {
         ses_putchar(scb, endchar);
     }
 
-}  /* write_c_objtype_ex */
+}  /* write_c_objtype_max */
 
 
 /*******************************************************************
@@ -1077,8 +1366,10 @@ void
         ses_putstr(scb, (const xmlChar *)"VAL_ENUM_NAME");
         break;
     case NCX_BT_STRING:
-    case NCX_BT_UNION:
         ses_putstr(scb, (const xmlChar *)"VAL_STRING");
+        break;
+    case NCX_BT_UNION:
+        //ses_putstr(scb, (const xmlChar *)"VAL_STRING");
         break;
     case NCX_BT_BINARY:
         ses_putstr(scb, (const xmlChar *)"VAL_BINARY");
@@ -1205,7 +1496,180 @@ status_t
 
 }  /* save_c_objects */
 
+
+/********************************************************************
+* FUNCTION save_all_c_objects
+* 
+* save the path name bindings for C typdefs for mod and all submods
+*
+* INPUTS:
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   savecdefQ == Q of c_define_t structs to use
+*   cmode == C code generating mode to use
+*
+* OUTPUTS:
+*   savecdefQ may get new structs added
+*
+* RETURNS:
+*  status
+*********************************************************************/
+status_t
+    save_all_c_objects (ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        dlq_hdr_t *savecdefQ,
+                        c_mode_t cmode)
+{
+    status_t res;
+
+    res = save_c_objects(mod, &mod->datadefQ, savecdefQ, cmode);
+    if (res == NO_ERR) {
+        if (cp->unified && mod->ismod) {
+            yang_node_t *node;
+            for (node = (yang_node_t *)
+                     dlq_firstEntry(&mod->allincQ);
+                 node != NULL && res == NO_ERR;
+                 node = (yang_node_t *)dlq_nextEntry(node)) {
+                if (node->submod) {
+                    res = save_c_objects(node->submod,
+                                         &node->submod->datadefQ, 
+                                         savecdefQ, cmode);
+                }
+            }
+        }
+    }
+    return res;
+
+} /* save_all_c_objects */
+
+
+/********************************************************************
+* FUNCTION skip_c_top_object
+* 
+* Check if a top-level object should be skipped
+* in C file SIL code generation
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*  TRUE if object should be skipped
+*  FALSE if object should not be skipped
+*********************************************************************/
+boolean
+    skip_c_top_object (obj_template_t *obj)
+{
+    if (!obj_has_name(obj) ||
+        !obj_is_enabled(obj) ||
+        !obj_is_config(obj) ||
+        obj_is_cli(obj) || 
+        obj_is_abstract(obj) ||
+        obj_is_rpc(obj) ||
+        obj_is_notif(obj)) {
+        return TRUE;
+    }
+    return FALSE;
+}  /* END skip_c_top_object */
+
+
+/********************************************************************
+* FUNCTION write_c_key_params
+* 
+* Write all the keys in C function parameter list format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+void
+    write_c_key_params (ses_cb_t *scb, 
+                        obj_template_t *obj, 
+                        dlq_hdr_t *objnameQ, 
+                        uint32 keycount,
+                        int32 startindent)
+{
+    c_keywalker_parms_t parms;
+
+#ifdef DEBUG
+    if (!scb || !obj || !objnameQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (keycount == 0) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    parms.scb = scb;
+    parms.objnameQ = objnameQ;
+    parms.parmname = NULL;
+    parms.keycount = keycount;
+    parms.keynum = 0;
+    parms.startindent = startindent;
+    parms.done = FALSE;
+
+    obj_traverse_keys(obj, &parms, NULL, write_key_parm);
+
+} /* write_c_key_params */
+
+
+/********************************************************************
+* FUNCTION write_c_key_values
+* 
+* Write all the keys in call-C-function-to-get-key-value format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   parmname == name of parameter used in C code
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+void
+    write_c_key_values (ses_cb_t *scb, 
+                        obj_template_t *obj, 
+                        dlq_hdr_t *objnameQ, 
+                        const xmlChar *parmname,
+                        uint32 keycount,
+                        int32 startindent)
+{
+    c_keywalker_parms_t parms;
+
+#ifdef DEBUG
+    if (!scb || !obj || !objnameQ || !parmname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (keycount == 0) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    parms.scb = scb;
+    parms.objnameQ = objnameQ;
+    parms.parmname = parmname;
+    parms.keycount = keycount;
+    parms.keynum = 0;
+    parms.startindent = startindent;
+    parms.done = FALSE;
+
+    obj_traverse_keys(obj, &parms, NULL, write_key_value);
+
+} /* write_c_key_params */
+
+
 /* END c_util.c */
+
 
 
 

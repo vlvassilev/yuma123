@@ -13,12 +13,12 @@ TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
 
 ifdef FREEBSD
-REAL_INST=$(DESTDIR)$(PREFIX)/lib
+REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
 else
 ifdef LIB64
-REAL_INST=$(DESTDIR)$(PREFIX)/lib64
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
 else
-REAL_INST=$(DESTDIR)$(PREFIX)/lib
+REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
 endif
 endif
 
@@ -66,12 +66,13 @@ ifdef CROSS_TARGET
 # don't install anything
 install:
 else
+# normal build: 'make' or 'make STATIC=1'
 install: $(BLD_INCLUDES)
-ifndef STATIC
-# install dynamic libncx file
+# install static or dynamic libncx file
 	mkdir -p $(REAL_INST)
 	install -v $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
+ifndef STATIC
 # libncx.so --> libncx.so.M.N
 # libncx.so.1 --> libncx.so.M.N
 ifndef MAC
@@ -80,20 +81,20 @@ ifndef MAC
 	lib$(SUBDIR_NM).$(LIBSUFFIX);\
 	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
-endif
+endif  # MAC
 ifndef FREEBSD
 ifndef DESTDIR
 ifndef MAC
 # skip in MacOsX, RPM, FreeBSD and rest of debian fakeroot builds
-	ldconfig
-endif
-endif
-endif
-endif
-endif
-endif
-endif
-endif
+	ldconfig $(REAL_INST)
+endif  # MAC
+endif  # DESTDIR
+endif  # FREEBSD
+endif  # STATIC
+endif  # CROSS_TARGET
+endif  # DEVELOPER
+endif  # CLIENT
+endif  # SERVER
 
 # 1 librarr uninstall rule for all variants
 # TBD: uninstall includes
@@ -116,11 +117,11 @@ ifndef STATIC
 ifndef MAC
 	(cd $(LBASE); ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX))
-endif
-endif
-endif
-endif
-endif
+endif  # MAC
+endif  # STATIC
+endif  # DEVELOPER
+endif  # CLIENT
+endif  # SERVER
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files

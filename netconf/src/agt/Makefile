@@ -10,7 +10,19 @@ SUBDIR_CPP=
 ############### TARGET PROFILE ##############################
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
-BIN_INST=$(TBASE)/bin
+LIB_INST=$(TBASE)/lib
+
+#BIN_INST=$(TBASE)/bin
+
+ifdef FREEBSD
+REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+else
+ifdef LIB64
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+else
+REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+endif
+endif
 
 # if the target is DEBIAN or RPM package, then
 # install the include files
@@ -36,45 +48,81 @@ endif
 
 test:
 
-ifdef SHLIBS
-# nothing to do for debian SHLIBS build
-install:
-else 
+# build the library in any developer context
+# and in the 1-pass RPM RELEASE build
+# for ubunte RELEASE builds, only build if 
+# this is the SHLIBS pass, not CLIENT, SERVER, or DEVELOPER
 ifdef SERVER
 # nothing to do for debian SERVER build
 install:
-else 
+else
 ifdef CLIENT
 # nothing to do for debian CLIENT build
 install:
-else 
+else
 ifdef DEVELOPER
 # just install the H files
 install: includes
 else
-# just install the H files, except debian yuma-tools build
+ifdef CROSS_TARGET
+# don't install anything
+install:
+else
+# normal build: 'make' or 'make STATIC=1'
 install: $(BLD_INCLUDES)
-endif
-endif
-endif
-endif
+# install static or dynamic libagt file
+	mkdir -p $(REAL_INST)
+	install -v $(OWNER) $(GRP) \
+	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
+ifndef STATIC
+# libagt.so --> libagt.so.M.N
+# libagt.so.1 --> libagt.so.M.N
+ifndef MAC
+	(cd $(REAL_INST); \
+	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX);\
+	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+endif  # MAC
+ifndef FREEBSD
+ifndef DESTDIR
+ifndef MAC
+# skip in MacOsX, RPM, FreeBSD and rest of debian fakeroot builds
+	ldconfig $(REAL_INST)
+endif  # MAC
+endif  # DESTDIR
+endif  # FREEBSD
+endif  # STATIC
+endif  # CROSS_TARGET
+endif  # DEVELOPER
+endif  # CLIENT
+endif  # SERVER
+
 
 uninstall:
+	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)*
 
+
+# check which variant of the library to build
+ifdef SERVER
+agtlib:
+else
 ifdef CLIENT
 agtlib:
 else
 ifdef DEVELOPER
 agtlib:
 else
-ifdef SHLIBS
-agtlib:
-else
-# either SERVER or normal or RPM build
-agtlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
-endif
-endif
-endif
+agtlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX)
+ifndef STATIC
+ifndef MAC
+	(cd $(LBASE); ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX))
+endif  # MAC
+endif  # STATIC
+endif  # DEVELOPER
+endif  # CLIENT
+endif  # SERVER
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files
@@ -96,6 +144,32 @@ ifndef CLIENT
 endif
 
 distclean: superclean
+
+
+ifdef WINDOWS
+RDYNAMIC=
+LC=
+else
+RDYNAMIC=-rdynamic
+LC=-lc
+endif
+
+# this rule is ignored if STATIC=1; used only in linux
+$(LBASE)/libagt.so.$(SOVERSION): $(OBJS)
+ifdef FREEBSD
+	$(CC) $(CFLAGS) -shared $(RDYNAMIC) -Wl,-soname,libagt.so.$(SOVERSION) \
+	-o $@ $(OBJS) -L/usr/local/lib $(LC) -lxml2
+else
+	$(CC) $(CFLAGS) -shared $(RDYNAMIC) -Wl,-soname,libagt.so.$(SOVERSION) \
+	-o $@ $(OBJS) $(LC) -lxml2
+endif
+
+# this rule is ignored if STATIC=1; used only on MacOSX
+$(LBASE)/libagt.dylib: $(OBJS)
+	$(CC) $(CFLAGS) -shared -dynamiclib -std=gnu99 -current_version \
+	$(SOVERSION) \
+	-undefined dynamic_lookup \
+	-o $@ -install_name libagt.dylib $(OBJS) -lxml2
 
 
 includes:

@@ -18,7 +18,11 @@ TARGET=../bin
 
 LIB_INST=../lib
 
+ifdef YUMA_HOME
 WORK_INST=$(YUMA_HOME)/target/lib
+else
+WORK_INST=
+endif
 
 ifdef LIB64
 REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
@@ -159,10 +163,10 @@ CEES = $(wildcard *.c)
 
 HEES = $(wildcard *.h)
 
-ifdef YUMA_HOME
-LAGT= -L$(YUMA_HOME)/target/lib -lagt -lncx
+ifdef FORCE_YUMA_HOME
+YUMALIBS= -L$(YUMA_HOME)/target/lib -lagt -lncx
 else
-LAGT=
+YUMALIBS= -L$(REAL_INST) -lagt -lncx
 endif
 
 
@@ -260,11 +264,12 @@ ADD_DL=-ldl
 endif
 
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) $(ADD_DL) $(LAGT)
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) $(ADD_DL) $(YUMALIBS)
 
 
 $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -dynamiclib -std=gnu99 -current_version 1.0 \
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -dynamiclib -std=gnu99 \
+	-current_version 1.0 \
 	-undefined dynamic_lookup \
 	-o $@ -install_name lib$(SUBDIR_NM).dylib $(OBJS) -lxml2
 

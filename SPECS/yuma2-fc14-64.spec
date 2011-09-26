@@ -61,7 +61,9 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 
 %files doc
 %defattr(-,root,root,-)
-/usr/share/doc/yuma/
+/usr/share/doc/yuma/server-call-chain.txt
+/usr/share/doc/yuma/pdf/
+/usr/share/doc/yuma/html/
 
 # main package rules
 

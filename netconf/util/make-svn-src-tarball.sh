@@ -8,7 +8,7 @@ if [ $# -gt 1 ]; then
   echo "Usage: make-svn-src-tarball [trunk]"
   echo "Creates a debug yuma source tarball"
   exit 1
-elif [ $# -eq 0 ; then
+elif [ $# -eq 0 ]; then
   echo ""
 elif [ $1 -ne "trunk" ]; then
   echo "Usage: make-svn-src-tarball [trunk]"

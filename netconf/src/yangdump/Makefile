@@ -27,13 +27,16 @@ REAL_INST=$(DESTDIR)$(PREFIX)/bin
 # that contains 'bar'. 
 
 
-LIBS =	-lydump -lncx -lxml2 -lz
+LIBS = -lydump -lncx -lxml2 -lz
 
 LIBTARGS= $(LBASE)/libncx.$(LIBNCXSUFFIX) $(LBASE)/libydump.a
 
 ############################# MAKE RULES ##################
+ifdef DEVELOPER
+all:
+else
 all: yangdump
-
+endif  # DEVELOPER
 
 #################### PLATFORM DEFINITIONS ############
 include ../platform/platform.profile
@@ -48,8 +51,10 @@ test:
 
 # needs to be done by root
 install:
+ifndef DEVELOPER
 	mkdir -p $(REAL_INST)
 	install $(OWNER) $(GRP) $(BIN_INST)/$(SUBDIR_NM) $(REAL_INST)
+endif
 
 uninstall:
 	rm -f  $(REAL_INST)/$(SUBDIR_NM)

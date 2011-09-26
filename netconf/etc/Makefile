@@ -20,21 +20,6 @@ uninstall:
 superclean: clean
 
 
-ifdef SERVER
-install:
-	mkdir -p $(ETC_INSTALL)
-	cp netconfd-sample.conf $(ETC_INSTALL)/
-else
-ifdef CLIENT
-install:
-	mkdir -p $(ETC_INSTALL)
-	cp yangcli-sample.conf $(ETC_INSTALL)/
-	cp yangdiff-sample.conf $(ETC_INSTALL)/
-	cp yangdump-sample.conf $(ETC_INSTALL)/
-else
-ifdef SHLIBS
-install:
-else
 ifdef DEVELOPER
 install:
 else
@@ -44,10 +29,8 @@ install:
 	cp yangcli-sample.conf $(ETC_INSTALL)/
 	cp yangdiff-sample.conf $(ETC_INSTALL)/
 	cp yangdump-sample.conf $(ETC_INSTALL)/
-endif
-endif
-endif
-endif
+endif  # DEVELOPER
+
 
 distclean: superclean uninstall
 

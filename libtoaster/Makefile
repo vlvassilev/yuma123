@@ -2,6 +2,10 @@
 #  
 #   very top libtoaster directory
 
+# BUILD VARIABLES
+#
+# DEVELOPER=1 : USED FOR debian yuma-dev package
+
 ##################### LIBRARIES ########################
 #
 # DIRS:  
@@ -18,8 +22,13 @@ endif
 
 SRC_INST=$(DESTDIR)$(PREFIX)/share/yuma/src/libtoaster
 
+
 #################### PLATFORM DEFINITIONS ############
+ifdef DEVELOPER
+all:
+else
 all: toasterall
+endif  # DEVELOPER
 
 
 ################################ MAKE RULES #################################
@@ -31,7 +40,11 @@ superclean: toastersuperclean
 
 distclean: toastersuperclean
 
+ifdef DEVELOPER
 install: toasterinstall
+else
+install: libinstall
+endif  # DEVELOPER
 
 toasterall:
 	for dir in $(DIRS); do\
@@ -48,43 +61,24 @@ toastersuperclean:
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
-toasterinstall:
+libinstall:
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done
-ifndef DEBIAN
-	mkdir -p $(SRC_INST)
-	mkdir -p $(SRC_INST)/src
-	mkdir -p $(SRC_INST)/lib
-	mkdir -p $(SRC_INST)/bin
-	cp Makefile $(SRC_INST)
-	cp src/*start $(SRC_INST)/src/
-	cp src/*c $(SRC_INST)/src/
-	cp src/*h $(SRC_INST)/src/
-	cp src/Makefile $(SRC_INST)/src/
-else
-ifdef SERVER
-else
-ifdef CLIENT
-else
-ifdef SHLIBS
-else
-#  this is DEVELOPER or no subtag in DEBIAN
-	mkdir -p $(SRC_INST)
-	mkdir -p $(SRC_INST)/src
-	mkdir -p $(SRC_INST)/lib
-	mkdir -p $(SRC_INST)/bin
-	cp Makefile $(SRC_INST)
-	cp src/*start $(SRC_INST)/src/
-	cp src/*c $(SRC_INST)/src/
-	cp src/*h $(SRC_INST)/src/
-	cp src/Makefile $(SRC_INST)/src/
-endif
-endif
-endif
-endif
 
-.PHONY: all clean superclean install \
+toasterinstall:
+	mkdir -p $(SRC_INST)
+	mkdir -p $(SRC_INST)/src
+	mkdir -p $(SRC_INST)/lib
+	mkdir -p $(SRC_INST)/bin
+	cp Makefile $(SRC_INST)
+	cp src/*start $(SRC_INST)/src/
+	cp src/*c $(SRC_INST)/src/
+	cp src/*h $(SRC_INST)/src/
+	cp src/Makefile $(SRC_INST)/src/
+
+
+.PHONY: all clean superclean install libinstall \
 	toasterall toasterclean toastersuperclean toasterinstall distclean
 
 

@@ -1511,22 +1511,26 @@ status_t
 status_t
     y_yuma_arp_init2 (void)
 {
-    status_t res;
+    status_t res = NO_ERR;
+    boolean  added = FALSE;
 
-    res = NO_ERR;
-
-    if (proc_net_arp_ok) {
-        arp_val = agt_init_cache(
-          y_yuma_arp_M_yuma_arp,
-          y_yuma_arp_N_arp,
-          &res);
-        if (res != NO_ERR) {
-            return res;
-        }
-        /* put your init2 code here */
+    if (!proc_net_arp_ok) {
+        return res;
     }
 
+    arp_val = agt_add_top_node_if_missing(yuma_arp_mod, y_yuma_arp_N_arp,
+                                          &added, &res);
+    if (res != NO_ERR || arp_val == NULL) {
+        return res;
+    }
+
+    /* ignoring 'added' because no default leafs within /arp
+     * so the val_add_defaults function is not needed
+     */
+
+    res = y_yuma_arp_arp_mro(arp_val);
     return res;
+
 } /* y_yuma_arp_init2 */
 
 

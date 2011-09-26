@@ -21,19 +21,15 @@ uninstall:
 
 superclean: clean
 
-ifdef CLIENT
-install:
+ifdef DEBIAN
+ifdef DEVELOPER
+install: installfiles
 else
-ifdef SHLIBS
-install:
-else
-ifdef SERVER
-install:
+install: 
+endif  # DEVELOPER
 else
 install: installfiles
-endif
-endif
-endif
+endif  # DEBIAN
 
 installfiles:
 	mkdir -p $(UTIL_INSTALL)

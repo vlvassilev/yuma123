@@ -9,18 +9,21 @@
 # This is an ordered list
 # Put only the directories that build object files in the list
 
-# S_DIRS == all server dirs
-S_DIRS = netconf
+DIRS =
+
+ifndef DEVELOPER
+DIRS += libtecla
+endif  # DEVELOPER
+
+# DIRS == all netconf dirs
+DIRS += netconf
 
 ifndef NOTOASTER
-S_DIRS += libtoaster
+DIRS += libtoaster
 endif
 
-# DIRS = all targets
-DIRS = libtecla $(S_DIRS)
-
-# C_DIRS == all client dirs 
-C_DIRS = libtecla netconf
+# building yuma-doc ignores DIRS, uses DOCDIRS instead
+DOCDIRS = netconf/doc
 
 #################### PLATFORM DEFINITIONS ############
 
@@ -35,54 +38,41 @@ superclean: yumasuperclean
 
 install: yumainstall
 
-ifdef CLIENT
-yumaall: yuma-client
+ifdef DOC
+# yuma-doc package
+# nothing to make at this time, just install
+yumaall:
 
-yumainstall: yuma-client-install
-else
-ifdef SERVER
-yumaall: yuma-server
+yumainstall: yuma-doc-install
 
-yumainstall: yuma-server-install
-else
-ifdef SHLIBS
-yumaall: yuma-shlibs
-
-yumainstall: yuma-shlibs-install
 else
 ifdef DEVELOPER
+# yuma-dev package
 yumaall: yuma-dev
 
-yumainstall: yuma-dev-install
+yumainstall: yuma-all-install
+
 else
+# yuma package or normal build
 yumaall: yuma-all
 
 yumainstall: yuma-all-install
-endif
-endif
-endif
-endif
 
+endif  # DEVELOPER
+endif  # DOC
 
 libtecla/Makefile:
 	cd libtecla && ./configure
 
-yuma-client: libtecla/Makefile
-	for dir in $(C_DIRS); do\
-	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
-        done
-
-yuma-server:
-	for dir in $(S_DIRS); do\
-	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
-        done
-
-
 yuma-all: libtecla/Makefile
 	for dir in $(DIRS); do\
-	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
+	  cd $$dir && $(MAKE) && cd ..;\
         done
 
+yuma-dev:
+	for dir in $(DIRS); do\
+	  cd $$dir && $(MAKE) && cd ..;\
+        done
 
 yumaclean: libtecla/Makefile
 	for dir in $(DIRS); do\
@@ -94,31 +84,19 @@ yumasuperclean: libtecla/Makefile
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
-yuma-client-install: libtecla/Makefile
-	for dir in $(C_DIRS); do\
-          cd $$dir && $(MAKE) install && cd ..;\
-        done
-
-yuma-server-install:
-	for dir in $(S_DIRS); do\
-          cd $$dir && $(MAKE) install && cd ..;\
-        done
-
-yuma-dev-install:
-	for dir in $(DIRS); do\
-          cd $$dir && $(MAKE) install && cd ..;\
-        done
-
 yuma-all-install:
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done
 
-.PHONY: all clean superclean install \
+yuma-doc-install:
+	for dir in $(DOCDIRS); do\
+          cd $$dir && $(MAKE) install && cd ..;\
+        done
+
+.PHONY: all clean superclean install yuma-dev \
 	yumaall yumaclean yumasuperclean yumainstall \
-	yuma-client yuma-server yuma-dev yuma-all \
-	yuma-client-install yuma-server-install \
-	yuma-dev-install yuma-all-install
+	yuma-all yuma-all-install yuma-doc-install
 
 
 # prevent the make program from choking on all the symbols

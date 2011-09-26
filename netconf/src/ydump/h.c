@@ -179,6 +179,44 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_start_cplusplus
+* 
+* Generate the start __cplusplus wrapper
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*
+*********************************************************************/
+static void
+    write_start_cplusplus (ses_cb_t *scb)
+{
+    ses_putstr(scb, (const xmlChar *)"\n#ifdef __cplusplus");
+    ses_putstr(scb, (const xmlChar *)"\nextern \"C\" {");
+    ses_putstr(scb, (const xmlChar *)"\n#endif");
+
+}  /* write_start_cplusplus */
+
+
+/********************************************************************
+* FUNCTION write_end_cplusplus
+* 
+* Generate the end __cplusplus wrapper
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*
+*********************************************************************/
+static void
+    write_end_cplusplus (ses_cb_t *scb)
+{
+    ses_putstr(scb, (const xmlChar *)"\n#ifdef __cplusplus");
+    ses_putstr(scb, (const xmlChar *)"\n} /* end extern 'C' */");
+    ses_putstr(scb, (const xmlChar *)"\n#endif");
+
+}  /* write_end_cplusplus */
+
+
+/********************************************************************
 * FUNCTION write_h_object_typdef
 * 
 * Generate the H file typdefs definitions for 1 data node
@@ -716,7 +754,10 @@ static status_t
 
     write_h_includes(scb, mod, cp);
 
+    write_start_cplusplus(scb);
+
     if (!cp->isuser) {
+        ses_putchar(scb, '\n');
         /* mod name */
         ses_putstr(scb, POUND_DEFINE);
         write_identifier(scb, mod->name, BAR_MOD, mod->name, FALSE);
@@ -827,6 +868,8 @@ static status_t
             c_write_fn_prototypes(mod, cp, scb, &objnameQ);
         }
     }
+
+    write_end_cplusplus(scb);
 
     /* Write the end of the H file */
     ses_putchar(scb, '\n');

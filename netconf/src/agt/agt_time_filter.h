@@ -38,6 +38,10 @@
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define y_yuma_time_filter_M_yuma_time_filter (const xmlChar *)"yuma-time-filter"
 #define y_yuma_time_filter_R_yuma_time_filter (const xmlChar *)"2011-08-13"
 
@@ -55,5 +59,9 @@ extern status_t
 /* yuma-time-filter module cleanup */
 extern void
     y_yuma_time_filter_cleanup (void);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif

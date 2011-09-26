@@ -8,7 +8,7 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
-export MY_REL=3
+export MY_REL=1
 
 configure: configure-stamp
 configure-stamp:
@@ -24,7 +24,8 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) DEBIAN=1 FULL_STATIC=1 STATIC=1 RELEASE=$(MY_REL)
+	# !!! no longer using FULL_STATIC=1 STATIC=1 !!!
+	$(MAKE) DEBIAN=1 RELEASE=$(MY_REL)
 
 	#docbook-to-man debian/yuma.sgml > yuma.1
 
@@ -37,10 +38,14 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..)
-	$(MAKE) DEBIAN=1  STATIC=1 \
-	DESTDIR=$(CURDIR)/debian/yuma clean
-	#$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
-	#DESTDIR=$(CURDIR)/debian/yuma-dev clean
+	$(MAKE) DEBIAN=1 DESTDIR=$(CURDIR)/debian/yuma clean
+	$(MAKE) DEBIAN=1 DEVELOPER=1 DESTDIR=$(CURDIR)/debian/yuma-dev clean
+	$(MAKE) DEBIAN=1 DOC=1 DESTDIR=$(CURDIR)/debian/yuma-doc clean
+
+#	$(MAKE) DEBIAN=1 STATIC=1 DESTDIR=$(CURDIR)/debian/yuma clean
+#	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
+#	DESTDIR=$(CURDIR)/debian/yuma-dev clean
+#	$(MAKE) DEBIAN=1 STATIC=1 DOC=1 DESTDIR=$(CURDIR)/debian/yuma-doc clean
 
 	dh_clean 
 
@@ -51,14 +56,23 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) DEBIAN=1 STATIC=1 RELEASE=$(MY_REL) \
+	$(MAKE) DEBIAN=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma install
-	#$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
-	#DESTDIR=$(CURDIR)/debian/yuma-dev install
+	$(MAKE) DEBIAN=1 DEVELOPER=1 RELEASE=$(MY_REL) \
+	DESTDIR=$(CURDIR)/debian/yuma-dev install
+	$(MAKE) DEBIAN=1 DOC=1 RELEASE=$(MY_REL) \
+	DESTDIR=$(CURDIR)/debian/yuma-doc install
+
+#	$(MAKE) DEBIAN=1 STATIC=1 RELEASE=$(MY_REL) \
+#	DESTDIR=$(CURDIR)/debian/yuma install
+#	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
+#	DESTDIR=$(CURDIR)/debian/yuma-dev install
+#	$(MAKE) DEBIAN=1 STATIC=1 DOC=1 RELEASE=$(MY_REL) \
+#	DESTDIR=$(CURDIR)/debian/yuma-doc install
 
 postinst: 
-	#ldconfig
-	#echo "*** did ldconfig ***"
+	ldconfig
+	echo "*** did ldconfig ***"
 
 # Build architecture-independent files here.
 binary-indep: install
@@ -88,7 +102,7 @@ binary-arch: install
 	dh_compress
 	dh_fixperms
 #	dh_perl
-#	dh_makeshlibs
+	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol

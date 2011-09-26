@@ -1,17 +1,29 @@
 #!/bin/sh
 #
-# prep-deb.sh [svnversion]
+# prep-deb.sh [major version number]
 #
-# make the yuma build code and tar it up for debuild
+# make the yuma build code and tar it up for debian
 #
-# 2 packages:
-#   yuma-tools-version.deb
-#   yuma-tools-dev-version.deb
-#
-# the $1 parameter must be a revision number if present
-# this will be used instead of HEAD in the svn export step
+# the $1 parameter must be '1' or '2'
 
+if [ $# != 1 ]; then
+  echo "Usage: prep-deb.sh <major-version>"
+  echo "Example:   prep-deb.sh 1"
+  exit 1
+fi
+
+if [ $1 = 1 ]; then
 VER="1.15"
+URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1
+elif [ $1 = 2 ]; then
+VER="2.1"
+URL=https://yuma.svn.sourceforge.net/svnroot/yuma/trunk
+else
+  echo "Error: major version must be 1 or 2"
+  echo "Usage: prep-deb.sh <major-version>"
+  echo "Example:   prep-deb.sh 2"
+  exit 1
+fi
 
 mkdir -p ~/build
 mkdir -p ~/rpmprep
@@ -19,11 +31,7 @@ rm -rf ~/rpmprep/*
 
 cd ~/rpmprep
 
-if [ $1 ]; then
-  svn export -r$1 https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$VER
-else
-  svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$VER
-fi
+svn export $URL yuma-$VER
 
 tar cvf yuma_$VER.tar yuma-$VER/
 gzip yuma_$VER.tar

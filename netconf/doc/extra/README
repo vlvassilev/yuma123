@@ -1,13 +1,11 @@
 
-Yuma Tools -- A Toolset for the YANG data modeling language 
-        and NETCONF protocol
-===========================================================
+Yuma -- A Toolset for the YANG data modeling language and NETCONF protocol
+==========================================================================
 
 Copyright (c) 2008 - 2011, Andy Bierman
 
-See the file "yumatools-cs-license.pdf" for information on usage 
-and redistribution of this toolset, and for a 
-DISCLAIMER OF ALL WARRANTIES.
+See the file "/usr/share/doc/yuma/COPYRIGHT" for information on usage 
+and redistribution of this toolset, and for a DISCLAIMER OF ALL WARRANTIES.
 
 Source:
 -------
@@ -29,6 +27,8 @@ FILES:
    /usr/sbin/netconf-subsystem
  - a binary linux library called 'libncx.so'
    /usr/lib/libncx.so
+ - a binary linux library called 'libagt.so'
+   /usr/lib/libagt.so
  - a binary linux library called 'libtoaster.so'
    /usr/lib/yuma/libtoaster.so
  - documentation pages
@@ -80,8 +80,10 @@ IMPORTANT INSTALLATION NOTE
   **************************************************************
 
 
-Refer to the manuals in the /usr/share/doc/yuma/ directory
+Refer to the manuals in the /usr/share/doc/yuma/ directories
 for installation and operation instructions.
+
+   file:///usr/share/doc/yuma/html/index.html
 
 
 

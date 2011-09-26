@@ -3293,4 +3293,90 @@ val_value_t *
 }  /* agt_get_key_value */
 
 
+/********************************************************************
+* FUNCTION agt_add_top_node_if_missing
+* 
+* SIL Phase 2 init:  Check the running config to see if
+* the specified node is there; if not create one
+* return the node either way
+* INPUTS:
+*   mod == module containing object
+*   objname == object name
+*   added   == address of return added flag
+*   res     == address of return status
+*
+* OUTPUTS:
+*   *added == TRUE if new node was added
+*   *res == return status, return NULL unless NO_ERR
+*
+* RETURNS:
+*   if *res==NO_ERR,
+*      pointer to new or existing node for modname:objname
+*      this is added to running config and does not have to
+*      be deleted.  
+*      !!!! No MRO nodes or default nodes have been added !!!!
+*********************************************************************/
+val_value_t *
+    agt_add_top_node_if_missing (ncx_module_t *mod,
+                                 const xmlChar *objname,
+                                 boolean *added,
+                                 status_t *res)
+{
+    obj_template_t        *nodeobj;
+    cfg_template_t        *runningcfg;
+    val_value_t           *nodeval;
+    const xmlChar         *modname;
+#ifdef DEBUG
+    if (!mod || !objname || !added || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+    *added = FALSE;
+    modname = ncx_get_modname(mod);
+
+    /* make sure the running config root is set */
+    runningcfg = cfg_get_config(NCX_EL_RUNNING);
+    if (!runningcfg || !runningcfg->root) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    nodeobj = obj_find_template_top(mod, modname, objname);
+    if (nodeobj == NULL) {
+        *res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return NULL;
+    }
+
+    /* check to see if the /nacm branch already exists
+     * if so, then skip all this init stuff
+     */
+    nodeval = val_find_child(runningcfg->root, modname, objname);
+    if (nodeval == NULL) {
+        /* did not find the /modname:objname node so create one;
+         * get all the static object nodes first 
+         */
+
+        /* create the static structure for the /nacm data model
+         * start with the top node /nacm
+         */
+        nodeval = val_new_value();
+        if (nodeval == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            *added = TRUE;
+            val_init_from_template(nodeval, nodeobj);
+            
+            /* handing off the malloced memory here */
+            val_add_child_sorted(nodeval, runningcfg->root);
+        }
+    }
+
+    return nodeval;
+
+}  /* agt_add_top_node_if_missing */
+
+
 /* END file agt_util.c */

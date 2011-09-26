@@ -26,8 +26,10 @@ endif
 
 ifdef LIB64
 REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+REAL_BASE=$(DESTDIR)$(PREFIX)/lib64
 else
 REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+REAL_BASE=$(DESTDIR)$(PREFIX)/lib
 endif
 
 
@@ -38,9 +40,15 @@ all: sil_dummy sil_lib
 #################### PLATFORM DEFINITIONS ############
 CINCBASE=$(DESTDIR)$(PREFIX)/include
 
-CINC = -I. -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx \
-     -I$(CINCBASE)/yuma/agt -I$(CINCBASE) -I$(CINCBASE)/libxml2 \
-     -I$(CINCBASE)/libxml2/libxml
+CINC = -I. -I$(CINCBASE) -I$(CINCBASE)/libxml2 -I$(CINCBASE)/libxml2/libxml
+
+ifdef FORCE_YUMA_HOME
+CINC += -I$(YUMA_HOME)/src/platform -I$(YUMA_HOME)/src/ncx \
+     -I$(YUMA_HOME)/src/agt 
+else
+CINC += -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx \
+     -I$(CINCBASE)/yuma/agt 
+endif
 
 ifdef FREEBSD
 CINC += -I/usr/local/include -I/usr/local/include/libxml2 \
@@ -166,7 +174,7 @@ HEES = $(wildcard *.h)
 ifdef FORCE_YUMA_HOME
 YUMALIBS= -L$(YUMA_HOME)/target/lib -lagt -lncx
 else
-YUMALIBS= -L$(REAL_INST) -lagt -lncx
+YUMALIBS= -L$(REAL_BASE) -lagt -lncx
 endif
 
 
@@ -178,9 +186,6 @@ DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
 
 ######################## PLATFORM DEFINITIONS #############
 PLATFORM_CPP=
-
-.PHONY: all superclean clean test install uninstall \
-        distclean depend lint code splitcode
 
 ######################### MAKE DEPENDENCIES ###############
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \
@@ -257,14 +262,8 @@ superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
-ifdef FREEBSD
-ADD_DL=
-else
-ADD_DL=-ldl
-endif
-
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) $(ADD_DL) $(YUMALIBS)
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) $(YUMALIBS)
 
 
 $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
@@ -282,6 +281,10 @@ splitcode:
 	yangdump format=yc indent=4 module=$(SUBDIR_NM) output=y_$(SUBDIR_NM).c
 	yangdump format=uh indent=4 module=$(SUBDIR_NM) output=u_$(SUBDIR_NM).h
 	yangdump format=uc indent=4 module=$(SUBDIR_NM) output=u_$(SUBDIR_NM).c
+
+
+.PHONY: all superclean clean test install uninstall \
+        distclean depend lint code splitcode work sil_lib sil_dummy
 
 
 # prevent the make program from choking on all the symbols

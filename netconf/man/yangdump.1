@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangdump 1 "July 20, 2011" Linux "yangdump 2.0"
+.TH yangdump 1 "September 25, 2011" Linux "yangdump 2.1"
 .SH NAME
 yangdump \- validate YANG modules and convert them to different formats
 
@@ -22,7 +22,7 @@ yangdump \- validate YANG modules and convert them to different formats
 provides validation and translation of YANG data models.
 Information about a module or submodule can be generated as well.
 This version of yangdump supports the YANG data modeling language
-defined in \fBdraft-ietf-netmod-yang-12.txt\fP.
+defined in \fBRFC 6020\fP.
 
 The \fBformat\fP parameter is used to select a translation output mode.
 If it is missing, then no translation will be done.
@@ -154,11 +154,17 @@ The following translation formats are available:
 
 .nf
 
-   xsd:   XSD 1.0 
+    xsd:  XSD 1.0 
    html:  XHTML 1.0
    yang:  Canonical YANG (in progress)
    copy:  Validate, and copy with a new name
-   yin:   YIN format
+    yin:  YIN format
+      c:  Combined Yuma and User SIL C module
+      h:  Combined Yuma and User SIL H file
+     uc:  User part of a split SIL C module
+     uh:  User part of a split SIL H file
+     yc:  Yuma part of a split SIL C module
+     yh:  Yuma part of a split SIL H file
 
 .fi
 .IP --\fBfeature-code-default\fP=enum

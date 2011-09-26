@@ -11,7 +11,7 @@
     <meta content="" name="DC.subject" />
     <meta content="" name="DC.description" />
     <meta content="Andy Bierman" name="DC.creator" />
-    <meta content="2011-07-20T17:48:03" name="DC.date" />
+    <meta content="2011-09-25T14:29:40" name="DC.date" />
     <meta content="" name="DC.language" />
     <style media="all" type="text/css">
       body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
@@ -47,9 +47,9 @@
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">YANG Module Compiler</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 2.0</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 2.1</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
-    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated:  July 20, 2011</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated:  September 25, 2011</p>
     <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
     <div id="TableofContents1" style="background-color:transparent">
       <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma yangdump Manual</p>
@@ -1845,9 +1845,89 @@
       </li>
     </ul>
     <h3 dir="ltr" id="toc23"><span class="SectionNumber">2.3.8</span> Agent Instrumentation H File Generation</h3>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:bold"> --format=h</span> parameter value is only relevant for the SDK version of <span style="font-weight:normal">Yuma</span>.  Refer to the <span style="font-weight:normal">Yuma</span> Developer Guide for more details.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are 3 different parameters for generating SIL developer H files:</p>
+    <table cellspacing="0" dir="ltr" id="hfilestable" style="margin-top:0;margin-bottom:0;margin-left:63.004795px;margin-right:71.0016px;width:562.0032px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <thead>
+        <tr>
+          <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">Parameter</p>
+          </td>
+          <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">Description</p>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--format=h</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Generate combined User and Yuma SIL H file</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--format=uh</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Generate split User SIL H file</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--format=yh</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Generate split Yuma SIL H file</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:normal">se</span><span style="font-weight:bold"> </span>parameter values are only relevant for Yuma server developers.  Refer to the <span style="font-weight:normal">Yuma</span> Developer Guide for more details.</p>
     <h3 dir="ltr" id="toc24"><span class="SectionNumber">2.3.9</span> Agent Instrumentation C File Generation</h3>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:bold"> --format=c</span> parameter value is only relevant fot the SDK version of <span style="font-weight:normal">Yuma</span>.  Refer to the <span style="font-weight:normal">Yuma</span> Developer Guide for more details.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are 3 different parameters for generating SIL developer C files:</p>
+    <table cellspacing="0" dir="ltr" id="Table9table" style="margin-top:0;margin-bottom:0;margin-left:63.004795px;margin-right:71.0016px;width:562.0032px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <thead>
+        <tr>
+          <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">Parameter</p>
+          </td>
+          <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">Description</p>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--format=c</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Generate combined User and Yuma SIL C file</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--format=uc</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Generate split User SIL C file</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:151.66881px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--format=yc</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:392.6656px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Generate split Yuma SIL C file</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:normal">se</span><span style="font-weight:bold"> </span>parameter values are only relevant for Yuma server developers.  Refer to the <span style="font-weight:normal">Yuma</span> Developer Guide for more details.</p>
     <h1 dir="ltr" id="toc25"><span class="SectionNumber">3</span> CLI Reference</h1>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">yangdump</span> program uses command line interface (CLI) parameters to control program behavior.</p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The following sections document all the Yuma CLI parameters relevant to this program, in alphabetical order.</p>
@@ -2565,6 +2645,7 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <h2 dir="ltr" id="toc37"><span class="SectionNumber">3.12</span> --format</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--format</span> parameter controls the type of <span style="font-weight:bold">yangdump</span> conversion desired, if any.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Yuma SIL developers should refer to the <span style="font-weight:bold">make_sil_dir</span> script to generate SIL code instead of using the <span style="font-weight:bold">yangdump</span> command directly for code generation formats (c, h, uc, uh, yc, yh).</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter is missing, then no translation will be done, but the module will be validated, and any requested reports will be generated. </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following values are supported: </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
@@ -2626,7 +2707,7 @@
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">sqldb</p>
         <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
           <li>
-            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate module specific SQL data for the netconfcentral.sql template.  This mode is only available in the <span style="font-weight:bold">yangdumpcode</span> version of <span style="font-weight:bold">yangdump</span>.</p>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate module specific SQL data for the netconfcentral.sql template.</p>
           </li>
         </ul>
       </li>
@@ -2634,7 +2715,7 @@
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">h</p>
         <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
           <li>
-            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation H file.   This mode is only available in the <span style="font-weight:bold">yangdumpcode</span> version of <span style="font-weight:bold">yangdump</span>.</p>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation combined SIL H file.</p>
           </li>
         </ul>
       </li>
@@ -2642,7 +2723,39 @@
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">c</p>
         <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
           <li>
-            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation C file.   This mode is only available in the <span style="font-weight:bold">yangdumpcode</span> version of <span style="font-weight:bold">yangdump</span>.</p>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation combined SIL C file.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">uh</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation User SIL H file.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">uc</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation User SIL C file.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">yh</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation Yuma SIL H file.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">yc</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Generate a module specific <span style="font-weight:bold">netconfd</span> agent instrumentation Yuma SIL C file.</p>
           </li>
         </ul>
       </li>
@@ -2656,7 +2769,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
         </td>
         <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">enumeration (xsd, sql, sqldb, html, yang, copy, h, c))</p>
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">enumeration (xsd, sql, sqldb, html, yang, copy, h, c, uc, uh, yc, yh))</p>
         </td>
       </tr>
       <tr>

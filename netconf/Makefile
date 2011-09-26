@@ -17,16 +17,11 @@ DIRS = src modules etc doc man util
 
 TOP_INSTALL = $(DESTDIR)$(PREFIX)/share/yuma
 
-#ifndef JFLAG
-#JFLAG = -j3
-#endif
-
 #################### PLATFORM DEFINITIONS ############
 
 all: treeall
 
 ################################ MAKE RULES #################################
-#
 
 clean: treeclean
 
@@ -37,9 +32,6 @@ distclean: distclean
 install: treeinstall
 
 uninstall: treeuninstall
-
-
-
 
 treeall:
 	for dir in $(DIRS); do\
@@ -63,7 +55,9 @@ treedistclean:
 
 treeinstall:
 	mkdir -p $(TOP_INSTALL)
+ifndef DEVELOPER
 	mkdir -p $(TOP_INSTALL)/modules
+endif
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done

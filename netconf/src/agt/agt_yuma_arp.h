@@ -39,6 +39,16 @@
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/********************************************************************
+*								    *
+*			 C O N S T A N T S			    *
+*								    *
+*********************************************************************/
+
 #define y_yuma_arp_M_yuma_arp (const xmlChar *)"yuma-arp"
 #define y_yuma_arp_R_yuma_arp (const xmlChar *)"2011-08-25"
 
@@ -64,6 +74,12 @@
 #define NEIGH_DIR	"/proc/sys/net/ipv4/neigh/"
 
 enum { ARP_ADD, ARP_DEL };
+
+/********************************************************************
+*								    *
+*			     T Y P E S				    *
+*								    *
+*********************************************************************/
 
 /* container /arp/arp-settings */
 typedef struct y_yuma_arp_T_arp_arp_settings_ {
@@ -102,6 +118,13 @@ typedef struct y_yuma_arp_T_arp_ {
     y_yuma_arp_T_arp_dynamic_arps dynamic_arps;
 } y_yuma_arp_T_arp;
 
+
+/********************************************************************
+*								    *
+*			F U N C T I O N S			    *
+*								    *
+*********************************************************************/
+
 /* yuma-arp module init 1 */
 extern status_t
     y_yuma_arp_init (
@@ -115,5 +138,9 @@ extern status_t
 /* yuma-arp module cleanup */
 extern void
     y_yuma_arp_cleanup (void);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif

@@ -1039,10 +1039,6 @@ extern xmlChar *
 extern status_t
     agt_set_mod_defaults (ncx_module_t *mod);
 
-#ifdef __cplusplus
-}  /* end extern 'C' */
-#endif
-
 
 /********************************************************************
 * FUNCTION agt_set_with_defaults
@@ -1096,5 +1092,38 @@ extern val_value_t *
     agt_get_key_value (val_value_t *startval,
                        val_value_t **lastkey);
 
+
+/********************************************************************
+* FUNCTION agt_add_top_node_if_missing
+* 
+* SIL Phase 2 init:  Check the running config to see if
+* the specified node is there; if not create one
+* return the node either way
+* INPUTS:
+*   mod      == module containing object
+*   objname == object name
+*   added   == address of return added flag
+*   res     == address of return status
+*
+* OUTPUTS:
+*   *added == TRUE if new node was added
+*   *res == return status, return NULL unless NO_ERR
+*
+* RETURNS:
+*   if *res==NO_ERR,
+*      pointer to new or existing node for modname:objname
+*      this is added to running config and does not have to
+*      be deleted.  
+*      !!!! No MRO nodes or default nodes have been added !!!!
+*********************************************************************/
+extern val_value_t *
+    agt_add_top_node_if_missing (ncx_module_t *mod,
+                                 const xmlChar *objname,
+                                 boolean *added,
+                                 status_t *res);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_agt_util */

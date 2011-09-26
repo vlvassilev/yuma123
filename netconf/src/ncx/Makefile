@@ -13,12 +13,12 @@ TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
 
 ifdef FREEBSD
-REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib
 else
 ifdef LIB64
-REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64
 else
-REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib
 endif
 endif
 
@@ -49,15 +49,7 @@ test:
 # build the library in any developer context
 # and in the 1-pass RPM RELEASE build
 # for ubunte RELEASE builds, only build if 
-# this is the SHLIBS pass, not CLIENT, SERVER, or DEVELOPER
-ifdef SERVER
-# nothing to do for debian SERVER build
-install:
-else
-ifdef CLIENT
-# nothing to do for debian CLIENT build
-install:
-else
+# this is real build not DEVELOPER
 ifdef DEVELOPER
 # just install the H files
 install: includes
@@ -93,8 +85,6 @@ endif  # FREEBSD
 endif  # STATIC
 endif  # CROSS_TARGET
 endif  # DEVELOPER
-endif  # CLIENT
-endif  # SERVER
 
 # 1 librarr uninstall rule for all variants
 # TBD: uninstall includes
@@ -103,12 +93,6 @@ uninstall:
 
 
 # check which variant of the library to build
-ifdef SERVER
-ncxlib:
-else
-ifdef CLIENT
-ncxlib:
-else
 ifdef DEVELOPER
 ncxlib:
 else
@@ -120,8 +104,6 @@ ifndef MAC
 endif  # MAC
 endif  # STATIC
 endif  # DEVELOPER
-endif  # CLIENT
-endif  # SERVER
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files
@@ -167,16 +149,10 @@ $(LBASE)/libncx.dylib: $(OBJS)
 
 # install the H files into $DESTDIR/usr/include
 includes:
-ifndef SHLIBS
-ifndef SERVER
-ifndef CLIENT
 	mkdir -p $(REAL_INC_INST)/ncx
 	mkdir -p $(REAL_INC_INST)/platform
 	cp *.h $(REAL_INC_INST)/ncx
 	cp ../platform/procdefs.h $(REAL_INC_INST)/platform
-endif
-endif
-endif
 
 .PHONY: includes ncxdummy ncxlib
 

@@ -10,17 +10,17 @@ SUBDIR_CPP=
 ############### TARGET PROFILE ##############################
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
+BIN_INST=$(TBASE)/bin
+
 LIB_INST=$(TBASE)/lib
 
-#BIN_INST=$(TBASE)/bin
-
 ifdef FREEBSD
-REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib
 else
 ifdef LIB64
-REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64
 else
-REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib
 endif
 endif
 
@@ -29,8 +29,11 @@ endif
 REAL_INC_INST=$(DESTDIR)$(PREFIX)/include/yuma
 
 #################### MAKE RULES ########################
-
+ifdef DEVELOPER
+all:
+else
 all: agtdummy agtlib
+endif  # DEVELOPER
 
 #################### PLATFORM DEFINITIONS ############
 include ../platform/platform.profile
@@ -51,15 +54,8 @@ test:
 # build the library in any developer context
 # and in the 1-pass RPM RELEASE build
 # for ubunte RELEASE builds, only build if 
-# this is the SHLIBS pass, not CLIENT, SERVER, or DEVELOPER
-ifdef SERVER
-# nothing to do for debian SERVER build
-install:
-else
-ifdef CLIENT
-# nothing to do for debian CLIENT build
-install:
-else
+# this is the yuma package (not DEVELOPER)
+
 ifdef DEVELOPER
 # just install the H files
 install: includes
@@ -95,8 +91,6 @@ endif  # FREEBSD
 endif  # STATIC
 endif  # CROSS_TARGET
 endif  # DEVELOPER
-endif  # CLIENT
-endif  # SERVER
 
 
 uninstall:
@@ -104,12 +98,6 @@ uninstall:
 
 
 # check which variant of the library to build
-ifdef SERVER
-agtlib:
-else
-ifdef CLIENT
-agtlib:
-else
 ifdef DEVELOPER
 agtlib:
 else
@@ -121,27 +109,19 @@ ifndef MAC
 endif  # MAC
 endif  # STATIC
 endif  # DEVELOPER
-endif  # CLIENT
-endif  # SERVER
+
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files
-ifdef CLIENT
-agtdummy:
-else
 agtdummy: dependencies $(OBJS)
-endif
 
 clean:
-ifndef CLIENT
 	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).*
-endif
+
 
 superclean:
-ifndef CLIENT
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LBASE)/lib$(SUBDIR_NM).*
-endif
 
 distclean: superclean
 
@@ -173,17 +153,11 @@ $(LBASE)/libagt.dylib: $(OBJS)
 
 
 includes:
-ifndef SHLIBS
-ifndef SERVER
-ifndef CLIENT
 	mkdir -p $(REAL_INC_INST)/agt
 	cp *.h $(REAL_INC_INST)/agt
-endif
-endif
-endif
 
 
-.PHONY: includes
+.PHONY: includes agtlib agtdummy
 
 
 # prevent the make program from choking on all the symbols

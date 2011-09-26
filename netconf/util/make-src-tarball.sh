@@ -14,14 +14,17 @@ if [ $# != 3 ]; then
   exit 1
 fi
 
-echo "Making yuma source tarball for $1.$2-$3"
-mkdir -p ~/srctarballprep
-rm -rf ~/srctarballprep/*
-cd ~/srctarballprep
-
 if [ $1 = 1 ]; then
+  echo "Making yuma source tarball for $1.$2-$3"
+  mkdir -p ~/srctarballprep
+  cd ~/srctarballprep
+  rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
   svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$1.$2-$3
 elif [ $1 = 2 ]; then
+  echo "Making yuma source tarball for $1.$2-$3"
+  mkdir -p ~/srctarballprep
+  cd ~/srctarballprep
+  rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
   svn export https://yuma.svn.sourceforge.net/svnroot/yuma/trunk yuma-$1.$2-$3
 else
   echo "Error: major version must be 1 or 2"

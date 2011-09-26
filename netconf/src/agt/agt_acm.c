@@ -2135,94 +2135,54 @@ status_t
     agt_acm_init2 (void)
 {
     const agt_profile_t   *profile;
-    obj_template_t        *nacmobj;
-    cfg_template_t        *runningcfg;
     val_value_t           *nacmval, *childval;
-    status_t               res;
-    boolean                nacmfound;
+    status_t               res = NO_ERR;
+    boolean                added = FALSE;
 
     if (!agt_acm_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-    res = NO_ERR;
     profile = agt_get_profile();
     superuser = profile->agt_superuser;
-    nacmfound = FALSE;
 
     if (profile->agt_accesscontrol_enum != AGT_ACMOD_NONE) {
         acmode = profile->agt_accesscontrol_enum;
     }
 
-
-    /* make sure the running config root is set */
-    runningcfg = cfg_get_config(NCX_EL_RUNNING);
-    if (!runningcfg || !runningcfg->root) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
+    nacmval = agt_add_top_node_if_missing(nacmmod, nacm_N_nacm,
+                                          &added, &res);
+    if (res != NO_ERR || nacmval == NULL) {
+        return res;
+    }
+    if (added) {
+        /* add /nacm/noRuleDefault */
+        res = val_add_defaults(nacmval, FALSE);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
-    nacmobj = obj_find_template_top(nacmmod, 
-                                    AGT_ACM_MODULE,
-                                    nacm_N_nacm);
-    if (nacmobj == NULL) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    /* check to see if the /nacm branch already exists
-     * if so, then skip all this init stuff
+    /* add read-only virtual leafs to the nacm value node
+     * create /nacm/deniedRpcs
      */
-    nacmval = val_find_child(runningcfg->root,
-                             AGT_ACM_MODULE,
-                             nacm_N_nacm);
-    if (nacmval == NULL) {
-        /* did not find the /nacm node so create one;
-         * get all the static object nodes first 
-         */
-
-        /* create the static structure for the /nacm data model
-         * start with the top node /nacm
-         */
-        nacmval = val_new_value();
-        if (nacmval == NULL) {
-            res = ERR_INTERNAL_MEM;
-        } else {
-            val_init_from_template(nacmval, nacmobj);
-            
-            /* handing off the malloced memory here */
-            val_add_child_sorted(nacmval, runningcfg->root);
-
-            /* add /nacm/noRuleDefault */
-            res = val_add_defaults(nacmval, FALSE);
-        }
-    } else {
-        nacmfound = TRUE;
+    childval = agt_make_virtual_leaf(nacmval->obj,
+                                     nacm_N_deniedRpcs,
+                                     get_deniedRpcs,
+                                     &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, nacmval);
     }
 
-    /* add read-only virtual leafs to the nacm value node */
+    /* create /nacm/deniedDataWrites */
     if (res == NO_ERR) {
-        /* create /nacm/deniedRpcs */
-        childval = agt_make_virtual_leaf(nacmobj,
-                                         nacm_N_deniedRpcs,
-                                         get_deniedRpcs,
-                                         &res);
-        if (childval != NULL) {
-            val_add_child_sorted(childval, nacmval);
-        }
-    }
-
-    if (res == NO_ERR) {
-        /* create /nacm/deniedDataWrites */
-        childval = agt_make_virtual_leaf(nacmobj,
+        childval = agt_make_virtual_leaf(nacmval->obj,
                                          nacm_N_deniedDataWrites,
                                          get_deniedDataWrites,
                                          &res);
         if (childval != NULL) {
             val_add_child_sorted(childval, nacmval);
         }
-    }
-
-    if (res == NO_ERR && !nacmfound) {
-        val_set_canonical_order(nacmval);
     }
 
     notif_cache = new_acm_cache();

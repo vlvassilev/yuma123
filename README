@@ -14,20 +14,47 @@ Build Variables:
 
   CYGWIN=1: build on windows within cygwin environment
 
+  DEBIAN=1: set for ubuntu packaing build; do not use
+     in normal builds
+
   DEBUG=1: set to add gdb symbols instead of -O2;
            does not remove the #ifdef DEBUG function
            NULL pointer checks in external functions
 
   DESTDIR=string: set the debian target build (default NULL)
 
+  DEVELOPER=1: debian packaging build flag to build the 
+      yuma-dev package.  Do not use in normal builds.
+
+  DOC=1: debian packaging build flag to build the yuma-doc package.
+      Do not use in normal builds
+
   ETC_PREFIX=string: set the top etc dir (after DESTDIR)
          default: /etc
 
   FREEBSD=1: Build for a FreeBSD platform
 
+  FORCE_YUMA_HOME=1: use when building SIL libraries to   
+     link against a development version of yuma.
+     The YUMA_HOME environment variable must be set,
+     and it must point to the 'netconf' directory:
+
+     Bash example using 'mybranch':
+
+     export YUMA_HOME=/home/andy/swdev/yuma/trunk/branches/mybranch/netconf
+
+     The yuma include (H) files from $(YUMA_HOME)/src/*
+     will be used instead of the system H files in /usr/include/yuma.
+
+     The libagt and libncx libraries from $(YUMA_HOME)/target/lib
+     will be used instead of the system libraries in /usr/lib or /usr/lib64.
+     The static versions (libagt.a and libncx.a) will be expected if
+     STATIC=1 is also set.  Otherwise the dynamic library versions
+     will be expected instead.
+
   FULL_STATIC=1: solve linking problems forcing static versions
       of all external libraries (used only by debian package build)
-
+ 
   LIB64=1: install and look for SIL libs in /usr/lib64/yuma
          instead of /usr/lib/yuma (used by FC14 64 bit)
 
@@ -95,12 +122,14 @@ Default Installed Programs:
 
 Default Installed Libraries:
 
-  - /usr/lib/libncx.so.1
+  - /usr/lib/libagt.so.2.1
+  - /usr/lib/libncx.so.2.1
   - /usr/lib/yuma/libtoaster.so
 
 Default Installed Libraries if LIB64=1:
 
-  - /usr/lib64/libncx.so.1
+  - /usr/lib64/libagt.so.2.1
+  - /usr/lib64/libncx.so.2.1
   - /usr/lib64/yuma/libtoaster.so
    
 Default Installed Additional Files:

@@ -2,12 +2,12 @@
 # platform.profile
 #
 
-# libncx version
+# libncx and libagt versions (use the same!)
 # need some way to set versions without using
 # environment vars, so it works in plain debuild, rpmbuild
 #
 LIBNCX_MAJOR_VERSION=2
-LIBNCX_MINOR_VERSION=0
+LIBNCX_MINOR_VERSION=1
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 # default DESTDIR is NULL; it is only used by packaging builds

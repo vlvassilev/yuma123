@@ -39,7 +39,7 @@ yuma (2.1-1) unstable; urgency=medium
       no longer required to be present
     * added libagt.so to shared library install location (d: /usr/lib)
     * using shared libraries in default location for libagt and libncx
-      for ubuntu and RPM packaging.  Not static libaries anymore!
+      for ubuntu and RPM packaging.  Not static libraries anymore!
     * building libagt.so and installing it in /usr/lib/yuma
     * building and installing libncx.a and libagt.a if STATIC=1
       present in make cmd
@@ -67,7 +67,7 @@ yuma (2.1-1) unstable; urgency=medium
       the XML payload before an <edit-config> is sent
 
   * yangdump:
-    * added support for split SIL filesor combined (old way):
+    * added support for split SIL files or combined (old way):
       * --format=yc : Yuma SIL C file
       * --format=yh : Yuma SIL H file
       * --format=uc : User SIL C file
@@ -152,7 +152,7 @@ yuma (2.0-2) unstable; urgency=medium
     * rewrote buffer code to pack incoming message buffers instead
       of using client buffer size as-is
     * fixed memory leak in new support code for malformed-message
-      only occured when malformed-message error generated
+      only occurred when malformed-message error generated
     * Improve logging for debug purposes from netconf-subsys.c
       (by Mark Pashley)
     * Many bugfixes and dead code removal detected by Coverity
@@ -163,7 +163,7 @@ yuma (2.0-2) unstable; urgency=medium
         DEAD CODE
         Code with no effect.
         Use after free
-        Null pointer derference
+        Null pointer dereference
         Resource Leaks
     * sprintf changed to snprintf and strcpy changed to strncpy
       in some cases, to make sure no buffer overrun can occur

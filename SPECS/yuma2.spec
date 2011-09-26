@@ -153,10 +153,9 @@ echo "Check the user manuals in /usr/share/doc/yuma"
     * fixed bug 3395740
     * source tree specified by YUMA_HOME environment variable
       no longer required to be present
-    * moved the libncx.so shared library install location to /usr/lib/yuma
-      ** !! TO UPDATE INSTALL, DELETE OLD /usr/lib/libncx.* by hand
-      mydir> sudo rm -f /usr/lib/libncx*
-    * building libagt.so and installing it in /usr/lib/yuma
+    * added libagt.so to shared library install location (d: /usr/lib)
+    * using shared libraries in default location for libagt and libncx
+      for ubuntu and RPM packaging.  Not static libaries anymore!
     * building and installing libncx.a and libagt.a if STATIC=1 
       present in make cmd
     * updated SIL makefile so YUMA_HOME is not used unless

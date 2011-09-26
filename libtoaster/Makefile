@@ -24,11 +24,7 @@ SRC_INST=$(DESTDIR)$(PREFIX)/share/yuma/src/libtoaster
 
 
 #################### PLATFORM DEFINITIONS ############
-ifdef DEVELOPER
-all:
-else
 all: toasterall
-endif  # DEVELOPER
 
 
 ################################ MAKE RULES #################################

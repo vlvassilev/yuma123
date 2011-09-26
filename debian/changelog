@@ -37,9 +37,9 @@ yuma (2.1-1) unstable; urgency=medium
     * fixed bug 3395740
     * source tree specified by YUMA_HOME environment variable
       no longer required to be present
-    * moved the libncx.so shared library install location to /usr/lib/yuma
-      ** !! TO UPDATE INSTALL, DELETE OLD /usr/lib/libncx.* by hand
-      mydir> sudo rm -f /usr/lib/libncx*
+    * added libagt.so to shared library install location (d: /usr/lib)
+    * using shared libraries in default location for libagt and libncx
+      for ubuntu and RPM packaging.  Not static libaries anymore!
     * building libagt.so and installing it in /usr/lib/yuma
     * building and installing libncx.a and libagt.a if STATIC=1
       present in make cmd
@@ -56,7 +56,7 @@ yuma (2.1-1) unstable; urgency=medium
 
       yangcli> some-command @filespec.xml
 
-      filespec.xml (in YUMA_DATAPATH) == RPC input element
+      filespec.xml (in YUMA_DATAPATH) == RPC <input> element
       <input>
         <a>10</a>
         <b>fred</b>

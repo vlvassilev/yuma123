@@ -39,8 +39,8 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 
 %files dev
 %defattr(-,root,root,-)
-%{_bindir}/make_sil_dir.sh
-%{_mandir}/man1/make_sil_dir.sh.1.gz
+%{_bindir}/make_sil_dir
+%{_mandir}/man1/make_sil_dir.1.gz
 %{_includedir}/yuma/
 %{_datadir}/yuma/util/
 %{_datadir}/yuma/src/libtoaster/

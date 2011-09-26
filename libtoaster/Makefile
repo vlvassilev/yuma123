@@ -40,11 +40,15 @@ superclean: toastersuperclean
 
 distclean: toastersuperclean
 
+ifdef DEBIAN
 ifdef DEVELOPER
 install: toasterinstall
 else
 install: libinstall
 endif  # DEVELOPER
+else
+install: toasterinstall libinstall
+endif  # DEBIAN
 
 toasterall:
 	for dir in $(DIRS); do\

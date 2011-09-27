@@ -34,8 +34,7 @@ and other files needed to create SIL code for use with
 the netconfd server.
 
 %post dev
-echo "Yuma Tools developer files installed."
-echo "Check the user manuals in /usr/share/doc/yuma"
+echo "Yuma developer files installed."
 
 %files dev
 %defattr(-,root,root,-)
@@ -56,8 +55,7 @@ development toolkit.  This package contains the Yuma user manuals
 in PDF and HTML format.
 
 %post doc
-echo "Yuma Tools developer files installed."
-echo "Check the user manuals in /usr/share/doc/yuma"
+echo "Yuma documentation files installed."
 
 %files doc
 %defattr(-,root,root,-)

@@ -1985,7 +1985,7 @@ boolean
         return FALSE;
     } else {
         c = (char)ch;
-        return isspace(c) ? TRUE : FALSE;
+        return isspace((int)c) ? TRUE : FALSE;
     }
     /*NOTREACHED*/
 } /* xml_isspace */

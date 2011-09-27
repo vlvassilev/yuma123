@@ -996,7 +996,7 @@ status_t
         str++;
         isneg = TRUE;
     }
-    while (isdigit((char)*str)) {
+    while (isdigit((int)*str)) {
         str++;
     }
 
@@ -1075,7 +1075,7 @@ status_t
     if (point) {
         fracnum = 0;
         str = point + 1;
-        while (isdigit((char)*str)) {
+        while (isdigit((int)*str)) {
             str++;
         }
         numdigits = (uint32)(str - point - 1);

@@ -298,13 +298,13 @@ xmlChar *
         /* check is frac-seconds entered, and skip it */
         if (*retptr == '.') {
             retptr++;
-            if (!isdigit(*retptr)) {
+            if (!isdigit((int)*retptr)) {
                 *res = ERR_NCX_INVALID_VALUE;
                 return NULL;
             }
 
             retptr++;  /* got a start digit */
-            while (isdigit((char)*retptr)) {
+            while (isdigit((int)*retptr)) {
                 retptr++;
             }
         }

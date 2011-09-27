@@ -5474,7 +5474,8 @@ boolean
         return FALSE;       /* TEMP -- handling ASCII only */
     } else {
         c = (char)ch;
-        return (isalpha(c) || isdigit(c) || c=='_' || c=='-' || c=='.')
+        return (isalpha((int)c) || isdigit((int)c) || 
+		c=='_' || c=='-' || c=='.')
             ? TRUE : FALSE;
     }
     /*NOTREACHED*/
@@ -5500,7 +5501,7 @@ boolean
         return FALSE;       /* TEMP -- handling ASCII only */
     } else {
         c = (char)ch;
-        return (isalpha(c) || (c=='_')) ? TRUE : FALSE;
+        return (isalpha((int)c) || (c=='_')) ? TRUE : FALSE;
     }
     /*NOTREACHED*/
 } /* ncx_valid_fname_ch */

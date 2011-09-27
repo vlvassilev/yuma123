@@ -692,7 +692,7 @@ static boolean
             if (line[word_cur - 2] == '-') {
                 if ((word_cur - 3) >= word_start) {
                     /* check for previous char before '--' */
-                    if (isspace(line[word_cur - 3])) {
+		  if (isspace((int)line[word_cur - 3])) {
                         /* this a real '--' command start */
                         return TRUE;
                     } else {
@@ -703,7 +703,7 @@ static boolean
                     /* start of line is '--' */
                     return TRUE;
                 }
-            } else if (isspace(line[word_cur - 2])) {
+            } else if (isspace((int)line[word_cur - 2])) {
                 /* this is a real '-' command start */
                 return TRUE;
             } else {
@@ -793,17 +793,17 @@ static status_t
     str = &line[word_end - 1];
 
     /* check starting in between 2 token sequences */
-    if (isspace(*str)) {
+    if (isspace((int)*str)) {
         inbetween = TRUE;
 
         /* the tab was in between tokens, not inside a token
          * skip all the whitespace backwards
          */
-        while (str >= &line[word_start] && isspace(*str)) {
+        while (str >= &line[word_start] && isspace((int)*str)) {
             str--;
         }
 
-        if (isspace(*str)) {
+        if (isspace((int)*str)) {
             /* only found spaces, so this is the line start */
             *expectparm = TRUE;
             *tokenstart = word_end;
@@ -832,7 +832,7 @@ static status_t
      * count the equals signs; hack to guess if
      * this is a complete assignment statement
      */
-    while (str >= &line[word_start] && !isspace(*str)) {
+    while (str >= &line[word_start] && !isspace((int)*str)) {
         if (*str == '=') {
             if (equals == NULL) {
                 equals = str;
@@ -843,7 +843,7 @@ static status_t
     }
 
     /* figure out where the backwards search stopped */
-    if (isspace(*str)) {
+    if (isspace((int)*str)) {
         /* found a space entered so see if
          * the string following it looks like
          * the start of a parameter or a value
@@ -915,7 +915,7 @@ static status_t
             str = seqstart;
 
             while (str < &line[word_end] && 
-                   !isspace(*str) &&
+                   !isspace((int)*str) &&
                    *str != '=') {
                 str++;
             }
@@ -1190,7 +1190,7 @@ static status_t
     status_t               res;
 
     /* skip starting whitespace */
-    while (word_start < word_end && isspace(line[word_start])) {
+    while (word_start < word_end && isspace((int)line[word_start])) {
         word_start++;
     }
 
@@ -1256,7 +1256,7 @@ static status_t
     word_start = 0;
 
     /* skip starting whitespace */
-    while ((str < &line[word_end]) && isspace(*str)) {
+    while ((str < &line[word_end]) && isspace((int)*str)) {
         str++;
     }
 
@@ -1295,19 +1295,19 @@ static status_t
         equaldone = FALSE;
 
         while ((str < &line[word_end]) && 
-               !isspace(*str) && (*str != '=')) {
+               !isspace((int)*str) && (*str != '=')) {
             str++;
         }
 
         /* check where the string search stopped */
-        if (isspace(*str) || *str == '=') {
+        if (isspace((int)*str) || *str == '=') {
             /* stopped past the first word
              * so need to skip further
              */
-            if (isspace(*str)) {
+	  if (isspace((int)*str)) {
                 /* find equals sign or word_end */
                 while ((str < &line[word_end]) && 
-                       isspace(*str)) {
+                       isspace((int)*str)) {
                     str++;
                 }
             }
@@ -1318,7 +1318,7 @@ static status_t
 
                 /* skip more whitespace */
                 while ((str < &line[word_end]) && 
-                       isspace(*str)) {
+                       isspace((int)*str)) {
                     str++;
                 }
             }
@@ -1367,7 +1367,7 @@ static status_t
      * check if it is an entire or partial command name
      */
     cmdend = str;
-    while (cmdend < &line[word_end] && !isspace(*cmdend)) {
+    while (cmdend < &line[word_end] && !isspace((int)*cmdend)) {
         cmdend++;
     }
     cmdlen = (int)(cmdend - str);
@@ -1428,7 +1428,7 @@ static status_t
      * command name
      */
     str = cmdend;
-    while (str < &line[word_end] && isspace(*str)) {
+    while (str < &line[word_end] && isspace((int)*str)) {
         str++;
     }
 
@@ -1563,7 +1563,7 @@ static status_t
     word_start = 0;
 
     /* skip starting whitespace */
-    while ((str < &line[word_end]) && isspace(*str)) {
+    while ((str < &line[word_end]) && isspace((int)*str)) {
         str++;
     }
 

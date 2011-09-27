@@ -501,7 +501,7 @@ static int32
 
     /* look for any whitespace in the string at all */
     str = parmstr;
-    while (*str && !isspace(*str)) {
+    while (*str && !isspace((int)*str)) {
         str++;
     }
     if (*str == '\0') {
@@ -512,7 +512,7 @@ static int32
 
     /* check leading whitespace */
     str = parmstr;
-    while (*str && isspace(*str)) {
+    while (*str && isspace((int)*str)) {
         str++;
     }
     if (*str == '\0') {
@@ -538,16 +538,16 @@ static int32
     /* started with some non-whitespace; go until the
      * equals sign is seen or the next whitespace
      */
-    while (*str && !isspace(*str) && (*str != '=')) {
+    while (*str && !isspace((int)*str) && (*str != '=')) {
         str++;
     }
 
     /* check where the search stopped */
     if (*str == '=') {
         str++;   /* str == first char to be inside dquotes */
-    } else if (isspace(*str)) {
+    } else if (isspace((int)*str)) {
         /* see if the equals sign is still out there */
-        while (*str && isspace(*str)) {
+      while (*str && isspace((int)*str)) {
             str++;
         }
         if (*str == '=') {
@@ -966,7 +966,7 @@ status_t
     while (buffpos < bufflen && res == NO_ERR) {
 
         /* first skip starting whitespace */
-        while (buff[buffpos] && isspace(buff[buffpos])) {
+      while (buff[buffpos] && isspace((int)buff[buffpos])) {
             buffpos++;
         }
 
@@ -1000,7 +1000,7 @@ status_t
         /* check the parmname string for a terminating char */
         parmname = &buff[buffpos];
         str = &parmname[1];
-        while (*str && !isspace(*str) && *str != '=') {
+        while (*str && !isspace((int)*str) && *str != '=') {
             str++;
         }
 
@@ -1022,7 +1022,7 @@ status_t
         }
 
         if ((buffpos < bufflen) &&
-            ((buff[buffpos] == '=') || isspace(buff[buffpos]))) {
+            ((buff[buffpos] == '=') || isspace((int)buff[buffpos]))) {
 
             /* assume that the parm followed by a 
              * space is the termination, try again on
@@ -1034,7 +1034,7 @@ status_t
 
             buffpos++;  /* skip past '=' or whitespace */
 
-            while (buff[buffpos] && isspace(buff[buffpos])) {
+            while (buff[buffpos] && isspace((int)buff[buffpos])) {
                 buffpos++;
             }
 
@@ -1055,7 +1055,7 @@ status_t
                     
                     /* find the end of the unquoted string */
                     str = &parmval[1];
-                    while (*str && !isspace(*str)) {
+                    while (*str && !isspace((int)*str)) {
                         str++;
                     }
                 }
@@ -1326,7 +1326,7 @@ val_value_t *
         parmnamelen = 0;
 
         /* first skip starting whitespace */
-        while (buff[buffpos] && isspace(buff[buffpos])) {
+        while (buff[buffpos] && isspace((int)buff[buffpos])) {
             buffpos++;
         }
 
@@ -1343,7 +1343,7 @@ val_value_t *
             } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
                 testch = buff[buffpos+2];
                 if (testch == '\0' ||
-                    isspace(testch) ||
+                    isspace((int)testch) ||
                     testch == NCX_CLI_START_CH) {
                     res = ERR_NCX_INVALID_VALUE;
                 } else {
@@ -1353,7 +1353,7 @@ val_value_t *
             } else {
                 testch = buff[buffpos+1];
                 if (testch == '\0' ||
-                    isspace(testch)) {
+                    isspace((int)testch)) {
                     res = ERR_NCX_INVALID_VALUE;
                 } else {
                     buffpos++;    /* skip past 1 dash */
@@ -1425,7 +1425,7 @@ val_value_t *
                     int32 idx = buffpos + parmnamelen;
 
                     /* check for whitespace following value */
-                    while (isspace(buff[idx]) && idx < bufflen) {
+                    while (isspace((int)buff[idx]) && idx < bufflen) {
                         idx++;
                     }
 
@@ -1469,7 +1469,7 @@ val_value_t *
 
                 /* skip past any whitespace after the parm name */
                 if (!isdefaultparm) {
-                    while (isspace(buff[buffpos]) && buffpos < bufflen) {
+		  while (isspace((int)buff[buffpos]) && buffpos < bufflen) {
                         buffpos++;
                     }
                 }
@@ -1488,7 +1488,7 @@ val_value_t *
                             buffpos++;
 
                             /* skip any whitespace */
-                            while (buff[buffpos] && isspace(buff[buffpos])) {
+                            while (buff[buffpos] && isspace((int)buff[buffpos])) {
                                 buffpos++;
                             }
                         } /* else whitespace already skipped */
@@ -1551,7 +1551,7 @@ val_value_t *
 
                             /* find the end of the unquoted string */
                             str = &parmval[1];
-                            while (*str && !isspace(*str)) {
+                            while (*str && !isspace((int)*str)) {
                                 str++;
                             }
                         }

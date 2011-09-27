@@ -38,14 +38,9 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..)
-	$(MAKE) DEBIAN=1 DESTDIR=$(CURDIR)/debian/yuma clean
-	$(MAKE) DEBIAN=1 DEVELOPER=1 DESTDIR=$(CURDIR)/debian/yuma-dev clean
-	$(MAKE) DEBIAN=1 DOC=1 DESTDIR=$(CURDIR)/debian/yuma-doc clean
-
-#	$(MAKE) DEBIAN=1 STATIC=1 DESTDIR=$(CURDIR)/debian/yuma clean
-#	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
-#	DESTDIR=$(CURDIR)/debian/yuma-dev clean
-#	$(MAKE) DEBIAN=1 STATIC=1 DOC=1 DESTDIR=$(CURDIR)/debian/yuma-doc clean
+	$(MAKE) DEBIAN=1 RELEASE=$(MY_REL) DESTDIR=$(CURDIR)/debian/yuma clean
+	$(MAKE) DEBIAN=1 DEVELOPER=1 RELEASE=$(MY_REL) DESTDIR=$(CURDIR)/debian/yuma-dev clean
+	$(MAKE) DEBIAN=1 DOC=1 RELEASE=$(MY_REL) DESTDIR=$(CURDIR)/debian/yuma-doc clean
 
 	dh_clean 
 
@@ -56,19 +51,11 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) DEBIAN=1 RELEASE=$(MY_REL) \
-	DESTDIR=$(CURDIR)/debian/yuma install
+	$(MAKE) DEBIAN=1 RELEASE=$(MY_REL) DESTDIR=$(CURDIR)/debian/yuma install
 	$(MAKE) DEBIAN=1 DEVELOPER=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-dev install
 	$(MAKE) DEBIAN=1 DOC=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-doc install
-
-#	$(MAKE) DEBIAN=1 STATIC=1 RELEASE=$(MY_REL) \
-#	DESTDIR=$(CURDIR)/debian/yuma install
-#	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
-#	DESTDIR=$(CURDIR)/debian/yuma-dev install
-#	$(MAKE) DEBIAN=1 STATIC=1 DOC=1 RELEASE=$(MY_REL) \
-#	DESTDIR=$(CURDIR)/debian/yuma-doc install
 
 postinst: 
 	ldconfig

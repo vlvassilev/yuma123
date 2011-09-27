@@ -570,9 +570,9 @@ static void
     ses_putstr(scb, (const xmlChar *)"10000");
 
     ses_putstr(scb, (const xmlChar *)";tcp;");
-    sprintf(buffer, "%d;", getuid());
+    sprintf(buffer, "%u;", (uint32)getuid());
     ses_putstr(scb, (const xmlChar *)buffer);
-    sprintf(buffer, "%d;", getgid());
+    sprintf(buffer, "%u;", (uint32)getgid());
     ses_putstr(scb, (const xmlChar *)buffer);
 
     /* additional group IDs is empty */

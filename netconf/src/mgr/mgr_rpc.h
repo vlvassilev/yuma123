@@ -29,7 +29,7 @@ date             init     comment
 ----------------------------------------------------------------------
 13-feb-07    abb      Begun; started from agt_rpc.h
 */
-#include <time.h>
+#include <sys/time.h>
 
 #ifndef _H_cfg
 #include "cfg.h"

@@ -67,13 +67,23 @@ install: $(BLD_INCLUDES)
 ifndef STATIC
 # libncx.so --> libncx.so.M.N
 # libncx.so.1 --> libncx.so.M.N
-ifndef MAC
-	(cd $(REAL_INST); \
-	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
-	lib$(SUBDIR_NM).$(LIBSUFFIX);\
-	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
-	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
-endif  # MAC
+#ifndef MAC
+#ifdef DEBIAN
+#ifdef DEVELOPER
+#	(cd $(REAL_INST); \
+#	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+#	lib$(SUBDIR_NM).$(LIBSUFFIX);\
+#	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+#	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+#endif  # DEVELOPER
+#else
+#	(cd $(REAL_INST); \
+#	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+#	lib$(SUBDIR_NM).$(LIBSUFFIX);\
+#	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+#	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+#endif  # DEBIAN
+#endif  # MAC
 ifndef FREEBSD
 ifndef DESTDIR
 ifndef MAC

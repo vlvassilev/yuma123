@@ -27,6 +27,7 @@ Description: YANG-based Unified Modular Automation tools (dev)
 
 Package: yuma-doc
 Architecture: any
+Section: doc
 Depends: ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools (doc)
  Yuma Tools is a YANG-based NETCONF-over-SSH client and server

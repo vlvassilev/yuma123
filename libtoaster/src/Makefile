@@ -34,12 +34,10 @@ REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
 endif
 endif
 
+REALINC=$(DESTDIR)$(PREFIX)/include
+
 #################### MAKE RULES ########################
-ifdef DEVELOPER
-all:
-else
 all: sil_dummy sil_lib
-endif  # DEVELOPER
 
 #################### PLATFORM DEFINITIONS ############
 
@@ -51,14 +49,12 @@ ifdef YUMA_HOME
 CINC = -I. -I$(YUMA_HOME)/src/platform -I$(YUMA_HOME)/src/ncx \
      -I$(YUMA_HOME)/src/agt
 else
-CINC = -I. -I$(REAL_INST)/platform -I$(REAL_INST)/ncx -I$(REAL_INST)/agt
+CINC = -I. -I$(REALINC)/platform -I$(REALINC)/ncx -I$(REALINC)/agt
 endif  # YUMA_HOME
 endif  # RELEASE
 
-
 CINC += -I$(PREFIX)/include -I$(PREFIX)/include/libxml2 \
         -I$(PREFIX)/include/libxml2/libxml
-
 
 # added /sw/include for MacOSX
 ifdef MAC
@@ -297,7 +293,6 @@ $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
 code:
 	yangdump format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h
 	yangdump format=c indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).c
-
 
 .PHONY: all superclean clean test install uninstall \
         distclean depend lint code work sil_lib sil_dummy

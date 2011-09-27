@@ -40,7 +40,6 @@ yuma (2.1-1) unstable; urgency=medium
     * added libagt.so to shared library install location (d: /usr/lib)
     * using shared libraries in default location for libagt and libncx
       for ubuntu and RPM packaging.  Not static libraries anymore!
-    * building libagt.so and installing it in /usr/lib/yuma
     * building and installing libncx.a and libagt.a if STATIC=1
       present in make cmd
     * updated SIL makefile so YUMA_HOME is not used unless

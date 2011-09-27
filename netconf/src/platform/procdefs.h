@@ -158,12 +158,14 @@ extern "C" {
 
 #endif	    /* CPV_UNIX */
 
+#ifndef __cplusplus
 #ifndef min
 #define	    min(A,B)	((A<B)?A:B)
 #endif
 
 #ifndef max
 #define	    max(A,B)	((A>B)?A:B)
+#endif
 #endif
 
 #ifdef CHAR_BIT
@@ -189,18 +191,19 @@ typedef		unsigned int		uint;
 #endif	    /* !CPV_UNIX */
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 typedef     uint8_t             uchar;
-typedef	    uint8_t             uint8;
-typedef	    uint16_t            uint16;
-typedef	    uint32_t            uint32;
-typedef	    uint64_t            uint64;
-typedef	    int8_t              int8;
-typedef	    int16_t             int16;
-typedef	    int32_t   	        int32;
-typedef	    int64_t        	int64;
-typedef	    uint8_t      	byte;
-typedef	    int		        boolean;
+typedef		uint8_t             uint8;
+typedef		uint16_t            uint16;
+typedef		uint32_t            uint32;
+typedef		uint64_t            uint64;
+typedef		int8_t              int8;
+typedef		int16_t             int16;
+typedef		int32_t   		    int32;
+typedef		int64_t        		int64;
+typedef		uint8_t      		byte;
+typedef		bool			    boolean;
 
 #ifdef SUN413_GNU
 typedef         unsigned long           ulong;
@@ -232,15 +235,10 @@ typedef		long double		LDBL;
 #define SEEK_END    2
 #endif	    /* CPV_UNIX */
 
-/* c convention boolean...integer version--version for CPP directives */
-#define	 _FALSE	 0
-#define	 _TRUE	 1
-/* #define  _TRUE (!0) */
-
 /* c-portability adjustment ...(avoid lint error)--version for runtine code */
 #if !defined(FALSE) && !defined(TRUE)
-#define		FALSE	 ((boolean)0)
-#define		TRUE	 ((boolean)1)
+#define		FALSE	 false
+#define		TRUE	 true
 #endif	    /* FALSE | TRUE */
 
 

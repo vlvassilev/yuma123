@@ -33,110 +33,34 @@ date         init     comment
 #include <memory.h>
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
 #include  "agt.h"
-#endif
-
-#ifndef _H_agt_acm
 #include  "agt_acm.h"
-#endif
-
-#ifndef _H_agt_cb
 #include  "agt_cb.h"
-#endif
-
-#ifndef _H_agt_connect
 #include  "agt_connect.h"
-#endif
-
-#ifndef _H_agt_ncx
 #include  "agt_ncx.h"
-#endif
-
-#ifndef _H_agt_ncxserver
 #include  "agt_ncxserver.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_ses
 #include  "agt_ses.h"
-#endif
-
-#ifndef _H_agt_state
 #include  "agt_state.h"
-#endif
-
-#ifndef _H_agt_sys
 #include  "agt_sys.h"
-#endif
-
-#ifndef _H_agt_top
 #include  "agt_top.h"
-#endif
-
-#ifndef _H_agt_util
 #include  "agt_util.h"
-#endif
-
-#ifndef _H_cfg
 #include  "cfg.h"
-#endif
-
-#ifndef _H_def_reg
 #include  "def_reg.h"
-#endif
-
-#ifndef _H_getcb
 #include  "getcb.h"
-#endif
-
-#ifndef _H_log
 #include  "log.h"
-#endif
-
-#ifndef _H_ncxmod
 #include  "ncxmod.h"
-#endif
-
-#ifndef _H_rpc
 #include  "rpc.h"
-#endif
-
-#ifndef _H_ses
 #include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
 #include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include  "tstamp.h"
-#endif
-
-#ifndef _H_val
 #include  "val.h"
-#endif
-
-#ifndef _H_xmlns
 #include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -502,11 +426,7 @@ status_t
 {
     ses_cb_t  *scb;
 
-#ifdef DEBUG
-    if (dummy_session == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( dummy_session && "dummy_session is NULL!" );
 
     if (!agt_ses_init_done) {
         agt_ses_init();
@@ -564,20 +484,9 @@ status_t
 void
     agt_ses_free_dummy_session (ses_cb_t *scb)
 {
-#ifdef DEBUG
-    if (!scb) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-    if (!agt_ses_init_done) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-    if (scb->sid != 0 || !agtses[0]) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL!" );
+    assert( agt_ses_init_done && "agt_ses_init_done is false!" );
+    assert( agtses[0] && "agtses[0] is null" );
 
     agt_acm_clear_session_cache(scb);
     ses_free_scb(scb);
@@ -719,17 +628,13 @@ void
 {
     ses_id_t  slot;
 
+    assert( scb && "scb is NULL!" );
+    assert( agt_ses_init_done && "agt_ses_init_done is false!" );
 
-#ifdef DEBUG
-    if (!scb) {
-        SET_ERROR(ERR_INTERNAL_PTR);
+    if (scb->type==SES_TYP_DUMMY) {
+        agt_ses_free_dummy_session( scb );
         return;
     }
-    if (!agt_ses_init_done) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-#endif
 
     slot = scb->sid;
 

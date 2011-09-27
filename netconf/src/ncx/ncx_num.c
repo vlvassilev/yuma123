@@ -2209,7 +2209,7 @@ status_t
             }
         }
 #else
-        ilen = sprintf((char *)buff, "%lld", num->d);
+        ilen = sprintf((char *)buff, "%lld", (long long)num->d);
 #endif
         break;
     default:

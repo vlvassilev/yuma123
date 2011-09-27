@@ -141,6 +141,11 @@ ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
 endif
 
+# check if cygwin build
+ifdef CYGWIN
+  CFLAGS += -DCYGWIN=1
+endif
+
 ifndef GRP
 ifdef MAC
    GRP=

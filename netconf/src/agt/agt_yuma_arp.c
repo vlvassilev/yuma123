@@ -70,7 +70,11 @@
 #endif
 
 #include <sys/ioctl.h>
+
+#ifndef CYGWIN
 #include <net/if_arp.h>
+#endif
+
 #include <net/if.h>
 #include <string.h>
 #include <arpa/inet.h>

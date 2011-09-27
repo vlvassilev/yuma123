@@ -25,55 +25,16 @@
 
 //#include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include "procdefs.h"
+#ifndef CYGWIN
+#define BUILD_ARP 1
 #endif
 
-#ifndef _H_agt
-#include "agt.h"
-#endif
-
-#ifndef _H_agt_cb
-#include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_timer
-#include "agt_timer.h"
-#endif
-
-#ifndef _H_agt_util
-#include "agt_util.h"
-#endif
-
-#ifndef _H_agt_yuma_arp
-#include "agt_yuma_arp.h"
-#endif
-
-#ifndef _H_dlq
-#include "dlq.h"
-#endif
-
-#ifndef _H_ncx
-#include "ncx.h"
-#endif
-
-#ifndef _H_ncxmod
-#include "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
-#include "ncxtypes.h"
-#endif
-
-#ifndef _H_status
-#include "status.h"
-#endif
 
 #include <sys/ioctl.h>
 
-#ifndef CYGWIN
+#ifdef BUILD_ARP
 #include <net/if_arp.h>
-#endif
+#endif  // BUILD_ARP
 
 #include <net/if.h>
 #include <string.h>
@@ -81,6 +42,20 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <dirent.h>
+
+#include "procdefs.h"
+#include "agt.h"
+#include "agt_cb.h"
+#include "agt_timer.h"
+#include "agt_util.h"
+#include "agt_yuma_arp.h"
+#include "dlq.h"
+#include "ncx.h"
+#include "ncxmod.h"
+#include "ncxtypes.h"
+#include "status.h"
+
+#ifdef BUILD_ARP
 
 /* module static variables */
 static ncx_module_t *yuma_arp_mod;
@@ -1364,6 +1339,8 @@ static void
 
 } /* y_yuma_arp_init_static_vars */
 
+#endif  /* END ifdef BUILD_ARP */
+
 
 /********************************************************************
 * FUNCTION y_yuma_arp_init
@@ -1382,6 +1359,7 @@ status_t
         const xmlChar *modname,
         const xmlChar *revision)
 {
+#ifdef BUILD_ARP
     agt_profile_t *agt_profile;
     status_t res;
     FILE    *testfile;
@@ -1500,6 +1478,12 @@ status_t
     /* put your module initialization code here */
     
     return res;
+#else
+    (void)modname;
+    (void)revision;
+    return NO_ERR;
+#endif
+
 } /* y_yuma_arp_init */
 
 
@@ -1515,6 +1499,7 @@ status_t
 status_t
     y_yuma_arp_init2 (void)
 {
+#ifdef BUILD_ARP
     status_t res = NO_ERR;
     boolean  added = FALSE;
 
@@ -1534,7 +1519,9 @@ status_t
 
     res = y_yuma_arp_arp_mro(arp_val);
     return res;
-
+#else
+    return NO_ERR;
+#endif
 } /* y_yuma_arp_init2 */
 
 
@@ -1546,6 +1533,7 @@ status_t
 void
     y_yuma_arp_cleanup (void)
 {
+#ifdef BUILD_ARP
     if (!proc_net_arp_ok) {
         return;
     }
@@ -1583,6 +1571,7 @@ void
         (const xmlChar *)"/arp/static-arps/static-arp/mac-address");
 
     /* put your cleanup code here */
+#endif
     
 } /* y_yuma_arp_cleanup */
 

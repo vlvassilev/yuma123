@@ -41,6 +41,10 @@ all: sil_dummy sil_lib
 
 #################### PLATFORM DEFINITIONS ############
 
+ifdef CYGWIN
+CINC = -I. -I../../netconf/src/platform -I../../netconf/src/ncx \
+     -I../../netconf/src/agt
+else
 ifdef RELEASE
 CINC = -I. -I../../netconf/src/platform -I../../netconf/src/ncx \
      -I../../netconf/src/agt
@@ -49,9 +53,11 @@ ifdef YUMA_HOME
 CINC = -I. -I$(YUMA_HOME)/src/platform -I$(YUMA_HOME)/src/ncx \
      -I$(YUMA_HOME)/src/agt
 else
-CINC = -I. -I$(REALINC)/platform -I$(REALINC)/ncx -I$(REALINC)/agt
+CINC = -I. -I$(REALINC)/yuma/platform -I$(REALINC)/yuma/ncx \
+	-I$(REALINC)/yuma/agt
 endif  # YUMA_HOME
 endif  # RELEASE
+endif  # CYGWIN
 
 CINC += -I$(PREFIX)/include -I$(PREFIX)/include/libxml2 \
         -I$(PREFIX)/include/libxml2/libxml

@@ -22,105 +22,31 @@
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_agt
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_acm
 #include "agt_acm.h"
-#endif
-
-#ifndef _H_agt_cb
 #include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_ncx
 #include "agt_ncx.h"
-#endif
-
-#ifndef _H_agt_plock
 #include "agt_plock.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_timer
 #include "agt_timer.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_plock
 #include "plock.h"
-#endif
-
-#ifndef _H_plock_cb
 #include "plock_cb.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
 
 
 /* module static variables */
@@ -321,6 +247,14 @@ static status_t
 
             testval = xpath_get_resnode_valptr(resnode);
 
+            /* !!! Update 2011-09-27
+             * Just talked to the RFC author; Martin and I
+             * agree RFC 5717 does not specify that write 
+             * access be required to create a partial lock
+             * In fact -- a user may want to lock a node
+             * to do a stable read
+             */
+#if 0
             /* RFC 5717 says to check that the user access
              * write access to each node in the nodeset
              * so check that now;  this is a different
@@ -345,43 +279,43 @@ static status_t
                                  NCX_NT_NONE,
                                  NULL);
                 retres = res;
-            } else {
-                /* make sure there is a plock slot available
-                 * and no part of this subtree is already locked
-                 * do not check lock conflicts if this subtree
-                 * is unauthorized for writing
-                 */
-                lockowner = 0;
-                res = val_ok_to_partial_lock(testval,
-                                             SES_MY_SID(scb),
-                                             &lockowner);
-                if (res != NO_ERR) {
-                    if (res == ERR_NCX_LOCK_DENIED) {
-                        agt_record_error(scb,
-                                         &msg->mhdr,
-                                         NCX_LAYER_OPERATION,
-                                         res,
-                                         methnode,
-                                         NCX_NT_UINT32_PTR,
-                                         &lockowner,
-                                         NCX_NT_VAL,
-                                         testval);
-                    } else {
-                        agt_record_error(scb,
-                                         &msg->mhdr,
-                                         NCX_LAYER_OPERATION,
-                                         res,
-                                         methnode,
-                                         NCX_NT_NONE,
-                                         NULL,
-                                         NCX_NT_VAL,
-                                         testval);
-                    }
-                    retres = res;
-                }
             }
-        }
-    }
+#endif
+
+            /* make sure there is a plock slot available
+             * and no part of this subtree is already locked
+             * do not check lock conflicts if this subtree
+             * is unauthorized for writing
+             */
+            lockowner = 0;
+            res = val_ok_to_partial_lock(testval, SES_MY_SID(scb),
+                                         &lockowner);
+            if (res != NO_ERR) {
+                if (res == ERR_NCX_LOCK_DENIED) {
+                    agt_record_error(scb,
+                                     &msg->mhdr,
+                                     NCX_LAYER_OPERATION,
+                                     res,
+                                     methnode,
+                                     NCX_NT_UINT32_PTR,
+                                     &lockowner,
+                                     NCX_NT_VAL,
+                                     testval);
+                } else {
+                    agt_record_error(scb,
+                                     &msg->mhdr,
+                                     NCX_LAYER_OPERATION,
+                                     res,
+                                     methnode,
+                                     NCX_NT_NONE,
+                                     NULL,
+                                     NCX_NT_VAL,
+                                     testval);
+                }
+                retres = res;
+            }
+        }  // for loop
+    }  // if retres == NO_ERR
 
     /* make sure there is no partial commit in progress */
     if (agt_ncx_cc_active()) {

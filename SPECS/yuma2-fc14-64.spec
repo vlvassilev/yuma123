@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -72,11 +72,11 @@ echo "Yuma documentation files installed."
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make LIB64=1 RELEASE=1 %{?_smp_mflags}
+make LIB64=1 RELEASE=2 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id LIB64=1 RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id LIB64=1 RELEASE=2 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -110,6 +110,11 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Tue Sep 27 2011 Andy Bierman <andy at netconfcentral.org> 2.1-2 [1457]
+  * Build
+    * fix bug added recently that breaks build in libtoaster
+      in a plain build (YUMA_HOME not set) and breaks CYGWIN
+      build as well
 * Sun Sep 25 2011 Andy Bierman <andy at netconfcentral.org> 2.1-1 [1424]
   * netconfd
     * add --runpath to netconfd.yang

@@ -1,3 +1,9 @@
+yuma (2.1-2) unstable; urgency=medium
+  * Build
+    * fix bug added recently that breaks build in libtoaster
+      in a plain build (YUMA_HOME not set) and breaks CYGWIN
+      build as well
+ -- Andy Bierman <andy@netconfcentral.org>  Sun, 27 Sep 2011 19:00:00 -0700
 yuma (2.1-1) unstable; urgency=medium
   * netconfd
     * add --runpath to netconfd.yang

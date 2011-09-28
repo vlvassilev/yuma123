@@ -1330,7 +1330,6 @@ ssize_t
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
     int        ret;
-    char      *errormsg;
 
 #ifdef DEBUG
     if (!s || !buff || !erragain) {
@@ -1339,7 +1338,6 @@ ssize_t
     }
 #endif
 
-    errormsg = NULL;
     *erragain = FALSE;
 
     scb = (ses_cb_t *)s;

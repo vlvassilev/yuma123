@@ -144,7 +144,6 @@ static status_t
     mgr_scb_t    *mscb;
     boolean       c1, c2;
     status_t      res;
-    ncx_protocol_t proto;
 
     mscb = mgr_ses_get_mscb(scb);
 
@@ -217,7 +216,6 @@ static status_t
 
     /* check if the mandatory base protocol capability was set */
     res = NO_ERR;
-    proto = NCX_PROTO_NONE;
     c1 = cap_std_set(&mscb->caplist, CAP_STDID_V1);
     c2 = cap_std_set(&mscb->caplist, CAP_STDID_V11);
 
@@ -394,7 +392,6 @@ void
     mgr_scb_t             *mscb;
     xml_msg_hdr_t          msg;
     status_t               res;
-    ncx_node_t             dtyp;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -428,7 +425,6 @@ void
     res = NO_ERR;
     val = NULL;
     obj = NULL;
-    dtyp = NCX_NT_OBJ;
     xml_msg_init_hdr(&msg);
 
     /* get a value struct to hold the server hello msg */

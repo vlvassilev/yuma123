@@ -463,8 +463,8 @@ static status_t
     const xmlChar *errorstr;
     val_value_t *toasterDoneness_val;
     val_value_t *toasterToastType_val;
-    uint32 toasterDoneness;
-    val_idref_t *toasterToastType;
+    //uint32 toasterDoneness;
+    //val_idref_t *toasterToastType;
 
     res = NO_ERR;
     errorval = NULL;
@@ -475,7 +475,8 @@ static status_t
         y_toaster_M_toaster,
         y_toaster_N_toasterDoneness);
     if (toasterDoneness_val != NULL && toasterDoneness_val->res == NO_ERR) {
-        toasterDoneness = VAL_UINT(toasterDoneness_val);
+        //toasterDoneness = VAL_UINT(toasterDoneness_val);
+        // validate toast doneness within instrumentation if needed
     }
 
     toasterToastType_val = val_find_child(
@@ -483,7 +484,8 @@ static status_t
         y_toaster_M_toaster,
         y_toaster_N_toasterToastType);
     if (toasterToastType_val != NULL && toasterToastType_val->res == NO_ERR) {
-        toasterToastType = VAL_IDREF(toasterToastType_val);
+        //toasterToastType = VAL_IDREF(toasterToastType_val);
+        // validate toast-type within instrumentation if needed
     }
 
     /* added code starts here */
@@ -545,7 +547,7 @@ static status_t
     val_value_t *toasterDoneness_val;
     val_value_t *toasterToastType_val;
     uint32 toasterDoneness;
-    val_idref_t *toasterToastType;
+    //val_idref_t *toasterToastType;
 
     res = NO_ERR;
     toasterDoneness = 0;
@@ -563,7 +565,8 @@ static status_t
         y_toaster_M_toaster,
         y_toaster_N_toasterToastType);
     if (toasterToastType_val != NULL && toasterToastType_val->res == NO_ERR) {
-        toasterToastType = VAL_IDREF(toasterToastType_val);
+        //toasterToastType = VAL_IDREF(toasterToastType_val);
+        // invoke instrumentation with this toast type
     }
 
     /* invoke your device instrumentation code here */

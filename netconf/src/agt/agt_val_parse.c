@@ -2066,7 +2066,7 @@ static status_t
                       val_value_t  *retval)
 {
     const xml_node_t     *errnode;
-    obj_template_t *chobj, *topchild, *curchild, *nextchobj;
+    obj_template_t *chobj, *topchild, *curchild;
     const agt_profile_t  *profile;
     val_value_t          *chval;
     xml_node_t            chnode;
@@ -2079,7 +2079,6 @@ static status_t
     chobj = NULL;
     topchild = NULL;
     curchild = NULL;
-    nextchobj = NULL;
     res = NO_ERR;
     res2 = NO_ERR;
     retres = NO_ERR;

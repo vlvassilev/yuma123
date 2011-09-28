@@ -337,14 +337,9 @@ static boolean
 {
     c_keywalker_parms_t *parms = (c_keywalker_parms_t *)cookie1;
     xmlChar              endchar;
-    boolean              isfirst = FALSE;
     boolean              notunion = (obj_get_basetype(obj) != NCX_BT_UNION);
 
     (void)cookie2;
-
-    if (parms->keynum == 0) {
-        isfirst = TRUE;
-    }
 
     if (++parms->keynum == parms->keycount) {
         endchar = 0;

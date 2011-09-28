@@ -250,13 +250,11 @@ static status_t
     val_value_t           *reqdata, *targetval, *parmval;
     ses_cb_t              *scb;
     status_t               res;
-    ncx_cfg_t              cfg_id;
     xmlns_id_t             obj_nsid;
 
     req = NULL;
     reqdata = NULL;
     res = NO_ERR;
-    cfg_id = lockcb->config_id;
 
     if (LOGDEBUG) {
         log_debug("\nSending <%s> request",
@@ -289,7 +287,7 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
 
-    /* set the [un]lock/input/target node to 'cfg_id' */
+    /* set the [un]lock/input/target node XML namespace */
     targetval = xml_val_new_struct(NCX_EL_TARGET, obj_nsid);
     if (!targetval) {
         log_error("\nError allocating a new RPC request");
@@ -786,8 +784,11 @@ void
         server_cb->command_mode = CMD_MODE_AUTOUNLOCK;
         done = FALSE;
         res = handle_release_locks_request_to_server(server_cb,
-                                                    TRUE,
-                                                    &done);
+                                                    TRUE, &done);
+        if (res != NO_ERR) {
+            log_error("\nError: handle lock request failed (%)",
+                      get_error_string(res));
+        }
         if (done) {
             clear_lock_cbs(server_cb);
         }

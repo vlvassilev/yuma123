@@ -1442,7 +1442,7 @@ static boolean
     xmlChar                 *cmpstring;
     ncx_num_t                cmpnum;
     int32                    cmpresult;
-    boolean                  bool1, bool2, fnresult, cfgonly;
+    boolean                  bool1, bool2, fnresult;
     status_t                 myres;
 
     *res = NO_ERR;
@@ -1452,8 +1452,6 @@ static boolean
     if (!pcb->val) {
         return TRUE;
     }
-
-    cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ? TRUE : FALSE;
 
     if (val2->restype == XP_RT_NODESET) {
         /* invert the exop; use val2 as val1 */

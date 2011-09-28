@@ -337,7 +337,7 @@ status_t
 {
     xmlns_t  *rec;
     char      buff[NCX_MAX_NUMLEN+2];
-    uint32    nlen, mlen, plen;
+    uint32    mlen, plen;
     status_t  res;
 
 #ifdef DEBUG
@@ -346,7 +346,6 @@ status_t
     }
 #endif
 
-    nlen = xml_strlen(ns);
     mlen = xml_strlen(modname);
 
     if (pfix) {

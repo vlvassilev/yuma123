@@ -709,7 +709,7 @@ status_t
     xmlns_pmap_t    *newpmap;
     xmlns_t         *nsrec;
     xmlChar         *buff;
-    xmlns_id_t       ncid, ncxid, nsid, invid;
+    xmlns_id_t       ncid, ncxid, invid;
     uint32           plen;
     boolean          invalid;
     status_t         res, retres;
@@ -794,7 +794,6 @@ status_t
      */
     res = NO_ERR;
     ncid = xmlns_nc_id();
-    nsid = xmlns_ns_id();
     ncxid = xmlns_ncx_id();
 
     /* make sure XMLNS decl for NETCONF is in the map

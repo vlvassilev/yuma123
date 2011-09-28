@@ -395,7 +395,7 @@ static status_t
     ses_msg_t      *msg;
     ses_msg_buff_t *buff;
     status_t        res;
-    uint32          saveinpos, count;
+    uint32          count;
     boolean         done;
     xmlChar         ch;
     size_t          chunkleft, inbuffleft, outbuffleft, copylen;
@@ -710,7 +710,6 @@ static status_t
                     
                     /* reset reader state */
                     scb->instate = SES_INST_IDLE;
-                    saveinpos = scb->inendpos;
                     scb->inendpos = 0;
                     buff->bufflen = buff->buffpos;
                     buff->buffpos = 0;

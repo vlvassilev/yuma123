@@ -2078,12 +2078,11 @@ static status_t
     status_t          res, retres;
     ncx_iqual_t       iqual;
     op_editop_t       cur_editop;
-    boolean           initialdone, topreplace;
+    boolean           topreplace;
     uint32            lockid;
 
     res = NO_ERR;
     retres = NO_ERR;
-    initialdone = done;
     topreplace = FALSE;
     cur_editop = OP_EDITOP_NONE;
     curparent = NULL;
@@ -5162,7 +5161,6 @@ status_t
     val_value_t      *newval, *nextval, *matchval;
     agt_profile_t    *profile;
     status_t          res;
-    boolean           no_startup_errors;
 
 #ifdef DEBUG
     if (!scb || !msg || !source || !target) {
@@ -5171,12 +5169,14 @@ status_t
 #endif
 
     res = NO_ERR;
-    no_startup_errors = dlq_empty(&target->load_errQ);
+
     profile = agt_get_profile();
 
 #ifdef ALLOW_SKIP_EMPTY_COMMIT
     /* usually only save if the source config was touched */
     if (!cfg_get_dirty_flag(source)) {
+        boolean no_startup_errors = dlq_empty(&target->load_errQ);
+
         /* no need to merge the candidate into the running
          * config because there are no changes in the candidate
          */

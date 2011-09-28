@@ -392,7 +392,6 @@ static status_t
     xmlChar                  tstampbuff[TSTAMP_MIN_SIZE];
     int                      ret;
     status_t                 res, res2, filterres;
-    agt_not_stream_t         streamid;
     boolean                  futurestop, isnegative;
     op_filtertyp_t           filtertyp;
 
@@ -409,7 +408,6 @@ static status_t
     starttime_utc = NULL;
     stoptime_utc = NULL;
     stream = NCX_DEF_STREAM_NAME;
-    streamid = AGT_NOT_STREAM_NETCONF;
     tstamp_datetime(tstampbuff);
     futurestop = FALSE;
     isnegative = FALSE;

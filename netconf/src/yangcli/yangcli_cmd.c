@@ -3152,11 +3152,8 @@ static status_t
             uint32  len)
 {
     val_value_t      *valset;
-    status_t          res;
-    boolean           imode;
+    status_t          res = NO_ERR;
 
-    res = NO_ERR;
-    imode = interactive_mode();
     valset = get_valset(server_cb, rpc, &line[len], &res);
     if (res == NO_ERR || res == ERR_NCX_SKIPPED) {
         pwd();
@@ -3281,7 +3278,7 @@ static status_t
     obj_template_t        *targobj;
     const xmlChar         *target;
     status_t               res;
-    boolean                imode, save_getopt;
+    boolean                save_getopt;
 
     res = NO_ERR;
     valset = get_valset(server_cb, 
@@ -3308,7 +3305,6 @@ static status_t
 
     save_getopt = server_cb->get_optional;
 
-    imode = interactive_mode();
     newparm = NULL;
     curparm = NULL;
     targobj = NULL;
@@ -4654,7 +4650,7 @@ static val_value_t *
     xmlChar               *fromurl;
     var_type_t             vartype;
     boolean                isvarref, iscli, isselect, saveopt;
-    boolean                isextern, keepexterntop, alt_names;
+    boolean                isextern, alt_names;
     status_t               res;
     ncx_name_match_t       match_names;
 
@@ -4668,7 +4664,6 @@ static val_value_t *
     iscli = FALSE;
     isselect = FALSE;
     isextern = FALSE;
-    keepexterntop = FALSE;   /* TBD: make this a parameter */
     res = NO_ERR;
     vartype = VAR_TYP_NONE;
 
@@ -8061,7 +8056,7 @@ void *
     const xmlChar  *prefix, *defname, *modname, *defmod;
     ncx_module_t   *mod;
     modptr_t       *modptr;
-    uint32          prelen, tempcount, matchcount;
+    uint32          tempcount, matchcount;
     xmlns_id_t      nsid;
     status_t        res;
     boolean         first;
@@ -8069,7 +8064,6 @@ void *
     def = NULL;
     q = NULL;
     oldq = 0;
-    prelen = 0;
     *len = 0;
     start = line;
     modname = NULL;
@@ -8098,7 +8092,6 @@ void *
         /* use an explicit module prefix in YANG
          * only this exact module will be tried
          */
-        prelen = p - start;
         q = p+1;
         while (*q && !xml_isspace(*q)) {
             q++;

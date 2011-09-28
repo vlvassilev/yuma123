@@ -149,14 +149,13 @@ status_t
     const agt_profile_t   *agt_profile;
     val_value_t           *oldcaps, *newcaps;
     cap_list_t            *oldmycaps,*newmycaps;
-    xmlns_id_t             nc_id, ncx_id;
+    xmlns_id_t             nc_id;
     status_t               res;
 
     res = NO_ERR;
     newcaps = NULL;
 
     nc_id = xmlns_nc_id();
-    ncx_id = xmlns_ncx_id();
     oldcaps = agt_caps;
     oldmycaps = my_agt_caps;
 

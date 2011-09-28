@@ -369,7 +369,6 @@ status_t
 {
     struct timeval timeout;
     int            i, ret;
-    status_t       res;
     boolean        done, done2;
     mgr_io_state_t state;
 
@@ -503,7 +502,6 @@ status_t
 
         /* check select return status for non-recoverable error */
         if (ret < 0) {
-            res = ERR_NCX_OPERATION_FAILED;
             log_error("\nmgr_io select failed (%s)", 
                       strerror(errno));
             mgr_request_shutdown();

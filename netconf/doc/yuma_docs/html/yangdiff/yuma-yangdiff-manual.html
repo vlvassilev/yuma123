@@ -1,0 +1,2452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
+  <!-- This file was converted to xhtml by Writer2xhtml ver. 1.0. See http://writer2latex.sourceforge.net for more info. -->
+  <head profile="http://dublincore.org/documents/dcq-html/">
+    <title>Yuma yangdiff Manual</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta content="" name="description" />
+    <meta content="" name="keywords" />
+    <link href="http://purl.org/dc/elements/1.1/" rel="schema.DC" />
+    <meta content="Yuma yangdiff Manual" name="DC.title" />
+    <meta content="" name="DC.subject" />
+    <meta content="" name="DC.description" />
+    <meta content="Andy Bierman" name="DC.creator" />
+    <meta content="2011-09-25T14:35:22" name="DC.date" />
+    <meta content="" name="DC.language" />
+    <style media="all" type="text/css">
+      body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
+      span.Internetlink {}
+      a:link {text-decoration:none}
+      a:visited {color:#800000;text-decoration:underline}
+      p.TitlePageTitle {margin-left:0;margin-right:0;margin-top:200.01599px;margin-bottom:4.0032px;border-top:none;border-bottom:3.3216px solid #000000;border-left:none;border-right:none;padding-top:0;padding-bottom:1.3248px;padding-left:0;padding-right:0;text-align:right;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:32.0px}
+      p.TableofContentsPageTitle {margin-left:0;margin-right:0;margin-top:15.984px;margin-bottom:4.0032px;border:none;padding:0;text-align:center;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:21.333334px}
+      p.Standard {margin-left:0;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;font-family:'Luxi Sans',sans-serif;font-size:16.0px}
+      p.TableHeading {margin-left:9.6px;margin-right:9.6px;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:transparent;text-indent:0;text-align:center;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:13.333334px}
+      p.TableContents {margin-left:9.6px;margin-right:9.6px;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:transparent;text-indent:0;font-family:'Luxi Sans',sans-serif;font-size:13.333334px}
+      p.Contents3 {margin-left:32.016px;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;text-indent:0;font-family:'Luxi Sans',sans-serif;font-size:14.666667px}
+      p.ContentsHeading {margin-left:0;margin-right:0;margin-top:15.984px;margin-bottom:8.016px;border:none;padding:0;background-color:transparent;text-indent:0;text-align:center;font-family:'Liberation Sans',sans-serif;font-weight:bold;font-size:21.333334px}
+      p.Textbody {margin-left:0;margin-right:0;margin-top:0;margin-bottom:8.016px;border:none;padding:0;font-family:'Luxi Sans',sans-serif;font-size:13.333334px}
+      p.Contents2 {margin-left:15.984px;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;text-indent:0;font-family:'Luxi Sans',sans-serif;font-size:16.0px}
+      p.Contents1 {margin-left:0;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:transparent;text-align:left;font-family:'Luxi Sans',sans-serif;font-size:16.0px}
+      p.Example2 {margin-left:9.6px;margin-right:9.6px;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:#ffffcc;text-indent:0;font-family:'Bitstream Charter',serif;font-size:12.0px}
+      p.Example {margin-left:96.0px;margin-right:96.0px;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:#ffffcc;text-indent:0;font-family:Courier,monospace;font-size:12.0px}
+      h1 {margin-left:0;margin-right:0;margin-top:18.672px;margin-bottom:18.672px;border:none;padding:0;background-color:#e6e6ff;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:26.666668px;clear:left}
+      h2 {margin-left:0;margin-right:0;margin-top:18.672px;margin-bottom:18.672px;border:none;padding:0;background-color:#9999ff;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:21.333334px;clear:left}
+      h3 {margin-left:0;margin-right:0;margin-top:18.672px;margin-bottom:18.672px;border:none;padding:0;background-color:#83caff;font-family:'Luxi Sans',sans-serif;font-variant:small-caps;font-weight:bold;font-size:17.333334px;color:#000000;clear:left}
+      .frameGraphics {margin-left:0;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;font-size:16.0px}
+      .frameGraphics p {margin-left:0;margin-right:0;margin-top:0;margin-bottom:0;font-size:16.0px}
+    </style>
+  </head>
+  <body dir="ltr">
+    <p class="TitlePageTitle" dir="ltr" lang="en-US" style="text-align:center" xml:lang="en-US">Yuma yangdiff Manual</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:24.0px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:24.0px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:24.0px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">YANG-Based Unified Modular Automation Tools</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">YANG Module Compare Tool</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 2.1</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Last Updated:  September 25, 2011</p>
+    <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
+    <div id="TableofContents1" style="background-color:transparent">
+      <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma yangdiff Manual</p>
+      <p class="Contents1" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">1</span>
+        <a href="#toc0"> Preface</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">1.1</span>
+        <a href="#toc1"> Legal Statements</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">1.2</span>
+        <a href="#toc2"> Additional Resources</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">1.2.1</span>
+        <a href="#toc3"> WEB Sites</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">1.2.2</span>
+        <a href="#toc4"> Mailing Lists</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">1.3</span>
+        <a href="#toc5"> Conventions Used in this Document</a>
+      </p>
+      <p class="Contents1" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2</span>
+        <a href="#toc6"> yangdiff User Guide</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.1</span>
+        <a href="#toc7"> Introduction</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.1.1</span>
+        <a href="#toc8"> Features</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.1.2</span>
+        <a href="#toc9"> Starting yangdiff</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.1.3</span>
+        <a href="#toc10"> Stopping yangdiff</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.1.4</span>
+        <a href="#toc11"> Configuration Parameter List</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.2</span>
+        <a href="#toc12"> Comparing YANG Modules</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.3</span>
+        <a href="#toc13"> Diff Reports</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.3.1</span>
+        <a href="#toc14"> Terse Report</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.3.2</span>
+        <a href="#toc15"> Normal Report</a>
+      </p>
+      <p class="Contents3" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">2.3.3</span>
+        <a href="#toc16"> Revision Statement</a>
+      </p>
+      <p class="Contents1" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3</span>
+        <a href="#toc17"> CLI Reference</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.1</span>
+        <a href="#toc18"> --config</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.2</span>
+        <a href="#toc19"> --difftype</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.3</span>
+        <a href="#toc20"> --feature-disable</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.4</span>
+        <a href="#toc21"> --feature-enable</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.5</span>
+        <a href="#toc22"> --feature-enable-default</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.6</span>
+        <a href="#toc23"> --header</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.7</span>
+        <a href="#toc24"> --help</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.8</span>
+        <a href="#toc25"> --help-mode</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.9</span>
+        <a href="#toc26"> --indent</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.10</span>
+        <a href="#toc27"> --log</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.11</span>
+        <a href="#toc28"> --log-append</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.12</span>
+        <a href="#toc29"> --log-level</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.13</span>
+        <a href="#toc30"> --modpath</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.14</span>
+        <a href="#toc31"> --new</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.15</span>
+        <a href="#toc32"> --old</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.16</span>
+        <a href="#toc33"> --output</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.17</span>
+        <a href="#toc34"> --subdirs</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.18</span>
+        <a href="#toc35"> --version</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.19</span>
+        <a href="#toc36"> --warn-idlen</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.20</span>
+        <a href="#toc37"> --warn-linelen</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.21</span>
+        <a href="#toc38"> --warn-off</a>
+      </p>
+      <p class="Contents2" dir="ltr" lang="en-US" xml:lang="en-US">
+        <span class="SectionNumber">3.22</span>
+        <a href="#toc39"> --yuma-home</a>
+      </p>
+    </div>
+    <p class="Standard" dir="ltr" lang="en-US" style="margin-top:0;margin-bottom:5.328px" xml:lang="en-US"> </p>
+    <h1 dir="ltr" id="toc0"><span class="SectionNumber">1</span> Preface</h1>
+    <h2 dir="ltr" id="toc1"><span class="SectionNumber">1.1</span> <a id="RHPDTOCBK"></a><a id="bkmRHPDTOCBK"></a>Legal Statements</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Copyright 2009 - 2011 Andy Bierman,  All Rights Reserved.</p>
+    <h2 dir="ltr" id="toc2"><span class="SectionNumber">1.2</span> Additional Resources</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This document assumes you have successfully set up the software as described in the printed document:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super"> </span> Installation Guide</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Other documentation includes:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span style="font-family:Arial,sans-serif"> Yuma</span>
+      <span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super"> </span>
+      <span style="font-family:Arial,sans-serif"> Quickstart Guide</span>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super"> </span> User Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-family:Arial,sans-serif" xml:lang="en-US"> Yuma netconfd  Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-family:Arial,sans-serif" xml:lang="en-US"> Yuma yangcli Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-family:Arial,sans-serif" xml:lang="en-US"> Yuma yangdump Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span> Developer Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To obtain additional support you may join the yuma-users group on sourceforge.net and send email to this e-mail address:<br /></p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink"> </span>
+      <span class="Internetlink">yuma-users@lists.sourceforge.net</span>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink">The SourceForge.net Support Page for Yuma can be found at this WEB page:</span>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink"> </span>
+      <a href="http://sourceforge.net/projects/yuma/support">
+        <span class="Internetlink">http://sourceforge.net/projects/yuma/support</span>
+      </a>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are several sources of free information and tools for use with YANG and/or NETCONF.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink">The following section lists the resources available at this time.</span>
+    </p>
+    <h3 dir="ltr" id="toc3"><span class="SectionNumber">1.2.1</span> WEB Sites</h3>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">Netconf Central</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+              <a href="http://www.netconfcentral.org/">http://www.netconfcentral.org/</a>
+            </p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Yuma Home Page</p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Free information on NETCONF and YANG, tutorials, on-line YANG module validation and documentation database </p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">Yuma SourceFource OpenSource Project</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">
+              <a href="http://sourceforge.net/projects/yuma/">http://sourceforge.net/projects/yuma/</a>
+            </p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Download Yuma source and binaries; project forums and help</p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">Yang Central</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+              <a href="http://www.yang-central.org/">http://www.yang-central.org</a>
+            </p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Free information and tutorials on YANG, free YANG tools for download</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">NETCONF Working Group Wiki Page</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">
+              <a href="http://trac.tools.ietf.org/wg/netconf/trac/wiki">http://trac.tools.ietf.org/wg/netconf/trac/wiki</a>
+            </p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Free information on NETCONF standardization activities and NETCONF implementations</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">NETCONF WG Status Page</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">http://tools.ietf.org/wg/netconf/</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">IETF Internet draft status for NETCONF documents</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">libsmi Home Page</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">
+              <a href="http://www.ibr.cs.tu-bs.de/projects/libsmi/">http://www.ibr.cs.tu-bs.de/projects/libsmi/</a>
+            </p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Free tools such as smidump, to convert SMIv2 to YANG</p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <h3 dir="ltr" id="toc4"><span class="SectionNumber">1.2.2</span> Mailing Lists</h3>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+          <span class="Internetlink">
+            <span style="font-weight:bold">NETCONF Working Group</span>
+          </span>
+        </p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+              <span class="Internetlink">http://www.ietf.org/html.charters/netconf-charter.html</span>
+            </p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+              <span class="Internetlink">Technical issues related to the NETCONF protocol are discussed on the NETCONF WG mailing list.  Refer to the instructions on the WEB page for joining the mailing list.</span>
+            </p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+          <span class="Internetlink">
+            <span style="font-weight:bold">NETMOD Working Group</span>
+          </span>
+        </p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+              <a href="http://www.ietf.org/html.charters/netmod-charter.html">
+                <span class="Internetlink">http://www.ietf.org/html.charters/netmod-charter.html</span>
+              </a>
+            </p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+              <span class="Internetlink">Technical issues related to the YANG language and YANG data types are discussed on the NETMOD WG mailing list.  Refer to the instructions on the WEB page for joining the mailing list.</span>
+            </p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <h2 dir="ltr" id="toc5">
+      <span class="SectionNumber">1.3</span>
+      <span class="Internetlink"> Conventions Used in this Document</span>
+    </h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink">The following formatting conventions are used throughout this document:</span>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink">Documentation Conventions</span>
+    </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="docconventionstable" style="margin-top:0;margin-bottom:0;margin-left:100.003204px;margin-right:96.998405px;width:498.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <thead>
+        <tr>
+          <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">Convention</p>
+          </td>
+          <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">Description</p>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">--foo</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">CLI parameter foo</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">&lt;foo&gt;</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">XML parameter foo</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">foo</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">yangcli</span> command or parameter</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$FOO</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Environment variable FOO</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$$foo</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">yangcli</span> global variable foo</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">some text</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example command or PDU</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">some text</p>
+          </td>
+          <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
+            <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Plain text</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1 dir="ltr" id="toc6"><span class="SectionNumber">2</span> yangdiff User Guide</h1>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <div style="text-align:center">
+      <img alt="graphics18" class="frameGraphics" id="graphics18graphic" src="yuma-yangdiff-manual-img1.png" style="width:648.52795px;height:480.79678px" />
+    </div>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"></p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc7"><span class="SectionNumber">2.1</span> Introduction</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">yangdiff</span> program is used to compare two revisions of the same YANG file.  </p>
+    <h3 dir="ltr" id="toc8"><span class="SectionNumber">2.1.1</span> Features</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">yangdiff</span> program has the following features:</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The conceptual YANG object trees are compared, not the actual YANG statements.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Two separate subtrees of modules can be compared, not just 1 file at a time.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The differences report format for differences is easy to read, and can be configured with 2 different levels of verbosity.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A YANG revision statement can be automatically generated instead of a list of differences.  This will include an English text summary of the differences found.</p>
+      </li>
+    </ul>
+    <h3 dir="ltr" id="toc9"><span class="SectionNumber">2.1.2</span> Starting yangdiff</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The current working directory in use when <span style="font-weight:bold">yangdiff</span> is invoked is important.  It is most convenient to run <span style="font-weight:bold">yangdiff</span> from a work directory, rather than the installation directory or within the module library.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">yangdiff</span> program can be invoked several ways:</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To get the current version and exit:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+    </ul>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">yangdiff --version</span></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To get program help and exit:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+    </ul>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">yangdiff --help</span></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">yangdiff --help --brief</span></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">yangdiff --help --full</span></p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To compare a new YANG module named 'foo', with an old version named foo.2008-09-01.yang, the following command line can be used</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+    </ul>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">yangdiff --old=foo.2008-09-01.yang --new=foo</span></p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US">To get all the configuration parameters from a text file named '~/yangdiff-project1.conf':</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
+      </li>
+    </ul>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US">  <span style="font-style:normal;font-weight:bold">yangdiff</span><span style="font-weight:bold"> --</span><span style="font-style:normal;font-weight:bold">config</span><span style="font-weight:bold">=</span><span style="font-style:normal;font-weight:bold">~/yangdiff-project1.conf</span></p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal;font-weight:bold" xml:lang="en-US"> </p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To generate a terse differences report called <span style="font-style:italic">~/project-X-diffs.log</span> for  the old files in the '<span style="font-style:italic">/public/project-X/modules'</span> with the new modules in the '<span style="font-style:italic">~/work</span>' directory:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+    </ul>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US">  <span style="font-style:normal;font-weight:bold">yangdiff</span><span style="font-weight:bold"> --</span><span style="font-style:normal;font-weight:bold">difftype=terse <br />   --output=~/project-X-diffs.log \</span></p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal;font-weight:bold" xml:lang="en-US">   --old=/public/project-X/modules \</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal;font-weight:bold" xml:lang="en-US">   --new=/work</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To generate a revision statement differences to <span style="font-style:italic">~/foo-projectX-revision.txt</span> for  the '~/work/foo.yang' module, with the old version in the in the  '<span style="font-style:italic">/public/project-X/modules'</span>:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+    </ul>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US">  <span style="font-style:normal;font-weight:bold">yangdiff</span><span style="font-weight:bold"> --</span><span style="font-style:normal;font-weight:bold">difftype=revision <br />   --output=~/foo-project-X-revision.txt \</span></p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal;font-weight:bold" xml:lang="en-US">   --old=/public/project-X/modules \</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal;font-weight:bold" xml:lang="en-US">   --new=/work/foo.yang</p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal;font-weight:bold" xml:lang="en-US"> </p>
+    <h3 dir="ltr" id="toc10"><span class="SectionNumber">2.1.3</span> Stopping yangdiff</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There is no interactive mode for <span style="font-weight:bold">yangdiff</span>, so there is no need for a command to exit the program.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The Control C character sequence can be used to cancel the <span style="font-weight:bold">yangdiff</span> processing in progress.  However, this will leave any partially completed output files in place.</p>
+    <h3 dir="ltr" id="toc11"><span class="SectionNumber">2.1.4</span> Configuration Parameter List</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following configuration parameters are used by <span style="font-weight:bold">yangdiff</span>.  Refer to the CLI Reference for more details.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff CLI Parameters</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table147table" style="margin-top:0;margin-bottom:0;margin-left:64.003204px;margin-right:70.003204px;width:562.0032px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:center;font-weight:bold" xml:lang="en-US">parameter</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:center;font-weight:bold" xml:lang="en-US">description</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--config</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the configuration file to use for parameters.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--datapath</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Sets the data file search path.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--difftype</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the type of differences report that should be output.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--feature-disable</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Leaf list of features to disable</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--feature-enable</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies a feature that should be enabled</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--feature-enable-default</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies if a feature should be enabled or disabled by default</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--header</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies whether the module header data should be compared or not.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--help</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Get context-sensitive help, then exit.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--help-mode</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Adjust the help output (--brief, or --full).</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--indent</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the indent count to use when writing data.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--log</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the log file to use instead of STDOUT.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--log-append</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Controls whether a log file will be reused or overwritten.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--log-level</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Controls the verbosity of logging messages.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--modpath</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Sets the module search path.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--new</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the location of the new revision to compare.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--old</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the location of the old revision to compare.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--output</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:left;font-weight:normal" xml:lang="en-US">Specifies where output files should be generated.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--runpath</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Sets the executable file search path.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--subdirs</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:left;font-weight:normal" xml:lang="en-US">Controls whether sub-directories are searched for YANG files.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--version</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Prints the program version and then exit.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--warn-idlen</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Controls how identifier lengths are checked.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--warn-linelen</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Controls how line lengths are checked.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--warn-off</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Suppresses the specified warning number.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:143.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--yuma-home</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:400.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Specifies the <span style="font-weight:bold">$YUMA_HOME</span> project root to use when searching for files.</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc12"><span class="SectionNumber">2.2</span> Comparing YANG Modules</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">yangdiff</span> program compares YANG files in the following maner:</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The cooked object trees are compared, not the actual YANG statements.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Whitespace differences are ignored.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Non-semantic changes are ignored:</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A uses-stmt can replace a set of objects if the grouping is identical to the old objects.</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Refine statements are combined into the cooked objects, and not compared directly.</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A typedef statement can replace an inline type statement</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Changes to YANG comments are ignored.</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Sub-statement order is ignored, however object order with a container or list is not ignored.</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Objects can be moved to submodules, and include statements instead.</p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the <span style="font-weight:bold">--old</span> parameter is missing, then the module search path will be used to find the specified module with the same name.  If the<span style="font-weight:bold"> --old </span>parameter contains just a module name, then the module search path will be used to find a module with the new name.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--new</span> parameter is required.  It can represent one YANG file or a directory of new YANG modules.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--difftype</span> parameter is optional.  The 'normal' report mode is used if this parameter is missing.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--output</span> parameter will be used for the report file, if it is specified.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table148table" style="margin-top:0;margin-bottom:0;margin-left:133.9968px;margin-right:167.00159px;width:395.00162px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:113.6624px">
+          <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">symbol</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:263.6704px">
+          <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">description</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:113.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:center;font-weight:bold" xml:lang="en-US">A</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:263.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Definition has bend added.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:113.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:center;font-weight:bold" xml:lang="en-US">M</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:263.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Definition has been modified.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:113.6624px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="text-align:center;font-weight:bold" xml:lang="en-US">D</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:263.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Definition has been deleted.</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc13"><span class="SectionNumber">2.3</span> Diff Reports</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This section uses the example module below (test/<span style="font-weight:bold">test3a.yang</span>) to demonstrate the different report formats available.  The old module revision is <span style="font-weight:bold">test/test3.yang</span>.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following command is used in all 3 examples, except the value of the --difftype parameter is changed each time.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> <span style="font-weight:bold">yangdiff --old=test3a --new=test3 --difftype=&lt;enum&gt;</span></p>
+    <h3 dir="ltr" id="toc14"><span class="SectionNumber">2.3.1</span> Terse Report</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If <span style="font-weight:bold">--difftype=terse</span> is selected, then a brief summary of all changes will be listed.  There will be no indentation, and only the change (Add, Modify, Delete), and the top-level definition is identified.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// Generated by yangdiff 0.9.7.473 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// Copyright (c) 2009, Netconf Central, All Rights Reserved. </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// old: test3 (2008-10-19) test3.yang </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// new: test3 (2009-09-09) test3a.yang </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D revision '2008-10-19' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A revision '2009-09-09' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A feature X </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A identity testbase </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A identity testbase1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">M typedef C </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D container test-D1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D leaf test-D </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">M container test33 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h3 dir="ltr" id="toc15"><span class="SectionNumber">2.3.2</span> Normal Report</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If <span style="font-weight:bold">--difftype=normal</span> is selected, then a complete summary of all changes will be listed.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If a change line is indented, it indicates a sub-statement of the object in the previous line has been changed.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// Generated by yangdiff 0.9.7.473 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// Copyright (c) 2009, Netconf Central, All Rights Reserved. </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// old: test3 (2008-10-19) test3.yang </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// new: test3 (2009-09-09) test3a.yang </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D revision '2008-10-19' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A revision '2009-09-09' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A feature X </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A identity testbase </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">A identity testbase1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">M typedef C </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   M type </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      M range from 'min .. 41 | 45' to 'min .. 41' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D container test-D1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D leaf test-D </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">M container test33 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   D presence 'not a top-level mand...' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   M choice f </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      M case f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         M leaf f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            A if-feature 'X' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h3 dir="ltr" id="toc16"><span class="SectionNumber">2.3.3</span> Revision Statement</h3>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If <span style="font-weight:bold">--difftype=revision</span> is selected, then a complete summary of all changes will be printed in the form of a YANG revision statement.  The current date will be used for the revision-date field of the revision statement.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// Generated by yangdiff 0.9.7.473 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// Copyright (c) 2009, Netconf Central, All Rights Reserved. </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// old: test3 (2008-10-19) test3.yang </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">// new: test3 (2009-09-09) test3a.yang </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   revision 2009-09-10 { </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      description " </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Removed revision '2008-10-19' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Added revision '2009-09-09' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Added feature X </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Added identity testbase </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Added identity testbase1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Changed typedef C </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            - Changed type </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">               - Changed range from 'min .. 41 | 45' to 'min .. 41' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Removed container test-D1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Removed leaf test-D </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Changed container test33 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            - Removed presence 'not a top-level mand...' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            - Changed choice f </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">               - Changed case f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">                  - Changed leaf f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">                     - Added if-feature 'X' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      "; </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   } </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h1 dir="ltr" id="toc17"><span class="SectionNumber">3</span> CLI Reference</h1>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">yangdiff</span> program uses command line interface (CLI) parameters to control program behavior.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The following sections document all the Yuma CLI parameters relevant to this program, in alphabetical order.</p>
+    <h2 dir="ltr" id="toc18"><span class="SectionNumber">3.1</span> --config</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--config</span> parameter specifies the name of a Yuma configuration file that contains more parameters to process, in addition to the CLI parameters.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Refer to the 'Configuration Files' section for details on the format of this file.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--config parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table45table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">string: complete file specification of the text file to parse for more parameters.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">/etc/yuma/yangdiff.conf</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --old=test1<br />   --new=test1a \<br />   --config=~/testconf.conf</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc19"><span class="SectionNumber">3.2</span> --difftype</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--difftype</span> parameter controls how differences are displayed in the <span style="font-weight:bold">yangdiff</span> program.. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The allowed values are 'terse', 'normal', and 'revision'. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The basic report format is: </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-weight:bold;font-size:13.333334px" xml:lang="en-US"> [add/delete/modify] field-name [field-value] </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The '<span style="font-weight:bold">terse</span>' option will include the names of the top-level fields that are different.  The actual differences for modification lines ('M') are not printed.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> M typedef C </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> D container test-D1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> D leaf test-D </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> M container test33 </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The '<span style="font-weight:bold">normal</span>' option will  include any changes for any nested fields or objects.  A brief description of the changes made in a modification line ('M') are printed.  This is the default reporting mode.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">M typedef C </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   M type </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      M range from 'min .. 41 | 45' to 'min .. 41' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D container test-D1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">D leaf test-D </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">M container test33 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   D presence 'not a top-level mand...' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   M choice f </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      M case f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         M leaf f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            A if-feature 'X' </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The '<span style="font-weight:bold">revision</span>' option will generate the differences report in YANG revision-stmt format.  For example:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  revision 2009-09-10 { </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      description " </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Changed typedef C </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            - Changed type </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">               - Changed range from 'min .. 41 | 45' to 'min .. 41' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Removed container test-D1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Removed leaf test-D </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">         - Changed container test33 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            - Removed presence 'not a top-level mand...' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">            - Changed choice f </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">               - Changed case f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">                  - Changed leaf f1 </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">                     - Added if-feature 'X' </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">      "; </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   } </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">difftype parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table150table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">enumeration:<br />  <span style="font-weight:bold">terse<br />  normal<br />  revision</span></p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">normal</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --difftype=revision \<br />  --new=test3a\<br />  --old=~test3</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc20"><span class="SectionNumber">3.3</span> --feature-disable</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--feature-disable</span> parameter directs all programs to disable a specific feature.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter is a formatted string containing a module name, followed by a colon ':', followed by a feature name, e.g.,</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">test:feature1</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">It is an error if a <span style="font-weight:bold">--feature-enable</span> and <span style="font-weight:bold">--feature-disable</span> parameter specify the same feature.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Parameters for unknown features will be ignored.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--feature-disable parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table159table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">formatted string (module:feature</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">unlimited</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangcli<br />yangdiff<br />yangdump<br />netconfd</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  --format=c \<br />    --feature-disable=test:feature1 \<br />    --module=test</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc21"><span class="SectionNumber">3.4</span> --feature-enable</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--feature-enable</span> parameter directs all programs to enable a specific feature.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter is a formatted string containing a module name, followed by a colon ':', followed by a feature name, e.g.,</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">test:feature1</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">It is an error if a <span style="font-weight:bold">--feature-disable</span> and <span style="font-weight:bold">--feature-enable</span> parameter specify the same feature.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Parameters for unknown features will be ignored.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--feature-enable parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table160table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">formatted string (module:feature</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">unlimited</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangcli<br />yangdiff<br />yangdump<br />netconfd</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  \<br />    --feature-enable=test:feature1 \<br />    --old=test --new=test-new</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc22"><span class="SectionNumber">3.5</span> --feature-enable-default</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--feature-enable-default</span> parameter controls how <span style="font-weight:bold">yangdump</span> will generate C code for YANG features by default.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If 'true', then by default, features will be enabled.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If 'false', then by default, features will be disabled.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If a <span style="font-weight:bold">--feature-enable</span> or <span style="font-weight:bold">--feature-disable</span> parameter is present for a specific feature, then this parameter will be ignored for that feature.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--feature-enable-default parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table162table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">boolean (true or false)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">TRUE</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangcli<br />yangdiff<br />yangdump<br />netconfd</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff \<br />   --feature-enable-default=false</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc23"><span class="SectionNumber">3.6</span> --header</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--header</span> parameter controls whether YANG header contents will be compared in the <span style="font-weight:bold">yangdiff</span> program.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--header parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table149table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">boolean (true or false)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">TRUE</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --header=false \<br />  --old=~/saved-modules \<br />  -- new=~/work</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc24"><span class="SectionNumber">3.7</span> --help</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--help</span> parameter causes program help text to be printed, and then the program will exit instead of running as normal.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter can be combined with the <span style="font-weight:bold">--help-mode</span> parameter to control the verbosity of the help text.  Use <span style="font-weight:bold">--brief</span> for less, and <span style="font-weight:bold">--full </span>for more than the normal verbosity.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter can be combined with the <span style="font-weight:bold">--version</span> parameter in all programs.  It can also be combined with the <span style="font-weight:bold">--show-errors</span> parameter in <span style="font-weight:bold">yangdump</span>.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The program configuration parameters will be displayed in alphabetical order, not in schema order.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--help parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table44table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">empty</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --help</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc25"><span class="SectionNumber">3.8</span> --help-mode</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--help-mode</span> parameter is used to control the amount of detail printed when help text is requested in some command.  It is always used with another command, and makes no sense by itself.  It is ignored unless used with the <span style="font-weight:bold">--help</span> parameter.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--help-mode parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table46table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">choice of 3 empty leafs</p>
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">  --brief<br />  --normal<br />  --full</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">normal</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --help --help-mode=full</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+          <span style="font-weight:bold">default choice: </span>
+          <span style="font-weight:normal">normal</span>
+        </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">choice help-mode</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">brief</p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">type: empty</p>
+              </li>
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter specifies that brief documentation mode should be used.</p>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">normal</p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">type: empty</p>
+              </li>
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter specifies that normal documentation mode should be used.</p>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">full</p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">type: empty</p>
+              </li>
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter specifies that full documentation mode should be used.</p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc26"><span class="SectionNumber">3.9</span> --indent</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--indent</span> parameter specifies the number of spaces that will be used to add to the indentation level, each time a child node is printed during program operation.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--indent parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table47table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">uint32 (0 .. 9)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">2</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangcli --indent=4</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc27"><span class="SectionNumber">3.10</span> --log</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--log</span> parameter specifies the file name to be used for logging program messages, instead of STDOUT.  It can be used with the optional<span style="font-weight:bold"> --log-append</span> and <span style="font-weight:bold">--log-level</span> parameters to control how the log file is written.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--log parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table48table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">string: log file specification</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  --log=~/test.log&amp;</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc28"><span class="SectionNumber">3.11</span> --log-append</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--log-append</span> parameter specifies that the existing log file (if any) should be appended , instead of deleted.  It is ignored unless the <span style="font-weight:bold">--log</span> parameter is present.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--log-append parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table49table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">empty</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  --log-append \<br />  --log=~/server.log&amp;</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc29"><span class="SectionNumber">3.12</span> --log-level</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--log-level</span> parameter controls the verbosity level of messages printed to the log file or STDOUT, if no log file is specified.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The log levels are incremental, meaning that each higher level includes everything from the previous level, plus additional messages.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are 7 settings that can be used:</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">none</span>: All logging is suppressed.  Use with extreme caution!</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">error</span>: Error messages are printed, indicating problems that require attention.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">warn</span>: Warning messages are printed, indicating problems that may require attention.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">info</span>: Informational messages are printed, that indicate program status changes.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">debug</span>: Debugging messages are printed that indicate program activity.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">debug2</span>: Protocol debugging and trace messages are enabled.</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">debug3</span>: Very verbose debugging messages are enabled.  This has an impact on resources and performance, and should be used with caution.</p>
+      </li>
+    </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">log-level parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table51table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">enumeration:<br />  <span style="font-weight:bold">off<br /></span><span style="font-weight:bold">  error<br />  warn<br />  info<br /></span><span style="font-weight:bold">  debug<br />  debug2<br />  debug3</span></p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">--info (--debug for DEBUG builds)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  --log-level=debug \<br />  --log=~/server.log&amp;</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc30"><span class="SectionNumber">3.13</span> --modpath</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--modpath</span> parameter specifies the YANG module search path to use while searching for YANG files.  It consists of a colon (':') separated list of path specifications, commonly found in Unix, such as the <span style="font-weight:bold">$PATH</span> environment variable.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter overrides the <span style="font-weight:bold">$YUMA_MODPATH</span> environment variable, if it is present.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--modpath parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table71table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">string: list of directory specifications</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">$YUMA_MODPATH</span> environment variable</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff \<br />  --modpath=”~/testmodules:~/modules:~/trunk/netconf/modules”</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc31"><span class="SectionNumber">3.14</span> --new</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--new</span> parameter specifies the YANG file or directory containing the new revision to be compared in the <span style="font-weight:bold">yangdiff</span> program.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter indicates a filename, then it represents the YANG source module name to compare as the newer of the two revisions. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter indicates a directory (and the 'old' parameter indicates a filename), then it will be used to to search for a file with the same name as the 'new' parameter. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the 'old' parameter identifies a directory as well (and the 'no-subdirs' parameter is present), then the modules within the 'new' directory will be  compared to files with the same name in the 'old' directory.  </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the <span style="font-weight:bold">--subdirs</span> parameter is ''true'', then all sub-directories within the 'src' directory will also be checked. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this string begins with a '~' character, then a username is expected to follow or a directory separator character.  If it begins with a '$' character, then an environment variable name is expected to follow. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">~/some/path ==&gt; &lt;my-home-dir&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">$workdir/some/path ==&gt; &lt;workdir-env-var&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter must be present unless the<span style="font-weight:bold"> --help</span>  or <span style="font-weight:bold">--version</span> parameters are present. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--new parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table151table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">string (module or directory specification. length 1 .. 4095)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff \<br />  --new=test3a<br />  --difftype=terse <br />  --old=test3\</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc32"><span class="SectionNumber">3.15</span> --old</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--old</span> parameter specifies the YANG file or directory containing the older revision to be compared in the <span style="font-weight:bold">yangdiff</span> program.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter indicates a filename, then it represents the YANG source module name to compare as the older of the two revisions. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter indicates a directory (and the 'old' parameter indicates a filename), then it will be used to to search for a file with the same name as the 'new' parameter. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this string begins with a '~' character, then a username is expected to follow or a directory separator character.  If it begins with a '$' character, then an environment variable name is expected to follow. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">~/some/path ==&gt; &lt;my-home-dir&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">$workdir/some/path ==&gt; &lt;workdir-env-var&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter must be present unless the <span style="font-weight:bold">--help</span>  or <span style="font-weight:bold">--version</span> parameters are present. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--old parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table152table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">string (module or directory specification. length 1 .. 4095)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff \<br />  --old=test3<br />  --difftype=terse <br />  --new=test3a\</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc33"><span class="SectionNumber">3.16</span> --output</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--output</span> parameter specifies where the output files generated by the program will be stored.</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The default is STDOUT if this parameter is not specified and the <span style="font-weight:bold">--defnames</span> parameter is set to 'false'. </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter represents an existing directory, then the <span style="font-weight:bold">--defnames</span> parameter will be set to 'true' by default. </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this parameter represents a file name, then the <span style="font-weight:bold">--defnames</span> parameter will be ignored, and all translation output will be directed to the specified file. </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If this string begins with a '~' character, then a username is expected to follow or a directory separator character.   If it begins with a '$' character, then an environment variable name is expected to follow. </p>
+      </li>
+    </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> ~/some/path ==&gt; &lt;my-home-dir&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> ~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> $workdir/some/path ==&gt; &lt;workdir-env-var&gt;/some/path </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the target specified in this parameter <span style="font-weight:bold">does not </span>exist:</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If there is only one file to be output, then this parameter is used as the file name.</p>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If there are multiple files to be output, then this parameter is used as a directory name.  A new directory will be created, if it is needed.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the target specified in this parameter <span style="font-weight:bold">does</span> exist:</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If there is only one file to be output:</p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the existing target is also a file, then the current file is over-written.</p>
+              </li>
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the existing target is a directory, then the output file will be created in this directory.</p>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If there are multiple files to be output:</p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the existing target is a file, then an error will be generated instead of the output files.</p>
+              </li>
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the existing target is a directory, then the output files will be created in the specified directory.</p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Use a trailing path separator character to force this parameter value to be treated as a path specification (e.g., '~/workfiles/').</p>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter is ignored if the <span style="font-weight:bold">--format</span> parameter is missing.</p>
+      </li>
+    </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--output parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table128table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">string (path or file specification)</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdump<br />yangdiff</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  \<br />  --output=~/diff-files</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc34"><span class="SectionNumber">3.17</span> --subdirs</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--subdirs</span> parameter controls whether sub-directories should be searched or not, if they are found during a module search.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If false, the file search paths for modules, scripts, and data files will not include sub-directories if they exist in the specified path. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--subdirs parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table138table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">boolean</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">TRUE</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff</p>
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangiff  \<br />  --subdirs=false \<br />  --subtree=/testpath</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc35"><span class="SectionNumber">3.18</span> --version</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--version</span> parameter causes the program version string to be printed, and then the program will exit instead of running as normal. </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">All Yuma version strings use the same format:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> DEBUG: &lt;major&gt;.&lt;minor&gt;.&lt;svn-build-version&gt;</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">or</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> NON-DEBUG: &lt;major&gt;.&lt;minor&gt;-&lt;release&gt;</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">An example version number that may be printed:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> yangdiff  2.0-0</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter can be combined with the <span style="font-weight:bold">--help </span>parameter.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--version parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table52table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">empty</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  --version</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc36"><span class="SectionNumber">3.19</span> --warn-idlen</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:bold"> --warn-idlen</span> parameter controls whether identifier length warnings will be generated.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The value zero disables all identifier length checking.  If non-zero, then a warning will be generated if an identifier is defined which has a length is greater than this amount.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--warn-idlen parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table53table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">uint32: 0 to disable, or 8 .. 1023</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">64</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --warn-idlen=50</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc37"><span class="SectionNumber">3.20</span> --warn-linelen</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:bold"> --warn-linelen</span> parameter controls whether line length warnings will be generated.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The value zero disables all line length checking.  If non-zero, then a warning will be generated if a YANG file line is entered which has a length is greater than this amount.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Tab characters are counted as 8 spaces.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--warn-linelen parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table54table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">uint32: 0 to disable, or 40 .. 4095</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">72</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff --warn-linelen=79</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc38"><span class="SectionNumber">3.21</span> --warn-off</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The<span style="font-weight:bold"> --warn-off</span> parameter suppresses a specific warning number.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The error and warning numbers, and the default messages, can be viewed with the yangdump program by using the <span style="font-weight:bold">--show-errors</span> configuration parameter.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The specific warning message will be disabled for all modules.  No message will be printed and the warning will not count towards the total for that module.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">--warn-off parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table55table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">uint32: 400 .. 899</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">none</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">499</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  --warn-off=435<br /># revision order not descending</p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <h2 dir="ltr" id="toc39"><span class="SectionNumber">3.22</span> --yuma-home</h2>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--yuma-home</span> parameter specifies the project directory root to use when searching for files.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If present, this directory location will override the '<span style="font-weight:bold">$YUMA_HOME</span> environment variable, if it is set.  If this parameter is set to a zero-length string, then the $<span style="font-weight:bold">YUMA_HOME</span> environment variable will be ignored.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following directories are searched when either the <span style="font-weight:bold">$YUMA_HOME</span> environment variable or this parameter is set:</p>
+    <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$YUMA_HOME/modules</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This sub-tree is searched for YANG files.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$YUMA_HOME/data</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This directory is searched for data files.</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">$YUMA_HOME/scripts</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This directory is searched for <span style="font-weight:bold">yangcli</span> script files.</p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">yuma-home parameter</p>
+    <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <table cellspacing="0" dir="ltr" id="Table50table" style="margin-top:0;margin-bottom:0;margin-left:101.001595px;margin-right:126.0px;width:468.99838px;border-collapse:separate;border-spacing:0;table-layout:fixed">
+      <tr>
+        <td style="border-top:1.0px solid #000000;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Syntax</p>
+        </td>
+        <td style="border:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">string: directory specification</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Default:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:bold">$YUMA_HOME</span> environment variable</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Min Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">0</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Max Allowed:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">1</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Supported by:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">netconfd<br />yangcli<br />yangdiff<br />yangdump</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:162.6704px">
+          <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
+        </td>
+        <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">yangdiff  \<br />  --yuma-home=~/sw/netconf </p>
+        </td>
+      </tr>
+    </table>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+ module tunion {
+
+  namespace "http://netconfcentral.org/ns/tunion";
+
+  prefix tunion;
+
+  revision "2011-07-02" {
+    description 
+      "Bug report";
+  }
+
+   typedef matchall-string-type {
+     type string {
+       pattern "\*";
+     }
+   }
+
+   container tunion {
+     leaf tunion-leaf {
+       type union {
+         type matchall-string-type;
+         type int32;
+       }
+       default "*";
+     }
+   }
+ }

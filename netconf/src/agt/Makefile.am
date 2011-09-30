@@ -32,5 +32,5 @@ $(top_srcdir)/netconf/src/agt/agt_xpath.c \
 $(top_srcdir)/netconf/src/agt/agt_yuma_arp.c
 
 libagt_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
-libagt_la_LDFLAGS = -static -lxml2 -lz  -ldl
+libagt_la_LDFLAGS = -lxml2 -lz  -ldl
 

@@ -43,85 +43,26 @@ date         init     comment
 
 #include "libtecla.h"
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_util
 #include "yangcli_util.h"
-#endif
 
 
 /********************************************************************
@@ -168,7 +109,11 @@ boolean
     }
 #endif
 
-    if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+    if (!xml_strcmp(rpcname, YANGCLI_ALIAS)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_ALIASES)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_CD)) {
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
         ;
@@ -213,6 +158,10 @@ boolean
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_WHILE)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_UNSET)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_USERVARS)) {
         ;
     } else {
         return FALSE;

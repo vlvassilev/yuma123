@@ -102,8 +102,11 @@ extern "C" {
 #define YANGCLI_NUM_TIMERS    16
 
 /* look in yangcli.c:yangcli_init for defaults not listed here */
-#define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)\
-    "~/.yuma/.yangcli_history"
+#define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)"~/.yuma/.yangcli_history"
+
+#define YANGCLI_DEF_ALIASES_FILE  (const xmlChar *)"~/.yuma/.yangcli_aliases"
+
+#define YANGCLI_DEF_USERVARS_FILE (const xmlChar *)"~/.yuma/yangcli_uservars.xml"
 
 #define YANGCLI_DEF_TIMEOUT   30
 
@@ -167,10 +170,13 @@ extern "C" {
  * matches parm clauses in yangcli container in yangcli.yang
  */
 
+#define YANGCLI_ALIASES_FILE  (const xmlChar *)"aliases-file"
 #define YANGCLI_ALT_NAMES   (const xmlChar *)"alt-names"
+#define YANGCLI_AUTOALIASES (const xmlChar *)"autoaliases"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
 #define YANGCLI_AUTOHISTORY (const xmlChar *)"autohistory"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
+#define YANGCLI_AUTOUSERVARS (const xmlChar *)"autouservars"
 #define YANGCLI_BADDATA     (const xmlChar *)"bad-data"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
@@ -230,13 +236,17 @@ extern "C" {
 #define YANGCLI_TRANSPORT   (const xmlChar *)"transport"
 #define YANGCLI_USE_XMLHEADER (const xmlChar *)"use-xmlheader"
 #define YANGCLI_USER        (const xmlChar *)"user"
+#define YANGCLI_USERVARS_FILE  (const xmlChar *)"uservars-file"
 #define YANGCLI_VALUE       (const xmlChar *)"value"
 #define YANGCLI_VAR         (const xmlChar *)"var"
 #define YANGCLI_VARREF      (const xmlChar *)"varref"
 #define YANGCLI_VARS        (const xmlChar *)"vars"
+#define YANGCLI_VARTYPE     (const xmlChar *)"vartype"
 #define YANGCLI_WITH_DEFAULTS  (const xmlChar *)"with-defaults"
 
 /* YANGCLI local RPC commands */
+#define YANGCLI_ALIAS   (const xmlChar *)"alias"
+#define YANGCLI_ALIASES (const xmlChar *)"aliases"
 #define YANGCLI_CD      (const xmlChar *)"cd"
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
 #define YANGCLI_CREATE  (const xmlChar *)"create"
@@ -276,6 +286,9 @@ extern "C" {
 #define YANGCLI_WHILE   (const xmlChar *)"while"
 #define YANGCLI_XGET    (const xmlChar *)"xget"
 #define YANGCLI_XGET_CONFIG   (const xmlChar *)"xget-config"
+#define YANGCLI_UNSET   (const xmlChar *)"unset"
+#define YANGCLI_USERVARS  (const xmlChar *)"uservars"
+
 
 
 /* specialized prompts for the fill command */
@@ -401,6 +414,15 @@ typedef struct autoload_devcb_t_ {
     status_t            res;
     boolean             retrieved;
 } autoload_devcb_t;
+
+
+/* yangcli command alias control block */
+typedef struct alias_cb_t_ {
+    dlq_hdr_t           qhdr;
+    xmlChar            *name;
+    xmlChar            *value;
+    uint8               quotes;
+}  alias_cb_t;
 
 
 /* NETCONF server control block */
@@ -627,6 +649,30 @@ extern val_value_t *
 
 
 /********************************************************************
+* FUNCTION get_aliases_file
+* 
+*  Get the aliases-file value
+* 
+* RETURNS:
+*    aliases_file variable
+*********************************************************************/
+extern const xmlChar *
+    get_aliases_file (void);
+
+
+/********************************************************************
+* FUNCTION get_uservars_file
+* 
+*  Get the uservars-file value
+* 
+* RETURNS:
+*    aliases_file variable
+*********************************************************************/
+extern const xmlChar *
+    get_uservars_file (void);
+
+
+/********************************************************************
 * FUNCTION replace_connect_valset
 * 
 *  Replace the current connect value set with a clone
@@ -654,6 +700,17 @@ extern status_t
 extern dlq_hdr_t *
     get_mgrloadQ (void);
 
+
+/********************************************************************
+* FUNCTION get_aliasQ
+* 
+*  Get the aliasQ value pointer
+* 
+* RETURNS:
+*    aliasQ variable
+*********************************************************************/
+extern dlq_hdr_t *
+    get_aliasQ (void);
 
 
 /********************************************************************

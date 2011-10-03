@@ -446,6 +446,7 @@ extern "C" {
 #define NCX_EL_DEFAULT         (const xmlChar *)"default"
 #define NCX_EL_DEFAULT_OPERATION (const xmlChar *)"default-operation"
 #define NCX_EL_DEFAULT_PARM    (const xmlChar *)"default-parm"
+#define NCX_EL_DEFAULT_PARM_EQUALS_OK (const xmlChar *)"default-parm-equals-ok"
 #define NCX_EL_DEFAULT_STYLE   (const xmlChar *)"default-style"
 #define NCX_EL_DEFINITIONS     (const xmlChar *)"definitions"
 #define NCX_EL_DEFOP           (const xmlChar *)"default-operation"
@@ -631,6 +632,8 @@ extern "C" {
 #define NCX_EL_SHORT           (const xmlChar *)"short"
 #define NCX_EL_SHOW_ERRORS     (const xmlChar *)"show-errors"
 #define NCX_EL_SHUTDOWN        (const xmlChar *)"shutdown"
+#define NCX_EL_SIL_DELETE_CHILDREN_FIRST (const xmlChar *)\
+    "sil-delete-children-first"
 #define NCX_EL_SLIST           (const xmlChar *)"slist"
 #define NCX_EL_SOURCE          (const xmlChar *)"source"
 #define NCX_EL_SQL             (const xmlChar *)"sql"

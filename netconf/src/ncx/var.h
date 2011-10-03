@@ -140,6 +140,20 @@ extern void
 
 
 /********************************************************************
+* FUNCTION var_clean_type_from_varQ
+* 
+* Clean all entries of one type from a Q of ncx_var_t
+* 
+* INPUTS:
+*   varQ == Q of var structs to free
+*   vartype == variable type to delete
+*********************************************************************/
+extern void
+    var_clean_type_from_varQ (dlq_hdr_t *varQ, 
+                              var_type_t vartype);
+
+
+/********************************************************************
 * FUNCTION var_set_str
 * 
 * Find and set (or create a new) global user variable

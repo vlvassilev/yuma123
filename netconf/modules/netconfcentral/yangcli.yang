@@ -50,6 +50,21 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2011-09-30 {
+       description 
+         "Add CLI parameters:
+            --aliases-file
+            --autoaliases
+            --autouservars
+            --uservars-file
+          Add yangcli local commands:
+            alias
+            aliases
+            unset
+            uservars
+         ";
+    }
+
     revision 2011-09-05 {
        description 
          "Add 'json' to --display-mode enumerations.";
@@ -263,6 +278,31 @@ module yangcli {
        type string {
           length "1..max";
        }
+    }
+
+    typedef YangcliVariableType {
+      description
+        "yangcli user and system variable types";
+      type enumeration {
+        enum session {
+          description "Session variable (for future use)";
+        }
+        enum local {
+          description "Local user variable";
+        }
+        enum config {
+          description "User configuration variable";
+        }
+        enum global {
+          description "Global user variable";
+        }
+        enum system {
+          description "System variable";
+        }
+        enum queue {
+          description "System internal Queue variable";
+        }
+      }
     }
 
     /*************************************************************
@@ -613,6 +653,13 @@ module yangcli {
         }
       }
 
+      leaf aliases-file {
+        description
+          "Specifies the yangcli command aliases file to use.";
+        type string;
+        default "~/.yuma/.yangcli_aliases";
+      }
+
       leaf autocomp {
         description
           "Controls whether partial keywords will be 
@@ -620,6 +667,20 @@ module yangcli {
            By default, the first match for a partial keyword
            will be used if no definition is found for
            a command name or parameter name.";
+        type boolean;
+        default true;
+      }
+
+      leaf autoaliases {
+        description
+          "Controls whether the yangcli command aliases will
+           be saved at exit and loaded at startup.
+           If true, the 'aliases-file' parameter will be used if it is set,
+           or else the default aliases file will be used
+           (~/.yuma/.yangcli_aliases), for loading
+           and saving the yangcli command aliases.
+           If false, the yangcli command aliases will only be stored
+           and loaded manually with the aliases command.";
         type boolean;
         default true;
       }
@@ -644,6 +705,20 @@ module yangcli {
            and saving the history buffer.
            If false, the history buffer will only be stored
            and loaded manually with the history command.";
+        type boolean;
+        default true;
+      }
+
+      leaf autouservars {
+        description
+          "Controls whether the yangcli user variables will
+           be saved at exit and loaded at startup.
+           If true, the 'uservars-file' parameter will be used if set,
+           or else the default user variables file will be used
+           (~/.yuma/yangcli_uservars.xml), for loading
+           and saving the yangcli user variables.
+           If false, the yangcli user variables will only be stored
+           and loaded manually with the uservars command.";
         type boolean;
         default true;
       }
@@ -827,6 +902,13 @@ module yangcli {
         default false;
       }
 
+      leaf uservars-file {
+        description
+          "Specifies the yangcli user variables file to use.";
+        type string;
+        default "~/.yuma/yangcli_uservars.xml";
+      }
+
       leaf use-xmlheader {
         description
           "Specifies how file result variables will be written
@@ -843,6 +925,99 @@ module yangcli {
      *        RPC methods for local commands within yangcli
      *
      *************************************************************/
+
+    rpc alias {
+      description 
+        "Show or set a specific yangcli command alias.
+        
+         * Show all aliases in memory (same as aliases):
+
+           yangcli>  alias   
+
+         * Show one alias 'foo':
+
+           yangcli>  alias foo
+
+         * Set one alias; make sure there is no whitespace
+           between the '=' char and either string.  If the value
+           has whitespace, it must be quoted. If the equals sign
+           is present, then a valid value string must be present.
+
+           Quotes will be preserved if used:
+             * Single quotes can appear within doubled-quoted 
+               strings but not any double quotes.
+             * Double quotes can appear within single-quoted strings
+               but not any single quotes.
+
+           The first token in a plain command or the first token
+           in the right-hand-side expression in an assignment
+           statement can be an alias.
+
+           The alias name must exact match the token.
+           A new command line will be constructed replacing
+           the alias name with its value.  The new command
+           line will then be parsed as usual.
+
+           yangcli>  alias s=show
+           yangcli>  alias getfoo='sget-config source=running /top/foo'
+
+        * Aliases can override real commands, so be careful
+          not to unintentionally alter real commands.
+
+           yangcli>  alias get-config='get-config source=running'
+       ";
+      input {
+        ncx:default-parm var;
+        ncx:default-parm-equals-ok;
+
+        leaf var {
+          description "The alias command string.";
+          type string { length "1 .. max"; }
+        }
+      }
+    }
+
+    rpc aliases {
+      description "Manage the yangcli command aliases";
+      input {
+
+        choice alias-action {
+          default show;
+
+          leaf show {
+            description 
+              "Show all the yangcli command aliases.";
+            type empty;
+          }
+
+          leaf clear {
+            description 
+              "Delete all the yangcli aliases from memory.";
+            type empty;
+          }
+
+          leaf load {
+            description 
+              "Load the yangcli command aliases from the
+               specified file spec.  The default aliases
+               file will be loaded automatically at startup
+               if the '--autoaliases' parameter is present.";
+            type string;
+            default "~/.yuma/.yangcli_aliases";
+          }
+
+          leaf save {
+            description 
+              "Save the yangcli command aliases to the 
+               specified filespec. The default aliases
+               file will be saved automatically at shutdown
+               if the '--autoaliases' parameter is present.";
+            type string;
+            default "~/.yuma/.yangcli_aliases";
+          }
+        }
+      }
+    }
 
     rpc cd {
       description "Change the current working directory.";
@@ -1823,6 +1998,95 @@ module yangcli {
       }
     }
 
+    rpc unset {
+      description 
+        "Delete a specific yangcli command alias.
+        
+         * Delete one alias 'foo':
+           yangcli>  unset foo
+       ";
+      input {
+        leaf name {
+          description 
+            "Name of the yangcli command alias to delete.";
+          type nt:NcxName;
+          mandatory true;
+        }
+      }
+    }
+
+    rpc uservars {
+      description "Manage the yangcli user variables";
+      input {
+
+        choice uservars-action {
+          mandatory true;
+
+          leaf clear {
+            description 
+              "Delete all the yangcli user variables from memory.";
+            type empty;
+          }
+
+          leaf load {
+            description 
+              "Load the yangcli user variables from the
+               specified XML file spec.  The default user variables
+               file will be loaded automatically at startup
+               if the '--autouservars' parameter is present.
+               The container 'vars' data structure represents
+               the format of the XML file expected.";
+            type string;
+            default "~/.yuma/yangcli_uservars.xml";
+          }
+
+          leaf save {
+            description 
+              "Save the yangcli user variables to the 
+               specified filespec. The default user variables
+               file will be saved automatically at shutdown
+               if the '--autouservars' parameter is present.
+               The container 'vars' data structure represents
+               the format of the XML file that will be written.";
+            type string;
+            default "~/.yuma/yangcli_uservars.xml";
+          }
+        }
+      }
+    }
+
+    container vars {
+      description 
+        "Represents all saved yangcli user variables";
+      list var {
+        description 
+          "Data structure to save one yangcli user variable";
+        key name;
+        leaf name { 
+          type nt:NcxName; 
+          description "Name of the user variable";
+        }
+        leaf target {
+          ncx:schema-instance;
+          type string;
+          description 
+            "Target variable if variable represents a node 
+             from a datastore";
+        }
+        leaf vartype {
+          type YangcliVariableType;
+          description
+            "User variable type; only 'global' variables can 
+             be saved in the yangcli uservars file.";
+          default global;
+        }
+        anyxml value {
+          description 
+            "Node value renamed to 'value' since YANG requires
+             each node to have a consistent name.";
+        }
+      }
+    }
 
 }
 

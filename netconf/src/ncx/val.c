@@ -223,7 +223,7 @@ static void
 
     fil = fopen((const char *)fname, "r");
     if (!fil) {
-        log_error("\nval: Open extern failed (%s)", fname);
+        log_error("\nError: Open extern failed (%s)", fname);
         return;
     } 
 

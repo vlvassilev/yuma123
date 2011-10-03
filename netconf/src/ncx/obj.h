@@ -177,6 +177,12 @@ extern "C" {
 /* object is tagged ncx:very-secure */
 #define OBJ_FL_VERY_SECURE  bit25
 
+/* object is tagged ncx:default-parm-equals-ok */
+#define OBJ_FL_CLI_EQUALS_OK  bit26
+
+/* object is tagged ncx:sil-delete-children-first */
+#define OBJ_FL_SIL_DELETE_CHILDREN_FIRST  bit27
+
 
 
 /********************************************************************
@@ -3702,6 +3708,38 @@ extern const xmlChar *
 *********************************************************************/
 extern obj_template_t *
     obj_get_leafref_targobj (obj_template_t  *obj);
+
+
+/********************************************************************
+* FUNCTION obj_is_cli_equals_ok
+*
+* Check if object is marked as ncx:default-parm-equals-ok
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:default-parm-equals-ok
+*   FALSE if not
+*********************************************************************/
+extern boolean
+    obj_is_cli_equals_ok (const obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_is_sil_delete_children_first
+*
+* Check if object is marked as ncx:sil-delete-children-first
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:sil-delete-children-first
+*   FALSE if not
+*********************************************************************/
+extern boolean
+    obj_is_sil_delete_children_first (const obj_template_t *obj);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

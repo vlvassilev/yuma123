@@ -11644,51 +11644,45 @@ void
 
     appinfoQ = obj_get_appinfoQ(obj);
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_PASSWORD)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
         obj->flags |= OBJ_FL_PASSWD;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_HIDDEN)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_HIDDEN)) {
         obj->flags |= OBJ_FL_HIDDEN;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_XSDLIST)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_XSDLIST)) {
         obj->flags |= OBJ_FL_XSDLIST;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_ROOT)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ROOT)) {
         obj->flags |= OBJ_FL_ROOT;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_CLI)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_CLI)) {
         obj->flags |= OBJ_FL_CLI;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_ABSTRACT)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ABSTRACT)) {
         obj->flags |= OBJ_FL_ABSTRACT;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NACM_PREFIX, 
-                               NCX_EL_SECURE)) {
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, 
+                               NCX_EL_DEFAULT_PARM_EQUALS_OK)) {
+        obj->flags |= OBJ_FL_CLI_EQUALS_OK;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, 
+                               NCX_EL_SIL_DELETE_CHILDREN_FIRST)) {
+        obj->flags |= OBJ_FL_SIL_DELETE_CHILDREN_FIRST;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, NACM_PREFIX, NCX_EL_SECURE)) {
         obj->flags |= OBJ_FL_SECURE;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NACM_PREFIX, 
-                               NCX_EL_VERY_SECURE)) {
+    if (ncx_find_const_appinfo(appinfoQ, NACM_PREFIX, NCX_EL_VERY_SECURE)) {
         obj->flags |= OBJ_FL_VERY_SECURE;
     }
 
@@ -11698,8 +11692,7 @@ void
         /* ncx:xpath extension */
         if (typ_is_xpath_string(typdef)) {
             obj->flags |= OBJ_FL_XPATH;
-        } else if (ncx_find_const_appinfo(appinfoQ, 
-                                          NCX_PREFIX, 
+        } else if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, 
                                           NCX_EL_XPATH)) {
             obj->flags |= OBJ_FL_XPATH;
         }
@@ -11707,8 +11700,7 @@ void
         /* ncx:qname extension */
         if (typ_is_qname_string(typdef)) {
             obj->flags |= OBJ_FL_QNAME;
-        } else if (ncx_find_const_appinfo(appinfoQ, 
-                                          NCX_PREFIX, 
+        } else if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, 
                                           NCX_EL_XPATH)) {
             obj->flags |= OBJ_FL_QNAME;
         }
@@ -11716,8 +11708,7 @@ void
         /* ncx:schema-instance extension */
         if (typ_is_schema_instance_string(typdef)) {
             obj->flags |= OBJ_FL_SCHEMAINST;
-        } else if (ncx_find_const_appinfo(appinfoQ, 
-                                          NCX_PREFIX, 
+        } else if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, 
                                           NCX_EL_SCHEMA_INSTANCE)) {
             obj->flags |= OBJ_FL_SCHEMAINST;
         }
@@ -11969,6 +11960,63 @@ obj_template_t *
     /*NOTREACHED*/
 
 }  /* obj_get_leafref_targobj */
+
+
+/********************************************************************
+* FUNCTION obj_is_cli_equals_ok
+*
+* Check if object is marked as ncx:default-parm-equals-ok
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:default-parm-equals-ok
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_cli_equals_ok (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_CLI_EQUALS_OK) ? TRUE : FALSE;
+
+}   /* obj_is_cli_equals_ok */
+
+
+/********************************************************************
+* FUNCTION obj_is_sil_delete_children_first
+*
+* Check if object is marked as ncx:sil-delete-children-first
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked as ncx:sil-delete-children-first
+*   FALSE if not
+*********************************************************************/
+boolean
+    obj_is_sil_delete_children_first (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_SIL_DELETE_CHILDREN_FIRST) ? TRUE : FALSE;
+
+}   /* obj_is_sil_delete_children_first */
+
 
 
 /* END obj.c */

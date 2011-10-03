@@ -766,6 +766,42 @@ void
 
 
 /********************************************************************
+* FUNCTION var_clean_type_from_varQ
+* 
+* Clean all entries of one type from a Q of ncx_var_t
+* 
+* INPUTS:
+*   varQ == Q of var structs to free
+*   vartype == variable type to delete
+*********************************************************************/
+void
+    var_clean_type_from_varQ (dlq_hdr_t *varQ, 
+                              var_type_t vartype)
+{
+    ncx_var_t *var, *nextvar;
+
+#ifdef DEBUG
+    if (!varQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (var = (ncx_var_t *)dlq_firstEntry(varQ);
+         var != NULL;
+         var = nextvar) {
+
+        nextvar = (ncx_var_t *)dlq_nextEntry(var);
+        if (var->vartype == vartype) {
+            dlq_remove(var);
+            var_free(var);
+        }
+    }
+
+}  /* var_clean_type_from_varQ */
+
+
+/********************************************************************
 * FUNCTION var_set_str
 * 
 * Find and set (or create a new) global user variable

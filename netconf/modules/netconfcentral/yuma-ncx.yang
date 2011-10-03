@@ -10,11 +10,19 @@ module yuma-ncx {
     "Andy Bierman <andy at netconfcentral.org>";
 
   description
-    "This module contains definitions for 
-     Yuma Netconf extensions.
+    "This module contains definitions for Yuma Netconf extensions.
 
-     The elements will be present in appinfo elements,
+     Some extensions are used to control yangdump translation
+     format.  Some are used for CLI parsing in yangcli.
+
+     These elements may be present in appinfo elements,
      used in YANG to XSD translation.";
+
+  revision 2011-09-30 {
+    description 
+       "Added default-parm-equals and sil-delete-children-first
+        extensions.";
+  }
 
   revision 2009-12-21 {
     description 
@@ -410,6 +418,40 @@ module yuma-ncx {
     }
   }
 
+  extension default-parm-equals-ok {
+    description
+     "Used within a CLI container or rpc definition to specify a
+      leaf parameter within the CLI container or rpc input
+      section, that is used as the default if no parameter name 
+      is entered.
+
+      This can be used in addition to ncx:default-parm to
+      allow an equals sign '=' in the default parm string value.
+
+      This option is quite risky because any unrecognized
+      parameter without any prefix (- or --) will be tried
+      as the default parameter type, instead of catching
+      the unknown parameter error.  This includes strings containing
+      an equals sign, so an unknown parameter error will never
+      be generated.
+
+           rpc foo {
+             input {
+               ncx:default-parm a;
+               ncx:default-parm-equals-ok;
+               leaf a { type string; }
+               leaf b { type int32; }
+             }
+           }
+               
+           yangcli> foo bogus-parm=fred
+
+      This will interpreted as if parameter 'a' were entered:
+
+           yangcli> foo a='bogus-parm=fred'
+      ";
+  }
+
   extension hidden {
     description
       "Used to prevent publication of a YANG data object.
@@ -464,6 +506,59 @@ module yuma-ncx {
        instead of just an empty container.  This is needed
        for yuma to correctly process any RPC method
        that contains a 'config' parameter.";
+  }
+
+  extension sil-delete-children-first {
+    description
+      "Used within a container or list definition to indicate
+       that the SIL callbacks for descendant nodes should
+       be invoked first, when a data node instance of
+       the object containing this extension is deleted.
+
+       Normally, the parent node is expected to delete all its
+       own sub-structures when the SIL edit callback is
+       invoked.  If this extension is present, then any 
+       SIL callbacks for any of the child nodes will be 
+       invoked first instead.
+
+       If a child node is a list or a container, and
+       it also contains an 'ncx:sil-delete-children-first'
+       extension, then its children will be checked first.
+
+       The SIL edit callback will not be invoked for leaf,
+       leaf-list, or anyxml descendant nodes in this mode.
+       They will only will called if their parent node
+       is not getting deleted.
+
+         container foo {
+           ncx:sil-delete-children-first;
+           list foos {
+             ncx:sil-delete-children-first;
+             key a;
+             leaf a { type string; }
+             container b {
+               list c { ... }
+             }
+             leaf d { type empty; }
+           }
+         }
+
+       In this example, assume node /foo gets deleted.
+       Then the SIL edit callbacks would be done as follows:
+
+       1) /foo/foos[a='n']/b   (called for row 'n' of /foo/foos)
+       2) /foo/foos[a='n']     (called for row 'n' of /foo/foos)
+       3) repeat (1,2) until all rows in /foo/foos are deleted
+       4) /foo 
+
+     Note that the SIL edit callback is not done for list
+     /foo/foos[a='n']/b/c because this extension is
+     not present in container '/foo/foos/b'.
+
+     Note that the SIL edit callback is not done for 
+     nodes /foo/foos[a='n']/a or /foo/foos[a='n']/d because
+     they are leafs.
+    ";
   }
 
   extension xsdlist {

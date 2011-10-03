@@ -87,10 +87,12 @@ date         init     comment
 #include "yangconst.h"
 #include "yangcli.h"
 #include "yangcli_cmd.h"
+#include "yangcli_alias.h"
 #include "yangcli_autoload.h"
 #include "yangcli_autolock.h"
 #include "yangcli_save.h"
 #include "yangcli_tab.h"
+#include "yangcli_uservars.h"
 #include "yangcli_util.h"
 
 
@@ -179,11 +181,27 @@ static ncxmod_temp_progcb_t  *temp_progcb;
  */
 static dlq_hdr_t      modlibQ;
 
+/* Q of alias_cb_t structs representing all command aliases */
+static dlq_hdr_t      aliasQ;
+
+/* flag to indicate init never completed OK; used during cleanup */
+static boolean       init_done;
 
 /*****************  C O N F I G   V A R S  ****************/
 
+/* TRUE if OK to load aliases automatically
+ * FALSE if --autoaliases=false set by user
+ * when yangcli starts, this var controls
+ * whether the ~/.yuma/.yangcli_aliases file will be loaded
+ * into this application automatically
+ */
+static boolean         autoaliases;
+
+/* set if the --aliases-file parameter is present */
+static const xmlChar *aliases_file;
+
 /* TRUE if OK to load modules automatically
- * FALSE if --no-autoload set by user
+ * FALSE if --autoload=false set by user
  * when server connection is made, and module discovery is done
  * then this var controls whether the matching modules
  * will be loaded into this application automatically
@@ -196,6 +214,17 @@ static boolean         autoload;
  * FALSE if only exact match should be used
  */
 static boolean         autocomp;
+
+/* TRUE if OK to load user vars automatically
+ * FALSE if --autouservars=false set by user
+ * when yangcli starts, this var controls
+ * whether the ~/.yuma/.yangcli_uservars file will be loaded
+ * into this application automatically
+ */
+static boolean         autouservars;
+
+/* set if the --uservars=filespec parameter is set */
+static const xmlChar  *uservars_file;
 
 /* NCX_BAD_DATA_IGNORE to silently accept invalid input values
  * NCX_BAD_DATA_WARN to warn and accept invalid input values
@@ -745,9 +774,7 @@ static status_t
             log_error("\nError: invalid hostname");
         } else {
             /* save or update the connnect_valset */
-            testval = val_find_child(connect_valset,
-                                     NULL, 
-                                     YANGCLI_SERVER);
+            testval = val_find_child(connect_valset, NULL, YANGCLI_SERVER);
             if (testval) {
                 res = val_set_simval(testval,
                                      testval->typdef,
@@ -762,20 +789,38 @@ static status_t
                                          NULL, 
                                          YANGCLI_SERVER);
                 if (testobj) {
-                    testval = val_make_simval_obj(testobj,
-                                                  usestr,
-                                                  &res);
+                    testval = val_make_simval_obj(testobj, usestr, &res);
                     if (testval) {
                         val_add_child(testval, connect_valset);
                     }
                 }
             }
         }
+    } else if (!xml_strcmp(configval->name, YANGCLI_AUTOALIASES)) {
+        if (ncx_is_true(usestr)) {
+            autoaliases = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            autoaliases = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_ALIASES_FILE)) {
+        aliases_file = usestr;
     } else if (!xml_strcmp(configval->name, YANGCLI_AUTOCOMP)) {
         if (ncx_is_true(usestr)) {
             autocomp = TRUE;
         } else if (ncx_is_false(usestr)) {
             autocomp = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_AUTOHISTORY)) {
+        if (ncx_is_true(usestr)) {
+            autohistory = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            autohistory = FALSE;
         } else {
             log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
@@ -791,6 +836,17 @@ static status_t
             log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
         }
+    } else if (!xml_strcmp(configval->name, YANGCLI_AUTOUSERVARS)) {
+        if (ncx_is_true(usestr)) {
+            autouservars = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            autouservars = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_USERVARS_FILE)) {
+        uservars_file = usestr;
     } else if (!xml_strcmp(configval->name, YANGCLI_BADDATA)) {
         testbaddata = ncx_get_baddata_enum(usestr);
         if (testbaddata != NCX_BAD_DATA_NONE) {
@@ -1765,88 +1821,108 @@ static status_t
     if (parm) {
         strval = VAL_STR(parm);
     }
-    res = create_config_var(server_cb,
-                            YANGCLI_SERVER, 
-                            strval);
+    res = create_config_var(server_cb, YANGCLI_SERVER, strval);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* $$ autoaliases = boolean */
+    res = create_config_var(server_cb, YANGCLI_AUTOALIASES, 
+                            (autoaliases) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* $$ aliases-file = filespec */
+    res = create_config_var(server_cb, YANGCLI_ALIASES_FILE, aliases_file);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$autocomp = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_AUTOCOMP, 
+    res = create_config_var(server_cb, YANGCLI_AUTOCOMP, 
                             (autocomp) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
+    /* $$ autohistory = boolean */
+    res = create_config_var(server_cb, YANGCLI_AUTOHISTORY, 
+                            (autohistory) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* $$ autoload = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_AUTOLOAD, 
+    res = create_config_var(server_cb, YANGCLI_AUTOLOAD, 
                             (autoload) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
+    /* $$ autouservars = boolean */
+    res = create_config_var(server_cb, YANGCLI_AUTOUSERVARS, 
+                            (autouservars) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* $$ uservars-file = filespec */
+    res = create_config_var(server_cb, YANGCLI_USERVARS_FILE, uservars_file);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* $$baddata = enum */
-    res = create_config_var(server_cb,
-                            YANGCLI_BADDATA, 
+    res = create_config_var(server_cb, YANGCLI_BADDATA, 
                             ncx_get_baddata_string(baddata));
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$default-module = string */
-    res = create_config_var(server_cb,
-                            YANGCLI_DEF_MODULE, 
-                            default_module);
+    res = create_config_var(server_cb, YANGCLI_DEF_MODULE, default_module);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$display-mode = enum */
-    res = create_config_var(server_cb,
-                            YANGCLI_DISPLAY_MODE, 
+    res = create_config_var(server_cb, YANGCLI_DISPLAY_MODE, 
                             ncx_get_display_mode_str(display_mode));
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$ echo-replies = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_ECHO_REPLIES, 
+    res = create_config_var(server_cb, YANGCLI_ECHO_REPLIES, 
                             (echo_replies) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$ time-rpcs = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_TIME_RPCS, 
+    res = create_config_var(server_cb, YANGCLI_TIME_RPCS, 
                             (time_rpcs) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$ match-names = enum */
-    res = create_config_var(server_cb,
-                            YANGCLI_MATCH_NAMES, 
+    res = create_config_var(server_cb, YANGCLI_MATCH_NAMES, 
                             ncx_get_name_match_string(match_names));
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$ alt-names = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_ALT_NAMES, 
+    res = create_config_var(server_cb, YANGCLI_ALT_NAMES, 
                             (alt_names) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$ use-xmlheader = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_USE_XMLHEADER, 
+    res = create_config_var(server_cb, YANGCLI_USE_XMLHEADER, 
                             (use_xmlheader) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
@@ -1860,24 +1936,20 @@ static status_t
     } else {
         strval = (const xmlChar *)getenv(ENV_USER);
     }
-    res = create_config_var(server_cb,
-                            YANGCLI_USER, 
-                            strval);
+    res = create_config_var(server_cb, YANGCLI_USER, strval);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$test-option = enum */
-    res = create_config_var(server_cb,
-                            YANGCLI_TEST_OPTION,
+    res = create_config_var(server_cb, YANGCLI_TEST_OPTION,
                             op_testop_name(testoption));
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$error-optiona = enum */
-    res = create_config_var(server_cb,
-                            YANGCLI_ERROR_OPTION,
+    res = create_config_var(server_cb, YANGCLI_ERROR_OPTION,
                             op_errop_name(erroption)); 
     if (res != NO_ERR) {
         return res;
@@ -1885,25 +1957,20 @@ static status_t
 
     /* $$default-timeout = uint32 */
     sprintf((char *)numbuff, "%u", default_timeout);
-    res = create_config_var(server_cb,
-                            YANGCLI_TIMEOUT, 
-                            numbuff);
+    res = create_config_var(server_cb, YANGCLI_TIMEOUT, numbuff);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$indent = int32 */
     sprintf((char *)numbuff, "%d", defindent);
-    res = create_config_var(server_cb,
-                            NCX_EL_INDENT, 
-                            numbuff);
+    res = create_config_var(server_cb, NCX_EL_INDENT, numbuff);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$optional = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_OPTIONAL, 
+    res = create_config_var(server_cb, YANGCLI_OPTIONAL, 
                             (cur_server_cb->get_optional) 
                             ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
@@ -1913,8 +1980,7 @@ static status_t
     /* $$log-level = enum
      * could have changed during CLI processing; do not cache
      */
-    res = create_config_var(server_cb,
-                            NCX_EL_LOGLEVEL, 
+    res = create_config_var(server_cb, NCX_EL_LOGLEVEL, 
                             log_get_debug_level_string
                             (log_get_debug_level()));
     if (res != NO_ERR) {
@@ -1922,24 +1988,21 @@ static status_t
     }
 
     /* $$fixorder = boolean */
-    res = create_config_var(server_cb,
-                            YANGCLI_FIXORDER, 
+    res = create_config_var(server_cb, YANGCLI_FIXORDER, 
                             (fixorder) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$with-defaults = enum */
-    res = create_config_var(server_cb,
-                            YANGCLI_WITH_DEFAULTS,
+    res = create_config_var(server_cb, YANGCLI_WITH_DEFAULTS,
                             ncx_get_withdefaults_string(withdefaults)); 
     if (res != NO_ERR) {
         return res;
     }
 
     /* $$default-operation = enum */
-    res = create_config_var(server_cb,
-                            NCX_EL_DEFAULT_OPERATION,
+    res = create_config_var(server_cb, NCX_EL_DEFAULT_OPERATION,
                             op_defop_name(defop)); 
     if (res != NO_ERR) {
         return res;
@@ -2081,6 +2144,22 @@ static status_t
         }
     }
 
+    /* get the autoaliases parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOALIASES);
+    if (parm && parm->res == NO_ERR) {
+        autoaliases = VAL_BOOL(parm);
+    } else {
+        autoaliases = TRUE;
+    }
+
+    /* get the aliases-file parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_ALIASES_FILE);
+    if (parm && parm->res == NO_ERR) {
+        aliases_file = VAL_STR(parm);
+    } else {
+        aliases_file = YANGCLI_DEF_ALIASES_FILE;
+    }
+
     /* get the autocomp parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOCOMP);
     if (parm && parm->res == NO_ERR) {
@@ -2090,9 +2169,7 @@ static status_t
     }
 
     /* get the autohistory parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_AUTOHISTORY);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOHISTORY);
     if (parm && parm->res == NO_ERR) {
         autohistory = VAL_BOOL(parm);
     } else {
@@ -2105,6 +2182,14 @@ static status_t
         autoload = VAL_BOOL(parm);
     } else {
         autoload = TRUE;
+    }
+
+    /* get the autouservars parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOUSERVARS);
+    if (parm && parm->res == NO_ERR) {
+        autouservars = VAL_BOOL(parm);
+    } else {
+        autouservars = TRUE;
     }
 
     /* get the baddata parameter */
@@ -2126,14 +2211,11 @@ static status_t
     }
 
     /* get the default module for unqualified module addesses */
-    default_module = get_strparm(mgr_cli_valset, 
-                                 YANGCLI_MOD, 
+    default_module = get_strparm(mgr_cli_valset, YANGCLI_MOD, 
                                  YANGCLI_DEF_MODULE);
 
     /* get the display-mode parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_DISPLAY_MODE);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_DISPLAY_MODE);
     if (parm && parm->res == NO_ERR) {
         dmode = ncx_get_display_mode_enum(VAL_ENUM_NAME(parm));
         if (dmode != NCX_DISPLAY_MODE_NONE) {
@@ -2146,9 +2228,7 @@ static status_t
     }
 
     /* get the echo-replies parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_ECHO_REPLIES);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_ECHO_REPLIES);
     if (parm && parm->res == NO_ERR) {
         echo_replies = VAL_BOOL(parm);
     } else {
@@ -2156,9 +2236,7 @@ static status_t
     }
 
     /* get the time-rpcs parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TIME_RPCS);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_TIME_RPCS);
     if (parm && parm->res == NO_ERR) {
         time_rpcs = VAL_BOOL(parm);
     } else {
@@ -2194,9 +2272,7 @@ static status_t
     }
 
     /* get indent param */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_INDENT);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_INDENT);
     if (parm && parm->res == NO_ERR) {
         defindent = (int32)VAL_UINT(parm);
     } else {
@@ -2204,9 +2280,7 @@ static status_t
     }
 
     /* get the password parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_PASSWORD);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
     if (parm && parm->res == NO_ERR) {
         /* save to the connect_valset parmset */
         res = add_clone_parm(parm, connect_valset);
@@ -2216,9 +2290,7 @@ static status_t
     }
 
     /* get the --ncport parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_NCPORT);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_NCPORT);
     if (parm && parm->res == NO_ERR) {
         /* save to the connect_valset parmset */
         res = add_clone_parm(parm, connect_valset);
@@ -2228,9 +2300,7 @@ static status_t
     }
 
     /* get the --private-key parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_PRIVATE_KEY);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PRIVATE_KEY);
     if (parm && parm->res == NO_ERR) {
         /* save to the connect_valset parmset */
         res = add_clone_parm(parm, connect_valset);
@@ -2240,9 +2310,7 @@ static status_t
     }
 
     /* get the --public-key parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_PUBLIC_KEY);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PUBLIC_KEY);
     if (parm && parm->res == NO_ERR) {
         /* save to the connect_valset parmset */
         res = add_clone_parm(parm, connect_valset);
@@ -2252,9 +2320,7 @@ static status_t
     }
 
     /* get the --transport parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TRANSPORT);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_TRANSPORT);
     if (parm && parm->res == NO_ERR) {
         /* save to the connect_valset parmset */
         res = add_clone_parm(parm, connect_valset);
@@ -2264,19 +2330,13 @@ static status_t
     }
 
     /* get the run-script parameter */
-    runscript = get_strparm(mgr_cli_valset, 
-                            YANGCLI_MOD, 
-                            YANGCLI_RUN_SCRIPT);
+    runscript = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_RUN_SCRIPT);
 
     /* get the run-command parameter */
-    runcommand = get_strparm(mgr_cli_valset, 
-                             YANGCLI_MOD, 
-                             YANGCLI_RUN_COMMAND);
+    runcommand = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_RUN_COMMAND);
 
     /* get the timeout parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         default_timeout = VAL_UINT(parm);
 
@@ -2290,9 +2350,7 @@ static status_t
     }
 
     /* get the user name */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_USER);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USER);
     if (parm && parm->res == NO_ERR) {
         res = add_clone_parm(parm, connect_valset);
         if (res != NO_ERR) {
@@ -2301,17 +2359,13 @@ static status_t
     }
 
     /* get the version parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_VERSION);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_VERSION);
     if (parm && parm->res == NO_ERR) {
         versionmode = TRUE;
     }
 
     /* get the match-names parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_MATCH_NAMES);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_MATCH_NAMES);
     if (parm && parm->res == NO_ERR) {
         match_names = ncx_get_name_match_enum(VAL_ENUM_NAME(parm));
         if (match_names == NCX_MATCH_NONE) {
@@ -2322,9 +2376,7 @@ static status_t
     }
 
     /* get the alt-names parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_ALT_NAMES);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_ALT_NAMES);
     if (parm && parm->res == NO_ERR) {
         alt_names = VAL_BOOL(parm);
     } else {
@@ -2332,9 +2384,7 @@ static status_t
     }
 
     /* get the force-target parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_FORCE_TARGET);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_FORCE_TARGET);
     if (parm && parm->res == NO_ERR) {
         force_target = VAL_ENUM_NAME(parm);
     } else {
@@ -2342,13 +2392,19 @@ static status_t
     }
 
     /* get the use-xmlheader parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_USE_XMLHEADER);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USE_XMLHEADER);
     if (parm && parm->res == NO_ERR) {
         use_xmlheader = VAL_BOOL(parm);
     } else {
         use_xmlheader = TRUE;
+    }
+
+    /* get the uservars-file parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USERVARS_FILE);
+    if (parm && parm->res == NO_ERR) {
+        uservars_file = VAL_STR(parm);
+    } else {
+        uservars_file = YANGCLI_DEF_USERVARS_FILE;
     }
 
     return NO_ERR;
@@ -3565,9 +3621,12 @@ static status_t
     runcommand = NULL;
     runcommanddone = FALSE;
     dlq_createSQue(&mgrloadQ);
+    aliases_file = YANGCLI_DEF_ALIASES_FILE;
+    autoaliases = TRUE;
     autocomp = TRUE;
     autohistory = TRUE;
     autoload = TRUE;
+    autouservars = TRUE;
     baddata = YANGCLI_DEF_BAD_DATA;
     connect_valset = NULL;
     confname = NULL;
@@ -3582,8 +3641,10 @@ static status_t
     withdefaults = YANGCLI_DEF_WITH_DEFAULTS;
     echo_replies = TRUE;
     time_rpcs = FALSE;
+    uservars_file = YANGCLI_DEF_USERVARS_FILE;
     temp_progcb = NULL;
     dlq_createSQue(&modlibQ);
+    dlq_createSQue(&aliasQ);
 
     /* set the character set LOCALE to the user default */
     setlocale(LC_CTYPE, "");
@@ -3592,13 +3653,7 @@ static status_t
      * to be processed.  No module can get its internal config
      * until the NCX module parser and definition registry is up
      */
-    res = ncx_init(NCX_SAVESTR, 
-                   log_level, 
-                   TRUE,
-                   NULL,
-                   argc, 
-                   argv);
-
+    res = ncx_init(NCX_SAVESTR, log_level, TRUE, NULL, argc, argv);
     if (res != NO_ERR) {
         return res;
     }
@@ -3713,9 +3768,7 @@ static status_t
 
     /* check print help and exit */
     if (helpmode) {
-        help_program_module(YANGCLI_MOD, 
-                            YANGCLI_BOOT, 
-                            helpsubmode);
+        help_program_module(YANGCLI_MOD, YANGCLI_BOOT, helpsubmode);
     }
 
     /* check quick exit */
@@ -3737,17 +3790,14 @@ static status_t
     }
 
     /* check if there are any deviation parameters to load first */
-    for (modval = val_find_child(mgr_cli_valset,
-                                 YANGCLI_MOD,
+    for (modval = val_find_child(mgr_cli_valset, YANGCLI_MOD,
                                  NCX_EL_DEVIATION);
          modval != NULL && res == NO_ERR;
-         modval = val_find_next_child(mgr_cli_valset,
-                                      YANGCLI_MOD,
+         modval = val_find_next_child(mgr_cli_valset, YANGCLI_MOD,
                                       NCX_EL_DEVIATION,
                                       modval)) {
 
-        res = ncxmod_load_deviation(VAL_STR(modval),
-                                    &savedevQ);
+        res = ncxmod_load_deviation(VAL_STR(modval), &savedevQ);
         if (res != NO_ERR) {
             log_error("\n load deviation failed (%s)", 
                       get_error_string(res));
@@ -3758,9 +3808,7 @@ static status_t
 
     if (res == NO_ERR) {
         /* check if any explicitly listed modules should be loaded */
-        modval = val_find_child(mgr_cli_valset,
-                                YANGCLI_MOD,
-                                NCX_EL_MODULE);
+        modval = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_MODULE);
         while (modval != NULL && res == NO_ERR) {
             log_info("\nyangcli: Loading requested module %s", 
                      VAL_STR(modval));
@@ -3775,10 +3823,8 @@ static status_t
                 revision = savestr + 1;
             }
 
-            res = ncxmod_load_module(VAL_STR(modval),
-                                     revision,
-                                     &savedevQ,
-                                     NULL);
+            res = ncxmod_load_module(VAL_STR(modval), revision,
+                                     &savedevQ, NULL);
             if (res != NO_ERR) {
                 log_error("\n load module failed (%s)", 
                           get_error_string(res));
@@ -3786,15 +3832,13 @@ static status_t
                 log_info("\n load OK");
             }
 
-            modval = val_find_next_child(mgr_cli_valset,
-                                         YANGCLI_MOD,
-                                         NCX_EL_MODULE,
-                                         modval);
+            modval = val_find_next_child(mgr_cli_valset, YANGCLI_MOD,
+                                         NCX_EL_MODULE, modval);
         }
     }
 
+    /* discard any deviations loaded from the CLI or conf file */
     ncx_clean_save_deviationsQ(&savedevQ);
-
     if (res != NO_ERR) {
         return res;
     }
@@ -3826,6 +3870,22 @@ static status_t
         }
     }
 
+    /* load the user aliases */
+    if (autoaliases) {
+        res = load_aliases(aliases_file);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    /* load the user variables */
+    if (autouservars) {
+        res = load_uservars(server_cb, uservars_file);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
     /* make sure the startup screen is generated
      * before the auto-connect sequence starts
      */
@@ -3840,9 +3900,7 @@ static status_t
      */
     server_cb->state = MGR_IO_ST_IDLE;
     if (connect_valset) {
-        parm = val_find_child(connect_valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_SERVER);
+        parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_SERVER);
         if (parm && parm->res == NO_ERR) {
             res = do_connect(server_cb, NULL, NULL, 0, TRUE);
             if (res != NO_ERR) {
@@ -3869,8 +3927,31 @@ static void
 {
     server_cb_t  *server_cb;
     modptr_t     *modptr;
+    status_t      res = NO_ERR;
 
     log_debug2("\nShutting down yangcli\n");
+
+    /* save the user variables */
+    if (autouservars && init_done) {
+        if (cur_server_cb) {
+            res = save_uservars(cur_server_cb, uservars_file);
+        } else {
+            res = ERR_NCX_MISSING_PARM;
+        }
+        if (res != NO_ERR) {
+            log_error("\nError: yangcli user variables could "
+                      "not be saved (%s)", get_error_string(res));
+        }
+    }
+
+    /* save the user aliases */
+    if (autoaliases && init_done) {
+        res = save_aliases(aliases_file);
+        if (res != NO_ERR) {
+            log_error("\nError: yangcli command aliases could "
+                      "not be saved (%s)", get_error_string(res));
+        }
+    }
 
     while (!dlq_empty(&mgrloadQ)) {
         modptr = (modptr_t *)dlq_deque(&mgrloadQ);
@@ -3931,6 +4012,8 @@ static void
 
     /* cleanup the module library search results */
     ncxmod_clean_search_result_queue(&modlibQ);
+
+    free_aliases();
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
@@ -4162,6 +4245,36 @@ val_value_t *
 
 
 /********************************************************************
+* FUNCTION get_aliases_file
+* 
+*  Get the aliases-file value
+* 
+* RETURNS:
+*    aliases_file variable
+*********************************************************************/
+const xmlChar *
+    get_aliases_file (void)
+{
+    return aliases_file;
+}  /* get_aliases_file */
+
+
+/********************************************************************
+* FUNCTION get_uservars_file
+* 
+*  Get the uservars-file value
+* 
+* RETURNS:
+*    aliases_file variable
+*********************************************************************/
+const xmlChar *
+    get_uservars_file (void)
+{
+    return uservars_file;
+}  /* get_uservars_file */
+
+
+/********************************************************************
 * FUNCTION replace_connect_valset
 * 
 *  Replace the current connect value set with a clone
@@ -4232,6 +4345,21 @@ dlq_hdr_t *
 {
     return &mgrloadQ;
 }  /* get_mgrloadQ */
+
+
+/********************************************************************
+* FUNCTION get_aliasQ
+* 
+*  Get the aliasQ value pointer
+* 
+* RETURNS:
+*    aliasQ variable
+*********************************************************************/
+dlq_hdr_t *
+    get_aliasQ (void)
+{
+    return &aliasQ;
+}  /* get_aliasQ */
 
 
 /********************************************************************
@@ -4578,10 +4706,8 @@ status_t
             if (configvar==NULL) {
                 res = SET_ERROR(ERR_INTERNAL_VAL);
             } else {
-                res = handle_config_assign(server_cb,
-                                           configvar,
-                                           resultvar,
-                                           resultstr);
+                res = handle_config_assign(server_cb, configvar,
+                                           resultvar, resultstr);
                 if (res == NO_ERR) {
                     log_info("\nOK\n");
                 }                    
@@ -4837,7 +4963,7 @@ int main (int argc, char *argv[])
 #endif
 
     res = yangcli_init(argc, argv);
-
+    init_done = (res == NO_ERR) ? TRUE : FALSE;
     if (res != NO_ERR) {
         log_error("\nyangcli: init returned error (%s)\n", 
                   get_error_string(res));

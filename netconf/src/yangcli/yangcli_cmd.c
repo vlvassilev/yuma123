@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2009 - 2011, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -44,177 +44,51 @@ date         init     comment
 
 #include "libtecla.h"
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_conf
 #include "conf.h"
-#endif
-
-#ifndef _H_help
 #include "help.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_io
 #include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_load
 #include "mgr_load.h"
-#endif
-
-#ifndef _H_mgr_not
 #include "mgr_not.h"
-#endif
-
-#ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_obj_help
 #include "obj_help.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xml_wr
 #include "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_autolock
+#include "yangcli_alias.h"
 #include "yangcli_autolock.h"
-#endif
-
-#ifndef _H_yangcli_cond
 #include "yangcli_cond.h"
-#endif
-
-#ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
-#endif
-
-#ifndef _H_yangcli_eval
 #include "yangcli_eval.h"
-#endif
-
-#ifndef _H_yangcli_list
 #include "yangcli_list.h"
-#endif
-
-#ifndef _H_yangcli_save
 #include "yangcli_save.h"
-#endif
-
-#ifndef _H_yangcli_show
 #include "yangcli_show.h"
-#endif
-
-#ifndef _H_yangcli_tab
 #include "yangcli_tab.h"
-#endif
-
-#ifndef _H_yangcli_timer
 #include "yangcli_timer.h"
-#endif
-
-#ifndef _H_yangcli_util
+#include "yangcli_uservars.h"
 #include "yangcli_util.h"
-#endif
 
 
 /********************************************************************
@@ -1678,12 +1552,7 @@ static status_t
         return ERR_NCX_SKIPPED;
     }
 
-    res = get_case(server_cb, 
-                   rpc, 
-                   cas, 
-                   valset, 
-                   oldvalset, 
-                   iswrite);
+    res = get_case(server_cb, rpc, cas, valset, oldvalset, iswrite);
     switch (res) {
     case NO_ERR:
         break;
@@ -1793,9 +1662,7 @@ static val_value_t *
     server_cb->get_optional = TRUE;
 
     set_completion_state(&server_cb->completion_state,
-                         rpc,
-                         parm,
-                         CMD_STATE_GETVAL);
+                         rpc, parm, CMD_STATE_GETVAL);
 
     *res = get_parm(server_cb, rpc, parm, dummy, NULL);
     server_cb->get_optional = saveopt;
@@ -2553,32 +2420,22 @@ static status_t
     mode = HELP_MODE_NORMAL;
 
     /* look for the 'brief' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_BRIEF);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
     if (parm && parm->res == NO_ERR) {
         mode = HELP_MODE_BRIEF;
     } else {
         /* look for the 'full' parameter */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_FULL);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
         if (parm && parm->res == NO_ERR) {
             mode = HELP_MODE_FULL;
         }
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_COMMAND);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMAND);
     if (parm && parm->res == NO_ERR) {
         dtyp = NCX_NT_OBJ;
         res = NO_ERR;
-        obj = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen, &res);
         if (obj != NULL) {
             if (obj->objtype == OBJ_TYP_RPC && 
                 !obj_is_hidden(obj)) {
@@ -2623,26 +2480,18 @@ static status_t
     }
 
     /* look for the specific definition parameters */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_COMMANDS);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
         res = do_help_commands(server_cb, mode);
         val_free_value(valset);
         return res;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_TYPE);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TYPE);
     if (parm && parm->res==NO_ERR) {
         res = NO_ERR;
         dtyp = NCX_NT_TYP;
-        typ = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        typ = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen, &res);
         if (typ) {
             help_type(typ, mode);
         } else {
@@ -2674,12 +2523,9 @@ static status_t
         return res;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_OBJECT);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_OBJECT);
     if (parm && parm->res == NO_ERR) {
         xmlChar *valstr = VAL_STR(parm);
-
 
         obj = NULL;
         if (valstr && *valstr == '/') {
@@ -2702,11 +2548,7 @@ static status_t
             /* union match NcxIdentifier type */
             res = NO_ERR;
             dtyp = NCX_NT_OBJ;
-            obj = parse_def(server_cb, 
-                            &dtyp, 
-                            valstr,
-                            &dlen,
-                            &res);
+            obj = parse_def(server_cb, &dtyp, valstr, &dlen, &res);
         }
 
         if (obj) {
@@ -2757,18 +2599,11 @@ static status_t
         return res;
     }
 
-
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_NOTIFICATION);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_NOTIFICATION);
     if (parm && parm->res == NO_ERR) {
         res = NO_ERR;
         dtyp = NCX_NT_OBJ;
-        obj = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen, &res);
         if (obj != NULL) {
             if (obj->objtype == OBJ_TYP_NOTIF &&
                 !obj_is_hidden(obj)) {
@@ -3314,12 +3149,7 @@ static status_t
      * if target == /foo/bar/baz then
      * valroot --> /foo and targobj --> /foo/bar/baz
      */
-    valroot = get_instanceid_parm(target,
-                                  TRUE,
-                                  TRUE,
-                                  &targobj,
-                                  &targval,
-                                  &res);
+    valroot = get_instanceid_parm(target, TRUE, TRUE, &targobj, &targval, &res);
     if (res != NO_ERR) {
         if (valroot) {
             val_free_value(valroot);
@@ -3358,17 +3188,13 @@ static status_t
     }
 
     /* find the value to use as content value or template, if any */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_VALUE);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VALUE);
     if (parm && parm->res == NO_ERR) {
         curparm = parm;
     }
 
     /* find the --optional flag */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_OPTIONAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
         server_cb->get_optional = TRUE;
     }
@@ -3379,11 +3205,7 @@ static status_t
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
         /* make a new leaf, toss the targval if any */
-        newparm = fill_value(server_cb, 
-                             rpc, 
-                             targobj, 
-                             curparm,
-                             &res);
+        newparm = fill_value(server_cb, rpc, targobj, curparm, &res);
         if (targval) {
             val_free_value(targval);
             targval = NULL;
@@ -3402,12 +3224,8 @@ static status_t
             }
         }
         if (res == NO_ERR) {
-            res = get_choice(server_cb, 
-                             rpc, 
-                             targobj, 
-                             newparm, 
-                             curparm,
-                             iswrite);
+            res = get_choice(server_cb, rpc, targobj, newparm, 
+                             curparm, iswrite);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -3447,11 +3265,7 @@ static status_t
                 val_init_from_template(newparm, targobj);
             }
         }
-        res = fill_valset(server_cb, 
-                          rpc, 
-                          newparm, 
-                          curparm,
-                          TRUE);
+        res = fill_valset(server_cb, rpc, newparm, curparm, TRUE);
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }
@@ -3462,9 +3276,7 @@ static status_t
         if (server_cb->result_name || 
             server_cb->result_filename) {
             /* save the filled in value */
-            res = finish_result_assign(server_cb, 
-                                       newparm, 
-                                       NULL);
+            res = finish_result_assign(server_cb, newparm, NULL);
             newparm = NULL;
         }
     } else {
@@ -3644,12 +3456,8 @@ static status_t
             newnode = val_get_first_child(config_content);
             if (newnode) {
                 val_remove_child(newnode);
-                res = add_content(server_cb, 
-                                  rpc, 
-                                  newnode, 
-                                  newnode->obj, 
-                                  dofill,
-                                  curtop);
+                res = add_content(server_cb, rpc, newnode, newnode->obj, 
+                                  dofill, curtop);
                 if (res != NO_ERR) {
                     val_free_value(newnode);
                     done = TRUE;
@@ -3712,12 +3520,8 @@ static status_t
     /* get to the root of the object chain */
     parent = obj_get_parent(curobj);
     if (parent && !obj_is_root(parent)) {
-        res = add_config_from_content_node(server_cb,
-                                           rpc,
-                                           config_content,
-                                           parent,
-                                           config,
-                                           curtop);
+        res = add_config_from_content_node(server_cb, rpc, config_content,
+                                           parent, config, curtop);
         if (res != NO_ERR) {
             return res;
         }
@@ -3731,13 +3535,7 @@ static status_t
         *curtop = config;
     }
 
-    res = add_content(server_cb, 
-                      rpc, 
-                      config_content, 
-                      curobj, 
-                      TRUE,
-                      curtop);
-
+    res = add_content(server_cb, rpc, config_content, curobj, TRUE, curtop);
     return res;
 
 }  /* add_config_from_content_node */
@@ -3882,13 +3680,8 @@ static status_t
     /* get to the root of the object chain */
     parent = obj_get_parent(curobj);
     if (parent && !obj_is_root(parent)) {
-        res = add_filter_from_content_node(server_cb,
-                                           rpc,
-                                           get_content,
-                                           parent,
-                                           filter,
-                                           dofill,
-                                           curtop);
+        res = add_filter_from_content_node(server_cb, rpc, get_content,
+                                           parent, filter, dofill, curtop);
         if (res != NO_ERR) {
             return res;
         }
@@ -3902,12 +3695,7 @@ static status_t
         *curtop = filter;
     }
 
-    res = add_content(server_cb, 
-                      rpc, 
-                      get_content, 
-                      curobj, 
-                      dofill,
-                      curtop);
+    res = add_content(server_cb, rpc, get_content, curobj, dofill, curtop);
     return res;
 
 }  /* add_filter_from_content_node */
@@ -4149,12 +3937,8 @@ static status_t
      */
     if (valroot) {
         val_add_child(valroot, parm);
-        res = complete_path_content(server_cb,
-                                    rpc,
-                                    valroot,
-                                    config_content,
-                                    dofill,
-                                    TRUE);
+        res = complete_path_content(server_cb, rpc, valroot, config_content,
+                                    dofill, TRUE);
         if (res != NO_ERR) {
             val_free_value(valroot);
             val_free_value(reqdata);
@@ -4163,11 +3947,8 @@ static status_t
     } else {
         /* !!! use the parm as-is, even if a container !!! */
         dummy_parm = NULL;
-        res = add_config_from_content_node(server_cb,
-                                           rpc, 
-                                           config_content,
-                                           config_content->obj,
-                                           parm, 
+        res = add_config_from_content_node(server_cb, rpc, config_content,
+                                           config_content->obj, parm, 
                                            &dummy_parm);
         if (res != NO_ERR) {
             val_free_value(config_content);
@@ -4225,13 +4006,9 @@ static status_t
     if (res == NO_ERR) {
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_max(reqdata, 
-                               0,
-                               server_cb->defindent,
-                               DUMP_VAL_LOG,
-                               server_cb->display_mode,
-                               FALSE,
-                               FALSE);
+            val_dump_value_max(reqdata, 0, server_cb->defindent,
+                               DUMP_VAL_LOG, server_cb->display_mode,
+                               FALSE, FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */
@@ -4285,10 +4062,7 @@ static status_t
     dlq_enque(metaval, &val->metaQ);
 
     if (selectval) {
-        val_set_qname(selectval,
-                      0,
-                      NCX_EL_SELECT,
-                      xml_strlen(NCX_EL_SELECT));
+        val_set_qname(selectval, 0, NCX_EL_SELECT, xml_strlen(NCX_EL_SELECT));
         dlq_enque(selectval, &val->metaQ);
     }
 
@@ -4714,14 +4488,10 @@ static val_value_t *
     }
     if (parm == NULL && 
         !iswrite && 
-        !xml_strncmp(obj_get_name(rpc),
-                     (const xmlChar *)"xget",
-                     4)) {
+        !xml_strncmp(obj_get_name(rpc), (const xmlChar *)"xget", 4)) {
 
         /* try urltarget; convert to XPath first */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              NCX_EL_URLTARGET);
+        parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_URLTARGET);
         if (parm != NULL) {
             fromurl = xpath_convert_url_to_path(VAL_STR(parm),
                                                 match_names,
@@ -4756,15 +4526,11 @@ static val_value_t *
         server_cb->get_optional = getoptional;
 
         /* from CLI -- look for the 'target' parameter */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              NCX_EL_TARGET);
+        parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TARGET);
         if (parm != NULL) {
             target = VAL_STR(parm);
         } else {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  NCX_EL_URLTARGET);
+            parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_URLTARGET);
             if (parm != NULL) {
                 res = NO_ERR;
                 fromurl = xpath_convert_url_to_path(VAL_STR(parm),
@@ -4796,12 +4562,8 @@ static val_value_t *
             return NULL;
         }
 
-        *valroot = get_instanceid_parm(target,
-                                       TRUE,
-                                       iswrite,
-                                       &targobj,
-                                       &targval,
-                                       &res);
+        *valroot = get_instanceid_parm(target, TRUE, iswrite, &targobj,
+                                       &targval, &res);
         if (res != NO_ERR) {
             log_error("\nError: invalid target parameter (%s)",
                       get_error_string(res));
@@ -4829,15 +4591,11 @@ static val_value_t *
         }
         
         curparm = NULL;
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_VALUE);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VALUE);
         if (parm && parm->res == NO_ERR) {
             if (parm->btyp == NCX_BT_EXTERN) {
                 isextern = TRUE;
-                curparm = mgr_load_extern_file(VAL_EXTERN(parm),
-                                               NULL,
-                                               &res);
+                curparm = mgr_load_extern_file(VAL_EXTERN(parm), NULL,  &res);
                 if (res != NO_ERR) {
                     *retres = res;
                     return NULL;
@@ -7154,7 +6912,15 @@ static status_t
     rpcname = obj_get_name(rpc);
     cond = runstack_get_cond_state(server_cb->runstack_context);
 
-    if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+    if (!xml_strcmp(rpcname, YANGCLI_ALIAS)) {
+        if (cond) {
+            res = do_alias(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_ALIASES)) {
+        if (cond) {
+            res = do_aliases(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_CD)) {
         if (cond) {
             res = do_cd(server_cb, rpc, line, len);
         }
@@ -7250,6 +7016,14 @@ static status_t
     } else if (!xml_strcmp(rpcname, YANGCLI_WHILE)) {
         res = do_while(server_cb, rpc, line, len);
         didcmd = TRUE;
+    } else if (!xml_strcmp(rpcname, YANGCLI_UNSET)) {
+        if (cond) {
+            res = do_unset(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_USERVARS)) {
+        if (cond) {
+            res = do_uservars(server_cb, rpc, line, len);
+        }
     } else {
         res = ERR_NCX_INVALID_VALUE;
         log_error("\nError: The %s command is not allowed in this mode",
@@ -7292,10 +7066,12 @@ status_t
     top_command (server_cb_t *server_cb,
                  xmlChar *line)
 {
-    obj_template_t         *rpc;
-    uint32                 len;
-    ncx_node_t             dtyp;
-    status_t               res;
+    obj_template_t         *rpc = NULL;
+    xmlChar                *newline = NULL;
+    xmlChar                *useline = NULL;
+    uint32                 len = 0;
+    ncx_node_t             dtyp = NCX_NT_OBJ;
+    status_t               res = NO_ERR;
 
 #ifdef DEBUG
     if (!server_cb || !line) {
@@ -7303,21 +7079,33 @@ status_t
     }
 #endif
 
-    res = NO_ERR;
-
-    if (!xml_strlen(line)) {
+    if (xml_strlen(line) == 0) {
         return res;
     }
 
-    dtyp = NCX_NT_OBJ;
-    rpc = (obj_template_t *)parse_def(server_cb,
-                                      &dtyp, 
-                                      line, 
-                                      &len,
-                                      &res);
+    /* first check the command keyword to see if it is an alias */
+    newline = expand_alias(line, &res);
+    if (res == ERR_NCX_SKIPPED) {
+        res = NO_ERR;
+        useline = line;
+    } else if (res == NO_ERR) {
+        if (newline == NULL) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        useline = newline;
+    } else {
+        log_error("\nError: %s\n", get_error_string(res));
+        if (newline) {
+            m__free(newline);
+        }
+        return res;
+    }
+
+    /* look for an RPC command match for the command keyword */
+    rpc = (obj_template_t *)parse_def(server_cb, &dtyp, useline, &len, &res);
     if (rpc==NULL || !obj_is_rpc(rpc)) {
         if (server_cb->result_name || server_cb->result_filename) {
-            res = finish_result_assign(server_cb, NULL, line);
+            res = finish_result_assign(server_cb, NULL, useline);
         } else {
             if (res == ERR_NCX_DEF_NOT_FOUND) {
                 /* this is an unknown command */
@@ -7328,16 +7116,17 @@ status_t
                 log_error("\nError: %s\n", get_error_string(res));
             }
         }
-        return res;
-    }
-
-    /* check  handful of yangcli commands */
-    if (is_yangcli_ns(obj_get_nsid(rpc))) {
-        res = do_local_command(server_cb, rpc, line, len);
+    } else if (is_yangcli_ns(obj_get_nsid(rpc))) {
+        /* check handful of yangcli commands */
+        res = do_local_command(server_cb, rpc, useline, len);
     } else {
         res = ERR_NCX_OPERATION_FAILED;
         log_error("\nError: Not connected to server."
                   "\nLocal commands only in this mode.\n");
+    }
+
+    if (newline) {
+        m__free(newline);
     }
 
     return res;
@@ -7366,12 +7155,13 @@ status_t
                   xmlChar *line)
 {
     obj_template_t        *rpc, *input;
-    mgr_rpc_req_t         *req;
-    val_value_t           *reqdata, *valset, *parm;
+    mgr_rpc_req_t         *req = NULL;
+    val_value_t           *reqdata = NULL, *valset = NULL, *parm;
     ses_cb_t              *scb;
+    xmlChar               *newline, *useline = NULL;
     uint32                 len, linelen;
-    status_t               res;
-    boolean                shut;
+    status_t               res = NO_ERR;
+    boolean                shut = FALSE;
     ncx_node_t             dtyp;
 
 #ifdef DEBUG
@@ -7380,28 +7170,36 @@ status_t
     }
 #endif
 
-    req = NULL;
-    reqdata = NULL;
-    valset = NULL;
-    res = NO_ERR;
-    shut = FALSE;
-
     /* make sure there is something to parse */
     linelen = xml_strlen(line);
     if (!linelen) {
         return res;
     }
 
+    /* first check the command keyword to see if it is an alias */
+    newline = expand_alias(line, &res);
+    if (res == ERR_NCX_SKIPPED) {
+        res = NO_ERR;
+        useline = line;
+    } else if (res == NO_ERR) {
+        if (newline == NULL) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        useline = newline;
+    } else {
+        log_error("\nError: %s\n", get_error_string(res));
+        if (newline) {
+            m__free(newline);
+        }
+        return res;
+    }
+
     /* get the RPC method template */
     dtyp = NCX_NT_OBJ;
-    rpc = (obj_template_t *)parse_def(server_cb,
-                                      &dtyp, 
-                                      line, 
-                                      &len,
-                                      &res);
+    rpc = (obj_template_t *)parse_def(server_cb, &dtyp, useline, &len, &res);
     if (rpc == NULL || !obj_is_rpc(rpc)) {
         if (server_cb->result_name || server_cb->result_filename) {
-            res = finish_result_assign(server_cb, NULL, line);
+            res = finish_result_assign(server_cb, NULL, useline);
         } else {
             if (res == ERR_NCX_DEF_NOT_FOUND) {
                 /* this is an unknown command */
@@ -7412,6 +7210,9 @@ status_t
                 log_error("\nError: %s", get_error_string(res));
             }
         }
+        if (newline) {
+            m__free(newline);
+        }
         return res;
     }
 
@@ -7421,10 +7222,13 @@ status_t
             res = ERR_NCX_OPERATION_FAILED;
             log_stdout("\nError: Already connected");
         } else {
-            res = do_local_conn_command(server_cb, rpc, line, len);
+            res = do_local_conn_command(server_cb, rpc, useline, len);
             if (res == ERR_NCX_SKIPPED) {
-                res = do_local_command(server_cb, rpc, line, len);
+                res = do_local_command(server_cb, rpc, useline, len);
             }
+        }
+        if (newline) {
+            m__free(newline);
         }
         return res;
     }
@@ -7434,8 +7238,7 @@ status_t
      */
 
     /* construct a method + parameter tree */
-    reqdata = xml_val_new_struct(obj_get_name(rpc), 
-                                 obj_get_nsid(rpc));
+    reqdata = xml_val_new_struct(obj_get_name(rpc), obj_get_nsid(rpc));
     if (!reqdata) {
         log_error("\nError allocating a new RPC request");
         res = ERR_INTERNAL_MEM;
@@ -7447,15 +7250,12 @@ status_t
 
     /* check if any params are expected */
     if (res == NO_ERR && input) {
-        while (line[len] && xml_isspace(line[len])) {
+        while (useline[len] && xml_isspace(useline[len])) {
             len++;
         }
 
         if (len < linelen) {
-            valset = parse_rpc_cli(server_cb,
-                                   rpc, 
-                                   &line[len], 
-                                   &res);
+            valset = parse_rpc_cli(server_cb, rpc, &useline[len], &res);
             if (res != NO_ERR) {
                 log_error("\nError in the parameters for '%s' command (%s)",
                           obj_get_name(rpc), get_error_string(res));
@@ -7475,11 +7275,7 @@ status_t
         /* fill in any missing parameters from the CLI */
         if (res == NO_ERR) {
             if (interactive_mode()) {
-                res = fill_valset(server_cb, 
-                                  rpc, 
-                                  valset, 
-                                  NULL, 
-                                  TRUE);
+                res = fill_valset(server_cb, rpc, valset, NULL, TRUE);
                 if (res == ERR_NCX_SKIPPED) {
                     res = NO_ERR;
                 }
@@ -7532,13 +7328,9 @@ status_t
             if (LOGDEBUG2) {
                 log_debug2("\nabout to send <%s> RPC request with reqdata:",
                            obj_get_name(rpc));
-                val_dump_value_max(reqdata, 
-                                   0,
-                                   server_cb->defindent,
-                                   DUMP_VAL_LOG,
-                                   server_cb->display_mode,
-                                   FALSE,
-                                   FALSE);
+                val_dump_value_max(reqdata, 0, server_cb->defindent,
+                                   DUMP_VAL_LOG, server_cb->display_mode,
+                                   FALSE, FALSE);
             }
 
             /* the request will be stored if this returns NO_ERR */
@@ -7557,6 +7349,10 @@ status_t
 
     if (valset) {
         val_free_value(valset);
+    }
+
+    if (newline) {
+        m__free(newline);
     }
 
     if (res != NO_ERR) {
@@ -8129,11 +7925,7 @@ void *
         }
         if (modname) {
             /* try exact match in specified module */
-            def = try_parse_def(server_cb,
-                                NULL,
-                                modname, 
-                                defname, 
-                                dtyp);
+            def = try_parse_def(server_cb, NULL, modname, defname, dtyp);
         } else {
             log_error("\nError: no module found for prefix '%s'", 
                       prefix);
@@ -8144,11 +7936,7 @@ void *
          * modules. An unprefixed keyword will match
          * a yangcli command first
          */
-        def = try_parse_def(server_cb,
-                            NULL,
-                            YANGCLI_MOD, 
-                            defname, 
-                            dtyp);
+        def = try_parse_def(server_cb, NULL, YANGCLI_MOD, defname, dtyp);
 
         if (def == NULL) {
             /* 2) try an exact match in the default module
@@ -8161,11 +7949,7 @@ void *
                 /* do not re-check the yangcli and netconf modules */
                 if (xml_strcmp(defmod, NC_MODULE) &&
                     xml_strcmp(defmod, NCXMOD_IETF_NETCONF)) {
-                    def = try_parse_def(server_cb,
-                                        NULL,
-                                        defmod, 
-                                        defname, 
-                                        dtyp);
+                    def = try_parse_def(server_cb, NULL, defmod, defname, dtyp);
                 }
             }
         }
@@ -8182,11 +7966,8 @@ void *
                  modptr != NULL;
                  modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-                def = try_parse_def(server_cb, 
-                                    modptr->mod,
-                                    modptr->mod->name, 
-                                    defname, 
-                                    dtyp);
+                def = try_parse_def(server_cb, modptr->mod, modptr->mod->name, 
+                                    defname, dtyp);
                 if (def != NULL) {
                     matchcount++;
                     lastmatch = def;
@@ -8202,21 +7983,15 @@ void *
                      modptr != NULL;
                      modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-                    ncx_match_rpc_error(modptr->mod,
-                                        modptr->mod->name,
-                                        defname,
-                                        FALSE,
-                                        first);
+                    ncx_match_rpc_error(modptr->mod, modptr->mod->name,
+                                        defname, FALSE, first);
                     if (first) {
                         first = FALSE;
                     }
                 }
                 /* check any matches for local commands too */
-                ncx_match_rpc_error(get_yangcli_mod(),
-                                    NULL,
-                                    defname,
-                                    FALSE,
-                                    FALSE);
+                ncx_match_rpc_error(get_yangcli_mod(), NULL, defname,
+                                    FALSE, FALSE);
             } else {
                 /*  0 or 1 matches found */
                 def = lastmatch;
@@ -8232,11 +8007,7 @@ void *
                  mod != NULL;
                  mod = ncx_get_next_module(mod)) {
 
-                def = try_parse_def(server_cb, 
-                                    mod,
-                                    mod->name, 
-                                    defname, 
-                                    dtyp);
+                def = try_parse_def(server_cb, mod, mod->name, defname, dtyp);
                 if (def != NULL) {
                     lastmatch = def;
                     matchcount++;
@@ -8246,11 +8017,7 @@ void *
             if (matchcount > 1) {
                 /* generate ambiguous command error */
                 res = ERR_NCX_AMBIGUOUS_CMD;
-                ncx_match_rpc_error(NULL, 
-                                    NULL, 
-                                    defname,
-                                    FALSE,
-                                    TRUE);
+                ncx_match_rpc_error(NULL, NULL, defname, FALSE, TRUE);
             } else {
                 /* 0 or 1 matches found */
                 def = lastmatch;
@@ -8306,21 +8073,15 @@ void *
                                  dlq_firstEntry(&server_cb->modptrQ);
                              modptr != NULL;
                              modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-                            ncx_match_rpc_error(modptr->mod,
-                                                modptr->mod->name,
-                                                defname,
-                                                TRUE,
-                                                first);
+                            ncx_match_rpc_error(modptr->mod, modptr->mod->name,
+                                                defname, TRUE, first);
                             if (first) {
                                 first = FALSE;
                             }
                         }
                         /* list any partial local command matches */
-                        ncx_match_rpc_error(get_yangcli_mod(),
-                                            NULL,
-                                            defname,
-                                            TRUE,
-                                            FALSE);
+                        ncx_match_rpc_error(get_yangcli_mod(), NULL,  defname,
+                                            TRUE, FALSE);
                     }
                 }
 
@@ -8334,11 +8095,7 @@ void *
                     def = ncx_match_any_rpc(NULL, defname, &matchcount);
                     if (matchcount > 1) {
                         res = ERR_NCX_AMBIGUOUS_CMD;
-                        ncx_match_rpc_error(NULL,
-                                            NULL,
-                                            defname,
-                                            TRUE,
-                                            TRUE);
+                        ncx_match_rpc_error(NULL, NULL, defname, TRUE, TRUE);
                     }
                 }
                 break;

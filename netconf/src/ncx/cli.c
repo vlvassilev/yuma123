@@ -42,61 +42,20 @@ date         init     comment
 #include <ctype.h>
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 
 /********************************************************************
@@ -945,11 +904,7 @@ status_t
 
     res = NO_ERR;
     bufflen = 0;
-    buff = copy_argv_to_buffer(argc,
-                               argv,
-                               CLI_MODE_PROGRAM,
-                               &bufflen,
-                               &res);
+    buff = copy_argv_to_buffer(argc, argv, CLI_MODE_PROGRAM, &bufflen, &res);
     if (!buff) {
         return res;
     }
@@ -1195,7 +1150,8 @@ val_value_t *
     val_value_t    *val;
     obj_template_t *chobj;
     const char     *msg;
-    char           *parmname, *parmval, *str, *buff, testch;
+    char           *parmname, *parmval;
+    char           *str = NULL, *buff, testch;
     int32           buffpos, bufflen;
     uint32          parmnamelen, copylen, matchcount;
     ncx_btype_t     btyp;
@@ -1295,11 +1251,7 @@ val_value_t *
     /* need to parse some CLI parms
      * get 1 normalized buffer
      */
-    buff = copy_argv_to_buffer(argc, 
-                               argv,
-                               mode,
-                               &bufflen,
-                               status);
+    buff = copy_argv_to_buffer(argc, argv, mode, &bufflen, status);
     if (!buff) {
         val_free_value(val);
         return NULL;
@@ -1316,6 +1268,7 @@ val_value_t *
      * save each parm value in a ps_parm_t struct
      */
     while (buffpos < bufflen && res == NO_ERR) {
+        boolean finish_equals_ok = FALSE;
 
         gotdashes = FALSE;
         gotmatch = FALSE;
@@ -1380,20 +1333,17 @@ val_value_t *
                 copylen = parmnamelen;
 
                 /* check if this parameter name is in the parmset def */
-                chobj = obj_find_child_str(obj, 
-                                           NULL,
+                chobj = obj_find_child_str(obj, NULL, 
                                            (const xmlChar *)parmname,
                                            parmnamelen);
 
                 /* check if parm was found, try partial name if not */
                 if (!chobj && autocomp) {
                     matchcount = 0;
-                    chobj = 
-                        obj_match_child_str(obj, 
-                                            NULL,
-                                            (const xmlChar *)parmname,
-                                            parmnamelen,
-                                            &matchcount);
+                    chobj = obj_match_child_str(obj, NULL,
+                                                (const xmlChar *)parmname,
+                                                parmnamelen,
+                                                &matchcount);
                     if (chobj) {
                         gotmatch = TRUE;
                         if (matchcount > 1) {
@@ -1424,18 +1374,25 @@ val_value_t *
                 if (parmnamelen) {
                     int32 idx = buffpos + parmnamelen;
 
-                    /* check for whitespace following value */
-                    while (isspace((int)buff[idx]) && idx < bufflen) {
-                        idx++;
-                    }
-
-                    /* check for equals sign, indicating an unknown
-                     * parameter name, not a value string for the
-                     * default parameter
+                    /* check if next char is an equals sign and
+                     * the default-parm-equals_ok flag is set
                      */
-                    if (buff[idx] == '=') {
-                        /* will prevent chobj from getting set */
-                        res = ERR_NCX_UNKNOWN_PARM;
+                    if (obj_is_cli_equals_ok(obj) && buff[idx] == '=') {
+                        finish_equals_ok = TRUE;
+                    } else {
+                        /* check for whitespace following value */
+                        while (isspace((int)buff[idx]) && idx < bufflen) {
+                            idx++;
+                        }
+
+                        /* check for equals sign, indicating an unknown
+                         * parameter name, not a value string for the
+                         * default parameter
+                         */
+                        if (buff[idx] == '=') {
+                            /* will prevent chobj from getting set */
+                            res = ERR_NCX_UNKNOWN_PARM;
+                        }
                     }
                 }
 
@@ -1469,7 +1426,7 @@ val_value_t *
 
                 /* skip past any whitespace after the parm name */
                 if (!isdefaultparm) {
-		  while (isspace((int)buff[buffpos]) && buffpos < bufflen) {
+                    while (isspace((int)buff[buffpos]) && buffpos < bufflen) {
                         buffpos++;
                     }
                 }
@@ -1488,7 +1445,8 @@ val_value_t *
                             buffpos++;
 
                             /* skip any whitespace */
-                            while (buff[buffpos] && isspace((int)buff[buffpos])) {
+                            while (buff[buffpos] && buffpos < bufflen &&
+                                   isspace((int)buff[buffpos])) {
                                 buffpos++;
                             }
                         } /* else whitespace already skipped */
@@ -1496,8 +1454,57 @@ val_value_t *
 
                     /* if any chars left in buffer, get the parmval */
                     if (buffpos < bufflen) {
-                        if (buff[buffpos] == NCX_QUOTE_CH ||
-                            buff[buffpos] == NCX_SQUOTE_CH) {
+                        if (finish_equals_ok) {
+                            /* treating the entire string as the 
+                             * parm value; expecting a string to follow
+                             */
+                            int32  j, testidx = 0;
+
+                            parmval = &buff[buffpos];
+
+                            while ((buffpos+testidx) < bufflen &&
+                                   buff[buffpos+testidx] != '=') {
+                                testidx++;
+                            }
+
+                            j = buffpos+testidx+1;
+                            if (buff[buffpos+testidx] != '=') {
+                                res = SET_ERROR(ERR_INTERNAL_VAL);
+                            } else {
+                                if (j < bufflen) {
+                                    if (buff[j] == NCX_QUOTE_CH ||
+                                        buff[j] == NCX_SQUOTE_CH) {
+
+                                        savechar = buff[j++];
+                                        while (j < bufflen && buff[j] && 
+                                               buff[j] != savechar) {
+                                            j++;
+                                        }
+                                        if (buff[j]) {
+                                            if (j < bufflen) {
+                                                /* OK exit */
+                                                str = &buff[j+1];
+                                            } else {
+                                                res = SET_ERROR
+                                                    (ERR_INTERNAL_VAL);
+                                            }
+                                        } else {
+                                            str = &buff[j];
+                                        }
+                                    } else {
+                                        /* not a quoted string */
+                                        while (j < bufflen && buff[j] &&
+                                               !isspace((int)buff[j])) {
+                                            j++;
+                                        }
+                                        str = &buff[j];  // OK exit
+                                    }
+                                } else {
+                                    str = &buff[j];
+                                }
+                            }
+                        } else if (buff[buffpos] == NCX_QUOTE_CH ||
+                                   buff[buffpos] == NCX_SQUOTE_CH) {
 
                             savechar = buff[buffpos];
 
@@ -1550,19 +1557,24 @@ val_value_t *
                             parmval = &buff[buffpos];
 
                             /* find the end of the unquoted string */
-                            str = &parmval[1];
+                            str = parmval+1;
                             while (*str && !isspace((int)*str)) {
                                 str++;
                             }
                         }
 
                         /* terminate string */
-                        *str = 0;
+                        if (str) {
+                            *str = 0;
 
-                        /* skip buffpos past eo-string */
-                        buffpos += (uint32)((str - parmval) + 1);  
+                            /* skip buffpos past eo-string */
+                            buffpos += (uint32)((str - parmval) + 1);  
+                        } else {
+                            res = SET_ERROR(ERR_INTERNAL_VAL);
+                        }
                     }
                 }
+
 
                 /* make sure value entered if expected
                  * NCX_BT_EMPTY and NCX_BT_STRING 
@@ -1580,11 +1592,8 @@ val_value_t *
 
         /* create a new val_value struct and set the value */
         if (res == NO_ERR) {
-            res = parse_cli_parm(rcxt,
-                                 val, 
-                                 chobj, 
-                                 (const xmlChar *)parmval,
-                                 script);
+            res = parse_cli_parm(rcxt, val, chobj, 
+                                 (const xmlChar *)parmval, script);
         } else if (res == ERR_NCX_EMPTY_VAL &&
                    gotmatch && !gotdashes) {
             /* matched parm did not work out so
@@ -1595,11 +1604,8 @@ val_value_t *
             if (chobj) {
                 savechar = parmname[parmnamelen];
                 parmname[parmnamelen] = 0;
-                res = parse_cli_parm(rcxt,
-                                     val, 
-                                     chobj, 
-                                     (const xmlChar *)parmname, 
-                                     script);
+                res = parse_cli_parm(rcxt, val, chobj, 
+                                     (const xmlChar *)parmname, script);
                 parmname[parmnamelen] = savechar;
             }
         }
@@ -1609,8 +1615,7 @@ val_value_t *
             msg = get_error_string(res);
             errbuff[0] = 0;
             if (parmname != NULL) {
-                xml_strncpy(errbuff, 
-                            (const xmlChar *)parmname, 
+                xml_strncpy(errbuff, (const xmlChar *)parmname, 
                             min(parmnamelen, ERRLEN));
             }
             switch (res) {

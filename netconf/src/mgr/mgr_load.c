@@ -30,41 +30,15 @@ date         init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_load
 #include "mgr_load.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_mgr_val_parse
 #include "mgr_val_parse.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
 
 
 /********************************************************************

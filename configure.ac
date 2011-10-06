@@ -31,7 +31,7 @@ platform_netconf_includedir="$includedir/yuma/platform"
 AC_SUBST(platform_netconf_includedir)
 
 
-CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1"
+CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2"
 AC_SUBST(CFLAGS)
 
 

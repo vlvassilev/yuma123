@@ -291,6 +291,25 @@ module netconfd {
          type inet:port-number;
       }
 
+      leaf tcp-direct-address {
+        description 
+          "The server will use this local TCP address to listen for incomming
+           connections instead of the default /tmp/ncxserver.sock UNIX
+           socket. By default if only tcp-direct-port is specified
+           the addressed used is localhost.";
+
+         type inet:host;
+      }
+
+      leaf tcp-direct-port {
+        description 
+          "The server will use this local TCP port to listen for incomming
+           connections instead of the default /tmp/ncxserver.sock UNIX
+           socket. tcp-direct-address controls the server bind address.";
+
+         type inet:port-number;
+      }
+
       uses ncxapp:ModuleParm;
 
       uses ncxapp:DeviationParm;

@@ -2112,6 +2112,7 @@ static void
     status_t                res;
     uint16                  port;
     boolean                 startedsession, tcp, portbydefault;
+    boolean                 tcp_direct_enable;
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
@@ -2216,6 +2217,19 @@ static void
         !xml_strcmp(VAL_ENUM_NAME(val),
                     (const xmlChar *)"tcp")) {
         tcp = TRUE;
+    
+        tcp_direct_enable = FALSE;
+        val = val_find_child(server_cb->connect_valset,
+                             YANGCLI_MOD, 
+                             YANGCLI_TCP_DIRECT_ENABLE);
+        if(val == NULL) printf("val is NULL.\n");
+        if(val->res == NO_ERR) printf("val->res is NO_ERR.\n");
+
+        if (val != NULL && 
+            val->res == NO_ERR && 
+            VAL_BOOL(val)) {
+            tcp_direct_enable = TRUE;
+        }
     }
 
     if (tcp) {
@@ -2240,7 +2254,7 @@ static void
                               privatekey,
                               server, 
                               port,
-                              (tcp) ? SES_TRANSPORT_TCP 
+                              (tcp) ? ((tcp_direct_enable) ? SES_TRANSPORT_TCP_DIRECT : SES_TRANSPORT_TCP) 
                               : SES_TRANSPORT_SSH,
                               server_cb->temp_progcb,
                               &server_cb->mysid,

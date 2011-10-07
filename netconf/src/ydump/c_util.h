@@ -673,9 +673,9 @@ extern void
 
 
 /********************************************************************
-* FUNCTION write_c_key_values
+* FUNCTION write_c_key_vars
 * 
-* Write all the keys in call-C-function-to-get-key-value format
+* Write all the local key variables in the SIL C function
 *
 * INPUTS:
 *   scb == session to use
@@ -688,10 +688,32 @@ extern void
 *
 *********************************************************************/
 extern void
+    write_c_key_vars (ses_cb_t *scb, 
+                      obj_template_t *obj, 
+                      dlq_hdr_t *objnameQ, 
+                      const xmlChar *parmname,
+                      uint32 keycount,
+                      int32 startindent);
+
+
+/********************************************************************
+* FUNCTION write_c_key_values
+* 
+* Write all the keys in call-C-function-to-get-key-value format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+extern void
     write_c_key_values (ses_cb_t *scb, 
                         obj_template_t *obj, 
                         dlq_hdr_t *objnameQ, 
-                        const xmlChar *parmname,
                         uint32 keycount,
                         int32 startindent);
 

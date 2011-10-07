@@ -319,6 +319,62 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION write_key_var
+* 
+* Write the key variable; walker function
+*
+* INPUTS:
+*   obj == the key object
+*   cookie1 == the key walker parameter block to use
+*   cookie2 = not used
+* RETURNS:
+*   TRUE to keep walking
+*********************************************************************/
+static boolean
+    write_key_var (obj_template_t *obj,
+                   void *cookie1,
+                   void *cookie2)
+{
+    c_keywalker_parms_t *parms = (c_keywalker_parms_t *)cookie1;
+    xmlChar endchar = 0;
+    boolean isconst = typ_is_string(obj_get_basetype(obj)) ? TRUE : FALSE;
+    boolean notunion = (obj_get_basetype(obj) != NCX_BT_UNION);
+
+    (void)cookie2;
+
+    if (parms->done) {
+        /* 'done' not used yet -- always walks until the end */
+        return FALSE;
+    }
+
+    ses_indent(parms->scb, parms->startindent);
+    
+    /* write the data type, name and then endchar */
+    write_c_objtype_max(parms->scb, obj, parms->objnameQ, endchar,
+                        isconst,
+                        FALSE, /* needstar */
+                        FALSE, /* usename */
+                        FALSE, /* useprefix */
+                        FALSE, /* isuser */
+                        TRUE); /* isvar */
+    ses_putstr(parms->scb, (const xmlChar *)" = ");
+    if (notunion) {
+        write_c_val_macro_type(parms->scb, obj);
+        ses_putchar(parms->scb, '(');
+    }
+    ses_putstr(parms->scb, (const xmlChar *)"agt_get_key_value(");
+    ses_putstr(parms->scb, parms->parmname);
+    ses_putstr(parms->scb, (const xmlChar *)", &lastkey)");
+    if (notunion) {
+        ses_putchar(parms->scb, ')');
+    }
+    ses_putchar(parms->scb, ';');
+
+    return TRUE;
+} /* write_key_var */
+
+
+/********************************************************************
 * FUNCTION write_key_value
 * 
 * Write the key value get-function-call; walker function
@@ -336,8 +392,8 @@ static boolean
                      void *cookie2)
 {
     c_keywalker_parms_t *parms = (c_keywalker_parms_t *)cookie1;
+    const c_define_t    *cdef = NULL;    
     xmlChar              endchar;
-    boolean              notunion = (obj_get_basetype(obj) != NCX_BT_UNION);
 
     (void)cookie2;
 
@@ -348,18 +404,15 @@ static boolean
     }
 
     ses_indent(parms->scb, parms->startindent);
-    if (notunion) {
-        write_c_val_macro_type(parms->scb, obj);
-        ses_putchar(parms->scb, '(');
-    }
-    ses_putstr(parms->scb, (const xmlChar *)"agt_get_key_value(");
-    ses_putstr(parms->scb, parms->parmname);
-    ses_putstr(parms->scb, (const xmlChar *)", &lastkey)");
-    if (notunion) {
-        ses_putchar(parms->scb, ')');
-    }
-    if (endchar) {
-        ses_putchar(parms->scb, endchar);
+    /* write the variable name and then endchar */
+    cdef = find_path_cdefine(parms->objnameQ, obj);
+    if (cdef == NULL) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+    } else {
+        ses_putstr(parms->scb, cdef->varstr);
+        if (endchar) {
+            ses_putchar(parms->scb, endchar);
+        }
     }
 
     return TRUE;
@@ -1615,9 +1668,9 @@ void
 
 
 /********************************************************************
-* FUNCTION write_c_key_values
+* FUNCTION write_c_key_vars
 * 
-* Write all the keys in call-C-function-to-get-key-value format
+* Write all the local key variables in the SIL C function
 *
 * INPUTS:
 *   scb == session to use
@@ -1630,12 +1683,12 @@ void
 *
 *********************************************************************/
 void
-    write_c_key_values (ses_cb_t *scb, 
-                        obj_template_t *obj, 
-                        dlq_hdr_t *objnameQ, 
-                        const xmlChar *parmname,
-                        uint32 keycount,
-                        int32 startindent)
+    write_c_key_vars (ses_cb_t *scb, 
+                      obj_template_t *obj, 
+                      dlq_hdr_t *objnameQ, 
+                      const xmlChar *parmname,
+                      uint32 keycount,
+                      int32 startindent)
 {
     c_keywalker_parms_t parms;
 
@@ -1653,6 +1706,53 @@ void
     parms.scb = scb;
     parms.objnameQ = objnameQ;
     parms.parmname = parmname;
+    parms.keycount = keycount;
+    parms.keynum = 0;
+    parms.startindent = startindent;
+    parms.done = FALSE;
+
+    obj_traverse_keys(obj, &parms, NULL, write_key_var);
+
+} /* write_c_key_vars */
+
+
+/********************************************************************
+* FUNCTION write_c_key_values
+* 
+* Write all the keys in call-C-function-to-get-key-value format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+void
+    write_c_key_values (ses_cb_t *scb, 
+                        obj_template_t *obj, 
+                        dlq_hdr_t *objnameQ, 
+                        uint32 keycount,
+                        int32 startindent)
+{
+    c_keywalker_parms_t parms;
+
+#ifdef DEBUG
+    if (!scb || !obj || !objnameQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (keycount == 0) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    parms.scb = scb;
+    parms.objnameQ = objnameQ;
+    parms.parmname = NULL;
     parms.keycount = keycount;
     parms.keynum = 0;
     parms.startindent = startindent;

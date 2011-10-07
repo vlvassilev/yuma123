@@ -622,6 +622,9 @@ static void
             ses_putstr_indent(scb, 
                               (const xmlChar *)"val_value_t *lastkey = NULL;",
                               indent);
+            /* add the key local variables */
+            write_c_key_vars(scb, obj, objnameQ, PARM_ERRORVAL, 
+                             keycount, indent);
         }
     }
 
@@ -640,9 +643,12 @@ static void
                       indent*3);
     ses_putstr_indent(scb, (const xmlChar *)"}", indent);
 
-    /* generate call to user edit function if format is yuma C */
+    /* generate call to user edit function if format is yuma C
+     * first need to get all the local variables
+     */
     if (cp->format == NCX_CVTTYP_YC) {
         ses_putchar(scb, '\n');
+
         ses_putstr_indent(scb, (const xmlChar *)"res = u_", indent);
         ses_putstr(scb, cdef->idstr);
         ses_putstr(scb, EDIT_SUFFIX);
@@ -650,8 +656,7 @@ static void
                    (const xmlChar *)"(scb, msg, cbtyp, editop, newval, curval");
         if (keycount) {
             ses_putchar(scb, ',');
-            write_c_key_values(scb, obj, objnameQ, PARM_ERRORVAL, keycount,
-                               indent+indent);
+            write_c_key_values(scb, obj, objnameQ, keycount, indent+indent);
         }
         ses_putchar(scb, ')');
         ses_putchar(scb, ';');
@@ -901,6 +906,8 @@ static void
             ses_putstr_indent(scb, 
                               (const xmlChar *)"val_value_t *lastkey = NULL;",
                               indent);
+            /* add the key local variables */
+            write_c_key_vars(scb, obj, objnameQ, PARM_DSTVAL, keycount, indent);
         }
         break;
     default:
@@ -1101,8 +1108,7 @@ static void
         ses_putstr(scb, (const xmlChar *)"(dstval");
         if (keycount) {
             ses_putchar(scb, ',');
-            write_c_key_values(scb, obj, objnameQ, PARM_DSTVAL, keycount,
-                               indent+indent);
+            write_c_key_values(scb, obj, objnameQ, keycount, indent+indent);
         }
         ses_putchar(scb, ')');
         ses_putchar(scb, ';');

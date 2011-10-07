@@ -7186,6 +7186,7 @@ status_t
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
         useline = newline;
+        linelen = xml_strlen(newline);
     } else {
         log_error("\nError: %s\n", get_error_string(res));
         if (newline) {

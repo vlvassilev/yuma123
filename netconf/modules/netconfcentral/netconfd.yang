@@ -21,6 +21,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-10-06 {
+       description 
+         "Add --home parameter.";
+    }
+
     revision 2011-08-27 {
        description 
          "Add --runpath parameter.
@@ -112,6 +117,8 @@ module netconfd {
             netconfd [parameters]";
 
       uses ncxapp:NcxAppCommon;
+
+      uses ncxapp:HomeParm;
 
       uses ncxapp:SubdirsParm;
 

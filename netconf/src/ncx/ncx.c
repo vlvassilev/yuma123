@@ -655,13 +655,24 @@ static status_t
     logappend = FALSE;
     loglevel = LOG_DEBUG_NONE;
 
-    /* create bootstrap parm: log-level */
-    parm = cli_new_rawparm(NCX_EL_LOGLEVEL);
+    /* create bootstrap parm: home */
+    parm = cli_new_rawparm(NCX_EL_HOME);
     if (parm) {
         dlq_enque(parm, &parmQ);
     } else {
         log_error("\nError: malloc failed");
         res = ERR_INTERNAL_MEM;
+    }
+
+    /* create bootstrap parm: log-level */
+    if (res == NO_ERR) {
+        parm = cli_new_rawparm(NCX_EL_LOGLEVEL);
+        if (parm) {
+            dlq_enque(parm, &parmQ);
+        } else {
+            log_error("\nError: malloc failed");
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* create bootstrap parm: log */
@@ -724,6 +735,20 @@ static status_t
     if (res != NO_ERR) {
         cli_clean_rawparmQ(&parmQ);
         return res;
+    }
+
+    /* --home=<dirspec> */
+    parm = cli_find_rawparm(NCX_EL_HOME, &parmQ);
+    if (parm && parm->count) {
+        if (parm->count > 1) {
+            log_error("\nError: Only one home parameter allowed");
+            res = ERR_NCX_DUP_ENTRY;
+        } else if (parm->value) {
+            ncxmod_set_home((const xmlChar *)parm->value);
+        } else {
+            log_error("\nError: no value entered for 'home' parameter");
+            res = ERR_NCX_INVALID_VALUE;
+        }
     }
 
     /* --log-level=<debug_level> */

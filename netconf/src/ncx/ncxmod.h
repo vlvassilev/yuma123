@@ -744,6 +744,35 @@ extern xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncxmod_set_home
+* 
+*   Override the HOME env var with the home CLI var
+*
+* THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
+* MALLOC FAILED IGNORED!!!
+*
+* INPUTS:
+*   home == new HOME value
+*        == NULL or empty string to disable
+*********************************************************************/
+extern void
+    ncxmod_set_home (const xmlChar *home);
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_home
+*
+*  Get the HOME or --home parameter value,
+*  whichever is in effect, if any
+*
+* RETURNS:
+*   const point to the home variable, or NULL if not set
+*********************************************************************/
+extern const xmlChar *
+    ncxmod_get_home (void);
+
+
+/********************************************************************
 * FUNCTION ncxmod_set_yuma_home
 * 
 *   Override the YUMA_HOME env var with the yuma-home CLI var

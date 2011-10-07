@@ -1737,7 +1737,7 @@ static status_t
         return res;
     }
 
-    envstr = getenv(USER_HOME);
+    envstr = (const char *)ncxmod_get_home();
     res = create_system_var(server_cb, USER_HOME, envstr);
     if (res != NO_ERR) {
         return res;
@@ -1893,7 +1893,7 @@ static status_t
         return res;
     }
 
-    /* $$ echo-replies = boolean */
+    /* $$echo-replies = boolean */
     res = create_config_var(server_cb, YANGCLI_ECHO_REPLIES, 
                             (echo_replies) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {

@@ -552,13 +552,8 @@ static void
 #if 0
     char addrbuff[16];
     socklen_t  socklen = 16;
-    int ret = getsockname(scb->fd,
-                          addrbuff,
-                          &socklen);
-    inet_ntop(AF_INET, 
-              addrbuff,
-              buffer,
-              64);
+    int ret = getsockname(scb->fd, addrbuff, &socklen);
+    inet_ntop(AF_INET, addrbuff, buffer, 64);
     ses_putstr(scb, (const xmlChar *)buffer);
 #else
     /* use bogus address for now */
@@ -578,7 +573,7 @@ static void
     /* additional group IDs is empty */
     ses_putchar(scb, ';');
     
-    str = getenv("HOME");
+    str = (const char *)ncxmod_get_home();
     if (str != NULL) {
         ses_putstr(scb, (const xmlChar *)str);
         ses_putchar(scb, ';');

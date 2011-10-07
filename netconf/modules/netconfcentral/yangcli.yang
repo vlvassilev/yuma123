@@ -50,13 +50,14 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-09-30 {
+    revision 2011-10-06 {
        description 
          "Add CLI parameters:
             --aliases-file
             --autoaliases
             --autouservars
             --uservars-file
+            --home
           Add yangcli local commands:
             alias
             aliases
@@ -641,6 +642,8 @@ module yangcli {
       uses ncxapp:NcxAppCommon;
 
       uses ncxapp:SubdirsParm;
+
+      uses ncxapp:HomeParm;
 
       uses ConnectParms;
 

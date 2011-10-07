@@ -109,6 +109,11 @@ module yangdiff {
     
         ";
 
+    revision 2011-10-06 {
+       description 
+         "Add --home parameter,";
+    }
+
     revision 2009-04-10 {
        description 
           "Moved common parameters to ncx-app-common";
@@ -279,6 +284,8 @@ module yangdiff {
           type boolean;
           default true;
         }
+
+        uses ncxapp:HomeParm;
 
         uses ncxapp:SubdirsParm;
     }

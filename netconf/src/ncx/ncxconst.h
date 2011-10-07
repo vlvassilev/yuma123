@@ -510,6 +510,7 @@ extern "C" {
 #define NCX_EL_HELLO_TIMEOUT   (const xmlChar *)"hello-timeout"
 #define NCX_EL_HELP            (const xmlChar *)"help"
 #define NCX_EL_HIDDEN          (const xmlChar *)"hidden"
+#define NCX_EL_HOME            (const xmlChar *)"home"
 #define NCX_EL_HTML            (const xmlChar *)"html"
 #define NCX_EL_IDENTIFIER      (const xmlChar *)"identifier"
 #define NCX_EL_IDENTITYREF     (const xmlChar *)"identityref"

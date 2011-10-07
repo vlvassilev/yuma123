@@ -138,6 +138,11 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
+    revision 2011-10-06 {
+       description 
+         "Add --home parameter.";
+    }
+
     revision 2011-09-12 {
        description 
           "Add --format=uc and --format=uh to support
@@ -274,6 +279,8 @@ module yangdump {
         uses ncxapp:NcxAppCommon;
 
         uses ncxapp:FeatureCodeParms;
+
+        uses ncxapp:HomeParm;
 
         uses ncxapp:ModuleParm;
 

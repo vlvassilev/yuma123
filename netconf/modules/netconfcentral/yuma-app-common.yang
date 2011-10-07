@@ -14,6 +14,11 @@ module yuma-app-common {
     description 
        "Common CLI parameters used in all yuma applications.";
 
+    revision 2011-10-06 {
+       description 
+         "Add HomeParm grouping,";
+    }
+
     revision 2011-04-24 {
        description 
          "Remove empty featureParms grouping.
@@ -415,6 +420,16 @@ module yuma-app-common {
            /* default "netconf1.0 netconf1.1"; */
         }
     }
+
+    grouping HomeParm {
+        leaf home {
+           description
+              "Directory specification for the home directory
+               to use instead of HOME.";
+           type string { length "1..max"; }
+        }
+    }
+
 }
 
 

@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -72,11 +72,11 @@ echo "Yuma documentation files installed."
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make LIB64=1 RELEASE=2 %{?_smp_mflags}
+make LIB64=1 RELEASE=3 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id LIB64=1 RELEASE=2 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id LIB64=1 RELEASE=3 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT

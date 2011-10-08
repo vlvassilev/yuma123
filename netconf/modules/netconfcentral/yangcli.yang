@@ -50,7 +50,7 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-10-06 {
+    revision 2011-10-08 {
        description 
          "Add CLI parameters:
             --aliases-file
@@ -640,6 +640,8 @@ module yangcli {
         "CLI Parameter Set for the NETCONF Client Application.";
 
       uses ncxapp:NcxAppCommon;
+
+      uses ncxapp:CommonFeatureParms;
 
       uses ncxapp:SubdirsParm;
 

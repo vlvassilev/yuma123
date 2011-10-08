@@ -21,7 +21,7 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
-    revision 2011-10-06 {
+    revision 2011-10-08 {
        description 
          "Add --home parameter.";
     }
@@ -117,6 +117,8 @@ module netconfd {
             netconfd [parameters]";
 
       uses ncxapp:NcxAppCommon;
+
+      uses ncxapp:CommonFeatureParms;
 
       uses ncxapp:HomeParm;
 

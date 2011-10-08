@@ -138,7 +138,7 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
-    revision 2011-10-06 {
+    revision 2011-10-08 {
        description 
          "Add --home parameter.";
     }
@@ -277,6 +277,8 @@ module yangdump {
          "CLI Parameter Set for the YANG Converter Application.";
 
         uses ncxapp:NcxAppCommon;
+
+        uses ncxapp:CommonFeatureParms;
 
         uses ncxapp:FeatureCodeParms;
 

@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "September 25, 2011" Linux "netconfd 2.1"
+.TH netconfd 1 "October 7, 2011" Linux "netconfd 2.1"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -109,7 +109,7 @@ Internal file search path for configuration data files.
 Overrides the YUMA_DATAPATH environment variable.
 This parameter affects the search for the startup 
 configuration file (default: startup-cfg.xml).
-.IP --\fBdefault-style\fP=enum
+.IP --\fBdefault-style\fP=enum 
 Selects the type of filtering behavior the server will
 advertise as the 'basic' behavior in the 'with-defaults'
 capability.  The server will use this default handling
@@ -177,6 +177,9 @@ The default value is 600 seconds (10 minutes).
 Print this help text and exit.
 The help-mode choice (--brief, --normal, or --full) may also be present
 to control the amount of help text printed.
+.IP --\fBhome\fP=dirspec
+Directory specification for the home directory
+to use instead of HOME.
 .IP --\fBidle-timeout\fP=number
 Specifies the number of seconds that a session
 may remain idle without issuing any RPC requests.
@@ -257,6 +260,14 @@ will be accepted by the server.
 
 If no ports are configured, then the server will accept
 connections on the netconf-ssh port (tcp/830).
+.IP --\fBprotocols\fP=bits
+Specifies which NETCONF protocol versions the server
+will attempt to use. The empty set is not allowed.
+The values 'netconf1.0' and 'netconf1.1' are supported.
+The default is to enable both NETCONF protocol versions.
+.IP --\fBrunpath\fP=pathlist
+Internal file search path for executable modules.
+Overrides the YUMA_RUNPATH environment variable.
 .IP --\fBstartup\fP=filespec
 The full or relative filespec of the startup config file to use.
 If present, overrides the default startup config
@@ -265,14 +276,22 @@ override the YUMA_DATAPATH environement variable
 and the datapath CLI parameter, if the first
 character is the forward slash '/', indicating
 an absolute file path.  If this parameter is present,
-then the --no-startup parameter cannot be present.
+then the --no-startup and --factory-startup parameters cannot be present.
 This is the default, which will cause startup-cfg.xml to
 be used if not present.
 .IP --\fBno-startup\fP
 If present, do not load the startup config file.
 Use only factory default values instead.
+Does not affect the startup.cfg file, if present.
 If this parameter is present, then the --startup
-paraemter cannot be present.
+or --factory-startup parameter cannot be present.
+.IP --\fBfactory-startup\fP
+Force the system to use the factory configuration
+and delete the startup config file if it exists.
+Force the NV-storage startup to
+contain the factory default configuration.
+If this parameter is present,
+then the --no-startup and --startup parameters cannot be present.
 .IP --\fBstartup-error\fP=boolean
 If true, then errors in the startup configuration will be
 treated as fatal errors.  If false, the server will attempt

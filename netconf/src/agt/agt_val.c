@@ -27,129 +27,40 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_acm
 #include "agt_acm.h"
-#endif
-
-#ifndef _H_agt_cap
 #include "agt_cap.h"
-#endif
-
-#ifndef _H_agt_cb
 #include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_ncx
 #include "agt_ncx.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_agt_val
 #include "agt_val.h"
-#endif
-
-#ifndef _H_agt_val_parse
 #include "agt_val_parse.h"
-#endif
-
-#ifndef _H_cap
 #include "cap.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_plock
 #include "plock.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_typ
-#include  "typ.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xpath
-#include  "xpath.h"
-#endif
-
-#ifndef _H_xpath_yang
-#include  "xpath_yang.h"
-#endif
-
-#ifndef _H_xpath1
-#include  "xpath1.h"
-#endif
-
-#ifndef _H_yangconst
-#include  "yangconst.h"
-#endif
+#include "status.h"
+#include "typ.h"
+#include "tstamp.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xpath.h"
+#include "xpath_yang.h"
+#include "xpath1.h"
+#include "yangconst.h"
 
 
 /********************************************************************
@@ -182,7 +93,8 @@ static status_t
                           rpc_msg_t  *msg,
                           val_value_t *newnode,
                           val_value_t *curnode,
-                          boolean lookparent);
+                          boolean lookparent,
+                          boolean indelete);
 
 static status_t
     apply_commit_deletes (ses_cb_t  *scb,
@@ -290,12 +202,12 @@ static void
 } /* handle_audit_record */
 
 
-
 /********************************************************************
 * FUNCTION handle_subtree_node_callback
 * 
-* Compare current node if 
-* functions and invoke them
+* Compare current node if config
+* find the nodes that changed and call the
+* relevant user callback functions
 *
 * INPUTS:
 *    scb == session control block invoking the callback
@@ -356,13 +268,9 @@ static status_t
         }
     }
 
-    res = handle_user_callback(cbtyp,
-                               editop,
-                               scb,
-                               msg,
-                               newnode,
-                               curnode,
-                               FALSE);
+    res = handle_user_callback(cbtyp, editop, scb, msg, newnode, 
+                               curnode, FALSE,
+                               (editop == OP_EDITOP_DELETE) ? TRUE : FALSE);
 
     return res;
 
@@ -376,10 +284,10 @@ static status_t
 * functions and invoke them
 *
 * INPUTS:
-*    scb == session control block invoking the callback
-*    msg == RPC message in progress
 *    cbtyp == agent callback type
 *    editop == edit operation applied to newnode oand/or curnode
+*    scb == session control block invoking the callback
+*    msg == RPC message in progress
 *    newnode == new node in operation
 *    curnode == current node in operation
 *
@@ -415,12 +323,8 @@ static status_t
             curchild = NULL;
         }
 
-        res = handle_subtree_node_callback(cbtyp,
-                                           editop,
-                                           scb,
-                                           msg,
-                                           newchild,
-                                           curchild);
+        res = handle_subtree_node_callback(cbtyp, editop, scb,
+                                           msg, newchild, curchild);
         if (res != NO_ERR) {
             return res;
         }
@@ -440,12 +344,8 @@ static status_t
 
         newchild = val_first_child_match(newnode, curchild);
         if (newchild == NULL) {
-            res = handle_subtree_node_callback(cbtyp,
-                                               OP_EDITOP_DELETE,
-                                               scb,
-                                               msg,
-                                               NULL,
-                                               curchild);
+            res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE,
+                                               scb, msg, NULL, curchild);
             if (res != NO_ERR) {
                 return res;
             }
@@ -455,6 +355,77 @@ static status_t
     return res;
 
 } /* handle_subtree_callback */
+
+
+/********************************************************************
+* FUNCTION delete_children_first
+* 
+* Doing a delete operation and checking for the 
+* sil-delete-children-first flag. Just calling the
+* SIL callback functions, not actually removing the
+* child nodes in case a rollback is needed
+*
+* Calls recursively for all child nodes where sil-delete-children-first
+* is set, then invokes the SIL callback for the 'curnode' last
+*
+* INPUTS:
+*    cbtyp == agent callback type
+*    scb == session control block invoking the callback
+*    msg == RPC message in progress
+*    curnode == current node in operation
+*
+* RETURNS:
+*   status of the operation (usually returned from the callback)
+*   NO USER CALLBACK FOUND == NO_ERR
+*********************************************************************/
+static status_t
+    delete_children_first (agt_cbtyp_t cbtyp,
+                           ses_cb_t  *scb,
+                           rpc_msg_t  *msg,
+                           val_value_t *curnode)
+{
+    val_value_t  *curchild;
+    status_t      res = NO_ERR;
+
+    if (curnode == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (LOGDEBUG2) {
+        log_debug2("\nEnter delete_children_first for '%s'", curnode->name);
+    }
+
+    for (curchild = val_get_first_child(curnode);
+         curchild != NULL;
+         curchild = val_get_next_child(curchild)) {
+
+        if (!obj_is_config(curchild->obj)) {
+            continue;
+        }
+
+        if (obj_is_leafy(curchild->obj)) {
+            continue;
+        }
+
+        if (obj_is_sil_delete_children_first(curchild->obj)) {
+            res = delete_children_first(cbtyp, scb, msg, curchild);
+        } else {
+            res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE, scb,
+                                               msg, NULL, curchild);
+        }
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (!obj_is_leafy(curnode->obj)) {
+        res = handle_subtree_node_callback(cbtyp, OP_EDITOP_DELETE, scb,
+                                           msg, NULL, curnode);
+    }
+
+    return res;
+
+} /* delete_children_first */
 
 
 /********************************************************************
@@ -471,6 +442,8 @@ static status_t
 *    curnode == current node in operation
 *    lookparent == TRUE if the parent should be checked for
 *                  a callback function; FALSE otherwise
+*    indelete == TRUE if in middle of a sil-delete-children-first
+*                 callback; FALSE if not
 * RETURNS:
 *   status of the operation (usually returned from the callback)
 *   NO USER CALLBACK FOUND == NO_ERR
@@ -482,7 +455,8 @@ static status_t
                           rpc_msg_t  *msg,
                           val_value_t *newnode,
                           val_value_t *curnode,
-                          boolean lookparent)
+                          boolean lookparent,
+                          boolean indelete)
 {
     agt_cb_fnset_t    *cbset;
     val_value_t       *val;
@@ -511,11 +485,27 @@ static status_t
     }
 #endif
 
-    /* no difference during apply stage, so treat remove
-     * the same as a delete for user callback purposes
+    /* no difference during apply stage, and validate
+     * stage checks differences before callback invoked
+     * so treat remove the same as a delete for user callback purposes
      */
     if (editop == OP_EDITOP_REMOVE) {
         editop = OP_EDITOP_DELETE;
+    }
+
+    /* check if this is a child-first delete
+     * the child nodes may have SIL callbacks and not the
+     * parent, so the recursion is done before the
+     * SIL callback is found for the current node
+     * Only call during COMMIT phase
+     */
+    if (obj_is_sil_delete_children_first(val->obj) &&
+        !obj_is_leafy(val->obj) &&
+        !indelete && 
+        editop == OP_EDITOP_DELETE &&
+        (cbtyp == AGT_CB_COMMIT || cbtyp == AGT_CB_COMMIT_CHECK)) {
+        res = delete_children_first(cbtyp, scb, msg, curnode);
+        return res;
     }
 
     /* find the right callback function to call */
@@ -1301,7 +1291,7 @@ static status_t
         }
 
         res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
-                                   newval, curval, TRUE);
+                                   newval, curval, TRUE, FALSE);
         if (res != NO_ERR) {
             return res;
         }
@@ -1968,11 +1958,8 @@ static status_t
 
             res = handle_user_callback(AGT_CB_VALIDATE, 
                                        newval->editvars->editop,
-                                       scb, 
-                                       msg, 
-                                       newval, 
-                                       curval,
-                                       TRUE);
+                                       scb, msg, newval, curval,
+                                       TRUE, FALSE);
             if (res != NO_ERR) {
                 errdone = TRUE;
             }
@@ -2193,19 +2180,12 @@ static status_t
                             curval)) {
             res = handle_user_callback(AGT_CB_VALIDATE, 
                                        newval->editvars->editop,
-                                       scb, 
-                                       msg, 
-                                       newval, 
-                                       curval,
-                                       TRUE);
+                                       scb, msg, newval, curval,
+                                       TRUE, FALSE);
         }
 
         if (res == NO_ERR && topreplace) {
-            res = check_commit_deletes(scb,
-                                       msg,
-                                       newval,
-                                       curval,
-                                       TRUE);
+            res = check_commit_deletes(scb, msg, newval, curval, TRUE);
         }
         if (res != NO_ERR) {
             retres = res;
@@ -2213,9 +2193,7 @@ static status_t
         break;
     case AGT_CB_TEST_APPLY:
         res = test_apply_write_val(newval->editvars->curparent, 
-                                   newval, 
-                                   curval, 
-                                   &done);
+                                   newval, curval, &done);
         if (res != NO_ERR) {
             retres = res;
         }
@@ -2462,13 +2440,9 @@ static void
         /* Since 'create' cannot apply to an attribute,
          * the metadata is not checked
          */
-        res = handle_user_callback(AGT_CB_ROLLBACK, 
-                                   undo->editop,
-                                   scb, 
-                                   msg, 
-                                   undo->newnode, 
-                                   curval,
-                                   TRUE);
+        res = handle_user_callback(AGT_CB_ROLLBACK, undo->editop,
+                                   scb, msg, undo->newnode, curval,
+                                   TRUE, FALSE);
 
         /* delete the node from the tree
          * unless it is a default leaf
@@ -2486,13 +2460,9 @@ static void
         /* Since 'delete' cannot apply to an attribute,
          * the metadata is not checked
          */
-        res = handle_user_callback(AGT_CB_ROLLBACK, 
-                                   undo->editop,
-                                   scb,
-                                   msg, 
-                                   undo->newnode,
-                                   curval,
-                                   TRUE);
+        res = handle_user_callback(AGT_CB_ROLLBACK, undo->editop,
+                                   scb, msg, undo->newnode, curval,
+                                   TRUE, FALSE);
 
         /* the node is still in the tree,
          * do not need to do anything to undo a delete
@@ -2501,13 +2471,9 @@ static void
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:
         /* call the user rollback handler, if any */
-        res = handle_user_callback(AGT_CB_ROLLBACK, 
-                                   undo->editop,
-                                   scb,
-                                   msg, 
-                                   undo->newnode,
-                                   curval,
-                                   TRUE);
+        res = handle_user_callback(AGT_CB_ROLLBACK, undo->editop,
+                                   scb, msg, undo->newnode, curval,
+                                   TRUE, FALSE);
 
         /* check if the old node needs to be swapped back
          * of if the new node is just removed
@@ -2516,8 +2482,7 @@ static void
             if (undo->curnode) {
                 /* try to replace old curval */
                 if (undo->curnode_clone) {
-                    val_swap_child(undo->curnode_clone, 
-                                   undo->curnode);
+                    val_swap_child(undo->curnode_clone, undo->curnode);
 
                     if (target->cfg_id == NCX_CFGID_RUNNING) {
                         val_check_swap_resnode(undo->curnode, 
@@ -2603,13 +2568,9 @@ static void
                 undo->curnode->parent = undo->parentnode;
             }
 
-            res = handle_user_callback(AGT_CB_COMMIT, 
-                                       undo->editop, 
-                                       scb, 
-                                       msg, 
-                                       undo->newnode, 
-                                       undo->curnode,
-                                       TRUE);
+            res = handle_user_callback(AGT_CB_COMMIT, undo->editop, 
+                                       scb, msg, undo->newnode, 
+                                       undo->curnode, TRUE, FALSE);
             if ( NO_ERR != res )
             {
                /* FIXME: errors returned by handle_user_callback() are

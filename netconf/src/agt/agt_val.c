@@ -1894,7 +1894,8 @@ static status_t
         if (res == NO_ERR) {
             res = agt_check_max_access(newval->editvars->editop, 
                                        obj_get_max_access(newval->obj), 
-                                       (curval != NULL));
+                                       (curval != NULL),
+                                       obj_is_key(newval->obj));
         }
 
         /* make sure the node is not partial locked
@@ -2148,7 +2149,8 @@ static status_t
         if (res == NO_ERR) {
             res = agt_check_max_access(newval->editvars->editop, 
                                        obj_get_max_access(newval->obj), 
-                                       (curval != NULL));
+                                       (curval != NULL),
+                                       obj_is_key(newval->obj));
         }
 
         if (res == NO_ERR) {

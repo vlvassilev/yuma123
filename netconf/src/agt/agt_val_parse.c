@@ -577,7 +577,8 @@ static status_t
                                   nextnode.elname, 
                                   TRUE, 
                                   retval, 
-                                  get_editop(&nextnode));
+                                  get_editop(&nextnode),
+                                  ncx_get_gen_anyxml());
         if (!chval) {
             res = ERR_INTERNAL_MEM;
         }
@@ -1461,8 +1462,18 @@ static status_t
     }
 
     if (empty) {
+        res2 = NO_ERR;
         xml_clean_node(&valnode);
-        return NO_ERR;
+        if (retval->v.str == NULL) {
+            retval->v.str = xml_strdup(EMPTY_STRING);
+            if (retval->v.str == NULL) {
+                res2 = ERR_INTERNAL_MEM;
+            }
+        }
+        if (res2 == NO_ERR && obj_is_key(retval->obj)) {
+            res2 = val_gen_key_entry(retval);
+        }
+        return res2;
     }
 
 #ifdef AGT_VAL_PARSE_DEBUG
@@ -2231,7 +2242,8 @@ static status_t
                                       obj_get_name(curchild), 
                                       FALSE, 
                                       retval, 
-                                      get_editop(&chnode));
+                                      get_editop(&chnode),
+                                      curchild);
             if (!chval) {
                 res = ERR_INTERNAL_MEM;
             }

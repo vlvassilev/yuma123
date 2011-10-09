@@ -411,7 +411,8 @@ static status_t
                                   nextnode.elname, 
                                   TRUE, 
                                   retval, 
-                                  get_editop(&nextnode));
+                                  get_editop(&nextnode),
+                                  ncx_get_gen_anyxml());
         if (!chval) {
             res = ERR_INTERNAL_MEM;
         }
@@ -1622,7 +1623,8 @@ static status_t
                                   obj_get_name(curchild), 
                                   errmode, 
                                   retval, 
-                                  get_editop(&chnode));
+                                  get_editop(&chnode),
+                                  curchild);
             if (!chval) {
                 res = ERR_INTERNAL_MEM;
             }

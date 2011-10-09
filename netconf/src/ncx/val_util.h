@@ -368,16 +368,18 @@ extern void
  *   copyname == TRUE is dname strdup should be used
  *   parent == parent node
  *   editop == requested edit operation
- *   
+ *   obj == object template to use
+ *
  * RETURNS:
  *   status
  *********************************************************************/
 extern val_value_t *
     val_new_child_val (xmlns_id_t   nsid,
-		       const xmlChar *name,
-		       boolean copyname,
-		       val_value_t *parent,
-		       op_editop_t editop);
+                       const xmlChar *name,
+                       boolean copyname,
+                       val_value_t *parent,
+                       op_editop_t editop,
+                       obj_template_t *obj);
 
 
 /********************************************************************

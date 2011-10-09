@@ -1664,7 +1664,8 @@ void
  *   copyname == TRUE is dname strdup should be used
  *   parent == parent node
  *   editop == requested edit operation
- *   
+ *   obj == object template to use
+ *
  * RETURNS:
  *   status
  *********************************************************************/
@@ -1673,7 +1674,8 @@ val_value_t *
                        const xmlChar *name,
                        boolean copyname,
                        val_value_t *parent,
-                       op_editop_t editop)
+                       op_editop_t editop,
+                       obj_template_t *obj)
 {
     val_value_t *chval;
 
@@ -1698,6 +1700,7 @@ val_value_t *
     chval->parent = parent;
     chval->editvars->editop = editop;
     chval->nsid = nsid;
+    chval->obj = obj;
 
     return chval;
 

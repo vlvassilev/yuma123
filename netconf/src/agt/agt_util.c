@@ -1706,13 +1706,15 @@ status_t
 *   op == requested op
 *   acc == max-access for the parameter
 *   cur_exists == TRUE if the corresponding node in the target exists
+*   iskey == TRUE if the target node is a key
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
     agt_check_max_access (op_editop_t  op,
                           ncx_access_t acc,
-                          boolean cur_exists)
+                          boolean cur_exists,
+                          boolean iskey)
 {
     switch (op) {
     case OP_EDITOP_NONE:
@@ -1745,6 +1747,19 @@ status_t
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
     case OP_EDITOP_CREATE:
+        switch (acc) {
+        case NCX_ACCESS_NONE:
+            return ERR_NCX_NO_ACCESS_MAX;
+        case NCX_ACCESS_RO:
+            return ERR_NCX_ACCESS_READ_ONLY;
+        case NCX_ACCESS_RW:
+            return ERR_NCX_NO_ACCESS_MAX;
+        case NCX_ACCESS_RC:
+            /* create/delete allowed */
+            return NO_ERR;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
     case OP_EDITOP_DELETE:
     case OP_EDITOP_REMOVE:
         switch (acc) {
@@ -1756,7 +1771,7 @@ status_t
             return ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RC:
             /* create/delete allowed */
-            return NO_ERR;
+            return (iskey) ? ERR_NCX_NO_ACCESS_MAX : NO_ERR;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }

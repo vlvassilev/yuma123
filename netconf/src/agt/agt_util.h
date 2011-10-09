@@ -544,13 +544,15 @@ extern status_t
 *   op == requested op
 *   acc == max-access for the parameter
 *   cur_exists == TRUE if the corresponding node in the target exists
+*   iskey == TRUE if the target node is a key
 * RETURNS:
 *   status
 *********************************************************************/
 extern status_t
     agt_check_max_access (op_editop_t  op,
 			  ncx_access_t acc,
-			  boolean cur_exists);
+			  boolean cur_exists,
+                          boolean iskey);
 
 
 /********************************************************************

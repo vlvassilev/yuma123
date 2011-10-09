@@ -699,6 +699,9 @@ static rpc_err_t
     case ERR_NCX_NO_DEFAULT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
         return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_MISSING_KEY:
+        *apptag = RPC_ERR_APPTAG_DATA_INVALID;
+        return RPC_ERR_MISSING_ELEMENT;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -1176,6 +1179,7 @@ rpc_err_rec_t *
     case ERR_NCX_MISSING_PARM:
     case ERR_NCX_EXTRA_CHOICE:
     case ERR_NCX_MISSING_CHOICE:
+    case ERR_NCX_MISSING_KEY:
         if (!error_parm) {
             SET_ERROR(ERR_INTERNAL_PTR);
         } else {
@@ -1195,6 +1199,13 @@ rpc_err_rec_t *
                 }
                 break;
             case NCX_NT_STRING:
+                /* FIXME: setting this to 0 may cause a
+                 * SET_ERROR when the XML element is printed
+                 * because the error-info 'bad-element'
+                 * is supposed to be a QName and nsid must != 0
+                 * TBD: redo this whole error API!!!
+                 * but first just pass in the NSID of the bad-element
+                 */
                 badnsid1 = 0;
                 err2 = (const void *)error_parm;
                 break;

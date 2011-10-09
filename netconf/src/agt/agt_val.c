@@ -2031,6 +2031,57 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION check_keys_present
+* 
+* Check that the specified list entry has all key leafs present
+* Generate and record <rpc-error>s for each missing key
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming rpc_msg_t in progress
+*   newval == val_value_t from the PDU
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_keys_present (ses_cb_t  *scb,
+                        rpc_msg_t  *msg,
+                        val_value_t  *newval)
+{
+    obj_key_t        *objkey = NULL;
+    status_t          res = NO_ERR;
+
+    if (newval->obj->objtype != OBJ_TYP_LIST) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    for (objkey = obj_first_key(newval->obj);
+         objkey != NULL;
+         objkey = obj_next_key(objkey)) {
+
+        if (val_find_child(newval, obj_get_mod_name(objkey->keyobj),
+                           obj_get_name(objkey->keyobj))) {
+            continue;
+        }
+
+        res = ERR_NCX_MISSING_KEY;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_CONTENT, 
+                         res,
+                         NULL, 
+                         NCX_NT_OBJ, 
+                         objkey->keyobj, /* error-info */
+                         NCX_NT_VAL, 
+                         newval);  /* error-path */
+    }
+
+    return res;
+
+} /* check_keys_present */
+
+
+/********************************************************************
 * FUNCTION invoke_cpxval_cb
 * 
 * Invoke all the specified agent complex type callbacks for a 
@@ -2122,6 +2173,14 @@ static status_t
                              NCX_NT_VAL, 
                              newval);
             CHK_EXIT(res, retres);
+        }
+
+        if (res == NO_ERR && newval->btyp == NCX_BT_LIST) {
+            /* make sure all the keys are present since this
+             * was not done in agt_val_parse.c
+             */
+            res = check_keys_present(scb, msg, newval);
+            /* errors recorded if any */
         }
 
         /* check if the wd:default attribute is present and if so,

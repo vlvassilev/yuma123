@@ -672,6 +672,8 @@ const char *
         return "multiple matches found";
     case ERR_NCX_NO_DEFAULT:
         return "no schema default for this node";
+    case ERR_NCX_MISSING_KEY:
+        return "expected key leaf in list";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

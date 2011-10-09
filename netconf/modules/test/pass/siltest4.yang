@@ -41,7 +41,7 @@ module siltest4 {
              leaf xxx { type string; }
              leaf yyy { type boolean; }
              leaf zzz { type uint64; config false; }
-             container xxx {
+             container con-xxx {
                 // this SIL will not get called in ancestor deleted
                 leaf x { type string; }
              }

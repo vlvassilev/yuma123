@@ -509,21 +509,14 @@ static status_t
     }
 
     /* print all the <error-info> elements */    
-    send_rpc_error_info(scb,
-                        msg,
-                        err,
-                        indent);
+    send_rpc_error_info(scb, msg,  err, indent);
 
     if (indent >= 0) {
         indent -= ses_indent_count(scb);
     }
 
     /* generate the <rpc-error> end tag */
-    xml_wr_end_elem(scb, 
-                    msg, 
-                    ncid, 
-                    NCX_EL_RPC_ERROR, 
-                    indent);
+    xml_wr_end_elem(scb, msg, ncid, NCX_EL_RPC_ERROR, indent);
 
     return retres;
 

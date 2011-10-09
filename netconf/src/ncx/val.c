@@ -787,19 +787,25 @@ static int32
             return 1;
         }
 
+        if (xml_strcmp(c1->val->name, c2->val->name)) {
+            /* could be an invalid key not checked yet
+             * not calling SET_ERROR()
+             */
+            return -2;
+        }
+
         res = NO_ERR;
 
         /* same name in the same namespace */
         if (c1->val->btyp == c2->val->btyp) {
             cmp = val_compare(c1->val, c2->val);
         } else if (typ_is_string(c1->val->btyp)) {
-            cmp = val_compare_to_string(val2,
-                                        VAL_STR(c1->val), 
-                                        &res);
+            /* this might be anyxml parse */
+            cmp = val_compare_to_string(c2->val, VAL_STR(c1->val), &res);
+            cmp *= -1;
         } else if (typ_is_string(c2->val->btyp)) {
-            cmp = val_compare_to_string(val1,
-                                        VAL_STR(c2->val), 
-                                        &res);
+            /* this might be anyxml parse */
+            cmp = val_compare_to_string(c1->val, VAL_STR(c2->val), &res);
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
             return -2;
@@ -2649,9 +2655,18 @@ status_t
             prefixnsid = mod->nsid;
             identity = ncx_find_identity(mod, qname, FALSE);
         } else {
-            /*** TBD: agent module check only ***/
-            /* check all modules */
             identity = NULL;
+            /* check all session modules first */
+            for (mod = ncx_get_first_session_module();
+                 mod != NULL && identity == NULL;
+                 mod = ncx_get_next_session_module(mod)) {
+                identity = ncx_find_identity(mod, qname, FALSE);
+                if (identity) {
+                    prefixnsid = mod->nsid;                 
+                }
+            }
+
+            /* check all normal modules last */
             for (mod = ncx_get_first_module();
                  mod != NULL && identity == NULL;
                  mod = ncx_get_next_module(mod)) {

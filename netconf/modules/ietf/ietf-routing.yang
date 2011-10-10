@@ -1,12 +1,23 @@
    module ietf-routing {
+
      namespace "urn:ietf:params:xml:ns:yang:ietf-routing";
-     prefix rt;
+
+     prefix "rt";
+
+     import ietf-yang-types {
+       prefix "yang";
+     }
+
+     import iana-afn-safi {
+       prefix "ianaaf";
+     }
 
      organization
        "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+
      contact
-       "WG Web:   <http://tools.ietf.org/wg/netmod/>
-        WG List:  <mailto:netmod@ietf.org>
+       "WG Web: <http://tools.ietf.org/wg/netmod/>
+        WG List: <mailto:netmod@ietf.org>
 
         WG Chair: David Kessens
         <mailto:david.kessens@nsn.com>
@@ -14,14 +25,29 @@
         WG Chair: Juergen Schoenwaelder
         <mailto:j.schoenwaelder@jacobs-university.de>
 
-        Editor:   Ladislav Lhotka
-        <mailto:lhotka@cesnet.cz>";
-     description
-       "This module contains YANG definitions for top-level containers
-        for the configuration of routing together with several type
-        definitions and identities.";
+        Editor: Ladislav Lhotka
+        <mailto:lhotka@cesnet.cz>
+       ";
 
-     revision 2011-04-27 {
+     description
+       "This module contains YANG definitions of essential components
+        that may be used for configuring a routing subsystem.
+
+        Copyright (c) 2011 IETF Trust and the persons identified as
+        authors of the code. All rights reserved.
+
+        Redistribution and use in source and binary forms, with or
+        without modification, is permitted pursuant to, and subject to
+        the license terms contained in, the Simplified BSD License set
+        forth in Section 4.c of the IETF Trust's Legal Provisions
+        Relating to IETF Documents
+        (http://trustee.ietf.org/license-info).
+
+        This version of this YANG module is part of RFC XXXX; see the
+        RFC itself for full legal notices.
+       ";
+
+     revision 2011-09-23 {
        description
          "Initial revision.";
        reference
@@ -39,348 +65,318 @@
      identity direct {
        base routing-protocol;
        description
-         "Identity for the pseudo-protocol providing routes to directly
-          connected networks. An implementation MUST preconfigure
-          exactly one instance of this pseudo-protocol for each routing
-          process."; 
+         "Routing pseudo-protocol which provides routes to directly
+          connected networks.";
      }
 
      identity static {
        base routing-protocol;
        description
-         "Identity for static routing pseudo-protocol.";
+         "Static routing pseudo-protocol.";
      }
 
      identity route-filter {
        description
-         "Base identity from which all route filters are
-          derived.";
+         "Base identity from which all route filters are derived.";
      }
 
      identity deny-all-route-filter {
        base route-filter;
        description
-         "This identity represents a route filter that blocks all
-          routes.";
+         "Route filter that blocks all routes.";
      }
 
-     /* Type definitions */
+     /* Type Definitions */
 
-     typedef address-family {
-       type enumeration {
-         enum "other" {
-           value 0;
-           description
-             "none of the following";
-         }
-         enum "ipV4" {
-           value 1;
-           description
-             "IP Version 4";
-         }
-         enum "ipV6" {
-           value 2;
-           description
-             "IP Version 6";
-         }
-         enum "nsap" {
-           value 3;
-           description
-             "NSAP";
-         }
-         enum "hdlc" {
-           value 4;
-           description
-             "(8-bit multidrop)";
-         }
-
-         enum "bbn1822" {
-           value 5;
-           description
-             "BBN Report 1822";
-         }
-         enum "all802" {
-           value 6;
-           description
-             "(includes all 802 media plus Ethernet 'canonical
-             format')";
-         }
-         enum "e163" {
-           value 7;
-         }
-         enum "e164" {
-           value 8;
-           description
-             "(SMDS, FrameRelay, ATM)";
-         }
-         enum "f69" {
-           value 9;
-           description
-             "(Telex)";
-         }
-         enum "x121" {
-           value 10;
-           description
-             "(X.25, Frame Relay)";
-         }
-         enum "ipx" {
-           value 11;
-           description
-             "IPX (Internet Protocol Exchange)";
-         }
-         enum "appleTalk" {
-           value 12;
-           description
-             "Apple Talk";
-         }
-         enum "decnetIV" {
-           value 13;
-           description
-             "DEC Net Phase IV";
-         }
-         enum "banyanVines" {
-           value 14;
-           description
-             "Banyan Vines";
-         }
-         enum "e164withNsap" {
-           value 15;
-           description
-             "(E.164 with NSAP format subaddress)";
-         }
-         enum "dns" {
-           value 16;
-           description
-             "(Domain Name System)";
-         }
-         enum "distinguishedName" {
-           value 17;
-           description
-             "(Distinguished Name, per X.500)";
-         }
-         enum "asNumber" {
-           value 18;
-           description
-             "(16-bit quantity, per the AS number space)";
-         }
-         enum "xtpOverIPv4" {
-           value 19;
-           description
-             "XTP over IP version 4";
-         }
-         enum "xtpOverIpv6" {
-           value 20;
-           description
-             "XTP over IP version 6";
-         }
-         enum "xtpNativeModeXTP" {
-           value 21;
-           description
-             "XTP native mode XTP";
-         }
-         enum "fibreChannelWWPN" {
-           value 22;
-           description
-             "Fibre Channel World-Wide Port Name";
-         }
-         enum "fibreChannelWWNN" {
-           value 23;
-           description
-             "Fibre Channel World-Wide Node Name";
-         }
-         enum "gwid" {
-           value 24;
-           description
-             "Gateway Identifier";
-         }
-         enum "afi" {
-           value 25;
-           description
-             "AFI for L2VPN";
-         }
-       }
-       description
-         "This typedef is a YANG enumeration of IANA-registered
-          address families.";
-       reference
-         "http://www.iana.org/assignments/ianaaddressfamilynumbers-mib";
-     }
-
-     typedef subsequent-address-family {
-       type enumeration {
-         enum "nlri-unicast" {
-           value 1;
-           description
-             "Network Layer Reachability Information used for
-              unicast forwarding";
-           reference "RFC4760";
-         }
-         enum "nlri-multicast" {
-           value 2;
-           description
-             "Network Layer Reachability Information used for
-              multicast forwarding";
-           reference "RFC4760";
-         }
-         enum "nlri-mpls" {
-           value 4;
-           description
-             "Network Layer Reachability Information (NLRI) with
-              MPLS Labels";
-           reference "RFC3107";
-         }
-         enum "mcast-vpn" {
-           value 5;
-           description
-             "MCAST-VPN";
-           reference "draft-ietf-l3vpn-2547bis-mcast-bgp-08";
-         }
-         enum "nlri-dynamic-ms-pw" {
-           value 6;
-           status obsolete;
-           description
-             "Network Layer Reachability Information used for Dynamic
-              Placement of Multi-Segment Pseudowires (TEMPORARY -
-              Expires 2008-08-23)";
-           reference "draft-ietf-pwe3-dynamic-ms-pw-13";
-         }
-         enum "tunnel-safi" {
-           value 64;
-           description
-             "Tunnel SAFI";
-           reference "draft-nalawade-kapoor-tunnel-safi-05";
-         }
-         enum "vpls" {
-           value 65;
-           description
-             "Virtual Private LAN Service (VPLS)";
-           reference "RFC4761, RFC6074";
-         }
-         enum "bgp-mdt" {
-           value 66;
-           description
-             "BGP MDT SAFI";
-           reference "RFC6037";
-         }
-         enum "bgp-4over6" {
-           value 67;
-           description
-             "BGP 4over6 SAFI";
-           reference "RFC5747";
-         }
-         enum "bgp-6over4" {
-           value 68;
-           description
-             "BGP 6over4 SAFI";
-           reference "mailto:cuiyong&tsinghua.edu.cn";
-         }
-         enum "l1vpn-auto-discovery" {
-           value 69;
-           description
-             "Layer-1 VPN auto-discovery information";
-           reference "draft-ietf-l1vpn-bgp-auto-discovery-05";
-         }
-         enum "mpls-vpn" {
-           value 128;
-           description
-             "MPLS-labeled VPN address";
-           reference "RFC4364";
-         }
-         enum "multicast-bgp-mpls-vpn" {
-           value 129;
-           description
-             "Multicast for BGP/MPLS IP Virtual Private Networks
-             (VPNs)";
-           reference
-             "draft-ietf-l3vpn-2547bis-mcast-10,
-              draft-ietf-l3vpn-2547bis-mcast-10";
-         }
-         enum "route-target-constraints" {
-           value 132;
-           description
-             "Route Target constraints";
-           reference "RFC4684";
-         }
-         enum "ipv4-diss-flow" {
-           value 133;
-           description
-             "IPv4 dissemination of flow specification rules";
-           reference "RFC5575";
-         }
-         enum "vpnv4-diss-flow" {
-           value 134;
-           description
-             "IPv4 dissemination of flow specification rules";
-           reference "RFC5575";
-         }
-         enum "vpn-auto-discovery" {
-           value 140;
-           description
-             "VPN auto-discovery";
-           reference "draft-ietf-l3vpn-bgpvpn-auto-09";
-         }
-       }
-       description
-         "This typedef is a YANG enumeration of IANA-registered
-          subsequent address families.";
-       reference "http://www.iana.org/assignments/safi-namespace/"
-               + "safi-namespace.xml";
-     }
-
-     typedef routing-process-ref {
+     typedef router-ref {
        type leafref {
-         path "/rt:routing/rt:routing-process/rt:name";
+         path "/rt:routing/rt:router/rt:name";
        }
        description
-         "This type is used for leafs that reference a routing
-          process.";
+         "This type is used for leafs that reference a router
+          instance.";
      }
 
-     /* Data nodes */
+     /* Groupings */
+
+     grouping afn-safi {
+       leaf address-family {
+         type ianaaf:address-family;
+         default "ipV4";
+         description
+           "Address family of routes in the routing table.";
+       }
+       leaf safi {
+         type ianaaf:subsequent-address-family;
+         default "nlri-unicast";
+         description
+           "Subsequent address family identifier of routes in the
+            routing table.";
+       }
+       description
+         "This grouping provides two parameters specifying address
+          family and subsequent address family.";
+     }
+
+     grouping route-content {
+       description
+         "Generic parameters of routes.";
+       leaf source-protocol {
+         type string;
+         description
+           "The name of the routing protocol instance from which the
+            route comes. This routing protocol must be configured
+            (automatically or manually) in the device.";
+       }
+       leaf last-modified {
+         type yang:date-and-time;
+         description
+           "Time stamp of the last modification of the route. If the
+            route was never modified, it is the time when the route was
+            inserted to the routing table.";
+       }
+     }
+
+     /* RPC Methods */
+
+     rpc get-route {
+       description
+         "Query the forwarding information base of a router instance
+          whose name is given as the first parameter 'router-name'. The
+          second parameter 'destination-address' should be augmented in
+          order to support destination addresses of all supported
+          address families. The server returns the route which is
+          currently used for forwarding datagrams to that destination
+          address, or an error message, if no such route exists.";
+       input {
+         leaf router-name {
+           type router-ref;
+           mandatory "true";
+           description
+             "First parameter: name of the router instance whose
+              forwarding information base is queried.";
+         }
+         container destination-address {
+           uses afn-safi;
+           description
+             "Second parameter: destination address.
+
+              AFN/SAFI-specific modules must augment this container with
+              a leaf named 'address'.
+             ";
+         }
+       }
+       output {
+         container route {
+           uses afn-safi;
+           description
+             "Contents of the reply specific for each address family
+              should be defined through augmenting.";
+           uses route-content;
+         }
+       }
+     }
+
+     /* Data Nodes */
 
      container routing {
        description
          "Routing parameters.";
-       list routing-process {
+       list router {
          key "name";
          description
-           "Each entry is a container for configuration and operational
-            state data of a single (virtual) router for a given address
-            family and subsequent address family identifier (SAFI). Each
-            entry has a unique name.
-
-            The definitions of data for a particular address family and
-            subsequent address family shall be provided via augmentation
-            by other modules.";
+           "Each list entry is a container for configuration and
+            operational state data of a single (logical) router.";
          leaf name {
            type string;
            description
-             "The unique name of the routing process.";
-         }
-         leaf address-family {
-           type address-family;
-           default "ipV4";
-           description
-             "Address family of the routing process.";
-         }
-         leaf safi {
-           type subsequent-address-family;
-           default "nlri-unicast";
-           description
-             "Subsequent address family identifier of the routing
-             process.";
+             "The unique router name.";
          }
          leaf description {
            type string;
            description
-             "Textual description of the routing process.";
+             "Textual description of the router.";
          }
          leaf enabled {
            type boolean;
            default "true";
            description
-             "Enable or disable the routing process. The default value
-              is 'true', which means that the process is enabled.";
+             "Enable or disable the router. The default value is 'true',
+              which means that the router is enabled.";
+         }
+         container routing-protocols {
+           description
+             "Container for the list of configured routing protocol
+              instances.";
+           list routing-protocol {
+             key "name";
+             description
+               "An instance of a routing protocol.";
+             leaf name {
+               type string;
+               description
+                 "The name of the routing protocol instance.";
+             }
+             leaf description {
+               type string;
+               description
+                 "Textual description of the routing protocol
+                  instance.";
+             }
+             leaf type {
+               type identityref {
+                 base routing-protocol;
+               }
+               mandatory "true";
+               description
+                 "Type of the routing protocol - an identity derived
+                  from the 'routing-protocol' base identity.";
+             }
+             container connected-routing-tables {
+               description
+                 "Container for connected routing tables.";
+               list connected-routing-table {
+                 key "name";
+                 description
+                   "List of routing tables to which the routing protocol
+                    instance is connected. No more than one routing
+                    table may be configured for each AFN/SAFI pair.
+
+                    Implementation may provide default routing tables
+                    for some AFN/SAFI pairs, which are used if the
+                    corresponding entry is not configured.
+                   ";
+                 leaf name {
+                   type leafref {
+                     path "../../../../../routing-tables/routing-table/"
+                        + "name";
+                   }
+                   description
+                     "This must be the name of an existing routing
+                      table.";
+                 }
+                 leaf import-filter {
+                   type leafref {
+                     path "../../../../../route-filters/route-filter/"
+                        + "name";
+                   }
+                   description
+                     "Reference to a route filter that is used for
+                      filtering routes passed from this routing protocol
+                      instance to the routing table specified by the
+                      'name' sibling node. If this leaf is not present,
+                      the behavior is protocol-specific, but typically
+                      it means that all routes are accepted.";
+                 }
+                 leaf export-filter {
+                   type leafref {
+                     path "../../../../../route-filters/route-filter/"
+                        + "name";
+                   }
+                   description
+                     "Reference to a route filter that is used for
+                      filtering routes passed from the routing table
+                      specified by the 'name' sibling node to this
+                      routing protocol instance. If this leaf is not
+                      present, the behavior is protocol-specific -
+                      typically it means that all routes are accepted,
+                      except for the 'direct' and 'static'
+                      pseudo-protocols which accept no routes from any
+                      routing table.";
+                 }
+               }
+             }
+           }
+         }
+         container route-filters {
+           description
+             "Container for configured route filters.";
+           list route-filter {
+             key "name";
+             description
+               "Route filters are used for filtering and/or manipulating
+                routes that are passed between a routing protocol and a
+                routing table or vice versa, or between two routing
+                tables. It is expected that other modules augment this
+                list with contents specific for a particular route
+                filter type.";
+             leaf name {
+               type string;
+               description
+                 "The name of the route filter.";
+             }
+             leaf description {
+               type string;
+               description
+                 "Textual description of the route filter.";
+             }
+             leaf type {
+               type identityref {
+                 base route-filter;
+               }
+               default "deny-all-route-filter";
+               description
+                 "Type of the route-filter - an identity derived from
+                  the 'route-filter' base identity. The default value
+                  represents an all-blocking filter.";
+             }
+           }
+         }
+         container routing-tables {
+           description
+             "Container for configured routing tables.";
+           list routing-table {
+             key "name";
+             description
+               "Each entry represents a routing table identified by the
+                'name' key. All routes in a routing table must have the
+                same AFN and SAFI.";
+             leaf name {
+               type string;
+               description
+                 "The name of the routing table.";
+             }
+             uses afn-safi;
+             leaf description {
+               type string;
+               description
+                 "Textual description of the routing table.";
+             }
+             container routes {
+               config "false";
+               description
+                 "Current contents of the routing table (operational
+                  state data).";
+               list route {
+                 description
+                   "A routing table entry. It is expected that this data
+                    node will be augmented with information specific for
+                    routes of each address family.";
+                 uses route-content;
+               }
+             }
+             list recipient-routing-tables {
+               key "recipient-name";
+               description
+                 "A list of routing tables that receive routes from this
+                  routing table.";
+               leaf recipient-name {
+                 type leafref {
+                   path "../../../routing-table/name";
+                 }
+                 description
+                   "The name of the recipient routing table.";
+               }
+               leaf filter {
+                 type leafref {
+                   path "../../../../route-filters/route-filter/name";
+                 }
+                 description
+                   "A route filter which is applied to the routes passed
+                    on to the recipient routing table.";
+               }
+             }
+           }
          }
        }
      }

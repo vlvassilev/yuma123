@@ -103,16 +103,45 @@ BOOST_AUTO_TEST_CASE( edit_slt_entries_test1 )
     // create the top level container
     createMainContainer( primarySession_ );
 
-    // Add some entries
+    //Reset logged callbacks
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+    cbChecker_->resetExpectedCallbacks();     
+
+    // Add an entry
     addEntryValuePair( primarySession_, "entryKey1", "entryVal1" );
+    
+    // Check callbacks
+    vector<string> elements = {"theList"};
+    cbChecker_->addKeyValuePair("simple_list_test",
+                                "simple_list",
+                                elements,
+                                "theKey",
+                                "theVal");
+    cbChecker_->checkCallbacks("simple_list_test");                               
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+
+    // Add an entry
     addEntryValuePair( primarySession_, "entryKey2", "entryVal2" );
+    
+    // Check callbacks
+    cbChecker_->checkCallbacks("simple_list_test");                               
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+ 
+    // Add an entry
     addEntryValuePair( primarySession_, "entryKey3", "entryVal3" );
+
+    // Check callbacks
+    cbChecker_->checkCallbacks("simple_list_test");                               
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+    cbChecker_->resetExpectedCallbacks();            
 
     checkEntries( primarySession_ );
 
     // remove all entries
     deleteMainContainer( primarySession_ );
+    
     checkEntries( primarySession_ );
+
 }
 
 // ---------------------------------------------------------------------------|

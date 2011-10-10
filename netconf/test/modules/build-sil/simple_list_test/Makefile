@@ -5,7 +5,11 @@ include $(YUMA_ROOT)/test/make-rules/common.mk
 # Test Harness Support Sources
 BASE_NAME := simple_list_test
 
+ifeq ($(DISABLE_TEST_CB_LOGGING),)
 YUMA_TEST_SOURCES := $(BASE_NAME).cpp
+else
+YUMA_TEST_SOURCES := $(BASE_NAME).c
+endif
 
 ALL_SOURCES := $(YUMA_TEST_SOURCES)
 

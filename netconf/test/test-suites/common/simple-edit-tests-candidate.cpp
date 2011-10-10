@@ -79,21 +79,44 @@ BOOST_AUTO_TEST_CASE( slt_value_create )
 
     createMainContainer( primarySession_ );
 
+    //Reset logged callbacks
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+    cbChecker_->resetExpectedCallbacks();     
+
     // set some values
     populateDatabase( 3 );
 
+    // Check callbacks
+    vector<string> elements = {"theList"};
+    cbChecker_->addKeyValuePair("simple_list_test", "simple_list", elements, "theKey", "theVal");
+    cbChecker_->addKeyValuePair("simple_list_test", "simple_list", elements, "theKey", "theVal");
+    cbChecker_->addKeyValuePair("simple_list_test", "simple_list", elements, "theKey", "theVal");
+    cbChecker_->checkCallbacks("simple_list_test");                               
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+    cbChecker_->resetExpectedCallbacks();
+
     // check the entries exist
     checkEntries( primarySession_ );
+
     // commit the changes
     commitChanges( primarySession_ );
+
+    // Check callbacks
+    cbChecker_->commitKeyValuePairs("simple_list_test", "simple_list", elements, "theKey", "theVal", 3);
+    cbChecker_->checkCallbacks("simple_list_test");                               
+    cbChecker_->resetModuleCallbacks("simple_list_test");
+    cbChecker_->resetExpectedCallbacks();
+
     // check the entries exist
     checkEntries( primarySession_ );
 
     // remove all entries
     deleteMainContainer( primarySession_ );
     checkEntries( primarySession_ );
+    
     commitChanges( primarySession_ );
     checkEntries( primarySession_ );
+    
 }
 
 // ---------------------------------------------------------------------------|
@@ -226,6 +249,128 @@ BOOST_AUTO_TEST_CASE( slt_lock_released_no_comit )
         commitChanges( primarySession_ );
         checkEntries( primarySession_ );
     }
+}
+
+// ---------------------------------------------------------------------------|
+// Add some data then merge some data with a mix of modified values for 
+// existing keys and new key/value pairs; verify that the new pairs are added
+// and the existing values remain unchanged
+// ---------------------------------------------------------------------------|
+BOOST_AUTO_TEST_CASE( slt_merge_values )
+{
+    DisplayTestDescrption( 
+            "Demonstrate population of database and merging of new and "
+            "updated data.",
+            "Procedure: \n"
+            "\t 1 - Create the top level container for the module\n"
+            "\t 2 - Create some keyed entry values \n"
+            "\t 3 - Check all values are in the candidate\n"
+            "\t 4 - Commit the operation\n"
+            "\t 5 - Check all values are in the running\n"
+            "\t 6 - Merge new pairs and modified values\n"
+            "\t 7 - Check only new pairs added to candidate\n"
+            "\t 8 - Commit the operation\n"
+            "\t 9 - Check only new pairs added to running\n"
+            "\t10 - Clean out the database and check it was cleaned"
+            );
+
+    // RAII Vector of database locks 
+    vector< unique_ptr< NCDbScopedLock > > locks = getFullLock( primarySession_ );
+
+    // create the top level container
+
+    createMainContainer( primarySession_ );
+
+    // set some values
+    populateDatabase( 20 );
+
+    // commit & check entries exist
+    checkEntries( primarySession_ );
+    commitChanges( primarySession_ );
+    checkEntries( primarySession_ );
+
+    // merge some values
+    BOOST_TEST_MESSAGE("MERGING VALUES");
+    mergeEntryValuePair( primarySession_, "entryKey18", "newValue22" );
+    mergeEntryValuePair( primarySession_, "entryKey19", "newValue23" );
+    mergeEntryValuePair( primarySession_, "entryKey20", "newValue20" );
+    mergeEntryValuePair( primarySession_, "entryKey21", "newValue21" );
+
+    // commit & check entries exist
+    BOOST_TEST_MESSAGE("CHECKING ENTRIES - PRE-COMMIT");
+    checkEntries( primarySession_ );
+    commitChanges( primarySession_ );
+    BOOST_TEST_MESSAGE("CHECKING ENTRIES - POST-COMMIT");
+    checkEntries( primarySession_ );
+
+    // remove all entries
+    BOOST_TEST_MESSAGE("DELETING MAIN CONTAINER");
+    deleteMainContainer( primarySession_ );
+    BOOST_TEST_MESSAGE("CHECKING ENTRIES - PRE-COMMIT");
+    checkEntries( primarySession_ );
+    commitChanges( primarySession_ );
+    BOOST_TEST_MESSAGE("CHECKING ENTRIES - POST-COMMIT");
+    checkEntries( primarySession_ );
+}
+
+// ---------------------------------------------------------------------------|
+// Add some data then replace some data with a mix of modified values for 
+// existing keys and new key/value pairs; verify that the new pairs are added
+// and the existing values remain unchanged
+// ---------------------------------------------------------------------------|
+BOOST_AUTO_TEST_CASE( slt_replace_values )
+{
+    DisplayTestDescrption( 
+            "Demonstrate population of database and replacing of new and "
+            "updated data.",
+            "Procedure: \n"
+            "\t 1 - Create the top level container for the module\n"
+            "\t 2 - Create some keyed entry values \n"
+            "\t 3 - Check all values are in the candidate\n"
+            "\t 4 - Commit the operation\n"
+            "\t 5 - Check all values are in the running\n"
+            "\t 6 - Replace new pairs and modified values\n"
+            "\t 7 - Check new pairs added to candidate\n"
+            "\t 8 - Check existing pairs updated with modified values in "
+            "candidate\n"
+            "\t 9 - Commit the operation\n"
+            "\t10 - Check new pairs added to running\n"
+            "\t11 - Check existing pairs updated with modified values in "
+            "running\n"
+            "\t12 - Clean out the database and check it was cleaned"
+            );
+
+    // RAII Vector of database locks 
+    vector< unique_ptr< NCDbScopedLock > > locks = getFullLock( primarySession_ );
+
+    // create the top level container
+
+    createMainContainer( primarySession_ );
+
+    // set some values
+    populateDatabase( 20 );
+
+    // commit & check entries exist
+    checkEntries( primarySession_ );
+    commitChanges( primarySession_ );
+    checkEntries( primarySession_ );
+
+    // replace some values
+    replaceEntryValuePair( primarySession_, "entryKey18", "newValue22" );
+    replaceEntryValuePair( primarySession_, "entryKey19", "newValue23" );
+    replaceEntryValuePair( primarySession_, "entryKey20", "newValue20" );
+    replaceEntryValuePair( primarySession_, "entryKey21", "newValue21" );
+
+    // commit & check entries exist
+    checkEntries( primarySession_ );
+    commitChanges( primarySession_ );
+    checkEntries( primarySession_ );
+
+    // remove all entries
+    deleteMainContainer( primarySession_ );
+    checkEntries( primarySession_ );
+    commitChanges( primarySession_ );
+    checkEntries( primarySession_ );
 }
 // ---------------------------------------------------------------------------|
 BOOST_AUTO_TEST_SUITE_END()

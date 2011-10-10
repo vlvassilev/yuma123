@@ -15,6 +15,7 @@
 // ---------------------------------------------------------------------------|
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/nc-session/abstract-nc-session-factory.h"
+#include "test/support/callbacks/abstract-cb-checker-factory.h"
 #include "test/support/misc-util/log-utils.h"
 #include "test/support/checkers/string-presence-checkers.h"
 
@@ -31,7 +32,9 @@ namespace YumaTest
 BaseSuiteFixture::BaseSuiteFixture() 
     : testContext_( TestContext::getTestContext() )
     , sessionFactory_( testContext_->sessionFactory_ )
+    , cbCheckerFactory_( testContext_->cbCheckerFactory_ )
     , primarySession_( sessionFactory_->createSession() )
+    , cbChecker_( cbCheckerFactory_->createChecker() )
     , queryEngine_( testContext_->queryEngine_ )
     , writeableDbName_( testContext_->writeableDbName_ )
 {
@@ -82,6 +85,21 @@ void BaseSuiteFixture::runEditQuery(
     assert( session );
     vector<string> expPresent{ "ok" };
     vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryEditConfig( session, query, writeableDbName_, 
+                                 checker );
+}
+
+// ---------------------------------------------------------------------------|
+void BaseSuiteFixture::runFailedEditQuery( 
+        shared_ptr<AbstractNCSession> session,
+        const string& query,
+        const string& failReason )
+{
+    assert( session );
+    vector<string> expNotPresent{ "ok" };
+    vector<string> expPresent{ "error", "rpc-error", failReason };
     
     StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
     queryEngine_->tryEditConfig( session, query, writeableDbName_, 

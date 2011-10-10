@@ -3,6 +3,7 @@
 YUMA_COMMON_TEST_SUPPORT_SOURCES := \
        $(YUMA_TEST_ROOT)/support/checkers/checker-group.cpp \
        $(YUMA_TEST_ROOT)/support/checkers/string-presence-checkers.cpp \
+       $(YUMA_TEST_ROOT)/support/checkers/log-entry-presence-checkers.cpp \
        $(YUMA_TEST_ROOT)/support/callbacks/sil-callback-log.cpp \
        $(YUMA_TEST_ROOT)/support/callbacks/callback-checker.cpp \
        $(YUMA_TEST_ROOT)/support/db-models/device-test-db.cpp \

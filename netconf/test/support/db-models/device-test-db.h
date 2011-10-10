@@ -31,10 +31,11 @@ typedef boost::optional<std::string> opt_string_t;
 // ---------------------------------------------------------------------------|
 struct ConnectionItem
 {
-    uint32_t sourceId_;             ///< the id of the source endpoint
-    uint32_t sourcePinId_;          ///< additional source endpoint data
-    uint32_t destinationId_;        ///< the is of the destination endpoint
-    uint32_t destinationPinId_;     ///< additional destination endpoint data
+    uint32_t id_;                   ///< The id 
+    uint32_t sourceId_;             ///< the id of the source 
+    uint32_t sourcePinId_;          ///< additional source data
+    uint32_t destinationId_;        ///< the id of the destination 
+    uint32_t destinationPinId_;     ///< additional destination data
     uint32_t bitrate_;              ///< the bitrate of the connection
 
     /** Constructor */
@@ -46,6 +47,14 @@ struct ConnectionItem
      * \param ptree the parsed xml representing the object to construct. 
      */
     explicit ConnectionItem( const boost::property_tree::ptree& pt );
+
+    /**
+     * Unpack a property tree value.
+     *
+     * \param v the value to unpack
+     * \return true if the item was unpacked.
+     */
+    bool unpackItem( const boost::property_tree::ptree::value_type& v );
 };
 
 // ---------------------------------------------------------------------------|
@@ -79,6 +88,52 @@ struct ConnectionItemConfig
  * \param rhs the rhs containing expected results for comparison.
  */
 void checkEqual( const ConnectionItem& lhs, const ConnectionItem& rhs );
+
+// ---------------------------------------------------------------------------|
+struct StreamConnectionItem : public ConnectionItem
+{
+    uint32_t sourceStreamId_;       ///< the id of the source endpoint
+    uint32_t destinationStreamId_;  ///< the is of the destination endpoint
+
+    /** Constructor */
+    StreamConnectionItem();
+
+    /** 
+     * Constructor. Populate from a parsed xml property tree.
+     *
+     * \param ptree the parsed xml representing the object to construct. 
+     */
+    explicit StreamConnectionItem( const boost::property_tree::ptree& pt );
+};
+
+// ---------------------------------------------------------------------------|
+/**
+ * Utility class to support test harness setting of Stream Connection Items.
+ * This class supplies optional parameters for each element in a
+ * connectionItem. 
+ *
+ * note: this class connot be derived from ConnectionItemConfig
+ * because the use of inheritance prevents easy initialisation, which
+ * defeats the purpose of the class!
+ */
+struct StreamConnectionItemConfig 
+{
+    opt_uint32_t sourceId_;             ///< optional value for sourceId
+    opt_uint32_t sourcePinId_;          ///< optional value for sourcePinId
+    opt_uint32_t destinationId_;        ///< optional value for destinationId_
+    opt_uint32_t destinationPinId_;     ///< optional value for destinationPinId_
+    opt_uint32_t bitrate_;              ///< optional value for bitrate
+    opt_uint32_t sourceStreamId_;       ///< optional value for source stream Id
+    opt_uint32_t destinationStreamId_;  ///< optional value for destination stream id
+};
+
+/**
+ * Check if two ConnectionItems are equal.
+ *
+ * \param lhs the lhs containing expected results for comparison.
+ * \param rhs the rhs containing expected results for comparison.
+ */
+void checkEqual( const StreamConnectionItem& lhs, const StreamConnectionItem& rhs );
 
 // ---------------------------------------------------------------------------|
 struct ResourceNode
@@ -132,11 +187,11 @@ void checkEqual( const ResourceNode& lhs, const ResourceNode& rhs );
 struct StreamItem
 {
     typedef std::map<uint32_t, ResourceNode> ResourceDescription_type;
-    typedef std::map<uint32_t, ConnectionItem> VirtualResourceConnections_type;
+    typedef std::map<uint32_t, ConnectionItem> ResourceConnections_type;
 
     uint32_t id_;         ///< the id of the profile.
     ResourceDescription_type resourceDescription_;    ///< resource description details
-    VirtualResourceConnections_type virtualResourceConnections_;  /// resource connections
+    ResourceConnections_type resourceConnections_;    /// resource connections
 
     /** Constructor */
     StreamItem();
@@ -160,8 +215,8 @@ void checkEqual( const StreamItem& lhs, const StreamItem& rhs );
 // ---------------------------------------------------------------------------|
 struct Profile
 {
-    typedef std::map< uint32_t, StreamItem >        StreamsMap_type; 
-    typedef std::map< uint32_t, ConnectionItem >    StreamConnectionMap_type;
+    typedef std::map< uint32_t, StreamItem >              StreamsMap_type; 
+    typedef std::map< uint32_t, StreamConnectionItem >    StreamConnectionMap_type;
 
     uint32_t id_;                ///< the id of the profile.
     StreamsMap_type streams_;    ///< the profiles streams

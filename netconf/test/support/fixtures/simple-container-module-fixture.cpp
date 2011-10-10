@@ -179,12 +179,13 @@ void SimpleContainerModuleFixture::deleteMainContainer(
 // ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::addEntry(
     std::shared_ptr<AbstractNCSession> session,
-    const string& entryKeyStr )
+    const string& entryKeyStr,
+    const string& operationStr )
 {
     assert( session );
 
     string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyOperationText( "theList", "theKey", entryKeyStr, "create" ) );
+            wrBuilder_.genKeyOperationText( "theList", "theKey", entryKeyStr, operationStr ) );
     runEditQuery( session, query );
 }
 
@@ -192,13 +193,14 @@ void SimpleContainerModuleFixture::addEntry(
 void SimpleContainerModuleFixture::addEntryValue(
     std::shared_ptr<AbstractNCSession> session,
     const string& entryKeyStr,
-    const string& entryValStr )
+    const string& entryValStr,
+    const string& operationStr )
 {
     assert( session );
 
     string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
             wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
-                wrBuilder_.genOperationText( "theVal", entryValStr, "create" ) ) );
+                wrBuilder_.genOperationText( "theVal", entryValStr, operationStr ) ) );
     
     runEditQuery( session, query );
 }
@@ -210,10 +212,98 @@ void SimpleContainerModuleFixture::addEntryValuePair(
     const string& entryValStr )
 {
     assert( session );
-    addEntry( session, entryKeyStr );
-    addEntryValue( session, entryKeyStr, entryValStr );
+    addEntry( session, entryKeyStr, "create" );
+    addEntryValue( session, entryKeyStr, entryValStr, "create" );
 
     (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::mergeEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    addEntry( session, entryKeyStr, "merge" );
+    addEntryValue( session, entryKeyStr, entryValStr, "merge" );
+
+//    if (candidateEntries_->find(entryKeyStr) == candidateEntries_->end())
+//    {
+        (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+//    }
+
+//DEBUG
+    EntryMap_T::iterator it;
+    BOOST_TEST_MESSAGE("JOE DEBUG OP (MERGE) - " << entryKeyStr << ". " << entryValStr << ":");
+    for (it = candidateEntries_->begin(); it != candidateEntries_->end(); it++)
+    {
+        BOOST_TEST_MESSAGE((*it).first << " => " << (*it).second << "\n");
+    }
+//DEBUG
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::replaceEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    addEntry( session, entryKeyStr, "replace" );
+    addEntryValue( session, entryKeyStr, entryValStr, "replace" );
+
+    (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+//DEBUG
+    EntryMap_T::iterator it;
+    BOOST_TEST_MESSAGE("JOE DEBUG OP (REPLACE) - " << entryKeyStr << ". " << entryValStr << ":\n");
+    for (it = candidateEntries_->begin(); it != candidateEntries_->end(); it++)
+    {
+        BOOST_TEST_MESSAGE((*it).first << " => " << (*it).second << "\n");
+    }
+//DEBUG
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntry(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr )
+{
+    assert( session );
+
+    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
+            wrBuilder_.genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
+    runEditQuery( session, query );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValue(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+
+    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
+            wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                wrBuilder_.genOperationText( "theVal", entryValStr, "delete" ) ) );
+    
+    runEditQuery( session, query );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    EntryMap_T::iterator it;
+    assert( session );
+    deleteEntry( session, entryKeyStr );
+    deleteEntryValue( session, entryKeyStr, entryValStr );
+
+    it=candidateEntries_->find(entryKeyStr);
+    candidateEntries_->erase(it);
 }
 
 // ---------------------------------------------------------------------------|
@@ -265,12 +355,23 @@ void SimpleContainerModuleFixture::checkEntriesImpl(
     EntriesConvertFunctor conv( expPresent );
     for_each( refMap->begin(), refMap->end(), conv );
 
+    BOOST_TEST_MESSAGE("EXPECTED PRESENT:\n");
+    for (unsigned int i = 0; i < expPresent.size(); i++)
+    {
+        BOOST_TEST_MESSAGE(expPresent.at(i) + "\n");
+    }
+
     // now add all elements from the running that are not in the
     // candidate to the expectedNotPresent list
     if ( useCandidate() )
     {
         AddDifferingEntriesFunctor diff( expNotPresent, refMap );
         for_each( otherMap->begin(), otherMap->end(), diff );
+    }
+    BOOST_TEST_MESSAGE("EXPECTED NOT PRESENT:\n");
+    for (unsigned int i = 0; i < expNotPresent.size(); i++)
+    {
+        BOOST_TEST_MESSAGE(expNotPresent.at(i) + "\n");
     }
 
     StringsPresentNotPresentChecker checker( expPresent, expNotPresent );

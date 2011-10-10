@@ -33,9 +33,8 @@ date	     init     comment
 #include <stdio.h>
 #include <xmlstring.h>
 
-#ifndef _H_status
+#include "procdefs.h"
 #include "status.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {

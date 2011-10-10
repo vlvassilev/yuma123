@@ -214,9 +214,9 @@ string NCMessageBuilder::genOperationText(
     query << "<" << nodeName << " " 
                  << genXmlNsNcText( IETF_NS ) << " " 
                  << " nc:operation=\"" << operation 
-          << "\">\n"
+          << "\">"
           << nodeVal 
-          << "</" << nodeName << ">";
+          << "</" << nodeName << ">\n";
     return query.str();
 }
 

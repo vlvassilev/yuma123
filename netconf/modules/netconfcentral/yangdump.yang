@@ -208,6 +208,11 @@ module yangdump {
                  "Generate combined server instrumentation library 
                   C file. Compatible with version 1 'c' format";
            }
+           enum cpp_test {
+              description 
+                 "Generate combined server instrumentation library 
+                  CPP file for testing purposes.";
+           }
            enum uh {
               description 
                  "Generate server instrumentation library 

@@ -1959,6 +1959,9 @@ xmlChar *
     case NCX_CVTTYP_YC:
         ext = (const xmlChar *)".c";
         break;
+    case NCX_CVTTYP_CPP_TEST:
+        ext = (const xmlChar *)".cpp";
+        break;
     case NCX_CVTTYP_YANG:
     case NCX_CVTTYP_COPY:
         ext = (const xmlChar *)".yang";

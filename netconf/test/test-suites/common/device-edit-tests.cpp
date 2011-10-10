@@ -93,20 +93,77 @@ BOOST_AUTO_TEST_CASE( edit_dt_entries_test1 )
     // RAII Vector of database locks 
     vector< unique_ptr< NCDbScopedLock > > locks = getFullLock( primarySession_ );
 
-    // create the top level container
-    createMainContainer( primarySession_ );
+    //Reset logged callbacks
+    cbChecker_->resetModuleCallbacks("device_test");
+    cbChecker_->resetExpectedCallbacks();
 
-    // Add some entries
-    //TODO
+    BOOST_TEST_MESSAGE("Create xpo container\n");
+    // Create top level container
+    createXpoContainer( primarySession_ );
 
-    //TODO
-    //checkEntries( primarySession_ );
+    // Check callbacks
+    vector<string> xpo_elements = {};
+    cbChecker_->updateContainer("device_test",
+                                "xpo",
+                                xpo_elements,
+                                "create");
+    cbChecker_->checkCallbacks("device_test");                             
+    cbChecker_->resetModuleCallbacks("device_test");
+    cbChecker_->resetExpectedCallbacks();
+
+
+    BOOST_TEST_MESSAGE("Add a profile\n");
+    // Add a profile
+    createXpoProfile( primarySession_, 1 );
+
+    // Check callbacks
+    vector<string> elements = {"profile"};
+    cbChecker_->addKey("device_test",
+                       "xpo",
+                       elements,
+                       "id");
+    cbChecker_->checkCallbacks("device_test");                               
+    cbChecker_->resetModuleCallbacks("device_test");
+    cbChecker_->resetExpectedCallbacks();            
+
+    BOOST_TEST_MESSAGE("Add a stream item\n");
+    // Add a stream item
+    createProfileStreamItem( primarySession_, 1, 1 );
+
+    // Check callbacks
+    elements.push_back("stream");
+    cbChecker_->addKey("device_test",
+                       "xpo",
+                       elements,
+                       "id");
+    cbChecker_->checkCallbacks("device_test");                               
+    cbChecker_->resetModuleCallbacks("device_test");
+
+    // Add a stream item
+    createProfileStreamItem( primarySession_, 1, 2 );
+
+    // Check callbacks
+    cbChecker_->checkCallbacks("device_test");                               
+    cbChecker_->resetModuleCallbacks("device_test");
+
+    // Add a stream item
+    createProfileStreamItem( primarySession_, 1, 3 );
+
+    // Check callbacks
+    cbChecker_->checkCallbacks("device_test");                               
+    cbChecker_->resetModuleCallbacks("device_test");
+    cbChecker_->resetExpectedCallbacks(); 
+     
+    // Check database      
+    checkCandidate();
 
     // remove all entries
-    deleteMainContainer( primarySession_ );
+    deleteXpoContainer( primarySession_ );
 
-    //TODO
-    //checkEntries( primarySession_ );
+    // Check database      
+    checkCandidate();
+
+    //TODO - extend to fully populate database - see device-edit-tests-candidate
 }
 
 // ---------------------------------------------------------------------------|

@@ -410,6 +410,7 @@ extern "C" {
 #define NCX_EL_BRIEF           (const xmlChar *)"brief"
 #define NCX_EL_BYTE            (const xmlChar *)"byte"
 #define NCX_EL_C               (const xmlChar *)"c"
+#define NCX_EL_CPP_TEST        (const xmlChar *)"cpp_test"
 #define NCX_EL_CANCEL          (const xmlChar *)"cancel"
 #define NCX_EL_CANCEL_COMMIT   (const xmlChar *)"cancel-commit"
 #define NCX_EL_CANDIDATE       (const xmlChar *)"candidate"

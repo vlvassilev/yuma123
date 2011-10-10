@@ -21,7 +21,6 @@
 
  */
 
-extern "C" {
 #include <xmlstring.h>
 
 #include "procdefs.h"
@@ -35,9 +34,6 @@ extern "C" {
 #include "ncxtypes.h"
 #include "status.h"
 #include "simple_list_test.h"
-}
-
-#include "test/support/callbacks/sil-callback-log.h"
 
 /* module static variables */
 static ncx_module_t *simple_list_test_mod;
@@ -93,61 +89,34 @@ static status_t simple_list_test_simple_list_theList_theKey_edit (
             agt_cbtype_name(cbtyp));
     }
 
-    YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();
-    YumaTest::SILCallbackLog::CallbackInfo cbData;
-    cbData.cbName = "simple_list_test_simple_list_theList_theKey_edit";
-    val_value_t* value = (newval) ? newval : curval;
-    std::string module_name = (char*) val_get_mod_name(value);
-
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
-        cbData.cbType = "validate";
-        cbLog.addCallback(module_name, cbData);
         /* description-stmt validation here */
         break;
     case AGT_CB_APPLY:
-        cbData.cbType = "apply";
-        cbLog.addCallback(module_name, cbData);
         /* database manipulation done here */
         break;
     case AGT_CB_COMMIT:
-        cbData.cbType = "commit";
         /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
-            cbData.cbPhase = "load";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_MERGE:
-            cbData.cbPhase = "merge";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_REPLACE:
-            cbData.cbPhase = "replace";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_CREATE:
-            cbData.cbPhase = "create";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_DELETE:
-            cbData.cbPhase = "delete";
-            cbLog.addCallback(module_name, cbData);
             break;
         default:
-            cbData.cbPhase = "default";
-            cbLog.addCallback(module_name, cbData);
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
     case AGT_CB_ROLLBACK:
-        cbData.cbType = "rollback";
-        cbLog.addCallback(module_name, cbData);
         /* undo device instrumentation here */
         break;
     default:
-        cbData.cbType = "default";
-        cbLog.addCallback(module_name, cbData);
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -197,61 +166,34 @@ static status_t simple_list_test_simple_list_theList_theVal_edit (
             agt_cbtype_name(cbtyp));
     }
 
-    YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();
-    YumaTest::SILCallbackLog::CallbackInfo cbData;
-    cbData.cbName = "simple_list_test_simple_list_theList_theVal_edit";
-    val_value_t* value = (newval) ? newval : curval;
-    std::string module_name = (char*) val_get_mod_name(value);
-
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
-        cbData.cbType = "validate";
-        cbLog.addCallback(module_name, cbData);
         /* description-stmt validation here */
         break;
     case AGT_CB_APPLY:
-        cbData.cbType = "apply";
-        cbLog.addCallback(module_name, cbData);
         /* database manipulation done here */
         break;
     case AGT_CB_COMMIT:
-        cbData.cbType = "commit";
         /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
-            cbData.cbPhase = "load";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_MERGE:
-            cbData.cbPhase = "merge";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_REPLACE:
-            cbData.cbPhase = "replace";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_CREATE:
-            cbData.cbPhase = "create";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_DELETE:
-            cbData.cbPhase = "delete";
-            cbLog.addCallback(module_name, cbData);
             break;
         default:
-            cbData.cbPhase = "default";
-            cbLog.addCallback(module_name, cbData);
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
     case AGT_CB_ROLLBACK:
-        cbData.cbType = "rollback";
-        cbLog.addCallback(module_name, cbData);
         /* undo device instrumentation here */
         break;
     default:
-        cbData.cbType = "default";
-        cbLog.addCallback(module_name, cbData);
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -301,61 +243,34 @@ static status_t simple_list_test_simple_list_theList_edit (
             agt_cbtype_name(cbtyp));
     }
 
-    YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();
-    YumaTest::SILCallbackLog::CallbackInfo cbData;
-    cbData.cbName = "simple_list_test_simple_list_theList_edit";
-    val_value_t* value = (newval) ? newval : curval;
-    std::string module_name = (char*) val_get_mod_name(value);
-
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
-        cbData.cbType = "validate";
-        cbLog.addCallback(module_name, cbData);
         /* description-stmt validation here */
         break;
     case AGT_CB_APPLY:
-        cbData.cbType = "apply";
-        cbLog.addCallback(module_name, cbData);
         /* database manipulation done here */
         break;
     case AGT_CB_COMMIT:
-        cbData.cbType = "commit";
         /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
-            cbData.cbPhase = "load";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_MERGE:
-            cbData.cbPhase = "merge";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_REPLACE:
-            cbData.cbPhase = "replace";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_CREATE:
-            cbData.cbPhase = "create";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_DELETE:
-            cbData.cbPhase = "delete";
-            cbLog.addCallback(module_name, cbData);
             break;
         default:
-            cbData.cbPhase = "default";
-            cbLog.addCallback(module_name, cbData);
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
     case AGT_CB_ROLLBACK:
-        cbData.cbType = "rollback";
-        cbLog.addCallback(module_name, cbData);
         /* undo device instrumentation here */
         break;
     default:
-        cbData.cbType = "default";
-        cbLog.addCallback(module_name, cbData);
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -405,50 +320,27 @@ static status_t simple_list_test_simple_list_edit (
             agt_cbtype_name(cbtyp));
     }
 
-    YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();
-    YumaTest::SILCallbackLog::CallbackInfo cbData;
-    cbData.cbName = "simple_list_test_simple_list_edit";
-    val_value_t* value = (newval) ? newval : curval;
-    std::string module_name = (char*) val_get_mod_name(value);
-
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
-        cbData.cbType = "validate";
-        cbLog.addCallback(module_name, cbData);
         /* description-stmt validation here */
         break;
     case AGT_CB_APPLY:
-        cbData.cbType = "apply";
-        cbLog.addCallback(module_name, cbData);
         /* database manipulation done here */
         break;
     case AGT_CB_COMMIT:
-        cbData.cbType = "commit";
         /* device instrumentation done here */
         switch (editop) {
         case OP_EDITOP_LOAD:
-            cbData.cbPhase = "load";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_MERGE:
-            cbData.cbPhase = "merge";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_REPLACE:
-            cbData.cbPhase = "replace";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_CREATE:
-            cbData.cbPhase = "create";
-            cbLog.addCallback(module_name, cbData);
             break;
         case OP_EDITOP_DELETE:
-            cbData.cbPhase = "delete";
-            cbLog.addCallback(module_name, cbData);
             break;
         default:
-            cbData.cbPhase = "default";
-            cbLog.addCallback(module_name, cbData);
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
 
@@ -458,13 +350,9 @@ static status_t simple_list_test_simple_list_edit (
         
         break;
     case AGT_CB_ROLLBACK:
-        cbData.cbType = "rollback";
-        cbLog.addCallback(module_name, cbData);
         /* undo device instrumentation here */
         break;
     default:
-        cbData.cbType = "default";
-        cbLog.addCallback(module_name, cbData);
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 

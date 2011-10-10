@@ -708,6 +708,7 @@ void
     ses_putchar(scb, '"');
     switch (cvttyp) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_H:
         break;
     case NCX_CVTTYP_UC:
@@ -1003,6 +1004,7 @@ void
     /* module format */
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
         ses_putstr_indent(scb, (const xmlChar *)"Combined SIL module", 
                           indent);
         break;
@@ -1083,6 +1085,7 @@ void
     ses_putstr(scb, (const xmlChar *)"\n/* END ");
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_H:
         break;
     case NCX_CVTTYP_UC:

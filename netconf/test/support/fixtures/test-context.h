@@ -11,6 +11,7 @@
 namespace YumaTest 
 {
 class AbstractNCSessionFactory;
+class AbstractCBCheckerFactory;
 class NCQueryTestEngine;
 
 /**
@@ -35,7 +36,8 @@ struct TestContext
      * \param queryFactory the factory to use when creating NCQueries.
      */
     TestContext( TargetDbConfig targetDbConfig,
-                     std::shared_ptr<AbstractNCSessionFactory> queryFactory );
+                 std::shared_ptr<AbstractNCSessionFactory> queryFactory,
+                 std::shared_ptr<AbstractCBCheckerFactory> cbCheckerFactory );
 
     /**
      * Set the new test context.
@@ -68,6 +70,9 @@ struct TestContext
 
     /** the session factory. */
     std::shared_ptr<AbstractNCSessionFactory> sessionFactory_;
+
+    /** the cb checker factory. */
+    std::shared_ptr<AbstractCBCheckerFactory> cbCheckerFactory_;
 
 private:    
     /** The current test context */

@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------------------|
 #include "test/support/fixtures/test-context.h"
 #include "test/support/msg-util/NCMessageBuilder.h"
+#include "test/support/callbacks/callback-checker.h"
 
 // ---------------------------------------------------------------------------|
 // Standard includes
@@ -27,6 +28,8 @@ class NCQueryTestEngine;
 class NCDbScopedLock;
 class AbstractNCSession;
 class AbstractNCSessionFactory;
+class CallbackChecker;
+class AbstractCBCheckerFactory;
 
 // ---------------------------------------------------------------------------|
 /**
@@ -92,14 +95,31 @@ public:
     void runEditQuery( std::shared_ptr<AbstractNCSession> session,
                        const std::string& query );
 
+    /**
+     * Run an edit query.
+     *
+     * \param session the session running the query.
+     * \param query the query to run.
+     * \param failReson the expected fail reason.
+     */
+    void runFailedEditQuery( std::shared_ptr<AbstractNCSession> session,
+                       const std::string& query,
+                       const std::string& failReason );
+
     /** the test context */
     std::shared_ptr<TestContext> testContext_;
 
     /** the session factory. */
     std::shared_ptr<AbstractNCSessionFactory> sessionFactory_;
 
+    /** the cb checker factory. */
+    std::shared_ptr<AbstractCBCheckerFactory> cbCheckerFactory_;
+    
     /** Each test always has one session */
     std::shared_ptr<AbstractNCSession> primarySession_;
+
+    /** Each test always has one cb checker */
+    std::shared_ptr<CallbackChecker> cbChecker_;
 
     /** The Query Engine */
     std::shared_ptr<NCQueryTestEngine> queryEngine_;

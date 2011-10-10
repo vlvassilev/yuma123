@@ -43,6 +43,7 @@ string XPOQueryBuilder::addProfileNodePath(
 
 // ---------------------------------------------------------------------------|
 string XPOQueryBuilder::addStreamConnectionPath( 
+    const uint16_t profileId,
     const uint16_t connectionId,
     const string& queryText ) const
 {
@@ -50,7 +51,7 @@ string XPOQueryBuilder::addStreamConnectionPath(
     string query = genKeyParentPathText( "streamConnection", "id",
             boost::lexical_cast<string>( connectionId ) , queryText );
 
-    return genModuleOperationText( "xpo", moduleNs_, query );
+    return addProfileNodePath( profileId, query );
 }
 
 // ---------------------------------------------------------------------------|
@@ -90,7 +91,7 @@ string XPOQueryBuilder::addVRConnectionNodePath(
     const string& queryText ) const
 {
     // add the resource path
-    string query = genKeyParentPathText( "connection", "id",
+    string query = genKeyParentPathText( "resourceConnection", "id",
             boost::lexical_cast<string>( connectionId ) , queryText );
 
     // add the profile and stream path
@@ -127,6 +128,7 @@ string XPOQueryBuilder::genProfileQuery( const uint16_t profileId,
 
 // ---------------------------------------------------------------------------|
 string XPOQueryBuilder::genStreamConnectionQuery( 
+        const uint16_t profileId,
         const uint16_t streamId,
         const string& op ) const
 {
@@ -135,8 +137,9 @@ string XPOQueryBuilder::genStreamConnectionQuery(
                 boost::lexical_cast<string>( streamId ), op );
 
     // add the module info
-    return genModuleOperationText( "xpo", moduleNs_, query );
+    return addProfileNodePath( profileId, query );
 }
+
 // ---------------------------------------------------------------------------|
 string XPOQueryBuilder::genProfileStreamItemQuery( const uint16_t profileId,
                                         const uint16_t streamId,
@@ -186,9 +189,19 @@ string XPOQueryBuilder::configureVResourceNode(
 
     return oss.str();
 }
+
 // ---------------------------------------------------------------------------|
-string XPOQueryBuilder::configureVRConnectionItem( 
+string XPOQueryBuilder::configureResourceConnection( 
     const ConnectionItemConfig& config, 
+    const string& op ) const
+{
+    return configureConnectionItem( config, op );
+}
+
+// ---------------------------------------------------------------------------|
+template <class T>
+string XPOQueryBuilder::configureConnectionItem(
+    const T& config, 
     const string& op ) const
 {
     ostringstream oss;
@@ -221,6 +234,29 @@ string XPOQueryBuilder::configureVRConnectionItem(
     {
         oss << genOperationText( "bitrate", 
                 boost::lexical_cast<string>( *config.bitrate_ ), op );
+    }
+
+    return oss.str();
+}
+
+// ---------------------------------------------------------------------------|
+string XPOQueryBuilder::configureStreamConnection( 
+    const StreamConnectionItemConfig& config, 
+    const string& op ) const
+{
+    ostringstream oss;
+
+    oss << configureConnectionItem( config, op );
+    if ( config.sourceStreamId_ )
+    {
+        oss << genOperationText( "sourceStreamId", 
+                boost::lexical_cast<string>( *config.sourceStreamId_), op );
+    }
+
+    if ( config.destinationStreamId_ )
+    {
+        oss << genOperationText( "destinationStreamId", 
+                boost::lexical_cast<string>( *config.destinationStreamId_), op );
     }
 
     return oss.str();

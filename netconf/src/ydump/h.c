@@ -721,6 +721,7 @@ static status_t
 
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_H:
         prefix = EMPTY_STRING;
         break;

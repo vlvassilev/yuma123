@@ -7,6 +7,7 @@
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/nc-query-util/yuma-op-policies.h"
 #include "test/support/nc-session/spoof-nc-session-factory.h"
+#include "test/support/callbacks/integ-cb-checker-factory.h"
 
 // ---------------------------------------------------------------------------|
 // Standard includes
@@ -83,8 +84,11 @@ void IntegrationTestFixture<SpoofedArgs, OpPolicy>::configureTestContext()
    shared_ptr< AbstractNCSessionFactory > sessionFactory(
            new SpoofNCSessionFactory( queryLogPolicy ) ) ;
 
+   shared_ptr< AbstractCBCheckerFactory > cbCheckerFactory(
+           new IntegCBCheckerFactory( getTargetDbConfig()==TestContext::CONFIG_USE_CANDIDATE) ) ;
+
    shared_ptr< TestContext > testContext( 
-           new TestContext( getTargetDbConfig(), sessionFactory ) );
+           new TestContext( getTargetDbConfig(), sessionFactory, cbCheckerFactory ) );
 
    assert( testContext );
 

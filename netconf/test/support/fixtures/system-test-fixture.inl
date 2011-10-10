@@ -7,6 +7,7 @@
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/nc-query-util/yuma-op-policies.h"
 #include "test/support/nc-session/remote-nc-session-factory.h"
+#include "test/support/callbacks/system-cb-checker-factory.h"
 
 // ---------------------------------------------------------------------------|
 // Standard includes
@@ -124,8 +125,11 @@ void SystemTestFixture<SpoofedArgs, OpPolicy>::configureTestContext()
            new RemoteNCSessionFactory( ipAddr, ipPort, user, password,
                                        queryLogPolicy ) ) ;
 
+   shared_ptr< AbstractCBCheckerFactory > cbCheckerFactory(
+           new SystemCBCheckerFactory() );
+
    shared_ptr< TestContext > 
-       testContext( new TestContext( getTargetDbConfig(), sessionFactory ) );
+       testContext( new TestContext( getTargetDbConfig(), sessionFactory, cbCheckerFactory ) );
 
    assert( testContext );
 

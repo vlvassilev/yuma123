@@ -144,6 +144,27 @@ public:
     }
 
     /**
+     * Set the log verbosity to the supplied level
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param logLevelStr the log level to apply
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void trySetLogLevel( std::shared_ptr<AbstractNCSession> session,
+                            const std::string& logLevelStr,
+                            Checker& checker )
+    {
+        // build a set log level message for test.yang
+        const std::string queryStr = 
+            getMessageBuilder().buildSetLogLevelMessage( 
+                logLevelStr, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+    
+
+    /**
      * Utility function for locking the database.
      *
      * \param session the session to use for injecting the message.

@@ -76,6 +76,74 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION write_cb_logging_init
+* 
+* Generate the initialisation of callback logging
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   idstr == id of the call to be logged
+*   suffix == suffix of the call to be logged
+*   indent == level of indentation for generated code
+*
+*********************************************************************/
+static void
+    write_cb_logging_init (ses_cb_t *scb,
+                           const xmlChar * idstr,
+                           const xmlChar * suffix,
+                           int32 indent)
+{
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"YumaTest::SILCallbackLog::CallbackInfo cbData;",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"cbData.cbName = \"",
+                      indent);
+    ses_putstr(scb, idstr);
+    ses_putstr(scb, suffix);
+    ses_putstr(scb, (const xmlChar *)"\";");
+} /* write_cb_logging_init */
+
+
+/********************************************************************
+* FUNCTION write_cb_logging_add_cb
+* 
+* Generate the adding of a callback to the callback log
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   module_name == session control block to use for writing
+*   is_string == TRUE if the module name given should be generated
+*                as a string (in quotation marks)
+*                FALSE if the module name given should be generated as 
+*                a variable name
+*   indent == level of indentation for generated code
+*
+*********************************************************************/
+static void
+    write_cb_logging_add_cb (ses_cb_t *scb,
+                             const xmlChar *mod_name,
+                             boolean is_string,
+                             int32 indent)
+{
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"cbLog.addCallback(",
+                      indent);
+    if (is_string) {
+        ses_putstr(scb, (const xmlChar *)"\"");
+    }
+    ses_putstr(scb, mod_name);
+    if (is_string) {
+        ses_putstr(scb, (const xmlChar *)"\"");
+    }
+    ses_putstr(scb, (const xmlChar *)", cbData);");
+} /* write_cb_logging_add_cb */
+
+
+/********************************************************************
 * FUNCTION write_if_res
 * 
 * Write if (res != NO_ERR) ... statements
@@ -216,6 +284,12 @@ static void
 #endif
     boolean                   needrpc, neednotif;
 
+    if (cp->format == NCX_CVTTYP_CPP_TEST) {
+        /* allow correct compiling with cpp flags */
+        ses_putchar(scb, '\n');
+        ses_putstr(scb, (const xmlChar *)"extern \"C\" {");
+    }
+
     needrpc = need_rpc_includes(mod, cp);
     neednotif = need_notif_includes(mod, cp);
 
@@ -266,6 +340,7 @@ static void
     /* include for the module H file */
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
         write_ncx_include(scb, ncx_get_modname(mod));
         break;
     case NCX_CVTTYP_UC:
@@ -290,6 +365,13 @@ static void
         }
     }
 #endif
+
+    if (cp->format == NCX_CVTTYP_CPP_TEST) {
+        /* close extern */
+        ses_putstr(scb, (const xmlChar *)"\n}\n");
+        /* add include for callback logging */
+        write_ncx_include(scb, (const xmlChar *)"test/support/callbacks/sil-callback-log");
+    }
 
     ses_putchar(scb, '\n');
 } /* write_c_includes */
@@ -360,7 +442,8 @@ static void
     /* create a static object template pointer for
      * each top-level real object, RPC, or notification
      */
-    if (cp->format == NCX_CVTTYP_C || cp->format == NCX_CVTTYP_YC) {
+    if (cp->format == NCX_CVTTYP_C || cp->format == NCX_CVTTYP_CPP_TEST || 
+        cp->format == NCX_CVTTYP_YC) {
         if (mod->ismod) {
             /* print a banner */
             ses_putstr(scb, (const xmlChar *)"\n/* module static variables */");
@@ -494,7 +577,7 @@ static void
         ses_putstr(scb, (const xmlChar *)" = NULL;");
     }
 
-    if (cp->format == NCX_CVTTYP_C) {
+    if (cp->format == NCX_CVTTYP_C || cp->format == NCX_CVTTYP_CPP_TEST) {
         /* put inline user marker comment */
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb, 
@@ -664,23 +747,62 @@ static void
 
     /* generate switch on callback type */
     if (cp->format != NCX_CVTTYP_YC) {
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putchar(scb, '\n');
+            write_cb_logging_init(scb, cdef->idstr, EDIT_SUFFIX, indent);
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"val_value_t* value = (newval) ? newval : curval;",
+                              indent);
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"std::string module_name = (char*) val_get_mod_name(value);",
+                              indent);
+        }
+
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb, (const xmlChar *)"switch (cbtyp) {", indent);
 
         ses_putstr_indent(scb, (const xmlChar *)"case AGT_CB_VALIDATE:",
                           indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbType = \"validate\";",
+                              indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"/* description-stmt "
                           "validation here */",
                           indent+indent);
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent+indent);
 
         ses_putstr_indent(scb, (const xmlChar *)"case AGT_CB_APPLY:", indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbType = \"apply\";",
+                              indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"/* database manipulation "
                           "done here */", indent+indent);
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent+indent);
 
         /* commit case arm */
         ses_putstr_indent(scb, (const xmlChar *)"case AGT_CB_COMMIT:", indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbType = \"commit\";",
+                              indent+indent);
+        }
+
         ses_putstr_indent(scb,  (const xmlChar *)"/* device instrumentation "
                           "done here */", indent+indent);
 
@@ -690,20 +812,74 @@ static void
 
         ses_putstr_indent(scb, (const xmlChar *)"case OP_EDITOP_LOAD:",
                           indent+indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbPhase = \"load\";",
+                              indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
         ses_putstr_indent(scb, (const xmlChar *)"case OP_EDITOP_MERGE:",
                           indent+indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbPhase = \"merge\";",
+                              indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
         ses_putstr_indent(scb, (const xmlChar *)"case OP_EDITOP_REPLACE:",
                           indent+indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbPhase = \"replace\";",
+                              indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
         ses_putstr_indent(scb, (const xmlChar *)"case OP_EDITOP_CREATE:",
                           indent+indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbPhase = \"create\";",
+                              indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
         ses_putstr_indent(scb, (const xmlChar *)"case OP_EDITOP_DELETE:",
                           indent+indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbPhase = \"delete\";",
+                              indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+        }
+
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
         ses_putstr_indent(scb, (const xmlChar *)"default:", indent+indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbPhase = \"default\";",
+                              indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+        }
+
         ses_putstr_indent(scb,
                           (const xmlChar *)"res = SET_ERROR(ERR_INTERNAL_VAL);",
                           indent*3);
@@ -713,7 +889,7 @@ static void
     /* generate cache object check */
     if (!cp->isuser && obj_is_top(obj)) {
         ses_putchar(scb, '\n');
-        if (cp->format == NCX_CVTTYP_C) {
+        if (cp->format == NCX_CVTTYP_C || cp->format == NCX_CVTTYP_CPP_TEST) {
             ses_putstr_indent(scb, (const xmlChar *)"if (res == NO_ERR) {",
                               indent+indent);
             i = 3;
@@ -727,7 +903,7 @@ static void
         write_c_value_var(scb, obj_get_name(obj));
         ses_putchar(scb, ',');
         ses_putstr(scb, (const xmlChar *)" newval, curval, editop);");
-        if (cp->format == NCX_CVTTYP_C) {
+        if (cp->format == NCX_CVTTYP_C || cp->format == NCX_CVTTYP_CPP_TEST) {
             ses_putstr_indent(scb, (const xmlChar *)"}\n", indent+indent);
         } else {
             ses_putstr_indent(scb, (const xmlChar *)"}\n", indent);
@@ -736,7 +912,7 @@ static void
 
     /* generate check on read-only child nodes */
     if (!cp->isuser && obj_has_ro_children(obj)) {
-        if (cp->format == NCX_CVTTYP_C) {
+        if (cp->format == NCX_CVTTYP_C || cp->format == NCX_CVTTYP_CPP_TEST) {
             i = 2;
             ses_putstr_indent(scb, (const xmlChar *)
                               "if (res == NO_ERR && curval == NULL) {",
@@ -765,11 +941,29 @@ static void
         /* rollback case arm */
         ses_putstr_indent(scb, (const xmlChar *)"case AGT_CB_ROLLBACK:",
                           indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbType = \"rollback\";",
+                              indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+        }
+
         ses_putstr_indent(scb,
                           (const xmlChar *)"/* undo device instrumentation "
                           "here */", indent+indent);
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent+indent);
         ses_putstr_indent(scb, (const xmlChar *)"default:", indent);
+
+        if (cp->format == NCX_CVTTYP_CPP_TEST) {
+            /* generate callback logging */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"cbData.cbType = \"default\";",
+                              indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+        }
+
         ses_putstr_indent(scb,
                           (const xmlChar *)"res = SET_ERROR(ERR_INTERNAL_VAL);",
                           indent+indent);
@@ -897,6 +1091,7 @@ static void
     ses_putstr_indent(scb, (const xmlChar *)"status_t res = NO_ERR;", indent);
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_UC:
         ses_indent(scb, indent);
         write_c_objtype_ex(scb, obj, objnameQ, ';', TRUE, FALSE);
@@ -930,9 +1125,20 @@ static void
     ses_putstr(scb, (const xmlChar *)" callback\");");
     ses_putstr_indent(scb, (const xmlChar *)"}", indent);
 
+    ses_putchar(scb, '\n');
+
+    if (cp->format == NCX_CVTTYP_CPP_TEST) {
+        /* generate callback logging */
+        write_cb_logging_init(scb, cdef->idstr, GET_SUFFIX, indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"std::string module_name = (char*) val_get_mod_name(dstval);",
+                          indent);
+        write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent);
+    }
 
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_YC:
         /* print message about removing (void)foo; line */
         ses_putchar(scb, '\n');
@@ -971,6 +1177,7 @@ static void
     ses_putchar(scb, '\n');
     switch (cp->format) {
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_UC:
         ses_putstr_indent(scb, 
                           (const xmlChar *)"/* set the ", 
@@ -1208,6 +1415,13 @@ static void
                           indent);
     }
 
+    if (cp->format == NCX_CVTTYP_CPP_TEST) {
+        /* generate callback logging */
+        write_cb_logging_init(scb, cdef->idstr, MRO_SUFFIX, indent);
+        write_cb_logging_add_cb(scb, ncx_get_modname(mod), TRUE, indent);
+        ses_putchar(scb, '\n');
+    }
+
     /* create read-only child nodes as needed */
     for (childobj = obj_first_child(obj);
          childobj != NULL;
@@ -1422,6 +1636,13 @@ static void
     ses_putstr_indent(scb, 
                       (const xmlChar *)"status_t res = NO_ERR;",
                       indent);
+    ses_putchar(scb, '\n');
+
+    if (cp->format == NCX_CVTTYP_CPP_TEST) {
+        /* generate callback logging */
+        write_cb_logging_init(scb, cdef->idstr, MRO_SUFFIX, indent);
+        write_cb_logging_add_cb(scb, ncx_get_modname(mod), TRUE, indent);
+    }
 
     /* generate 'add <path>' comment */
     ses_putchar(scb, '\n');
@@ -1671,6 +1892,7 @@ static void
         ses_putstr_indent(scb, (const xmlChar *)"val_value_t *errorval = NULL;",
                           indent);
     }
+    ses_putchar(scb, '\n');
 
     if (hasinput) {
         /* declare value pointer node variables for 
@@ -1703,6 +1925,9 @@ static void
             ses_indent(scb, indent);
             write_c_objtype_ex(scb, obj, objnameQ, ';', TRUE, FALSE);
         }
+
+
+
 
         /* retrieve the parameter from the input */
         for (obj = obj_first_child(inputobj);
@@ -1784,6 +2009,29 @@ static void
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb, (const xmlChar *)"/* invoke your device "
                           "instrumentation code here */\n", indent);
+    }
+
+    if (cp->format == NCX_CVTTYP_CPP_TEST) {
+        /* generate callback logging */
+        ses_putchar(scb, '\n');
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();",
+                          indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"YumaTest::SILCallbackLog::CallbackInfo cbData;",
+                          indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"cbData.cbName = \"",
+                          indent);
+        write_identifier(scb, modname, NULL, obj_get_name(rpcobj), cp->isuser);
+        if (is_validate) {
+            ses_putstr(scb, (const xmlChar *)"_validate");
+        } else {
+            ses_putstr(scb, (const xmlChar *)"_invoke");
+        }
+        ses_putstr(scb, (const xmlChar *)"\";");
+        write_cb_logging_add_cb(scb, ncx_get_modname(mod), TRUE, indent);
+        ses_putchar(scb, '\n');
     }
 
     /* return NO_ERR */

@@ -43,7 +43,7 @@ public:
      * \retrun the formatted xml query,
      */
     std::string addProfileNodePath( 
-        const uint16_t profileId,
+        uint16_t profileId,
         const std::string& queryText ) const;
 
     /** 
@@ -56,18 +56,20 @@ public:
      * \return XML formatted query
      */
     std::string addProfileStreamNodePath( 
-        const uint16_t profileId,
-        const uint16_t streamId,
+        uint16_t profileId,
+        uint16_t streamId,
         const std::string& queryText ) const;
 
     /** 
      * Add the path to the stream connection (streamConnection)
      *
+     * \param profileId the of the owning profile.
      * \param streamId the of the stream to create. 
      * \param queryText the resource query to add the path to.
      * \return XML formatted query
      */
     std::string addStreamConnectionPath( 
+        uint16_t profileId,
         uint16_t connectionId,
         const std::string& queryText ) const;
 
@@ -81,9 +83,9 @@ public:
      * \return XML formatted query
      */
     std::string addResourceNodePath( 
-        const uint16_t profileId,
-        const uint16_t streamId,
-        const uint16_t resourceId,
+        uint16_t profileId,
+        uint16_t streamId,
+        uint16_t resourceId,
         const std::string& queryText ) const;
 
     /** 
@@ -97,9 +99,9 @@ public:
      * \return XML formatted query
      */
     std::string addVRConnectionNodePath( 
-        const uint16_t profileId,
-        const uint16_t streamId,
-        const uint16_t connectionId,
+        uint16_t profileId,
+        uint16_t streamId,
+        uint16_t connectionId,
         const std::string& queryText ) const;
 
     /**
@@ -150,14 +152,14 @@ public:
      * \param resourceNodeId the id of the resource node to create.
      * \return XML formatted query
      */
-    std::string genProfileChildQuery( const uint16_t profileId,
-                                      const uint16_t streamId,
+    std::string genProfileChildQuery( uint16_t profileId,
+                                      uint16_t streamId,
                                       const std::string&  nodeName,
-                                      const uint16_t nodeId,
+                                      uint16_t nodeId,
                                       const std::string& op ) const;
     
     /**
-     * Configure a connection item.
+     * Configure a resource connection item.
      * This function generates the complete configuration for a
      * ConnectionItem, items are configured depending on whether or
      * not they have been set in the supplied ConnectionItemConfig.
@@ -166,10 +168,23 @@ public:
      * \param op the operation being performed
      * \return XML representation of the data being configured.
      */
-     std::string configureVRConnectionItem( 
+     std::string configureResourceConnection( 
         const YumaTest::ConnectionItemConfig& config,
         const std::string& op ) const;
 
+    /**
+     * Configure a stream connection item.
+     * This function generates the complete configuration for a
+     * ConnectionItem, items are configured depending on whether or
+     * not they have been set in the supplied StreamConnectionItemConfig.
+     *
+     * \param config the configuration to generate
+     * \param op the operation being performed
+     * \return XML representation of the data being configured.
+     */
+     std::string configureStreamConnection( 
+        const YumaTest::StreamConnectionItemConfig& config,
+        const std::string& op ) const;
    /**
      * Configure a Virtual resource item.
      * This function generates the complete configuration for a
@@ -187,16 +202,17 @@ public:
     /**
      * Generate a query for a specific stream.
      *
+      * \param profileId the id of the stream
      * \param streamId the id of the stream
      * \param op the operation to perform.
      * \return XML formatted query
      */
      std::string genStreamConnectionQuery( 
+           uint16_t profileId,
            uint16_t streamId,
            const std::string& op ) const;
 
      /**
-      *
       * Generate a query for a specific stream in a profile.
       *
       * \param profileId the id of the stream
@@ -207,6 +223,24 @@ public:
      std::string genProfileStreamItemQuery( uint16_t profileId,
                                             uint16_t streamId,
                                             const std::string& op ) const;
+private:
+    /**
+     *
+     * Generate the ConnectionItemConfig part of the supplied config.
+     * \tparam T a class that mus supply the member variables:
+     *           sourceId_
+     *           sourcePinId_
+     *           destinationId_
+     *           destinationPinId_
+     *           bitrate_
+     * \param config the config
+     * \param op the operation being performed
+     * \return XML representation of the data being configured.
+     */
+    template <class T>
+    std::string configureConnectionItem( const T& config, 
+                                         const std::string& op ) const;
+
 private:
      const std::string moduleNs_; ///< the module's namespace
 };

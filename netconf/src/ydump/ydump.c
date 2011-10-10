@@ -1318,6 +1318,7 @@ static boolean
     case NCX_CVTTYP_SQLDB:
     case NCX_CVTTYP_H:
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_YH:
     case NCX_CVTTYP_YC:
     case NCX_CVTTYP_UH:
@@ -1438,6 +1439,7 @@ static status_t
                   cp->format == NCX_CVTTYP_HTML ||
                   cp->format == NCX_CVTTYP_H ||
                   cp->format == NCX_CVTTYP_C ||
+                  cp->format == NCX_CVTTYP_CPP_TEST ||
                   cp->format == NCX_CVTTYP_UC ||
                   cp->format == NCX_CVTTYP_UH ||
                   cp->format == NCX_CVTTYP_YC ||
@@ -1694,6 +1696,7 @@ static status_t
             break;
         case NCX_CVTTYP_UC:
         case NCX_CVTTYP_C:
+        case NCX_CVTTYP_CPP_TEST:
         case NCX_CVTTYP_YC:
             cp->isuser = (cp->format == NCX_CVTTYP_UC) ? TRUE : FALSE;
             if (ncx_any_dependency_errors(pcb->top)) {
@@ -1909,7 +1912,7 @@ status_t
     if (res == NO_ERR) {
         res = process_cli_input(argc, argv, cvtparms);
     }
-
+        
     if (res == NO_ERR && cvtparms->collect_stats) {
         res = init_cvtparms_stats(cvtparms);
     }
@@ -2003,7 +2006,8 @@ status_t
 	if (!(cvtparms->format == NCX_CVTTYP_XSD ||
 	      cvtparms->format == NCX_CVTTYP_HTML ||
 	      cvtparms->format == NCX_CVTTYP_H ||
-	      cvtparms->format == NCX_CVTTYP_C)) {
+	      cvtparms->format == NCX_CVTTYP_C ||
+	      cvtparms->format == NCX_CVTTYP_CPP_TEST)) {
 	    write_banner();
 	}
     }

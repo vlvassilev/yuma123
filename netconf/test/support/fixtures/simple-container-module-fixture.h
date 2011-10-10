@@ -74,9 +74,11 @@ public:
      *
      * \param session the session running the query
      * \param entryKeyStr the name of the entry key to add.
+     * \param operationStr the type of addition - add, merge, replace.
      */
     void addEntry( std::shared_ptr<AbstractNCSession> session,
-                   const std::string& entryKeyStr );
+                   const std::string& entryKeyStr,
+                   const std::string& operationStr );
 
     /** 
      * Add an entry value.
@@ -84,19 +86,76 @@ public:
      * \param session the session running the query
      * \param entryKeyStr the name of the entry key.
      * \param entryValStr the value of the entry.
+     * \param operationStr the type of addition - add, merge, replace.
      */
     void addEntryValue( std::shared_ptr<AbstractNCSession> session,
                         const std::string& entryKeyStr,
-                        const std::string& entryValStr );
+                        const std::string& entryValStr,
+                        const std::string& operationStr );
 
     /** 
      * Add an entry key and value.
      *
-     * \param session the session running the query
+     * \param session the session running the query.
      * \param entryKeyStr the name of the entry key.
      * \param entryValStr the value of the entry.
      */
     void addEntryValuePair( std::shared_ptr<AbstractNCSession> session,
+                            const std::string& entryKeyStr,
+                            const std::string& entryValStr );
+
+    /** 
+     * Merge an entry key and value.
+     *
+     * \param session the session running the query.
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     */
+    void mergeEntryValuePair( std::shared_ptr<AbstractNCSession> session,
+                              const std::string& entryKeyStr,
+                              const std::string& entryValStr );
+
+    /** 
+     * Replace an entry key and value.
+     *
+     * \param session the session running the query.
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     */
+    void replaceEntryValuePair( std::shared_ptr<AbstractNCSession> session,
+                                const std::string& entryKeyStr,
+                                const std::string& entryValStr );
+
+    /** 
+     * Delete an entry.
+     *
+     * \param session the session running the query
+     * \param entryKeyStr the name of the entry key to add.
+     * \param operationStr the type of addition - add, merge, replace.
+     */
+    void deleteEntry( std::shared_ptr<AbstractNCSession> session,
+                      const std::string& entryKeyStr );
+
+    /** 
+     * Delete an entry value.
+     *
+     * \param session the session running the query
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     * \param operationStr the type of addition - add, merge, replace.
+     */
+    void deleteEntryValue( std::shared_ptr<AbstractNCSession> session,
+                        const std::string& entryKeyStr,
+                        const std::string& entryValStr );
+
+    /** 
+     * delete an entry key and value.
+     *
+     * \param session the session running the query.
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     */
+    void deleteEntryValuePair( std::shared_ptr<AbstractNCSession> session,
                             const std::string& entryKeyStr,
                             const std::string& entryValStr );
 
@@ -113,7 +172,7 @@ public:
     /** 
      * Edit an entry key and value.
      *
-     * \param session the session running the query
+     * \param session the session running the query.
      * \param entryKeyStr the name of the entry key.
      * \param entryValStr the value of the entry.
      */

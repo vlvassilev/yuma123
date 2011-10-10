@@ -701,28 +701,32 @@ static void
         dest->v.num.d = src->v.num.d;
         break;
     case NCX_BT_BINARY:
+        // FIXME: Temporary fix to prevent the newval containing a NULL
+        // FIXME: pointer when <commit> SIL callback is made!
         ncx_clean_binary(&dest->v.binary);
-        dest->v.binary.ustr = src->v.binary.ustr;
         dest->v.binary.ubufflen = src->v.binary.ubufflen;
         dest->v.binary.ustrlen = src->v.binary.ustrlen;
-        src->v.binary.ustr = NULL;
-        src->v.binary.ustrlen = 0;
-        src->v.binary.ubufflen = 0;
+        dest->v.binary.ustr = m__getMem( src->v.binary.ustrlen );
+        memcpy( dest->v.binary.ustr, src->v.binary.ustr, src->v.binary.ustrlen );
         break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:   /****/
         ncx_clean_str(&dest->v.str);
-        dest->v.str = src->v.str;
-        src->v.str = NULL;
+        // FIXME: Temporary fix to prevent the newval containing a NULL
+        // FIXME: pointer when <commit> SIL callback is made!
+        dest->v.str = xml_strdup( src->v.str );
+        // src->v.str = NULL;
         break;
     case NCX_BT_IDREF:
+        // FIXME: Temporary fix to prevent the newval containing a NULL
+        // FIXME: pointer when <commit> SIL callback is made!
         dest->v.idref.nsid = src->v.idref.nsid; 
+        dest->v.idref.identity = src->v.idref.identity;
         if (dest->v.idref.name) {
             m__free(dest->v.idref.name);
         }
-        dest->v.idref.name = src->v.idref.name;
-        src->v.idref.name = NULL;
+        dest->v.idref.name = xml_strdup( src->v.idref.name );
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);

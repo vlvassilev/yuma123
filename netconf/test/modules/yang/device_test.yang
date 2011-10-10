@@ -340,9 +340,20 @@ module device_test {
             }
         }
 
-        leaf activeProfile {
-            description "The number of the active profile.";
-            type uint32;
+        grouping streamItem {
+            description "Stream container.";
+            uses resourceDescription;
+
+            list resourceConnection {
+                description "Connection between two virtual resources.";
+                key id;
+
+                leaf id {
+                    description "Connection identifier.";
+                    type uint32;
+                }
+                uses connectionItem;
+            }
         }
         
         list profile {
@@ -373,24 +384,26 @@ module device_test {
                     description "Connection identifier.";
                     type uint32;
                 }
+
+                leaf sourceStreamId {
+                    description "The ID of the stream providing the input to the
+                                 connection.";
+                    type uint32;
+                }
+
+                leaf destinationStreamId {
+                    description "The ID of the stream accepting the output of the
+                                 connection.";
+                    type uint32;
+                }
+
                 uses connectionItem;
             }
         }
-       
-        grouping streamItem {
-            description "Stream container.";
-            uses resourceDescription;
 
-            list connection {
-                description "Connection between two virtual resources.";
-                key id;
-
-                leaf id {
-                    description "Connection identifier.";
-                    type uint32;
-                }
-                uses connectionItem;
-            }
+        leaf activeProfile {
+            description "The number of the active profile.";
+            type uint32;
         }
     }
 

@@ -50,7 +50,7 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-10-08 {
+    revision 2011-10-10 {
        description 
          "Add CLI parameters:
             --aliases-file
@@ -2072,11 +2072,13 @@ module yangcli {
           description "Name of the user variable";
         }
         leaf target {
-          ncx:schema-instance;
+          //need to treat as string in case referenced modules 
+          //are not loaded when yangcli starts
+          //ncx:schema-instance;
           type string;
           description 
             "Target variable if variable represents a node 
-             from a datastore";
+             from a datastore.";
         }
         leaf vartype {
           type YangcliVariableType;

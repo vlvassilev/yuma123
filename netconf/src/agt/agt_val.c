@@ -1892,10 +1892,7 @@ static status_t
          * and whether or not the entry currently exists
          */
         if (res == NO_ERR) {
-            res = agt_check_max_access(newval->editvars->editop, 
-                                       obj_get_max_access(newval->obj), 
-                                       (curval != NULL),
-                                       obj_is_key(newval->obj));
+            res = agt_check_max_access(newval, (curval != NULL));
         }
 
         /* make sure the node is not partial locked
@@ -2147,10 +2144,7 @@ static status_t
                                iqual,
                                ses_get_protocol(scb));
         if (res == NO_ERR) {
-            res = agt_check_max_access(newval->editvars->editop, 
-                                       obj_get_max_access(newval->obj), 
-                                       (curval != NULL),
-                                       obj_is_key(newval->obj));
+            res = agt_check_max_access(newval, (curval != NULL));
         }
 
         if (res == NO_ERR) {

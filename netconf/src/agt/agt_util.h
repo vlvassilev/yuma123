@@ -541,18 +541,14 @@ extern status_t
 * Check if the max-access for a parameter is exceeded
 *
 * INPUTS:
-*   op == requested op
-*   acc == max-access for the parameter
+*   newval == value node from PDU to check
 *   cur_exists == TRUE if the corresponding node in the target exists
-*   iskey == TRUE if the target node is a key
 * RETURNS:
 *   status
 *********************************************************************/
 extern status_t
-    agt_check_max_access (op_editop_t  op,
-			  ncx_access_t acc,
-			  boolean cur_exists,
-                          boolean iskey);
+    agt_check_max_access (val_value_t *newval,
+                          boolean cur_exists);
 
 
 /********************************************************************

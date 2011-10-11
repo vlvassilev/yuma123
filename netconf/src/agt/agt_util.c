@@ -1703,19 +1703,27 @@ status_t
 * Check if the max-access for a parameter is exceeded
 *
 * INPUTS:
-*   op == requested op
-*   acc == max-access for the parameter
+*   newval == value node from PDU to check
 *   cur_exists == TRUE if the corresponding node in the target exists
-*   iskey == TRUE if the target node is a key
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
-    agt_check_max_access (op_editop_t  op,
-                          ncx_access_t acc,
-                          boolean cur_exists,
-                          boolean iskey)
+    agt_check_max_access (val_value_t *newval,
+                          boolean cur_exists)
 {
+    op_editop_t   op;
+    ncx_access_t  acc;
+    boolean       iskey;
+
+    if (newval == NULL || newval->editvars == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    op= newval->editvars->editop;
+    acc = obj_get_max_access(newval->obj);
+    iskey = obj_is_key(newval->obj);
+
     switch (op) {
     case OP_EDITOP_NONE:
         return NO_ERR;
@@ -1771,7 +1779,22 @@ status_t
             return ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RC:
             /* create/delete allowed */
-            return (iskey) ? ERR_NCX_NO_ACCESS_MAX : NO_ERR;
+            if (iskey) {
+                if (newval->parent && newval->parent->editvars) {
+                    op_editop_t pop = newval->parent->editvars->editop;
+                    if (pop == OP_EDITOP_DELETE || pop == OP_EDITOP_REMOVE) {
+                        /* delete operation is derived from parent */
+                        return NO_ERR;
+                    } else {
+                        /* deleting the key leaf but not the parent */
+                        return ERR_NCX_NO_ACCESS_MAX;
+                    }
+                } else {
+                    /* key leaf with no parent?? */
+                    return SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
+            return NO_ERR;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }

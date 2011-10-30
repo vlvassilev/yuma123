@@ -112,6 +112,97 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Sat Oct 29 2011 Andy Bierman <andy at netconfcentral.org> 2.1-3 [1537]
+  * netconfd
+   * fixed bug in partial-lock module; remove write access
+     requirement in order to allow user to create a partial lock 
+   * fixed bug in split SIL generation; local vars now being used
+     to force the given agt_get_key_value invocation order.
+   * add --home parameter to override $HOME variable
+   * fixed bug in database editing where list entries with
+     missing key leafs were allowed to be created anyway
+   * fixed bug in validating identityref input, where
+     the session modules were not checked and a valid
+     identityref value (without a prefix) could be
+     treated as an invalid value
+   * fix bug where an empty string as a key leaf was not being
+     added to the index queue which rippled to other errors
+     during editing
+   * added checks for trying to delete a key leaf
+   * Changed SIL callback behavior for replace operation
+     If the parent node contains the operation="replace"
+     attribute, and at least one child node changed,
+     then the SIL-replace callbacks will be invoked
+     for all the child nodes, not just the changed child nodes.
+   * Changed SIL callback behavior for 'apply' phase
+     The SIL callbacks are no longer called for the candidate
+     database, just the running database.  This prevents
+     double-call (during edit-config and then again in commit).
+     It also prevents SIL resource allocation that will not be
+     cleaned up if <discard-changes> is called.
+   * fixing bug 3426015:
+     The server incorrectly returned an error for a missing current node
+     even if there are no effective operations in the entire request
+     (default-operation='none' and no nc:operation attributes present)
+   * Added 'Commit-Complete' callback support.
+     This change introduces a mechanism that allows SIL modules to
+     register for notification when a commit operation has completed.
+     See API documentation in agt_commit_complete.h
+   * fix bug where replace edit operation was not done
+     at the correct level, so the result was the merge of a
+     complex child node, not a replace as requested
+   * fixed bug in agt_yuma_arp where the /arp/dynamic-arps container
+     was getting created on reboot, if the /arp container was in the
+     startup config
+
+  * yangdump
+    * Added format=cpp_test parameter for yangdump to allow generation 
+      of cpp test module source containing callback logging.
+      Used by regression test code.
+    * add --home parameter to override $HOME variable
+   * add support for ncx:sil-delete-children-first
+  * fix memory leaks and potential use-after-free bugs
+    found by Coverity static analysis
+
+  * yangcli
+    * Added support for command aliases and persistent user variables
+    * Add CLI parameters:
+       --aliases-file
+       --autoaliases
+       --autouservars
+       --uservars-file
+     * Add yangcli local commands:
+       alias
+       aliases
+       unset
+       uservars
+    * yangcli now saving global user variables ($$foo) in an XML file
+    * yangcli now saving command aliases in a text file
+    * add --home parameter to override $HOME variable
+    * fixed bug in validating identityref input, where
+      the session modules were not checked and a valid
+      identityref value (without a prefix) could be
+      treated as an invalid value
+    * fixed bug in file assignment gave wrong top element name:
+      $$a = xget /system
+      @foo.xml = $$a
+    * fix bug where index chains for lists created with
+      the fill command were not being created; This caused
+      show var commands to display the list as if it were
+      a container
+    * fix memory leaks and potential use-after-free bugs
+      found by Coverity static analysis
+
+  * yangdiff
+    * add --home parameter to override $HOME variable
+    * fix memory leaks and potential use-after-free bugs
+      found by Coverity static analysis
+
+  * YANG Parse
+   * fix bug 3422752:
+     revision-stmt ending in semi-colon was not accepted;
+     e.g.;   revision 2011-01-01;
+
 * Tue Sep 27 2011 Andy Bierman <andy at netconfcentral.org> 2.1-2 [1457]
   * Build
     * fix bug added recently that breaks build in libtoaster

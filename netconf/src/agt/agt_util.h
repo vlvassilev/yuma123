@@ -1120,6 +1120,23 @@ extern val_value_t *
                                  boolean *added,
                                  status_t *res);
 
+/********************************************************************
+* FUNCTION agt_any_operations_set
+*
+* Check the new node and all descendants
+* for any operation attibutes prsent
+*
+* INPUTS:
+*   val == value node to check
+*
+* RETURNS:
+*   TRUE if any operation attributes found
+*   FALSE if no operation attributes found
+*/
+extern boolean
+    agt_any_operations_set (val_value_t *val);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

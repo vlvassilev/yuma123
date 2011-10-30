@@ -139,6 +139,7 @@ void checkEqual( const StreamConnectionItem& lhs, const StreamConnectionItem& rh
 struct ResourceNode
 {
     uint32_t id_;                    ///< The id of the resource node
+    uint32_t channelId_;             ///< The id of the channel 
     uint32_t resourceType_;          ///< the type of resource
     // TODO: Add support for binary types from yang
     // binary configuration_;
@@ -273,7 +274,6 @@ struct XPO3Container
  * \param rhs the rhs containing expected results for comparison.
  */
 void checkEqual( const XPO3Container& lhs, const XPO3Container& rhs );
-
 
 } // namespace YumaTest
 

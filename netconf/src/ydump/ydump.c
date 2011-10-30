@@ -1469,6 +1469,9 @@ static status_t
             log_error("\nError: open session failed (%s)\n",
                       get_error_string(res));
             yang_free_pcb(pcb);
+            if (scb) {
+                ses_free_scb(scb);
+            }
             return res;
         }
 

@@ -33,8 +33,10 @@ public:
      * The target DB name must be either 'running' or 'candidate'. Running
      * is only valid if Yuma is configured to allow modifications to the
      * running config.
+     *
+     * \param builder the message builder to use.
      */
-    NCQueryTestEngine();
+    explicit NCQueryTestEngine( std::shared_ptr<NCMessageBuilder> builder );
 
     /** Destructor */
     virtual ~NCQueryTestEngine();
@@ -56,7 +58,7 @@ public:
                         Checker& checker )
     {
         // build a load module message for test.yang
-        const std::string queryStr = getMessageBuilder().buildLoadMessage( 
+        const std::string queryStr = messageBuilder_->buildLoadMessage( 
                 moduleName, session->allocateMessageId() );
         runQuery( session, queryStr, checker );
     }
@@ -75,7 +77,7 @@ public:
                           Checker& checker )
     {
         // build a lock module message for test.yang
-        const std::string queryStr = getMessageBuilder().buildLockMessage( 
+        const std::string queryStr = messageBuilder_->buildLockMessage( 
                 session->allocateMessageId(), target );
         runQuery( session, queryStr, checker );
     }
@@ -94,7 +96,7 @@ public:
                             Checker& checker )
     {
         // build an unlock module message for test.yang
-        const std::string queryStr = getMessageBuilder().buildUnlockMessage( 
+        const std::string queryStr = messageBuilder_->buildUnlockMessage( 
                 session->allocateMessageId(), target );
         runQuery( session, queryStr, checker );
     }
@@ -117,7 +119,7 @@ public:
     {
         // build a load module message for test.yang
         const std::string queryStr = 
-            getMessageBuilder().buildGetConfigMessageXPath( 
+            messageBuilder_->buildGetConfigMessageXPath( 
                 xPathFilterStr, target, session->allocateMessageId() );
         runQuery( session, queryStr, checker );
     }
@@ -138,7 +140,7 @@ public:
                         Checker& checker )
     {
         const std::string queryStr = 
-            getMessageBuilder().buildEditConfigMessage( 
+            messageBuilder_->buildEditConfigMessage( 
                 query, target, session->allocateMessageId() );
         runQuery( session, queryStr, checker );
     }
@@ -158,11 +160,28 @@ public:
     {
         // build a set log level message for test.yang
         const std::string queryStr = 
-            getMessageBuilder().buildSetLogLevelMessage( 
+            messageBuilder_->buildSetLogLevelMessage( 
                 logLevelStr, session->allocateMessageId() );
         runQuery( session, queryStr, checker );
     }
     
+    /**
+     * Discard changes
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryDiscardChanges( std::shared_ptr<AbstractNCSession> session,
+                            Checker& checker )
+    {
+        // build a set discard-changes message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildDiscardChangesMessage( 
+                           session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
 
     /**
      * Utility function for locking the database.

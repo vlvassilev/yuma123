@@ -23,6 +23,13 @@
 namespace YumaTest
 {
 
+template<class T>
+struct EmptyOp
+{
+    void operator()( T& expData, const T& queryData ) const
+    {}
+};
+
 /**
  * Check the results of a netconf query and ensure that all the
  * supplied strings are present.
@@ -33,26 +40,30 @@ namespace YumaTest
  * TODO: Add additional parameter to allow customisation of the check
  * function (currently this is hard-coded to 'checkEqual'
  */
-template<class T> 
+template<class T, class FuncTor=EmptyOp<T> > 
 class XMLContentChecker
 {
-    typedef T type;
 public:
+    typedef T type;
+    typedef FuncTor CustomUpdateHook;
+
     /**
      * Constructor.
      *
      * \param expData the contents to check. This is the test
      * harness's model of the remote database.
      */
-    explicit XMLContentChecker( std::shared_ptr<T> expData )
+    XMLContentChecker( std::shared_ptr<T> expData,
+                       const CustomUpdateHook& hook = EmptyOp<T>() )
     : expData_( expData )
+    , customHook_( hook )
     {
     }
 
     /** 
      * Destructor
      */
-    ~XMLContentChecker()
+    virtual ~XMLContentChecker()
     {
     }
 
@@ -65,7 +76,7 @@ public:
      *
      * \param queryResult the query to check,
      */
-    void operator()( const std::string& queryResult ) const
+    void operator()( const std::string& queryResult ) 
     {
         using namespace boost::xpressive;
         using boost::property_tree::ptree;
@@ -77,12 +88,30 @@ public:
                 "No <data> section in result!" );
 
         ptree pt = PTreeUtils::ParseXMlString( what[0] );
-        checkEqual( *expData_, type( pt ) );
+
+        type queryData( pt );
+        customHook_( *expData_, queryData );
+        checkEqual( *expData_, queryData );
     }
 
-private:
+protected:
+    /**
+     * Hook to allow custom inspection of results.
+     *
+     * \param queryData the data from the server.
+     */
+    virtual void customCheckHook( const type& queryData )
+    {
+        (void) queryData;
+        // no operation;
+    }
+
+protected:
     /** the expected results */
     std::shared_ptr<type> expData_;
+
+    /** the custom hook functor */
+    const CustomUpdateHook& customHook_;
 };
 
 } // namespace YumaTest

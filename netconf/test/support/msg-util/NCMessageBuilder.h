@@ -137,13 +137,33 @@ public:
      * \param configChange the configuration change
      * \param target the target database name
      * \param messageId the id of the message
-     * \param defaultOperation the default Netconf operation
      * \return a Netconf 'edit-config' message.
      */
     std::string buildEditConfigMessage( const std::string& configChange,
                     const std::string& target,
-                    uint16_t messageId, 
-                    const std::string& defaultOperation = "merge" ) const;
+                    uint16_t messageId ) const;
+
+    /**
+     * Build a Netconf 'discard-changes' message.
+     *
+     * \param messageId the id of the message
+     * \return a Netconf 'edit-config' message.
+     */
+    std::string buildDiscardChangesMessage( uint16_t messageId ) const;
+
+    /**
+     * Set the default edit operation.
+     *
+     * \param defaultOperation the new default operation
+     */
+    void setDefaultOperation( const std::string& defaultOperation );
+
+    /**
+     * Set the default edit operation.
+     *
+     * \param defaultOperation the new default operation
+     */
+    const std::string getDefaultOperation() const;
 
     /**
      * Utility function for generating text for 'edit-config' operations.
@@ -221,36 +241,51 @@ public:
      * \param keyName the name of the key for the node 
      * \param keyVal the new value of the key 
      * \param queryText the query to format
+     * \param op the operation text. 
      * \return a string containing the xml formatted query
      */
     std::string genKeyParentPathText( const std::string& nodeName,
                                       const std::string& keyName,
                                       const std::string& keyVal,
-                                      const std::string& queryText ) const;
+                                      const std::string& queryText,
+                                      const std::string& op="" ) const;
 
 protected:
+    /**
+     * Utility function for generating node text.
+     *
+     * \param nodeName the name of the parent node
+     * \param op the operation text. 
+     * \return a string containing the xml formatted node 
+     * ( note this does not include the closing '>' )
+     */
+    std::string genNodeText( const std::string& nodeName, 
+                             const std::string& op ) const;
     /**
      * Utility function for generating xmlns text.
      *
      * \param xmlnsArg the argument string (e.g. xmlns or xmlns:nc )
      * \param ns the namespace string 
      */
-    const std::string genXmlNsText( const std::string& xmlnsArg, 
-                               const std::string& ns ) const;
+    std::string genXmlNsText( const std::string& xmlnsArg, 
+                              const std::string& ns ) const;
 
     /**
      * Utility function for generating xmlns text.
      *
      * \param ns the namespace string 
      */
-    const std::string genXmlNsText( const std::string& ns ) const;
+    std::string genXmlNsText( const std::string& ns ) const;
 
     /**
      * Utility function for generating xmlns:nc text.
      *
      * \param ns the namespace string 
      */
-    const std::string genXmlNsNcText( const std::string& ns ) const;
+    std::string genXmlNsNcText( const std::string& ns ) const;
+
+protected:
+    std::string defaultOperation_; ///< The default edit operation
 };
 
 } // namespace YumaTest

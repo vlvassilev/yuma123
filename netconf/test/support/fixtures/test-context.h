@@ -12,7 +12,6 @@ namespace YumaTest
 {
 class AbstractNCSessionFactory;
 class AbstractCBCheckerFactory;
-class NCQueryTestEngine;
 
 /**
  * BOOST Test does not have any way of accessing global test suite
@@ -61,9 +60,6 @@ struct TestContext
 
     /** The configuration */
     TargetDbConfig targetDbConfig_;
-
-    /** the engine used for injecting queries */
-    std::shared_ptr<NCQueryTestEngine> queryEngine_;
 
     /** the name of the writable database (either running or candidate) */
     std::string writeableDbName_;

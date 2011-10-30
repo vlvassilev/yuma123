@@ -7864,18 +7864,14 @@ int32
                 return ret;
             }
 
-            /* check if they have same value */
-            if (ch1->typdef && ch2->typdef) {
-                /* these are both leafs */
-                ret = val_compare_ex(ch1, ch2, TRUE);
-            } else {
-                /* assume they are the same complex object type
-                 * do not start the replace operation at this node
-                 * keep trying child nodes until one is different
-                 */
-                ret = 0;
-            }
-
+            /* check if they have same value
+             * need to compare complex types as well
+             * as leafs because the replace operation
+             * could already be set in the parent
+             * so skipping a complex node can result
+             * in the merge of child nodes, instead of replace
+             */
+            ret = val_compare_ex(ch1, ch2, TRUE);
             if (ret) {
                 return ret;
             }

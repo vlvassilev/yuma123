@@ -222,15 +222,10 @@ static status_t
                      val_value_t *val)
 {
     obj_key_t    *key;
-    status_t      res;
-
-    res = NO_ERR;
+    status_t      res = NO_ERR;
 
     /* 0 or more index components expected */
-    for (key = instart; 
-         key != NULL;
-         key = (obj_key_t *)dlq_nextEntry(key)) {
-
+    for (key = instart; key != NULL; key = obj_next_key(key)) {
         res = val_gen_index_comp(key, val);
         if (res != NO_ERR) {
             return res;

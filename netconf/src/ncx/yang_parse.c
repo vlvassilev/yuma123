@@ -2596,14 +2596,25 @@ static status_t
         }
     }
 
-    /* Get the starting left brace for the sub-clauses */
-    res = ncx_consume_token(tkc, mod, TK_TT_LBRACE);
+    /* Get the starting left brace for the sub-clauses
+     * or a semi-colon to end the revision statement
+     */
+    res = TK_ADV(tkc);
     if (res != NO_ERR) {
-        retres = res;
-        if (NEED_EXIT(res)) {
-            ncx_free_revhist(rev);
-            return res;
-        }
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
+    }
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+        done = TRUE;
+        break;
+    case TK_TT_LBRACE:
+        break;
+    default:
+        retres = ERR_NCX_WRONG_TKTYPE;
+        expstr = "semi-colon or left brace";
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        done = TRUE;
     }
 
     /* get the description clause and any appinfo extensions */
@@ -2706,14 +2717,9 @@ static status_t
         }
     }
 
-    /* save or delete the revision struct */
-    if (rev->version) {
-        rev->res = retres;
-        dlq_enque(rev, &mod->revhistQ);
-    } else {
-        ncx_free_revhist(rev);
-    }
-
+    /* save the revision struct */
+    rev->res = retres;
+    dlq_enque(rev, &mod->revhistQ);
     return retres;
 
 }  /* consume_revision */

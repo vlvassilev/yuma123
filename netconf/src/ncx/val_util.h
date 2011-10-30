@@ -1007,6 +1007,24 @@ extern void
                        val_walker_fn_t walkerfn);
 
 
+/********************************************************************
+* FUNCTION val_build_index_chains
+* 
+* Check descendant-or-self nodes for lists
+* Check if they have index chains built already
+* If not, then try to add one
+* for each of the key objects in order
+*
+* INPUTS:
+*   val == value node to start check from
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_build_index_chains (val_value_t *val);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

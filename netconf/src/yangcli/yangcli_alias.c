@@ -161,8 +161,10 @@ static alias_cb_t *
  * INPUTS:
  *   alias == alias to add
  *
+ * RETURNS:
+ *   status
  *********************************************************************/
-static void
+static status_t
     add_alias (alias_cb_t *alias)
 {
     dlq_hdr_t  *aliasQ = get_aliasQ();
@@ -172,7 +174,7 @@ static void
     if (aliasQ == NULL) {
         SET_ERROR(ERR_INTERNAL_VAL);
         free_alias(alias);
-        return;
+        return ERR_INTERNAL_VAL;
     }
 
     for (curalias = (alias_cb_t *)dlq_firstEntry(aliasQ);
@@ -183,15 +185,16 @@ static void
         if (ret == 0) {
             SET_ERROR(ERR_NCX_DUP_ENTRY);
             free_alias(alias);
-            return;
+            return ERR_NCX_DUP_ENTRY;
         } else if (ret > 0) {
             dlq_insertAhead(alias, curalias);
-            return;
+            return NO_ERR;
         }
     }
 
     /* new last entry */
     dlq_enque(alias, aliasQ);
+    return NO_ERR;
 
 }  /* add_alias */
 
@@ -528,11 +531,16 @@ static status_t
                 } else {
                     res = set_alias(alias, valptr);
                     if (res == NO_ERR) {
-                        add_alias(alias);
-                        if (loginfo) {
-                            log_info("\nAdded alias '%s'\n", alias->name);
+                        res = add_alias(alias);
+                        if (res == NO_ERR) {
+                            if (loginfo) {
+                                log_info("\nAdded alias '%s'\n", alias->name);
+                            } else {
+                                log_debug2("\nAdded alias '%s'", alias->name);
+                            }
                         } else {
-                            log_debug2("\nAdded alias '%s'", alias->name);
+                            log_error("\nError: alias was not added '%s'\n",
+                                      get_error_string(res));
                         }
                     } else {
                         log_error("\nError: invalid alias value '%s'\n",

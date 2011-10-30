@@ -19,6 +19,9 @@ include simple-edit-candidate.mk
 include lock-load-running.mk
 include lock-load-candidate.mk
 include device-edit-running.mk
+include device-edit-candidate.mk
+include default-none-running.mk
+include discard-changes.mk
 
 # ----------------------------------------------------------------------------|
 include $(YUMA_TEST_ROOT)/make-rules/common-rules.mk

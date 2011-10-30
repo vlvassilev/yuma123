@@ -154,10 +154,7 @@ static void
     tstamp_datetime(tbuff);
 
     if (node) {
-        (void)val_gen_instance_id(NULL, 
-                                  node, 
-                                  NCX_IFMT_XPATH1, 
-                                  &ibuff);
+        (void)val_gen_instance_id(NULL, node, NCX_IFMT_XPATH1, &ibuff);
     }
 
     if (LOGINFO) {
@@ -230,7 +227,6 @@ static status_t
                                   val_value_t *curnode)
 {
     const xmlChar     *name;
-    int                retval;
     status_t           res;
 
     if (newnode != NULL) {
@@ -242,24 +238,42 @@ static status_t
     }
 
     if (newnode && curnode) {
-        retval = val_compare_ex(newnode, curnode, TRUE);
-        if (retval == 0) {
-            /* apply here but nothing to do,
-             * so skip this entire subtree
+        int  retval;
+        if (newnode->parent && newnode->parent->editvars &&
+            newnode->parent->editvars->editop == OP_EDITOP_REPLACE &&
+            newnode->parent->editvars->operset) {
+            /* replace parent was explicitly requested and this 
+             * function would not have been called unless something
+             * in the replaced node changed.  
+             * Invoke the SIL callbacks for the child nodes
+             * even if oldval == newval; 
+             *
+             * Operation must be explicitly set w/ operation="replace"
+             * attribute because <copy-config> will also
+             * appear to be a replace operation and the unchanged
+             * subtrees must be skipped in this mode
              */
-            if (LOGDEBUG && cbtyp != AGT_CB_COMMIT_CHECK) {
-                log_debug("\napply_write_val: "
-                          "Skipping replace node "
-                          "'%s', no changes",
-                          (name) ? name : (const xmlChar *)"--");
-            }
+            retval = -1;
         } else {
-            retval = val_compare_for_replace(newnode, curnode);
+            retval = val_compare_ex(newnode, curnode, TRUE);
             if (retval == 0) {
-                if (LOGDEBUG2 && cbtyp != AGT_CB_COMMIT_CHECK) {
-                    log_debug2("\napply_write_val: "
-                               "Skip replace node '%s'",
-                               (name) ? name : (const xmlChar *)"--");
+                /* apply here but nothing to do,
+                 * so skip this entire subtree
+                 */
+                if (LOGDEBUG && cbtyp != AGT_CB_COMMIT_CHECK) {
+                    log_debug("\napply_write_val: "
+                              "Skipping subtree node "
+                              "'%s', no changes",
+                              (name) ? name : (const xmlChar *)"--");
+                }
+            } else {
+                retval = val_compare_for_replace(newnode, curnode);
+                if (retval == 0) {
+                    if (LOGDEBUG2 && cbtyp != AGT_CB_COMMIT_CHECK) {
+                        log_debug2("\napply_write_val: "
+                                   "Skip subtree.2 node '%s'",
+                                   (name) ? name : (const xmlChar *)"--");
+                    }
                 }
             }
         }
@@ -864,10 +878,8 @@ static void
 
     val_remove_child(curchild);
     
-    val_add_child_clean_editvars(newchild->editvars, 
-                                 curchild,
-                                 parent, 
-                                 &cleanQ);        
+    val_add_child_clean_editvars(newchild->editvars, curchild,
+                                 parent, &cleanQ);
 
     if (undo) {
         /*** TBD: remember order! ***/
@@ -1109,19 +1121,14 @@ static status_t
                      val_value_t  *curval,
                      boolean      *done)
 {
-    const xmlChar   *name;
-    rpc_undo_rec_t   *undo;
-    status_t          res;
-    op_editop_t       cur_editop;
-    boolean           applyhere, topreplace, freenew, add_defs_done;
-    int               retval;
-    uint32            lockid;
-
-    res = NO_ERR;
-    freenew = FALSE;
-    undo = NULL;
-    name = NULL;
-    add_defs_done = FALSE;
+    const xmlChar   *name = NULL;
+    rpc_undo_rec_t  *undo = NULL;
+    status_t         res = NO_ERR;
+    op_editop_t      cur_editop = OP_EDITOP_NONE;
+    boolean          applyhere = FALSE, topreplace = FALSE, freenew = FALSE;
+    boolean          add_defs_done = FALSE;
+    int              retval = 0;
+    uint32           lockid = 0;
 
     if (newval) {
         cur_editop = newval->editvars->editop;
@@ -1239,11 +1246,8 @@ static status_t
             res = NO_ERR;
             lockid = 0;
             if (curval != NULL) {
-                res = val_write_ok(curval,
-                                   editop,
-                                   SES_MY_SID(scb),
-                                   TRUE,
-                                   &lockid);
+                res = val_write_ok(curval, editop, SES_MY_SID(scb),
+                                   TRUE, &lockid);
                 if (res != NO_ERR) {
                     agt_record_error(scb, 
                                      &msg->mhdr, 
@@ -1271,18 +1275,14 @@ static status_t
             }
             if (logval) {
                 xmlChar *buff = NULL;
-                res = val_gen_instance_id(&msg->mhdr,
-                                          logval,
-                                          NCX_IFMT_XPATH1,
-                                          &buff);
+                res = val_gen_instance_id(&msg->mhdr, logval,
+                                          NCX_IFMT_XPATH1, &buff);
                 if (res == NO_ERR) {
                     log_debug("\napply_write_val: apply %s on %s",
-                              op_editop_name(editop),
-                              buff);
+                              op_editop_name(editop), buff);
                 } else {
                     log_debug("\napply_write_val: apply %s on %s", 
-                              op_editop_name(editop),
-                              name);
+                              op_editop_name(editop), name);
                 }
                 if (buff) {
                     m__free(buff);
@@ -1290,12 +1290,27 @@ static status_t
             }
         }
 
-        res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
-                                   newval, curval, TRUE, FALSE);
-        if (res != NO_ERR) {
-            return res;
+        if (target->cfg_id == NCX_CFGID_RUNNING) {
+            /* only call SIL-apply once, when the data tree edits
+             * are applied to the running config.
+             * The candidate target is skipped so the SIL
+             * apply callback is not called twice.
+             * Also there is no corresponding callback
+             * to cleanup the candidate if <discard-changes>
+             * is invoked by the client or the server
+             */
+            res = handle_user_callback(AGT_CB_APPLY, editop, scb, msg, 
+                                       newval, curval, TRUE, FALSE);
+            if (res != NO_ERR) {
+                return res;
+            }
         }
 
+        /* For now, an undo record is built for candidate
+         * and then again for running during commit phase
+         * this allows rollback-on-error on the candidate
+         * to be supported, not just the running config
+         */
         undo = add_undo_node(msg, editop, newval, curval, parent, NO_ERR, 
                              &res);
         if (res != NO_ERR) {
@@ -1337,19 +1352,14 @@ static status_t
             val_remove_child(newval);
             if (curval) {
                 if (newval->editvars->insertstr) {
-                    move_child_node(newval, 
-                                    curval, 
-                                    parent, 
-                                    (msg->rpc_need_undo) ?
-                                    undo : NULL);
+                    move_child_node(newval, curval, parent, 
+                                    (msg->rpc_need_undo) ? undo : NULL);
                 } else {
                     freenew = val_merge(newval, curval);
                 }
             } else {
-                add_child_node(newval, 
-                               parent,
-                               (msg->rpc_need_undo) ?
-                               undo : NULL);
+                add_child_node(newval, parent, 
+                               (msg->rpc_need_undo) ? undo : NULL);
             }
             break;
         case OP_EDITOP_REPLACE:
@@ -1357,11 +1367,8 @@ static status_t
             val_remove_child(newval);
             if (curval) {
                 if (newval->editvars->insertstr) {
-                    move_child_node(newval, 
-                                    curval, 
-                                    parent, 
-                                    (msg->rpc_need_undo) ?
-                                    undo : NULL);
+                    move_child_node(newval, curval, parent, 
+                                    (msg->rpc_need_undo) ? undo : NULL);
                 } else {
                     val_swap_child(newval, curval);
 
@@ -1373,10 +1380,8 @@ static status_t
                     rpc_set_undorec_free_curnode(undo);
                 }
             } else {
-                add_child_node(newval, 
-                               parent, 
-                               (msg->rpc_need_undo) ?
-                               undo : NULL);
+                add_child_node(newval, parent, 
+                               (msg->rpc_need_undo) ? undo : NULL);
             }
             break;
         case OP_EDITOP_CREATE:
@@ -1386,10 +1391,8 @@ static status_t
                 freenew = val_merge(newval, curval);
             } else {
                 freenew = FALSE;
-                add_child_node(newval, 
-                               parent, 
-                               (msg->rpc_need_undo) ?
-                               undo : NULL);
+                add_child_node(newval, parent, 
+                               (msg->rpc_need_undo) ? undo : NULL);
             }
             break;
         case OP_EDITOP_LOAD:
@@ -1439,11 +1442,8 @@ static status_t
         
         if (newval->editvars) {
             /* move the list entry after the merge is done */
-            move_mergedlist_node(newval, 
-                                 curval, 
-                                 parent, 
-                                 (msg->rpc_need_undo) ?
-                                 undo : NULL);
+            move_mergedlist_node(newval, curval, parent, 
+                                 (msg->rpc_need_undo) ? undo : NULL);
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
             freenew = TRUE;
@@ -1451,11 +1451,7 @@ static status_t
     }
 
     if (res == NO_ERR && topreplace) {
-        res = apply_commit_deletes(scb,
-                                   msg,
-                                   target,
-                                   newval,
-                                   curval,
+        res = apply_commit_deletes(scb, msg, target, newval, curval,
                                    TRUE);  /* toponly */
     }
 
@@ -1630,10 +1626,7 @@ static status_t
                 freetest = TRUE;
                 if (curval) {
                     if (newval->editvars->insertstr) {
-                        move_child_node(testval, 
-                                        curval, 
-                                        parent, 
-                                        NULL);
+                        move_child_node(testval, curval, parent, NULL);
                         freetest = FALSE;
                     } else {
                         freetest = val_merge(testval, curval);
@@ -1655,10 +1648,7 @@ static status_t
                 freetest = TRUE;
                 if (curval) {
                     if (newval->editvars->insertstr) {
-                        move_child_node(testval, 
-                                        curval, 
-                                        parent, 
-                                        NULL);
+                        move_child_node(testval, curval, parent, NULL);
                         freetest = FALSE;
                     } else {
                         testval->parent = curval->parent;
@@ -1985,10 +1975,7 @@ static status_t
         } else {
             curparent = NULL;
         }
-        res = test_apply_write_val(curparent, 
-                                   newval, 
-                                   curval, 
-                                   &done);
+        res = test_apply_write_val(curparent, newval, curval, &done);
         break;
     case AGT_CB_APPLY:
     case AGT_CB_COMMIT_CHECK:
@@ -2175,8 +2162,15 @@ static status_t
             /* make sure all the keys are present since this
              * was not done in agt_val_parse.c
              */
-            res = check_keys_present(scb, msg, newval);
-            /* errors recorded if any */
+            if (editop == OP_EDITOP_NONE && !agt_any_operations_set(newval)) {
+                if (LOGDEBUG3) {
+                    log_debug3("\nSkipping key_check for '%s'; no edit ops",
+                               newval->name);
+                }
+            } else {
+                res = check_keys_present(scb, msg, newval);
+                /* errors recorded if any */
+            }
         }
 
         /* check if the wd:default attribute is present and if so,

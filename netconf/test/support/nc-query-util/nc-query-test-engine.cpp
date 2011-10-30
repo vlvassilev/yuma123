@@ -32,8 +32,8 @@ NCDbScopedLock::~NCDbScopedLock()
 }
 
 // ---------------------------------------------------------------------------|
-NCQueryTestEngine::NCQueryTestEngine() 
-    : NCBaseQueryTestEngine()
+NCQueryTestEngine::NCQueryTestEngine( shared_ptr<NCMessageBuilder> builder ) 
+    : NCBaseQueryTestEngine( builder )
 {
 }
 
@@ -71,7 +71,7 @@ void NCQueryTestEngine::commit( shared_ptr<AbstractNCSession> session )
     vector<string> expNotPresent = { "error", "rpc-error" };
     StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
 
-    string queryStr = getMessageBuilder().buildCommitMessage( 
+    string queryStr = messageBuilder_->buildCommitMessage( 
             session->allocateMessageId() );
     runQuery( session, queryStr, checker );
 }

@@ -354,7 +354,6 @@ status_t
     fullspec = ncx_get_source(fspec, &res);
     if (res == NO_ERR && fullspec) {
         ncx_var_t *var;
-        boolean    anyout = FALSE;
 
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL && res == NO_ERR;
@@ -373,7 +372,6 @@ status_t
             val_init_from_template(varval, varobj);
             /* pass off memory to parent here */
             val_add_child(varval, varsval);
-            anyout = TRUE;
 
             /* add var/name */
             childobj = obj_find_child(varobj, YANGCLI_MOD, NCX_EL_NAME);
@@ -388,8 +386,14 @@ status_t
             /* pass off memory to parent here */
             val_add_child(childval, varval);
 
-            /* leave out var/vartype because it is default (global)
-             * add var/target if needed
+            /* leave out var/vartype because it is default (global) */
+
+#if 0
+            /* add var/target if needed
+             * FIXME: the var->val->obj pointers are stale
+             * if they were from session data node objects
+             * and the memory has already been freed for these
+             * objects.  No generic replacement was done!
              */
             if (var->val->obj && obj_is_data_db(var->val->obj)) {
 
@@ -413,6 +417,7 @@ status_t
                 /* pass off memory to parent here */
                 val_add_child(childval, varval);
             }
+#endif
 
             /* for now just clone the value and put it in the
              * tree instead of manipulating the var structs

@@ -1,7 +1,7 @@
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../../target/lib/ 
 export PATH=$PATH:../../../../target/bin/
 export YUMA_HOME=../../../../../
-export YUMA_MODPATH=$YUMA_MODPATH:../../yang/
+export YUMA_MODPATH=$YUMA_MODPATH:../../yang/:$YUMA_HOME/netconf/modules
 
 BASENAME=$(basename $1 .yang)
 

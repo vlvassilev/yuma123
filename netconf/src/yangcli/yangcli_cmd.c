@@ -464,6 +464,7 @@ static xmlChar *
         if (server_cb->returncode == MGR_IO_RC_DROPPED ||
             server_cb->returncode == MGR_IO_RC_DROPPED_NOW) {
             log_write("\nSession was dropped by the server");
+            clear_server_cb_session(server_cb);
             return NULL;
         }
 
@@ -3202,9 +3203,14 @@ static status_t
     if (res == NO_ERR) {
         if (server_cb->result_name || 
             server_cb->result_filename) {
+            /* set the index chains because the value is being saved */
+            res = val_build_index_chains(newparm);
+
             /* save the filled in value */
-            res = finish_result_assign(server_cb, newparm, NULL);
-            newparm = NULL;
+            if (res == NO_ERR) {
+                res = finish_result_assign(server_cb, newparm, NULL);
+                newparm = NULL;
+            }
         }
     } else {
         clear_result(server_cb);
@@ -3384,6 +3390,7 @@ static status_t
                                   dofill, curtop);
                 if (res != NO_ERR) {
                     val_free_value(newnode);
+                    newnode = NULL;
                     done = TRUE;
                 }
             } else {

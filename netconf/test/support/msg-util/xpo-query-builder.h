@@ -1,4 +1,4 @@
-#ifndef __XPO_QUERY_BUILDER_H
+ #ifndef __XPO_QUERY_BUILDER_H
 #define __XPO_QUERY_BUILDER_H
 
 // ---------------------------------------------------------------------------|
@@ -18,7 +18,7 @@ namespace YumaTest
 {
 
 /**
- * Utility lass for build queries aginst teh device test XPO
+ * Utility lass for build queries against the device test XPO
  * container.
  */
 class XPOQueryBuilder : public NCMessageBuilder
@@ -40,11 +40,13 @@ public:
      *
      * \param profileId the id of the profile
      * \param queryText the query to add the path to.
-     * \retrun the formatted xml query,
+     * \param op option operation type.
+     * \return the formatted xml query,
      */
     std::string addProfileNodePath( 
         uint16_t profileId,
-        const std::string& queryText ) const;
+        const std::string& queryText,
+        const std::string& op="" ) const;
 
     /** 
      * Add the path to the resource node (profile.stream.resource)
@@ -53,12 +55,14 @@ public:
      * \param streamId the of the stream to create. 
      * \param resourceId the id of the connection node to create.
      * \param queryText the resource query to add the path to.
+     * \param op option operation type.
      * \return XML formatted query
      */
     std::string addProfileStreamNodePath( 
         uint16_t profileId,
         uint16_t streamId,
-        const std::string& queryText ) const;
+        const std::string& queryText,
+        const std::string& op="" ) const;
 
     /** 
      * Add the path to the stream connection (streamConnection)
@@ -66,12 +70,14 @@ public:
      * \param profileId the of the owning profile.
      * \param streamId the of the stream to create. 
      * \param queryText the resource query to add the path to.
+     * \param op option operation type.
      * \return XML formatted query
      */
     std::string addStreamConnectionPath( 
         uint16_t profileId,
         uint16_t connectionId,
-        const std::string& queryText ) const;
+        const std::string& queryText,
+        const std::string& op="" ) const;
 
     /** 
      * Add the path to the resource node (profile.stream.resource).
@@ -80,13 +86,15 @@ public:
      * \param streamId the id of the owning stream.
      * \param resourceId the id of the resource node.
      * \param queryText the resource query to add the path to.
+     * \param op option operation type.
      * \return XML formatted query
      */
     std::string addResourceNodePath( 
         uint16_t profileId,
         uint16_t streamId,
         uint16_t resourceId,
-        const std::string& queryText ) const;
+        const std::string& queryText,
+        const std::string& op="" ) const;
 
     /** 
      * Add the path to the VR connection node
@@ -96,13 +104,15 @@ public:
      * \param streamId the id of the owning stream.
      * \param connectionId the id of the connection node.
      * \param queryText the resource query to add the path to.
+     * \param op option operation type.
      * \return XML formatted query
      */
     std::string addVRConnectionNodePath( 
         uint16_t profileId,
         uint16_t streamId,
         uint16_t connectionId,
-        const std::string& queryText ) const;
+        const std::string& queryText,
+        const std::string& op="" ) const;
 
     /**
      * Generate a query on the basic XPO container.

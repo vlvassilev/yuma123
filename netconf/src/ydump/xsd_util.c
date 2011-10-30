@@ -1299,6 +1299,7 @@ static val_value_t *
         newval = xml_val_new_cstring(NCX_EL_UNITS, ncx_id, units);
         if (!newval) {
             val_free_value(appval);
+            return NULL;
         } else {
             val_add_child(newval, appval);
         }
@@ -1321,6 +1322,7 @@ static val_value_t *
         newval = xml_val_new_cstring(NCX_EL_CONDITION, ncx_id, condition);
         if (!newval) {
             val_free_value(appval);
+            return NULL;
         } else {
             val_add_child(newval, appval);
         }
@@ -1331,6 +1333,7 @@ static val_value_t *
         newval = make_reference(ref);
         if (!newval) {
             val_free_value(appval);
+            return NULL;
         } else {
             val_add_child(newval, appval);
         }

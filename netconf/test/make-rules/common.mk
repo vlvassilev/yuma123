@@ -24,6 +24,6 @@ ALL_SOURCES_OUTPUT = $(addprefix output/,$(notdir $(1)))
 ALL_OBJECTS = $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(call ALL_SOURCES_OUTPUT,$(1))))
 
 define MAKE_TEST
-g++ $(LDFLAGS) $^ -o $@
+g++ $^ $(LDFLAGS) -o $@
 endef
 

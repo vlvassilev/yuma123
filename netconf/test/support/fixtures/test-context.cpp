@@ -1,5 +1,4 @@
 #include "test/support/fixtures/test-context.h"
-#include "test/support/nc-query-util/nc-query-test-engine.h"
 
 // ---------------------------------------------------------------------------|
 namespace YumaTest 
@@ -15,7 +14,6 @@ TestContext::TestContext(
         std::shared_ptr<AbstractNCSessionFactory> sessionFactory,
         std::shared_ptr<AbstractCBCheckerFactory> cbCheckerFactory )
     : targetDbConfig_( targetDbConfig )
-    , queryEngine_( new NCQueryTestEngine() )
     , writeableDbName_( 
             targetDbConfig == TestContext::CONFIG_WRITEABLE_RUNNNIG ?
             "running" : "candidate" ) 

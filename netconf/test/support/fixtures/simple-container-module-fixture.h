@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------|
 // Test Harness includes
 // ---------------------------------------------------------------------------|
-#include "test/support/fixtures/base-suite-fixture.h"
+#include "test/support/fixtures/query-suite-fixture.h"
 #include "test/support/msg-util/NCMessageBuilder.h"
 
 // ---------------------------------------------------------------------------|
@@ -26,7 +26,7 @@ class AbstractNCSession;
  * It can be used on a per test case basis or on a per test suite
  * basis.
  */
-struct SimpleContainerModuleFixture : public BaseSuiteFixture
+struct SimpleContainerModuleFixture : public QuerySuiteFixture
 {
 public:
     /** Convenience typedef */
@@ -68,6 +68,15 @@ public:
      * \param session the session running the query
      */
     void deleteMainContainer( std::shared_ptr<AbstractNCSession> session );
+
+    /** 
+     * Perform specified operation on the top level container.
+     *
+     * \param session the session running the query
+     * \param op the operation to perform
+     */
+    void mainContainerOp( std::shared_ptr<AbstractNCSession> session,
+                           const std::string& op);
 
     /** 
      * Add an entry.
@@ -181,6 +190,14 @@ public:
                          const std::string& entryValStr );
 
     /**
+     * Remove edits from the candidate configuration by performing a 
+     * discard-changes operation.
+     *
+     * \param session the session running the query.
+     */
+    void discardChangesOperation( std::shared_ptr<AbstractNCSession> session );
+
+    /**
      * Verify the entries in the specified database.
      * This function checks that all expected entries are present in
      * the specified database. It also checks that both databases
@@ -223,15 +240,11 @@ public:
     virtual void commitChanges( std::shared_ptr<AbstractNCSession> session );
 
     /**
-     * Let the test harness know that changes shoudl be discarded
-     * (e.g. due to unlocking the database without a commit.
+     * Let the test harness know that changes should be discarded
+     * (e.g. due to unlocking the database without a commit).
      */
     void discardChanges();
 
-    /** The NCMessage builder for the writeable database */
-    NCMessageBuilder wrBuilder_;
-
-    const std::string moduleName_;      ///< The module name
     const std::string moduleNs_;        ///< the module namespace
     const std::string containerName_;   ///< the container name 
 

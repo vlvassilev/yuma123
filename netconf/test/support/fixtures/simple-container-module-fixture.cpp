@@ -123,9 +123,7 @@ namespace YumaTest
 
 // ---------------------------------------------------------------------------|
 SimpleContainerModuleFixture::SimpleContainerModuleFixture() 
-    : BaseSuiteFixture()
-    , wrBuilder_()
-    , moduleName_( "simple_list_test" )
+    : QuerySuiteFixture()
     , moduleNs_( "http://netconfcentral.org/ns/simple_list_test" )
     , containerName_( "simple_list" )
     , runningEntries_( new EntryMap_T() )
@@ -160,7 +158,7 @@ void SimpleContainerModuleFixture::createMainContainer(
     std::shared_ptr<AbstractNCSession> session )
 {
     assert( session );
-    string query = wrBuilder_.genTopLevelContainerText( 
+    string query = messageBuilder_->genTopLevelContainerText( 
             containerName_, moduleNs_, "create" );
     runEditQuery( session, query );
 }
@@ -169,11 +167,22 @@ void SimpleContainerModuleFixture::createMainContainer(
 void SimpleContainerModuleFixture::deleteMainContainer(
     std::shared_ptr<AbstractNCSession> session )
 {
-    string query = wrBuilder_.genTopLevelContainerText( 
+    string query = messageBuilder_->genTopLevelContainerText( 
             containerName_, moduleNs_, "delete" );
     runEditQuery( session, query );
 
     candidateEntries_->clear();
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::mainContainerOp(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& op )
+{
+    assert( session );
+    string query = messageBuilder_->genTopLevelContainerText( 
+            containerName_, moduleNs_, op );
+    runEditQuery( session, query );
 }
 
 // ---------------------------------------------------------------------------|
@@ -184,8 +193,8 @@ void SimpleContainerModuleFixture::addEntry(
 {
     assert( session );
 
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyOperationText( "theList", "theKey", entryKeyStr, operationStr ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, operationStr ) );
     runEditQuery( session, query );
 }
 
@@ -198,9 +207,9 @@ void SimpleContainerModuleFixture::addEntryValue(
 {
     assert( session );
 
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
-                wrBuilder_.genOperationText( "theVal", entryValStr, operationStr ) ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, operationStr ) ) );
     
     runEditQuery( session, query );
 }
@@ -271,8 +280,8 @@ void SimpleContainerModuleFixture::deleteEntry(
 {
     assert( session );
 
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
     runEditQuery( session, query );
 }
 
@@ -284,9 +293,9 @@ void SimpleContainerModuleFixture::deleteEntryValue(
 {
     assert( session );
 
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
-                wrBuilder_.genOperationText( "theVal", entryValStr, "delete" ) ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, "delete" ) ) );
     
     runEditQuery( session, query );
 }
@@ -299,8 +308,8 @@ void SimpleContainerModuleFixture::deleteEntryValuePair(
 {
     EntryMap_T::iterator it;
     assert( session );
-    deleteEntry( session, entryKeyStr );
     deleteEntryValue( session, entryKeyStr, entryValStr );
+    deleteEntry( session, entryKeyStr );
 
     it=candidateEntries_->find(entryKeyStr);
     candidateEntries_->erase(it);
@@ -328,14 +337,29 @@ void SimpleContainerModuleFixture::editEntryValue(
     const string& entryValStr )
 {
     assert(session);
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
-                wrBuilder_.genOperationText( "theVal", entryValStr, "replace" ) ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, "replace" ) ) );
     
 
     runEditQuery( session, query );
 
     (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::discardChangesOperation( 
+    std::shared_ptr<AbstractNCSession> session )
+{
+    assert(session);
+
+    vector<string> expPresent{ "rpc-reply", "ok" };
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryDiscardChanges( session, checker );
+
+    discardChanges();
 }
 
 // ---------------------------------------------------------------------------|
@@ -398,7 +422,7 @@ void SimpleContainerModuleFixture::checkEntries(
 void SimpleContainerModuleFixture::commitChanges(
     std::shared_ptr<AbstractNCSession> session )
 {
-    BaseSuiteFixture::commitChanges( session );
+    QuerySuiteFixture::commitChanges( session );
     
     // copy the editted changes to the running changes
     if ( useCandidate() )

@@ -14,7 +14,8 @@ namespace YumaTest
 {
 
 // ---------------------------------------------------------------------------|
-NCBaseQueryTestEngine::NCBaseQueryTestEngine()
+NCBaseQueryTestEngine::NCBaseQueryTestEngine( 
+    shared_ptr<NCMessageBuilder> builder ) : messageBuilder_( builder )
 {}
 
 // ---------------------------------------------------------------------------|
@@ -30,7 +31,7 @@ void NCBaseQueryTestEngine::setLogLevel(
     vector<string> expNotPresent = { "error", "rpc-error" };
 
     // build a load module message for test.yang
-    string queryStr = getMessageBuilder().buildSetLogLevelMessage( 
+    string queryStr = messageBuilder_->buildSetLogLevelMessage( 
             logLevel,
             session->allocateMessageId() );
 
@@ -39,3 +40,4 @@ void NCBaseQueryTestEngine::setLogLevel(
 }
 
 } // namespace YumaTest
+

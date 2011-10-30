@@ -32,11 +32,12 @@ XPOQueryBuilder::~XPOQueryBuilder()
 // ---------------------------------------------------------------------------|
 string XPOQueryBuilder::addProfileNodePath( 
     const uint16_t profileId,
-    const string& queryText ) const
+    const string& queryText,
+    const string& op ) const
 {
     // add the profile path
     string query = genKeyParentPathText( "profile", "id",
-            boost::lexical_cast<string>( profileId ) , queryText );
+            boost::lexical_cast<string>( profileId ) , queryText, op );
 
     return genModuleOperationText( "xpo", moduleNs_, query );
 }
@@ -45,11 +46,12 @@ string XPOQueryBuilder::addProfileNodePath(
 string XPOQueryBuilder::addStreamConnectionPath( 
     const uint16_t profileId,
     const uint16_t connectionId,
-    const string& queryText ) const
+    const string& queryText,
+    const string& op ) const
 {
     // add the profile path
     string query = genKeyParentPathText( "streamConnection", "id",
-            boost::lexical_cast<string>( connectionId ) , queryText );
+            boost::lexical_cast<string>( connectionId ) , queryText, op );
 
     return addProfileNodePath( profileId, query );
 }
@@ -58,11 +60,12 @@ string XPOQueryBuilder::addStreamConnectionPath(
 string XPOQueryBuilder::addProfileStreamNodePath( 
     const uint16_t profileId,
     const uint16_t streamId,
-    const string& queryText ) const
+    const string& queryText,
+    const string& op ) const
 {
     // add the stream path
     string query = genKeyParentPathText( "stream", "id",
-            boost::lexical_cast<string>( streamId ) , queryText );
+            boost::lexical_cast<string>( streamId ) , queryText, op );
 
     // add the profile path
     return addProfileNodePath( profileId, query );
@@ -73,11 +76,12 @@ string XPOQueryBuilder::addResourceNodePath(
     const uint16_t profileId,
     const uint16_t streamId,
     const uint16_t resourceId,
-    const string& queryText ) const
+    const string& queryText,
+    const string& op ) const
 {
     // add the resource path
     string query = genKeyParentPathText( "resourceNode", "id",
-            boost::lexical_cast<string>( resourceId ) , queryText );
+            boost::lexical_cast<string>( resourceId ) , queryText, op );
 
     // add the profile and stream path
     return addProfileStreamNodePath( profileId, streamId, query );
@@ -88,11 +92,12 @@ string XPOQueryBuilder::addVRConnectionNodePath(
     const uint16_t profileId,
     const uint16_t streamId,
     const uint16_t connectionId,
-    const string& queryText ) const
+    const string& queryText,
+    const string& op ) const
 {
     // add the resource path
     string query = genKeyParentPathText( "resourceConnection", "id",
-            boost::lexical_cast<string>( connectionId ) , queryText );
+            boost::lexical_cast<string>( connectionId ) , queryText, op );
 
     // add the profile and stream path
     return addProfileStreamNodePath( profileId, streamId, query );

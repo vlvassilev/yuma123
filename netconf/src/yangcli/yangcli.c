@@ -1393,12 +1393,7 @@ static status_t
     if (*str == '$') {
         /* check if a valid variable assignment is being made */
         res = var_check_ref(server_cb->runstack_context,
-                            str, 
-                            ISLEFT, 
-                            &tlen, 
-                            &vartype, 
-                            &name, 
-                            &nlen);
+                            str, ISLEFT, &tlen, &vartype, &name, &nlen);
         if (res != NO_ERR) {
             /* error in the varref */
             return res;
@@ -1416,9 +1411,7 @@ static status_t
              * for the output file
              */
             curval = var_get_str(server_cb->runstack_context,
-                                 name, 
-                                 nlen, 
-                                 vartype);
+                                 name, nlen, vartype);
             if (curval == NULL) {
                 log_error("\nError: file assignment variable "
                           "not found");
@@ -1454,15 +1447,12 @@ static status_t
             case VAR_TYP_GLOBAL:
             case VAR_TYP_CONFIG:
                 curval = var_get_str(server_cb->runstack_context,
-                                     name, 
-                                     nlen, 
-                                     vartype);
+                                     name, nlen, vartype);
                 break;
             case VAR_TYP_LOCAL:
             case VAR_TYP_SESSION:
                 curval = var_get_local_str(server_cb->runstack_context,
-                                           name, 
-                                           nlen);
+                                           name, nlen);
                 break;
             default:
                 return SET_ERROR(ERR_INTERNAL_VAL);
@@ -1530,7 +1520,7 @@ static status_t
         str++;
     }
 
-    /* check end of string == unset command, but only if in a TRUE conditional */
+    /* check EO string == unset command, but only if in a TRUE conditional */
     if (!*str && runstack_get_cond_state(server_cb->runstack_context)) {
         if (*fileassign) {
             /* got file assignment (@foo) =  EOLN
@@ -1549,10 +1539,7 @@ static status_t
             }
 
             /* else try to unset this variable */
-            res = var_unset(server_cb->runstack_context,
-                            name, 
-                            nlen, 
-                            vartype);
+            res = var_unset(server_cb->runstack_context, name, nlen, vartype);
         }
         *len = str - line;
         return res;
@@ -1562,8 +1549,13 @@ static status_t
      * and the current char is either '$', '"', '<',
      * or a valid first name
      *
+     * if *fileassign:
+     *
+     *      @foo.xml = blah
+     *               ^
+     *  else:
      *      $foo = blah
-     *             ^
+     *           ^
      */
     if (*fileassign) {
         obj = NULL;
@@ -1573,13 +1565,14 @@ static status_t
 
     /* get the script or CLI input as a new val_value_t struct */
     val = var_check_script_val(server_cb->runstack_context,
-                               obj, 
-                               str, 
-                               ISTOP, 
-                               &res);
+                               obj, str, ISTOP, &res);
     if (val) {
+        if (obj == NULL) {
+            obj = val->obj;
+        }
+
         /* a script value reference was found */
-        if (obj==NULL || !xml_strcmp(val->name, NCX_EL_STRING)) {
+        if (obj == NULL || obj == ncx_get_gen_string()) {
             /* the generic name needs to be overwritten */
             val_set_name(val, name, nlen);
         }
@@ -1600,20 +1593,14 @@ static status_t
                     res = SET_ERROR(ERR_INTERNAL_VAL);
                 } else {
                     /* hand off 'val' memory here */
-                    res = handle_config_assign(server_cb,
-                                               curval, 
-                                               val,
-                                               NULL);
+                    res = handle_config_assign(server_cb, curval, val, NULL);
                 }
             } else {
                 /* val is a malloced struct, pass it over to the
                  * var struct instead of cloning it
                  */
                 res = var_set_move(server_cb->runstack_context,
-                                   name, 
-                                   nlen, 
-                                   vartype, 
-                                   val);
+                                   name, nlen, vartype, val);
                 if (res != NO_ERR) {
                     val_free_value(val);
                 }
@@ -4724,7 +4711,7 @@ status_t
                                    resultvar);
             }
             if (res != NO_ERR) {
-                val_free_value(resultvar);
+                /* resultvar is freed even if error returned */
                 log_error("\nError: set result for '%s' failed (%s)",
                           server_cb->result_name, 
                           get_error_string(res));

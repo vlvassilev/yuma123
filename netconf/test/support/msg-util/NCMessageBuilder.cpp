@@ -26,7 +26,7 @@ namespace YumaTest
 {
 
 // ---------------------------------------------------------------------------!
-NCMessageBuilder::NCMessageBuilder() 
+NCMessageBuilder::NCMessageBuilder() : defaultOperation_( "merge" )
 {
 }
 
@@ -36,8 +36,20 @@ NCMessageBuilder::~NCMessageBuilder()
 }
 
 // ---------------------------------------------------------------------------!
-const string NCMessageBuilder::genXmlNsText( const string& xmlnsArg, 
-                                             const string& ns ) const
+void NCMessageBuilder::setDefaultOperation( const string& defaultOperation )
+{
+    defaultOperation_ = defaultOperation;
+}
+
+// ---------------------------------------------------------------------------!
+const std::string NCMessageBuilder::getDefaultOperation() const
+{
+    return defaultOperation_;
+}
+
+// ---------------------------------------------------------------------------!
+string NCMessageBuilder::genXmlNsText( const string& xmlnsArg, 
+                                       const string& ns ) const
 {
     stringstream query;
 
@@ -47,13 +59,13 @@ const string NCMessageBuilder::genXmlNsText( const string& xmlnsArg,
 }
 
 // ---------------------------------------------------------------------------!
-const string NCMessageBuilder::genXmlNsText( const string& ns ) const
+string NCMessageBuilder::genXmlNsText( const string& ns ) const
 {
     return genXmlNsText( "xmlns", ns );
 }
 
 // ---------------------------------------------------------------------------!
-const string NCMessageBuilder::genXmlNsNcText( const string& ns ) const
+string NCMessageBuilder::genXmlNsNcText( const string& ns ) const
 {
     return genXmlNsText( "xmlns:nc", ns );
 }
@@ -173,19 +185,50 @@ string NCMessageBuilder::buildSetLogLevelMessage(
 // ------------------------------------------------------------------------|
 string NCMessageBuilder::buildEditConfigMessage( const string& configChange, 
         const string& target,
-        uint16_t messageId,
-        const string& defaultOperation ) const
+        uint16_t messageId ) const
 {
     stringstream query;
     query << "  <edit-config " << genXmlNsText( IETF_NS ) << ">\n"
           << "    <target> " << "<" << target << "/> " << "</target>\n"
-          << "    <default-operation>" << defaultOperation 
+          << "    <default-operation>" << defaultOperation_ 
               << "</default-operation>\n"
           << "    <config>\n"
           << "      " << configChange << "\n"
           << "    </config>\n"
           << "  </edit-config>";
     return buildRPCMessage( query.str(), messageId );
+}
+
+// ---------------------------------------------------------------------------!
+string NCMessageBuilder::buildDiscardChangesMessage( 
+                           const uint16_t messageId ) const
+{
+    stringstream query;
+    
+    query << XML_START_MSG << "\n"
+          << "<rpc " << genXmlNsNcText( IETF_NS ) << "\n"
+          << "     " << "message-id=\"" << messageId << "\">\n"
+          << "     " << "<discard-changes/>\n"
+          << "</rpc>\n";
+
+    return query.str();
+}
+
+// ------------------------------------------------------------------------|
+string NCMessageBuilder::genNodeText( 
+        const string& nodeName,
+        const string& op ) const
+{
+    stringstream query;
+ 
+    query << "<" << nodeName;
+    if ( !op.empty() )
+    {
+        query << " " << genXmlNsNcText( IETF_NS );
+        query << " nc:operation=\"" << op << "\"";
+    }
+
+    return query.str();
 }
 
 // ------------------------------------------------------------------------|
@@ -196,9 +239,8 @@ string NCMessageBuilder::genTopLevelContainerText(
 {
     stringstream query;
  
-    query << "<" << moduleName << " " << genXmlNsNcText( IETF_NS )
-          << " nc:operation=\"" << operation << "\""
-          << " " << genXmlNsText( moduleNs ) << "/>";
+    query << genNodeText( moduleName, operation );
+    query << " " << genXmlNsText( moduleNs ) << "/>";
         
     return query.str();
 }
@@ -211,10 +253,8 @@ string NCMessageBuilder::genOperationText(
 {
     stringstream query;
  
-    query << "<" << nodeName << " " 
-                 << genXmlNsNcText( IETF_NS ) << " " 
-                 << " nc:operation=\"" << operation 
-          << "\">"
+    query << genNodeText( nodeName, operation );
+    query << ">" 
           << nodeVal 
           << "</" << nodeName << ">\n";
     return query.str();
@@ -229,10 +269,8 @@ string NCMessageBuilder::genKeyOperationText(
 {
     stringstream query;
  
-    query << "<" << nodeName << " " 
-                 << genXmlNsNcText( IETF_NS ) << " " 
-                 << " nc:operation=\"" << operation 
-          << "\">\n"
+    query << genNodeText( nodeName, operation );
+    query << ">"
           << "<" << keyName << ">" << keyVal << "</" << keyName << ">"
           << "</" << nodeName << ">";
     return query.str();
@@ -243,11 +281,13 @@ string NCMessageBuilder::genKeyParentPathText(
         const string& nodeName,
         const string& keyName,
         const string& keyVal,
-        const string& queryText ) const
+        const string& queryText,
+        const string& op ) const
 {
     stringstream query;
 
-    query << "<" << nodeName << ">\n"
+    query << genNodeText( nodeName, op );
+    query << ">"
           << "<" << keyName << ">" << keyVal << "</" << keyName << ">\n"
           << queryText << "\n"
          << "</" << nodeName << ">"; 

@@ -81,6 +81,43 @@ void RunningCBChecker::commitKeyValuePairs(const std::string& modName,
 }
 
 // ---------------------------------------------------------------------------|
+void RunningCBChecker::deleteKey(const std::string& modName, 
+                                 const std::string& containerName,
+                                 const std::vector<std::string>& listElement,
+                                 const std::string& key)
+{
+    vector<string> elements(listElement);
+    addExpectedCallback(modName, containerName, elements, "edit", "validate", "");
+    elements.push_back(key); 
+    addExpectedCallback(modName, containerName, elements, "edit", "validate", "");
+    elements.pop_back(); 
+    addExpectedCallback(modName, containerName, elements, "edit", "apply", "");
+
+    //TODO - Add commit callbacks
+}
+
+// ---------------------------------------------------------------------------|
+void RunningCBChecker::deleteKeyValuePair(const std::string& modName, 
+                                          const std::string& containerName,
+                                          const std::vector<std::string>& listElement,
+                                          const std::string& key,
+                                          const std::string& value)
+{
+    vector<string> elements(listElement);
+    elements.push_back(value); 
+    addExpectedCallback(modName, containerName, elements, "edit", "validate", "");
+    addExpectedCallback(modName, containerName, elements, "edit", "apply", "");
+    addExpectedCallback(modName, containerName, elements, "edit", "commit", "delete");
+    elements.pop_back(); 
+    addExpectedCallback(modName, containerName, elements, "edit", "validate", "");
+    elements.push_back(key); 
+    addExpectedCallback(modName, containerName, elements, "edit", "validate", "");
+    elements.pop_back(); 
+    addExpectedCallback(modName, containerName, elements, "edit", "apply", "");
+    addExpectedCallback(modName, containerName, elements, "edit", "commit", "delete");
+}
+
+// ---------------------------------------------------------------------------|
 void RunningCBChecker::updateLeaf(const std::string& modName, 
                 const std::string& containerName,
                 const std::vector<std::string>& listElement,

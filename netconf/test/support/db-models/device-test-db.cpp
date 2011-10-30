@@ -129,7 +129,7 @@ ConnectionItem::ConnectionItem( const boost::property_tree::ptree& pt )
     {
         if ( !unpackItem( v ) )
         {
-            BOOST_FAIL( "Unsupported child for ResourceNode: " << v.first );
+            BOOST_FAIL( "Unsupported child for ConnectionItem: " << v.first );
         }
     }
 }
@@ -171,7 +171,7 @@ StreamConnectionItem::StreamConnectionItem( const boost::property_tree::ptree& p
             }
             else 
             {
-                BOOST_FAIL( "Unsupported child for ResourceNode: " << v.first );
+                BOOST_FAIL( "Unsupported child for StreamConnectionItem: " << v.first );
             }
         }
     }
@@ -189,6 +189,7 @@ void checkEqual( const StreamConnectionItem& lhs, const StreamConnectionItem& rh
 
 // ===========================================================================|
 ResourceNode::ResourceNode() : id_(0)
+                             , channelId_(0)
                              , resourceType_(0)
                              , physicalPath_()
 {}
@@ -196,6 +197,7 @@ ResourceNode::ResourceNode() : id_(0)
 // ---------------------------------------------------------------------------|
 ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
     : id_(0)
+    , channelId_(0)
     , resourceType_()
     , physicalPath_()
 {
@@ -204,6 +206,10 @@ ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
         if ( v.first == "id" )
         {
             id_ = v.second.get_value<uint16_t>();
+        }
+        else if ( v.first == "channelId" )
+        {
+            channelId_ = v.second.get_value<uint32_t>();
         }
         else if ( v.first == "resourceType" )
         {
@@ -226,6 +232,7 @@ void checkEqual( const ResourceNode& lhs, const ResourceNode& rhs )
     BOOST_CHECK_EQUAL( lhs.id_, rhs.id_ );
     BOOST_CHECK_EQUAL( lhs.resourceType_, rhs.resourceType_ );
     BOOST_CHECK_EQUAL( lhs.physicalPath_, rhs.physicalPath_ );
+    BOOST_CHECK_EQUAL( lhs.channelId_, rhs.channelId_ );
 }
 
 // ===========================================================================|

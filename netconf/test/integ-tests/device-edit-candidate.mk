@@ -1,7 +1,9 @@
 # ----------------------------------------------------------------------------|
 # Device Edit tests
-EDIT_TEST_SUITE_SOURCES := $(YUMA_TEST_SUITE_COMMON)/device-edit-tests.cpp \
-                           $(YUMA_TEST_SUITE_COMMON)/device-edit-tests-candidate.cpp \
+EDIT_TEST_SUITE_SOURCES := $(YUMA_TEST_SUITE_COMMON)/device-tests-misc.cpp \
+                           $(YUMA_TEST_SUITE_COMMON)/device-tests-create.cpp \
+                           $(YUMA_TEST_SUITE_COMMON)/device-tests-merge.cpp \
+                           $(YUMA_TEST_SUITE_COMMON)/device-tests-replace.cpp \
                            device-edit-candidate.cpp \
 
 ALL_SOURCES += $(EDIT_TEST_SUITE_SOURCES) 

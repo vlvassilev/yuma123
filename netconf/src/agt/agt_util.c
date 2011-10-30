@@ -1894,8 +1894,24 @@ status_t
     /* check the child editop against the parent editop */
     switch (*cop) {
     case OP_EDITOP_NONE:
-        /* no operation set in the child or the parent yet */
-        res = (curnode) ? NO_ERR : ERR_NCX_DATA_MISSING;
+        /* no operation set in the child or the parent yet
+         * need to check the entire subtree from this node
+         * to see if any operations set at all; if so then
+         * it matters if the corresponding node exists
+         * at this level of the data tree
+         */
+        if (curnode) {
+            res = NO_ERR;
+        } else if (newnode) {
+            if (agt_any_operations_set(newnode)) {
+                res = ERR_NCX_DATA_MISSING;
+            } else {
+                res = NO_ERR;
+            }
+        } else {
+            /* should not happen */
+            res = NO_ERR;
+        }
         break;
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:
@@ -3415,6 +3431,43 @@ val_value_t *
     return nodeval;
 
 }  /* agt_add_top_node_if_missing */
+
+
+/********************************************************************
+* FUNCTION agt_any_operations_set
+*
+* Check the new node and all descendants
+* for any operation attibutes prsent
+*
+* INPUTS:
+*   val == value node to check
+*
+* RETURNS:
+*   TRUE if any operation attributes found
+*   FALSE if no operation attributes found
+*/
+boolean
+    agt_any_operations_set (val_value_t *val)
+{
+    val_value_t  *childval;
+
+    if (val->editvars && val->editvars->operset) {
+        return TRUE;
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+        boolean anyset = agt_any_operations_set(childval);
+        if (anyset) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+
+}  /* agt_any_operations_set */
+
 
 
 /* END file agt_util.c */

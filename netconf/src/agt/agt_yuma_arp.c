@@ -1513,11 +1513,12 @@ status_t
         return res;
     }
 
-    /* ignoring 'added' because no default leafs within /arp
-     * so the val_add_defaults function is not needed
-     */
-
-    res = y_yuma_arp_arp_mro(arp_val);
+    if (added) {
+        /* just the top node was created, instead of going through
+         * the SIL edit callback, so make-read-only was not called
+         */
+        res = y_yuma_arp_arp_mro(arp_val);
+    }
     return res;
 #else
     return NO_ERR;

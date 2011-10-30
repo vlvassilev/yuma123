@@ -3643,6 +3643,64 @@ void
 }  /* val_traverse_keys */
 
 
+/********************************************************************
+* FUNCTION val_build_index_chains
+* 
+* Check descendant-or-self nodes for lists
+* Check if they have index chains built already
+* If not, then try to add one
+* for each of the key objects in order
+*
+* INPUTS:
+*   val == value node to start check from
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_build_index_chains (val_value_t *val)
+{
+    val_value_t *childval = NULL;
+    status_t     res = NO_ERR;
+
+#ifdef DEBUG
+    if (!val || !val->obj) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (obj_is_leafy(val->obj)) {
+        return NO_ERR;
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+        if (!obj_is_leafy(childval->obj)) {
+            res = val_build_index_chains(childval);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+    }
+
+    if (val->btyp != NCX_BT_LIST) {
+        /* container or maybe anyxml */
+        return NO_ERR;
+    }
+
+    if (!dlq_empty(&val->indexQ)) {
+        /* assume index chain already built */
+        return NO_ERR;
+    }
+
+    /* 0 or more index components expected */
+    res = val_gen_index_chain(val->obj, val);
+    return res;
+    
+}  /* val_build_index_chains */
+
+
 /* END file val_util.c */
 
 

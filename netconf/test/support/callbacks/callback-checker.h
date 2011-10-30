@@ -63,7 +63,6 @@ public:
      * leading to the list that the pair will be added to.
      * \param key the key to be added.
      */
-
     virtual void addKey(const std::string& modName, 
                         const std::string& containerName,
                         const std::vector<std::string>& listElement,
@@ -104,6 +103,36 @@ public:
                                      int count) = 0;
 
     /**
+     * Add expected callbacks for deleting a key from a list.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param listElement a vector representing the hierarchy of elements 
+     * leading to the list that the key will be added to.
+     * \param key the key to be added.
+     */
+    virtual void deleteKey(const std::string& modName, 
+                           const std::string& containerName,
+                           const std::vector<std::string>& listElement,
+                           const std::string& key) = 0;
+
+    /**
+     * Add expected callbacks for deleting a key value pair from a list.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param listElement a vector representing the hierarchy of elements 
+     * leading to the list that the pair will be deleted from.
+     * \param key the key to be deleted.
+     * \param value the value to be deleted.
+     */
+    virtual void deleteKeyValuePair(const std::string& modName, 
+                                    const std::string& containerName,
+                                    const std::vector<std::string>& listElement,
+                                    const std::string& key,
+                                    const std::string& value) = 0;
+
+    /**
      * Add expected callbacks for adding a leaf to a container or updating a
      * leaf in a container.
      *
@@ -113,7 +142,6 @@ public:
      * leading to the leaf.
      * \param phase the specific edit operation which has beem invoked.
      */
-
     virtual void updateLeaf(const std::string& modName, 
                             const std::string& containerName,
                             const std::vector<std::string>& listElement,
@@ -129,7 +157,6 @@ public:
      * being checked.
      * \param phase the specific edit operation which has beem invoked.
      */
-
     virtual void updateContainer(const std::string& modName, 
                                  const std::string& containerName,
                                  const std::vector<std::string>& listElement,

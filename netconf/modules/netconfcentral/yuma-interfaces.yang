@@ -2,7 +2,7 @@ module yuma-interfaces {
 
     namespace "http://netconfcentral.org/ns/yuma-interfaces";
 
-    prefix "if";
+    prefix "yuma-if";
 
     import ietf-yang-types { prefix yang; }
 
@@ -23,7 +23,7 @@ module yuma-interfaces {
 	  "Initial version.";
     }
 
-    container interfaces {
+    container yuma-interfaces {
       description
         "Container for all interfaces information.";
  

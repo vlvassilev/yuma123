@@ -532,11 +532,13 @@ status_t
         return res;
     }
 
+#ifndef DISABLE_YUMA_INTERFACES
     /* load the NETCONF interface monitoring data model module */
     res = agt_if_init();
     if (res != NO_ERR) {
         return res;
     }
+#endif
 
     /* initialize the NCX server core callback functions.
      * the schema (yuma-netconf.yang) for these callbacks was 
@@ -693,12 +695,13 @@ status_t
      **  add non-config data
      **  check existing startup config and add factory default
      ** nodes as needed  */
-
+#ifndef DISABLE_YUMA_INTERFACES
     /* load the nacm access control DM module */
     res = agt_acm_init2();
     if (res != NO_ERR) {
         return res;
     }
+#endif
 
     /* load any system module non-config data */
     res = agt_sys_init2();

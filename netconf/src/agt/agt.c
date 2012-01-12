@@ -695,13 +695,11 @@ status_t
      **  add non-config data
      **  check existing startup config and add factory default
      ** nodes as needed  */
-#ifndef DISABLE_YUMA_INTERFACES
     /* load the nacm access control DM module */
     res = agt_acm_init2();
     if (res != NO_ERR) {
         return res;
     }
-#endif
 
     /* load any system module non-config data */
     res = agt_sys_init2();
@@ -733,12 +731,13 @@ status_t
         return res;
     }
 
+#ifndef DISABLE_YUMA_INTERFACES
     /* load the interface monitoring callback functions and data */
     res = agt_if_init2();
     if (res != NO_ERR) {
         return res;
     }
-
+#endif
     /* TBD: load the time filter callbacks
      * this currently does not do anything
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -2846,6 +2846,18 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ncx_delete_mod_obsolete_objects
+* 
+* Go through one module and delete the obsolete nodes
+* 
+* INPUTS:
+*    mod == module to check
+*********************************************************************/
+extern void
+    ncx_delete_mod_obsolete_objects (ncx_module_t *mod);
+
+
+/********************************************************************
 * FUNCTION ncx_get_name_match_enum
 * 
 * Get the enum for the string name of a ncx_name_match_t enum
@@ -2886,6 +2898,32 @@ extern const xmlChar *
 *********************************************************************/
 extern void
     ncx_write_tracefile (const char *buff, uint32 count);
+
+
+/********************************************************************
+* FUNCTION ncx_set_top_mandatory_allowed
+* 
+* Allow or disallow modules with top-level mandatory object
+* to be loaded; used by the server when agt_running_error is TRUE
+*
+* INPUTS:
+*   allowed == value to set T: to allow; F: to disallow
+*********************************************************************/
+extern void
+    ncx_set_top_mandatory_allowed (boolean allowed);
+
+
+/********************************************************************
+* FUNCTION ncx_get_top_mandatory_allowed
+* 
+* Check if top-level mandatory objects are allowed or not
+*
+* RETURNS:
+*   T: allowed; F: disallowed
+*********************************************************************/
+extern boolean
+    ncx_get_top_mandatory_allowed (void);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

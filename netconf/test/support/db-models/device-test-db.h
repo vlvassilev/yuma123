@@ -141,10 +141,9 @@ struct ResourceNode
     uint32_t id_;                    ///< The id of the resource node
     uint32_t channelId_;             ///< The id of the channel 
     uint32_t resourceType_;          ///< the type of resource
-    // TODO: Add support for binary types from yang
-    // binary configuration_;
-    // binary statusConfig_;
-    // binary alarmConfig_;
+    std::string configuration_;      ///< binary configuration data
+    std::string statusConfig_;       ///< binary status configuration data
+    std::string alarmConfig_;        ///< binary alarm configuration data
     std::string physicalPath_;       ///< that name of the path
 
     /** Constructor */
@@ -157,6 +156,10 @@ struct ResourceNode
      */
     explicit ResourceNode( const boost::property_tree::ptree& pt );
 };
+
+// ---------------------------------------------------------------------------|
+/** convenience typedef. */
+typedef std::map<uint32_t, ResourceNode> ResourceDescriptionMap;
 
 // ---------------------------------------------------------------------------|
 /**
@@ -173,6 +176,9 @@ struct ResourceNode
 struct ResourceNodeConfig
 {
     opt_uint32_t resourceType_;     ///< optional value for resourceType_
+    opt_string_t configuration_;    ///< optional value for configuration_
+    opt_string_t statusConfig_;     ///< optional value for statusConfig_
+    opt_string_t alarmConfig_;      ///< optional value for alarmConfig_
     opt_string_t physicalPath_;     ///< optional value for physicalPath_
 };
 
@@ -187,11 +193,10 @@ void checkEqual( const ResourceNode& lhs, const ResourceNode& rhs );
 // ---------------------------------------------------------------------------|
 struct StreamItem
 {
-    typedef std::map<uint32_t, ResourceNode> ResourceDescription_type;
     typedef std::map<uint32_t, ConnectionItem> ResourceConnections_type;
 
     uint32_t id_;         ///< the id of the profile.
-    ResourceDescription_type resourceDescription_;    ///< resource description details
+    ResourceDescriptionMap resourceDescription_;    ///< resource description details
     ResourceConnections_type resourceConnections_;    /// resource connections
 
     /** Constructor */

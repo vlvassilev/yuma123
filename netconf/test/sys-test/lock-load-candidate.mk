@@ -3,6 +3,7 @@
 CANDIDATE_DB_SOURCES := $(YUMA_TEST_SUITE_COMMON)/module-load-test-suite.cpp \
                         $(YUMA_TEST_SUITE_COMMON)/db-lock-test-suite-common.cpp \
                         $(YUMA_TEST_SUITE_COMMON)/db-lock-test-suite-candidate.cpp \
+                        $(YUMA_TEST_SUITE_SYSTEM)/my-session-tests.cpp \
 					    lock-load-candidate.cpp
 
 ALL_SOURCES += $(CANDIDATE_DB_SOURCES) 

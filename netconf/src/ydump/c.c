@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -94,10 +94,12 @@ static void
                            int32 indent)
 {
     ses_putstr_indent(scb,
-                      (const xmlChar *)"YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();",
+                      (const xmlChar *)"YumaTest::SILCallbackLog& cbLog "
+                      "= YumaTest::SILCallbackLog::getInstance();",
                       indent);
     ses_putstr_indent(scb,
-                      (const xmlChar *)"YumaTest::SILCallbackLog::CallbackInfo cbData;",
+                      (const xmlChar *)"YumaTest::SILCallbackLog::Callback"
+                      "Info cbData;",
                       indent);
     ses_putstr_indent(scb,
                       (const xmlChar *)"cbData.cbName = \"",
@@ -370,7 +372,8 @@ static void
         /* close extern */
         ses_putstr(scb, (const xmlChar *)"\n}\n");
         /* add include for callback logging */
-        write_ncx_include(scb, (const xmlChar *)"test/support/callbacks/sil-callback-log");
+        write_ncx_include(scb, (const xmlChar *)
+                          "test/support/callbacks/sil-callback-log");
     }
 
     ses_putchar(scb, '\n');
@@ -753,10 +756,12 @@ static void
             ses_putchar(scb, '\n');
             write_cb_logging_init(scb, cdef->idstr, EDIT_SUFFIX, indent);
             ses_putstr_indent(scb,
-                              (const xmlChar *)"val_value_t* value = (newval) ? newval : curval;",
+                              (const xmlChar *)"val_value_t* value = "
+                              "(newval) ? newval : curval;",
                               indent);
             ses_putstr_indent(scb,
-                              (const xmlChar *)"std::string module_name = (char*) val_get_mod_name(value);",
+                              (const xmlChar *)"std::string module_name = "
+                              "(char*) val_get_mod_name(value);",
                               indent);
         }
 
@@ -771,7 +776,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbType = \"validate\";",
                               indent+indent);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent+indent);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"/* description-stmt "
@@ -786,7 +792,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbType = \"apply\";",
                               indent+indent);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent+indent);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"/* database manipulation "
@@ -818,7 +825,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbPhase = \"load\";",
                               indent*3);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent*3);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
@@ -830,7 +838,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbPhase = \"merge\";",
                               indent*3);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent*3);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
@@ -842,7 +851,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbPhase = \"replace\";",
                               indent*3);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent*3);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
@@ -854,7 +864,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbPhase = \"create\";",
                               indent*3);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent*3);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
@@ -866,7 +877,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbPhase = \"delete\";",
                               indent*3);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent*3);
         }
 
         ses_putstr_indent(scb, (const xmlChar *)"break;", indent*3);
@@ -877,7 +889,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbPhase = \"default\";",
                               indent*3);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent*3);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent*3);
         }
 
         ses_putstr_indent(scb,
@@ -947,7 +960,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbType = \"rollback\";",
                               indent+indent);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent+indent);
         }
 
         ses_putstr_indent(scb,
@@ -961,7 +975,8 @@ static void
             ses_putstr_indent(scb,
                               (const xmlChar *)"cbData.cbType = \"default\";",
                               indent+indent);
-            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent+indent);
+            write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                    FALSE, indent+indent);
         }
 
         ses_putstr_indent(scb,
@@ -1131,9 +1146,11 @@ static void
         /* generate callback logging */
         write_cb_logging_init(scb, cdef->idstr, GET_SUFFIX, indent);
         ses_putstr_indent(scb,
-                          (const xmlChar *)"std::string module_name = (char*) val_get_mod_name(dstval);",
+                          (const xmlChar *)"std::string module_name = "
+                          "(char*) val_get_mod_name(dstval);",
                           indent);
-        write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", FALSE, indent);
+        write_cb_logging_add_cb(scb, (const xmlChar *)"module_name", 
+                                FALSE, indent);
     }
 
     switch (cp->format) {
@@ -2015,10 +2032,12 @@ static void
         /* generate callback logging */
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb,
-                          (const xmlChar *)"YumaTest::SILCallbackLog& cbLog = YumaTest::SILCallbackLog::getInstance();",
+                          (const xmlChar *)"YumaTest::SILCallbackLog& "
+                          "cbLog = YumaTest::SILCallbackLog::getInstance();",
                           indent);
         ses_putstr_indent(scb,
-                          (const xmlChar *)"YumaTest::SILCallbackLog::CallbackInfo cbData;",
+                          (const xmlChar *)
+                          "YumaTest::SILCallbackLog::CallbackInfo cbData;",
                           indent);
         ses_putstr_indent(scb,
                           (const xmlChar *)"cbData.cbName = \"",

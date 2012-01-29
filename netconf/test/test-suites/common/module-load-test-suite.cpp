@@ -49,6 +49,24 @@ BOOST_AUTO_TEST_CASE(load_yang_module_from_modpath)
 }
 
 // ---------------------------------------------------------------------------|
+BOOST_AUTO_TEST_CASE(load_bad_yang_module_from_modpath)
+{
+    DisplayTestDescrption( 
+        "Demonstrate loading of a corrupted 'yang' module (missing namespace)"
+        "from the configured --modpath.",
+        "The test1badns module should be found in one of the directories "
+        "specified using the --modpath command line parameter.\n\n"
+        "Note 1: There is no associated SIL for this module so it will be "
+        "loaded as a '.yang' file\n" ); 
+    
+    vector<string> expPresent{ "rpc-error", "error" };
+    vector<string> expNotPresent{ "mod-revision" };
+
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryLoadModule( primarySession_, "test1badns", checker );
+}
+
+// ---------------------------------------------------------------------------|
 // Test cases for loading yang modules
 // ---------------------------------------------------------------------------|
 BOOST_AUTO_TEST_CASE(load_sil_module_from_modpath)

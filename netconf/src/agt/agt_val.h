@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -36,6 +36,10 @@ date	     init     comment
 
 #ifndef _H_agt
 #include "agt.h"
+#endif
+
+#ifndef _H_agt_cfg
+#include "agt_cfg.h"
 #endif
 
 #ifndef _H_cfg
@@ -175,14 +179,13 @@ extern status_t
 * This function is intended for validating PDUs (RPC requests)
 * during the PDU processing.  It does not check the instance
 * count or must-stmt expressions for any <config> (ncx:root)
-* container.  This must be dome with the agt_val_root_check function.
+* container.  This must be done with the agt_val_root_check function.
 *
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
-*   root == database root of 'valset'
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -198,25 +201,49 @@ extern status_t
     agt_val_instance_check (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
 			    val_value_t *valset,
-			    val_value_t *root,
 			    ncx_layer_t layer);
 
 
 /********************************************************************
 * FUNCTION agt_val_root_check
 * 
+* !!! Full database validation !!!
 * Check for the proper number of object instances for
 * the specified configuration database
-* 
+* Check must and when statements
+* Check empty NP containers
+* Check choices (selected case, and it is complete)
+*
+* Tests are divided into 3 groups:
+*    A) top-level nodes (child of conceptual <config> root
+*    B) parent data node for child instance tests (mand/min/max)
+*    C) data node referential tests (must/unique/leaf)
+*
+* Test pruning
+*   The global variable agt_profile.agt_rootflags is used
+*   to determine if any type (A) commit tests are needed
+*
+*   The global variable agt_profile.agt_config_state is
+*   used to force complete testing; There are 3 states:
+*       AGT_CFG_STATE_INIT : running config has not been
+*         validated, or validation-in-progress
+*       AGT_CFG_STATE_OK : running config has been validated
+*         and it passed all validation checks
+*       AGT_CFG_STATE_BAD: running config validation has been
+*         attempted and it failed; running config is not valid!
+*         The server will shutdown if
+*   The target nodes in the undoQ records
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == RPC msg in progress 
-*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   msghdr == XML message header in progress
+*        == NULL MEANS NO RPC-ERRORS ARE RECORDED
+*   txcb == transaction control block
+*   target == target database to use
 *   root == val_value_t for the target config being checked
 *
 * OUTPUTS:
-*   if msg not NULL:
-*      msg->mhdr.msg_errQ may have rpc_err_rec_t 
+*   if mshdr not NULL:
+*      msghdr->msg_errQ may have rpc_err_rec_t 
 *      structs added to it which must be freed by the 
 *      caller with the rpc_err_free_record function
 *
@@ -225,44 +252,9 @@ extern status_t
 *********************************************************************/
 extern status_t 
     agt_val_root_check (ses_cb_t *scb,
-			rpc_msg_t *msg,
-			val_value_t *root);
-
-
-/********************************************************************
-* FUNCTION agt_val_split_root_check
-* 
-* Check for the proper number of object instances for
-* the specified configuration database.  Conceptually
-* combine the newroot and root and check that.
-* 
-* This function is only used if the cfg target is RUNNING
-* The CANDIDATE cfg should use the agt_val_root_check
-* instead for a pre-commit test
-*
-* INPUTS:
-*   scb == session control block (may be NULL; no session stats)
-*   msg == RPC message in progress 
-*       == NULL MEANS NO RPC-ERRORS ARE RECORDED
-*   newroot == val_value_t for the edit-config config contents
-*   root == val_value_t for the target config being checked
-*   defop == the starting default-operation value
-*
-* OUTPUTS:
-*   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
-*      rpc_err_free_record function
-*
-* RETURNS:
-*   status of the operation, NO_ERR if no validation errors found
-*********************************************************************/
-extern status_t 
-    agt_val_split_root_check (ses_cb_t *scb,
-			      rpc_msg_t *msg,
-			      val_value_t *newroot,
-			      val_value_t *root,
-			      op_editop_t defop);
+                        xml_msg_hdr_t *msghdr,
+                        agt_cfg_transaction_t *txcb,
+                        val_value_t *root);
 
 
 /********************************************************************
@@ -381,20 +373,20 @@ extern status_t
 
 
 /********************************************************************
-* FUNCTION agt_val_check_commit_locks
+* FUNCTION agt_val_check_commit_edits
 * 
 * Check if the requested commit operation
-* would cause any partial lock violations 
+* would cause any ACM or partial lock violations 
 * in the running config
-* Invoke all the AGT_CB_COMMIT_CHECK callbacks for a 
+* Invoke all the AGT_CB_VALIDATE callbacks for a 
 * source and target and write operation
 *
 * INPUTS:
 *   scb == session control block
 *   msg == incoming commit rpc_msg_t in progress
-*   source == cfg_template_t for the source (candidate)
+*   source == cfg_template_t for the source (e.g., candidate)
 *   target == cfg_template_t for the config database to 
-*             write (running)
+*             write (e.g., running)
 *
 * OUTPUTS:
 *   rpc_err_rec_t structs may be malloced and added 
@@ -404,10 +396,88 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    agt_val_check_commit_locks (ses_cb_t  *scb,
+    agt_val_check_commit_edits (ses_cb_t  *scb,
                                 rpc_msg_t  *msg,
                                 cfg_template_t *source,
                                 cfg_template_t *target);
+
+
+/********************************************************************
+* FUNCTION agt_val_delete_dead_nodes
+* 
+* Mark nodes deleted for each false when-stmt from <validate>
+* INPUTS:
+*   scb == session control block
+*   msg == incoming validate rpc_msg_t in progress
+*   root == value tree to check for deletions
+*
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added 
+*   to the msg->mhdr.errQ
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_val_delete_dead_nodes (ses_cb_t  *scb,
+                               rpc_msg_t  *msg,
+                               val_value_t *root);
+
+
+/********************************************************************
+* FUNCTION agt_val_add_module_commit_tests
+* 
+* !!! Initialize module data node validation !!!
+* !!! Must call after all modules are initially loaded !!!
+* 
+* Find all the data node objects in the specified module
+* that need some sort database referential integrity test
+*
+* !!! dynamic features are not supported.  Any disabled objects
+* due to false if-feature stmts will be skipped.  No support yet
+* to add or remove tests from the commit_testQ when obj_is_enabled()
+* return value changes.
+*
+* INPUTS:
+*  mod == module to check and add tests
+*
+* SIDE EFFECTS:
+*  agt_profile->commit_testQ will contain an agt_commit_test_t struct
+*  for each object found with commit-time validation tests
+*   
+* RETURNS:
+*   status of the operation, NO_ERR unless internal errors found
+*   or malloc error
+*********************************************************************/
+extern status_t 
+    agt_val_add_module_commit_tests (ncx_module_t *mod);
+
+
+/********************************************************************
+* FUNCTION agt_val_init_commit_tests
+* 
+* !!! Initialize full database validation !!!
+* !!! Must call after all modules are initially loaded !!!
+* !!! Must be called before load_running_config is called !!!
+* 
+* Find all the data node objects that need some sort
+* database referential integrity test
+* For :candidate this is done during the
+* validate of the <commit> RPC
+* For :writable-running, this is done during
+* <edit-config> or <copy-config>
+*
+* SIDE EFFECTS:
+*    all commit_test_t records created are stored in the
+*    agt_profile->commit_testQ
+*
+* RETURNS:
+*   status of the operation, NO_ERR unless internal errors found
+*   or malloc error
+*********************************************************************/
+extern status_t 
+    agt_val_init_commit_tests (void);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

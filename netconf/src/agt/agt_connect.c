@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -39,77 +39,24 @@ date         init     comment
 #include  <stdio.h>
 #include  <stdlib.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_connect
 #include "agt_connect.h"
-#endif
-
-#ifndef _H_agt_hello
 #include "agt_hello.h"
-#endif
-
-#ifndef _H_agt_rpcerr
 #include "agt_rpcerr.h"
-#endif
-
-#ifndef _H_agt_ses
 #include "agt_ses.h"
-#endif
-
-#ifndef _H_agt_state
 #include "agt_state.h"
-#endif
-
-#ifndef _H_agt_sys
 #include "agt_sys.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_cap
 #include "cap.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_top
+#include "status.h"
 #include "top.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
+#include "val.h"
 
 
 /********************************************************************
@@ -117,10 +64,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#ifdef DEBUG
-#define AGT_CONNECT_DEBUG 1
-#endif
 
 
 /********************************************************************
@@ -203,9 +146,7 @@ void
     }
 #endif
 
-#ifdef AGT_CONNECT_DEBUG
     log_debug("\nagt_connect got node");
-#endif
 
     res = NO_ERR;
 
@@ -340,9 +281,7 @@ void
                      scb->sid);
         }
     } else {
-        if (LOGDEBUG) {
-            log_debug("\nagt_connect msg ok");
-        }
+        log_debug("\nagt_connect msg ok");
         agt_sys_send_sysSessionStart(scb);
     }
     

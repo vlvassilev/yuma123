@@ -4,9 +4,38 @@
 
   prefix tunion;
 
-  revision "2011-07-02" {
+  import ietf-inet-types { prefix inet; }
+
+  revision "2011-12-09" {
     description 
       "Bug report";
+  }
+
+  typedef nested-union {
+    type union {
+      type boolean;
+      type inet:ip-address;
+      type int32;
+    }
+    default 42;
+  }
+
+  leaf nested-inline {
+    type union {
+      type boolean;
+      type union {
+        type string { length 4; }
+        type union {
+          type uint8;
+          type instance-identifier;
+          type int8;
+        }
+        type int16;
+      }
+    }
+    default -42;
+    description 
+      "default test needs to fail all members until int8 test";
   }
 
    typedef matchall-string-type {
@@ -22,6 +51,18 @@
          type int32;
        }
        default "*";
+     }
+     leaf nested {
+       type nested-union;
+       default -1;
+       description 
+         "default test needs to fail all members until int32 test";
+     }
+     leaf nested2 {
+       type nested-union;
+       default true;
+       description 
+         "default test needs to pass boolean test";
      }
    }
  }

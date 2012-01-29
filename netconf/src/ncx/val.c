@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -27,115 +27,45 @@ date         init     comment
 ----------------------------------------------------------------------
 19dec05      abb      begun
 21jul08      abb      start obj-based rewrite
+28dec11      abb      add editvars only if XML attrs present
 
 *********************************************************************
 *                                                                   *
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-#include  <string.h>
-#include  <ctype.h>
-
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
+#include <ctype.h>
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_b64
+#include "procdefs.h"
 #include "b64.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_getcb
 #include "getcb.h"
-#endif
-
-#ifndef _H_json_wr
 #include "json_wr.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncx_str
 #include "ncx_str.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
 #include "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 
 /********************************************************************
@@ -146,6 +76,7 @@ date         init     comment
 
 /* #define VAL_DEBUG  1 */
 /* #define VAL_EDITVARS_DEBUG */
+/* #define VAL_FREE_DEBUG 1 */
 
 /********************************************************************
 *                                                                   *
@@ -651,19 +582,23 @@ static void
 * Merge simple src val into dest val (! MUST be same type !)
 * Instance qualifiers have already been checked,
 * and only zero or 1 instance is allowed, so replace
-* the current one
+* the current dest value
 *
 * INPUTS:
 *    src == val to merge from
-*       (destructive -- entries will be moved, not copied)
 *    dest == val to merge into
 *
+* RETURNS:
+*   status
 *********************************************************************/
-static void
+static status_t
     merge_simple (ncx_btype_t btyp,
-                  val_value_t *src,
+                  const val_value_t *src,
                   val_value_t *dest)
 {
+    status_t res = NO_ERR;
+    xmlChar *val_copy = NULL;
+
     /* need to replace the current value or merge a list, etc. */
     switch (btyp) {
     case NCX_BT_ENUM:
@@ -701,36 +636,46 @@ static void
         dest->v.num.d = src->v.num.d;
         break;
     case NCX_BT_BINARY:
-        // FIXME: Temporary fix to prevent the newval containing a NULL
-        // FIXME: pointer when <commit> SIL callback is made!
-        ncx_clean_binary(&dest->v.binary);
-        dest->v.binary.ubufflen = src->v.binary.ubufflen;
-        dest->v.binary.ustrlen = src->v.binary.ustrlen;
-        dest->v.binary.ustr = m__getMem( src->v.binary.ustrlen );
-        memcpy( dest->v.binary.ustr, src->v.binary.ustr, src->v.binary.ustrlen );
+        val_copy = m__getMem( src->v.binary.ustrlen );
+        if (val_copy) {
+            ncx_clean_binary(&dest->v.binary);
+            dest->v.binary.ubufflen = src->v.binary.ubufflen;
+            dest->v.binary.ustrlen = src->v.binary.ustrlen;
+            dest->v.binary.ustr = val_copy;
+            memcpy( dest->v.binary.ustr, src->v.binary.ustr, 
+                    src->v.binary.ustrlen );
+        } else {
+            res = ERR_INTERNAL_MEM;
+        }
         break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /****/
-        ncx_clean_str(&dest->v.str);
-        // FIXME: Temporary fix to prevent the newval containing a NULL
-        // FIXME: pointer when <commit> SIL callback is made!
-        dest->v.str = xml_strdup( src->v.str );
-        // src->v.str = NULL;
+    case NCX_BT_LEAFREF:   /*** !!! not sure LEAFREF will ever get here */
+        val_copy = xml_strdup( src->v.str );
+        if (val_copy) {
+            ncx_clean_str(&dest->v.str);
+            dest->v.str = val_copy;
+        } else {
+            res = ERR_INTERNAL_MEM;
+        }
         break;
     case NCX_BT_IDREF:
-        // FIXME: Temporary fix to prevent the newval containing a NULL
-        // FIXME: pointer when <commit> SIL callback is made!
-        dest->v.idref.nsid = src->v.idref.nsid; 
-        dest->v.idref.identity = src->v.idref.identity;
-        if (dest->v.idref.name) {
-            m__free(dest->v.idref.name);
+        val_copy = xml_strdup( src->v.idref.name );
+        if (val_copy) {
+            dest->v.idref.nsid = src->v.idref.nsid; 
+            dest->v.idref.identity = src->v.idref.identity;
+            if (dest->v.idref.name) {
+                m__free(dest->v.idref.name);
+            }
+            dest->v.idref.name = val_copy;
+        } else {
+            res = ERR_INTERNAL_MEM;
         }
-        dest->v.idref.name = xml_strdup( src->v.idref.name );
         break;
     default:
-        SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
+    return res;
 
 }  /* merge_simple */
 
@@ -756,10 +701,10 @@ static void
 *   1 if val1 > val2 index
 *********************************************************************/
 static int32
-    index_match (val_value_t *val1,
-                 val_value_t *val2)
+    index_match (const val_value_t *val1,
+                 const val_value_t *val2)
 {
-    val_index_t *c1, *c2;
+    const val_index_t *c1, *c2;
     int32              cmp;
     status_t           res;
 
@@ -1138,46 +1083,6 @@ static void
 }  /* setup_virtual_retval */
 
 
-/********************************************************************
-* FUNCTION new_editvars
-* 
-* Malloc and initialize the val->editvars field
-*
-* INPUTS:
-*    val == val_value_t data structure to use
-*
-* OUTPUTS:
-*    val->editvars is malloced and initialized
-* 
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    new_editvars (val_value_t *val)
-{
-    val_editvars_t  *editvars;
-
-    if (val->editvars) {
-        return SET_ERROR(ERR_NCX_DATA_EXISTS);
-    }
-
-    editvars = m__getObj(val_editvars_t);
-    if (!editvars) {
-        return ERR_INTERNAL_MEM;
-    }
-    memset(editvars, 0x0, sizeof(val_editvars_t));
-
-    val->editvars = editvars;
-
-#ifdef VAL_EDITVARS_DEBUG
-    log_debug3("\n\nnew_editvars: %u = %p\n",
-               ++editvars_malloc,
-               editvars);
-#endif
-
-    return NO_ERR;
-
-}  /* new_editvars */
 
 
 /********************************************************************
@@ -1203,7 +1108,7 @@ static status_t
     /* set the copy->editvars */
     if (val->editvars) {
         if (!copy->editvars) {
-            res = new_editvars(copy);
+            res = val_new_editvars(copy);
             if (res != NO_ERR || !copy->editvars ) {
                 if ( NO_ERR == res ) {
                     res = ERR_INTERNAL_PTR;
@@ -1216,7 +1121,7 @@ static status_t
             }
         }
         copy->editvars->curparent = val->editvars->curparent;
-        copy->editvars->editop = val->editvars->editop;
+        copy->editop = val->editop;
         copy->editvars->insertop = val->editvars->insertop;
         copy->editvars->iskey = val->editvars->iskey;
         copy->editvars->operset = val->editvars->operset;
@@ -1243,7 +1148,6 @@ static status_t
     return res;
 
 }  /* copy_editvars */
-
 
 
 /********************************************************************
@@ -1618,10 +1522,7 @@ static val_value_t *
 val_value_t * 
     val_new_value (void)
 {
-    val_value_t  *val;
-    status_t      res;
-
-    val = m__getObj(val_value_t);
+    val_value_t *val = m__getObj(val_value_t);
     if (!val) {
         return NULL;
     }
@@ -1629,12 +1530,6 @@ val_value_t *
     (void)memset(val, 0x0, sizeof(val_value_t));
     dlq_createSQue(&val->metaQ);
     dlq_createSQue(&val->indexQ);
-
-    res = new_editvars(val);
-    if (res != NO_ERR) {
-        val_free_value(val);
-        val = NULL;
-    }
 
     return val;
 
@@ -1722,9 +1617,7 @@ void
     }
 #endif
 
-    init_from_template(val, 
-                       obj, 
-                       obj_get_basetype(obj));
+    init_from_template(val, obj, obj_get_basetype(obj));
 
 }  /* val_init_from_template */
 
@@ -1740,18 +1633,21 @@ void
 * INPUTS:
 *    val == val_value_t to delete
 *********************************************************************/
-void 
-    val_free_value (val_value_t *val)
+void val_free_value (val_value_t *val)
 {
-#ifdef DEBUG
     if (!val) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
+
+#ifdef VAL_FREE_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nval_free_value '%s' %p", 
+                   val->dname ? val->dname : NCX_EL_NONE, val);
+    }
 #endif
+
     clean_value(val, TRUE);
     m__free(val);
-
 }  /* val_free_value */
 
 
@@ -1996,31 +1892,17 @@ status_t
     switch (btyp) {
     case NCX_BT_BINARY:
         /* just get the length of the decoded binary string */
-        res = b64_decode(strval, 
-                         xml_strlen(strval),
-                         NULL, 
-                         NCX_MAX_UINT, 
-                         &len.u);
-        if (res == NO_ERR) {
-            res = val_range_ok_errinfo(typdef, 
-                                       NCX_BT_UINT32, 
-                                       &len, 
-                                       errinfo);
-        }
+        len.u = b64_get_decoded_str_len( strval, xml_strlen(strval) );
+        res = val_range_ok_errinfo( typdef, NCX_BT_UINT32, &len, errinfo);
         break;
     case NCX_BT_STRING:
         if (!(typ_is_xpath_string(typdef) ||
               typ_is_schema_instance_string(typdef))) {
 
             len.u = xml_strlen(strval);
-            res = val_range_ok_errinfo(typdef, 
-                                       NCX_BT_UINT32, 
-                                       &len, 
-                                       errinfo);
+            res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, &len, errinfo);
             if (res == NO_ERR) {
-                res = val_pattern_ok_errinfo(typdef, 
-                                             strval, 
-                                             errinfo);
+                res = val_pattern_ok_errinfo(typdef, strval, errinfo);
             }
             break;
         }
@@ -2039,11 +1921,8 @@ status_t
             /* do a first pass parsing to resolve all
              * the prefixes and check well-formed XPath
              */
-            xpathpcb->logerrors = logerrors;
-            res = xpath_yang_parse_path(NULL, 
-                                        NULL,
-                                        xpath_source,
-                                        xpathpcb);
+            res = xpath_yang_parse_path_ex(NULL, NULL, xpath_source,
+                                           xpathpcb, logerrors);
             if (res == NO_ERR) {
                 leafobj = NULL;
                 res = xpath_yang_validate_path_ex(NULL, 
@@ -2057,21 +1936,17 @@ status_t
             xpath_free_pcb(xpathpcb);
         } else {
             xpathpcb->logerrors = logerrors;
-            res = xpath1_parse_expr(NULL, 
-                                    NULL,
-                                    xpathpcb,
-                                    XP_SRC_YANG);
+            res = xpath1_parse_expr(NULL, NULL, xpathpcb, XP_SRC_YANG);
             if (res == NO_ERR) {
                 objroot = ncx_get_gen_root();
                 res = xpath1_validate_expr(objroot->tkerr.mod, 
-                                           objroot, 
-                                           xpathpcb);
+                                           objroot, xpathpcb);
             }
             xpath_free_pcb(xpathpcb);
         }
         break;
     case NCX_BT_LEAFREF:
-        /*** BUG: MISSING LEAFREF VALIDATION ***/
+        /*** FIXME: MISSING LEAFREF VALIDATION ***/
         return NO_ERR;
     default:
         return ERR_NCX_WRONG_DATATYP;
@@ -2186,9 +2061,7 @@ status_t
          * then the entire list is invalid
          */
         if (btyp == NCX_BT_SLIST) {
-            res = val_simval_ok_errinfo(listdef,
-                                        lmem->val.str,
-                                        errinfo);
+            res = val_simval_ok_errinfo(listdef, lmem->val.str, errinfo);
         } else {
             res = val_bit_ok(typdef, lmem->val.str, NULL);
         }
@@ -2908,7 +2781,7 @@ status_t
     }
 #endif
 
-    return val_simval_ok_ex(typdef, simval, NULL, NULL);
+    return val_simval_ok_max(typdef, simval, NULL, NULL, TRUE);
 
 } /* val_simval_ok */
 
@@ -3227,11 +3100,7 @@ status_t
                           val_value_t *retval,
                           ncx_errinfo_t **errinfo)
 {
-    return val_union_ok_ex(typdef, 
-                           strval, 
-                           retval, 
-                           errinfo, 
-                           NULL);
+    return val_union_ok_ex(typdef, strval, retval, errinfo, NULL);
 
 } /* val_union_ok_errinfo */
 
@@ -4918,82 +4787,57 @@ val_value_t *
 * FUNCTION val_merge
 * 
 * Merge src val into dest val (! MUST be same type !)
-* Any meta vars in src are also merged into dest
+* Any meta vars in src are NOT merged into dest!!!
 *
 * This function is not used to merge complex objects
 * !!! For typ_is_simple() only !!!
 *
+* The source may need to be copied in order to merge, for some basetypes
+* The dest is not altered unless the source value can be merged completed.
+*
 * INPUTS:
 *    src == val to merge from
-*
-*       !!! destructive -- entries will be moved, not copied !!!
-*       !!! Must be dequeued before calling this function !!!
-*       !!! Must not use src pointer value again if *freesrc == FALSE
-
-*    dest == val to merge into
+*    dest == val to merge into  !!! old value is not saved !!!
 *
 * RETURNS:
-*       TRUE if the source value needs to be deleted because the
-*          memory was not transfered to the parent val childQ.
-*       FALSE if the source value should not be freed because 
-*         the memory is still in use, but transferred to the target
+*    status
 *********************************************************************/
-boolean
-    val_merge (val_value_t *src,
+status_t
+    val_merge (const val_value_t *src,
                val_value_t *dest)
 {
-    ncx_btype_t      btyp;
-    ncx_iqual_t      iqual;
-    ncx_merge_t      mergetyp;
-    boolean          dupsok, retval;
-    status_t         res;
-
 #ifdef DEBUG
     if (!src || !dest) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return TRUE;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!typ_is_simple(src->btyp) || 
         !typ_is_simple(dest->btyp)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return TRUE;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }   
 #endif
 
-    res = NO_ERR;
-    retval = FALSE;
-    btyp = dest->btyp;
-    iqual = typ_get_iqualval_def(dest->typdef);
+    status_t res = NO_ERR;
+    ncx_btype_t btyp = dest->btyp;
+    ncx_iqual_t iqual = typ_get_iqualval_def(dest->typdef);
 
-    if (obj_is_system_ordered(dest->obj)) {
-        mergetyp = typ_get_mergetype(dest->typdef);
-    } else {
-        mergetyp = typ_get_mergetype(dest->typdef);
-    }
+    /* the mergetype is only set to NCX_MERGE_SORT for type bits
+     * it is NCX_MERGE_NONE for all other data types
+     * the value NCX_MERGE_FIRST is never used
+     */
+    ncx_merge_t mergetyp = typ_get_mergetype(dest->typdef);
     if (mergetyp == NCX_MERGE_NONE) {
         mergetyp = NCX_MERGE_LAST;
     }
 
+    boolean dupsok = FALSE;
+    ncx_list_t *list_copy = NULL;
     switch (iqual) {
     case NCX_IQUAL_1MORE:
     case NCX_IQUAL_ZMORE:
-        switch (src->obj->objtype) {
-        case OBJ_TYP_LEAF_LIST:
-        case OBJ_TYP_LIST:
-            /* duplicates not allowed in leaf lists 
-             * leave the current value in place
-             */
-
-            /********** TBD: MOVE via insert attribute *****
-             *** MOVE HANDLED ELSEWHERE (VERIFY?)
-             ***/
-
-            retval = TRUE;
-            break;
-        default:
-            SET_ERROR(ERR_INTERNAL_VAL);
-            retval = TRUE;
-        }
+        /* duplicates not allowed in leaf lists 
+         * leave the current value in place
+         */
+        res = SET_ERROR(ERR_NCX_DUP_ENTRY);
         break;
     case NCX_IQUAL_ONE:
     case NCX_IQUAL_OPT:
@@ -5016,23 +4860,29 @@ boolean
         case NCX_BT_BINARY:
         case NCX_BT_INSTANCE_ID:
         case NCX_BT_LEAFREF:
-            merge_simple(btyp, src, dest);
+            res = merge_simple(btyp, src, dest);
             break;
         case NCX_BT_UNION:
             res = SET_ERROR(ERR_INTERNAL_VAL);
             break;
         case NCX_BT_SLIST:
-            dupsok = val_duplicates_allowed(dest);
-            ncx_merge_list(&src->v.list, 
-                           &dest->v.list,
-                           mergetyp, 
-                           dupsok);
-            break;
         case NCX_BT_BITS:
-            ncx_merge_list(&src->v.list, 
-                           &dest->v.list,
-                           mergetyp, 
-                           FALSE);
+            if (btyp == NCX_BT_SLIST) {
+                dupsok = val_duplicates_allowed(dest);
+            }
+            list_copy = ncx_new_list(dest->btyp);
+            if (list_copy) {
+                res = ncx_copy_list(&src->v.list, list_copy);
+                if (res != NO_ERR) {
+                    ncx_free_list(list_copy);
+                }
+            } else {
+                res = ERR_INTERNAL_MEM;
+            }
+            if (res == NO_ERR) {
+                ncx_merge_list(list_copy, &dest->v.list, mergetyp, dupsok);
+                ncx_free_list(list_copy);
+            }
             break;
         case NCX_BT_ANY:
         case NCX_BT_CONTAINER:
@@ -5040,34 +4890,33 @@ boolean
         case NCX_BT_CHOICE:
         case NCX_BT_CASE:
             res = SET_ERROR(ERR_INTERNAL_VAL);
-            retval = TRUE;
             break;
         default:
             res = SET_ERROR(ERR_INTERNAL_VAL);
-            retval = TRUE;
         }
 
         /* copy the editvars struct to the leaf */
-        if (res == NO_ERR) {
-            res = copy_editvars(src, dest);
-            if (res != NO_ERR) {
-                /* !!! may not be an internal error !!! */
-                SET_ERROR(res);
-            }
-        }
-        retval = TRUE;
+        /*** REMOVING SINCE SOURCE IS SAVED ***/
+        //if (res == NO_ERR) {
+        //   res = copy_editvars(src, dest);
+        //}
         break;
     default:
-        retval = SET_ERROR(ERR_INTERNAL_VAL);
-        return TRUE;
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* clear the set-by-default flag */
+    /* set or clear the set-by-default flag;
+     * normalize VAL_FL_WITHDEF by converting to VAL_FL_DEFSET here */
     if (res == NO_ERR) {
-        dest->flags &= ~VAL_FL_DEFSET;
+        if (val_set_by_default(src)) {
+            dest->flags |= VAL_FL_DEFSET;
+        } else {
+            dest->flags &= ~VAL_FL_DEFSET;
+        }
+        dest->flags &= ~VAL_FL_WITHDEF;
     }
 
-    return retval;
+    return res;
 
 }  /* val_merge */
 
@@ -5170,6 +5019,7 @@ val_value_t *
 * FUNCTION val_replace
 * 
 * Replace a specified val_value_t struct and sub-trees
+* !!! this can be destructive to the source 'val' parameter !!!!
 *
 * INPUTS:
 *    val == value to clone from
@@ -5200,9 +5050,9 @@ status_t
     if (val->btyp == NCX_BT_EXTERN) {
         clean_value(copy, TRUE);
         val_init_from_template(copy, val->obj);
+        copy->btyp = NCX_BT_EXTERN;
         copy->v.fname = val->v.fname;
         val->v.fname = NULL;
-        val->btyp = copy->btyp;
         res = copy_editvars(val, copy);
         return res;
     } else if (!typ_is_simple(val->btyp)) {
@@ -5361,22 +5211,11 @@ void
     val_add_child_sorted (val_value_t *child,
                           val_value_t *parent)
 {
-    dlq_hdr_t       *childQ;
-    val_value_t     *curval;
-    obj_template_t  *newobj, *testobj;
-    xmlns_id_t       parentid, childid;
-    boolean          sysorder;
-    int              ret;
-
-#ifdef DEBUG
-    if (child == NULL || parent == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( child && "child is NULL!" );
+    assert( parent && "parent is NULL!" );
 
     child->parent = parent;
-    childQ = &parent->v.childQ;
+    dlq_hdr_t *childQ = &parent->v.childQ;
 
     /* check new first entry */
     if (dlq_empty(childQ)) {
@@ -5384,10 +5223,12 @@ void
         return;
     }
 
-    newobj = child->obj;
-    sysorder = obj_is_system_ordered(newobj);
-    childid = val_get_nsid(child);
-    parentid = val_get_nsid(parent);
+    val_value_t *curval = NULL;
+    obj_template_t *newobj = child->obj;
+    xmlns_id_t parentid = val_get_nsid(parent);
+    xmlns_id_t childid = val_get_nsid(child);
+    boolean sysorder = obj_is_system_ordered(newobj);
+    int ret = 0;
 
     /* The current set of sibling nodes needs to
      * be searched to determine where to insert this child
@@ -5407,14 +5248,11 @@ void
              * type list or leaf-list
              */
             if (newobj == curval->obj) {
-                /* make a new last one of these entries */
-                val_value_t  *nextchild;
+                /* make a new sorted or last one of these entries */
                 boolean syssorted = ncx_get_system_sorted();
+                boolean done = FALSE;
 
-                nextchild = val_get_next_child(curval);
-                while (nextchild != NULL && 
-                       nextchild->obj == child->obj) {
-
+                while (!done) {
                     if (sysorder && syssorted) {
                         if (newobj->objtype == OBJ_TYP_LIST) {
                             ret = val_index_compare(child, curval);
@@ -5426,9 +5264,12 @@ void
                             return;
                         }
                     }
-
-                    curval = nextchild;
-                    nextchild = val_get_next_child(curval);
+                    val_value_t *nextchild = val_get_next_child(curval);
+                    if (nextchild == NULL || nextchild->obj != child->obj) {
+                        done = TRUE;
+                    } else {
+                        curval = nextchild;
+                    }
                 }
                 dlq_insertAfter(child, curval);
                 return;
@@ -5455,18 +5296,14 @@ void
         /* there is no schema order to check, so see if this
          * child already exists
          */
-        curval = val_find_child(parent,
-                                val_get_mod_name(child),
-                                child->name);
+        curval = val_find_child(parent, val_get_mod_name(child), child->name);
         if (curval != NULL) {
             /* make new last instance of this child node */
             val_value_t *saveval = NULL;
             while (curval != NULL) {
                 saveval = curval;
-                curval = val_find_next_child(parent,
-                                             val_get_mod_name(child),
-                                             child->name,
-                                             curval);
+                curval = val_find_next_child(parent, val_get_mod_name(child),
+                                             child->name, curval);
             }
             dlq_insertAfter(child, saveval);
         } else {
@@ -5485,13 +5322,10 @@ void
              */
             if (newobj == curval->obj) {
                 /* make a new last one of these entries */
-                val_value_t  *nextchild;
                 boolean syssorted = ncx_get_system_sorted();
+                boolean done = FALSE;
 
-                nextchild = val_get_next_child(curval);
-                while (nextchild != NULL && 
-                       nextchild->obj == child->obj) {
-
+                while (!done) {
                     if (sysorder && syssorted) {
                         if (newobj->objtype == OBJ_TYP_LIST) {
                             ret = val_index_compare(child, curval);
@@ -5504,8 +5338,12 @@ void
                         }
                     }
 
-                    curval = nextchild;
-                    nextchild = val_get_next_child(curval);
+                    val_value_t *nextchild = val_get_next_child(curval);
+                    if (nextchild == NULL || nextchild->obj != child->obj) {
+                        done = TRUE;
+                    } else {
+                        curval = nextchild;
+                    }              
                 }
 
                 /* make a new last instance of this node type */
@@ -5518,8 +5356,7 @@ void
              * any native node will insert ahead of such 
              * an augment node
              */
-            if (val_get_nsid(curval) != parentid &&
-                childid == parentid) {
+            if (val_get_nsid(curval) != parentid && childid == parentid) {
                 dlq_insertAhead(child, curval);
                 return;
             }
@@ -5532,9 +5369,8 @@ void
              * the object siblings are not numbered, so
              * a linear search is used here
              */
-            for (testobj = obj_next_child_deep(child->obj);
-                 testobj != NULL;
-                 testobj = obj_next_child_deep(testobj)) {
+            obj_template_t *testobj = obj_next_child_deep(child->obj);
+            for (; testobj != NULL; testobj = obj_next_child_deep(testobj)) {
                 if (testobj == curval->obj) {
                     /* insert child ahead of this node
                      * which occurs after it in schema order
@@ -5550,186 +5386,6 @@ void
     }
 
 }   /* val_add_child_sorted */
-
-
-/********************************************************************
-* FUNCTION val_add_child_clean
-* 
-*  add an object and delete any extra cases
-*  Add a child value node to a parent value node
-*  This is only called by the agent when adding nodes
-*  to a target database.
-*
-*  If the child node being added is part of a choice/case,
-*  then all sibling nodes in other cases within the same
-*  choice will be deleted
-*
-*  The insert operation will also be check to see
-*  if the child is a list oo a leaf-list, which is ordered-by user
-*
-*  The default insert mode is always 'last'
-*
-* INPUTS:
-*    child == node to store in the parent
-*    parent == complex value node with a childQ
-*    cleanQ == address of Q to receive any deleted sibling nodes
-*
-* OUTPUTS:
-*    cleanQ may have nodes added if the child being added
-*    is part of a case.  All other cases will be deleted
-*    from the parent Q and moved to the cleanQ
-*
-*********************************************************************/
-void
-    val_add_child_clean (val_value_t *child,
-                         val_value_t *parent,
-                         dlq_hdr_t *cleanQ)
-{
-#ifdef DEBUG
-    if (child == NULL || parent == NULL || cleanQ == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    val_add_child_clean_editvars(child->editvars, 
-                                 child, 
-                                 parent, 
-                                 cleanQ);
-
-}   /* val_add_child_clean */
-
-
-/********************************************************************
-* FUNCTION val_add_child_clean_editvars
-* 
-*  Add a child value node to a parent value node
-*  This is only called by the agent when adding nodes
-*  to a target database.
-*
-*   Pass in the editvar to use
-*
-*  If the child node being added is part of a choice/case,
-*  then all sibling nodes in other cases within the same
-*  choice will be deleted
-*
-*  The insert operation will also be check to see
-*  if the child is a list oo a leaf-list, which is ordered-by user
-*
-*  The default insert mode is always 'last'
-*
-* INPUTS:
-*    editvars == val_editvars_t struct to use
-*    child == node to store in the parent
-*    parent == complex value node with a childQ
-*    cleanQ == address of Q to receive any deleted sibling nodes
-*
-* OUTPUTS:
-*    cleanQ may have nodes added if the child being added
-*    is part of a case.  All other cases will be deleted
-*    from the parent Q and moved to the cleanQ
-*
-*********************************************************************/
-void
-    val_add_child_clean_editvars (val_editvars_t *editvars,
-                                  val_value_t *child,
-                                  val_value_t *parent,
-                                  dlq_hdr_t *cleanQ)
-{
-    val_value_t  *testval, *nextval;
-    boolean       doins;
-
-#ifdef DEBUG
-    if (editvars == NULL || 
-        child == NULL || 
-        parent == NULL || 
-        cleanQ == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (child->casobj) {
-        for (testval = val_get_first_child(parent);
-             testval != NULL;
-             testval = nextval) {
-
-            nextval = val_get_next_child(testval);
-            if (testval->casobj && 
-                (testval->casobj->parent == child->casobj->parent)) {
-
-                if (testval->casobj != child->casobj) {
-                    log_debug3("\nagt_val: clean old case member '%s'"
-                               " from parent '%s'",
-                               testval->name, parent->name);
-                    dlq_remove(testval);
-                    testval->parent = NULL;
-                    dlq_enque(testval, cleanQ);
-                }
-            }
-        }
-    }
-
-    child->parent = parent;
-
-    doins = FALSE;
-    if (child->obj->objtype == OBJ_TYP_LIST) {
-        doins = TRUE;
-    } else if (child->obj->objtype == OBJ_TYP_LEAF_LIST) {
-        doins = TRUE;
-    }
-
-    if (doins) {
-        switch (editvars->insertop) {
-        case OP_INSOP_FIRST:
-            testval = val_find_child(parent, 
-                                     val_get_mod_name(child),
-                                     child->name);
-            if (testval) {
-                dlq_insertAhead(child, testval);
-            } else {
-                val_add_child_sorted(child, parent);
-            }
-            break;
-        case OP_INSOP_LAST:
-        case OP_INSOP_NONE:
-            val_add_child_sorted(child, parent);
-            break;
-        case OP_INSOP_BEFORE:
-        case OP_INSOP_AFTER:
-            /* find the entry specified by the val->insertstr value
-             * this is value='foo' for leaf-list and
-             * key="[x:foo='bar'][x:foo2=7]" for list
-             */
-            if (child->obj->objtype == OBJ_TYP_LEAF_LIST ||
-                child->obj->objtype == OBJ_TYP_LIST) {
-
-                if (editvars->insertval) {
-                    testval = editvars->insertval;
-                    if (editvars->insertop == OP_INSOP_BEFORE) {
-                        dlq_insertAhead(child, testval);
-                    } else {
-                        dlq_insertAfter(child, testval);
-                    }
-                } else {
-                    SET_ERROR(ERR_NCX_INSERT_MISSING_INSTANCE);
-                    val_add_child_sorted(child, parent);
-                }
-            } else {
-                /* wrong object type */
-                SET_ERROR(ERR_INTERNAL_VAL);
-                val_add_child_sorted(child, parent);
-            }
-            break;
-        default:
-            SET_ERROR(ERR_INTERNAL_VAL);
-            val_add_child_sorted(child, parent);
-        }
-    } else {
-        val_add_child_sorted(child, parent);
-    }
-
-}   /* val_add_child_clean_editvars */
 
 
 /********************************************************************
@@ -5855,6 +5511,10 @@ val_value_t *
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
 
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         /* check the node if the QName matches */
         if (val->nsid == child->nsid &&
             !xml_strcmp(val->name, child->name)) {
@@ -5924,6 +5584,10 @@ val_value_t *
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
 
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         /* check the node if the QName matches */
         if (val->nsid == child->nsid &&
             !xml_strcmp(val->name, child->name)) {
@@ -5983,7 +5647,15 @@ val_value_t *
         return NULL;
     }
 
-    return (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+    val_value_t *val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
+    for (; val != NULL; val = (val_value_t *)dlq_nextEntry(val)) {
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+        return val;
+    }
+
+    return NULL;
 
 }  /* val_get_first_child */
 
@@ -6009,7 +5681,15 @@ val_value_t *
     }
 #endif
 
-    return (val_value_t *)dlq_nextEntry(curchild);
+    val_value_t *val = (val_value_t *)dlq_nextEntry(curchild);
+    for (; val != NULL; val = (val_value_t *)dlq_nextEntry(val)) {
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+        return val;
+    }
+
+    return NULL;
 
 }  /* val_get_next_child */
 
@@ -6053,6 +5733,9 @@ val_value_t *
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
         if (modname && 
             xml_strcmp(modname, 
                        val_get_mod_name(val))) {
@@ -6065,6 +5748,59 @@ val_value_t *
     return NULL;
 
 }  /* val_find_child */
+
+
+/********************************************************************
+* FUNCTION val_find_child_que
+* 
+* Find the first instance of the specified child node in the
+* specified child Q
+*
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
+val_value_t *
+    val_find_child_que (const dlq_hdr_t *childQ,
+                        const xmlChar *modname,
+                        const xmlChar *childname)
+{
+    val_value_t *val;
+
+#ifdef DEBUG
+    if (!childQ || !childname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    for (val = (val_value_t *)dlq_firstEntry(childQ);
+         val != NULL;
+         val = (val_value_t *)dlq_nextEntry(val)) {
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+        if (modname && 
+            xml_strcmp(modname, 
+                       val_get_mod_name(val))) {
+            continue;
+        }
+        if (!xml_strcmp(val->name, childname)) {
+            return val;
+        }
+    }
+    return NULL;
+
+}  /* val_find_child_que */
 
 
 /********************************************************************
@@ -6106,6 +5842,9 @@ val_value_t *
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
         if (modname && 
             xml_strcmp(modname, val_get_mod_name(val))) {
             continue;
@@ -6161,6 +5900,9 @@ val_value_t *
     for (val = (val_value_t *)dlq_nextEntry(curchild);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
         if (modname && 
             xml_strcmp(modname, 
                        val_get_mod_name(val))) {
@@ -6209,6 +5951,10 @@ val_value_t *
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
 
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         /* check the node if the name matches */
         if (!xml_strcmp(val->name, name)) {
             return val;
@@ -6254,6 +6000,10 @@ val_value_t *
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
 
         if (!xmlns_ids_equal(nsid, val->nsid)) {
             continue;
@@ -6306,6 +6056,10 @@ val_value_t *
     for (val = (val_value_t *)dlq_nextEntry(curchild);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
 
         if (!xmlns_ids_equal(nsid, val->nsid)) {
             continue;
@@ -6362,6 +6116,10 @@ val_value_t *
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
 
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         /* check the node if the name matches */
         if (!xml_strcmp(val->name, name)) {
             if (typ_is_string(val->btyp)) {
@@ -6413,6 +6171,11 @@ uint32
     for (val = (val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         cnt++;
     }
     return cnt;
@@ -6457,6 +6220,10 @@ uint32
     for (val = (const val_value_t *)dlq_firstEntry(&parent->v.childQ);
          val != NULL;
          val = (const val_value_t *)dlq_nextEntry(val)) {
+
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
 
         if (modname &&
             xml_strcmp(modname, val_get_mod_name(val))) {
@@ -6546,6 +6313,10 @@ boolean
     for (val = (val_value_t *)dlq_firstEntry(&useval->v.childQ);
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
+
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
 
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
@@ -6741,6 +6512,10 @@ boolean
          val != NULL;
          val = (val_value_t *)dlq_nextEntry(val)) {
 
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         fncalled = FALSE;
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
@@ -6868,7 +6643,9 @@ boolean
      * value node checked and expanded if a virtual node
      */
     while (val) {
-        if (configonly && !obj_is_config(val->obj)) {
+
+        if (VAL_IS_DELETED(val) ||
+            (configonly && !obj_is_config(val->obj))) {
             /* skip this entry */
             if (forward) {
                 val = (val_value_t *)dlq_nextEntry(val);
@@ -6887,7 +6664,6 @@ boolean
         } else {
             useval = val;
         }
-                
 
         fnresult = process_one_valwalker(walkerfn,
                                          cookie1,
@@ -7031,7 +6807,8 @@ boolean
     }
 
     while (val) {
-        if (configonly && !obj_is_config(val->obj)) {
+        if (VAL_IS_DELETED(val) ||
+            (configonly && !obj_is_config(val->obj))) {
             if (forward) {
                 val = (val_value_t *)dlq_nextEntry(val);
             } else {
@@ -7334,6 +7111,10 @@ uint32
          val != NULL;
          val = (const val_value_t *)dlq_nextEntry(val)) {
 
+        if (VAL_IS_DELETED(val)) {
+            continue;
+        }
+
         if (xml_strcmp(val_get_mod_name(child),
                        val_get_mod_name(val))) {
             continue;
@@ -7410,19 +7191,13 @@ uint32
 *   TRUE if the index chains match
 *********************************************************************/
 boolean
-    val_index_match (val_value_t *val1,
-                     val_value_t *val2)
+    val_index_match (const val_value_t *val1,
+                     const val_value_t *val2)
 {
-    int32 ret;
+    assert(val1 && "val1 is NULL!" );
+    assert(val2 && "val2 is NULL!" );
 
-#ifdef DEBUG
-    if (!val1 || !val2) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    ret = index_match(val1, val2);
+    int32 ret = index_match(val1, val2);
     return (ret) ? FALSE : TRUE;
 
 }  /* val_index_match */
@@ -7444,30 +7219,24 @@ boolean
 *   -1 , - or 1 for compare value
 *********************************************************************/
 int
-    val_index_compare (val_value_t *val1,
-                       val_value_t *val2)
+    val_index_compare (const val_value_t *val1,
+                       const val_value_t *val2)
 {
-    int32 ret;
+    assert(val1 && "val1 is NULL!" );
+    assert(val2 && "val2 is NULL!" );
 
-#ifdef DEBUG
-    if (val1 == NULL || val2 == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
-
-    ret = index_match(val1, val2);
+    int32 ret = index_match(val1, val2);
     return ret;
 
 }  /* val_index_compare */
 
 
 /********************************************************************
-* FUNCTION val_compare_ex
+* FUNCTION val_compare_max
 * 
 * Compare 2 val_value_t struct value contents
 * Check all or config only
-*
+* Check just child nodes or all descendant nodes
 * Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
 * by comparing the simple value.
 *
@@ -7481,6 +7250,8 @@ int
 *    val2 == second value to check
 *    configonly == TRUE to compare config=true nodes only
 *                  FALSE to compare all nodes
+*    childonly == TRUE to look just 1 level for comparison
+*                 FALSE to compare all descendant nodes of complex types
 *
 * RETURNS:
 *   compare result
@@ -7489,21 +7260,18 @@ int
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare_ex (val_value_t *val1,
-                    val_value_t *val2,
-                    boolean configonly)
+    val_compare_max (const val_value_t *val1,
+                     const val_value_t *val2,
+                     boolean configonly,
+                     boolean childonly)
 {
     ncx_btype_t  btyp;
-    val_value_t *ch1, *ch2;
+    const val_value_t *ch1, *ch2;
     int32        ret;
     xmlns_id_t   nsid1, nsid2;
 
-#ifdef DEBUG
-    if (!val1 || !val2) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return -1;
-    }
-#endif
+    assert( val1 && "val1 is NULL!");
+    assert( val2 && "val2 is NULL!");
 
     if (val1->btyp != val2->btyp) {
         /* this might happen if a new config tree
@@ -7517,12 +7285,17 @@ int32
      */
     if (configonly) {
         /* if there was an nc:operation or YANG attribute in the
-         * node, then do not treat the nodes as equal
-         */
+         * node, then do not treat the nodes as equal   */
         if (val1->editvars && val1->editvars->operset) {
             return -1;
         }
         if (val2->editvars && val2->editvars->operset) {
+            return 1;
+        }
+
+        /* if the set-by-default property is different than
+         * do not treat the values as equal   */
+        if (val_set_by_default(val1) != val_set_by_default(val2)) {
             return 1;
         }
     }
@@ -7609,11 +7382,15 @@ int32
         ch1 = (val_value_t *)dlq_firstEntry(&val1->v.childQ);
         ch2 = (val_value_t *)dlq_firstEntry(&val2->v.childQ);
         for (;;) {
-            if (configonly) {
-                while (ch1 && !obj_get_config_flag(ch1->obj)) {
+            if ((ch1 && VAL_IS_DELETED(ch1)) || 
+                (ch2 && VAL_IS_DELETED(ch2)) || 
+                configonly) {
+                while (ch1 && (VAL_IS_DELETED(ch1) ||
+                               !obj_get_config_flag(ch1->obj))) {
                     ch1 = (val_value_t *)dlq_nextEntry(ch1);
                 }
-                while (ch2 && !obj_get_config_flag(ch2->obj)) {
+                while (ch2 && (VAL_IS_DELETED(ch2) ||
+                               !obj_get_config_flag(ch2->obj))) {
                     ch2 = (val_value_t *)dlq_nextEntry(ch2);
                 }
             }
@@ -7643,11 +7420,13 @@ int32
                 return ret;
             }
 
-            /* check if they have same value */
-            ret = val_compare_ex(ch1, ch2, configonly);
-            if (ret) {
-                return ret;
-            }
+            if (!childonly || typ_is_simple(ch1->btyp)) {
+                /* check if they have same value */
+                ret = val_compare_max(ch1, ch2, configonly, childonly);
+                if (ret) {
+                    return ret;
+                }
+            } // else childonly and complex node; treat as same
 
             /* get the next pair of child nodes to check */
             ch1 = (val_value_t *)dlq_nextEntry(ch1);
@@ -7668,7 +7447,42 @@ int32
     }
     return ret;
 
-}  /* val_compare_ex */
+}  /* val_compare_max */
+
+
+/********************************************************************
+* FUNCTION val_compare_ex
+* 
+* Compare 2 val_value_t struct value contents
+* Check all or config only
+*
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* Handle NCX_CL_COMPLEX by checking the index if needed
+* and then checking all the child nodes recursively
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    val2 == second value to check
+*    configonly == TRUE to compare config=true nodes only
+*                  FALSE to compare all nodes
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
+int32
+    val_compare_ex (const val_value_t *val1,
+                    const val_value_t *val2,
+                    boolean configonly)
+{
+    return val_compare_max(val1, val2, configonly, FALSE);
+}
 
 
 /********************************************************************
@@ -7695,10 +7509,10 @@ int32
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare (val_value_t *val1,
-                 val_value_t *val2)
+    val_compare (const val_value_t *val1,
+                 const val_value_t *val2)
 {
-    return val_compare_ex(val1, val2, FALSE);
+    return val_compare_max(val1, val2, FALSE, FALSE);
 }  /* val_compare */
 
 
@@ -7727,27 +7541,22 @@ int32
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare_to_string (val_value_t *val1,
+    val_compare_to_string (const val_value_t *val1,
                            const xmlChar *strval2,
                            status_t *res)
 {
 #define MYBUFFSIZE  64
 
+    assert( val1 && "val1 is NULL!");
+    assert( strval2 && "strval2 is NULL!");
+    assert( res && "res is NULL!");
+
     xmlChar      buff[MYBUFFSIZE];
     xmlChar     *mbuff = NULL;
-    status_t     myres;
     uint32       len = 0;
-    int32        retval;
+    int32        retval = 0;
 
-    if (!val1 || !strval2 || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return -1;
-    }
-
-    len = 0;
-    mbuff = NULL;
-
-    myres = val_sprintf_simval_nc(NULL, val1, &len);
+    status_t myres = val_sprintf_simval_nc(NULL, val1, &len);
     if (myres != NO_ERR) {
         *res = myres;
         return -2;
@@ -7803,21 +7612,15 @@ int32
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare_for_replace (val_value_t *val1,
-                             val_value_t *val2)
+    val_compare_for_replace (const val_value_t *val1,
+                             const val_value_t *val2)
 {
-    val_value_t *ch1, *ch2;
-    int32        ret;
+    assert( val1 && "val1 is NULL!");
+    assert( val2 && "val2 is NULL!");
+
+    const val_value_t *ch1, *ch2;
+    int32        ret = 0;
     xmlns_id_t   nsid1, nsid2;
-
-#ifdef DEBUG
-    if (!val1 || !val2) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return -1;
-    }
-#endif
-
-    ret = 0;
 
     switch (val1->btyp) {
     case NCX_BT_LIST:
@@ -7832,10 +7635,12 @@ int32
         ch1 = (val_value_t *)dlq_firstEntry(&val1->v.childQ);
         ch2 = (val_value_t *)dlq_firstEntry(&val2->v.childQ);
         for (;;) {
-            while (ch1 && !obj_get_config_flag(ch1->obj)) {
+            while (ch1 && (VAL_IS_DELETED(ch1) ||
+                           !obj_get_config_flag(ch1->obj))) {
                 ch1 = (val_value_t *)dlq_nextEntry(ch1);
             }
-            while (ch2 && !obj_get_config_flag(ch2->obj)) {
+            while (ch2 && (VAL_IS_DELETED(ch2) ||
+                           !obj_get_config_flag(ch2->obj))) {
                 ch2 = (val_value_t *)dlq_nextEntry(ch2);
             }
 
@@ -8013,10 +7818,7 @@ status_t
             }
         } else {
             /* need to generate the value string */
-            res = ncx_sprintf_num(buff, 
-                                  &val->v.num, 
-                                  btyp, 
-                                  len);
+            res = ncx_sprintf_num(buff, &val->v.num, btyp, len);
             if (res != NO_ERR) {
                 return SET_ERROR(res);
             }
@@ -8048,22 +7850,14 @@ status_t
                  * !!! to send; assume call to this fn
                  * !!! to retrieve the length was done OK
                  */
-                res = b64_encode(s, 
-                                 val->v.binary.ustrlen,
-                                 buff, 
-                                 NCX_MAX_UINT,
-                                 NCX_DEF_LINELEN, 
-                                 len);
+                res = b64_encode(s, val->v.binary.ustrlen, buff, NCX_MAX_UINT,
+                                 NCX_DEF_LINELEN, len);
             } else {
                 *len = 0;
             }
         } else if (s) {
-            res = b64_encode(s, 
-                             val->v.binary.ustrlen,
-                             NULL, 
-                             NCX_MAX_UINT,
-                             NCX_DEF_LINELEN, 
-                             len);
+            *len = b64_get_encoded_str_len( val->v.binary.ustrlen, 
+                                            NCX_DEF_LINELEN );
         } else {
             *len = 0;
         }
@@ -9033,7 +8827,7 @@ val_value_t *
 *   val == value to check
 *
 * SIDE EFFECTS:
-*   val->flags may be adjsuted
+*   val->flags may be adjusted
 *         VAL_FL_DEFVALSET will be set if not set already
 *         VAL_FL_DEFVAL will be set or cleared if 
 *            VAL_FL_DEFSETVAL is not already set,
@@ -9048,6 +8842,7 @@ boolean
 {
     const xmlChar *def;
     xmlChar       *binbuff;
+    val_value_t   *testval;
     ncx_enum_t     enu;
     ncx_num_t      num;
     boolean        ret;
@@ -9162,16 +8957,14 @@ boolean
         break;
     case NCX_BT_BINARY:
         deflen = xml_strlen(def);
-        res = b64_decode(def, deflen,
-                         NULL, NCX_MAX_UINT, &len);
-        if (res == NO_ERR) {
-            binbuff = m__getMem(len);
+        len = b64_get_decoded_str_len( def, deflen );
+        if ( len ) {
+           binbuff = m__getMem(len);
             if (!binbuff) {
                 SET_ERROR(ERR_INTERNAL_MEM);
                 return FALSE;
             } 
-            res = b64_decode(def, deflen,
-                               binbuff, len, &len);
+            res = b64_decode(def, deflen, binbuff, len, &len);
             if (res == NO_ERR) {
                 ret = memcmp(binbuff, val->v.binary.ustr, len) 
                     ? FALSE : TRUE;
@@ -9181,13 +8974,22 @@ boolean
         break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
+    case NCX_BT_LEAFREF:
         if (!xml_strcmp(def, val->v.str)) {
             ret = TRUE;
         }
         break;
-    case NCX_BT_LEAFREF:
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
+    case NCX_BT_IDREF:
+        // treating possible malloc failure as if the value is
+        // not set to its YANG default value
+        testval = val_make_simval(val->typdef, val->nsid, val->name, def, &res);
+        if (testval && res == NO_ERR) {
+            ret = val_compare(val, testval);
+        }
+        val_free_value(testval);
+        break;
     case NCX_BT_LIST:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
@@ -9522,6 +9324,32 @@ boolean
 
 
 /********************************************************************
+* FUNCTION val_get_subtree_dirty_flag
+* 
+* Get the subtree dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is subtree dirty, false otherwise
+*********************************************************************/
+boolean
+    val_get_subtree_dirty_flag (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
+    }
+#endif
+
+    return (val->flags & VAL_FL_SUBTREE_DIRTY) ? TRUE : FALSE;
+
+} /* val_get_subtree_dirty_flag */
+
+
+/********************************************************************
 * FUNCTION val_set_dirty_flag
 * 
 * Set the dirty flag for this value node
@@ -9535,14 +9363,17 @@ boolean
 void
     val_set_dirty_flag (val_value_t *val)
 {
-#ifdef DEBUG
     if (!val) {
-        SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }
-#endif
 
     val->flags |= VAL_FL_DIRTY;
+
+    val_value_t *parent = val->parent;
+    while (parent && !obj_is_root(parent->obj)) {
+        parent->flags |= VAL_FL_SUBTREE_DIRTY;
+        parent = parent->parent;
+    }
 
 } /* val_set_dirty_flag */
 
@@ -9561,16 +9392,46 @@ void
 void
     val_clear_dirty_flag (val_value_t *val)
 {
-#ifdef DEBUG
     if (!val) {
-        SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }
-#endif
 
     val->flags &= ~VAL_FL_DIRTY;
 
+    val_value_t *parent = val->parent;
+    while (parent && !obj_is_root(parent->obj)) {
+        parent->flags &= ~VAL_FL_SUBTREE_DIRTY;
+        parent = parent->parent;
+    }
+
 } /* val_clear_dirty_flag */
+
+
+/********************************************************************
+* FUNCTION val_dirty_subtree
+* 
+* Check the dirty or subtree_dirty flag
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty or any subtree may be dirty, false otherwise
+*********************************************************************/
+boolean
+    val_dirty_subtree (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
+    }
+#endif
+
+    return (val->flags & (VAL_FL_DIRTY | VAL_FL_SUBTREE_DIRTY)) ? TRUE : FALSE;
+
+} /* val_dirty_subtree */
+
 
 
 /********************************************************************
@@ -9606,7 +9467,8 @@ void
              chval = val_get_next_child(chval)) {
             val_clean_tree(chval);
         }
-        val->flags &= ~VAL_FL_DIRTY;
+        val->flags &= ~ (VAL_FL_DIRTY | VAL_FL_SUBTREE_DIRTY);
+        val->editop = OP_EDITOP_NONE;
         free_editvars(val);
     }
 
@@ -9871,6 +9733,15 @@ val_value_t *
         return NULL;
     }
     val_init_from_template(listval, sourceval->obj);
+
+    myres = val_new_editvars(sourceval);
+    if (myres != NO_ERR) {
+        val_free_value(listval);
+        if (res) {
+            *res = myres;
+        }
+        return NULL;
+    }
 
     xpcb = sourceval->editvars->insertxpcb;
     if (!xpcb || !xpcb->tkc || xpcb->validateres != NO_ERR) {
@@ -10313,7 +10184,10 @@ status_t
 #endif
 
     if (val->editvars == NULL) {
-        return ERR_NCX_NOT_FOUND;
+        status_t res = val_new_editvars(val);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     val->editvars->pcookie = pcookie;
@@ -10346,7 +10220,10 @@ status_t
 #endif
 
     if (val->editvars == NULL) {
-        return ERR_NCX_NOT_FOUND;
+        status_t res = val_new_editvars(val);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     val->editvars->icookie = icookie;
@@ -10420,8 +10297,7 @@ int
 /********************************************************************
 * FUNCTION val_delete_default_leaf
 * 
-* Do the internal work to setup a delete of
-* a default leaf
+* Do the internal work to convert a leaf to its YANG default value
 *
 * INPUTS:
 *    val == val_value_t struct to use
@@ -10432,31 +10308,24 @@ int
 status_t
     val_delete_default_leaf (val_value_t *val)
 {
-    status_t   res;
-
-    if ( !val ) {
+    if ( !val || !val->obj ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 
-    val->flags |= VAL_FL_DEFSET;
-    if (!val->editvars) {
-        res = new_editvars(val);
-        if (res != NO_ERR || !val->editvars ) {
-            if ( NO_ERR == res ) {
-                res = ERR_INTERNAL_MEM;
-            }
+    const xmlChar *defval = obj_get_default(val->obj);
 
-            if ( val->editvars ) {
-                free_editvars( val );
-            }
-
-            return res;
-        }
+    if ( !defval ) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
-    val->editvars->curparent = val->parent;
-    val->editvars->editop = OP_EDITOP_DELETE;
-    val->editvars->operset = TRUE;
-    return NO_ERR;
+
+    clean_value(val, FALSE);
+
+    status_t res = val_set_simval_str(val, val->typdef, val->nsid, val->name,
+                                      xml_strlen(val->name), defval);
+
+    val->flags |= VAL_FL_DEFSET;
+
+    return res;
 
 } /* val_delete_default_leaf */
 
@@ -10575,6 +10444,99 @@ val_index_t *
 } /* val_get_next_key */
 
 
+/********************************************************************
+* FUNCTION val_new_deleted_value
+* 
+* Malloc and initialize the fields in a val_value_t to be used
+* as a deleted node marker
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+val_value_t * 
+    val_new_deleted_value (void)
+{
+    val_value_t  *val;
+
+    val = m__getObj(val_value_t);
+    if (!val) {
+        return NULL;
+    }
+
+    (void)memset(val, 0x0, sizeof(val_value_t));
+    dlq_createSQue(&val->metaQ);
+    dlq_createSQue(&val->indexQ);
+    val->flags |= VAL_FL_DELETED;
+    return val;
+
+}  /* val_new_deleted_value */
+
+
+/********************************************************************
+* FUNCTION val_new_editvars
+* 
+* Malloc and initialize the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is malloced and initialized
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_new_editvars (val_value_t *val)
+{
+    val_editvars_t  *editvars;
+
+    if (val->editvars) {
+        return SET_ERROR(ERR_NCX_DATA_EXISTS);
+    }
+
+    editvars = m__getObj(val_editvars_t);
+    if (!editvars) {
+        return ERR_INTERNAL_MEM;
+    }
+    memset(editvars, 0x0, sizeof(val_editvars_t));
+
+    val->editvars = editvars;
+
+#ifdef VAL_EDITVARS_DEBUG
+    log_debug3("\n\nval_new_editvars: %u = %p\n",
+               ++editvars_malloc,
+               editvars);
+#endif
+
+    return NO_ERR;
+
+}  /* val_new_editvars */
+
+
+/********************************************************************
+* FUNCTION val_free_editvars
+* 
+* Free the editing variables for the value node
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is freed if set
+*    val->editop set to OP_EDITOP_NONE
+*********************************************************************/
+void
+    val_free_editvars (val_value_t *val)
+{
+    if (val == NULL) {
+        return;
+    }
+
+    free_editvars(val);
+    val->editop = OP_EDITOP_NONE;
+
+}  /* val_free_editvars */
 
 
 /* END file val.c */

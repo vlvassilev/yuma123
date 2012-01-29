@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -181,7 +181,8 @@ static status_t
     /* get the client address */
     con = getenv("SSH_CONNECTION");
     if (!con) {
-        SUBSYS_TRACE1( "ERROR: init_subsys(): Get SSH_CONNECTION variable failed\n" );
+        SUBSYS_TRACE1( "ERROR: init_subsys(): "
+                       "Get SSH_CONNECTION variable failed\n" );
         return ERR_INTERNAL_VAL;
     }
 
@@ -193,7 +194,8 @@ static status_t
     }
     cp = strchr(client_addr, ' ');
     if (!cp) {
-        SUBSYS_TRACE1( "ERROR: init_subsys(): Malformed SSH_CONNECTION variable\n" );
+        SUBSYS_TRACE1( "ERROR: init_subsys(): "
+                       "Malformed SSH_CONNECTION variable\n" );
         return ERR_INTERNAL_VAL;
     } else {
         *cp = 0;
@@ -205,7 +207,8 @@ static status_t
         port = strdup(++cp);
     }
     if (!port) {
-        SUBSYS_TRACE1( "ERROR: init_subsys(): Malformed SSH_CONNECTION variable\n" );
+        SUBSYS_TRACE1( "ERROR: init_subsys(): "
+                       "Malformed SSH_CONNECTION variable\n" );
         return ERR_INTERNAL_VAL;
     }
         
@@ -240,8 +243,8 @@ static status_t
         SUBSYS_TRACE1( "ERROR: init_subsys(): NCX Socket Connect failed\n" );
         return ERR_NCX_OPERATION_FAILED;
     } else {
-        SUBSYS_TRACE2( "INFO:  init_subsys(): NCX Socket Connected on FD: %d \n",
-                       ncxsock );
+        SUBSYS_TRACE2( "INFO:  init_subsys(): "
+                       "NCX Socket Connected on FD: %d \n", ncxsock );
         ncxconnect = TRUE;
     }
 
@@ -300,15 +303,8 @@ static status_t
     "address=\"%s\" magic=\"%s\" transport=\"ssh\" port=\"%s\" />\n%s";
 
     memset(msgbuff, 0x0, BUFFLEN);
-    sprintf(msgbuff, 
-            connectmsg,
-            (const char *)XML_START_MSG, 
-            NCX_URN, 
-            user, 
-            client_addr, 
-            NCX_SERVER_MAGIC, 
-            port, 
-            NC_SSH_END);
+    snprintf(msgbuff, BUFFLEN, connectmsg, (const char *)XML_START_MSG, 
+             NCX_URN, user, client_addr, NCX_SERVER_MAGIC, port, NC_SSH_END);
 
     res = send_buff(ncxsock, msgbuff, strlen(msgbuff));
     return res;
@@ -395,19 +391,20 @@ static status_t
         ret = select(FD_SETSIZE, &fds, NULL, NULL, NULL);
         if (ret < 0) {
             if ( errno != EINTR ) {
-                SUBSYS_TRACE1( "ERROR: io_loop(): select() failed with error: %s\n", 
-                               strerror( errno ) );
+                SUBSYS_TRACE1( "ERROR: io_loop(): select() "
+                               "failed with error: %s\n", strerror( errno ) );
                 res = ERR_NCX_OPERATION_FAILED;
                 done = TRUE;
             }
             else
             {
-                SUBSYS_TRACE2( "INFO: io_loop(): select() failed with error: %s\n", 
-                               strerror( errno  ) );
+                SUBSYS_TRACE2( "INFO: io_loop(): select() "
+                               "failed with error: %s\n", strerror( errno  ) );
             }
             continue;
         } else if (ret == 0) {
-            SUBSYS_TRACE1( "ERROR: io_loop(): select() returned 0, exiting...\n" );
+            SUBSYS_TRACE1( "ERROR: io_loop(): select() "
+                           "returned 0, exiting...\n" );
             res = NO_ERR;
             done = TRUE;
             continue;

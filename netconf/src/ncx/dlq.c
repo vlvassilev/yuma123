@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -198,12 +198,12 @@ void  dlq_createSQue (dlq_hdrT *queAddr)
 *********************************************************************/
 void dlq_destroyQue (dlq_hdrT *listP)
 {
-#ifdef CPP_ICHK
-    if (listP==NULL)
+    if ( !listP )
     {
-        err_msg(ERR_INTERNAL_PTR);
         return;
     }
+
+#ifdef CPP_ICHK
     if (!_hdr_node(listP) || !dlq_empty(listP))
     {
         err_msg(ERR_INTERNAL_QDEL);

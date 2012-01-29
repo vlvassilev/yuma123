@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -746,18 +746,12 @@ static status_t
      */
     if (res == NO_ERR) {
         if (LOGDEBUG) {
-            res = ncxmod_parse_module(modname, 
-                                      revision, 
-                                      &savedevQ,
-                                      retmod);
+            res = ncxmod_parse_module(modname, revision, &savedevQ, retmod);
         } else {
             /* ignore parse warnings during autoload unless debug mode */
             loglevel = log_get_debug_level();
             log_set_debug_level(LOG_DEBUG_ERROR);
-            res = ncxmod_parse_module(modname, 
-                                      revision, 
-                                      &savedevQ,
-                                      retmod);
+            res = ncxmod_parse_module(modname, revision, &savedevQ, retmod);
             log_set_debug_level(loglevel);
         }
         if (res != NO_ERR) {

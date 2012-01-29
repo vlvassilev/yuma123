@@ -28,11 +28,6 @@ using namespace std;
 
 // ---------------------------------------------------------------------------|
 
-// @TODO This suite currently only supports 'happy days' scenarios.
-// @TODO There is no support for many failures sceanrios such as:
-// @TODO    An attempt to  create a streamItem for a profile that does 
-// @TODO    not exist.
-// @TODO Support for these scenarios will be required!
 // ---------------------------------------------------------------------------|
 namespace YumaTest 
 {
@@ -101,6 +96,19 @@ void DeviceModuleCommonFixture::ensureProfileStreamExists(
     }
 }
 
+//------------------------------------------------------------------------------
+void DeviceModuleCommonFixture::ensureResourceExists( 
+        ResourceDescriptionMap& resourceMap,
+        const uint32_t resourceId )
+{
+    if ( resourceMap.find( resourceId ) == resourceMap.end() )
+    {
+        ResourceNode res;
+        res.id_ = resourceId;
+        resourceMap.insert( make_pair( resourceId, res ) );
+    }
+}
+
 // ---------------------------------------------------------------------------|
 void DeviceModuleCommonFixture::ensureResourceDescriptionExists( 
         const uint16_t profileId,
@@ -108,18 +116,8 @@ void DeviceModuleCommonFixture::ensureResourceDescriptionExists(
         const uint16_t resourceId )
 {
     ensureProfileStreamExists( profileId, streamId );
-
-    if ( candidateEntries_->profiles_[ profileId ]
-         .streams_[streamId].resourceDescription_.end() == 
-         candidateEntries_->profiles_[ profileId ]
-         .streams_[streamId].resourceDescription_.find( resourceId ) )
-    {
-        ResourceNode res;
-        res.id_ = resourceId;
-
-        candidateEntries_->profiles_[ profileId ].streams_[ streamId ]
-            .resourceDescription_.insert( make_pair( resourceId, res ) );
-    }
+    ensureResourceExists( candidateEntries_->profiles_[ profileId ].
+                streams_[ streamId ].resourceDescription_, resourceId );
 }
 
 // ---------------------------------------------------------------------------|
@@ -145,7 +143,6 @@ void DeviceModuleCommonFixture::ensureResourceConnectionExists(
 // ---------------------------------------------------------------------------|
 void DeviceModuleCommonFixture::createXpoContainer(
     std::shared_ptr<AbstractNCSession> session,
-    const std::string& op,
     const string& failReason )
 {
     string query = xpoBuilder_->genXPOQuery( "create" );
@@ -331,6 +328,37 @@ void DeviceModuleCommonFixture::resourceConnectionQuery(
 }
 
 // ---------------------------------------------------------------------------|
+void DeviceModuleCommonFixture::updateResourceDescriptionEntry( 
+    ResourceNode& resourceNode, const ResourceNodeConfig& config )
+{
+    if ( config.resourceType_ )
+    {
+        resourceNode.resourceType_ = *config.resourceType_;
+    }
+
+    if ( config.configuration_ )
+    {
+        resourceNode.configuration_ = *config.configuration_;
+    }
+
+    if ( config.statusConfig_ )
+    {
+        resourceNode.statusConfig_ = *config.statusConfig_;
+    }
+
+    if ( config.alarmConfig_ )
+    {
+        resourceNode.alarmConfig_ = *config.alarmConfig_;
+    }
+
+    if ( config.physicalPath_ )
+    {
+        resourceNode.physicalPath_ = *config.physicalPath_;
+    }
+}
+
+
+// ---------------------------------------------------------------------------|
 void DeviceModuleCommonFixture::configureResourceDescrption( 
     std::shared_ptr<AbstractNCSession> session,
     const uint16_t profileId,
@@ -347,7 +375,6 @@ void DeviceModuleCommonFixture::configureResourceDescrption(
     if ( failReason.empty() )
     {
         runEditQuery( session, query );
-
         if ( op == "delete" || op == "replace" )
         {
             if ( candidateEntries_->profiles_.find( profileId ) != 
@@ -357,26 +384,18 @@ void DeviceModuleCommonFixture::configureResourceDescrption(
             {
                 candidateEntries_->profiles_[ profileId ].streams_[ streamId ]
                     .resourceDescription_.erase( resourceId );
+            }
 
-                if ( op == "delete" )
-                {
-                    return;
-                }
+            if ( op == "delete" )
+            {
+                return;
             }
         }
 
         ensureResourceDescriptionExists( profileId, streamId, resourceId );
-        if ( config.resourceType_ )
-        {
-            candidateEntries_->profiles_[ profileId ].streams_[ streamId ]
-                .resourceDescription_[ resourceId ].resourceType_ = *config.resourceType_;
-        }
-
-        if ( config.physicalPath_ )
-        {
-            candidateEntries_->profiles_[ profileId ].streams_[ streamId ]
-                .resourceDescription_[ resourceId ].physicalPath_ = *config.physicalPath_;
-        }
+        updateResourceDescriptionEntry( 
+                candidateEntries_->profiles_[profileId].streams_[streamId].resourceDescription_[resourceId], 
+            config );
     }
     else
     {
@@ -443,11 +462,11 @@ void DeviceModuleCommonFixture::configureResourceConnection(
             {
                 candidateEntries_->profiles_[ profileId ].streams_[ streamId ]
                     .resourceConnections_.erase( connectionId );
+            }
 
-                if ( op == "delete" )
-                {
-                    return;
-                }
+            if ( op == "delete" )
+            {
+                return;
             }
         }
 
@@ -563,7 +582,7 @@ void DeviceModuleCommonFixture::queryConfig( const string& dbName ) const
 
 // ---------------------------------------------------------------------------|
 void DeviceModuleCommonFixture::checkEntriesImpl( const string& dbName,
-        const shared_ptr<XPO3Container>& db ) const
+        const shared_ptr<XPO3Container>& db )
 {
     XMLContentChecker<XPO3Container> checker( db );
     queryEngine_->tryGetConfigXpath( primarySession_, "xpo", 
@@ -571,7 +590,7 @@ void DeviceModuleCommonFixture::checkEntriesImpl( const string& dbName,
 }
 
 // ---------------------------------------------------------------------------|
-void DeviceModuleCommonFixture::checkConfig() const
+void DeviceModuleCommonFixture::checkConfig() 
 {
     checkEntriesImpl( writeableDbName_, candidateEntries_ );
     checkEntriesImpl( "running", runningEntries_ );
@@ -584,16 +603,46 @@ void DeviceModuleCommonFixture::initialise2Profiles()
     // create Profile 1
     xpoProfileQuery( primarySession_, 1 );
     profileStreamQuery( primarySession_, 1, 1 );
-    configureResourceDescrption( primarySession_, 1, 1, 1, ResourceNodeConfig{ 100, string( "VR-01" ) } );
-    configureResourceDescrption( primarySession_, 1, 1, 2, ResourceNodeConfig{ 101, string( "VR-02" ) } );
-    configureResourceDescrption( primarySession_, 1, 1, 3, ResourceNodeConfig{ 102, string( "VR-03" ) } );
+    configureResourceDescrption( primarySession_, 1, 1, 1, 
+                                 ResourceNodeConfig{ 100, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-01" ) } );
+    configureResourceDescrption( primarySession_, 1, 1, 2, 
+                                 ResourceNodeConfig{ 101, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-02" ) } );
+    configureResourceDescrption( primarySession_, 1, 1, 3, 
+                                 ResourceNodeConfig{ 102, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-03" ) } );
     configureResourceConnection( primarySession_, 1, 1, 1, ConnectionItemConfig{ 1, 10, 2, 11, 100 } );
     configureResourceConnection( primarySession_, 1, 1, 2, ConnectionItemConfig{ 2, 20, 3, 21, 200 } );
 
     profileStreamQuery( primarySession_, 1, 2 );
-    configureResourceDescrption( primarySession_, 1, 2, 1, ResourceNodeConfig{ 103, string( "VR-04" ) } );
-    configureResourceDescrption( primarySession_, 1, 2, 2, ResourceNodeConfig{ 104, string( "VR-05" ) } );
-    configureResourceDescrption( primarySession_, 1, 2, 3, ResourceNodeConfig{ 105, string( "VR-06" ) } );
+    configureResourceDescrption( primarySession_, 1, 2, 1, 
+                                 ResourceNodeConfig{ 103, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-04" ) } );
+    configureResourceDescrption( primarySession_, 1, 2, 2, 
+                                 ResourceNodeConfig{ 104, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-05" ) } );
+    configureResourceDescrption( primarySession_, 1, 2, 3, 
+                                 ResourceNodeConfig{ 105, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-06" ) } );
     configureResourceConnection( primarySession_, 1, 2, 1, ConnectionItemConfig{ 1, 1, 1, 1, 100 } );
     configureResourceConnection( primarySession_, 1, 2, 2, ConnectionItemConfig{ 1, 1, 1, 1, 100 } );
 
@@ -603,16 +652,46 @@ void DeviceModuleCommonFixture::initialise2Profiles()
     // create Profile 2
     xpoProfileQuery( primarySession_, 2 );
     profileStreamQuery( primarySession_, 2, 1 );
-    configureResourceDescrption( primarySession_, 2, 1, 1, ResourceNodeConfig{ 100, string( "VR-11" ) } );
-    configureResourceDescrption( primarySession_, 2, 1, 2, ResourceNodeConfig{ 101, string( "VR-12" ) } );
-    configureResourceDescrption( primarySession_, 2, 1, 3, ResourceNodeConfig{ 102, string( "VR-13" ) } );
+    configureResourceDescrption( primarySession_, 2, 1, 1, 
+                                 ResourceNodeConfig{ 100, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-11" ) } );
+    configureResourceDescrption( primarySession_, 2, 1, 2, 
+                                 ResourceNodeConfig{ 101, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-12" ) } );
+    configureResourceDescrption( primarySession_, 2, 1, 3, 
+                                 ResourceNodeConfig{ 102, 
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-13" ) } );
     configureResourceConnection( primarySession_, 2, 1, 1, ConnectionItemConfig{ 1, 10, 2, 11, 110 } );
     configureResourceConnection( primarySession_, 2, 1, 2, ConnectionItemConfig{ 2, 20, 3, 21, 210 } );
 
     profileStreamQuery( primarySession_, 2, 2 );
-    configureResourceDescrption( primarySession_, 2, 2, 1, ResourceNodeConfig{ 103,  string( "VR-14" ) } );
-    configureResourceDescrption( primarySession_, 2, 2, 2, ResourceNodeConfig{ 104,  string( "VR-15" ) } );
-    configureResourceDescrption( primarySession_, 2, 2, 3, ResourceNodeConfig{ 105,  string( "VR-16" ) } );
+    configureResourceDescrption( primarySession_, 2, 2, 1, 
+                                 ResourceNodeConfig{ 103,  
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-14" ) } );
+    configureResourceDescrption( primarySession_, 2, 2, 2, 
+                                 ResourceNodeConfig{ 104,  
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-15" ) } );
+    configureResourceDescrption( primarySession_, 2, 2, 3, 
+                                 ResourceNodeConfig{ 105,  
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     boost::optional<string>(),
+                                                     string( "VR-16" ) } );
     configureResourceConnection( primarySession_, 2, 2, 1, ConnectionItemConfig{ 1, 1, 1, 1, 250 } );
     configureResourceConnection( primarySession_, 2, 2, 2, ConnectionItemConfig{ 1, 1, 1, 1, 300 } );
 

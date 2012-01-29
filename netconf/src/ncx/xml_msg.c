@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -42,46 +42,18 @@ date         init     comment
 #include  <stdlib.h>
 #include  <string.h>
 #include  <memory.h>
+#include  <assert.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
 #include  "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include  "dlq.h"
-#endif
-
-#ifndef _H_ncx
 #include  "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include  "ncxconst.h"
-#endif
-
-#ifndef _H_rpc_err
 #include  "rpc_err.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_xmlns
 #include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_msg
 #include  "xml_msg.h"
-#endif
-
-#ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -286,6 +258,114 @@ static boolean
 
 }  /* xmlns_needed */
 
+/********************************************************************
+ * build a prefix map using the xmplns directives in a message.
+ * 
+ * \param msg the message in progrss
+ * \param attrs the the top-level attrs list (e;g, rpc_in_attrs)
+ * \return status
+ *********************************************************************/
+static status_t build_prefix_map_from_xmlns_directives( xml_msg_hdr_t* msg, 
+                                                         xml_attrs_t* attrs )
+{
+    xmlns_id_t invid = xmlns_inv_id();
+    xml_attr_t *attr = (xml_attr_t *)xml_first_attr(attrs);
+
+    for ( ; attr;  attr = (xml_attr_t *)xml_next_attr(attr)) {
+
+        /* make sure this is an XMLNS attribute with or wo a prefix */
+        if (xml_strncmp(XMLNS, attr->attr_qname, XMLNS_LEN)) {
+            continue;
+        }
+
+        /* find the namespace associated with the prefix 
+           note: it is not an error to have extra xmlns decls in the <rpc>elem;
+           still need to make sure not to reuse the prefix anyway */
+        xmlns_t *nsrec = def_reg_find_ns(attr->attr_val);
+
+        /* check if this attribute has a prefix */
+        if (attr->attr_qname == attr->attr_name) {
+            /* no prefix in the name so this must be the default namespace */
+            if ( !nsrec ) {
+                /* the default namespace is not one of ours, so it will not be 
+                 * used in the reply */
+                attr->attr_xmlns_ns = invid;
+            } else {
+                attr->attr_xmlns_ns = nsrec->ns_id;
+            }
+            continue;
+        }
+
+        /* there is a prefix, so get the prefix len. 
+         * The entire prefix was saved as the attr_name */
+        uint32 plen = xml_strlen(attr->attr_name);
+
+        /* get a new prefix map */
+        xmlns_pmap_t *newpmap = xmlns_new_pmap(plen+1);
+        if (!newpmap) {
+            return ERR_INTERNAL_MEM;
+        }
+
+        /* save the prefix and the xmlns ID */
+        xml_strncpy(newpmap->nm_pfix, attr->attr_name, plen);
+        if ( !nsrec ) {
+            newpmap->nm_id = invid;
+            attr->attr_xmlns_ns = invid;
+        } else {
+            newpmap->nm_id = nsrec->ns_id;
+            attr->attr_xmlns_ns = nsrec->ns_id;
+        }
+        newpmap->nm_topattr = TRUE;
+        add_pmap(msg, newpmap);
+    }
+
+    return NO_ERR;
+}
+
+/********************************************************************
+ * Add an ncid or ncxid to a prefix map.
+ * 
+ * \param msg the message in progrss
+ * \param attrs the the top-level attrs list (e;g, rpc_in_attrs)
+ * \param ncid the ncid to add.
+ * \return status
+ *********************************************************************/
+static status_t add_ncid_to_prefix_map( xml_msg_hdr_t* msg, 
+                                        xml_attrs_t* attrs,
+                                        xmlns_id_t ncid )
+{
+    status_t res = NO_ERR;
+
+    if (!find_prefix(msg, ncid) ) {
+        /* add a prefix an xmlns attr for NETCONF */
+        xmlChar *buff = NULL;
+        res = xml_msg_gen_new_prefix(msg, ncid, &buff, 0);
+        if (res != NO_ERR) {
+            m__free( buff );
+            return res;
+        }
+
+        res = xml_add_xmlns_attr(attrs, ncid, buff);
+        if (res != NO_ERR) {
+            m__free( buff );
+            return res;
+        }
+
+        /* create a new prefix map */
+        xmlns_pmap_t *newpmap = xmlns_new_pmap(0);
+        if (!newpmap) {
+            m__free( buff );
+            return ERR_INTERNAL_MEM;
+        } 
+        
+        newpmap->nm_id = ncid;
+        newpmap->nm_pfix = buff;
+        newpmap->nm_topattr = TRUE;
+        add_pmap(msg, newpmap);
+    }
+
+    return res;
+}
 
 /************** E X T E R N A L   F U N C T I O N S  ***************/
 
@@ -674,222 +754,76 @@ status_t
 
 }  /* xml_msg_gen_new_prefix */
 
-
 /********************************************************************
-* FUNCTION xml_msg_build_prefix_map
-*
-* Build a queue of xmlns_pmap_t records for the current message
-* 
-* INPUTS:
-*    msg == message in progrss
-*    attrs == the top-level attrs list (e;g, rpc_in_attrs)
-*    addncid == TRUE if a prefix entry for the NC namespace
-*                should be added
-*            == FALSE if the NC nsid should not be added
-*    addncxid == TRUE if a prefix entry for the NCX namespace
-*                should be added
-*             == FALSE if the NCX nsid should not be added
-* OUTPUTS:
-*   msg->prefixQ will be populated as needed,
-*   could be partially populated if some error returned
-*
-*   XMLNS Entries for NETCONF and NCX will be added if they 
-*   are not present
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xml_msg_build_prefix_map (xml_msg_hdr_t *msg,
-                              xml_attrs_t *attrs,
-                              boolean addncid,
-                              boolean addncxid)
+ * Build a queue of xmlns_pmap_t records for the current message
+ * This function will populate msg->prefixQ as needed,
+ * XMLNS Entries for NETCONF and NCX will be added if they 
+ * are not present
+ * 
+ * \param msg the message in progrss
+ * \param attrs the the top-level attrs list (e;g, rpc_in_attrs)
+ * \param addncid flag indicating if prefix entry for the NC namespace
+ *                should be added
+ * \param addncxid flag indicating if a prefix entry for the NCX namespace
+ *                should be added
+ * \return status
+ *********************************************************************/
+status_t xml_msg_build_prefix_map ( xml_msg_hdr_t *msg,
+                                    xml_attrs_t *attrs,
+                                    boolean addncid,
+                                    boolean addncxid )
 {
-    xml_attr_t      *attr;
-    xmlns_pmap_t    *newpmap;
-    xmlns_t         *nsrec;
-    xmlChar         *buff;
-    xmlns_id_t       ncid, ncxid, invid;
-    uint32           plen;
-    boolean          invalid;
-    status_t         res, retres;
+    assert( msg && "msg is NULL" );
+    assert( attrs && "attrs is NULL" );
 
-#ifdef DEBUG
-    if (!msg || !attrs) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    retres = NO_ERR;
-    invid = xmlns_inv_id();
-
-    /* look for any xmlns directives in the attrs list
-     * and build a prefix map entry so they will be reused
-     * in the reply.  Deal with foreign namespace decls as well
-     */
-    for (attr = (xml_attr_t *)xml_first_attr(attrs);
-         attr != NULL;
-         attr = (xml_attr_t *)xml_next_attr(attr)) {
-
-        /* make sure this is an XMLNS attribute with or wo a prefix */
-        if (xml_strncmp(XMLNS, attr->attr_qname, XMLNS_LEN)) {
-            continue;
-        }
-
-        /* find the namespace associated with the prefix */
-        nsrec = def_reg_find_ns(attr->attr_val);
-        if (nsrec == NULL) {
-            /* this is not an error to have extra xmlns decls
-             * in the <rpc> element; still need to make sure
-             * not to reuse the prefix anyway
-             */
-            invalid = TRUE;
-        } else {
-            invalid = FALSE;
-        }
-
-        /* check if this attribute has a prefix */
-        if (attr->attr_qname == attr->attr_name) {
-            /* no prefix in the name so this must be the
-             * default namespace
-             */
-            if (invalid) {
-                /* the default namespace is not one of ours,
-                 * so it will not be used in the reply
-                 */
-                attr->attr_xmlns_ns = invid;
-            } else {
-                attr->attr_xmlns_ns = nsrec->ns_id;
-            }
-            continue;
-        }
-
-        /* there is a prefix, so get the prefix len
-         * the entire prefix was saved as the attr_name 
-         */
-        plen = xml_strlen(attr->attr_name);
-
-        /* get a new prefix map */
-        newpmap = xmlns_new_pmap(plen+1);
-        if (!newpmap) {
-            retres = ERR_INTERNAL_MEM;
-            continue;
-        }
-
-        /* save the prefix and the xmlns ID */
-        xml_strncpy(newpmap->nm_pfix, attr->attr_name, plen);
-        if (invalid) {
-            newpmap->nm_id = invid;
-            attr->attr_xmlns_ns = invid;
-        } else {
-            newpmap->nm_id = nsrec->ns_id;
-            attr->attr_xmlns_ns = nsrec->ns_id;
-        }
-        newpmap->nm_topattr = TRUE;
-        add_pmap(msg, newpmap);
+    /* look for any xmlns directives in the attrs list and build a prefix map 
+     * entry so they will be reused in the reply. Deal with foreign namespace 
+     * decls as well */
+    status_t res = build_prefix_map_from_xmlns_directives( msg, attrs );
+    if ( res != NO_ERR ) {
+        return res;
     }
 
-    /* now add the basic xmlns directives needed for a NETCONF
-     * response, w/ or wo/ NCX extensions
-     */
-    res = NO_ERR;
-    ncid = xmlns_nc_id();
-    ncxid = xmlns_ncx_id();
-
-    /* make sure XMLNS decl for NETCONF is in the map
-     * make sure it is not the default, by forcing a new
-     * xmlns with a prefix -- needed by XPath 1.0 
-     */
-    if (addncid && !find_prefix(msg, ncid)) {
-        /* add a prefix an xmlns attr for NETCONF */
-        buff = NULL;
-        res = xml_msg_gen_new_prefix(msg, ncid, &buff, 0);
-        if (res == NO_ERR) {
-            res = xml_add_xmlns_attr(attrs, ncid, buff);
-        }
-        
-        if (res == NO_ERR) {
-            /* create a new prefix map */
-            newpmap = xmlns_new_pmap(0);
-            if (!newpmap) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-                newpmap->nm_id = ncid;
-                newpmap->nm_pfix = buff;
-                newpmap->nm_topattr = TRUE;
-                add_pmap(msg, newpmap);
-            }
-        }
-    }
-    if (res != NO_ERR) {
-        retres = res;
+    /* make sure XMLNS decl for NETCONF is in the map make sure it is not the 
+     * default, by forcing a new xmlns with a prefix -- needed by XPath 1.0 */
+    if ( addncid ) {
+        res = add_ncid_to_prefix_map( msg, attrs, xmlns_nc_id() );
     }
 
-    /* make sure XMLNS decl for NCX is in the map 
-     * try even if errors in setting up the NETCONF pmap 
-     */
-    if (addncxid && !find_prefix(msg, ncxid)) {
+    /* make sure XMLNS decl for NCX is in the map try even if errors in setting
+     * up the NETCONF pmap */
+    if (addncxid ) {
+        status_t retres = add_ncid_to_prefix_map( msg, attrs, xmlns_nc_id() );
 
-        /* add a prefix an xmlns attr for NCX */
-        buff = NULL;
-        res = xml_msg_gen_new_prefix(msg, ncxid, &buff, 0);
-        if (res == NO_ERR) {
-            res = xml_add_xmlns_attr(attrs, ncxid, buff);
-        }
-        if (res == NO_ERR) {
-            /* create a new prefix map */
-            newpmap = xmlns_new_pmap(0);
-            if (!newpmap) {
-                res = ERR_INTERNAL_MEM;
-            } else {
-                newpmap->nm_id = ncxid;
-                newpmap->nm_pfix = buff;
-                newpmap->nm_topattr = TRUE;
-                add_pmap(msg, newpmap);
-            }
-        }
-        if (res != NO_ERR) {
-            retres = res;
+        if (retres != NO_ERR && res == NO_ERR ) {
+            res = retres ;
         }
     }
 
-    return retres;
-
+    return res;
 }  /* xml_msg_build_prefix_map */
 
 
-/********************************************************************
-* FUNCTION xml_msg_finish_prefix_map
-*
-* Finish the queue of xmlns_pmap_t records for the current message
-* 
-* INPUTS:
-*    msg == message in progrss
-*    attrs == the top-level attrs list (e;g, rpc_in_attrs)
-* OUTPUTS:
-*   msg->prefixQ will be populated as needed,
-*   could be partially populated if some error returned
-*
-* RETURNS:
-*   status
+/**
+ * Finish the queue of xmlns_pmap_t records for the current message
+ * 
+ * /param msg message in progrss
+ * /param attrs the top-level attrs list (e;g, rpc_in_attrs)
+ *
+ * /return status of operation
 *********************************************************************/
-status_t
-    xml_msg_finish_prefix_map (xml_msg_hdr_t *msg,
-                               xml_attrs_t *attrs)
+status_t xml_msg_finish_prefix_map (xml_msg_hdr_t *msg,
+                                    xml_attrs_t *attrs)
 
 {
     xmlns_pmap_t    *newpmap;
-    xmlChar         *buff;
+    xmlChar         *buff = NULL;
     xmlns_id_t       wdaid;
-    status_t         res;
+    status_t         res = NO_ERR;
 
-#ifdef DEBUG
-    if (msg == NULL || attrs == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert(msg && "msg is NULL"); 
+    assert(attrs && "attrs is NULL"); 
 
-    res = NO_ERR;
     wdaid = xmlns_wda_id();
 
     /* make sure XMLNS decl for wd:default is in the map 
@@ -899,7 +833,6 @@ status_t
         !find_prefix(msg, wdaid)) {
 
         /* add a prefix an xmlns attr for WD */
-        buff = NULL;
         res = xml_msg_gen_new_prefix(msg, wdaid, &buff, 0);
         if (res == NO_ERR) {
             res = xml_add_xmlns_attr(attrs, wdaid, buff);
@@ -916,6 +849,10 @@ status_t
                 add_pmap(msg, newpmap);
             }
         }
+    }
+
+    if (buff && (res != NO_ERR)) {
+        m__free(buff);
     }
 
     return res;

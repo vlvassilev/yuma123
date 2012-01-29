@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -35,41 +35,39 @@ date         init     comment
 #include <errno.h>
 #include <assert.h>
 
-#include  "procdefs.h"
-#include  "agt.h"
-#include  "agt_acm.h"
-#include  "agt_cb.h"
-#include  "agt_connect.h"
-#include  "agt_ncx.h"
-#include  "agt_ncxserver.h"
-#include  "agt_rpc.h"
-#include  "agt_ses.h"
-#include  "agt_state.h"
-#include  "agt_sys.h"
-#include  "agt_top.h"
-#include  "agt_util.h"
-#include  "cfg.h"
-#include  "def_reg.h"
-#include  "getcb.h"
-#include  "log.h"
-#include  "ncxmod.h"
-#include  "rpc.h"
-#include  "ses.h"
-#include  "ses_msg.h"
-#include  "status.h"
-#include  "tstamp.h"
-#include  "val.h"
-#include  "xmlns.h"
-#include  "xml_util.h"
+#include "procdefs.h"
+#include "agt.h"
+#include "agt_acm.h"
+#include "agt_cb.h"
+#include "agt_connect.h"
+#include "agt_ncx.h"
+#include "agt_ncxserver.h"
+#include "agt_rpc.h"
+#include "agt_ses.h"
+#include "agt_state.h"
+#include "agt_sys.h"
+#include "agt_top.h"
+#include "agt_util.h"
+#include "cfg.h"
+#include "def_reg.h"
+#include "getcb.h"
+#include "log.h"
+#include "ncxmod.h"
+#include "rpc.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "tstamp.h"
+#include "val.h"
+#include "xmlns.h"
+#include "xml_util.h"
+
 
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#ifdef DEBUG
-#define AGT_SES_DEBUG 1
-#endif
 
 /* maximum number of concurrent inbound sessions 
  * Must be >= 2 since session 0 is used for the dummy scb
@@ -84,7 +82,7 @@ date         init     comment
 
 
 /* number of seconds to wait between session timeout checks */
-#define AGT_SES_TIMEOUT_INTERVAL  5
+#define AGT_SES_TIMEOUT_INTERVAL  1
 
 /********************************************************************
 *                                                                   *
@@ -172,7 +170,7 @@ static status_t
 
     (void)methnode;
 
-    sprintf((char *)numbuff, "%u", scb->indent);
+    snprintf((char *)numbuff, sizeof(numbuff), "%u", scb->indent);
     indentval = val_make_string(mysesmod->nsid,
                                 NCX_EL_INDENT,
                                 numbuff);
@@ -180,7 +178,7 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
 
-    sprintf((char *)numbuff, "%u", scb->linesize);
+    snprintf((char *)numbuff, sizeof(numbuff), "%u", scb->linesize);
     linesizeval = val_make_string(mysesmod->nsid,
                                   NCX_EL_LINESIZE,
                                   numbuff);
@@ -438,6 +436,10 @@ status_t
     }
 
     dummy_session->rollback_sid = use_sid;
+
+    /*TODO Quick fix for confirmed-commit/rollback bug. */
+    /*     Needs further investigation. */
+    dummy_session->sid = use_sid;
 
     if (scb == dummy_session) {
         return NO_ERR;  /* skip -- nothing to do */
@@ -822,32 +824,19 @@ boolean
     scb = agtses[rdy->sid];
 
     if (scb == NULL) {
-#ifdef AGT_SES_DEBUG
-        if (LOGDEBUG) {
-            log_debug("\nagt_ses: session %d gone", rdy->sid);
-        }
-#endif
+        log_debug("\nagt_ses: session %d gone", rdy->sid);
         return FALSE;
     }
 
-#ifdef AGT_SES_DEBUG
-    if (LOGDEBUG2) {
-        log_debug2("\nagt_ses msg ready for session %d", scb->sid);
-    }
-#endif
+    log_debug2("\nagt_ses msg ready for session %d", scb->sid);
 
     /* check the session control block state */
     if (scb->state >= SES_ST_SHUTDOWN_REQ) {
         /* don't process the message or even it mark it
          * It will be cleaned up when the session is freed
          */
-#ifdef AGT_SES_DEBUG
-        if (LOGDEBUG) {
-            log_debug("\nagt_ses drop input, session %d shutting down", 
-                      scb->sid);
-        }
-#endif
-
+        log_debug("\nagt_ses drop input, session %d shutting down", 
+                  scb->sid);
         return TRUE;
     }
 
@@ -860,7 +849,7 @@ boolean
             /* do not echo the ncx-connect message */
             cnt = xml_strcpy(buff, 
                              (const xmlChar *)"Incoming msg for session ");
-            sprintf((char *)(&buff[cnt]), "%u", scb->sid);
+            snprintf((char *)(&buff[cnt]), sizeof(buff) - cnt, "%u", scb->sid);
             ses_msg_dump(msg, buff);
         }
             
@@ -868,7 +857,7 @@ boolean
     } else if (LOGDEBUG2 && scb->state != SES_ST_INIT) {
         cnt = xml_strcpy(buff, 
                          (const xmlChar *)"Incoming msg for session ");
-        sprintf((char *)(&buff[cnt]), "%u", scb->sid);
+        snprintf((char *)(&buff[cnt]), sizeof(buff) - cnt, "%u", scb->sid);
         ses_msg_dump(msg, buff);
     }
 

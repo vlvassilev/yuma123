@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -176,9 +176,11 @@ static void
                 help_write_lines((const xmlChar *)"(", 0, FALSE);
 
                 if (btyp == NCX_BT_ENUM) {
-                    sprintf((char *)numbuff, "%d", tenum->val);
+                    snprintf((char *)numbuff, sizeof(numbuff), "%d",
+                             tenum->val);
                 } else {
-                    sprintf((char *)numbuff, "%u", tenum->pos);
+                    snprintf((char *)numbuff, sizeof(numbuff), "%u",
+                             tenum->pos);
                 }
 
                 help_write_lines(numbuff, 0, FALSE);
@@ -469,14 +471,16 @@ void
                 help_write_lines((const xmlChar *)"min-elements: ", 
                                  indent+NCX_DEF_INDENT,
                                  TRUE); 
-                sprintf(numbuff, "%u", obj->def.leaflist->minelems);
+                snprintf(numbuff, sizeof(numbuff), "%u",
+                         obj->def.leaflist->minelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }
             if (obj->def.leaflist->maxset) {
                 help_write_lines((const xmlChar *)"max-elements: ", 
                                  indent+NCX_DEF_INDENT,
                                  TRUE); 
-                sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
+                snprintf(numbuff, sizeof(numbuff), "%u",
+                         obj->def.leaflist->maxelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }
             break;
@@ -545,14 +549,16 @@ void
                 help_write_lines((const xmlChar *)"min-elements: ", 
                                  indent+NCX_DEF_INDENT, 
                                  TRUE); 
-                sprintf(numbuff, "%u", obj->def.list->minelems);
+                snprintf(numbuff, sizeof(numbuff), "%u",
+                         obj->def.list->minelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }
             if (obj->def.list->maxset) {
                 help_write_lines((const xmlChar *)"max-elements: ", 
                                  indent+NCX_DEF_INDENT, 
                                  TRUE); 
-                sprintf(numbuff, "%u", obj->def.list->maxelems);
+                snprintf(numbuff, sizeof(numbuff), "%u",
+                         obj->def.list->maxelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }
             break;

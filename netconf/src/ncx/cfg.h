@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010 Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -127,6 +127,8 @@ extern "C" {
 #define CFG_FL_TARGET       bit0
 #define CFG_FL_DIRTY        bit1
 
+#define CFG_INITIAL_TXID (cfg_transaction_id_t)0
+
 /********************************************************************
 *                                                                   *
 *                        T Y P E S                                  *
@@ -168,21 +170,27 @@ typedef enum cfg_location_t_ {
 } cfg_location_t;
 
 
+/* transaction is scoped to single session write operation on a config */
+typedef uint64 cfg_transaction_id_t;
+
+
 /* struct representing 1 configuration database */
 typedef struct cfg_template_t_ {
     ncx_cfg_t      cfg_id;
     cfg_location_t cfg_loc;
     cfg_state_t    cfg_state;
+    cfg_transaction_id_t last_txid;
+    cfg_transaction_id_t cur_txid;
     xmlChar       *name;
     xmlChar       *src_url;
-    xmlChar       *lock_time;
-    xmlChar       *last_ch_time;
+    xmlChar        lock_time[TSTAMP_MIN_SIZE];
+    xmlChar        last_ch_time[TSTAMP_MIN_SIZE];
     uint32         flags;
     ses_id_t       locked_by;
     cfg_source_t   lock_src;
     dlq_hdr_t      load_errQ;    /* Q of rpc_err_rec_t */
     dlq_hdr_t      plockQ;          /* Q of plock_cb_t */
-    val_value_t   *root;          /* btyp == container */
+    val_value_t   *root;          /* btyp == NCX_BT_CONTAINER */
 } cfg_template_t;
 
 
@@ -309,6 +317,20 @@ extern cfg_state_t
 *********************************************************************/
 extern cfg_template_t *
     cfg_get_config (const xmlChar *cfgname);
+
+
+/********************************************************************
+* FUNCTION cfg_get_config_name
+*
+* Get the config name from its ID
+*
+* INPUTS:
+*    cfgid == config ID
+* RETURNS:
+*    pointer to config name or NULL if not found
+*********************************************************************/
+extern const xmlChar *
+    cfg_get_config_name (ncx_cfg_t cfgid);
 
 
 /********************************************************************
@@ -616,10 +638,8 @@ extern void
 *    cfg == config target
 *    newroot == new config tree
 *
-* RETURNS:
-*    status
 *********************************************************************/
-extern status_t
+extern void
     cfg_apply_load_root (cfg_template_t *cfg,
 			 val_value_t *newroot);
 
@@ -634,6 +654,20 @@ extern status_t
 *********************************************************************/
 extern void
     cfg_update_last_ch_time (cfg_template_t *cfg);
+
+
+/********************************************************************
+* FUNCTION cfg_update_last_txid
+*
+* Update the last good transaction ID
+*
+* INPUTS:
+*    cfg == config target
+*    txid == trnasaction ID to use
+*********************************************************************/
+extern void
+    cfg_update_last_txid (cfg_template_t *cfg,
+                          cfg_transaction_id_t txid);
 
 
 /********************************************************************

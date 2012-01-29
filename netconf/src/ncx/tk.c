@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -36,44 +36,19 @@ date         init     comment
 #include <string.h>
 #include <memory.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -604,8 +579,8 @@ static status_t
 * RETURNS:
 *    TRUE if source type is TK_SOURCE_XPATH
 *********************************************************************/
-static void
-    consume_escaped_char( xmlChar **dest, const xmlChar **src, const xmlChar *endstr )
+static void consume_escaped_char( xmlChar **dest, 
+        const xmlChar **src, const xmlChar *endstr )
 {
     const xmlChar* instr = *src;
     xmlChar* outstr = *dest;
@@ -725,7 +700,7 @@ static xmlChar*
     }
     --endbuffer;           // skip back to first character before the newline 
 
-    while ( endbuffer >= buffer && is_space_or_tab( *endbuffer) ) {  //xml_isspace( *endbuffer )  ) {
+    while ( endbuffer >= buffer && is_space_or_tab( *endbuffer) ) {  
         --endbuffer;
     }
     ++endbuffer;           // skip non whitespace character
@@ -947,7 +922,8 @@ static status_t
                                    is_xpath_string( tkc->source), startpos );
 
         /* if --format=html or --format=yang then a copy of the original double 
-         * quoted string needs to be saved unaltered according to the YANG spec */
+         * quoted string needs to be saved unaltered according to the 
+         * YANG spec */
         if (TK_DOCMODE(tkc)) {
             origbuff = xml_strndup(tkbuff, total);
             if ( !origbuff ) {
@@ -3000,19 +2976,14 @@ status_t
 *   pointer to malloced and filled in token chain
 *   ready to be traversed; always check *res for valid syntax
 *********************************************************************/
-tk_chain_t *
-    tk_tokenize_metadata_string (ncx_module_t *mod,
-                                 xmlChar *str,
-                                 status_t *res)
+tk_chain_t * tk_tokenize_metadata_string ( ncx_module_t *mod,
+                                           xmlChar *str,
+                                           status_t *res )
 {
     tk_chain_t *tkc;
 
-#ifdef DEBUG
-    if (!str || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }   
-#endif
+    assert( str && " str is NULL" );
+    assert( res && " res is NULL" );
 
     /* create a new chain and parse the string */
     tkc = tk_new_chain();
@@ -3024,7 +2995,6 @@ tk_chain_t *
     tkc->bptr = tkc->buff = str;
     *res = tk_tokenize_input(tkc, mod);
     return tkc;
-
 } /* tk_tokenize_metadata_string */
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -107,6 +107,47 @@ extern status_t
 			   ncx_module_t *mod,
 			   xpath_source_t source,
 			   xpath_pcb_t *pcb);
+
+
+/********************************************************************
+* FUNCTION xpath_yang_parse_path_ex
+* 
+* Parse the leafref path as a leafref path
+*
+* DOES NOT VALIDATE PATH NODES USED IN THIS PHASE
+* A 2-pass validation is used in case the path expression
+* is defined within a grouping.  This pass is
+* used on all objects, even in groupings
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+*
+* INPUTS:
+*    tkc == parent token chain (may be NULL)
+*    mod == module in progress
+*    obj == context node
+*    source == context for this expression
+*              XP_SRC_LEAFREF or XP_SRC_INSTANCEID
+*    pcb == initialized xpath parser control block
+*           for the leafref path; use xpath_new_pcb
+*           to initialize before calling this fn.
+*           The pcb->exprstr field must be set
+*    logerrors == TRUE to log errors; 
+*              == FALSE to suppress error messages
+* OUTPUTS:
+*   pcb->tkc is filled and then validated for well-formed
+*   leafref or instance-identifier syntax
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    xpath_yang_parse_path_ex (tk_chain_t *tkc,
+                              ncx_module_t *mod,
+                              xpath_source_t source,
+                              xpath_pcb_t *pcb,
+                              boolean logerrors);
 
 
 /********************************************************************

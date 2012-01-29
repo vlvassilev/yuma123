@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -305,7 +305,7 @@ extern status_t
                            tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   typ_def_t *typdef,
-			   const xmlChar *defval,
+                           const xmlChar *defval,
 			   obj_template_t *obj);
 
 
@@ -318,6 +318,7 @@ extern status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typdef == typdef struct from leaf or leaf-list to check

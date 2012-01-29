@@ -4,6 +4,7 @@ module yuma-nacm {
 
     prefix "nacm";
 
+    import yuma-ncx { prefix ncx; }
     import ietf-yang-types { prefix yang; }
 
     organization  "Netconf Central";
@@ -12,6 +13,12 @@ module yuma-nacm {
 
     description 
       "NETCONF Server Access Control Model";
+
+    revision 2012-01-13 {
+        description  
+          "Add ncx:user-write restriction to prevent user deletion
+           of the nacm container";
+    }
 
     revision 2010-02-21 {
         description  
@@ -151,6 +158,7 @@ module yuma-nacm {
     }
 
     container nacm {
+        ncx:user-write update;
         nacm:very-secure;
 
         description

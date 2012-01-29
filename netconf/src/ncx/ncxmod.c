@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -26,6 +26,7 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -821,11 +822,7 @@ static status_t
     buffleft = bufflen - pathlen;
 
     /* try YANG first */
-    res = yang_copy_filename(modname,
-                             revision,
-                             &buff[pathlen],
-                             buffleft,
-                             TRUE);
+    res = yang_copy_filename(modname, revision, &buff[pathlen], buffleft, TRUE);
     if (res != NO_ERR) {
         return res;
     }
@@ -843,10 +840,7 @@ static status_t
     buff[pathlen] = 0;
 
     /* try YIN next */
-    res = yang_copy_filename(modname,
-                             revision,
-                             &buff[pathlen],
-                             buffleft,
+    res = yang_copy_filename(modname, revision, &buff[pathlen], buffleft,
                              FALSE);
     if (res != NO_ERR) {
         return res;
@@ -941,12 +935,7 @@ static status_t
         buff[pathlen] = 0;
     }
 
-    res = check_module_in_dir(buff, 
-                              bufflen,
-                              pathlen,
-                              modname,
-                              revision,
-                              done);
+    res = check_module_in_dir(buff, bufflen, pathlen, modname, revision, done);
     if (*done || res != NO_ERR) {
         return res;
     }
@@ -989,10 +978,7 @@ static status_t
                 } else {
                     xml_strcpy(&buff[pathlen], 
                                (const xmlChar *)ep->d_name);
-                    res = search_subdirs(buff, 
-                                         bufflen, 
-                                         modname, 
-                                         revision, 
+                    res = search_subdirs(buff, bufflen, modname, revision, 
                                          done);
                     if (*done) {
                         dirdone = TRUE;
@@ -1234,12 +1220,8 @@ static status_t
                     *str++ = NCXMOD_PSCHAR;
                     *str = '\0';
 
-                    res = list_subdirs(buff, 
-                                       bufflen, 
-                                       searchtype,
-                                       helpmode,
-                                       logstdout,
-                                       TRUE);
+                    res = list_subdirs(buff, bufflen, searchtype, helpmode,
+                                       logstdout, TRUE);
                     /* erase the filename and keep trying */
                     buff[pathlen] = 0;
                     if (res != NO_ERR) {
@@ -1313,11 +1295,7 @@ static status_t
         }
 
         /* list all the requested files in this path */
-        res = list_subdirs(buff,
-                           bufflen,
-                           searchtype,
-                           helpmode,
-                           logstdout,
+        res = list_subdirs(buff, bufflen, searchtype, helpmode, logstdout,
                            FALSE);
 
         if (res != NO_ERR) {
@@ -1455,11 +1433,7 @@ static status_t
         }
 
         /* try YANG or YIN file */
-        res = search_subdirs(buff, 
-                             bufflen, 
-                             modname,
-                             revision,
-                             done);
+        res = search_subdirs(buff, bufflen, modname, revision, done);
         if (*done && res == NO_ERR) {
 
             res = try_module(buff, 
@@ -2012,7 +1986,7 @@ static status_t
 
     if (ncx_get_cwd_subdirs()) {
         /* CHECK THE CURRENT DIR AND ANY SUBDIRS
-         * 3) try current working directory and subdirs if the subdirs parameter 
+         * 3) try cur working directory and subdirs if the subdirs parameter
          *    is true
          * check before the modpath, which can cause the wrong version to be 
          * picked, depending * on the CWD used by the application.  */
@@ -2084,7 +2058,9 @@ static status_t
                 *retmod = pcb->retmod;
             } else if (ptyp == YANG_PT_TOP) {
                 *retmod = pcb->top;
-            } 
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
         } else if (res != NO_ERR && pcb->retmod) {
             log_debug( "\nFree retmod import %p (%s)", 
                        pcb->retmod, pcb->retmod->name);
@@ -2294,20 +2270,12 @@ static status_t
      * does not get passed over for a generic foo.yang
      * later on in the search path
      */
-    res = load_module(modname, 
-                      revision,
-                      pcb, 
-                      ptyp, 
-                      &testmod);
+    res = load_module(modname, revision, pcb, ptyp, &testmod);
 
     if (res == ERR_NCX_MOD_NOT_FOUND) {
         if (revision && *revision) {
             /* try filenames without revision dates in them */
-            res = load_module(modname, 
-                              NULL,
-                              pcb, 
-                              ptyp, 
-                              &testmod);
+            res = load_module(modname, NULL, pcb, ptyp, &testmod);
             if (res == NO_ERR && testmod) {
                 if (testmod->version == NULL) {
                     /* asked for a specific revision; 
@@ -2324,7 +2292,14 @@ static status_t
         }
     }
 
-    if (retmod) {
+    if (res == NO_ERR && testmod && testmod->errors) {
+        log_debug("\nParser returned OK but module '%s' has errors",
+                  testmod->name);
+        res = ERR_NCX_OPERATION_FAILED;
+        if (!testmod->ismod && (pcb->top != testmod)) {
+            ncx_free_module(testmod);
+        }
+    } else if (retmod) {
         *retmod = testmod;
     }
 
@@ -2602,11 +2577,8 @@ static status_t
     retmod = NULL;
     searchresult = NULL;
 
-    res = try_load_module(pcb, 
-                          YANG_PT_TOP,
-                          (const xmlChar *)fullspec, 
-                          NULL, 
-                          &retmod);
+    res = try_load_module(pcb, YANG_PT_TOP, (const xmlChar *)fullspec, 
+                          NULL, &retmod);
 
     if (res != NO_ERR || retmod == NULL) {
         if (LOGDEBUG2) {
@@ -2761,6 +2733,10 @@ void
 * Determine the location of the specified module
 * and then load it into the system, if not already loaded
 *
+* This is the only load module variant that checks if there
+* are any errors recorded in the module or any of its dependencies
+* !!! ONLY RETURNS TRUE IF MODULE AND ALL IMPORTS ARE LOADED OK !!!
+*
 * Module Search order:
 *
 * 1) YUMA_MODPATH environment var (or set by modpath CLI var)
@@ -2787,23 +2763,23 @@ status_t
                         dlq_hdr_t *savedevQ,
                         ncx_module_t **retmod)
 {
-    yang_pcb_t      *pcb;
-    status_t         res;
 
-#ifdef DEBUG
-    if (!modname) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
+
+
+    assert( modname && "modname is NULL!" );
+
+    if (retmod) {
+        *retmod = NULL;
     }
-#endif
 
-    res = NO_ERR;
-
-    pcb = yang_new_pcb();
+    status_t res = NO_ERR;
+    yang_pcb_t *pcb = yang_new_pcb();
     if (!pcb) {
         res = ERR_INTERNAL_MEM;
     } else {
         pcb->revision = revision;
         pcb->savedevQ = savedevQ;
+
         res = try_load_module(pcb, YANG_PT_TOP, modname, revision, retmod);
     }
 
@@ -2883,11 +2859,7 @@ status_t
         pcb->revision = revision;
         pcb->savedevQ = savedevQ;
         pcb->parsemode = TRUE;
-        res = try_load_module(pcb, 
-                              YANG_PT_TOP,
-                              modname, 
-                              revision, 
-                              retmod);
+        res = try_load_module(pcb, YANG_PT_TOP, modname, revision, retmod);
     }
 
     if (LOGINFO && res != NO_ERR) {
@@ -2964,11 +2936,7 @@ ncxmod_search_result_t *
     retmod = NULL;
     searchresult = NULL;
 
-    res = try_load_module(pcb, 
-                          YANG_PT_TOP,
-                          modname, 
-                          revision, 
-                          &retmod);
+    res = try_load_module(pcb, YANG_PT_TOP, modname, revision, &retmod);
 
     if (res != NO_ERR || retmod == NULL) {
         if (LOGDEBUG2) {
@@ -3170,11 +3138,7 @@ status_t
     } else {
         pcb->deviationmode = TRUE;
         pcb->savedevQ = deviationQ;
-        res = try_load_module(pcb, 
-                              YANG_PT_TOP,
-                              deviname, 
-                              NULL, 
-                              &retmod);
+        res = try_load_module(pcb, YANG_PT_TOP, deviname, NULL, &retmod);
     }
 
     if (res != NO_ERR) {
@@ -3257,11 +3221,7 @@ status_t
     pcb->revision = revision;
     pcb->parentparm = parent;
 
-    res = try_load_module(pcb, 
-                          ptyp,
-                          modname,
-                          revision,
-                          retmod);
+    res = try_load_module(pcb, ptyp, modname, revision, retmod);
 
     pcb->revision = savedrev;
 
@@ -3327,11 +3287,7 @@ yang_pcb_t *
         pcb->with_submods = with_submods;
         pcb->savetkc = savetkc;
         pcb->docmode = docmode;
-        *res = try_load_module(pcb,
-                               YANG_PT_TOP,
-                               modname, 
-                               revision, 
-                               NULL);
+        *res = try_load_module(pcb, YANG_PT_TOP, modname, revision, NULL);
     }
 
     return pcb;
@@ -3390,11 +3346,7 @@ yang_pcb_t *
         if (modpath) {
             ncxmod_set_altpath(modpath);
         }
-        *res = try_load_module(pcb,
-                               YANG_PT_TOP,
-                               modname, 
-                               revision,
-                               NULL);
+        *res = try_load_module(pcb, YANG_PT_TOP, modname, revision, NULL);
         if (modpath) {
             ncxmod_clear_altpath();
         }

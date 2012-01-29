@@ -101,6 +101,24 @@ public:
         runQuery( session, queryStr, checker );
     }
 
+    /**
+     * Try to validate the database associated with this engine.
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param target the target database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryValidateDatabase( std::shared_ptr<AbstractNCSession> session,
+                              const std::string& target, 
+                              Checker& checker )
+    {
+        // build a validate message for test.yang
+        const std::string queryStr = messageBuilder_->buildValidateMessage( 
+                session->allocateMessageId(), target );
+        runQuery( session, queryStr, checker );
+    }
 
     /**
      * Get the configuration filtered using the supplied xpath
@@ -125,6 +143,72 @@ public:
     }
     
     /**
+     * Get the configuration filtered using the supplied subtree
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param subtreeFilterStr the subtree filter to apply
+     * \param target the target database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryGetConfigSubtree( std::shared_ptr<AbstractNCSession> session,
+                              const std::string& subtreeFilterStr,
+                              const std::string& target, 
+                              Checker& checker )
+    {
+        // build a load module message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildGetConfigMessageSubtree( 
+                subtreeFilterStr, target, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+    
+    /**
+     * Get the state data filtered using the supplied xpath
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param xPathFilterStr the XPath filter to apply
+     * \param target the target database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryGetXpath( std::shared_ptr<AbstractNCSession> session,
+                      const std::string& xPathFilterStr,
+                      const std::string& target, 
+                      Checker& checker )
+    {
+        // build a load module message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildGetMessageXPath( 
+                xPathFilterStr, target, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+    
+    /**
+     * Get the state data filtered using the supplied subtree
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param subtreeFilterStr the subtree filter to apply
+     * \param target the target database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryGetSubtree( std::shared_ptr<AbstractNCSession> session,
+                        const std::string& subtreeFilterStr,
+                        const std::string& target, 
+                        Checker& checker )
+    {
+        // build a load module message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildGetMessageSubtree( 
+                subtreeFilterStr, target, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+    
+    /**
      * Edit the configuration using the supplied query
      *
      * \tparam the type of results checker
@@ -142,6 +226,65 @@ public:
         const std::string queryStr = 
             messageBuilder_->buildEditConfigMessage( 
                 query, target, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Try a custom RPC Query.
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param query the edit config operation 
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryCustomRPC( std::shared_ptr<AbstractNCSession> session,
+                        const std::string& query,
+                        Checker& checker )
+    {
+        const std::string queryStr = 
+            messageBuilder_->buildRPCMessage( 
+                query, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Copy the configuration
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param target the target database name
+     * \param source the source database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryCopyConfig( std::shared_ptr<AbstractNCSession> session,
+                        const std::string& target, 
+                        const std::string& source, 
+                        Checker& checker )
+    {
+        const std::string queryStr = 
+            messageBuilder_->buildCopyConfigMessage( 
+                target, source, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Delete the configuration
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param target the target database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryDeleteConfig( std::shared_ptr<AbstractNCSession> session,
+                          const std::string& target, 
+                          Checker& checker )
+    {
+        const std::string queryStr = 
+            messageBuilder_->buildDeleteConfigMessage( 
+                target, session->allocateMessageId() );
         runQuery( session, queryStr, checker );
     }
 
@@ -176,13 +319,150 @@ public:
     void tryDiscardChanges( std::shared_ptr<AbstractNCSession> session,
                             Checker& checker )
     {
-        // build a set discard-changes message for test.yang
+        // build a discard-changes message for test.yang
         const std::string queryStr = 
             messageBuilder_->buildDiscardChangesMessage( 
                            session->allocateMessageId() );
         runQuery( session, queryStr, checker );
     }
 
+    /**
+     * Get my session
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryGetMySession( std::shared_ptr<AbstractNCSession> session,
+                                Checker& checker )
+    {
+        // build a get my session message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildGetMySessionMessage( 
+                           session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Set my session
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param indent the indent to be set.
+     * \param linesize the linesize to be set.
+     * \param withDefaults the with-defaults setting to be set.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void trySetMySession( std::shared_ptr<AbstractNCSession> session,
+                          const std::string& indent,
+                          const std::string& linesize,
+                          const std::string& withDefaults,
+                          Checker& checker )
+    {
+        // build a set my session message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildSetMySessionMessage(
+                indent, linesize, withDefaults, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Kill session
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param sessionId the id of the session to be killed.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryKillSession( std::shared_ptr<AbstractNCSession> session,
+                                    uint16_t sessionId,
+                                    Checker& checker )
+    {
+        // build a kill-session message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildKillSessionMessage( 
+                           sessionId, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Close session
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryCloseSession( std::shared_ptr<AbstractNCSession> session,
+                                    Checker& checker )
+    {
+        // build a close-session message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildCloseSessionMessage( 
+                           session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Shutdown
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryShutdown( std::shared_ptr<AbstractNCSession> session,
+                                    Checker& checker )
+    {
+        // build a shutdown message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildShutdownMessage( 
+                           session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Restart
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryRestart( std::shared_ptr<AbstractNCSession> session,
+                                    Checker& checker )
+    {
+        // build a restart message for test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildRestartMessage( 
+                           session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+
+    /**
+     * Get the data model definition files from the server
+     *
+     * \tparam the type of results checker
+     * \param session the session to use for injecting the message.
+     * \param xPathFilterStr the XPath filter to apply
+     * \param target the target database name
+     * \param checker the results checker.
+     */
+    template< class Checker >
+    void tryGetSchema( std::shared_ptr<AbstractNCSession> session,
+                       const std::string& schemaIdStr,
+                       Checker& checker )
+    {
+        // build a get-schema message for device_test.yang
+        const std::string queryStr = 
+            messageBuilder_->buildGetSchemaMessage(
+                schemaIdStr, session->allocateMessageId() );
+        runQuery( session, queryStr, checker );
+    }
+    
     /**
      * Utility function for locking the database.
      *
@@ -215,6 +495,22 @@ public:
      * \param session the session to use for injecting the message.
      */
     void commit( std::shared_ptr<AbstractNCSession> session );
+    
+    /**
+     * Send a commit message that is expected to fail.
+     *
+     * \param session the session to use for injecting the message.
+     */
+    void commitFailure( std::shared_ptr<AbstractNCSession> session );
+
+    /**
+     * Send a confirmed-commit message.
+     *
+     * \param session the session to use for injecting the message.
+     * \param timeout the confirm-timeout in seconds.
+     */
+    void confirmedCommit( std::shared_ptr<AbstractNCSession> session, 
+                          const int timeout );
 };    
 
 // ---------------------------------------------------------------------------|

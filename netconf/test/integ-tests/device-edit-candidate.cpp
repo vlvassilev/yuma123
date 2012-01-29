@@ -21,6 +21,7 @@ const char* SpoofedArgs::argv[] = {
     ( "--runpath=../modules/sil" ),
     ( "--access-control=off" ),
     ( "--log=./yuma-op/yuma-out.txt" ),
+    ( "--log-level=debug3" ),
     ( "--target=candidate" ),
     ( "--module=device_test" ),
     ( "--no-startup" ),         // ensure that no configuration from previous 

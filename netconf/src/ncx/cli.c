@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -117,12 +117,7 @@ static status_t
      */
     if (obj_is_root(obj)) {
         if (script) {
-            (void)var_get_script_val(rcxt,
-                                     obj, 
-                                     new_parm,
-                                     strval, 
-                                     ISPARM, 
-                                     &res);
+            (void)var_get_script_val(rcxt, obj, new_parm, strval, ISPARM, &res);
         } else {
             log_error("\nError: ncx:root object only "
                       "supported in script mode");
@@ -132,18 +127,13 @@ static status_t
         /* check if the only child is an OBJ_TYP_CHOICE */
         choiceobj = obj_first_child(obj);
         if (choiceobj == NULL) {
-            log_error("\nError: container %s does not "
-                      "have any child nodes", 
+            log_error("\nError: container %s does not have any child nodes", 
                       obj_get_name(obj));
             return ERR_NCX_INVALID_VALUE;
         }
-        if (choiceobj->objtype != OBJ_TYP_CHOICE) {
-            log_error("\nError: child %s in container %s must be "
-                      "a 'choice' object",
-                      obj_get_name(choiceobj),
-                      obj_get_name(obj));
-            return ERR_NCX_INVALID_VALUE;
-        }
+
+        /* check that empty string was not entered, for a default
+         * there is no default for a container   */
         if (strval == NULL || *strval == 0) {
             log_error("\nError: 'missing value string");
             return ERR_NCX_INVALID_VALUE;
@@ -155,14 +145,15 @@ static status_t
         if (*strval == '$' || *strval == '@') {
             /* this is a file or var reference */
             if (script) {
-                newchild = var_get_script_val(rcxt,
-                                              choiceobj, 
-                                              NULL,
-                                              strval, 
-                                              ISPARM, 
-                                              &res);
+                newchild = var_get_script_val_ex(rcxt, obj, choiceobj, NULL,
+                                                 strval, ISPARM, NULL, &res);
                 if (newchild != NULL) {
-                    val_add_child(newchild, new_parm);
+                    if (newchild->obj == obj) {
+                        val_replace(newchild, new_parm);
+                        val_free_value(newchild);
+                    } else {
+                        val_add_child(newchild, new_parm);
+                    }
                 }
             } else {
                 log_error("\nError: var or file reference only "
@@ -170,19 +161,25 @@ static status_t
                 return ERR_NCX_INVALID_VALUE;
             }
         } else {
+            if (choiceobj->objtype != OBJ_TYP_CHOICE) {
+                log_error("\nError: child %s in container %s must be "
+                          "a 'choice' object",
+                          obj_get_name(choiceobj),
+                          obj_get_name(obj));
+                return ERR_NCX_INVALID_VALUE;
+            }
+
             /* check if a child of any case is named 'strval'
              * this check will look deep and find child nodes
              * within a choice or case with the same name
              * as a member of the choice or case node
              */
-            targobj = obj_find_child(choiceobj,
-                                     obj_get_mod_name(choiceobj),
+            targobj = obj_find_child(choiceobj, obj_get_mod_name(choiceobj),
                                      strval);
             if (targobj == NULL) {
                 log_error("\nError: choice %s in container %s"
                           " does not have any child nodes named '%s'",
-                          obj_get_name(choiceobj),
-                          obj_get_name(obj),
+                          obj_get_name(choiceobj), obj_get_name(obj),
                           strval);
                 return ERR_NCX_INVALID_VALUE;
             }
@@ -190,8 +187,7 @@ static status_t
             if (targobj->objtype != OBJ_TYP_LEAF) {
                 log_error("\nError: case %s in choice %s in container %s"
                           " is not a leaf node",
-                          obj_get_name(targobj),
-                          obj_get_name(choiceobj),
+                          obj_get_name(targobj), obj_get_name(choiceobj),
                           obj_get_name(obj));
                 return ERR_NCX_INVALID_VALUE;
             }
@@ -214,16 +210,11 @@ static status_t
                 val_add_child(newchild, new_parm);
             }
         }
-    } else if (obj->objtype == OBJ_TYP_CHOICE &&
-               strval != NULL) {
+    } else if (obj->objtype == OBJ_TYP_CHOICE && strval != NULL) {
         if (*strval == '$' || *strval == '@') {
             if (script) {
-                newchild = var_get_script_val(rcxt,
-                                              obj, 
-                                              NULL,
-                                              strval, 
-                                              ISPARM, 
-                                              &res);
+                newchild = var_get_script_val(rcxt, obj, NULL, strval, 
+                                              ISPARM, &res);
                 if (newchild != NULL) {
                     val_replace(newchild, new_parm);
                     val_free_value(newchild);
@@ -233,15 +224,12 @@ static status_t
             }
         } else {
             /* check if a child of any case is named 'strval' */
-            targobj = obj_find_child(obj,
-                                     obj_get_mod_name(obj),
-                                     strval);
+            targobj = obj_find_child(obj, obj_get_mod_name(obj), strval);
             if (targobj && 
                 obj_get_basetype(targobj) == NCX_BT_EMPTY) {
                 /* found a match so set the value node to type empty */
                 val_init_from_template(new_parm, targobj);
-                val_set_name(new_parm,
-                             obj_get_name(targobj),
+                val_set_name(new_parm, obj_get_name(targobj),
                              xml_strlen(obj_get_name(targobj)));
             } else {
                 res = ERR_NCX_INVALID_VALUE;
@@ -249,12 +237,7 @@ static status_t
         }
     } else {
         if (script) {
-            (void)var_get_script_val(rcxt,
-                                     obj, 
-                                     new_parm,
-                                     strval, 
-                                     ISPARM, 
-                                     &res);
+            (void)var_get_script_val(rcxt, obj, new_parm, strval, ISPARM, &res);
         } else {
             /* get the base type value */
             btyp = obj_get_basetype(obj);
@@ -264,11 +247,8 @@ static status_t
                     res = val_simval_ok(typdef, strval);
                 }
                 if (res == NO_ERR) {
-                    res = val_set_simval(new_parm,
-                                         typdef,  
-                                         obj_get_nsid(obj),
-                                         obj_get_name(obj),
-                                         strval);
+                    res = val_set_simval(new_parm, typdef, obj_get_nsid(obj),
+                                         obj_get_name(obj), strval);
                 }
             } else {
                 res = ERR_NCX_WRONG_DATATYP;

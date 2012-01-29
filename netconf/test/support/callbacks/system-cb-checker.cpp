@@ -13,10 +13,34 @@ namespace YumaTest
 {
 
 // ---------------------------------------------------------------------------|
+void SystemCBChecker::addMainContainer(const std::string& modName, 
+                                       const std::string& containerName)
+{
+    // Do nothing as callbacks are not logged during system tests.
+}
+
+// ---------------------------------------------------------------------------|
+void SystemCBChecker::addElement(const std::string& /* modName */, 
+                                 const std::string& /* containerName */,
+                                 const std::vector<std::string>& /* element */)
+{
+    // Do nothing as callbacks are not logged during system tests.
+}
+
+// ---------------------------------------------------------------------------|
 void SystemCBChecker::addKey(const std::string& /* modName */, 
                              const std::string& /* containerName */,
                              const std::vector<std::string>& /* listElement */,
                              const std::string& /* key */)
+{
+    // Do nothing as callbacks are not logged during system tests.
+}
+
+// ---------------------------------------------------------------------------|
+void SystemCBChecker::addChoice(const std::string& /* modName */, 
+                                const std::string& /* containerName */,
+                                const std::vector<std::string>& /* choiceElement */,
+                                const std::vector<std::string>& /* removeElement */)
 {
     // Do nothing as callbacks are not logged during system tests.
 }
@@ -57,6 +81,32 @@ void SystemCBChecker::commitKeyValuePairs(const std::string& modName,
                                           const std::string& key,
                                           const std::string& value,
                                           int count)
+{
+    // Do nothing as callbacks are not logged during system tests.
+}
+
+// ---------------------------------------------------------------------------|
+void SystemCBChecker::addResourceNode(const std::string& /* modName */, 
+                                      const std::string& /* containerName */,
+                                      const std::vector<std::string>& /* elements */,
+                                      bool /* statusConfig */,
+                                      bool /* alarmConfig */)
+{
+    // Do nothing as callbacks are not logged during system tests.
+}
+
+// ---------------------------------------------------------------------------|
+void SystemCBChecker::addResourceCon(const std::string& /* modName */, 
+                                     const std::string& /* containerName */,
+                                     const std::vector<std::string>& /* elements */)
+{
+    // Do nothing as callbacks are not logged during system tests.
+}
+
+// ---------------------------------------------------------------------------|
+void SystemCBChecker::addStreamCon(const std::string& /* modName */, 
+                                   const std::string& /* containerName */,
+                                   const std::vector<std::string>& /* elements */)
 {
     // Do nothing as callbacks are not logged during system tests.
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -459,6 +459,58 @@ void
     m__free(iff);
     
 } /* ncx_free_iffeature */
+
+
+/********************************************************************
+* FUNCTION ncx_clone_iffeature
+* 
+* Clone a new ncx_iffeature_t struct
+*
+* INPUTS:
+*    srciff == ifffeature struct to clone
+* RETURNS:
+*    pointer to a malloced ncx_iffeature_t struct,
+*    or NULL if malloc error
+*********************************************************************/
+ncx_iffeature_t *
+    ncx_clone_iffeature (ncx_iffeature_t *srciff)
+{
+    ncx_iffeature_t *iff;
+
+    iff = m__getObj(ncx_iffeature_t);
+    if (!iff) {
+        return NULL;
+    }
+    memset(iff, 0x0, sizeof(ncx_iffeature_t));
+
+    if (srciff->prefix) {
+        iff->prefix = xml_strdup(srciff->prefix);
+        if (iff->prefix == NULL) {
+            ncx_free_iffeature(iff);
+            return NULL;
+        }
+    }
+
+    if (srciff->name) {
+        iff->name = xml_strdup(srciff->name);
+        if (iff->name == NULL) {
+            ncx_free_iffeature(iff);
+            return NULL;
+        }
+    }
+
+    iff->feature = srciff->feature;
+
+    ncx_set_error(&iff->tkerr,
+                  srciff->tkerr.mod,
+                  srciff->tkerr.linenum,
+                  srciff->tkerr.linepos);
+
+    //iff->seen not set
+
+    return iff;
+
+} /* ncx_clone_iffeature */
 
 
 /********************************************************************

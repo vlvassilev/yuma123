@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -33,65 +33,28 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
 
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_ses
 #include "agt_ses.h"
-#endif
-
-#ifndef _H_agt_top
 #include "agt_top.h"
-#endif
-
-#ifndef _H_agt_xml
 #include "agt_xml.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_top
+#include "status.h"
 #include "top.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -99,9 +62,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#ifdef DEBUG
-#define AGT_TOP_DEBUG 1
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -180,14 +140,10 @@ void
         return;
     }
 
-#ifdef AGT_TOP_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nagt_top: got node");
-        if (LOGDEBUG4 && scb->state != SES_ST_INIT) {
-            xml_dump_node(&top);
-        }
+    log_debug3("\nagt_top: got node");
+    if (LOGDEBUG4 && scb->state != SES_ST_INIT) {
+        xml_dump_node(&top);
     }
-#endif
 
     /* check node type and if handler exists, then call it */
     if (top.nodetyp==XML_NT_START || top.nodetyp==XML_NT_EMPTY) {

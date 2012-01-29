@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -639,9 +639,6 @@ typedef struct ncx_module_t_ {
     const xmlChar    *sourcefn;      /* ptr to fn in source */
     const xmlChar    *belongsver;    /* back ptr to mod ver */
 
-    dlq_hdr_t        *allimpQ;  /* back-ptr to pcb->allimpQ */
-
-
     xmlns_id_t        nsid;            /* assigned by xmlns */
     uint32            langver;
     boolean           ismod;     /* module/submodule keyword */
@@ -721,10 +718,10 @@ typedef struct ncx_import_t_ {
     ncx_module_t       *mod;                   /* back-ptr */
     boolean             used;
     boolean             usexsd;        /* FALSE if duplicate */
-    boolean             force_yuma_nc;  /* HACK: TRUE is yuma-nc replacing ietf-nc */
+    boolean       force_yuma_nc; /* HACK: TRUE if yuma-nc replacing ietf-nc */
     dlq_hdr_t           appinfoQ;
     ncx_error_t         tkerr;
-    status_t            res;           /* set to NO_ERR if the import was parsed OK */
+    status_t            res;   /* set to NO_ERR if the import was parsed OK */
 } ncx_import_t;
 
 

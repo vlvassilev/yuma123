@@ -4,7 +4,9 @@ AGT_SOURCES = $(YUMA_SRC_ROOT)/agt/agt_acm.c \
               $(YUMA_SRC_ROOT)/agt/agt.c \
               $(YUMA_SRC_ROOT)/agt/agt_cap.c \
               $(YUMA_SRC_ROOT)/agt/agt_cb.c \
+              $(YUMA_SRC_ROOT)/agt/agt_cfg.c \
               $(YUMA_SRC_ROOT)/agt/agt_cli.c \
+              $(YUMA_SRC_ROOT)/agt/agt_commit_complete.c \
               $(YUMA_SRC_ROOT)/agt/agt_connect.c \
               $(YUMA_SRC_ROOT)/agt/agt_hello.c \
               $(YUMA_SRC_ROOT)/agt/agt_if.c \

@@ -149,11 +149,18 @@ void SysTestNCSessionBase::sendHelloResponse()
 
     *out<< capabilities << "\n";
 
-    // verify that the agent is running in the same mode as the tesm
+    // verify that the agent is running in the same mode as the test
     string dbName( TestContext::getTestContext()->writeableDbName_ );
     if  ( string::npos == capabilities.find( dbName ) )
     {
         BOOST_FAIL( "Agent is not in '" << dbName << "' mode!" );
+    }
+
+    // verify that the agent has the startup capability enabled if required
+    bool usingStartup =  TestContext::getTestContext()->usingStartup_;
+    if  ( usingStartup && (string::npos == capabilities.find( "startup" )) )
+    {
+        BOOST_FAIL( "Agent has not enabled the startup capability!" );
     }
 
     const string helloMsg = NCMessageBuilder().buildHelloMessage();

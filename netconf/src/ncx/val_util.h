@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -410,6 +410,36 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION val_gen_instance_id_ex
+* 
+* Malloc and Generate the instance ID string for this value node, 
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   val == node to generate the instance ID for
+*   format == desired output format (NCX or Xpath)
+*   stop_at_root == TRUE to stop if a 'root' node is encountered
+*                == FALSE to keep recursing all the way to 
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_gen_instance_id_ex (xml_msg_hdr_t *mhdr,
+                            const val_value_t  *val, 
+                            ncx_instfmt_t format,
+                            boolean stop_at_root,
+                            xmlChar  **buff);
+
+
+/********************************************************************
 * FUNCTION val_gen_split_instance_id
 * 
 * Malloc and Generate the instance ID string for this value node, 
@@ -422,6 +452,8 @@ extern status_t
 *   format == desired output format (NCX or Xpath)
 *   leaf_pfix == namespace prefix string of the leaf to add
 *   leaf_name ==  name string of the leaf to add
+*   stop_at_root == TRUE to stop if a 'root' node is encountered
+*                == FALSE to keep recursing all the way to 
 *   buff == pointer to address of buffer to use
 *
 * OUTPUTS
@@ -438,6 +470,7 @@ extern status_t
 			       ncx_instfmt_t format,
 			       xmlns_id_t leaf_nsid,
 			       const xmlChar *leaf_name,
+                               boolean stop_at_root,
 			       xmlChar  **buff);
 
 
@@ -505,75 +538,6 @@ extern status_t
                         obj_template_t *obj,
                         boolean *condresult,
                         uint32 *whencount);
-
-
-/********************************************************************
-* FUNCTION val_check_child_conditional
-* 
-* checks if-feature and when-stmt
-* Check if the specified child object node is
-* conditionally TRUE or FALSE, based on any
-* if-feature of when statements attached to the child node
-*
-* INPUTS:
-*   val == parent value node of the object node to check
-*   valroot == database root for XPath purposes
-*   childobj == object template of child to check
-*   condresult == address of conditional test result
-*   
-* OUTPUTS:
-*   *condresult == TRUE if conditional is true or there are none
-*                  FALSE if conditional test failed
-*
-* RETURNS:
-*   status
-*********************************************************************/
-extern status_t
-    val_check_child_conditional (val_value_t *val,
-				 val_value_t *valroot,
-				 obj_template_t *childobj,
-				 boolean *condresult);
-
-
-/********************************************************************
-* FUNCTION val_is_mandatory
-*
-* Figure out if the value node is YANG mandatory or not
-*
-* INPUTS:
-*   val == parent value node of the object node to check
-*   valroot == database root for XPath purposes
-*   childobj == object template of child to check
-*   
-* RETURNS:
-*   TRUE if value is mandatory
-*   FALSE if value is not mandatory
-*********************************************************************/
-extern boolean
-    val_is_mandatory (val_value_t *val,
-		      val_value_t *valroot,
-		      obj_template_t *childobj);
-
-
-/********************************************************************
-* FUNCTION val_get_cond_iqualval
-* 
-* Get the instance qualifier enum for this value node
-* Check all the conditional statements that can make
-* the object required or not
-*
-* INPUTS:
-*   val == parent value node of the object node to check
-*   valroot == database root for XPath purposes
-*   dobj == object template of child to check
-*   
-* RETURNS:
-*   instance qualifier value
-*********************************************************************/
-extern ncx_iqual_t 
-    val_get_cond_iqualval (val_value_t *val,
-			   val_value_t *valroot,
-			   obj_template_t *obj);
 
 
 /********************************************************************

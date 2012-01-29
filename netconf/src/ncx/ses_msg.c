@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -35,39 +35,17 @@ date         init     comment
 #include  <memory.h>
 #include  <unistd.h>
 #include  <errno.h>
+#include  <assert.h>
 #include  <sys/uio.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include  "log.h"
-#endif
-
-#ifndef _H_send_buff
 #include  "send_buff.h"
-#endif
-
-#ifndef _H_ses
 #include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
 #include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include  "tstamp.h"
-#endif
-
-#ifndef _H_val
 #include  "val.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -118,7 +96,7 @@ static void
     size_t  pos;
     xmlChar buf[2];
 
-    if (LOGDEBUG2) {
+    if (LOGDEBUG) {
         buf[1] = 0;
         for (pos = buff->buffpos; pos < buff->bufflen; pos++) {
             buf[0] = buff->buff[pos];
@@ -150,10 +128,10 @@ static status_t
     if (scb->framing11) {
         ses_msg_add_framing(scb, buff);
         /* bufflen has been adjusted for buffstart */
-        if (LOGDEBUG3) {
-            log_debug3("\nses_msg send 1.1 buff:%u\n",
-                       buff->bufflen - buff->buffpos);
-            if (LOGDEBUG4) {
+        if (LOGDEBUG2) {
+            log_debug2("\nses_msg send 1.1 buff:%u\n",
+                      buff->bufflen - buff->buffpos);
+            if (LOGDEBUG3) {
                 trace_buff(buff);
             }
         }
@@ -169,10 +147,10 @@ static status_t
     } else {
         if (buff->bufflen > buff->buffstart) {
             /* send with base:1.0 framing; EOM markers in the buffer */
-            if (LOGDEBUG3) {
-                log_debug3("\nses_msg send 1.0 buff:%u\n",
-                           buff->bufflen - buff->buffpos);
-                if (LOGDEBUG4) {
+            if (LOGDEBUG2) {
+                log_debug("\nses_msg send 1.0 buff:%u\n",
+                          buff->bufflen - buff->buffpos);
+                if (LOGDEBUG3) {
                     trace_buff(buff);
                 }
             }
@@ -264,16 +242,11 @@ void
 * RETURNS:
 *   status
 *********************************************************************/
-status_t
-    ses_msg_new_msg (ses_msg_t **msg)
+status_t ses_msg_new_msg (ses_msg_t **msg)
 {
     ses_msg_t *newmsg;
 
-#ifdef DEBUG
-    if (!msg) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( msg && "msg == NULL" );
 
     /* try the freeQ first */
     newmsg = (ses_msg_t *)dlq_deque(&freeQ);
@@ -306,18 +279,12 @@ status_t
 *   msg == message to free (already removed from any Q)
 *
 *********************************************************************/
-void
-    ses_msg_free_msg (ses_cb_t *scb,
-                      ses_msg_t *msg)
+void ses_msg_free_msg (ses_cb_t *scb, ses_msg_t *msg)
 {
     ses_msg_buff_t *buff;
 
-#ifdef DEBUG
-    if (!scb || !msg) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb == NULL" );
+    assert( msg && "msg == NULL" );
 
     while (!dlq_empty(&msg->buffQ)) {
         buff = dlq_deque(&msg->buffQ);
@@ -354,18 +321,14 @@ void
 * RETURNS:
 *   status
 *********************************************************************/
-status_t
-    ses_msg_new_buff (ses_cb_t *scb, 
-                      boolean outbuff,
-                      ses_msg_buff_t **buff)
+status_t ses_msg_new_buff( ses_cb_t *scb, 
+                           boolean outbuff,
+                           ses_msg_buff_t **buff)
 {
     ses_msg_buff_t *newbuff;
 
-#ifdef DEBUG
-    if (scb == NULL || buff == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( scb && "scb == NULL" );
+    assert( buff && "buff == NULL" );
 
     /* handle the session freeQ separately */
     if (scb->freecnt) {
@@ -444,6 +407,8 @@ void
     ses_msg_free_buff (ses_cb_t *scb,
                        ses_msg_buff_t *buff)
 {
+    assert( scb && "scb == NULL" );
+
     if (scb->state < SES_ST_SHUTDOWN_REQ &&
         scb->freecnt < SES_MAX_FREE_BUFFERS) {
         dlq_enque(buff, &scb->freeQ);
@@ -496,11 +461,8 @@ status_t
 {
     status_t   res;
 
-#ifdef DEBUG
-    if (buff == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( scb && "scb == NULL" );
+    assert( buff && "buff == NULL" );
 
     res = NO_ERR;
     if (scb->framing11) {
@@ -544,11 +506,7 @@ status_t
     status_t         res;
     struct iovec     iovs[SES_MAX_BUFFSEND];
 
-#ifdef DEBUG
-    if (!scb) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( scb && "scb == NULL" );
 
     if (LOGDEBUG) {
         log_debug("\nses got send request on session %d", 
@@ -695,17 +653,12 @@ status_t
 * RETURNS:
 *   status, could return malloc or buffers exceeded error
 *********************************************************************/
-status_t
-    ses_msg_new_output_buff (ses_cb_t *scb)
+status_t ses_msg_new_output_buff (ses_cb_t *scb)
 {
     ses_msg_buff_t *buff;
     status_t        res;
 
-#ifdef DEBUG
-    if (!scb || !scb->outbuff) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( scb && "scb == NULL" );
 
     buff = scb->outbuff;
     buff->buffpos = 0;
@@ -751,16 +704,9 @@ status_t
 * OUTPUTS:
 *   scb->inready will be queued on the inreadyQ
 *********************************************************************/
-void
-    ses_msg_make_inready (ses_cb_t *scb)
+void ses_msg_make_inready (ses_cb_t *scb)
 {
-
-#ifdef DEBUG
-    if (!scb) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     if (!scb->inready.inq) {
         dlq_enque(&scb->inready, &inreadyQ);
@@ -781,16 +727,9 @@ void
 * OUTPUTS:
 *   scb->outready will be queued on the outreadyQ
 *********************************************************************/
-void
-    ses_msg_make_outready (ses_cb_t *scb)
+void ses_msg_make_outready (ses_cb_t *scb)
 {
-
-#ifdef DEBUG
-    if (!scb) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     if (!scb->outready.inq) {
         dlq_enque(&scb->outready, &outreadyQ);
@@ -812,17 +751,12 @@ void
 * OUTPUTS:
 *   scb->outready will be queued on the outreadyQ
 *********************************************************************/
-void
-    ses_msg_finish_outmsg (ses_cb_t *scb)
+void ses_msg_finish_outmsg (ses_cb_t *scb)
 {
     status_t   res;
 
-#ifdef DEBUG
-    if (scb == NULL || scb->outbuff == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( scb->outbuff && "scb->outbuff is NULL" );
 
     if (scb->stream_output) {
         res = do_send_buff(scb, scb->outbuff);
@@ -898,20 +832,13 @@ ses_ready_t *
 *   text == start text before message dump (may be NULL)
 *
 *********************************************************************/
-void
-    ses_msg_dump (const ses_msg_t *msg,
-                  const xmlChar *text)
+void ses_msg_dump (const ses_msg_t *msg, const xmlChar *text)
 {
     const ses_msg_buff_t *buff;
     boolean anytext;
     uint32  i;
 
-#ifdef DEBUG
-    if (!msg) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( msg && "msg is NULL" );
 
     if (text) {
         log_write("\n%s\n", text);
@@ -950,28 +877,19 @@ void
 *   framing chars added to buff->buff
 *
 *********************************************************************/
-void
-    ses_msg_add_framing (ses_cb_t *scb,
-                         ses_msg_buff_t *buff)
+void ses_msg_add_framing( ses_cb_t *scb, ses_msg_buff_t *buff )
 {
-    size_t     buffsize;
-    int32      numlen;
-    char       *p, numbuff[SES_MAX_CHUNKNUM_SIZE];
-
-#ifdef DEBUG
-    if (scb == NULL || buff == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb == NULL" );
+    assert( buff && "buff == NULL" );
 
     if (!scb->framing11) {
         return;
     }
 
     /* get the chunk size */
-    buffsize = buff->bufflen - SES_STARTCHUNK_PAD;
-    numlen = sprintf(numbuff, "%zu", buffsize);
+    char numbuff[SES_MAX_CHUNKNUM_SIZE];
+    size_t buffsize = buff->bufflen - SES_STARTCHUNK_PAD;
+    int32 numlen = snprintf(numbuff, sizeof(numbuff), "%zu", buffsize);
 
     /* figure out where to put the start chunks within
      * the beginning pad area; total size is numlen+3
@@ -979,7 +897,7 @@ void
      */
     buff->buffstart = SES_STARTCHUNK_PAD - (numlen + 3);
 
-    p = (char *)&buff->buff[buff->buffstart];
+    char *p = (char *)&buff->buff[buff->buffstart];
 
     *p++ = '\n';
     *p++ = '#';

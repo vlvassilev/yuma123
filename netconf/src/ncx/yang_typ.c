@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -67,81 +67,29 @@ date         init     comment
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <assert.h>
 #include <ctype.h>
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
+#include "procdefs.h"
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
-#include  "dlq.h"
-#endif
-
-#ifndef _H_log
+#include "dlq.h"
 #include "log.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_appinfo
 #include "ncx_appinfo.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_typ
-#include  "typ.h"
-#endif
-
-#ifndef _H_xml_util
+#include "status.h"
+#include "typ.h"
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yang
 #include "yang.h"
-#endif
-
-#ifndef _H_yang_typ
 #include "yang_typ.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -158,13 +106,12 @@ date         init     comment
 static status_t 
     resolve_type (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-                  ncx_module_t  *mod,
+                  ncx_module_t *mod,
                   typ_def_t *typdef,
                   const xmlChar *name,
                   const xmlChar *defval,
                   obj_template_t *obj,
-                  grp_template_t *grp,
-                  boolean fromdef);
+                  grp_template_t *grp);
 
 
 /********************************************************************
@@ -751,7 +698,8 @@ static status_t
     while (!done) {
         /* get one range spec */
         res = consume_yang_rangedef(tkc, mod, typdef, rbtyp);
-        if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) || ERR_NCX_EOF == res ) { 
+        if ( ( NO_ERR != res && res < ERR_LAST_SYS_ERR ) 
+             || ERR_NCX_EOF == res ) { 
 	        return res; 
 	    } 
 
@@ -1967,10 +1915,7 @@ static status_t
     /* check all the mandatory clauses are present */
     if (!enumdone) {
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "enumeration", 
-                            "enum");
+        ncx_mod_missing_err(tkc, mod, "enumeration", "enum");
     }
 
     return retres;
@@ -2096,10 +2041,7 @@ static status_t
     /* check all the mandatory clauses are present */
     if (!typedone) {
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "union", 
-                            "type");
+        ncx_mod_missing_err(tkc, mod, "union", "type");
     }
 
     return retres;
@@ -2210,8 +2152,7 @@ static status_t
                      * data type is needed to set the starting
                      * context node
                      */
-                    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc), 
-                                                  NULL);
+                    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc), NULL);
                     if (!sim->xleafref) {
                         res = ERR_INTERNAL_MEM;
                         ncx_print_errormsg(tkc, mod, res);
@@ -2997,6 +2938,7 @@ static status_t
 } /* validate_range_chain */
 
 
+#if 0
 /********************************************************************
 * FUNCTION check_defval
 * 
@@ -3100,6 +3042,71 @@ static status_t
     return res;
 
 } /* check_defval */
+#endif
+
+
+
+/********************************************************************
+* FUNCTION check_defval
+* 
+* Check the defval agtainst the typdef
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   typdef == typdef to check
+*   obj == obj_template_t containing the union (may be NULL)
+*   btyp == base type for the typdef
+*   badvalok == TRUE if invalid value is OK (called from union)
+*               FALSE if must be OK (called from plain simple type)
+*   defval == default value, if any
+*   name == typ_template_t name, if any
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t 
+    check_defval (tk_chain_t *tkc,
+                  ncx_module_t *mod,
+                  typ_def_t *typdef,
+                  obj_template_t *obj,
+                  ncx_btype_t  btyp,
+                  boolean badvalok,
+                  const xmlChar *defval,
+                  const xmlChar *name)
+{
+    status_t     res = ERR_NCX_SKIPPED;
+
+    if (defval != NULL) {
+        if (btyp == NCX_BT_IDREF) {
+            res = val_parse_idref(mod, defval, NULL, NULL, NULL);
+        } else {
+            res = val_simval_ok(typdef, defval);
+        }
+        if (res != NO_ERR) {
+            if (!badvalok) {
+                if (obj) {
+                    log_error("\nError: %s '%s' has invalid "
+                              "default value (%s)",
+                              (name) ? "Type" : 
+                              (const char *)obj_get_typestr(obj),
+                              (name) ? name : obj_get_name(obj), 
+                              defval);
+                } else {
+                    log_error("\nError: %s '%s' has invalid "
+                              "default value (%s)",
+                              (name) ? "Type" : "leaf or leaf-list",
+                              (name) ? (const char *)name : "--", 
+                              defval);
+                }
+                tkc->curerr = &typdef->tkerr;
+                ncx_print_errormsg(tkc, mod, res);
+            }
+        }
+    }
+    return res;
+
+} /* check_defval */
 
 
 /********************************************************************
@@ -3115,8 +3122,6 @@ static status_t
 *   unionQ == Q of unfinished typ_unionnode_t structs
 *   parent == obj_template_t containing the union (may be NULL)
 *   grp == grp_template_t containing the union (may be NULL)
-*   fromdef == TRUE if this is a call for a typedef
-*           == FALSE if this is a call for a leaf or leaf-list
 *   defval == default value, if any
 *   name == typ_template_t name, if any
 *
@@ -3130,33 +3135,21 @@ static status_t
                         dlq_hdr_t  *unionQ,
                         obj_template_t *parent,
                         grp_template_t *grp,
-                        boolean fromdef,
                         const xmlChar *defval,
                         const xmlChar *name)
 {
-    typ_unionnode_t *un;
-    status_t         res, retres;
-    ncx_btype_t      btyp;
-    boolean          defvaldone, hasdefval;
-
-    defvaldone = FALSE;
-    res = NO_ERR;
-    retres = NO_ERR;
+    typ_unionnode_t *un = NULL;
+    status_t         res = NO_ERR, retres = NO_ERR;
+    ncx_btype_t      btyp = NCX_BT_NONE;
+    boolean          defvaldone = FALSE;
 
     /* first resolve all the local type names */
     for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
-         un != NULL;
+         un != NULL && retres == NO_ERR;
          un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 
-        res = resolve_type(pcb,
-                           tkc, 
-                           mod, 
-                           un->typdef,
-                           NULL, 
-                           NULL, 
-                           parent, 
-                           grp, 
-                           fromdef);
+        res = resolve_type(pcb, tkc,  mod, un->typdef, NULL, 
+                           NULL, parent, grp);
         CHK_EXIT(res, retres);
 
         btyp = typ_get_basetype(un->typdef);
@@ -3173,32 +3166,20 @@ static status_t
 
         /* check default value if any defined */
         if ((retres == NO_ERR) && 
-            !defvaldone && 
+            !defvaldone && defval &&
             (btyp != NCX_BT_NONE) &&
             typ_ok(un->typdef)) {
 
-            hasdefval = FALSE;
-            res = check_defval(tkc, 
-                               mod, 
-                               un->typdef, 
-                               parent, 
-                               btyp, 
-                               TRUE, 
-                               defval,
-                               &hasdefval,
-                               name);
-            if (hasdefval) {
-                if (res == NO_ERR) {
-                    defvaldone = TRUE;
-                } else {
-                    retres = res;
-                }
+            res = check_defval(tkc, mod, un->typdef, parent, btyp, 
+                               TRUE, defval, name);
+            if (res == NO_ERR) {
+                defvaldone = TRUE;
             }
         }
 
         if (un->typdef->tclass == NCX_CL_NAMED) {
             un->typ = un->typdef->def.named.typ;
-            /* keep the typdef around for ncxdump */
+            /* keep the typdef around for yangdump */
         }
     }
 
@@ -3206,7 +3187,7 @@ static status_t
      * otherwise the resolve_type pass for member types in 
      * the union will print a typdef defualt error
      */
-    if (defval != NULL && !defvaldone) {
+    if (retres == NO_ERR && defval != NULL && !defvaldone) {
         retres = ERR_NCX_INVALID_VALUE;
         if (parent != NULL) {
             log_error("\nError: Union %s '%s' has invalid "
@@ -3221,7 +3202,11 @@ static status_t
                       (name) ? (const char *)name : "--", 
                       defval);
         }
-        tkc->curerr = &un->typdef->tkerr;
+        if (parent) {
+            tkc->curerr = &parent->tkerr;
+        } else if (grp) {
+            tkc->curerr = &grp->tkerr;
+        }
         ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -3255,15 +3240,13 @@ static status_t
                               const xmlChar *name)
 {
     typ_unionnode_t *un;
-    status_t         res, retres;
+    status_t         res = NO_ERR;
     ncx_btype_t      btyp = NCX_BT_NONE;
-    boolean          needtest, defvaldone, hasdefval;
+    boolean          needtest = FALSE, defvaldone = FALSE;
 
-    if (defval == NULL) {
+    if (!defval) {
         return NO_ERR;
     }
-
-    needtest = FALSE;
 
     /* check if this extra test is needed */
     for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
@@ -3273,10 +3256,9 @@ static status_t
         if (!typ_ok(un->typdef)) {
             return NO_ERR;
         }
-        btyp = typ_get_basetype(un->typdef);
 
-        if (btyp == NCX_BT_LEAFREF ||
-            btyp == NCX_BT_UNION ||
+        btyp = typ_get_basetype(un->typdef);
+        if (btyp == NCX_BT_LEAFREF || btyp == NCX_BT_UNION ||
             typ_is_xpath_string(un->typdef)) {
             needtest = TRUE;
         }
@@ -3286,43 +3268,28 @@ static status_t
         return NO_ERR;
     }
 
-    defvaldone = FALSE;
-    retres = NO_ERR;
-
     /* run the extra test */
     for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
-         un != NULL && !needtest;
+         un != NULL;
          un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 
         /* check default value if any defined */
-        if (!defvaldone && (btyp != NCX_BT_NONE)) {
-            hasdefval = FALSE;
-            res = check_defval(tkc, 
-                               mod, 
-                               un->typdef, 
-                               parent, 
-                               btyp, 
-                               TRUE, 
-                               defval,
-                               &hasdefval,
-                               name);
-            if (hasdefval) {
-                if (res == NO_ERR) {
-                    defvaldone = TRUE;
-                } else {
-                    retres = res;
-                }
+        if (defval && !defvaldone && (btyp != NCX_BT_NONE)) {
+            res = check_defval(tkc, mod, un->typdef, parent, btyp, TRUE, 
+                               defval, name);
+            if (res == NO_ERR) {
+                defvaldone = TRUE;
             }
         }
     }
 
     /* only report error if defval passed caused the error
      * otherwise the resolve_type pass for member types in 
-     * the union will print a typdef defualt error
+     * the union will print a typdef default error
      */
-    if (defval != NULL && !defvaldone) {
-        retres = ERR_NCX_INVALID_VALUE;
-        if (parent != NULL) {
+    if (defval && !defvaldone) {
+        res = ERR_NCX_INVALID_VALUE;
+        if (parent) {
             log_error("\nError: Union %s '%s' has invalid "
                       "default value (%s)",
                       (name) ? "type" : 
@@ -3335,13 +3302,18 @@ static status_t
                       (name) ? (const char *)name : "--", 
                       defval);
         }
-        tkc->curerr = &un->typdef->tkerr;
-        ncx_print_errormsg(tkc, mod, retres);
+        if (tkc) {
+            if (parent) {
+                tkc->curerr = &parent->tkerr;
+            }
+            ncx_print_errormsg(tkc, mod, res);
+        }
     }
 
-    return retres;
+    return res;
 
 }   /* resolve_union_type_final */
+
 
 
 /*******************************************************************
@@ -3373,8 +3345,6 @@ static status_t
 *   defval == default value string to check (may be NULL)
 *   obj == obj_template containing this typdef, NULL if top-level
 *   grp == grp_template containing this typdef, otherwise NULL
-*   fromdef == TRUE if this is a call for a typedef
-*           == FALSE if this is a call for a leaf or leaf-list
 * RETURNS:
 *   status of the operation
 *********************************************************************/
@@ -3386,8 +3356,7 @@ static status_t
                   const xmlChar *name,
                   const xmlChar *defval,
                   obj_template_t *obj,
-                  grp_template_t *grp,
-                  boolean fromdef)
+                  grp_template_t *grp)
 {
     typ_def_t        *testdef;
     typ_template_t   *errtyp;
@@ -3395,19 +3364,15 @@ static status_t
     typ_enum_t       *enu;
     typ_idref_t      *idref;
     ncx_identity_t   *testidentity;
-    const xmlChar    *errname;
-    status_t         res, retres;
-    boolean          errdone;
+    const xmlChar    *errname = NULL;
+    status_t         res = NO_ERR, retres = NO_ERR;
+    boolean          errdone = FALSE;
     ncx_btype_t      btyp;
 
     if (typdef->tclass == NCX_CL_BASE) {
         return NO_ERR;
     }
 
-    res = NO_ERR;
-    retres = NO_ERR;
-    errdone = FALSE;
-    errname = NULL;
     btyp = typ_get_basetype(typdef);
 
 #ifdef YANG_TYP_DEBUG
@@ -3421,10 +3386,7 @@ static status_t
 #endif
 
     /* check the appinfoQ */
-    res = ncx_resolve_appinfoQ(pcb,
-                               tkc, 
-                               mod, 
-                               &typdef->appinfoQ);
+    res = ncx_resolve_appinfoQ(pcb, tkc, mod, &typdef->appinfoQ);
     if (NEED_EXIT(res)) {
         return res;
     } else {
@@ -3433,12 +3395,7 @@ static status_t
 
     /* first resolve all the local type names */
     if (res == NO_ERR && btyp != NCX_BT_UNION) {
-        res = obj_set_named_type(tkc, 
-                                 mod, 
-                                 name, 
-                                 typdef, 
-                                 obj, 
-                                 grp);
+        res = obj_set_named_type(tkc, mod, name, typdef, obj, grp);
     }
 
     /* type name loop check */
@@ -3471,11 +3428,8 @@ static status_t
      * Errors printed in the called fn
      */
     if (btyp != NCX_BT_UNION) {
-        res = finish_yang_range(tkc, 
-                                mod, 
-                                typdef,
-                                typ_get_range_type
-                                (typ_get_basetype(typdef)));
+        res = finish_yang_range(tkc, mod, typdef,
+                                typ_get_range_type(typ_get_basetype(typdef)));
     }
 
     /* validate that the ranges are valid now that min/max is set 
@@ -3507,17 +3461,10 @@ static status_t
                            typdef->typenamestr : NCX_EL_NONE);
             }
         } else {
-            boolean hasdefval = FALSE;
-
-            res = check_defval(tkc, 
-                               mod, 
-                               typdef, 
-                               obj, 
-                               btyp, 
-                               FALSE, 
-                               defval,
-                               &hasdefval,
-                               name);
+            if (defval) {
+                res = check_defval(tkc, mod, typdef, obj, btyp, FALSE, 
+                                   defval, name);
+            }
         }
     }
 
@@ -3533,10 +3480,7 @@ static status_t
                      enu != NO_ERR;
                      enu = (typ_enum_t *)dlq_nextEntry(enu)) {
 
-                    res = ncx_resolve_appinfoQ(pcb,
-                                               tkc, 
-                                               mod, 
-                                               &enu->appinfoQ);
+                    res = ncx_resolve_appinfoQ(pcb, tkc, mod, &enu->appinfoQ);
                     CHK_EXIT(res, retres);
                 }
                 res = NO_ERR;
@@ -3550,16 +3494,14 @@ static status_t
                     xml_strcmp(idref->baseprefix, mod->prefix)) {
 
                     /* find the identity in another module */
-                    res = yang_find_imp_identity(pcb,
-                                                 tkc, 
-                                                 mod, 
+                    res = yang_find_imp_identity(pcb, tkc, mod, 
                                                  idref->baseprefix,
                                                  idref->basename, 
                                                  &typdef->tkerr,
                                                  &testidentity);
                 } else {
-                    testidentity = ncx_find_identity
-                        (mod, idref->basename, FALSE);
+                    testidentity = ncx_find_identity(mod, idref->basename, 
+                                                     FALSE);
                     if (!testidentity) {
                         res = ERR_NCX_DEF_NOT_FOUND;
                     } else {
@@ -3589,16 +3531,8 @@ static status_t
         typdef->tclass == NCX_CL_SIMPLE &&  
         btyp == NCX_BT_UNION) {
         testdef = typ_get_base_typdef(typdef);
-
-        res = resolve_union_type(pcb,
-                                 tkc, 
-                                 mod,
-                                 &testdef->def.simple.unionQ,
-                                 obj, 
-                                 grp, 
-                                 fromdef,
-                                 defval,
-                                 name);
+        res = resolve_union_type(pcb, tkc, mod, &testdef->def.simple.unionQ,
+                                 obj, grp, defval, name);
     }
 
     /*  check shadow typedef name error, even if other errors so far */
@@ -3622,8 +3556,7 @@ static status_t
         }
 
         /* check local typedef shadowed further up the chain */
-        if (!errtyp && obj && obj->parent && 
-            !obj_is_root(obj->parent)) {
+        if (!errtyp && obj && obj->parent && !obj_is_root(obj->parent)) {
             errtyp = obj_find_type(obj->parent, name);
         }
 
@@ -3650,7 +3583,6 @@ static status_t
 
 }  /* resolve_type */
 
-
 /*******************************************************************
 * FUNCTION resolve_type_final
 * 
@@ -3676,112 +3608,65 @@ static status_t
     const xmlChar *typname;
     xpath_pcb_t   *pcb;
     obj_template_t *leafobj;
-    status_t       res;
+    status_t       res = NO_ERR;
     ncx_btype_t    btyp;
-    boolean        hasdefval;
     
-
-    if (defval == NULL) {
-        return NO_ERR;
-    }
-
-    if (!typ_ok(typdef)) {
+    if (!defval || !typ_ok(typdef) || typdef->tclass == NCX_CL_BASE ) {
         /* skip this test if typdef malformed */
-        return NO_ERR;
-    }
-    if (typdef->tclass == NCX_CL_BASE) {
-        return NO_ERR;
-    }
-    if (defval == NULL && obj != NULL) {
-        return NO_ERR;
+        return res;
     }
 
     btyp = typ_get_basetype(typdef);
-    switch (btyp) {
-    case NCX_BT_LEAFREF:
-    case NCX_BT_UNION:
-        break;
-    default:
-        if (!typ_is_xpath_string(typdef)) {
-            return NO_ERR;
-        }
-    }
 
-    res = NO_ERR;
+    if ((btyp != NCX_BT_LEAFREF) && (btyp != NCX_BT_UNION) && 
+        !typ_is_xpath_string(typdef) ) {
+        return res;
+    }
 
     typname = (typdef->typenamestr) ? typdef->typenamestr : NCX_EL_NONE;
 
-#ifdef YANG_TYP_DEBUG
-    if (LOGDEBUG4) {
-        log_debug4("\nyang_typ: resolve type final '%s'", typname);
-    }
-#endif
+    log_debug4("\nyang_typ: resolve type final '%s'", typname);
 
     /* check default value if any defined */
-    switch (btyp) {
-    case NCX_BT_LEAFREF:
-    case NCX_BT_INSTANCE_ID:
+    if (btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID) {
         pcb = typ_get_leafref_pcb(typdef);
-        if (tkc != NULL) {
+        if (tkc) {
             tkc->curerr = &pcb->tkerr;
         }
 
         leafobj = NULL;
-        if (obj == NULL) {
+        if (!obj) {
             obj = ncx_get_gen_root();
         }
         
-        res = xpath_yang_validate_path(mod, 
-                                       obj, 
-                                       pcb, 
-                                       FALSE,
-                                       &leafobj);
+        res = xpath_yang_validate_path(mod, obj, pcb, FALSE, &leafobj);
         if (res == NO_ERR && leafobj != NULL) {
-            typ_set_xref_typdef(typdef, 
-                                obj_get_typdef(leafobj));
+            typ_set_xref_typdef(typdef, obj_get_typdef(leafobj));
             if (obj->objtype == OBJ_TYP_LEAF) {
                 obj->def.leaf->leafrefobj = leafobj;
             } else {
                 obj->def.leaflist->leafrefobj = leafobj;
             }
         }
-        break;
-    default:
-        ;
-        
     }
 
     if (res != NO_ERR) {
         return res;
     }
     
-    switch (btyp) {
-    case NCX_BT_UNION:
-        hasdefval = FALSE;
-
-        res = check_defval(tkc, 
-                           mod, 
-                           typdef, 
-                           obj, 
-                           btyp, 
-                           FALSE, 
-                           defval,
-                           &hasdefval,
-                           typname);
-        break;
-    default:
-        if (typdef->tclass == NCX_CL_SIMPLE) {
-            /* special check for union typdefs, errors printed by called fn */
-            res = resolve_union_type_final(tkc, 
-                                           mod,
-                                           &typdef->def.simple.unionQ,
-                                           obj, 
-                                           defval,
-                                           (obj) ? obj_get_name(obj) : NULL);
+    if (btyp == NCX_BT_UNION) {
+        if (defval) {
+            res = check_defval(tkc, mod, typdef, obj, btyp, FALSE, defval, 
+                               typname);
         }
+    } else if (typdef->tclass == NCX_CL_SIMPLE) {
+        /* special check for union typdefs, errors printed by called fn */
+        res = resolve_union_type_final(tkc, mod, &typdef->def.simple.unionQ,
+                                       obj, defval,
+                                       (obj) ? obj_get_name(obj) : NULL);
+        
     }
     
-
     return res;
 
 }  /* resolve_type_final */
@@ -3814,26 +3699,14 @@ static status_t
                      obj_template_t *obj,
                      grp_template_t *grp)
 {
-    status_t   res, retres;
-
-    retres = NO_ERR;
+    status_t   res, retres = NO_ERR;
 
     /* check the appinfoQ */
-    typ->res = res = ncx_resolve_appinfoQ(pcb,
-                                          tkc, 
-                                          mod, 
-                                          &typ->appinfoQ);
+    typ->res = res = ncx_resolve_appinfoQ(pcb, tkc, mod, &typ->appinfoQ);
     CHK_EXIT(res, retres);
 
-    typ->res = res = resolve_type(pcb,
-                                  tkc, 
-                                  mod, 
-                                  &typ->typdef, 
-                                  typ->name,
-                                  typ->defval, 
-                                  obj, 
-                                  grp, 
-                                  TRUE);
+    typ->res = res = resolve_type(pcb, tkc, mod, &typ->typdef, typ->name,
+                                  typ->defval, obj, grp);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -3870,11 +3743,7 @@ static status_t
     if (typ->res != NO_ERR) {
         return NO_ERR;
     }
-
-    typ->res = res = resolve_type_final(tkc, 
-                                        mod, 
-                                        NULL,
-                                        &typ->typdef, 
+    typ->res = res = resolve_type_final(tkc, mod, NULL,  &typ->typdef, 
                                         typ->defval);
     return res;
 
@@ -3923,10 +3792,7 @@ static status_t
     retres = NO_ERR;
     btyp = NCX_BT_NONE;
 
-    ncx_set_error(&intypdef->tkerr,
-                  mod,
-                  TK_CUR_LNUM(tkc),
-                  TK_CUR_LPOS(tkc));
+    ncx_set_error(&intypdef->tkerr, mod, TK_CUR_LNUM(tkc), TK_CUR_LPOS(tkc));
 
     /* Get the mandatory base type */
     res = yang_consume_pid_string(tkc, 
@@ -4148,9 +4014,7 @@ static status_t
     if (extonly) {
         /* give back left brace and get the appinfo */
         TK_BKUP(tkc);  
-        res = yang_consume_semiapp(tkc, 
-                                   mod,
-                                   &typdef->appinfoQ);
+        res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
         CHK_EXIT(res, retres);
     }
 
@@ -4221,24 +4085,17 @@ status_t
 * RETURNS:
 *   status of the operation
 *********************************************************************/
-status_t 
-    yang_typ_consume_metadata_type (yang_pcb_t *pcb,
-                                    tk_chain_t *tkc,
-                                    ncx_module_t  *mod,
-                                    typ_def_t *intypdef)
+status_t yang_typ_consume_metadata_type( yang_pcb_t *pcb,
+                                         tk_chain_t *tkc,
+                                         ncx_module_t  *mod,
+                                         typ_def_t *intypdef )
 {
-#ifdef DEBUG
-    if (!pcb || !tkc || !mod || !intypdef) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( pcb && "pcb is NULL" );
+    assert ( tkc && "tkc is NULL" );
+    assert ( mod && "mod is NULL" );
+    assert ( intypdef && "intypdef is NULL" );
 
-    return consume_type(pcb,
-                        tkc, 
-                        mod, 
-                        intypdef, 
-                        TRUE);
-
+    return consume_type(pcb, tkc, mod, intypdef, TRUE);
 }  /* yang_typ_consume_metadata_type */
 
 
@@ -4299,10 +4156,7 @@ status_t
         ncx_print_errormsg(tkc, mod, res);
         return res;
     } else {
-        ncx_set_error(&typ->tkerr,
-                      mod,
-                      TK_CUR_LNUM(tkc),
-                      TK_CUR_LPOS(tkc));
+        ncx_set_error(&typ->tkerr, mod, TK_CUR_LNUM(tkc), TK_CUR_LPOS(tkc));
     }
 
     /* Get the mandatory type name */
@@ -4704,12 +4558,7 @@ status_t
          typ != NULL;
          typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-        res = resolve_typedef(pcb,
-                              tkc, 
-                              mod, 
-                              typ, 
-                              parent, 
-                              grp);
+        res = resolve_typedef(pcb, tkc, mod, typ, parent, grp);
         CHK_EXIT(res, retres);
     }
 
@@ -4766,15 +4615,7 @@ status_t
     }
 #endif
 
-    res = resolve_type(pcb,
-                       tkc, 
-                       mod, 
-                       typdef, 
-                       NULL, 
-                       defval, 
-                       obj, 
-                       NULL, 
-                       FALSE);
+    res = resolve_type(pcb, tkc, mod, typdef, NULL, defval, obj, NULL);
     return res;
 
 }  /* yang_typ_resolve_type */
@@ -4783,17 +4624,16 @@ status_t
 /********************************************************************
 * FUNCTION yang_typ_resolve_type_final
 * 
-* Check default values for XPath types
+* Check deferred XPath resolution tests
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
-*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typdef == typdef struct from leaf or leaf-list to check
-*   defval == default value string for this leaf (may be NULL)
+*   defval == default value string for this typedef or leaf
 *   obj == obj_template containing this typdef
 *       == NULL if this is a top-level union typedef,
 *          checking its nested unnamed type clauses
@@ -4802,7 +4642,7 @@ status_t
 *********************************************************************/
 status_t 
     yang_typ_resolve_type_final (tk_chain_t *tkc,
-                                 ncx_module_t  *mod,
+                                 ncx_module_t *mod,
                                  typ_def_t *typdef,
                                  const xmlChar *defval,
                                  obj_template_t *obj)
@@ -4861,6 +4701,5 @@ status_t
     return res;
     
 } /* yang_typ_rangenum_ok */
-
 
 /* END file yang_typ.c */

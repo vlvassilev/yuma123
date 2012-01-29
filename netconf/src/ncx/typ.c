@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,49 +32,17 @@ date         init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_appinfo
 #include "ncx_appinfo.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -510,23 +478,15 @@ void
 
 
 /********************************************************************
-* FUNCTION typ_free_typdef
-* 
-* Scrub the memory in a typ_def_t by freeing all
-* Then free the typdef itself
-*
-* INPUTS:
-*    typdef == typ_def_t to delete
-*********************************************************************/
-void 
-    typ_free_typdef (typ_def_t *typdef)
+ * Scrub the memory in a typ_def_t by freeing all Then free the typdef itself
+ *
+ * \param typdef typ_def_t to delete
+ *********************************************************************/
+void typ_free_typdef (typ_def_t *typdef)
 {
-#ifdef DEBUG
     if (!typdef) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
     typ_clean_typdef(typdef);
     m__free(typdef);
@@ -1464,7 +1424,8 @@ const typ_rangedef_t *
     case NCX_CL_NAMED:
         if (typdef->def.named.newtyp) {
             return (const typ_rangedef_t *)
-                dlq_firstEntry(&typdef->def.named.newtyp->def.simple.range.rangeQ);
+                dlq_firstEntry(
+                        &typdef->def.named.newtyp->def.simple.range.rangeQ);
         } else {
             return NULL;
         }
@@ -4351,31 +4312,21 @@ ncx_errinfo_t *
 
 
 /********************************************************************
-* FUNCTION typ_clean_typeQ
-* 
-* Clean a queue of typ_template_t structs
-*
-* INPUTS:
-*     que == Q of typ_template_t to clean
-*
-*********************************************************************/
-void
-    typ_clean_typeQ (dlq_hdr_t *que)
+ * Clean a queue of typ_template_t structs
+ *
+ * \param que Q of typ_template_t to clean
+ *
+ *********************************************************************/
+void typ_clean_typeQ (dlq_hdr_t *que)
 {
-    typ_template_t *typ;
-
-#ifdef DEBUG
-    if (!que) {
-        SET_ERROR(ERR_INTERNAL_PTR);
+    if ( !que ) {
         return;
     }
-#endif
 
     while (!dlq_empty(que)) {
-        typ = (typ_template_t *)dlq_deque(que);
+        typ_template_t *typ = (typ_template_t *)dlq_deque(que);
         typ_free_template(typ);
     }
-
 }  /* typ_clean_typeQ */
 
 
@@ -4438,11 +4389,9 @@ boolean
 * RETURNS:
 *     TRUE if okay, FALSE if not
 *********************************************************************/
-boolean
-    typ_ok_for_metadata (ncx_btype_t btyp)
+boolean typ_ok_for_metadata (ncx_btype_t btyp)
 {
     return typ_ok_for_inline_index(btyp);
-
 }  /* typ_ok_for_metadata */
 
 

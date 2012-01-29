@@ -31,7 +31,7 @@ public:
         }
 
         /** Comparison of CallbackInfo */
-        bool operator==(const CallbackInfo& cbInfo);
+        bool operator==(const CallbackInfo& cbInfo) const;
 
         std::string cbName;
         std::string cbType;

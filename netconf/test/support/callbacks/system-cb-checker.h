@@ -23,6 +23,27 @@ class SystemCBChecker : public CallbackChecker
 {
 public:
     /**
+     * Add expected callbacks for adding main container.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     */
+    virtual void addMainContainer(const std::string& modName, 
+                                  const std::string& containerName);
+
+    /**
+     * Add expected callbacks for adding an element to a container.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param element a vector representing the hierarchy of elements 
+     * leading to the element to be added.
+     */
+    virtual void addElement(const std::string& modName, 
+                            const std::string& containerName,
+                            const std::vector<std::string>& element);
+
+    /**
      * Add expected callbacks for adding a key value pair to a list.
      *
      * \param modName the name of the module from which the callbacks are expected.
@@ -35,6 +56,21 @@ public:
                         const std::string& containerName,
                         const std::vector<std::string>& listElement,
                         const std::string& key);
+
+    /**
+     * Add expected callbacks for adding a choice.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param choiceElement a vector representing the hierarchy of elements 
+     * leading to the choice.
+     * \param removeElement a vector representing the hierarchy of elements 
+     * leading to the previous choice which should be removed.
+     */
+    virtual void addChoice(const std::string& modName, 
+                           const std::string& containerName,
+                           const std::vector<std::string>& choiceElement,
+                           const std::vector<std::string>& removeElement);
 
     /**
      * Add expected callbacks for adding a key value pair to a list.
@@ -130,6 +166,46 @@ public:
                                     const std::vector<std::string>& listElement,
                                     const std::string& key,
                                     const std::string& value);
+
+    /**
+     * Add expected callbacks for adding a resource node.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param elements a vector representing the hierarchy of elements 
+     * leading to the resource node.
+     * \param statusConfig true if the statusConfig leaf is added 
+     * \param alarmConfig true if the alarmConfig leaf is added 
+     */
+    virtual void addResourceNode(const std::string& modName, 
+                                 const std::string& containerName,
+                                 const std::vector<std::string>& elements,
+                                 bool statusConfig,
+                                 bool alarmConfig);
+
+    /**
+     * Add expected callbacks for adding a resource connection.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param elements a vector representing the hierarchy of elements 
+     * leading to the resource connection.
+     */
+    virtual void addResourceCon(const std::string& modName, 
+                                const std::string& containerName,
+                                const std::vector<std::string>& elements);
+
+    /**
+     * Add expected callbacks for adding a stream connection.
+     *
+     * \param modName the name of the module from which the callbacks are expected.
+     * \param containerName the name of the top level container.
+     * \param elements a vector representing the hierarchy of elements 
+     * leading to the stream connection.
+     */
+    virtual void addStreamCon(const std::string& modName, 
+                              const std::string& containerName,
+                              const std::vector<std::string>& elements);
 
     /**
      * Check that the expected callbacks match those logged for a given module.

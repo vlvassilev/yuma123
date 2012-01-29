@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -181,37 +181,22 @@ plock_cb_t *
 *   plcb == partial lock control block to free
 *
 *********************************************************************/
-void
-    plock_cb_free (plock_cb_t *plcb)
+void plock_cb_free (plock_cb_t *plcb)
 {
-    xpath_pcb_t  *xpathpcb;
-    xpath_result_t *result;
-
-#ifdef DEBUG
-    if (plcb == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
+    if ( !plcb ) {
         return;
     }
-#endif
 
     while (!dlq_empty(&plcb->plock_xpathpcbQ)) {
-        xpathpcb = (xpath_pcb_t *)
-            dlq_deque(&plcb->plock_xpathpcbQ);
-        xpath_free_pcb(xpathpcb);
+        xpath_free_pcb( (xpath_pcb_t *) dlq_deque(&plcb->plock_xpathpcbQ) );
     }
 
     while (!dlq_empty(&plcb->plock_resultQ)) {
-        result = (xpath_result_t *)
-            dlq_deque(&plcb->plock_resultQ);
-        xpath_free_result(result);
+        xpath_free_result( (xpath_result_t *) dlq_deque(&plcb->plock_resultQ) );
     }
 
-    if (plcb->plock_final_result != NULL) {
-        xpath_free_result(plcb->plock_final_result);
-    }
-
+    xpath_free_result(plcb->plock_final_result);
     m__free(plcb);
-
 }  /* plock_cb_free */
 
 
@@ -223,8 +208,7 @@ void
 * can decide if the ID should rollover
 *
 *********************************************************************/
-void
-    plock_cb_reset_id (void)
+void plock_cb_reset_id (void)
 {
     if (last_id == NCX_MAX_UINT) {
         last_id = 0;

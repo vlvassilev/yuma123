@@ -44,7 +44,6 @@ public:
     /// @param failReason optional expected failure reason.
     void createXpoContainer( 
             std::shared_ptr<YumaTest::AbstractNCSession> session,
-            const std::string& op = std::string( "create" ),
             const std::string& failReason = std::string() );
 
     /// @brief Delete the xpo level container.
@@ -133,7 +132,7 @@ public:
     /// @param session the session running the query.
     /// @param profileId the of the owning profile.
     /// @param streamId the of the stream to create. 
-    /// @param connectionId the id of the connection node to create.
+    /// @param resourceId the id of the resource node to create.
     /// @param config the configuration to generate
     /// @param op the operation type
     /// @param failReason optional expected failure reason.
@@ -214,7 +213,7 @@ public:
     /// @brief Check the configration. 
     /// @desc Get the contents of the candidate database and verify 
     /// that all entries are as expected.
-    virtual void checkConfig() const;
+    virtual void checkConfig();
 
     /// @brief Initialise 2 profiles for use in most test scenarios. 
     /// @desc This function creates 2 profiles with the following
@@ -254,8 +253,8 @@ protected:
     /// candidateEntries_ tree. If the item does not exist it will be created, 
     /// initialised and added.
     ///
-    /// @param profileId the of of the profile.
-    /// @param connectionId the of of the connection.
+    /// @param profileId the of the profile.
+    /// @param connectionId the of the connection.
     void ensureStreamConnectionExists( uint16_t profileId,
                                        uint16_t connectionId );
 
@@ -264,7 +263,7 @@ protected:
     /// candidateEntries_ tree. If the item does not exist it will be created, 
     /// initialised and added.
     ///
-    /// @param profileId the of of the connection.
+    /// @param profileId the of the connection.
     void ensureProfileExists( uint16_t profileId );
 
     /// @brief Update the stream entry in the expected data.
@@ -272,41 +271,47 @@ protected:
     /// profile in the candidateEntries_ tree. If the item does not exist
     /// it will be created, initialised and added.
     ///
-    /// @param profileId the of of the profile.
-    /// @param streamId the of of the connection.
+    /// @param profileId the of the profile.
+    /// @param streamId the of the connection.
     void ensureProfileStreamExists( uint16_t profileId, 
                                     uint16_t streamId );
+
+    /// @brief Ensure a resource description node exists.
+    /// @param resourceMap the map to create teh resouce for.
+    /// @param resourceId the of the resource.
+    void ensureResourceExists( ResourceDescriptionMap& resourceMap,
+                               uint32_t resourceId );
 
     /// @brief Update the resource description entry in the expected data.
     /// @desc Utility function to ensure that the resource exists for the
     /// stream of a profile in the candidateEntries_ tree. If the item does
     /// not exist it will be created, initialised and added.
     ///
-    /// @param profileId the of of the profile.
-    /// @param streamId the of of the connection.
-    /// @param resourceId the of of the resource.
+    /// @param profileId the of the profile.
+    /// @param streamId the of the connection.
+    /// @param resourceId the of the resource.
     void ensureResourceDescriptionExists( uint16_t profileId,
-                                            uint16_t streamId, 
-                                            uint16_t resourceId );
+                                          uint16_t streamId, 
+                                          uint16_t resourceId );
     
     /// @brief Update the resource connection entry in the expected data.
     /// @desc Utility function to ensure that the connection exists for the
     /// stream of a profile in the candidateEntries_ tree. If the item does
     /// not exist it will be created, initialised and added.
     ///
-    /// @param profileId the of of the connection.
-    /// @param streamId the of of the connection.
-    /// @param connectionId the of of the connection.
+    /// @param profileId the of the connection.
+    /// @param streamId the of the connection.
+    /// @param connectionId the of the connection.
     void ensureResourceConnectionExists( uint16_t profileId,
-                                                uint16_t streamId, 
-                                                uint16_t connectionId );
+                                         uint16_t streamId, 
+                                         uint16_t connectionId );
 
     /// @brief Utility fuction for checking the contents of a configuartion
     ///
     /// @param dbName the name of the netconf database to check
     /// @param db the expected contents.
     virtual void checkEntriesImpl( const std::string& dbName,
-        const std::shared_ptr<YumaTest::XPO3Container>& db ) const;
+        const std::shared_ptr<YumaTest::XPO3Container>& db );
 
     /// @brief Utility function to query a configuration.
     /// @desc this function can be used for debugging purposes. It
@@ -315,6 +320,13 @@ protected:
     ///
     /// @param dbName the name of the netconf database to check
     void queryConfig( const string& dbName ) const;
+
+    /// @param resourceNode the resource node to update.
+    /// @param config the configuration to generate
+    /// @param op the operation type
+    void updateResourceDescriptionEntry( 
+             YumaTest::ResourceNode& resourceNode,
+             const YumaTest::ResourceNodeConfig& config );
 
 protected:
     ///< The builder for the generating netconf messages in xml format. 

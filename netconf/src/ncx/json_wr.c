@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -31,57 +31,19 @@ date         init     comment
 #include  <memory.h>
 #include  <string.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_dlq
-#include "dlq.h"
-#endif
-
-#ifndef _H_ncx
+#include  "dlq.h"
 #include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include  "ncx_num.h"
-#endif
-
-#ifndef _H_ncxconst
 #include  "ncxconst.h"
-#endif
-
-#ifndef _H_obj
 #include  "obj.h"
-#endif
-
-#ifndef _H_ses
 #include  "ses.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_val
 #include  "val.h"
-#endif
-
-#ifndef _H_val_util
 #include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
 #include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_msg
 #include  "xml_msg.h"
-#endif
-
-#ifndef _H_json_wr
 #include  "json_wr.h"
-#endif
 
 
 /********************************************************************
@@ -160,7 +122,7 @@ static status_t
 
     out = val_get_value(scb, msg, val, testfn, TRUE, &malloced, &res);
 
-    if (res != NO_ERR) {
+    if (!out || res != NO_ERR) {
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }

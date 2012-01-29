@@ -73,6 +73,9 @@ ostream& operator<<( ostream& o,  const ResourceNode& it )
             "ResourceNode = { id_ = " << it.id_ << 
                               ", channelId_=" << it.channelId_ <<
                               ", resourceType=" << it.resourceType_ <<
+                              ", configuration=" << it.configuration_ <<
+                              ", alarmConfig=" << it.alarmConfig_ <<
+                              ", statusConfig=" << it.statusConfig_ <<
                               ", physicalPath_=" << it.physicalPath_ <<
                               " }\n";
     return o;
@@ -84,7 +87,7 @@ ostream& operator<<( ostream& o,  const StreamItem& it )
     o << setw(indent) << setfill( ' ' ) <<
             "StreamItem = { id_ = " << it.id_ << "\n";
     indent +=2;
-    BOOST_FOREACH( const StreamItem::ResourceDescription_type::value_type& val,
+    BOOST_FOREACH( const ResourceDescriptionMap::value_type& val,
             it.resourceDescription_ )
     { 
         o << val.second;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -2161,7 +2161,8 @@ status_t
                 buff[ilen++] = '0';
                 i++;
             }
-            ilen += sprintf((char *)&buff[ilen], "%lld", (long long)num->dec.val);
+            ilen += sprintf((char *)&buff[ilen], "%lld", 
+                            (long long)num->dec.val);
         } else {
             if (num->dec.digits == 0) {
                 return SET_ERROR(ERR_INTERNAL_VAL);

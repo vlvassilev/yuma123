@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -106,7 +106,8 @@ extern "C" {
 
 #define YANGCLI_DEF_ALIASES_FILE  (const xmlChar *)"~/.yuma/.yangcli_aliases"
 
-#define YANGCLI_DEF_USERVARS_FILE (const xmlChar *)"~/.yuma/yangcli_uservars.xml"
+#define YANGCLI_DEF_USERVARS_FILE \
+    (const xmlChar *)"~/.yuma/yangcli_uservars.xml"
 
 #define YANGCLI_DEF_TIMEOUT   30
 
@@ -530,13 +531,6 @@ typedef struct server_cb_t_ {
     boolean              climore;
     xmlChar              clibuff[YANGCLI_BUFFLEN];
 } server_cb_t;
-
-
-/* logging function template to switch between
- * log_stdout and log_write
- */
-typedef void (*logfn_t) (const char *fstr, ...);
-
 
 
 /********************************************************************

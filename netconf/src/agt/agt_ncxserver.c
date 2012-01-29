@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -43,67 +43,21 @@ date         init     comment
 #include <arpa/inet.h>
 #include <netdb.h>
 
-
-     
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include  "agt.h"
-#endif
-
-#ifndef _H_agt_ncxserver
+#include "procdefs.h"
+#include "agt.h"
 #include "agt_ncxserver.h"
-#endif
-
-#ifndef _H_agt_not
-#include  "agt_not.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_ses
-#include  "agt_ses.h"
-#endif
-
-#ifndef _H_agt_timer
-#include  "agt_timer.h"
-#endif
-
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
-#include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
+#include "agt_not.h"
+#include "agt_rpc.h"
+#include "agt_ses.h"
+#include "agt_timer.h"
+#include "def_reg.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncxconst.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "xmlns.h"
 
 
 /********************************************************************
@@ -111,9 +65,6 @@ date         init     comment
  *                       C O N S T A N T S                           *
  *                                                                   *
  *********************************************************************/
-#ifdef DEBUG
-#define AGT_NCXSERVER_DEBUG   1
-#endif
 
 /* how often to check for agent shutown (in seconds) */
 #define AGT_NCXSERVER_TIMEOUT  1

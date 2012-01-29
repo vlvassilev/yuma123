@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -24,16 +24,25 @@ leaf /netconf-state/datastores/datastore/name
 container /netconf-state/datastores/datastore/locks
 choice /netconf-state/datastores/datastore/locks/lock-type
 case /netconf-state/datastores/datastore/locks/lock-type/global-lock
-container /netconf-state/datastores/datastore/locks/lock-type/global-lock/global-lock
-leaf /netconf-state/datastores/datastore/locks/lock-type/global-lock/global-lock/locked-by-session
-leaf /netconf-state/datastores/datastore/locks/lock-type/global-lock/global-lock/locked-time
+container /netconf-state/datastores/datastore/locks/lock-type/global-lock/
+    global-lock
+leaf /netconf-state/datastores/datastore/locks/lock-type/global-lock/
+    global-lock/locked-by-session
+leaf /netconf-state/datastores/datastore/locks/lock-type/global-lock/
+    global-lock/locked-time
 case /netconf-state/datastores/datastore/locks/lock-type/partial-locks
-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks
-leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/lock-id
-leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/locked-by-session
-leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/locked-time
-leaf-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/select
-leaf-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/locked-nodes
+list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/
+    partial-locks
+leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/
+    partial-locks/lock-id
+leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/
+    partial-locks/locked-by-session
+leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/
+    partial-locks/locked-time
+leaf-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/
+    partial-locks/select
+leaf-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/
+    partial-locks/locked-nodes
 container /netconf-state/schemas
 list /netconf-state/schemas/schema
 leaf /netconf-state/schemas/schema/identifier
@@ -91,98 +100,31 @@ date         init     comment
 #include <memory.h>
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include  "agt.h"
-#endif
-
-#ifndef _H_agt_cap
-#include  "agt_cap.h"
-#endif
-
-#ifndef _H_agt_cb
-#include  "agt_cb.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_ses
-#include  "agt_ses.h"
-#endif
-
-#ifndef _H_agt_state
-#include  "agt_state.h"
-#endif
-
-#ifndef _H_agt_time_filter
-#include  "agt_time_filter.h"
-#endif
-
-#ifndef _H_agt_util
-#include  "agt_util.h"
-#endif
-
-#ifndef _H_cfg
-#include  "cfg.h"
-#endif
-
-#ifndef _H_getcb
-#include  "getcb.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
-#include  "ncxtypes.h"
-#endif
-
-#ifndef _H_rpc
-#include  "rpc.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
-#include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
+#include "procdefs.h"
+#include "agt.h"
+#include "agt_cap.h"
+#include "agt_cb.h"
+#include "agt_rpc.h"
+#include "agt_ses.h"
+#include "agt_state.h"
+#include "agt_time_filter.h"
+#include "agt_util.h"
+#include "cfg.h"
+#include "getcb.h"
+#include "log.h"
+#include "ncxmod.h"
+#include "ncxtypes.h"
+#include "rpc.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "tstamp.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_util.h"
 
 
 /********************************************************************
@@ -190,9 +132,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#ifdef DEBUG
-#define AGT_STATE_DEBUG 1
-#endif
 
 #define AGT_STATE_TOP_CONTAINER (const xmlChar *)"netconf-state"
 
@@ -257,7 +196,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S                            *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -274,17 +213,16 @@ static obj_template_t *mysessionobj;
 static obj_template_t *myschemaobj;
 
 
-/********************************************************************
-* FUNCTION get_caps
-*
-* <get> operation handler for the capabilities NP container
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
+/**
+ * \fn get_caps
+ * \brief <get> operation for the capabilities NP container
+ * \param scb session that issued the get (may be NULL)
+ * \param cbmode reason for the callback
+ * \param virval place-holder node in data model for this virtual
+ * value node
+ * \param dstval pointer to value output struct
+ * \return status
+ */
 static status_t 
     get_caps (ses_cb_t *scb,
               getcb_mode_t cbmode,
@@ -302,14 +240,13 @@ static status_t
         capsval = val_clone(agt_cap_get_capsval());
         if (!capsval) {
             return ERR_INTERNAL_MEM;
-        } else {
-            /* change the namespace to this module, 
-             * and get rid of the netconf NSID 
-             */
-            val_change_nsid(capsval, statemod->nsid);
-            val_move_children(capsval, dstval);
-            val_free_value(capsval);
         }
+        /* change the namespace to this module, 
+         * and get rid of the netconf NSID 
+         */
+        val_change_nsid(capsval, statemod->nsid);
+        val_move_children(capsval, dstval);
+        val_free_value(capsval);
     } else {
         res = ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
@@ -317,25 +254,17 @@ static status_t
 
 }  /* get_caps */
 
+// ----------------------------------------------------------------------------!
 
-
-/********************************************************************
-* FUNCTION make_plock_entry
-*
-* Make a partial-lock list entry
-*
-* INPUTS:
-*    plcb == partial lock control block to use
-*    plockobj == object template to use for the list struct
-*    res == address of return status
-*
-* OUTPUTS:
-*    *res == return status
-*
-* RETURNS:
-*    pointer to malloc value struct for this data; 
-*    NULL if malloc error
-*********************************************************************/
+/**
+ * \fn make_plock_entry
+ * \brief Make a partial-lock list entry
+ * \param plcb partial lock control block to use
+ * \param plockobj object template to use for the list struct
+ * \param res address of return status
+ * \return pointer to malloc value struct for this data; NULL if
+ * malloc error
+ */
 static val_value_t *
     make_plock_entry (plock_cb_t *plcb,
                       obj_template_t *plockobj,
@@ -382,9 +311,8 @@ static val_value_t *
     if (leafval == NULL) {
         val_free_value(plockval);
         return NULL;
-    } else {
-        val_add_child(leafval, plockval);
     }
+    val_add_child(leafval, plockval);
 
     /* add the session ID of the lock-owner */
     leafval = agt_make_uint_leaf(plockobj,
@@ -394,9 +322,8 @@ static val_value_t *
     if (leafval == NULL) {
         val_free_value(plockval);
         return NULL;
-    } else {
-        val_add_child(leafval, plockval);
     }
+    val_add_child(leafval, plockval);
 
     /* add the lock start timestamp */
     leafval = agt_make_leaf(plockobj,
@@ -406,9 +333,8 @@ static val_value_t *
     if (leafval == NULL) {
         val_free_value(plockval);
         return NULL;
-    } else {
-        val_add_child(leafval, plockval);
     }
+    val_add_child(leafval, plockval);
 
     /* add a 'select' leaf for each parm in the request */
     for (xpathpcb = plock_get_first_select(plcb);
@@ -500,18 +426,18 @@ static val_value_t *
 
 }  /* make_plock_entry */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION get_locks
-*
-* <get> operation handler for the locks NP container
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
+/**
+ * \fn get_locks
+ * \brief <get> operation handler for the locks NP container
+ * \param scb session that issued the get (may be NULL)
+ * \param cbmode reason for the callback
+ * \param virval place-holder node in data model for this virtual
+ * value node
+ * \param dstval pointer to value output struct
+ * \return status
+ */   
 static status_t 
     get_locks (ses_cb_t *scb,
                getcb_mode_t cbmode,
@@ -614,23 +540,16 @@ static status_t
 
 } /* get_locks */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION get_datastore_name
-*
-* Get the datastore name for the virtual
-* timestamp entry that was called from a <get> operation
-*
-* INPUTS:
-*    virval == virtual value
-*    retname== address of return name string pointer
-*
-* OUTPUTS:
-*   *retname == return name string
-
-* RETURNS:
-*    status
-*********************************************************************/
+/**
+ * \fn get_datastore_name
+ * \brief Get the datastore name for the virtual timestamp entry that
+ * was called from a <get> operation
+ * \param virval virtual value
+ * \param retname address of return name string pointer
+ * \return status
+ */
 static status_t 
     get_datastore_name (const val_value_t *virval,
                         const xmlChar **retname)
@@ -655,18 +574,18 @@ static status_t
 
 } /* get_datastore_name */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION get_last_modified
-*
-* <get> operation handler for the datastore/last-modified timestamp
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
+/**
+ * \fn get_last_modified
+ * \brief <get> operation handler for the datastore/last-modified timestamp
+ * \param scb session that issued the get (may be NULL)
+ * \param cbmode reason for the callback
+ * \param virval place-holder node in data model for this virtual
+ * value node
+ * \param dstval pointer to value output struct
+ * \return status
+ */
 static status_t 
     get_last_modified (ses_cb_t *scb,
                        getcb_mode_t cbmode,
@@ -701,23 +620,16 @@ static status_t
 
 } /* get_last_modified */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION make_datastore_val
-*
-* make a val_value_t struct for a specified configuration
-*
-INPUTS:
-*   confname == config name
-*   confobj == config object to use
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
+/**
+ * \fn make_datastore_val
+ * \brief make a val_value_t struct for a specified configuration
+ * \param confname config name
+ * \param confobj config object to use
+ * \param res address of return status
+ * \return malloced value struct or NULL if some error
+ */
 static val_value_t *
     make_datastore_val (const xmlChar *confname,
                         obj_template_t *confobj,
@@ -746,9 +658,8 @@ static val_value_t *
         }
         val_free_value(confval);
         return NULL;
-    } else {
-        val_add_child(nameval, confval);
     }
+    val_add_child(nameval, confval);
     
     /* create datastore/locks */
     testobj = obj_find_child(confobj, 
@@ -791,23 +702,16 @@ static val_value_t *
 
 } /* make_datastore_val */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION make_schema_val
-*
-* make a val_value_t struct for a specified module
-*
-INPUTS:
-*   mod == module control block to use
-*   schemaobj == <schema> object to use
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
+/**
+ * \fn make_schema_val
+ * \brief make a val_value_t struct for a specified module
+ * \param mod module control block to use
+ * \param schemaobj <schema> object to use
+ * \param res address of return status
+ * \return malloced value struct or NULL if some error
+ */
 static val_value_t *
     make_schema_val (ncx_module_t *mod,
                      obj_template_t *schemaobj,
@@ -890,23 +794,16 @@ static val_value_t *
 
 } /* make_schema_val */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION make_session_val
-*
-* make a val_value_t struct for a specified session
-*
-INPUTS:
-*   scb == session control block to use
-*   sessionobj == <session> object to use
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
+/**
+ * \fn make_session_val
+ * \brief make a val_value_t struct for a specified session
+ * \param scb session control block to use
+ * \param sessionobj <session> object to use
+ * \param res address of return status
+ * \return malloced value struct or NULL if some error
+ */
 static val_value_t *
     make_session_val (ses_cb_t *scb,
                       obj_template_t *sessionobj,
@@ -926,7 +823,7 @@ static val_value_t *
     val_init_from_template(sessionval, sessionobj);
 
     /* create session/sessionId */
-    sprintf((char *)numbuff, "%u", scb->sid);
+    snprintf((char *)numbuff, sizeof(numbuff), "%u", scb->sid);
     childval = agt_make_leaf(sessionobj,
                              AGT_STATE_OBJ_SESSIONID,
                              numbuff, 
@@ -1035,22 +932,14 @@ static val_value_t *
 
 } /* make_session_val */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION make_statistics_val
-*
-* make a val_value_t struct for the global statistics block
-*
-INPUTS:
-*   statisticsobj == <statistics> object to use
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
+/**
+ * \fn make_statistics_val
+ * \brief statisticsobj <statistics> object to use
+ * \param res address of return status
+ * \return malloced value struct or NULL if some error
+ */
 static val_value_t *
     make_statistics_val (obj_template_t *statisticsobj,
                          status_t *res)
@@ -1160,21 +1049,24 @@ static val_value_t *
 }  /* make_statistics_val */
 
 
-/********************************************************************
-* FUNCTION get_schema_validate
-*
-* get-schema : validate params callback
-*
-* INPUTS:
-*    see rpc/agt_rpc.h
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_schema_validate (ses_cb_t *scb,
-                         rpc_msg_t *msg,
-                         xml_node_t *methnode)
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn get_schema_validate
+ * \brief get-schema : validate params callback
+ * \param scb session control block to use
+ * \param see agt_rpc.h
+ * \param see agt_rpc.h
+ * \return status
+ ******************************************************************************/
+static status_t get_schema_validate( ses_cb_t *scb, 
+                                     rpc_msg_t *msg, 
+                                     xml_node_t *methnode)
 {
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( methnode  && "methnode  is NULL" );
+
     ncx_module_t    *findmod;
     const xmlChar   *identifier, *version, *format;
     val_value_t     *validentifier, *valversion, *valformat;
@@ -1378,26 +1270,17 @@ static status_t
     }
 
     return res;
-
 } /* get_schema_validate */
 
 
 /************* E X T E R N A L    F U N C T I O N S ***************/
 
-
-/********************************************************************
-* FUNCTION agt_state_init
-*
-* INIT 1:
-*   Initialize the agent state monitor module data structures
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    agt_state_init (void)
+/**
+ * \fn agt_state_init
+ * \brief Initialize the agent state monitor module data structures
+ * \return status
+ */
+status_t agt_state_init (void)
 {
     agt_profile_t   *agt_profile;
     status_t         res;
@@ -1406,9 +1289,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-#ifdef AGT_STATE_DEBUG
     log_debug2("\nagt: Loading netconf-state module");
-#endif
 
     agt_profile = agt_get_profile();
 
@@ -1430,19 +1311,15 @@ status_t
 
 }  /* agt_state_init */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION agt_state_init2
-*
-* INIT 2:
-*   Initialize the monitoring data structures
-*   This must be done after the <running> config is loaded
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   status
-*********************************************************************/
+/**
+ * \fn agt_state_init2
+ * \brief Initialize the monitoring data structures. This must be done
+ * after the <running> config is loaded
+ * \return status 
+ */
+
 status_t
     agt_state_init2 (void)
 {
@@ -1634,19 +1511,14 @@ status_t
 
 }  /* agt_state_init2 */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION agt_state_cleanup
-*
-* Cleanup the module data structures
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   none
-*********************************************************************/
-void 
-    agt_state_cleanup (void)
+/**
+ * \fn agt_state_cleanup
+ * \brief Cleanup the module data structures
+ * \return none
+ */
+void agt_state_cleanup (void)
 {
     if (agt_state_init_done) {
 
@@ -1663,29 +1535,20 @@ void
     }
 }  /* agt_state_cleanup */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION agt_state_add_session
-*
-* Add a session entry to the netconf-state DM
-*
-* INPUTS:
-*   scb == session control block to use for the info
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    agt_state_add_session (ses_cb_t *scb)
+/**
+ * \fn agt_state_add_session
+ * \brief Add a session entry to the netconf-state DM
+ * \param scb session control block to use for the info
+ * \return status
+ */
+status_t agt_state_add_session (ses_cb_t *scb)
 {
     val_value_t *session;
     status_t     res;
 
-#ifdef DEBUG
-    if (scb == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert (scb && " param scb is NULL");
 
     res = NO_ERR;
     session = make_session_val(scb, mysessionobj, &res);
@@ -1698,16 +1561,14 @@ status_t
 
 }  /* agt_state_add_session */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION agt_state_remove_session
-*
-* Remove a session entry from the netconf-state DM
-*
-* INPUTS:
-*   sid == session ID to find and delete
-*
-*********************************************************************/
+/**
+ * \fn agt_state_remove_session
+ * \brief Remove a session entry from the netconf-state DM
+ * \param sid session ID to find and delete
+ * \return none
+ */
 void
     agt_state_remove_session (ses_id_t sid)
 {
@@ -1738,28 +1599,20 @@ void
 }  /* agt_state_remove_session */
 
 
-/********************************************************************
-* FUNCTION agt_state_add_module_schema
-*
-* Add a schema entry to the netconf-state DM
-*
-* INPUTS:
-*   mod == module to add
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    agt_state_add_module_schema (ncx_module_t *mod)
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn agt_state_add_module_schema
+ * \brief Add a schema entry to the netconf-state DM
+ * \param mod module to add
+ * \return status
+ */
+status_t agt_state_add_module_schema (ncx_module_t *mod)
 {
     val_value_t *schema;
     status_t     res;
 
-#ifdef DEBUG
-    if (mod == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( mod && " param mod is NULL");
 
     if (!agt_advertise_module_needed(mod->name)) {
         return NO_ERR;

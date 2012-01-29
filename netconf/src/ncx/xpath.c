@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -790,8 +790,7 @@ static status_t
 
     /* get the import if there is a real prefix entered */
     if (prefix) {
-        mod = (ncx_module_t *)xmlns_get_modptr
-            (xmlns_find_ns_by_prefix(prefix));
+        mod = (ncx_module_t *)xmlns_get_modptr(xmlns_find_ns_by_prefix(prefix));
         if (!mod) {
             if (prefix) {
                 m__free(prefix);
@@ -802,9 +801,7 @@ static status_t
             return ERR_NCX_INVALID_NAME;
         }
         /* get the first object template */
-        curobj = obj_find_template_top(mod, 
-                                       ncx_get_modname(mod), 
-                                       name);
+        curobj = obj_find_template_top(mod, ncx_get_modname(mod), name);
     } else {
         /* no prefix given, check all top-level objects */
         curobj = ncx_find_any_object(name);
@@ -882,31 +879,21 @@ static status_t
         }
 
         /* make sure the prefix is valid, if present */
-        if (prefix && name) {
+        if (prefix) {
             mod = (ncx_module_t *)xmlns_get_modptr
                 (xmlns_find_ns_by_prefix(prefix));
             if (!mod) {
                 m__free(prefix);
-                if (name) {
-                    m__free(name);
-                }
+                m__free(name);
                 return ERR_NCX_INVALID_NAME;
             }
-            nextobj = obj_find_template(curQ, 
-                                        ncx_get_modname(mod), 
-                                        name);
-        } else if (name) {
-            /* no prefix given; try current module first */
-            nextobj = obj_find_template(curQ, 
-                                        obj_get_mod_name(curobj), 
-                                        name); 
-            if (!nextobj) {
-                nextobj = obj_find_template(curQ, 
-                                            NULL, 
-                                            name); 
-            }
+            nextobj = obj_find_template(curQ, ncx_get_modname(mod), name);
         } else {
-            nextobj = NULL;
+            /* no prefix given; try current module first */
+            nextobj = obj_find_template(curQ, obj_get_mod_name(curobj), name); 
+            if (!nextobj) {
+                nextobj = obj_find_template(curQ, NULL, name); 
+            }
         }
 
         if (prefix) {
@@ -926,12 +913,6 @@ static status_t
         }
     }
 
-    if (prefix) {
-        m__free(prefix);
-    }
-    if (name) {
-        m__free(name);
-    }
     if (targobj) {
         *targobj = curobj;
     }
@@ -2413,25 +2394,18 @@ xpath_pcb_t *
 
 
 /********************************************************************
-* FUNCTION xpath_free_pcb
-* 
-* Free a malloced XPath parser control block
-*
-* INPUTS:
-*   pcb == pointer to parser control block to free
-*********************************************************************/
-void
-    xpath_free_pcb (xpath_pcb_t *pcb)
+ * Free a malloced XPath parser control block
+ *
+ * \param pcb pointer to parser control block to free
+ *********************************************************************/
+void xpath_free_pcb (xpath_pcb_t *pcb)
 {
     xpath_result_t   *result;
     xpath_resnode_t  *resnode;
 
-#ifdef DEBUG
     if (!pcb) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
     if (pcb->tkc) {
         tk_free_chain(pcb->tkc);
@@ -2545,15 +2519,11 @@ void
 * INPUTS:
 *   result == pointer to result struct to free
 *********************************************************************/
-void
-    xpath_free_result (xpath_result_t *result)
+void xpath_free_result (xpath_result_t *result)
 {
-#ifdef DEBUG
     if (!result) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
     xpath_clean_result(result);
     m__free(result);
@@ -2684,6 +2654,30 @@ void
     m__free(resnode);
 
 }  /* xpath_free_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_delete_resnode
+* 
+* Delete and free a malloced XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to free
+*********************************************************************/
+void
+    xpath_delete_resnode (xpath_resnode_t *resnode)
+{
+#ifdef DEBUG
+    if (!resnode) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+    dlq_remove(resnode);
+    xpath_clean_resnode(resnode);
+    m__free(resnode);
+
+}  /* xpath_delete_resnode */
 
 
 /********************************************************************

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -37,110 +37,34 @@ date         init     comment
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
 
-#ifndef _H_b64
+#include "procdefs.h"
 #include "b64.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_val_parse
 #include "mgr_val_parse.h"
-#endif
-
-#ifndef _H_mgr_xml
 #include "mgr_xml.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncx_str
 #include "ncx_str.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tk
+#include "status.h"
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -1063,9 +987,8 @@ static status_t
                                         FALSE,
                                         FALSE,
                                         &res);
-                if (result) {
-                    xpath_free_result(result);
-                }
+                // not interested in the actual result, just the status in res!
+                xpath_free_result(result);
             }
             if (res != NO_ERR) {
                 res = ERR_NCX_INVALID_XPATH_EXPR;
@@ -1487,7 +1410,7 @@ static status_t
 
     if (res == NO_ERR) {
         /* start setting up the return value */
-        retval->editvars->editop = get_editop(startnode);
+        retval->editop = get_editop(startnode);
 
         /* setup the first child in the complex object
          * Allowed be NULL in some cases so do not check
@@ -1786,12 +1709,19 @@ static status_t
          * then the 'xmlns' attribute, then a defined attribute
          */
         if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
-            retval->editvars->editop = op_editop_id(attr->attr_val);
-            if (retval->editvars->editop == OP_EDITOP_NONE) {
+            retval->editop = op_editop_id(attr->attr_val);
+            if (retval->editop == OP_EDITOP_NONE) {
                 retres = ERR_NCX_INVALID_VALUE;
             }
             continue;
         } else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
+            if (retval->editvars == NULL) {
+                res = val_new_editvars(retval);
+                if (res != NO_ERR) {
+                    return res;
+                }
+            }
+
             retval->editvars->insertop = op_insertop_id(attr->attr_val);
             if (retval->editvars->insertop == OP_INSOP_NONE) {
                 retres = ERR_NCX_INVALID_VALUE;

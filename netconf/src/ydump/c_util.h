@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -123,7 +123,8 @@ extern "C" {
 #define PARM_ERRORVAL (const xmlChar *)"errorval"
 
 #define FN_BANNER_START (const xmlChar *)\
-    "\n\n/********************************************************************\n* FUNCTION "
+    "\n\n/*******************************************************"\
+    "*************\n* FUNCTION "
 
 #define FN_BANNER_LN (const xmlChar *)"\n* "
 

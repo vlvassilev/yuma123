@@ -15,7 +15,9 @@ INCLUDES := ./ \
             $(YUMA_SRC_ROOT)/platform \
             $(YUMA_ROOT) \
             $(DESTDIR)/usr/include/libxml2 \
-            $(DESTDIR)/usr/include/libxml2/libxml 
+            $(DESTDIR)/usr/include/libxml2/libxml \
+            $(DESTDIR)/include/libxml2 \
+            $(DESTDIR)/include/libxml2/libxml 
 
 LIBS := xml2 \
         boost_unit_test_framework

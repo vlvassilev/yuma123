@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -62,6 +62,8 @@ extern "C" {
 /* macro SET_ERROR
  * 
  * call the set_error function with hard-wired parameters
+ * Used to flag internal code errors only!!!
+ * Use log_error for normal errors expected during operation
  *
  * INPUTS:
  *    E == status_t : error enumeration
@@ -326,7 +328,8 @@ typedef enum status_t_
     ERR_NCX_MULTIPLE_MATCHES,           /* 381 */
     ERR_NCX_NO_DEFAULT,                 /* 382 */
     ERR_NCX_MISSING_KEY,                /* 383 */
-    ERR_LAST_USR_ERR,                   /* 384 -- not really used */
+    ERR_NCX_TOP_LEVEL_MANDATORY_FAILED, /* 384 */
+    ERR_LAST_USR_ERR,                   /* 385 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */
@@ -379,7 +382,8 @@ typedef enum status_t_
     ERR_NCX_DEPENDENCY_ERRORS,          /* 447 */
     ERR_NCX_TOP_LEVEL_MANDATORY,        /* 448 */
     ERR_NCX_FILE_MOD_MISMATCH,          /* 449 */
-    ERR_LAST_WARN,                      /* 450 -- not really used */
+    ERR_NCX_UNIQUE_CONDITIONAL_MISMATCH, /* 450 */
+    ERR_LAST_WARN,                      /* 451 -- not really used */
 
     /* system info return codes start at 900 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 900 */
@@ -399,7 +403,8 @@ typedef enum status_t_
 *  Generate an error stack entry or if log_error is enabled,
 *  then log the error report right now.
 *
-* Used to flag internal code errors
+* Used to flag internal code errors only!!!
+* Use log_error for normal errors expected during operation
 *
 * DO NOT USE THIS FUNCTION DIRECTLY!
 * USE THE SET_ERROR MACRO INSTEAD!

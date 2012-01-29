@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -28,118 +28,38 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-#include  <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_acm
 #include "agt_acm.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_rpcerr
 #include "agt_rpcerr.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_agt_val
 #include "agt_val.h"
-#endif
-
-#ifndef _H_agt_xpath
 #include "agt_xpath.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_obj
-#include  "obj.h"
-#endif
-
-#ifndef _H_op
-#include  "op.h"
-#endif
-
-#ifndef _H_rpc
+#include "log.h"
+#include "ncx.h"
+#include "ncxconst.h"
+#include "obj.h"
+#include "op.h"
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
-#include  "xpath.h"
-#endif
-
-#ifndef _H_xpath1
-#include  "xpath1.h"
-#endif
+#include "ses.h"
+#include "status.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_util.h"
+#include "xml_wr.h"
+#include "xpath.h"
+#include "xpath1.h"
 
 
 /********************************************************************
@@ -147,8 +67,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#define AGT_XPATH_DEBUG 1
 
 
 /********************************************************************
@@ -570,9 +488,7 @@ status_t
                       indent);
     }
 
-    if (result) {
-        xpath_free_result(result);
-    }
+    xpath_free_result(result);
 
     return res;
 

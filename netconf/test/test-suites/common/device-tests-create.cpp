@@ -81,13 +81,16 @@ BOOST_AUTO_TEST_CASE( FullProfile )
     cbChecker_->resetExpectedCallbacks();
     cbChecker_->resetModuleCallbacks("device_test");
 
-    // TODO: Add callback checking....
-
     createXpoContainer( primarySession_ );
     xpoProfileQuery( primarySession_, 1 );
     profileStreamQuery( primarySession_, 1, 1 );
     configureResourceDescrption( primarySession_, 1, 1, 1, 
-              ResourceNodeConfig{ 100,  string( "/card[0]/sdiConnector[0]" ) } );
+              ResourceNodeConfig{ 100, 
+                                  string( "111100001111" ),
+                                  boost::optional<string>(),
+                                  boost::optional<string>(),
+                                  string( "/card[0]/sdiConnector[0]" ) } );
+    
     configureResourceConnection( primarySession_, 1, 1, 1, 
              ConnectionItemConfig{ 100, 200, 300, 400, 500 } );
 
@@ -95,6 +98,25 @@ BOOST_AUTO_TEST_CASE( FullProfile )
              StreamConnectionItemConfig{ 100, 200, 300, 400, 500, 600, 700 } );
 
     setActiveProfile( primarySession_, 1 );
+    
+    // Check callbacks
+    vector<string> elements = {};
+    cbChecker_->updateContainer("device_test", "xpo", elements, "create");
+    elements.push_back("profile");
+    cbChecker_->addKey("device_test", "xpo", elements, "id");
+    elements.push_back("stream");
+    cbChecker_->addKey("device_test", "xpo", elements, "id");
+    cbChecker_->addResourceNode("device_test", "xpo", elements, false, false);
+    cbChecker_->addResourceCon("device_test", "xpo", elements);
+    elements.pop_back();
+    cbChecker_->addStreamCon("device_test", "xpo", elements);
+    elements.pop_back();
+    elements.push_back("activeProfile");
+    cbChecker_->addElement("device_test", "xpo", elements);
+    cbChecker_->checkCallbacks("device_test");                             
+    cbChecker_->resetModuleCallbacks("device_test");
+    cbChecker_->resetExpectedCallbacks();
+
     commitChanges( primarySession_ );
     checkConfig();
 

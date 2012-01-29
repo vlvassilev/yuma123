@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -36,136 +36,43 @@ date         init     comment
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_ses
 #include "agt_ses.h"
-#endif
-
-#ifndef _H_agt_top
 #include "agt_top.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_agt_val_parse
 #include "agt_val_parse.h"
-#endif
-
-#ifndef _H_agt_xml
 #include "agt_xml.h"
-#endif
-
-#ifndef _H_b64
 #include "b64.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncx_str
 #include "ncx_str.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tk
+#include "status.h"
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#ifdef DEBUG
-#define AGT_VAL_PARSE_DEBUG 1
-#endif
-
 
 /* forward declaration for recursive calls */
 static status_t 
@@ -429,16 +336,13 @@ static status_t
                   val_value_t  *retval)
 {
     const xml_node_t        *errnode;
-    val_value_t             *chval;
-    status_t                 res, res2;
+    status_t                 res;
     boolean                  done, getstrend, errdone;
     xml_node_t               nextnode;
 
     /* init local vars */
     errnode = startnode;
-    chval = NULL;
     res = NO_ERR;
-    res2 = NO_ERR;
     done = FALSE;
     getstrend = FALSE;
     errdone = FALSE;
@@ -462,109 +366,100 @@ static status_t
         return NO_ERR;
     default:
         res = ERR_NCX_WRONG_NODETYP;
+        /* add rpc-error to msg->errQ */
+        (void)parse_error_subtree(scb, msg, startnode, errnode, res, 
+                                  NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+        xml_clean_node(&nextnode);
+        return res;
     }
 
-    if (res == NO_ERR) {
-        /* at this point have either a simple type or a complex type
-         * get the next node which could be any type 
+    /* at this point have either a simple type or a complex type
+     * get the next node which could be any type 
+     */
+    res = get_xml_node(scb, msg, &nextnode, FALSE);
+    if (res != NO_ERR) {
+        xml_clean_node(&nextnode);
+        return res;
+    }
+
+    log_debug3("\nparse_any: expecting any node type");
+    if (LOGDEBUG4) {
+        xml_dump_node(&nextnode);
+    }
+
+    /* decide the base type from the child node type */
+    switch (nextnode.nodetyp) {
+    case XML_NT_START:
+    case XML_NT_EMPTY:
+        /* A nested start or empty element means the parent is
+         * treated as a 'container' data type
          */
-        res = get_xml_node(scb, msg, &nextnode, FALSE);
-        if (res != NO_ERR) {
-            errdone = TRUE;
+        val_init_from_template(retval, ncx_get_gen_container());
+        retval->nsid = startnode->nsid;
+        break;
+    case XML_NT_STRING:
+        /* treat this string child node as the string
+         * content for the parent node
+         */
+        val_init_from_template(retval, ncx_get_gen_string());
+        retval->nsid = startnode->nsid;
+        retval->v.str = xml_strdup(nextnode.simval);
+        res = (retval->v.str) ? NO_ERR : ERR_INTERNAL_MEM;
+        getstrend = TRUE;
+        break;
+    case XML_NT_END:
+        res = xml_endnode_match(startnode, &nextnode);
+        if (res == NO_ERR) {
+            /* treat this start + end pair as an 'empty' data type */
+            val_init_from_template(retval, ncx_get_gen_empty());
+            retval->v.boo = TRUE;
+            retval->nsid = startnode->nsid;
+            xml_clean_node(&nextnode);
+            return NO_ERR;
         }
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (res == NO_ERR) {
-
-#ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG4) {
-            log_debug4("\nparse_any: expecting any node type");
-            xml_dump_node(&nextnode);
-        }
-#endif
-
-        /* decide the base type from the child node type */
-        switch (nextnode.nodetyp) {
-        case XML_NT_START:
-        case XML_NT_EMPTY:
-            /* A nested start or empty element means the parent is
-             * treated as a 'container' data type
-             */
-            val_init_from_template(retval, ncx_get_gen_container());
-            retval->nsid = startnode->nsid;
-            break;
-        case XML_NT_STRING:
-            /* treat this string child node as the string
-             * content for the parent node
-             */
-            val_init_from_template(retval, ncx_get_gen_string());
-            retval->nsid = startnode->nsid;
-            retval->v.str = xml_strdup(nextnode.simval);
-            res = (retval->v.str) ? NO_ERR : ERR_INTERNAL_MEM;
-            getstrend = TRUE;
-            break;
-        case XML_NT_END:
-            res = xml_endnode_match(startnode, &nextnode);
-            if (res == NO_ERR) {
-                /* treat this start + end pair as an 'empty' data type */
-                val_init_from_template(retval, ncx_get_gen_empty());
-                retval->v.boo = TRUE;
-                retval->nsid = startnode->nsid;
-                xml_clean_node(&nextnode);
-                return NO_ERR;
-            } else {
-                errnode = &nextnode;
-            }
-            break;
-        default:
-            res = SET_ERROR(ERR_INTERNAL_VAL);
-            errnode = &nextnode;
-        }
+    if (res != NO_ERR) {
+        errnode = &nextnode;
+        /* add rpc-error to msg->errQ */
+        (void)parse_error_subtree(scb, msg, startnode, errnode, res, 
+                                  NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+        xml_clean_node(&nextnode);
+        return res;
     }
 
     /* check if processing a simple type as a string */
     if (getstrend) {
         /* need to get the endnode for startnode then exit */
         xml_clean_node(&nextnode);
-        res2 = get_xml_node(scb, msg, &nextnode, FALSE);
-        if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+        res = get_xml_node(scb, msg, &nextnode, FALSE);
+        if (res == NO_ERR) {
+            log_debug3("\nparse_any: expecting end node for %s", 
+                       startnode->qname);
             if (LOGDEBUG4) {
-                log_debug4("\nparse_any: expecting end node for %s", 
-                           startnode->qname);
                 xml_dump_node(&nextnode);
             }
-#endif
-            res2 = xml_endnode_match(startnode, &nextnode);
+            res = xml_endnode_match(startnode, &nextnode);
         } else {
             errdone = TRUE;
         }
-        if (res2 != NO_ERR) {
-            errnode = &nextnode;
-        }
-    }
 
-    /* check if there were any errors in the startnode */
-    if (res != NO_ERR || res2 != NO_ERR) {
+        if (res == NO_ERR) {
+            xml_clean_node(&nextnode);
+            return NO_ERR;
+        }
+
+        errnode = &nextnode;
         if (!errdone) {
             /* add rpc-error to msg->errQ */
-            (void)parse_error_subtree(scb, 
-                                      msg, 
-                                      startnode,
-                                      errnode, 
-                                      res, 
-                                      NCX_NT_NONE, 
-                                      NULL, 
-                                      NCX_NT_VAL, 
-                                      retval);
+            (void)parse_error_subtree(scb, msg, startnode, errnode, res, 
+                                      NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
         }
         xml_clean_node(&nextnode);
-        return (res==NO_ERR) ? res2 : res;
-    }
-
-    if (getstrend) {
-        xml_clean_node(&nextnode);
-        return NO_ERR;
+        return res;
     }
 
     /* if we get here, then the startnode is a container */
@@ -572,74 +467,44 @@ static status_t
         /* At this point have a nested start node
          *  Allocate a new val_value_t for the child value node 
          */
-        res = NO_ERR;
-        chval = val_new_child_val(nextnode.nsid, 
-                                  nextnode.elname, 
-                                  TRUE, 
-                                  retval, 
-                                  get_editop(&nextnode),
-                                  ncx_get_gen_anyxml());
+        val_value_t *chval;
+        chval = val_new_child_val(nextnode.nsid, nextnode.elname, TRUE, retval, 
+                                  get_editop(&nextnode), ncx_get_gen_anyxml());
         if (!chval) {
             res = ERR_INTERNAL_MEM;
-        }
-
-        /* check any error setting up the child node */
-        if (res == NO_ERR) {
-            val_add_child(chval, retval);
-
-            /* recurse through and get whatever nodes are present
-             * in the child node; call it an 'any' type
-             * make sure this function gets called again
-             * so the namespace errors can be ignored properly ;-)
-             *
-             * Cannot call this function directly or the
-             * XML attributes will not get processed
-             */
-            res = parse_btype_nc(scb, msg, 
-                                 ncx_get_gen_anyxml(), 
-                                 &nextnode, 
-                                 retval->dataclass, 
-                                 chval);
-            chval->res = res;
+            /* add rpc-error to msg->errQ */
+            (void)parse_error_subtree(scb, msg, startnode, errnode, res, 
+                                      NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
             xml_clean_node(&nextnode);
-
-            if (res != NO_ERR) {
-                errdone = TRUE;
-                chval = NULL;
-            }
+            return res;
         }
 
-        /* record any error, if not already done */
+        val_add_child(chval, retval);
+
+        /* recurse through and get whatever nodes are present
+         * in the child node; call it an 'any' type
+         * make sure this function gets called again
+         * so the namespace errors can be ignored properly ;-)
+         *
+         * Cannot call this function directly or the
+         * XML attributes will not get processed
+         */
+        res = parse_btype_nc(scb, msg, ncx_get_gen_anyxml(), &nextnode, 
+                             retval->dataclass, chval);
+        chval->res = res;
+        xml_clean_node(&nextnode);
+
         if (res != NO_ERR) {
-            if (!errdone) {
-                /* add rpc-error to msg->errQ */
-                (void)parse_error_subtree(scb, 
-                                          msg, 
-                                          startnode,
-                                          errnode, 
-                                          res, 
-                                          NCX_NT_NONE, 
-                                          NULL, 
-                                          NCX_NT_VAL, 
-                                          retval);
-            }
-            xml_clean_node(&nextnode);
-            if (chval) {
-                val_free_value(chval);
-            }
             return res;
         }
 
         /* get the next node */
         res = get_xml_node(scb, msg, &nextnode, FALSE);
         if (res == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+            log_debug3("\nparse_any: expecting start, empty, or end node");
             if (LOGDEBUG4) {
-                log_debug4("\nparse_any: expecting start, empty, "
-                           "or end node");
                 xml_dump_node(&nextnode);
             }
-#endif
             res = xml_endnode_match(startnode, &nextnode);
             if (res == NO_ERR) {
                 done = TRUE;
@@ -702,8 +567,8 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    if (retval->editvars->editop == OP_EDITOP_DELETE ||
-        retval->editvars->editop == OP_EDITOP_REMOVE) {
+    if (retval->editop == OP_EDITOP_DELETE ||
+        retval->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -730,12 +595,10 @@ static status_t
     }
 
     if (res == NO_ERR && !empty) {
-#ifdef AGT_VAL_PARSE_DEBUG
+        log_debug3("\nparse_enum: expecting string node");
         if (LOGDEBUG4) {
-            log_debug4("\nparse_enum: expecting string node");
             xml_dump_node(&valnode);
         }
-#endif
 
         /* validate the node type and enum string or number content */
         switch (valnode.nodetyp) {
@@ -750,8 +613,8 @@ static status_t
             break;
         case XML_NT_STRING:
             if (val_all_whitespace(valnode.simval) &&
-                (retval->editvars->editop == OP_EDITOP_DELETE ||
-                 retval->editvars->editop == OP_EDITOP_REMOVE)) {
+                (retval->editop == OP_EDITOP_DELETE ||
+                 retval->editop == OP_EDITOP_REMOVE)) {
                 res = NO_ERR;
             } else {
                 /* get the non-whitespace string here */
@@ -769,8 +632,8 @@ static status_t
             break;
         case XML_NT_END:
             enddone = TRUE;
-            if (retval->editvars->editop == OP_EDITOP_DELETE ||
-                retval->editvars->editop == OP_EDITOP_REMOVE) {
+            if (retval->editop == OP_EDITOP_DELETE ||
+                retval->editop == OP_EDITOP_REMOVE) {
                 retval->btyp = NCX_BT_ENUM;
                 /* leave value empty, OK for leaf */
             } else {
@@ -788,13 +651,11 @@ static status_t
         if (!enddone) {
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+                log_debug3("\nparse_enum: expecting end for %s", 
+                           startnode->qname);
                 if (LOGDEBUG4) {
-                    log_debug4("\nparse_enum: expecting end for %s", 
-                               startnode->qname);
                     xml_dump_node(&endnode);
                 }
-#endif
                 res2 = xml_endnode_match(startnode, &endnode);
                 if (res2 != NO_ERR) {
                     errnode = &endnode;
@@ -897,13 +758,11 @@ static status_t
             if (res != NO_ERR) {
                 errdone = TRUE;
             } else {
-#ifdef AGT_VAL_PARSE_DEBUG
+                log_debug3("\nparse_empty: expecting end for %s", 
+                           startnode->qname);
                 if (LOGDEBUG4) {
-                    log_debug4("\nparse_empty: expecting end for %s", 
-                               startnode->qname);
                     xml_dump_node(&endnode);
                 }
-#endif
                 res = xml_endnode_match(startnode, &endnode);
                 if (res != NO_ERR) {
                     if (endnode.nodetyp != XML_NT_STRING ||
@@ -915,14 +774,12 @@ static status_t
                         xml_clean_node(&endnode);
                         res = get_xml_node(scb, msg, &endnode, TRUE);
                         if (res == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+                            log_debug3("\nparse_empty: expecting "
+                                       "end for %s", 
+                                       startnode->qname);
                             if (LOGDEBUG4) {
-                                log_debug4("\nparse_empty: expecting "
-                                           "end for %s", 
-                                           startnode->qname);
                                 xml_dump_node(&endnode);
                             }
-#endif
                             res = xml_endnode_match(startnode, &endnode);
                             if (res != NO_ERR) {
                                 errnode = &endnode;
@@ -1006,8 +863,8 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    if (retval->editvars->editop == OP_EDITOP_DELETE ||
-        retval->editvars->editop == OP_EDITOP_REMOVE) {
+    if (retval->editop == OP_EDITOP_DELETE ||
+        retval->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1033,12 +890,11 @@ static status_t
     }
 
     if (res == NO_ERR && !empty) {
-#ifdef AGT_VAL_PARSE_DEBUG
+
+        log_debug3("\nparse_boolean: expecting string node.");
         if (LOGDEBUG4) {
-            log_debug4("\nparse_boolean: expecting string node.");
             xml_dump_node(&valnode);
         }
-#endif
 
         /* validate the node type and enum string or number content */
         switch (valnode.nodetyp) {
@@ -1065,13 +921,11 @@ static status_t
         /* get the matching end node for startnode */
         res2 = get_xml_node(scb, msg, &endnode, TRUE);
         if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+            log_debug3("\nparse_boolean: expecting end for %s", 
+                       startnode->qname);
             if (LOGDEBUG4) {
-                log_debug4("\nparse_boolean: expecting end for %s", 
-                           startnode->qname);
                 xml_dump_node(&endnode);
             }
-#endif
             res2 = xml_endnode_match(startnode, &endnode);
             if (res2 != NO_ERR) {
                 errnode = &endnode;
@@ -1176,8 +1030,8 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
     
     /* make sure the startnode is correct */
-    if (retval->editvars->editop == OP_EDITOP_DELETE ||
-        retval->editvars->editop == OP_EDITOP_REMOVE) {
+    if (retval->editop == OP_EDITOP_DELETE ||
+        retval->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1202,12 +1056,10 @@ static status_t
         }
     }
 
-#ifdef AGT_VAL_PARSE_DEBUG
+    log_debug3("\nparse_num: expecting string node.");
     if (LOGDEBUG4) {
-        log_debug4("\nparse_num: expecting string node.");
         xml_dump_node(&valnode);
     }
-#endif
 
     if (res == NO_ERR && !empty) {
         /* validate the number content */
@@ -1273,13 +1125,11 @@ static status_t
         if (!endtagdone) {
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+                log_debug3("\nparse_num: expecting end for %s", 
+                           startnode->qname);
                 if (LOGDEBUG4) {
-                    log_debug4("\nparse_num: expecting end for %s", 
-                               startnode->qname);
                     xml_dump_node(&endnode);
                 }
-#endif
                 res2 = xml_endnode_match(startnode, &endnode);
                 if (res2 != NO_ERR) {
                     errnode = &endnode;
@@ -1368,7 +1218,7 @@ static status_t
     xpath_result_t       *result; 
     xml_node_t            valnode, endnode;
     status_t              res, res2, res3;
-    boolean               errdone, empty, allow_delete_all;
+    boolean               errdone, empty;
     ncx_btype_t           listbtyp;
 
     /* init local vars */
@@ -1383,8 +1233,6 @@ static status_t
     res3 = NO_ERR;
     listbtyp = NCX_BT_NONE;
     listtyp = NULL;
-
-    allow_delete_all = FALSE;
 
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
@@ -1417,11 +1265,9 @@ static status_t
   
     /* check empty string corner case */
     if (empty) {
-        if (retval->editvars->editop == OP_EDITOP_DELETE ||
-            retval->editvars->editop == OP_EDITOP_REMOVE) {
+        if (retval->editop == OP_EDITOP_DELETE ||
+            retval->editop == OP_EDITOP_REMOVE) {
             if (obj->objtype == OBJ_TYP_LEAF) {
-                res = NO_ERR;
-            } else if (allow_delete_all) {
                 res = NO_ERR;
             } else {
                 res = ERR_NCX_MISSING_VAL_INST;
@@ -1476,12 +1322,11 @@ static status_t
         return res2;
     }
 
-#ifdef AGT_VAL_PARSE_DEBUG
+
+    log_debug3("\nparse_string: expecting string node.");
     if (LOGDEBUG4) {
-        log_debug4("\nparse_string: expecting string node.");
         xml_dump_node(&valnode);
     }
-#endif
 
     /* validate the string data type content */
     switch (valnode.nodetyp) {
@@ -1556,9 +1401,8 @@ static status_t
                                         FALSE,
                                         FALSE,
                                         &res);
-                if (result) {
-                    xpath_free_result(result);
-                }
+                // not interested in the actual result, just the status in res!
+                xpath_free_result(result);
             }
         }
 
@@ -1609,13 +1453,11 @@ static status_t
     /* get the matching end node for startnode */
     res2 = get_xml_node(scb, msg, &endnode, TRUE);
     if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+        log_debug3("\nparse_string: expecting end for %s", 
+                   startnode->qname);
         if (LOGDEBUG4) {
-            log_debug4("\nparse_string: expecting end for %s", 
-                       startnode->qname);
             xml_dump_node(&endnode);
         }
-#endif
         res2 = xml_endnode_match(startnode, &endnode);
         
     } else {
@@ -1701,8 +1543,8 @@ static status_t
     val_init_from_template(retval, obj);
     retval->dataclass = pick_dataclass(parentdc, obj);
 
-    if (retval->editvars->editop == OP_EDITOP_DELETE ||
-        retval->editvars->editop == OP_EDITOP_REMOVE) {
+    if (retval->editop == OP_EDITOP_DELETE ||
+        retval->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1730,12 +1572,10 @@ static status_t
     }
 
     if (res == NO_ERR && !empty) {
-#ifdef AGT_VAL_PARSE_DEBUG
+        log_debug3("\nparse_idref: expecting string node");
         if (LOGDEBUG4) {
-            log_debug4("\nparse_idref: expecting string node");
             xml_dump_node(&valnode);
         }
-#endif
 
         /* validate the node type and enum string or number content */
         switch (valnode.nodetyp) {
@@ -1750,8 +1590,8 @@ static status_t
             break;
         case XML_NT_STRING:
             if (val_all_whitespace(valnode.simval) &&
-                (retval->editvars->editop == OP_EDITOP_DELETE ||
-                 retval->editvars->editop == OP_EDITOP_REMOVE)) {
+                (retval->editop == OP_EDITOP_DELETE ||
+                 retval->editop == OP_EDITOP_REMOVE)) {
                 res = NO_ERR;
             } else {
                 retval->v.idref.nsid = valnode.contentnsid;
@@ -1781,8 +1621,8 @@ static status_t
             break;
         case XML_NT_END:
             enddone = TRUE;
-            if (retval->editvars->editop == OP_EDITOP_DELETE ||
-                retval->editvars->editop == OP_EDITOP_REMOVE) {
+            if (retval->editop == OP_EDITOP_DELETE ||
+                retval->editop == OP_EDITOP_REMOVE) {
                 retval->btyp = NCX_BT_IDREF;
             } else {
                 res = ERR_NCX_INVALID_VALUE;
@@ -1799,13 +1639,11 @@ static status_t
         if (!enddone) {
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+                log_debug3("\nparse_idref: expecting end for %s", 
+                           startnode->qname);
                 if (LOGDEBUG4) {
-                    log_debug4("\nparse_idref: expecting end for %s", 
-                               startnode->qname);
                     xml_dump_node(&endnode);
                 }
-#endif
                 res2 = xml_endnode_match(startnode, &endnode);
                 if (res2 != NO_ERR) {
                     errnode = &endnode;
@@ -1898,8 +1736,8 @@ static status_t
     retval->dataclass = pick_dataclass(parentdc, obj);
 
     /* make sure the startnode is correct */
-    if (retval->editvars->editop == OP_EDITOP_DELETE ||
-        retval->editvars->editop == OP_EDITOP_REMOVE) {
+    if (retval->editop == OP_EDITOP_DELETE ||
+        retval->editop == OP_EDITOP_REMOVE) {
         switch (startnode->nodetyp) {
         case XML_NT_EMPTY:
             empty = TRUE;
@@ -1925,12 +1763,10 @@ static status_t
     }
 
     if (res == NO_ERR && !empty) {
-#ifdef AGT_VAL_PARSE_DEBUG
+        log_debug3("\nparse_union: expecting string or number node.");
         if (LOGDEBUG4) {
-            log_debug4("\nparse_union: expecting string or number node.");
             xml_dump_node(&valnode);
         }
-#endif
 
         /* validate the node type and union node content */
         switch (valnode.nodetyp) {
@@ -1985,13 +1821,11 @@ static status_t
             /* get the matching end node for startnode */
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
-#ifdef AGT_VAL_PARSE_DEBUG
+                log_debug3("\nparse_union: expecting end for %s", 
+                           startnode->qname);
                 if (LOGDEBUG4) {
-                    log_debug4("\nparse_union: expecting end for %s", 
-                               startnode->qname);
                     xml_dump_node(&endnode);
                 }
-#endif
                 res2 = xml_endnode_match(startnode, &endnode);
                 if (res2 != NO_ERR) {
                     errnode = &endnode;
@@ -2079,7 +1913,6 @@ static status_t
     const xml_node_t     *errnode;
     obj_template_t *chobj, *topchild, *curchild;
     const agt_profile_t  *profile;
-    val_value_t          *chval;
     xml_node_t            chnode;
     status_t              res, res2, retres;
     boolean               done, errdone, empty, xmlorder;
@@ -2126,56 +1959,50 @@ static status_t
         res = ERR_NCX_WRONG_NODETYP;
     }
 
-    if (res == NO_ERR) {
-        /* start setting up the return value */
-        retval->editvars->editop = get_editop(startnode);
-
-        /* setup the first child in the complex object
-         * Allowed be NULL in some cases so do not check
-         * the result yet
-         */
-        chobj = obj_first_child(obj);
-    } else {
+    if (res != NO_ERR) {
         /* add rpc-error to msg->errQ */
-        (void)parse_error_subtree(scb, 
-                                  msg, 
-                                  startnode,
-                                  errnode, 
-                                  res, 
-                                  NCX_NT_NONE, 
-                                  NULL, 
-                                  NCX_NT_VAL, 
-                                  retval);
+        (void)parse_error_subtree(scb, msg, startnode, errnode, res, 
+                                  NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
         return res;
     }
+
+    /* start setting up the return value */
+    retval->editop = get_editop(startnode);
 
     if (empty) {
         return NO_ERR;
     }
+
+    /* setup the first child in the complex object
+     * Allowed be NULL in some cases so do not check
+     * the result yet
+     */
+    chobj = obj_first_child(obj);
 
     xml_init_node(&chnode);
 
     /* go through each child node until the parent end node */
     while (!done) {
         /* init per-loop vars */
+        val_value_t *chval;
         res2 = NO_ERR;
         errdone = FALSE;
         empty = FALSE;
-        chval = NULL;
 
         /* get the next node which should be a child or end node */
         res = get_xml_node(scb, msg, &chnode, TRUE);
         if (res != NO_ERR) {
             errdone = TRUE;
-            done = TRUE;
+            if (res != ERR_NCX_UNKNOWN_NS) {
+                done = TRUE;
+            }
         } else {
-#ifdef AGT_VAL_PARSE_DEBUG
+            log_debug3("\nparse_complex: expecting start-child "
+                       "or end node.");
             if (LOGDEBUG4) {
-                log_debug4("\nparse_complex: expecting start-child "
-                           "or end node.");
                 xml_dump_node(&chnode);
             }
-#endif
+
             /* validate the child member node type */
             switch (chnode.nodetyp) {
             case XML_NT_START:
@@ -2211,13 +2038,8 @@ static status_t
          * if no xmlorder, then check for any valid child
          */
         if (res==NO_ERR) {
-            res = obj_get_child_node(obj, 
-                                     chobj, 
-                                     &chnode, 
-                                     xmlorder,
-                                     NULL,
-                                     &topchild, 
-                                     &curchild);
+            res = obj_get_child_node(obj, chobj, &chnode, xmlorder,
+                                     NULL, &topchild, &curchild);
             if (res != NO_ERR) {
                 /* have no expected child element to match to 
                  * this XML node
@@ -2252,24 +2074,20 @@ static status_t
         /* check any errors in setting up the child node */
         if (res != NO_ERR) {
             /* try to skip just the child node sub-tree */
-            if (!errdone) {
-                /* add rpc-error to msg->errQ */
-                res2 = parse_error_subtree(scb, 
-                                           msg, 
-                                           &chnode,
-                                           errnode, 
-                                           res, 
-                                           NCX_NT_NONE, 
-                                           NULL, 
-                                           NCX_NT_VAL, 
-                                           retval);
+            if (res != ERR_XML_READER_EOF) {
+                if (errdone) {
+                    if (scb) {
+                        res2 = agt_xml_skip_subtree(scb, &chnode);
+                    }
+                } else {
+                    /* add rpc-error to msg->errQ */
+                    res2 = parse_error_subtree(scb, msg, &chnode, errnode, 
+                                               res, NCX_NT_NONE, NULL, 
+                                               NCX_NT_VAL, retval);
+                }
             }
             xml_clean_node(&chnode);
-            if (chval) {
-                val_free_value(chval);
-                chval = NULL;
-            }
-            if (res == ERR_NCX_UNKNOWN_NS || res2 != NO_ERR) {
+            if (res2 != NO_ERR) {
                 /* skip child didn't work, now skip the entire value subtree */
                 (void)agt_xml_skip_subtree(scb, startnode);
                 return res;
@@ -2287,12 +2105,8 @@ static status_t
          * in the child node
          */
         val_add_child(chval, retval);
-        res = parse_btype_nc(scb, 
-                             msg, 
-                             curchild,
-                             &chnode, 
-                             retval->dataclass, 
-                             chval);
+        res = parse_btype_nc(scb, msg, curchild, &chnode, 
+                             retval->dataclass, chval);
         chval->res = res;
         if (res != NO_ERR) {
             retres = res;
@@ -2411,12 +2225,21 @@ static status_t
         res = NO_ERR;
         metadef = NULL;
 
+        if (retval->editvars == NULL) {
+            res = val_new_editvars(retval);
+            if (res != NO_ERR) {
+                agt_record_error(scb, msg, NCX_LAYER_CONTENT, res, NULL,
+                                 NCX_NT_NONE, NULL, NCX_NT_VAL, retval);
+                return res;
+            }
+        }
+
         /* check qualified and unqualified operation attribute,
          * then the 'xmlns' attribute, then a defined attribute
          */
         if (val_match_metaval(attr, ncid, NC_OPERATION_ATTR_NAME)) {
-            retval->editvars->editop = op_editop_id(attr->attr_val);
-            if (retval->editvars->editop == OP_EDITOP_NONE) {
+            retval->editop = op_editop_id(attr->attr_val);
+            if (retval->editop == OP_EDITOP_NONE) {
                 res = ERR_NCX_INVALID_VALUE;
             } else {
                 retval->editvars->operset = TRUE;
@@ -2552,12 +2375,10 @@ static status_t
     obj_metadata_t *meta;
     obj_type_t            objtype;
     uint32                insertcnt, cnt, checkcnt;
-    status_t              res;
+    status_t              res = NO_ERR;
     xmlns_qname_t         qname;
-    xmlns_id_t            yangid;
-
-    res = NO_ERR;
-    yangid = xmlns_yang_id();
+    xmlns_id_t            yangid = xmlns_yang_id();
+    op_insertop_t         insop = OP_INSOP_NONE;
 
     if (!val->obj) {
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -2566,7 +2387,11 @@ static status_t
     objtype = val->obj->objtype;
 
     /* figure out how many key/value attributes are allowed */
-    switch (val->editvars->insertop) {
+    if (val->editvars) {
+        insop = val->editvars->insertop;
+    }
+
+    switch (insop) {
     case OP_INSOP_NONE:
         insertcnt = 0;
         checkcnt = 1;
@@ -2586,8 +2411,8 @@ static status_t
     }
 
     /* check if delete, these attrs not allowed at all then */
-    if (val->editvars->editop == OP_EDITOP_DELETE ||
-        val->editvars->editop == OP_EDITOP_REMOVE) {
+    if (val->editop == OP_EDITOP_DELETE ||
+        val->editop == OP_EDITOP_REMOVE) {
         checkcnt = 0;
     }
 
@@ -2611,7 +2436,7 @@ static status_t
     /* check the inst count of the YANG attributes
      * key attribute allowed for list only
      */
-    if (res == NO_ERR && val->editvars->insertstr) {
+    if (res == NO_ERR && val->editvars && val->editvars->insertstr) {
         if (val->editvars->iskey) {
             if (!checkcnt || val->obj->objtype != OBJ_TYP_LIST) {
                 res = ERR_NCX_EXTRA_ATTR;
@@ -2646,7 +2471,7 @@ static status_t
     }
 
     /* check missing value or key attributes */
-    if (res == NO_ERR && !val->editvars->insertstr &&
+    if (res == NO_ERR && val->editvars && !val->editvars->insertstr &&
         (val->editvars->insertop==OP_INSOP_BEFORE ||
          val->editvars->insertop==OP_INSOP_AFTER)) {
 
@@ -2755,7 +2580,7 @@ static status_t
     btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
-    retval->editvars->editop = OP_EDITOP_NONE;
+    retval->editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
 
     /* check namespace errors except if the type is ANY */
@@ -2769,47 +2594,23 @@ static status_t
     }
 
     /* parse the attributes, if any */
-    res2 = parse_metadata_nc(scb, 
-                             msg, 
-                             obj, 
-                             startnode, 
-                             nserr, 
-                             retval);
+    res2 = parse_metadata_nc(scb, msg, obj, startnode, nserr, retval);
 
     /* continue to parse the startnode depending on the base type 
      * to record as many errors as possible
      */
     switch (btyp) {
     case NCX_BT_ANY:
-        res = parse_any_nc(scb, 
-                           msg, 
-                           startnode, 
-                           parentdc, 
-                           retval);
+        res = parse_any_nc(scb, msg, startnode, parentdc, retval);
         break;
     case NCX_BT_ENUM:
-        res = parse_enum_nc(scb, 
-                            msg, 
-                            obj, 
-                            startnode, 
-                            parentdc, 
-                            retval);
+        res = parse_enum_nc(scb, msg, obj, startnode, parentdc, retval);
         break;
     case NCX_BT_EMPTY:
-        res = parse_empty_nc(scb, 
-                             msg, 
-                             obj, 
-                             startnode, 
-                             parentdc, 
-                             retval);
+        res = parse_empty_nc(scb, msg, obj, startnode, parentdc, retval);
         break;
     case NCX_BT_BOOLEAN:
-        res = parse_boolean_nc(scb, 
-                               msg, 
-                               obj, 
-                               startnode, 
-                               parentdc, 
-                               retval);
+        res = parse_boolean_nc(scb, msg, obj, startnode, parentdc, retval);
         break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
@@ -2821,13 +2622,7 @@ static status_t
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-        res = parse_num_nc(scb, 
-                           msg, 
-                           obj, 
-                           btyp, 
-                           startnode, 
-                           parentdc, 
-                           retval);
+        res = parse_num_nc(scb, msg, obj, btyp, startnode, parentdc, retval);
         break;
     case NCX_BT_LEAFREF:
     case NCX_BT_STRING:
@@ -2835,40 +2630,19 @@ static status_t
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
     case NCX_BT_INSTANCE_ID:
-        res = parse_string_nc(scb, 
-                              msg, 
-                              obj, 
-                              btyp,
-                              startnode, 
-                              parentdc,
-                              retval);
+        res = parse_string_nc(scb, msg, obj, btyp, startnode, parentdc, retval);
         break;
     case NCX_BT_IDREF:
-        res = parse_idref_nc(scb, 
-                             msg, 
-                             obj, 
-                             startnode, 
-                             parentdc, 
-                             retval);
+        res = parse_idref_nc(scb, msg, obj, startnode, parentdc, retval);
         break;
     case NCX_BT_UNION:
-        res = parse_union_nc(scb, 
-                             msg, 
-                             obj, 
-                             startnode, 
-                             parentdc, 
-                             retval);
+        res = parse_union_nc(scb, msg, obj, startnode, parentdc, retval);
         break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
-        res = parse_complex_nc(scb,
-                               msg, 
-                               obj,
-                               startnode, 
-                               parentdc,
-                               retval);
+        res = parse_complex_nc(scb, msg, obj, startnode, parentdc, retval);
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -2959,22 +2733,15 @@ status_t
     }
 #endif
 
-#ifdef AGT_VAL_PARSE_DEBUG
     if (LOGDEBUG3) {
         log_debug3("\nagt_val_parse: %s:%s btyp:%s", 
                    obj_get_mod_prefix(obj),
                    obj_get_name(obj), 
                    tk_get_btype_sym(obj_get_basetype(obj)));
     }
-#endif
 
     /* get the element values */
-    res = parse_btype_nc(scb, 
-                         msg, 
-                         obj, 
-                         startnode, 
-                         parentdc, 
-                         retval);
+    res = parse_btype_nc(scb, msg, obj, startnode, parentdc, retval);
     return res;
 
 }  /* agt_val_parse_nc */

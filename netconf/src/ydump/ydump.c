@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -968,6 +968,7 @@ static void
  *    treeformat == TRUE for tree format; FALSE for list forma
  *    startindent == startindent amount
  *    indent == indent amount
+ *    helpmode == verbosity level
  *
  * RETURNS:
  *    status
@@ -979,7 +980,8 @@ static status_t
                         uint32 bufflen,
                         boolean treeformat,
                         uint32 startindent,
-                        uint32 indent)
+                        uint32 indent,
+                        help_mode_t helpmode)
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childQ;
@@ -996,7 +998,11 @@ static status_t
         }
 
         if (!treeformat) {
-            res = obj_copy_object_id(obj, buff, bufflen, &reallen);
+            if (helpmode == HELP_MODE_FULL) {
+                res = obj_copy_object_id_mod(obj, buff, bufflen, &reallen);
+            } else {
+                res = obj_copy_object_id(obj, buff, bufflen, &reallen);
+            }
             if (res != NO_ERR) {
                 log_error("\nError: copy object ID failed (%s)",
                           get_error_string(res));
@@ -1028,7 +1034,8 @@ static status_t
                                      bufflen,
                                      treeformat,
                                      startindent+indent,
-                                     indent);
+                                     indent,
+                                     helpmode);
             if (res != NO_ERR) {
                 return res;
             }
@@ -1053,6 +1060,7 @@ static status_t
  *    bufflen == size of buff in bytes
  *    treeformat == TRUE for tree format; FALSE for list format
  *    indent == indent amount
+ *    helpmode == verbosity level
  *********************************************************************/
 static void
     output_one_module_identifiers (ncx_module_t *mod,
@@ -1060,7 +1068,8 @@ static void
                                    xmlChar *buff,
                                    uint32 bufflen,
                                    boolean treeformat,
-                                   uint32 indent)
+                                   uint32 indent,
+                                   help_mode_t helpmode)
 {
     status_t  res;
 
@@ -1070,7 +1079,8 @@ static void
                              bufflen,
                              treeformat,
                              indent,
-                             indent);
+                             indent,
+                             helpmode);
     if (res == NO_ERR) {
         ses_putchar(scb, '\n');
     }
@@ -1089,12 +1099,14 @@ static void
  *    cp == conversion parameters to use
  *    scb == session control block for output
  *    treeformat == TRUE for tree format; FALSE for list format
+ *    helpmode == verbosity level
  *********************************************************************/
 static void
     output_module_identifiers (yang_pcb_t *pcb,
                                yangdump_cvtparms_t *cp,
                                ses_cb_t *scb,
-                               boolean treeformat)
+                               boolean treeformat,
+                               help_mode_t helpmode)
 {
     ncx_module_t      *mod;
     yang_node_t       *node; 
@@ -1118,7 +1130,8 @@ static void
                                   (xmlChar *)cp->buff,
                                   cp->bufflen,
                                   treeformat,
-                                  cp->indent);
+                                  cp->indent,
+                                  helpmode);
 
     if ((cp->unified || cp->onemodule) && mod->ismod) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
@@ -1130,7 +1143,8 @@ static void
                                               (xmlChar *)cp->buff,
                                               cp->bufflen,
                                               treeformat,
-                                              cp->indent);
+                                              cp->indent,
+                                              helpmode);
             }
         }
     }
@@ -1495,11 +1509,11 @@ static status_t
         }
 
         if (cp->identifiers) {
-            output_module_identifiers(pcb, cp, scb, FALSE);
+            output_module_identifiers(pcb, cp, scb, FALSE, cp->helpsubmode);
         }
 
         if (cp->tree_identifiers) {
-            output_module_identifiers(pcb, cp, scb, TRUE);
+            output_module_identifiers(pcb, cp, scb, TRUE, cp->helpsubmode);
         }
 
         if (cp->collect_stats) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -164,6 +164,26 @@ extern "C" {
 #define AGT_FILE_SCHEME     (const xmlChar *)"file:///"
 
 
+/* tests for agt_commit_test_t flags field */
+#define AGT_TEST_FL_MIN_ELEMS  bit0
+#define AGT_TEST_FL_MAX_ELEMS  bit1
+#define AGT_TEST_FL_MANDATORY  bit2
+#define AGT_TEST_FL_MUST       bit3
+#define AGT_TEST_FL_UNIQUE     bit4
+#define AGT_TEST_FL_XPATH_TYPE bit5
+#define AGT_TEST_FL_CHOICE     bit6
+
+/* not really a commit test; done during delete_dead_nodes() */
+#define AGT_TEST_FL_WHEN       bit7
+
+/* mask for all the commit tests */
+#define AGT_TEST_ALL_COMMIT_MASK (bit0|bit1|bit2|bit3|bit4|bit5|bit6)
+
+/* mask for the subset of instance tests */
+#define AGT_TEST_INSTANCE_MASK (bit0|bit1|bit2|bit6)
+
+
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -180,16 +200,27 @@ typedef enum agt_acmode_t_ {
 } agt_acmode_t;
 
 
+/* server config state used in agt_val_root_check */
+typedef enum agt_config_state_t_ {
+    AGT_CFG_STATE_NONE,
+    AGT_CFG_STATE_INIT,
+    AGT_CFG_STATE_OK,
+    AGT_CFG_STATE_BAD
+} agt_config_state_t;
+
+
 /* enumeration of the different server callback types 
  * These are used are array indices so there is no dummy zero enum
+ * AGT_CB_TEST_APPLY has been replaced by AGT_CB_APPLY
+ * during the edit-config procedure
+ * AGT_CB_COMMIT_CHECK has been replaced by AGT_CB_VALIDATE
+ * during the commit procedure
  */
 typedef enum agt_cbtyp_t_ {
     AGT_CB_VALIDATE,               /* P1: write operation validate */
     AGT_CB_APPLY,                     /* P2: write operation apply */
     AGT_CB_COMMIT,               /* P3-pos: write operation commit */
-    AGT_CB_ROLLBACK,           /* P3-neg: write operation rollback */
-    AGT_CB_TEST_APPLY,         /* P1a-int: config data only, no CB */
-    AGT_CB_COMMIT_CHECK       /* P3-pre-test: cfg data only, no CB */
+    AGT_CB_ROLLBACK            /* P3-neg: write operation rollback */
 } agt_cbtyp_t;
 
 
@@ -201,10 +232,14 @@ typedef struct agt_profile_t_ {
     ncx_agttarg_t       agt_targ;
     ncx_agtstart_t      agt_start;
     log_debug_t         agt_loglevel;
+    boolean             agt_log_acm_reads;
+    boolean             agt_log_acm_writes;
+    boolean             agt_validate_all;
     boolean             agt_has_startup;
     boolean             agt_usestartup;   /* --no-startup flag */
     boolean             agt_factorystartup;   /* --factory-startup flag */
     boolean             agt_startup_error;  /* T: stop, F: continue */
+    boolean             agt_running_error;  /* T: stop, F: continue */
     boolean             agt_logappend;
     boolean             agt_xmlorder;
     boolean             agt_deleteall_ok;   /* TBD: not implemented */
@@ -229,8 +264,28 @@ typedef struct agt_profile_t_ {
     agt_acmode_t        agt_accesscontrol_enum;
     uint16              agt_ports[AGT_MAX_PORTS];
 
+    /****** state variables; TBD: move out of profile ******/
+
+    /* root commit test flags */
+    uint32              agt_rootflags;
+
+    /* server config state */
+    agt_config_state_t  agt_config_state;
+
+    /* server load-config errors */
+    boolean             agt_load_validate_errors;
+    boolean             agt_load_rootcheck_errors;
+    boolean             agt_load_apply_errors;
+
     /* Q of malloced ncx_save_deviations_t */
     dlq_hdr_t           agt_savedevQ;  
+
+    /* Q of malloced agt_commit_test_t */
+    dlq_hdr_t           agt_commit_testQ;  
+
+    /* cached location of startup transaction ID file */
+    xmlChar            *agt_startup_txid_file;
+
 } agt_profile_t;
 
 
@@ -426,6 +481,7 @@ extern status_t
 *********************************************************************/
 extern boolean
     agt_advertise_module_needed (const xmlChar *modname);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

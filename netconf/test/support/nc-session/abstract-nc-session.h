@@ -59,6 +59,14 @@ public:
     uint16_t allocateMessageId() 
     { return ++messageCount_; }
 
+    /**
+     * Return sessionId.
+     *
+     * \return the session id;
+     */
+    uint16_t getId() 
+    { return sessionId_; }
+
 protected:
     /**
      * Genearte a new log filename and add it to the internal map

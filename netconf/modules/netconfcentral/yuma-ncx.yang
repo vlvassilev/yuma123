@@ -18,6 +18,11 @@ module yuma-ncx {
      These elements may be present in appinfo elements,
      used in YANG to XSD translation.";
 
+  revision 2012-01-13 {
+    description 
+       "Added user-write extension.";
+  }
+
   revision 2011-09-30 {
     description 
        "Added default-parm-equals and sil-delete-children-first
@@ -621,6 +626,54 @@ module yuma-ncx {
       in the type-stmt of a typedef-stmt, leaf-stmt, 
       or leaf-list-stmt, or directly within a leaf-stmt or
       leaf-list-stmt.";
+  }
+
+  extension user-write {
+    description
+      "Used within database configuration data definition
+       statements to control user write access to the
+       database object containing this statement.
+
+       The 'permitted' argument is a list of operations
+       that users are permitted to invoke for the specified node.
+       These permissions will over-ride all NACM access control rules,
+       even if NACM is disabled.
+       
+       This extension does not apply to descendant nodes!
+       This extension has no effect if config-stmt is false!
+
+       The following values are supported:
+
+         * create : allow users to create instances of the object
+         * update : allow users to modify instances of the object
+         * delete : allow users to delete instances of the object
+
+       To dis-allow all user access, provide an empty string
+       for the 'permitted' parameter (user-write '';)
+
+       To allow only create and delete user access, provide
+       the string 'create delete' for the 'permitted' parameter.
+       Use this for parameters that cannot be changed once they
+       are set.
+
+       Providing all 3 parameters has the same affect as not using
+       this extension at all, but can be used anyway.
+
+       leaf user-write {
+         description 'equivalent YANG definition';
+         type bits {
+          bit create;
+          bit update;
+          bit delete;
+        }
+        default 'create update delete';
+      }
+
+    ";
+
+    argument exceptions {
+      yin-element true;
+    }
   }
 
 }

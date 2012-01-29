@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -26,125 +26,45 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_cap
 #include "agt_cap.h"
-#endif
-
-#ifndef _H_agt_cb
 #include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_cli
+#include "agt_cfg.h"
 #include "agt_cli.h"
-#endif
-
-#ifndef _H_agt_ncx
 #include "agt_ncx.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_rpcerr
 #include "agt_rpcerr.h"
-#endif
-
-#ifndef _H_agt_ses
 #include "agt_ses.h"
-#endif
-
-#ifndef _H_agt_sys
 #include "agt_sys.h"
-#endif
-
-#ifndef _H_agt_state
 #include "agt_state.h"
-#endif
-
-#ifndef _H_agt_time_filter
 #include "agt_time_filter.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_agt_val
 #include "agt_val.h"
-#endif
-
-#ifndef _H_cap
 #include "cap.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include  "tstamp.h"
-#endif
-
-#ifndef _H_val
 #include  "val.h"
-#endif
-
-#ifndef _H_xml_wr
 #include  "xml_wr.h"
-#endif
-
-#ifndef _H_yangconst
 #include  "yangconst.h"
-#endif
 
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#define AGT_NCX_DEBUG 1
 
 #define IF_MODIFIED_SINCE (const xmlChar *)"if-modified-since"
 
@@ -558,35 +478,22 @@ static status_t
                           rpc_msg_t *msg,
                           xml_node_t *methnode)
 {
-    cfg_template_t       *target;
-    val_value_t          *val, *urlval;
-    const agt_profile_t  *agt_profile;
-    const xmlChar        *urlstr;
-    xmlChar              *urlspec;
-    edit_parms_t         *editparms;
-    op_editop_t           defop;
-    op_errop_t            errop;
-    op_testop_t           testop;
-    status_t              res;
-
-    testop = OP_TESTOP_NONE;
-    errop = OP_ERROP_STOP;
-    defop = OP_EDITOP_MERGE;
-    urlstr = NULL;
-    urlval = NULL;
-    urlspec = NULL;
-    target = NULL;
+    cfg_template_t       *target = NULL;
+    val_value_t          *val = NULL, *urlval = NULL;
+    const agt_profile_t  *agt_profile = agt_get_profile();
+    const xmlChar        *urlstr = NULL;
+    xmlChar              *urlspec = NULL;
+    edit_parms_t         *editparms = NULL;
+    op_editop_t           defop = OP_EDITOP_MERGE;
+    op_errop_t            errop = OP_ERROP_STOP;
+    op_testop_t           testop = OP_TESTOP_NONE;
+    boolean               rootcheck = FALSE;
 
     /* check if the target config database exists */
-    res = agt_get_cfg_from_parm(NCX_EL_TARGET, 
-                                msg, 
-                                methnode, 
-                                &target);
+    status_t res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
     if (res != NO_ERR) {
         return res;  /* error already recorded */
     } 
-
-    agt_profile = agt_get_profile();
 
     /* check if the server supports this config as a target */
     if (target->cfg_id == NCX_CFGID_STARTUP ||
@@ -596,9 +503,7 @@ static status_t
 
         /* trying to edit running but this is not allowed */
         res = ERR_NCX_CONFIG_NOT_TARGET;
-        val = val_find_child(msg->rpc_input, 
-                             NC_MODULE,
-                             NCX_EL_TARGET);
+        val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_TARGET);
         agt_record_error(scb, 
                          &msg->mhdr, 
                          NCX_LAYER_OPERATION, 
@@ -612,9 +517,7 @@ static status_t
     }
 
     /* get the default-operation parameter */
-    val = val_find_child(msg->rpc_input, 
-                         NC_MODULE,
-                         NCX_EL_DEFAULT_OPERATION);
+    val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_DEFAULT_OPERATION);
     if (!val || val->res != NO_ERR) {
         /* set to the default if any error */
         defop = OP_EDITOP_MERGE;
@@ -623,9 +526,7 @@ static status_t
     }
 
     /* get the error-option parameter */
-    val = val_find_child(msg->rpc_input, 
-                         NC_MODULE,
-                         NCX_EL_ERROR_OPTION);
+    val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_ERROR_OPTION);
     if (!val || val->res != NO_ERR) {
         /* set to the default if any error */
         errop = OP_ERROP_STOP;
@@ -635,11 +536,9 @@ static status_t
 
     /* the internal processing needs to know if rollback is
      * requested to optimize the undo-prep and cleanup code path
+     * !!! This field is obsolete; rollback always done now !!!
      */
     msg->rpc_err_option = errop;
-    if (errop==OP_ERROP_ROLLBACK) {
-        msg->rpc_need_undo = TRUE;
-    }
 
     /* Get the test-option parameter:
      *
@@ -650,9 +549,7 @@ static status_t
      *
      * Get the value to check for the test-only extension
      */
-    val = val_find_child(msg->rpc_input, 
-                         NC_MODULE,
-                         NCX_EL_TEST_OPTION);
+    val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_TEST_OPTION);
     if (val == NULL) {
         /* set to the default if not present */
         if (agt_profile->agt_usevalidate) {
@@ -679,20 +576,18 @@ static status_t
     }
 
     /* try to get the config parameter */
-    val = val_find_child(msg->rpc_input, 
-                         NC_MODULE,
-                         NCX_EL_CONFIG);
+    val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_CONFIG);
     if (val == NULL) {
+        val_value_t *errval = NULL;
+
         /* try to get the config parameter */
-        res = agt_get_url_from_parm(NCX_EL_URL,
-                                    msg,
-                                    methnode,
-                                    &urlstr);
+        res = agt_get_url_from_parm(NCX_EL_URL, msg, methnode, 
+                                    &urlstr, &errval);
         if (res == NO_ERR) {
             /* get the filespec out of the URL */
-            urlspec = agt_get_filespec_from_url(urlstr, &res);     
+            urlspec = agt_get_filespec_from_url(urlstr, &res);
 
-            if (urlspec != NULL || res == NO_ERR) {
+            if (urlspec != NULL && res == NO_ERR) {
                 /* get the external file loaded into a value struct
                  * for the <nc:config> object node
                  */           
@@ -702,8 +597,53 @@ static status_t
                                               RPC_ERR_QUEUE(msg), 
                                               &res);
                 urlval = val;
+            } else {
+                /* convert file name to full filespec failed */
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res,
+                                 methnode, 
+                                 NCX_NT_VAL, 
+                                 errval, 
+                                 NCX_NT_VAL, 
+                                 errval);
             }
         } /* else error done */
+    }
+
+    /* if this is an edit-config on running or a test-then-set edit 
+     * on candidate then force an agt_val_root_check after the
+     * apply phase; rollback will be done if any test fails     */
+    if (res==NO_ERR &&
+        ((target->cfg_id == NCX_CFGID_RUNNING) ||
+         (target->cfg_id == NCX_CFGID_CANDIDATE &&
+          testop == OP_TESTOP_TESTTHENSET))) {
+        /* !!! defer this test; just apply for real and
+         * !!! rollback the edits if root check fails
+         * !!! force a rootcheck in the apply phase   */
+        rootcheck = TRUE;
+    }
+
+    if (res == NO_ERR) {
+        /* allocate a new transaction control block */
+        msg->rpc_txcb = 
+            agt_cfg_new_transaction(target->cfg_id, AGT_CFG_EDIT_TYPE_PARTIAL,
+                                    rootcheck, &res);
+        if (msg->rpc_txcb == NULL || res != NO_ERR) {
+            if (res == NO_ERR) {
+                res = ERR_NCX_OPERATION_FAILED;
+            }
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             methnode, 
+                             NCX_NT_NONE, 
+                             NULL, 
+                             NCX_NT_NONE, 
+                             NULL);
+        }
     }
 
     if (res == NO_ERR && val != NULL && val->res == NO_ERR) {
@@ -714,36 +654,15 @@ static status_t
          * attributes) against the existing data model.
          * <rpc-error> records will be added as needed 
          */
-        res = agt_val_validate_write(scb, 
-                                     msg, 
-                                     target, 
-                                     val, 
-                                     defop);
+        res = agt_val_validate_write(scb, msg, target, val, defop);
 
-        /* for continue-on-error, DO NOT ignore the validate return value
-         * make sure the entire change set is acceptable to the server
-         * schema syntax and server callback validate functions
-         *
-         * if this is an edit-config on running
-         * or a test-then-set edit on candidate
-         * then make a copy of the root and do a
-         * complete non-destructive validation
-         */
-        if (res==NO_ERR &&
-            ((target->cfg_id == NCX_CFGID_RUNNING) ||
-             (target->cfg_id == NCX_CFGID_CANDIDATE &&
-              testop == OP_TESTOP_TESTTHENSET))) {
-            res = agt_val_split_root_check(scb, 
-                                           msg, 
-                                           val, 
-                                           target->root, 
-                                           defop);
+    } else if (res == NO_ERR) {
+        if (!val) {
+            /* this is reported in agt_val_parse phase */
+            res = ERR_NCX_DATA_MISSING;
+        } else {
+            res = val->res;
         }
-    } else if (!val) {
-        /* this is reported in agt_val_parse phase */
-        res = ERR_NCX_DATA_MISSING;
-    } else {
-        res = val->res;
     }
 
     /* save the edit options in 'user1' */
@@ -763,7 +682,7 @@ static status_t
         } else {
             editparms->target = target;
             editparms->srcval = val;
-            editparms->urlval = urlval;
+            editparms->urlval = urlval;  /* transfer memory here */
             editparms->defop = defop;
             editparms->testop = testop;
             msg->rpc_user1 = (void *)editparms;            
@@ -823,11 +742,7 @@ static status_t
     }
 
     /* apply the <config> into the target config */
-    res = agt_val_apply_write(scb, 
-                              msg, 
-                              target, 
-                              (srcval) ? srcval : urlval,
-                              defop);
+    res = agt_val_apply_write(scb, msg, target, srcval, defop);
 
     /* check if the NV-storage needs to be updated after each
      * successful edit-config 
@@ -842,7 +757,6 @@ static status_t
                       get_error_string(res));
         }
     }
-
 
     /* cleanup the urlval and editparms
      * allocated in validate callback 
@@ -888,6 +802,7 @@ static status_t
     const void* errPtr = 0;
     ncx_node_t errNodeType = NCX_NT_NONE;
     const cap_list_t   *mycaps = agt_cap_get_caps();
+    val_value_t *errval2 = NULL;
 
     if ( !mycaps ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -920,7 +835,9 @@ static status_t
                                                methnode, srcval );
     } else if ( ERR_NCX_FOUND_URL == res  ) {
         const xmlChar *srcurl = NULL;
-        res = agt_get_url_from_parm( NCX_EL_SOURCE, msg, methnode, &srcurl );
+        
+        res = agt_get_url_from_parm( NCX_EL_SOURCE, msg, methnode, 
+                                     &srcurl, &errval2 );
         if ( NO_ERR == res ) {
             if ( srcurl )
             {
@@ -936,7 +853,7 @@ static status_t
                                                           &ignoreRes );
                     }
                 } else {
-                    res = ERR_INTERNAL_PTR;
+                    res = SET_ERROR(ERR_INTERNAL_PTR);
                 }
 
                 errPtr = srcurl;
@@ -949,8 +866,13 @@ static status_t
         /* set the errval to the destval for now, just in case
          * look for more errors, even if src already invalid
          */
-        val_value_t* errval = val_find_child( msg->rpc_input, NC_MODULE, 
-                                              NCX_EL_SOURCE );
+        val_value_t* errval;
+        if (errval2) {
+            errval = errval2;
+        } else {
+            errval = val_find_child( msg->rpc_input, NC_MODULE, 
+                                     NCX_EL_SOURCE );
+        }
 
         /* the sourcs is not found */
         agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
@@ -990,6 +912,7 @@ static status_t
     const void* errPtr = 0;
     ncx_node_t errNodeType = NCX_NT_NONE;
     const cap_list_t   *mycaps = agt_cap_get_caps();
+    val_value_t *errval2 = NULL;
 
     if ( !mycaps ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -1028,7 +951,8 @@ static status_t
         res =  ERR_NCX_OPERATION_NOT_SUPPORTED;
     } else if ( ERR_NCX_FOUND_URL == res ) {
         const xmlChar *desturl = NULL;
-        res = agt_get_url_from_parm( NCX_EL_TARGET, msg, methnode, &desturl );
+        res = agt_get_url_from_parm( NCX_EL_TARGET, msg, methnode, 
+                                     &desturl, &errval2 );
         if ( NO_ERR == res ) {
             if ( desturl ) {
                 /* check the destination URL */
@@ -1056,8 +980,13 @@ static status_t
         /* set the errval to the destval for now, just in case
          * look for more errors, even if src already invalid
          */
-        val_value_t* errval = val_find_child( msg->rpc_input, NC_MODULE, 
-                                              NCX_EL_TARGET );
+        val_value_t* errval;
+        if (errval2) {
+            errval = errval2;
+        } else {
+            errval = val_find_child( msg->rpc_input, NC_MODULE, 
+                                     NCX_EL_TARGET );
+        }
 
         /* cannot use this configuration datastore */
         agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
@@ -1065,6 +994,8 @@ static status_t
     }
     return res;
 }
+
+
 /********************************************************************
 * FUNCTION copy_config_validate
 *
@@ -1127,7 +1058,7 @@ static status_t
         else if ( srcurlspec  && desturlspec ) {
             const xmlChar *desturl = NULL;
             res = agt_get_url_from_parm( NCX_EL_TARGET, msg, 
-                                         methnode, &desturl );
+                                         methnode, &desturl, &errval );
 
             res = ERR_NCX_OPERATION_NOT_SUPPORTED;
 
@@ -1157,6 +1088,10 @@ static status_t
     /* get the config state; check if database already locked */
     if ( NO_ERR == res && destcfg ) {
         res = cfg_ok_to_write(destcfg, SES_MY_SID(scb));
+        /* make sure no transaction in progress (should not happen) */
+        if (res == NO_ERR && agt_cfg_txid_in_progress(destcfg->cfg_id)) {
+            res = ERR_NCX_NO_ACCESS_STATE;
+        }
         if (res != NO_ERR) {
             agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
                               methnode, NCX_NT_CFG, (const void *)destcfg, 
@@ -1167,12 +1102,30 @@ static status_t
     if ( NO_ERR == res && srcval && destcfg && 
          destcfg->cfg_id != NCX_CFGID_STARTUP) {
 
-        /* validate the <config> element (wrt/ embedded operation
-         * attributes) against the existing data model.
-         * <rpc-error> records will be added as needed 
-         */
-        res = agt_val_validate_write( scb, msg, destcfg, srcval, 
-                                      OP_EDITOP_REPLACE );
+        /* allocate a transaction control block */
+        msg->rpc_txcb = 
+            agt_cfg_new_transaction(destcfg->cfg_id, AGT_CFG_EDIT_TYPE_FULL,
+                                    FALSE, &res);
+        if (msg->rpc_txcb == NULL || res != NO_ERR) {
+            if (res == NO_ERR) {
+                res = ERR_NCX_OPERATION_FAILED;
+            }
+            agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+                              methnode, NCX_NT_NONE, NULL, NCX_NT_NONE, NULL );
+        }
+        if (res == NO_ERR) {
+            /* validate the <config> element (wrt/ embedded operation
+             * attributes) against the existing data model.
+             * <rpc-error> records will be added as needed 
+             */
+            msg->rpc_top_editop = OP_EDITOP_REPLACE;
+            res = agt_val_validate_write( scb, msg, destcfg, srcval, 
+                                          OP_EDITOP_REPLACE );
+
+            /* since the running config is not supported as a target,
+             * there is no need to run an agt_val_root_check on
+             * the result of the full-root replace operation  */
+        }
     }
 
     /* setup the edit parms to save for the invoke phase */
@@ -1232,12 +1185,9 @@ static status_t
                         rpc_msg_t *msg,
                         xml_node_t *methnode)
 {
-    copy_parms_t   *copyparms;
-    val_value_t    *sourceval;
-    status_t        res;
-
-    res = NO_ERR;
-    copyparms = (copy_parms_t *)msg->rpc_user1;
+    copy_parms_t   *copyparms = (copy_parms_t *)msg->rpc_user1;
+    val_value_t    *sourceval = NULL;
+    status_t        res = NO_ERR;
 
     if (copyparms->srcval != NULL ||
         copyparms->srcurlval != NULL) {
@@ -1259,13 +1209,17 @@ static status_t
                 res = NO_ERR;
                 copyparms->destfile = agt_get_startup_filespec(&res);
                 if (copyparms->destfile != NULL && res == NO_ERR) {
-                    res = cfg_save_inline(copyparms->destfile, 
-                                          sourceval,
-                                          TRUE);
+                    res = cfg_save_inline(copyparms->destfile, sourceval, TRUE);
                 }
                 break;
             case NCX_CFGID_CANDIDATE:
-                res = cfg_fill_candidate_from_inline(sourceval);
+                /* do not just blindly apply the replace write
+                 * instead, use the same API as for edit-config
+                 * except the edit_type is set differently  */
+                /* res = cfg_fill_candidate_from_inline(sourceval); */
+                msg->rpc_top_editop = OP_EDITOP_REPLACE;
+                res = agt_val_apply_write(scb, msg, copyparms->destcfg,
+                                          sourceval, OP_EDITOP_REPLACE);
                 break;
             default:
                 res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1275,13 +1229,10 @@ static status_t
             if (copyparms->destfile == NULL) {
                 /* creating a new file; get the destfile to use */
                 copyparms->destfile = 
-                    agt_get_target_filespec(copyparms->desturlspec,
-                                            &res);
+                    agt_get_target_filespec(copyparms->desturlspec, &res);
             } 
             if (res == NO_ERR) {
-                res = cfg_save_inline(copyparms->destfile, 
-                                      sourceval,
-                                      FALSE);
+                res = cfg_save_inline(copyparms->destfile, sourceval, FALSE);
             }
         } else {
             res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1317,13 +1268,11 @@ static status_t
             if (copyparms->destfile == NULL) {
                 /* creating a new file; get the destfile to use */
                 copyparms->destfile = 
-                    agt_get_target_filespec(copyparms->desturlspec,
-                                            &res);
+                    agt_get_target_filespec(copyparms->desturlspec, &res);
             } 
             if (res == NO_ERR) {
                 res = cfg_save_inline(copyparms->destfile, 
-                                      copyparms->srccfg->root,
-                                      FALSE);
+                                      copyparms->srccfg->root, FALSE);
             }
         } else {
             res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -1377,31 +1326,20 @@ static status_t
                             xml_node_t *methnode)
 {
     const agt_profile_t  *prof;
-    cfg_template_t       *target;
+    cfg_template_t       *target = NULL;
     status_t              res;
-    const void           *errval;
-    const xmlChar        *desturl;
-    xmlChar              *desturlspec, *destfile;
-    char                 *errstr;
+    void                 *errval = NULL;
+    const xmlChar        *desturl = NULL;
+    xmlChar              *desturlspec = NULL, *destfile = NULL;
+    char                 *errstr = NULL;
+    val_value_t          *urlval = NULL;
     ncx_node_t            errtyp;
 
-    target = NULL;
-    desturl = NULL;
-    desturlspec = NULL;
-    destfile = NULL;
-    errval = NULL;
-    errstr = NULL;
-
     /* get the config to delete */
-    res = agt_get_cfg_from_parm(NCX_EL_TARGET, 
-                                msg, 
-                                methnode, 
-                                &target);
+    res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
     if (res == ERR_NCX_FOUND_URL) {
-        res = agt_get_url_from_parm(NCX_EL_TARGET, 
-                                    msg, 
-                                    methnode, 
-                                    &desturl);
+        res = agt_get_url_from_parm(NCX_EL_TARGET, msg, methnode, 
+                                    &desturl, &urlval);
         if (res != NO_ERR) {
             /* errors already recorded */
             return res;
@@ -1433,9 +1371,7 @@ static status_t
 
                 /* check the URL parameter to see if it is valid */
                 if (desturlspec != NULL && res == NO_ERR) {
-                    destfile = ncxmod_find_data_file(desturlspec, 
-                                                     FALSE, 
-                                                     &res);
+                    destfile = ncxmod_find_data_file(desturlspec, FALSE, &res);
                 }
             }
         } else if (target->cfg_id == NCX_CFGID_STARTUP) {
@@ -1455,12 +1391,13 @@ static status_t
     }
 
     if (res != NO_ERR) {
-        errval = agt_get_parmval(NCX_EL_TARGET, msg);
+        errval = urlval ? urlval :
+            val_find_child(msg->rpc_input, val_get_mod_name(msg->rpc_input),
+                           NCX_EL_TARGET);
         if (errval) {
             errtyp = NCX_NT_VAL;
         } else {
-            errval = NCX_EL_TARGET;
-            errtyp = NCX_NT_STRING;
+            errtyp = NCX_NT_NONE;
         }
 
         errstr = strdup("/nc:rpc/nc:delete-config/nc:target");
@@ -1469,10 +1406,10 @@ static status_t
                          NCX_LAYER_OPERATION, 
                          res, 
                          methnode, 
-                         errtyp, 
-                         errval,
                          (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
-                         errstr);
+                         errstr,
+                         errtyp, 
+                         errval);
         if (errstr != NULL) {
             m__free(errstr);
         }
@@ -1896,69 +1833,47 @@ static status_t
                        rpc_msg_t *msg,
                        xml_node_t *methnode)
 {
-    cfg_template_t       *target;
-    val_value_t          *val, *child, *rootval, *urlval;
-    const xmlChar        *errstr, *urlstr;
-    const agt_profile_t  *profile;
-    xmlChar              *urlspec, *urlfilename;
-    status_t              res;
-    boolean               needfullcheck;
-
-    target = NULL;
-    res = NO_ERR;
-    rootval = NULL;
-    errstr = NULL;
-    child = NULL;
-    urlstr = NULL;
-    urlspec = NULL;
-    urlval = NULL;
-    urlfilename = NULL;
-    needfullcheck = TRUE;
-    profile = agt_get_profile();
+    cfg_template_t *target = NULL;
+    val_value_t *val = NULL, *child = NULL, *rootval = NULL, *urlval = NULL;
+    const xmlChar *errstr = NULL, *urlstr = NULL;
+    const agt_profile_t  *profile = agt_get_profile();
+    xmlChar *urlspec = NULL, *urlfilename = NULL;
+    status_t res = NO_ERR;
+    boolean errdone = FALSE, delneeded = FALSE, needfullcheck = FALSE;
 
     if (!profile->agt_usevalidate) {
         res = ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
     if (res == NO_ERR) {
-        /* get the source parameter */
-        val = val_find_child(msg->rpc_input, 
-                             NC_MODULE,
-                             NCX_EL_SOURCE);
+        /* attempt to get the source parameter */
+        val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_SOURCE);
         if (!val || val->res != NO_ERR) {
-            if (val) {
-                res = val->res;
-            } else {
-                res = ERR_NCX_OPERATION_FAILED;
-            }
+            res = val ? val->res : ERR_NCX_OPERATION_FAILED;
             errstr = NCX_EL_SOURCE;
+        }
+    }
+
+    if (res == NO_ERR) {
+        /* attempt to get the child parameter */
+        child = val_get_first_child(val);
+        if (!child || child->res != NO_ERR) {
+           res = child ? child->res : ERR_NCX_MISSING_PARM;
+           errstr = child ? child->name : NCX_EL_SOURCE;
         }
     }
 
     /* determine which variant of the input parameter is present */
     if (res == NO_ERR) {
-        child = val_get_first_child(val);
-        if (!child || child->res != NO_ERR) {
-            if (child) {
-                res = child->res;
-                errstr = child->name;
-            } else {
-                res = ERR_NCX_MISSING_PARM;
-                errstr = NCX_EL_SOURCE;
-            }
-        }
-    }
-
-    if (res == NO_ERR) {
         if (!xml_strcmp(child->name, NCX_EL_RUNNING)) {
             target = cfg_get_config_id(NCX_CFGID_RUNNING);
-            needfullcheck = FALSE;
         } else if (!xml_strcmp(child->name, NCX_EL_CANDIDATE)) {
             if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
                 res = ERR_NCX_OPERATION_NOT_SUPPORTED;
                 errstr = child->name;
             } else {
                 target = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+                needfullcheck = TRUE;
             }
         } else if (!xml_strcmp(child->name, NCX_EL_STARTUP)) {
             if (!profile->agt_has_startup) {
@@ -1966,7 +1881,6 @@ static status_t
                 errstr = child->name;
             } else {
                 target = cfg_get_config_id(NCX_CFGID_STARTUP);
-
             }
         } else if (!xml_strcmp(child->name, NCX_EL_URL)) {
             urlstr = VAL_STR(child);
@@ -1975,31 +1889,29 @@ static status_t
             /* get the filespec out of the URL */
             urlspec = agt_get_filespec_from_url(urlstr, &res);     
 
-            if (urlspec != NULL || res == NO_ERR) {
+            if (urlspec || res == NO_ERR) {
                 urlfilename = ncxmod_find_data_file(urlspec, FALSE, &res);
 
-                if (urlfilename != NULL && res == NO_ERR) {
+                if (urlfilename && res == NO_ERR) {
                     /* get the external file loaded into a value struct
                      * for the <nc:config> object node
                      */           
                     target = cfg_get_config_id(NCX_CFGID_RUNNING);
-                    urlval = agt_rpc_get_config_file(urlfilename,
-                                                     target,
-                                                     SES_MY_SID(scb), 
-                                                     RPC_ERR_QUEUE(msg), 
-                                                     &res);
+                    urlval = agt_rpc_get_config_file(urlfilename, target,
+                                 SES_MY_SID(scb), RPC_ERR_QUEUE(msg), &res);
                     if (res == NO_ERR) {
                         rootval = urlval;
-                        needfullcheck = FALSE;
+                        delneeded = TRUE;
                     }
                 }
             }
         } else if (!xml_strcmp(child->name, NCX_EL_CONFIG)) {
             rootval = child;
+            delneeded = TRUE;
         }
 
-        if (res == NO_ERR && rootval == NULL) {
-            if (target == NULL || target->root == NULL) {
+        if (res == NO_ERR && !rootval) {
+            if (!target || !target->root) {
                 res = ERR_NCX_OPERATION_FAILED;
                 errstr = child->name;
             } else {
@@ -2008,31 +1920,46 @@ static status_t
         }
     }
 
-    if (res != NO_ERR) {
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res, 
-                         methnode,
-                         (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
-                         (errstr) ? errstr : NULL,
-                         (rootval) ? NCX_NT_VAL : NCX_NT_NONE, 
-                         (rootval) ? rootval : NULL);
-    } else {
+    if (res == NO_ERR) {
         /* set the error parameter to gather the most errors */
         msg->rpc_err_option = OP_ERROP_CONTINUE;
 
-        if (needfullcheck) {
-            res = agt_val_validate_write(scb,
-                                         msg, 
-                                         NULL, 
-                                         rootval, 
-                                         OP_EDITOP_LOAD);
+        /* allocate a transaction control block; the target cfg_id will
+         * be ignored if this is an inline validate   */
+        msg->rpc_txcb = 
+            agt_cfg_new_transaction(target ? target->cfg_id : NCX_CFGID_RUNNING,
+                                    AGT_CFG_EDIT_TYPE_FULL, FALSE, &res);
+        if (msg->rpc_txcb == NULL || res != NO_ERR) {
+            if (res == NO_ERR) {
+                res = ERR_NCX_OPERATION_FAILED;
+            }
+        } else {
+            /* the validate command is just a root check
+             * there are no individual edits to check, so the
+             * SIL validate callbacks do not need to be called */
+            if (delneeded) {
+                res = agt_val_delete_dead_nodes(scb, msg, rootval);
+                // errors recorded if res != NO_ERR
+            }
+            if (res == NO_ERR && needfullcheck) {
+                /* set target to NULL to suppress checks on any locks */
+                op_editop_t useop = (profile->agt_validate_all) ?
+                    OP_EDITOP_LOAD : OP_EDITOP_COMMIT;
+                
+                res = agt_val_validate_write(scb, msg, NULL, rootval, useop);
+            }
+            if (res == NO_ERR) {
+                res = agt_val_root_check(scb, &msg->mhdr, msg->rpc_txcb, 
+                                         rootval);
+            }
+            errdone = TRUE;  // rpc-error already recorded if res != NO_ERR
         }
+    }
 
-        if (res == NO_ERR) {
-            res = agt_val_root_check(scb, msg, rootval);
-        }
+    if (res != NO_ERR && !errdone) {
+        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, 
+                         methnode, (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
+                         (errstr) ? errstr : NULL, NCX_NT_NONE, NULL);
     }
 
     if (urlval != NULL) {
@@ -2065,88 +1992,97 @@ static status_t
                      rpc_msg_t *msg,
                      xml_node_t *methnode)
 {
-    cfg_template_t       *candidate, *running;
-    const agt_profile_t  *profile;
-    val_value_t          *errval;
-    status_t              res;
-    boolean               errdone;
-
-
-    res = NO_ERR;
-    errdone = FALSE;
-    errval = NULL;
-    profile = agt_get_profile();
+    const agt_profile_t  *profile = agt_get_profile();
+    val_value_t          *errval = NULL;
+    status_t              res = NO_ERR;
+    boolean               errdone = FALSE;
 
     if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
         res = ERR_NCX_OPERATION_NOT_SUPPORTED;
     } else {
         /* get the candidate config */
-        candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
-        running = cfg_get_config_id(NCX_CFGID_RUNNING);
-        if (candidate == NULL || running == NULL) {
-            res = SET_ERROR(ERR_INTERNAL_VAL);
-        } else {
-            val_value_t *persistval, *persistidval;
+        cfg_template_t *candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+        cfg_template_t *running = cfg_get_config_id(NCX_CFGID_RUNNING);
 
-            /* make sure base:1.1 params allowed if present */
-            persistval = val_find_child(msg->rpc_input,
-                                        val_get_mod_name(msg->rpc_input),
-                                        NCX_EL_PERSIST);
-            persistidval = val_find_child(msg->rpc_input,
-                                          val_get_mod_name(msg->rpc_input),
-                                          NCX_EL_PERSIST_ID);
+        assert ( candidate && "candidate is NULL!" );
+        assert ( running && "candidate is NULL!" );
 
-            if ((persistval != NULL || persistidval != NULL) &&
-                ses_get_protocol(scb) == NCX_PROTO_NETCONF10) {
-                res = ERR_NCX_PROTO11_NOT_ENABLED;
-                if (persistval != NULL) {
-                    errval = persistval;
-                } else {
-                    errval = persistidval;
+        val_value_t *persistval, *persistidval;
+
+        /* make sure base:1.1 params allowed if present */
+        persistval = val_find_child(msg->rpc_input,
+                                    val_get_mod_name(msg->rpc_input),
+                                    NCX_EL_PERSIST);
+        persistidval = val_find_child(msg->rpc_input,
+                                      val_get_mod_name(msg->rpc_input),
+                                      NCX_EL_PERSIST_ID);
+
+        if ((persistval != NULL || persistidval != NULL) &&
+            ses_get_protocol(scb) == NCX_PROTO_NETCONF10) {
+            res = ERR_NCX_PROTO11_NOT_ENABLED;
+            if (persistval != NULL) {
+                errval = persistval;
+            } else {
+                errval = persistidval;
+            }
+        }
+
+        if (res == NO_ERR && persistidval != NULL) {
+            if (!commit_cb.cc_active) {
+                res = ERR_NCX_CC_NOT_ACTIVE;
+                errval = persistidval;
+            } else if (commit_cb.cc_persist_id == NULL ||
+                       xml_strcmp(VAL_STR(persistidval),
+                                  commit_cb.cc_persist_id)) {
+                res = ERR_NCX_INVALID_VALUE;
+                errval = persistidval;
+            }
+        }
+
+        if (res == NO_ERR) {
+            /* check if the candidate config can be written */
+            res = cfg_ok_to_write(candidate, SES_MY_SID(scb));
+        }
+
+        if (res == NO_ERR) {
+            /* check if the running config can be written */
+            res = cfg_ok_to_write(running, SES_MY_SID(scb));
+        }
+
+
+        if (res == NO_ERR) {
+            /* allocate a transaction control block */
+            msg->rpc_txcb = 
+                agt_cfg_new_transaction(NCX_CFGID_RUNNING, 
+                                        AGT_CFG_EDIT_TYPE_FULL, FALSE, &res);
+            if (msg->rpc_txcb == NULL || res != NO_ERR) {
+                if (res == NO_ERR) {
+                    res = ERR_NCX_OPERATION_FAILED;
                 }
-            }
-
-            if (res == NO_ERR && persistidval != NULL) {
-                if (!commit_cb.cc_active) {
-                    res = ERR_NCX_CC_NOT_ACTIVE;
-                    errval = persistidval;
-                } else if (commit_cb.cc_persist_id == NULL ||
-                           xml_strcmp(VAL_STR(persistidval),
-                                      commit_cb.cc_persist_id)) {
-                    res = ERR_NCX_INVALID_VALUE;
-                    errval = persistidval;
-                }
-            }
-
-            /* check if this session is allowed to clear the
-             * candidate config now
-             */
-            if (res == NO_ERR) {
-                res = cfg_ok_to_write(candidate, SES_MY_SID(scb));
-            }
-
-            if (res == NO_ERR) {
-                /* check if the running config can be written */
-                res = cfg_ok_to_write(running, SES_MY_SID(scb));
-            }
-
-            if (res == NO_ERR) {
-                res = agt_val_root_check(scb, 
-                                         msg, 
-                                         candidate->root);
+                agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+                                  methnode, NCX_NT_NONE, NULL, NCX_NT_NONE,
+                                  NULL );
+                errdone = TRUE;
+            } else {
+                /* check if this session allowed to perform all the
+                 * edits in the commit request   */
+                msg->rpc_txcb->commitcheck = TRUE;
+                res = agt_val_check_commit_edits(scb, msg, candidate, running);
                 if (res != NO_ERR) {
                     errdone = TRUE;
                 }
-            }
 
-            if (res == NO_ERR) {
-                res = agt_val_check_commit_locks(scb,
-                                                 msg,
-                                                 candidate,
-                                                 running);
-                if (res != NO_ERR) {
-                    errdone = TRUE;
+                /* do not need to delete dead nodes in candidate because
+                 * it is already done at the end of every edit */
+
+                if (res == NO_ERR ) {
+                    res = agt_val_root_check(scb, &msg->mhdr, msg->rpc_txcb,
+                                             candidate->root);
+                    if (res != NO_ERR) {
+                        errdone = TRUE;
+                    }
                 }
+                msg->rpc_txcb->commitcheck = FALSE;
             }
         }
     }
@@ -2256,10 +2192,11 @@ static status_t
     cfg_template_t *candidate, *running;
     xmlChar        *fname;
     status_t        res;
-    boolean         save_nvstore, errdone;
+    boolean         save_nvstore, errdone, timeout_extended;
 
     res = NO_ERR;
     errdone = FALSE;
+    timeout_extended = FALSE;
     errval = NULL;
 
     candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
@@ -2366,11 +2303,9 @@ static status_t
                 /* extend the timer */
                 (void)time(&commit_cb.cc_start_time);
                 if (timeoutval != NULL) {
-                    commit_cb.cc_cancel_timeout = 
-                        VAL_UINT(timeoutval);
+                    commit_cb.cc_cancel_timeout = VAL_UINT(timeoutval);
                 } else {
-                    commit_cb.cc_cancel_timeout = 
-                        NCX_DEF_CONFIRM_TIMEOUT;
+                    commit_cb.cc_cancel_timeout = NCX_DEF_CONFIRM_TIMEOUT;
                 }
                 if (LOGDEBUG2) {
                     log_debug2("\nConfirmed commit timer extended "
@@ -2378,8 +2313,8 @@ static status_t
                                commit_cb.cc_cancel_timeout);
                 }
                 save_nvstore = FALSE;
-                agt_sys_send_sysConfirmedCommit(scb,
-                                                NCX_CC_EVENT_EXTEND);
+                timeout_extended = TRUE;
+                agt_sys_send_sysConfirmedCommit(scb, NCX_CC_EVENT_EXTEND);
             }
         } else {
             /* confirmedval == NULL; finishing conf-commit */
@@ -2398,8 +2333,7 @@ static status_t
                 res = agt_ncx_cfg_save(running, FALSE);
             }
             if (res == NO_ERR) {
-                agt_sys_send_sysConfirmedCommit(scb,
-                                                NCX_CC_EVENT_COMPLETE);
+                agt_sys_send_sysConfirmedCommit(scb, NCX_CC_EVENT_COMPLETE);
 
                 clear_commit_cb();
             }
@@ -2447,11 +2381,9 @@ static status_t
                 /* set the timer */
                 (void)time(&commit_cb.cc_start_time);
                 if (timeoutval) {
-                    commit_cb.cc_cancel_timeout = 
-                        VAL_UINT(timeoutval);
+                    commit_cb.cc_cancel_timeout = VAL_UINT(timeoutval);
                 } else {
-                    commit_cb.cc_cancel_timeout = 
-                        NCX_DEF_CONFIRM_TIMEOUT;
+                    commit_cb.cc_cancel_timeout = NCX_DEF_CONFIRM_TIMEOUT;
                 }
                 commit_cb.cc_active = TRUE;
                 save_nvstore = FALSE;
@@ -2461,8 +2393,7 @@ static status_t
                                "%u seconds",
                                commit_cb.cc_cancel_timeout);
                 }
-                agt_sys_send_sysConfirmedCommit(scb,
-                                                NCX_CC_EVENT_START);
+                agt_sys_send_sysConfirmedCommit(scb, NCX_CC_EVENT_START);
             }
         } else {
             /* no confirmed commit is starting */
@@ -2476,9 +2407,7 @@ static status_t
     if (res == NO_ERR &&
         commit_cb.cc_backup_source == NULL) {
         /* search for the default startup-cfg.xml filename */
-        fname = ncxmod_find_data_file(NCX_DEF_BACKUP_FILE, 
-                                      FALSE, 
-                                      &res);
+        fname = ncxmod_find_data_file(NCX_DEF_BACKUP_FILE, FALSE, &res);
         if (fname) {
             /* rewrite the existing backup file
              * hand off fname malloced memory here 
@@ -2505,31 +2434,34 @@ static status_t
              */
             res = NO_ERR;
             commit_cb.cc_backup_source = 
-                ncxmod_make_data_filespec(NCX_DEF_BACKUP_FILE,
-                                          &res);
+                ncxmod_make_data_filespec(NCX_DEF_BACKUP_FILE, &res);
         }
     }
 
     /* attempt to save the backup, if a file name is available */
-    if (res == NO_ERR) {
+    if (res == NO_ERR && timeout_extended == FALSE) {
         res = write_config(commit_cb.cc_backup_source, running);
     }
 
     if (res == NO_ERR) {
-        res = agt_val_apply_commit(scb,
-                                   msg, 
-                                   candidate, 
-                                   running,
-                                   save_nvstore);
+        res = agt_val_apply_commit(scb, msg, candidate, running, save_nvstore);
         if (res != NO_ERR) {
             errdone = TRUE;
 
-            /* restore the config if needed */
-            res = agt_ncx_load_backup(commit_cb.cc_backup_source,
-                                      running,
-                                      commit_cb.cc_ses_id);
-            if (res != NO_ERR) {
-                errdone = FALSE;
+            if (msg->rpc_txcb->rollback_res != NO_ERR) {
+                /* close out the current transaction now so another
+                 * one can start   */
+                agt_cfg_free_transaction(msg->rpc_txcb);
+                msg->rpc_txcb = NULL;
+
+                /* restore the config because rollback failed */
+                status_t res2 = 
+                    agt_ncx_load_backup(commit_cb.cc_backup_source, running,
+                                        commit_cb.cc_ses_id);
+                if (res2 != NO_ERR) {
+                    res = res2;
+                    errdone = FALSE;
+                }
             }
         } else {
             res = cfg_fill_candidate_from_running();
@@ -2537,13 +2469,8 @@ static status_t
     }
 
     if (res != NO_ERR && !errdone) {
-        agt_record_error(scb,
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION,
-                         res,
-                         methnode,
-                         NCX_NT_NONE, 
-                         NULL, 
+        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+                         methnode, NCX_NT_NONE, NULL, 
                          (errval != NULL) ? NCX_NT_VAL : NCX_NT_NONE,
                          errval);
     }
@@ -2781,9 +2708,7 @@ static status_t
                           rpc_msg_t *msg,
                           xml_node_t *methnode)
 {
-    cfg_template_t  *target;
-    val_value_t     *val;
-    status_t         res;
+    status_t res = NO_ERR;
 
     /* This special callback is used by internal NCX functions
      * to load the initial configuration.  The msg->rpc_user1 parameter 
@@ -2797,43 +2722,62 @@ static status_t
      */
     if (scb->type != SES_TYP_DUMMY) {
         res = ERR_NCX_ACCESS_DENIED;
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res,
-                         methnode, 
-                         NCX_NT_NONE, 
-                         NULL, 
-                         NCX_NT_NONE, 
-                         NULL);
+        agt_record_error(scb, &msg->mhdr, NCX_LAYER_OPERATION, res, methnode, 
+                         NCX_NT_NONE, NULL, NCX_NT_NONE, NULL);
         return res;
     }
 
-    target = (cfg_template_t *)msg->rpc_user1;
+    cfg_template_t *target = (cfg_template_t *)msg->rpc_user1;
     if (!target) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 
     /* get the <nc:config> parameter */
-    val = val_find_child(msg->rpc_input, 
-                         NC_MODULE, 
-                         NCX_EL_CONFIG);
+    val_value_t *val = val_find_child(msg->rpc_input, NC_MODULE, NCX_EL_CONFIG);
     if (!val) {
         /* we shouldn't get here if the config param is missing */
         return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
-    /* errors will be added as needed */
-    res = agt_val_validate_write(scb, 
-                                 msg, 
-                                 target, 
-                                 val, 
-                                 msg->rpc_top_editop);
+    /* create a transaction CB */
+    msg->rpc_txcb = 
+        agt_cfg_new_transaction(NCX_CFGID_RUNNING, AGT_CFG_EDIT_TYPE_FULL,
+                                FALSE, &res);
+    if (msg->rpc_txcb == NULL || res != NO_ERR) {
+        if (res == NO_ERR) {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+    } else {
+        /* errors will be added as needed */
+        res = agt_val_validate_write(scb, msg, target, val, 
+                                     msg->rpc_top_editop);
 
-    if (res == NO_ERR) {
-        res = agt_val_root_check(scb, msg, val);
+        /* check what to do if errors occurred */
+        agt_profile_t *profile = agt_get_profile();
+        if (res != NO_ERR) {
+            profile->agt_load_validate_errors = TRUE;
+            if (profile->agt_startup_error) {
+                /* any startup errors mean server shutdown */
+                return res;
+            }
+            val_purge_errors_from_root(val);
+        }
+
+        res = agt_val_delete_dead_nodes(scb, msg, val);
+        if (res == NO_ERR) {
+            res = agt_val_root_check(scb, &msg->mhdr, msg->rpc_txcb, val);
+        }
+        if (res != NO_ERR) {
+            profile->agt_load_rootcheck_errors = TRUE;
+            if (profile->agt_running_error) {
+                return res;
+            } else {
+                val_purge_errors_from_root(val);
+                res = NO_ERR;
+            }
+        }
+        msg->rpc_user2 = val;
     }
-    msg->rpc_user2 = val;
 
     return res;
 
@@ -2855,46 +2799,29 @@ static status_t
                         rpc_msg_t *msg,
                         xml_node_t *methnode)
 {
-    cfg_template_t  *target;
-    val_value_t     *val;
-    status_t         res;
-
-    if (scb->type != SES_TYP_DUMMY) {
-        res = ERR_NCX_ACCESS_DENIED;
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res,
-                         methnode, 
-                         NCX_NT_NONE, 
-                         NULL, 
-                         NCX_NT_NONE, 
-                         NULL);
-        return res;
-    }
+    (void)methnode;
+    status_t res = NO_ERR;
 
     /* This special callback is used by internal NCX functions
      * to load the initial configuration. 
      */
+    cfg_template_t *target = (cfg_template_t *)msg->rpc_user1;
+    val_value_t *val = (val_value_t *)msg->rpc_user2;
 
-    res = NO_ERR;
-    target = (cfg_template_t *)msg->rpc_user1;
-    val = (val_value_t *)msg->rpc_user2;
-
-    if (!target || !val) {
+    if (target && val) {
+        /* load the <config> into the target config */
+        res = agt_val_apply_write(scb, msg, target, val, msg->rpc_top_editop);
+        if (res != NO_ERR) {
+            agt_profile_t *profile = agt_get_profile();
+            profile->agt_load_apply_errors = TRUE;
+        }
+    } else {
         res = SET_ERROR(ERR_INTERNAL_PTR);
     }
 
-    /* load the <config> into the target config */
-    if (res == NO_ERR) {
-        res = agt_val_apply_write(scb, 
-                                  msg, 
-                                  target, 
-                                  val, 
-                                  OP_EDITOP_LOAD);
+    if (target) {
+        val_clean_tree(target->root);
     }
-
-    val_clean_tree(target->root);
 
     return res;
 
@@ -2932,18 +2859,14 @@ static status_t
     agt_profile = agt_get_profile();
 
     /* mandatory module name */
-    modval = val_find_child(msg->rpc_input, 
-                            AGT_SYS_MODULE,
-                            NCX_EL_MODULE);
+    modval = val_find_child(msg->rpc_input, AGT_SYS_MODULE, NCX_EL_MODULE);
     if (!modval || modval->res != NO_ERR) {
         /* error already recorded */
         return ERR_NCX_OPERATION_FAILED;
     }
 
     /* optional revision data string */
-    revval = val_find_child(msg->rpc_input, 
-                            AGT_SYS_MODULE,
-                            NCX_EL_REVISION);
+    revval = val_find_child(msg->rpc_input, AGT_SYS_MODULE, NCX_EL_REVISION);
     if (revval && revval->res != NO_ERR) {
         /* error already recorded */
         return ERR_NCX_OPERATION_FAILED;
@@ -2955,14 +2878,11 @@ static status_t
         /* module not loaded already
          * load all the deviations first
          */
-        for (devval = val_find_child(msg->rpc_input, 
-                                     AGT_SYS_MODULE,
+        for (devval = val_find_child(msg->rpc_input, AGT_SYS_MODULE,
                                      NCX_EL_DEVIATION);
              devval != NULL && res == NO_ERR;
-             devval = val_find_next_child(msg->rpc_input, 
-                                          AGT_SYS_MODULE,
-                                          NCX_EL_DEVIATION,
-                                          devval)) {
+             devval = val_find_next_child(msg->rpc_input, AGT_SYS_MODULE,
+                                          NCX_EL_DEVIATION, devval)) {
 
             res = ncxmod_load_deviation(VAL_STR(devval),
                                         &agt_profile->agt_savedevQ);
@@ -3030,8 +2950,7 @@ static status_t
         /* some version of the module is already loaded
          * try again to get the exact version requested 
          */
-        testmod = ncx_find_module(VAL_STR(modval),
-                                  VAL_STR(revval));
+        testmod = ncx_find_module(VAL_STR(modval), VAL_STR(revval));
         if (testmod != NULL) {
             mod = testmod;
         } else {
@@ -3076,6 +2995,14 @@ static status_t
     }
 
     if (res == NO_ERR && mod && module_added) {
+        /* prune all the obsolete objects */
+        ncx_delete_mod_obsolete_objects(mod);
+
+        /* add the module commit tests for this module */
+        res = agt_val_add_module_commit_tests(mod);
+    }
+
+    if (res == NO_ERR && mod && module_added) {
         /* add the <schema> node in netconf-state module */
         res = agt_state_add_module_schema(mod);
     }
@@ -3091,9 +3018,7 @@ static status_t
         if (!moduri) {
             res = ERR_INTERNAL_MEM;
         } else {
-            agt_sys_send_sysCapabilityChange(scb, 
-                                             TRUE,
-                                             moduri);
+            agt_sys_send_sysCapabilityChange(scb, TRUE, moduri);
             m__free(moduri);
         }
     }
@@ -3964,10 +3889,10 @@ void
         log_debug("\nConfirmed-commit canceled");
     }
 
-    /* restore the config if needed */
-    res = agt_ncx_load_backup(commit_cb.cc_backup_source,
-                              running,
-                              commit_cb.cc_ses_id);
+    /* restore the config if needed
+     * restore as the system user, not any specific user
+     * to make sure that all the rollback edits will succeed  */
+    res = agt_ncx_load_backup(commit_cb.cc_backup_source, running, 0);
     if (res != NO_ERR) {
         log_error("\nError: restore running config failed (%s)",
                   get_error_string(res));

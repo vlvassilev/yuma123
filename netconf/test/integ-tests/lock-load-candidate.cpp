@@ -13,7 +13,8 @@ const char* SpoofedArgs::argv[] = {
                ":../../modules/ietf"
                ":../../modules/yang"
                ":../modules/yang"
-               ":../../modules/test/pass" ),
+               ":../../modules/test/pass"
+               ":../../modules/test/fail" ),
     ( "--runpath=../modules/sil" ),
     ( "--access-control=off" ),
     ( "--log=./yuma-op/yuma-out.txt" ),

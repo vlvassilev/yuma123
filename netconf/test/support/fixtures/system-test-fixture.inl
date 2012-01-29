@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------|
 #include "test/support/fixtures/system-test-fixture.h"
 #include "test/support/fixtures/test-context.h"
+#include "test/support/fixtures/system-fixture-helper-factory.h"
 #include "test/support/misc-util/log-utils.h"
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/nc-query-util/yuma-op-policies.h"
@@ -128,8 +129,13 @@ void SystemTestFixture<SpoofedArgs, OpPolicy>::configureTestContext()
    shared_ptr< AbstractCBCheckerFactory > cbCheckerFactory(
            new SystemCBCheckerFactory() );
 
-   shared_ptr< TestContext > 
-       testContext( new TestContext( getTargetDbConfig(), sessionFactory, cbCheckerFactory ) );
+   shared_ptr< AbstractFixtureHelperFactory > fixtureHelperFactory(
+           new SystemFixtureHelperFactory() );
+
+   shared_ptr< TestContext > testContext( 
+           new TestContext( false, getTargetDbConfig(), usingStartupCapability(), 
+                            numArgs_, argv_,
+                            sessionFactory, cbCheckerFactory, fixtureHelperFactory ) );
 
    assert( testContext );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -36,41 +36,15 @@ date	     init     comment
 #include <xmlstring.h>
 #include <xmlregexp.h>
 
-#ifndef _H_grp
 #include "grp.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,7 +61,6 @@ extern "C" {
 
 /* default vaule for mandatory statement */
 #define OBJ_DEF_MANDATORY   FALSE
-
 
 /* flags field in obj_template_t */
 
@@ -183,6 +156,14 @@ extern "C" {
 /* object is tagged ncx:sil-delete-children-first */
 #define OBJ_FL_SIL_DELETE_CHILDREN_FIRST  bit27
 
+/* object is tagged as ncx:user-write with no create access */
+#define OBJ_FL_BLOCK_CREATE bit28
+
+/* object is tagged as ncx:user-write with no update access */
+#define OBJ_FL_BLOCK_UPDATE bit29
+
+/* object is tagged as ncx:user-write with no delete access */
+#define OBJ_FL_BLOCK_DELETE bit30
 
 
 /********************************************************************
@@ -236,6 +217,7 @@ typedef struct obj_unique_comp_t_ {
     dlq_hdr_t               qhdr;
     struct obj_template_t_ *unobj;
     xmlChar                 *xpath;       /* saved unique str for this obj */
+    boolean                  isduplicate;  /* will be ignored by server */
 } obj_unique_comp_t;
 
 
@@ -410,9 +392,7 @@ typedef struct obj_rpc_t_ {
     dlq_hdr_t          datadefQ;         /* Q of obj_template_t */
 
     /* internal fields for manager and agent */
-    rpc_type_t      rpc_typ;
     xmlns_id_t      nsid;
-    rpc_outtyp_t    out_datatyp;
     boolean          supported;    /* mod loaded, not implemented */    
 } obj_rpc_t;
 
@@ -440,6 +420,19 @@ typedef struct obj_notif_t_ {
     dlq_hdr_t         datadefQ;          /* Q of obj_template_t */
 } obj_notif_t;
 
+/* back-pointer to inherited if-feature statements */
+typedef struct obj_iffeature_ptr_t_ {
+    dlq_hdr_t            qhdr;
+    ncx_iffeature_t     *iffeature;
+} obj_iffeature_ptr_t;
+
+
+/* back-pointer to inherited when statements */
+typedef struct obj_xpath_ptr_t_ {
+    dlq_hdr_t            qhdr;
+    struct xpath_pcb_t_  *xpath;
+} obj_xpath_ptr_t;
+
 
 /* One YANG data-def-stmt */
 typedef struct obj_template_t_ {
@@ -449,14 +442,18 @@ typedef struct obj_template_t_ {
     ncx_error_t    tkerr;
     grp_template_t *grp;          /* non-NULL == in a grp.datadefQ */
 
-    /* 4 back pointers */
+    /* 3 back pointers */
     struct obj_template_t_ *parent;
     struct obj_template_t_ *usesobj;
     struct obj_template_t_ *augobj;
+
     struct xpath_pcb_t_    *when;           /* optional when clause */
     dlq_hdr_t               metadataQ;       /* Q of obj_metadata_t */
     dlq_hdr_t               appinfoQ;         /* Q of ncx_appinfo_t */
     dlq_hdr_t               iffeatureQ;     /* Q of ncx_iffeature_t */
+
+    dlq_hdr_t          inherited_iffeatureQ;   /* Q of obj_iffeature_ptr_t */
+    dlq_hdr_t          inherited_whenQ;     /* Q of obj_xpath_ptr_t */
 
     /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     void                   *cbset;   
@@ -1900,6 +1897,22 @@ extern status_t
     obj_gen_object_id (const obj_template_t *obj,
 		       xmlChar  **buff);
 
+
+/********************************************************************
+ * Malloc and Generate the object ID for an object node
+ * Remove all conceptual OBJ_TYP_CHOICE and OBJ_TYP_CASE nodes
+ * so the resulting string will represent the structure of the
+ * value tree for XPath searching
+ *
+ * \param obj the node to generate the instance ID for
+ * \param buff the pointer to address of buffer to use
+ * \return status
+ *********************************************************************/
+extern status_t 
+    obj_gen_object_id_xpath (const obj_template_t *obj,
+                             xmlChar  **buff);
+
+
 /********************************************************************
 * FUNCTION obj_gen_object_id_code
 * 
@@ -1950,6 +1963,34 @@ extern status_t
 			xmlChar  *buff,
 			uint32 bufflen,
 			uint32 *reallen);
+
+
+/********************************************************************
+* FUNCTION obj_copy_object_id_mod
+* 
+* Generate the object ID for an object node and copy to the buffer
+* copy an object ID to a buffer; Use modname in object identifier
+* 
+* INPUTS:
+*   obj == node to generate the instance ID for
+*   buff == buffer to use
+*   bufflen == size of buff
+*   reallen == address of return length of actual identifier 
+*               (may be NULL)
+*
+* OUTPUTS
+*   buff == filled in with the object ID
+*  if reallen not NULL:
+*     *reallen == length of identifier, even if error occurred
+*  
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    obj_copy_object_id_mod (const obj_template_t *obj,
+                            xmlChar  *buff,
+                            uint32 bufflen,
+                            uint32 *reallen);
 
 
 /********************************************************************
@@ -2843,6 +2884,20 @@ extern const ncx_iffeature_t *
     obj_get_next_iffeature (const ncx_iffeature_t *iffeature);
 
 
+/********************************************************************
+* FUNCTION obj_is_leaf
+* 
+* Check if object is a proper leaf
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    TRUE if proper leaf
+*    FALSE if not
+*********************************************************************/
+extern boolean
+    obj_is_leaf (const obj_template_t  *obj);
 
 
 /********************************************************************
@@ -2855,7 +2910,7 @@ extern const ncx_iffeature_t *
 *
 * RETURNS:
 *    TRUE if proper leaf or leaf-list
-*    FALSE if node
+*    FALSE if not
 *********************************************************************/
 extern boolean
     obj_is_leafy (const obj_template_t  *obj);
@@ -3709,6 +3764,15 @@ extern const xmlChar *
 extern obj_template_t *
     obj_get_leafref_targobj (obj_template_t  *obj);
 
+/********************************************************************
+ * Get the target object for an augments object
+ * \param obj the object to check
+ * \return pointer to the augment context target object
+ *   or NULL if this object type does not have an augment target object
+ *********************************************************************/
+extern obj_template_t *
+    obj_get_augment_targobj (obj_template_t  *obj);
+
 
 /********************************************************************
 * FUNCTION obj_is_cli_equals_ok
@@ -3740,6 +3804,158 @@ extern boolean
 *********************************************************************/
 extern boolean
     obj_is_sil_delete_children_first (const obj_template_t *obj);
+
+
+/********************************************************************
+ * Add a child object to the specified complex node
+ *
+ * \param child the obj_template to add
+ * \param parent the obj_template of the parent
+ *********************************************************************/
+extern void 
+    obj_add_child (obj_template_t *child, obj_template_t *parent);
+
+
+/********************************************************************
+* FUNCTION obj_is_block_user_create
+*
+* Check if object is marked as ncx:user-write with create 
+* access disabled
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked to block user create access
+*   FALSE if not
+*********************************************************************/
+extern boolean
+    obj_is_block_user_create (const obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_is_block_user_update
+*
+* Check if object is marked as ncx:user-write with update
+* access disabled
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked to block user update access
+*   FALSE if not
+*********************************************************************/
+extern boolean
+    obj_is_block_user_update (const obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_is_block_user_delete
+*
+* Check if object is marked as ncx:user-write with delete
+* access disabled
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is marked to block user delete access
+*   FALSE if not
+*********************************************************************/
+extern boolean
+    obj_is_block_user_delete (const obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_new_iffeature_ptr
+*
+* Malloc and initialize a new obj_iffeature_ptr_t struct
+*
+* INPUTS:
+*  iff == iffeature to point at
+* RETURNS:
+*   malloced struct or NULL if memory error
+*********************************************************************/
+extern obj_iffeature_ptr_t *
+    obj_new_iffeature_ptr (ncx_iffeature_t *iff);
+
+
+/********************************************************************
+* FUNCTION obj_free_iffeature_ptr
+*
+* Free an obj_iffeature_ptr_t struct
+*
+* INPUTS:
+*   iffptr == struct to free
+*********************************************************************/
+extern void obj_free_iffeature_ptr (obj_iffeature_ptr_t *iffptr);
+
+
+/********************************************************************
+ * Get first if-feature pointer
+ *
+ * \param obj the obj_template to check
+ * \return pointer to first entry or NULL if none
+ *********************************************************************/
+extern obj_iffeature_ptr_t *
+    obj_first_iffeature_ptr (obj_template_t *obj);
+
+
+/********************************************************************
+ * Get the next if-feature pointer
+ *
+ * \param iffptr the current iffeature ptr struct
+ * \return pointer to next entry or NULL if none
+ *********************************************************************/
+extern obj_iffeature_ptr_t *
+    obj_next_iffeature_ptr (obj_iffeature_ptr_t *iffptr);
+
+
+/********************************************************************
+* FUNCTION obj_new_xpath_ptr
+*
+* Malloc and initialize a new obj_xpath_ptr_t struct
+*
+* INPUTS:
+*   xpath == Xpath PCB to point at
+* RETURNS:
+*   malloced struct or NULL if memory error
+*********************************************************************/
+extern obj_xpath_ptr_t *
+    obj_new_xpath_ptr (struct xpath_pcb_t_ *xpath);
+
+
+/********************************************************************
+* FUNCTION obj_free_xpath_ptr
+*
+* Free an obj_xpath_ptr_t struct
+*
+* INPUTS:
+*   xptr == struct to free
+*********************************************************************/
+extern void obj_free_xpath_ptr (obj_xpath_ptr_t *xptr);
+
+
+/********************************************************************
+ * Get first xpath pointer struct
+ *
+ * \param obj the obj_template to check
+ * \return pointer to first entry or NULL if none
+ *********************************************************************/
+extern obj_xpath_ptr_t *
+    obj_first_xpath_ptr (obj_template_t *obj);
+
+
+/********************************************************************
+ * Get the next xpath pointer struct
+ *
+ * \param xptr the current xpath ptr struct
+ * \return pointer to next entry or NULL if none
+ *********************************************************************/
+extern obj_xpath_ptr_t *
+    obj_next_xpath_ptr (obj_xpath_ptr_t *xptr);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

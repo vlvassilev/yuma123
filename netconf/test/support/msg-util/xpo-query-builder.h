@@ -212,27 +212,39 @@ public:
     /**
      * Generate a query for a specific stream.
      *
-      * \param profileId the id of the stream
+     * \param profileId the id of the stream
      * \param streamId the id of the stream
      * \param op the operation to perform.
      * \return XML formatted query
      */
-     std::string genStreamConnectionQuery( 
+    std::string genStreamConnectionQuery( 
            uint16_t profileId,
            uint16_t streamId,
            const std::string& op ) const;
 
-     /**
-      * Generate a query for a specific stream in a profile.
-      *
-      * \param profileId the id of the stream
-      * \param streamId the id of the stream
-      * \param op the operation to perform.
-      * \return XML formatted query
-      */
-     std::string genProfileStreamItemQuery( uint16_t profileId,
+    /**
+     * Generate a query for a specific stream in a profile.
+     *
+     * \param profileId the id of the stream
+     * \param streamId the id of the stream
+     * \param op the operation to perform.
+     * \return XML formatted query
+     */
+    std::string genProfileStreamItemQuery( uint16_t profileId,
                                             uint16_t streamId,
                                             const std::string& op ) const;
+
+    /**
+     * Generate a custom RPC query
+     *
+     * \param rpcName the name of the RPC
+     * \param params a string contaiing the xml formatted parameters
+     *               for the RPC
+     * \return XML formatted query
+     */
+    std::string buildCustomRPC( const std::string& rpcName, 
+                                const std::string& params ) const;
+
 private:
     /**
      *
@@ -251,7 +263,7 @@ private:
     std::string configureConnectionItem( const T& config, 
                                          const std::string& op ) const;
 
-private:
+protected:
      const std::string moduleNs_; ///< the module's namespace
 };
 

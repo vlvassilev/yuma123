@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009- 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,6 +32,7 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
+#include <assert.h>
 
 #ifdef HAS_FLOAT
 #include <math.h>
@@ -45,122 +46,39 @@ date         init     comment
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
+#include "procdefs.h"
 
 #ifndef RELEASE
 #include "curversion.h"
 #endif
 
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ext
 #include "ext.h"
-#endif
-
-#ifndef _H_grp
 #include "grp.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_appinfo
 #include "ncx_appinfo.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include "ncx_feature.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_ses_msg
+#include "status.h"
 #include "ses_msg.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_top
 #include "top.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_version
 #include "version.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_yang
 #include "yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
 
 /********************************************************************
 *                                                                   *
@@ -307,32 +225,27 @@ boolean             system_sorted;
 
 static FILE *tracefile;
 
-/********************************************************************
-* FUNCTION check_moddef
-* 
-* Check if a specified module is loaded
-* If not, load it.
-*
-* Search the module for the data struct for the 
-* specified definition name.
-*
-* INPUTS:
-*   pcb == parser control block to use
-*   imp == import struct to use
-*   defname == name of the app-specific definition to find
-*   dtyp == address of return definition type (for verification)
-*   *dtyp == NCX_NT_NONE for any match, or a specific type to find
-*   dptr == addres of return definition pointer
-*
-* OUTPUTS:
-*   pcb == parser control block to use
-*   imp->mod may be set if not already
-*   *dtyp == node type found NCX_NT_OBJ or NCX_NT_TYPE, etc. 
-*   *dptr == pointer to data struct or NULL if not found
-*
-* RETURNS:
-*   status
-*********************************************************************/
+
+/* flag to force yang_parse to reject a module that has top-level
+ * mandatory data nodes; applies to server <load> operation  */
+static boolean      allow_top_mandatory;
+
+/**
+ * \fn check_moddef
+ * \brief Check if a specified module is loaded; if not, load it.
+ * Search the module for the data struct for the specified definition
+ * name.
+ * \param pcb parser control block to use
+ * \param imp import struct to use, imp->mod may be set if not already
+ * \param defname name of the app-specific definition to find
+ * \param dtyp address of return definition type (for verification)
+ * \param *dtyp NCX_NT_NONE for any match, or a specific type to find
+ * \param dptr addres of return definition pointer
+ * \param (output) pcb parser control block to use
+ * \param (output) *dtyp node type found NCX_NT_OBJ or NCX_NT_TYPE, etc. 
+ * \param (output) *dptr pointer to data struct or NULL if not found
+ * \return status
+ */   
 static status_t
     check_moddef (yang_pcb_t *pcb,
                   ncx_import_t *imp,
@@ -372,7 +285,6 @@ static status_t
     case NCX_NT_GRP:
         *dptr = ncx_find_grouping(imp->mod, defname, FALSE);
         break;
-        break;
     case NCX_NT_OBJ:
         *dptr = obj_find_template(&imp->mod->datadefQ, 
                                   imp->mod->name, 
@@ -407,17 +319,15 @@ static status_t
 
 }  /* check_moddef */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION set_toplevel_defs
-*
-* INPUTS:
-*   mod == module to check
-*   nsid == namespace ID of the main module being added
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn set_toplevel_defs 
+ * \brief 
+ * \param mod module to check
+ * \param nsid namespace ID of the main module being added
+ * \return status 
+ */
 static status_t 
     set_toplevel_defs (ncx_module_t *mod,
                        xmlns_id_t    nsid)
@@ -441,12 +351,19 @@ static status_t
         grp->nsid = nsid;
     }
 
+    /* the first time this is called (for yuma-ncx) the
+     * gen_root object has not been set and is still NULL
+     * The 'root' object is defined in yuma-ncx.
+     * There are no real data objects in this module.
+     * All other modules that follow will set the parent of
+     * top-level objects to 'gen_root' for XPath usage */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (obj_is_data_db(obj) || obj_is_rpc(obj) 
-            || obj_is_notif(obj)) {
+        if (obj_is_data_db(obj) || obj_is_rpc(obj) || obj_is_notif(obj)) {
+            /* set the parent to the gen_root object so XPath expressions
+             * that reference the root via ancestor (../../foo) will work; */
             obj->parent = gen_root;
         }
     }
@@ -461,22 +378,19 @@ static status_t
 
 }  /* set_toplevel_defs */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION free_module
-* 
-* Scrub the memory in a ncx_module_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-*
-* MUST remove this struct from the ncx_modQ before calling
-* Do not need to remove module definitions from the registry
-*
-* Use the ncx_remove_module function if the module was 
-* already successfully added to the modQ and definition registry
-*
-* INPUTS:
-*    mod == ncx_module_t data structure to free
-*********************************************************************/
+/**
+ * \fn free_module
+ * \brief Scrub the memory in a ncx_module_t by freeing all the
+ * sub-fields and then freeing the entire struct itself 
+ * \details MUST remove this struct from the ncx_modQ before calling
+ * Do not need to remove module definitions from the registry
+ * Use the ncx_remove_module function if the module was 
+ * already successfully added to the modQ and definition registry
+ * \param mod ncx_module_t data structure to free
+ * \return none
+ */
 static void 
     free_module (ncx_module_t *mod)
 {
@@ -607,34 +521,29 @@ static void
 
 }  /* free_module */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION bootstrap_cli
-* 
-* Handle the CLI parms that need to be set even before
-* any other initialization has been done, or any YANG modules
-* have been loaded.
-*
-* Hardwired list of bootstrap parameters
-* DO NOT RESET THEM FROM THE OUTPUT OF THE cli_parse function
-* THESE CLI PARAMS WILL STILL BE IN THE argv array
-*
-* Common CLI parameters handled as bootstrap parameters
-*
-*   log-level
-*   log-append
-*   log
-*   modpath
-*
-* INPUTS:
-*    argc == CLI argument count
-*    argv == array of CLI parms
-*    dlevel == default debug level
-*    logtstamps == flag for log_open, if 'log' parameter is present
-*
-* RETURNS:
-*   status of the bootstrap CLI procedure
-*********************************************************************/
+/**
+ * \fn bootstrap_cli
+ * \brief Handle the CLI parms that need to be set even before
+ * any other initialization has been done, or any YANG modules
+ * have been loaded.
+ * \details Hardwired list of bootstrap parameters
+ * DO NOT RESET THEM FROM THE OUTPUT OF THE cli_parse function
+ * THESE CLI PARAMS WILL STILL BE IN THE argv array
+ *
+ * Common CLI parameters handled as bootstrap parameters
+ *
+ *   log-level
+ *   log-append
+ *   log
+ *   modpath
+ * \param argc CLI argument count
+ * \param argv array of CLI parms
+ * \param dlevel default debug level
+ * \param logtstamps flag for log_open, if 'log' parameter is present
+ * \return status
+ */
 static status_t 
     bootstrap_cli (int argc,
                    char *argv[],
@@ -779,7 +688,7 @@ static status_t
     if (res == NO_ERR) {
         parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
         logappend = (parm && parm->count) ? TRUE : FALSE;
-        if (parm->value) {
+        if (parm && parm->value) {
             log_error("\nError: log-append is empty parameter");
             res = ERR_NCX_INVALID_VALUE;
         }
@@ -846,19 +755,21 @@ static status_t
     }
 
     cli_clean_rawparmQ(&parmQ);
+
     return res;
 
 } /* bootstrap_cli */
 
 
-/********************************************************************
-* FUNCTION add_to_modQ
-*
-* INPUTS:
-*   mod == module to add to modQ
-*   modQ == Q of ncx_module_t to use
-*
-*********************************************************************/
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn add_to_modQ
+ * \brief 
+ * \param mod == module to add to modQ
+ * \param modQ == Q of ncx_module_t to use
+ * \return none
+ */
 static void
     add_to_modQ (ncx_module_t *mod,
                  dlq_hdr_t *modQ)
@@ -915,17 +826,16 @@ static void
             
 }  /* add_to_modQ */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION do_match_rpc_error
-*
-* Generate an error for multiple matches for 1 module
-*
-* INPUTS:
-*   mod == module struct to use
-*   rpcname == partial name string to match
-*   match == TRUE if match allowed, FALSE for exact match only
-*********************************************************************/
+/**
+ * \fn do_match_rpc_error
+ * \brief Generate an error for multiple matches for 1 module
+ * \param mod module struct to use
+ * \param rpcname partial name string to match
+ * \param match TRUE if match allowed, FALSE for exact match only
+ * \return none
+ */
 static void
     do_match_rpc_error (ncx_module_t *mod,
                         const xmlChar *rpcname,
@@ -976,31 +886,25 @@ static void
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
-/********************************************************************
-* FUNCTION ncx_init
-* 
-* Initialize the NCX module
-*
-* INPUTS:
-*    savestr == TRUE if parsed description strings that are
-*               not needed by the agent at runtime should
-*               be saved anyway.  Converters should use this value.
-*                 
-*            == FALSE if uneeded strings should not be saved.
-*               Embedded agents should use this value
-*
-*    dlevel == desired debug output level
-*    logtstamps == TRUE if log should use timestamps
-*                  FALSE if not; not used unless 'log' is present
-*    startmsg == log_debug2 message to print before starting;
-*                NULL if not used;
-*    argc == CLI argument count for bootstrap CLI
-*    argv == array of CLI parms for bootstrap CLI 
-*            (may be NULL to skip bootstrap CLI parameter parsing)
-*
-* RETURNS:
-*   status of the initialization procedure
-*********************************************************************/
+/**
+ * \fn ncx_init
+ * \brief Initialize the NCX module
+ * \param savestr TRUE if parsed description strings that are
+ *                not needed by the agent at runtime should
+ *                be saved anyway.  Converters should use this value.
+ *                 
+ *                FALSE if uneeded strings should not be saved.
+ *                Embedded agents should use this value
+ * \param dlevel desired debug output level
+ * \param logtstamps TRUE if log should use timestamps
+ *                   FALSE if not; not used unless 'log' is present
+ * \param startmsg log_debug2 message to print before starting;
+ *                 NULL if not used;
+ * \param argc CLI argument count for bootstrap CLI
+ * \param argv array of CLI parms for bootstrap CLI 
+ *             (may be NULL to skip bootstrap CLI parameter parsing)
+ * \return status 
+ */
 status_t 
     ncx_init (boolean savestr,
               log_debug_t dlevel,
@@ -1055,6 +959,8 @@ status_t
 #ifdef WITH_TRACEFILE
     tracefile = fopen("tracefile.xml", "w");
 #endif
+
+    allow_top_mandatory = TRUE;
 
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
@@ -1246,12 +1152,13 @@ status_t
 
 }  /* ncx_init */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_cleanup
-*
-*  cleanup NCX module
-*********************************************************************/
+/**
+ * \fn ncx_cleanup
+ * \brief cleanup NCX module
+ * \return none
+ */
 void
     ncx_cleanup (void)
 {
@@ -1322,15 +1229,13 @@ void
 
 }   /* ncx_cleanup */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_module
-* 
-* Malloc and initialize the fields in a ncx_module_t
-*
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
-*********************************************************************/
+/**
+ * \fn ncx_new_module
+ * \brief Malloc and initialize the fields in a ncx_module_t
+ * \return pointer to the malloced and initialized struct or NULL if an error
+ */
 ncx_module_t *
     ncx_new_module (void)
 {
@@ -1371,32 +1276,23 @@ ncx_module_t *
 
 }  /* ncx_new_module */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_module
-*
-* Find a ncx_module_t in the ncx_modQ
-* These are the modules that are already loaded
-*
-* INPUTS:
-*   modname == module name
-*   revision == module revision date
-*
-* RETURNS:
-*  module pointer if found or NULL if not
-*********************************************************************/
+/**
+ * \fn ncx_find_module
+ * \brief Find an ncx_module_t in the ncx_modQ; These are the modules that are
+ * already loaded*
+ * \param modname module name
+ * \param revision module revision date
+ * \return module pointer if found or NULL if not
+ */
 ncx_module_t *
     ncx_find_module (const xmlChar *modname,
                      const xmlChar *revision)
 {
     ncx_module_t *mod;
 
-#ifdef DEBUG
-    if (!modname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;    /* error */
-    }
-#endif
+    assert ( modname && " param modname is NULL" );
 
     /* check the yangcli session module Q
      * and then the current module Q
@@ -1413,20 +1309,16 @@ ncx_module_t *
 }   /* ncx_find_module */
 
 
-/********************************************************************
-* FUNCTION ncx_find_module_que
-*
-* Find a ncx_module_t in the specified Q
-* Check the namespace ID
-*
-* INPUTS:
-*   modQ == module Q to search
-*   modname == module name
-*   revision == module revision date
-*
-* RETURNS:
-*  module pointer if found or NULL if not
-*********************************************************************/
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn ncx_find_module_que
+ * \brief Find a ncx_module_t in the specified Q and check the namespace ID
+ * \param modQ module Q to search
+ * \param modname module name
+ * \param revision module revision date 
+ * \return module pointer if found or NULL if not
+ */
 ncx_module_t *
     ncx_find_module_que (dlq_hdr_t *modQ,
                          const xmlChar *modname,
@@ -1435,12 +1327,8 @@ ncx_module_t *
     ncx_module_t  *mod;
     int32          retval;
 
-#ifdef DEBUG
-    if (!modQ || !modname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;    /* error */
-    }
-#endif
+    assert ( modQ && " param modQ is NULL" );
+    assert ( modname && " param modname is NULL" );
 
     for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
          mod != NULL;
@@ -1469,36 +1357,23 @@ ncx_module_t *
 
 }   /* ncx_find_module_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_module_que_nsid
-*
-* Find a ncx_module_t in the specified Q
-* Check the namespace ID
-*
-* INPUTS:
-*   modQ == module Q to search
-*   nsid == xmlns ID to find
-*
-* RETURNS:
-*  module pointer if found or NULL if not
-*********************************************************************/
+/**
+ * \fn ncx_find_module_que_nsid
+ * \brief Find a ncx_module_t in the specified Q and check the namespace ID
+ * \param modQ module Q to search
+ * \param nsid xmlns ID to find
+ * \return module pointer if found or NULL if not
+ */
 ncx_module_t *
     ncx_find_module_que_nsid (dlq_hdr_t *modQ,
                               xmlns_id_t nsid)
 {
     ncx_module_t  *mod;
 
-#ifdef DEBUG
-    if (modQ == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;    /* error */
-    }
-    if (nsid == 0) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-#endif
+    assert ( modQ && " param modQ is NULL" );
+    assert ( nsid && " param nsid is NULL" );
 
     for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
          mod != NULL;
@@ -1512,47 +1387,37 @@ ncx_module_t *
 
 }   /* ncx_find_module_que_nsid */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_module
-* 
-* Scrub the memory in a ncx_module_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-* use if module was not added to registry
-*
-* MUST remove this struct from the ncx_modQ before calling
-* Does not remove module definitions from the registry
-*
-* Use the ncx_remove_module function if the module was 
-* already successfully added to the modQ and definition registry
-*
-* INPUTS:
-*    mod == ncx_module_t data structure to free
-*********************************************************************/
+/**
+ * \fn ncx_free_module
+ * \brief Scrub the memory in a ncx_module_t by freeing all the sub-fields and
+ * then freeing the entire struct itself use if module was not added to registry
+ * \details MUST remove this struct from the ncx_modQ before calling Does not
+ * remove module definitions from the registry
+ * Use the ncx_remove_module function if the module was 
+ * already successfully added to the modQ and definition registry
+ * \param  mod == ncx_module_t data structure to free
+ * \return none 
+ */
 void 
     ncx_free_module (ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (mod == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
 
     free_module(mod);
 
 }  /* ncx_free_module */
 
 
-/********************************************************************
-* FUNCTION ncx_any_mod_errors
-* 
-* Check if any of the loaded modules are loaded with non-fatal errors
-*
-* RETURNS:
-*    TRUE if any modules are loaded with non-fatal errors
-*    FALSE if all modules present have a status of NO_ERR
-*********************************************************************/
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn ncx_any_mod_errors
+ * \brief Check if any of the loaded modules are loaded with non-fatal errors
+ * \return TRUE if any modules are loaded with non-fatal errors; FALSE if all
+ * modules present have a status of NO_ERR
+ */
 boolean
     ncx_any_mod_errors (void)
 {
@@ -1570,36 +1435,25 @@ boolean
 
 }  /* ncx_any_mod_errors */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_any_dependency_errors
-* 
-* Check if any of the imports that this module relies on
-* were loadeds are loaded with non-fatal errors
-*
-* RETURNS:
-*    TRUE if any modules are loaded with non-fatal errors
-*    FALSE if all modules present have a status of NO_ERR
-*********************************************************************/
+/**
+ * \fn ncx_any_dependency_errors
+ * \brief Check if any of the imports that this module relies on were loadeds
+ * are loaded with non-fatal errors
+ * \param mod module to check 
+ * \return TRUE if any modules are loaded with non-fatal errors; FALSE if all
+ * modules present have a status of NO_ERR
+ */
 boolean
     ncx_any_dependency_errors (const ncx_module_t *mod)
 {
-    const ncx_module_t       *testmod;
-    const yang_import_ptr_t  *impptr;
-    const dlq_hdr_t          *impQ;
+    assert ( mod && " param mod is NULL" );
 
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    impQ = (mod->allimpQ) ? mod->allimpQ : &mod->saveimpQ;
-
-    for (impptr = (yang_import_ptr_t *)dlq_firstEntry(impQ);
-         impptr != NULL;
-         impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
+    const yang_import_ptr_t *impptr = 
+        (const yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
+    for (; impptr != NULL;  impptr = (const yang_import_ptr_t *)
+             dlq_nextEntry(impptr)) {
 
         /*** hack: skip ietf-netconf because it is not stored
          *** remove when ietf-netconf is supported
@@ -1608,17 +1462,15 @@ boolean
             continue;
         }
 
-        testmod = ncx_find_module(impptr->modname,
-                                  impptr->revision);
+        ncx_module_t *testmod = ncx_find_module(impptr->modname,
+                                                impptr->revision);
         if (!testmod) {
             /* missing import */
             return TRUE;
         }
             
-        if (testmod->status != NO_ERR) {
-            if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
-                return TRUE;
-            }
+        if (testmod->errors) {
+            return TRUE;
         }
     }
 
@@ -1626,36 +1478,29 @@ boolean
 
 }  /* ncx_any_dependency_errors */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_type
-*
-* Check if a typ_template_t in the mod->typeQ
-*
-* INPUTS:
-*   mod == ncx_module to check
-*   typname == type name
-*   useall == TRUE to use all submodules
-*             FALSE to only use the ones in the mod->includeQ
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_type
+ * \brief Check if a typ_template_t in the mod->typeQ
+ * \param mod == ncx_module to check 
+ * \param typname type name
+ * \param useall TRUE to use all submodules
+ *               FALSE to only use the ones in the mod->includeQ
+ * \return pointer to struct if present, NULL otherwise
+ */
 typ_template_t *
     ncx_find_type (ncx_module_t *mod,
                    const xmlChar *typname,
                    boolean useall)
 {
+    assert ( mod && " param mod is NULL" );
+    assert ( typname && " param typname is NULL" );
+
     typ_template_t *typ;
     yang_node_t    *node;
     ncx_include_t  *inc;
     dlq_hdr_t      *que;
-
-#ifdef DEBUG
-    if (!mod || !typname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
 
     typ = ncx_find_type_que(&mod->typeQ, typname);
     if (typ) {
@@ -1730,12 +1575,8 @@ typ_template_t *
 {
     typ_template_t *typ;
 
-#ifdef DEBUG
-    if (!typeQ || !typname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( typeQ && " param typeQ is NULL");
+    assert ( typname && " param typname is NULL");
 
     for (typ = (typ_template_t *)dlq_firstEntry(typeQ);
          typ != NULL;
@@ -1748,20 +1589,17 @@ typ_template_t *
 
 }   /* ncx_find_type_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_grouping
-*
-* Check if a grp_template_t in the mod->groupingQ
-*
-* INPUTS:
-*   mod == ncx_module to check
-*   grpname == group name
-*   useall == TRUE to check all existing nodes
-*             FALSE to only use includes visible to this [sub]mod
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_grouping
+ * \brief Check if a grp_template_t in the mod->groupingQ
+ * \param mod ncx_module to check 
+ * \param grpname group name
+ * \param useall TRUE to check all existing nodes
+ *               FALSE to only use includes visible to this [sub]mod
+ * \return pointer to struct if present, NULL otherwise
+ */
 grp_template_t *
     ncx_find_grouping (ncx_module_t *mod,
                        const xmlChar *grpname,
@@ -1772,12 +1610,8 @@ grp_template_t *
     ncx_include_t  *inc;
     dlq_hdr_t      *que;
 
-#ifdef DEBUG
-    if (!mod || !grpname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+    assert ( grpname && " param grpname is NULL" );
 
     /* check the main module */
     grp = ncx_find_grouping_que(&mod->groupingQ, grpname);
@@ -1833,31 +1667,23 @@ grp_template_t *
 
 }   /* ncx_find_grouping */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_grouping_que
-*
-* Check if a grp_template_t in the specified Q
-*
-* INPUTS:
-*   groupingQ == Queue of grp_template_t to check
-*   grpname == group name
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_grouping_que
+ * \brief Check if a grp_template_t in the specified Q
+ * \param groupingQ Queue of grp_template_t to check
+ * \param grpname group name
+ * \return pointer to struct if present, NULL otherwise
+ */
 grp_template_t *
     ncx_find_grouping_que (const dlq_hdr_t *groupingQ,
                            const xmlChar *grpname)
 {
     grp_template_t *grp;
 
-#ifdef DEBUG
-    if (!groupingQ || !grpname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( groupingQ && " param groupingQ is NULL" );
+    assert ( grpname && " param grpname is NULL" );
 
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
          grp != NULL;
@@ -1870,30 +1696,23 @@ grp_template_t *
 
 }   /* ncx_find_grouping_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_rpc
-*
-* Check if a rpc_template_t in the mod->rpcQ
-*
-* INPUTS:
-*   mod == ncx_module to check
-*   rpcname == RPC name
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_rpc
+ * \brief Check if a rpc_template_t in the mod->rpcQ
+ * \param mod ncx_module to check
+ * \param rpcname RPC name
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_find_rpc (const ncx_module_t *mod,
                   const xmlChar *rpcname)
 {
     obj_template_t *rpc;
 
-#ifdef DEBUG
-    if (!mod || !rpcname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+    assert ( rpcname && " param rpcname is NULL" );
 
     for (rpc = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          rpc != NULL;
@@ -1908,24 +1727,18 @@ obj_template_t *
 
 }   /* ncx_find_rpc */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_match_rpc
-*
-* Check if a rpc_template_t is in the mod->rpcQ
-* Partial match the commmand name
-*
-* INPUTS:
-*   mod == ncx_module to check
-*   rpcname == RPC name to match
-*   retcount == address of return match count
-*
-* OUTPUTS:
-*   *retcount == number of matches found
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_match_rpc
+ * \brief Check if a rpc_template_t is in the mod->rpcQ; Partial match the
+ * commmand name
+ * \param mod ncx_module to check
+ * \param rpcname RPC name to match
+ * \param retcount address of return match count; updated with
+ * number of matches found
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_match_rpc (const ncx_module_t *mod,
                    const xmlChar *rpcname,
@@ -1934,12 +1747,9 @@ obj_template_t *
     obj_template_t *rpc, *firstfound;
     uint32          len, cnt;
 
-#ifdef DEBUG
-    if (!mod || !rpcname || !retcount) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+    assert ( rpcname && " param rpcname is NULL" );
+    assert ( retcount && " param retcount is NULL" );
 
     *retcount = 0;
     cnt = 0;
@@ -1964,24 +1774,18 @@ obj_template_t *
 
 }   /* ncx_match_rpc */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_match_any_rpc
-*
-* Check if a rpc_template_t is in any module that
-* matches the rpc name string
-*
-* INPUTS:
-*   module == module name to check (NULL == check all)
-*   rpcname == RPC name to match
-*   retcount == address of return count of matches
-*
-* OUTPUTS:
-*   *retcount == number of matches found
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_match_any_rpc
+ * \brief Check if a rpc_template_t is in any module that matches the rpc name
+ * string
+ * \param module module name to check (NULL == check all)
+ * \param rpcname RPC name to match
+ * \param retcount address of return count of matches; set to
+ * number of matches
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_match_any_rpc (const xmlChar *module,
                        const xmlChar *rpcname,
@@ -1991,12 +1795,8 @@ obj_template_t *
     ncx_module_t   *mod;
     uint32          cnt, tempcnt;
 
-#ifdef DEBUG
-    if (!rpcname || !retcount) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( rpcname && " param rpcname is NULL" );
+    assert ( retcount && " param retcount is NULL" );
 
     firstfound = NULL;
     *retcount = 0;
@@ -2028,61 +1828,48 @@ obj_template_t *
 
 }   /* ncx_match_any_rpc */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_match_any_rpc_mod
-*
-* Check if a rpc_template_t is in the specified module
-*
-* INPUTS:
-*   mod == module struct to check
-*   rpcname == RPC name to match
-*   retcount == address of return count of matches
-*
-* OUTPUTS:
-*   *retcount == number of matches found
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_match_any_rpc_mod
+ * \brief Check if a rpc_template_t is in the specified module
+ * \param mod module struct to check
+ * \param rpcname RPC name to match
+ * \param retcount address of return count of matches
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_match_any_rpc_mod (ncx_module_t *mod,
                            const xmlChar *rpcname,
                            uint32 *retcount)
 {
-    obj_template_t *firstfound;
-
-#ifdef DEBUG
-    if (!mod || !rpcname || !retcount) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+    assert ( rpcname && " param rpcname is NULL" );
+    assert ( retcount && " param retcount is NULL" );
 
     *retcount = 0;
 
-    firstfound = ncx_match_rpc(mod, rpcname, retcount);
+    obj_template_t *firstfound = ncx_match_rpc(mod, rpcname, retcount);
 
     return firstfound;
 
 }   /* ncx_match_any_rpc_mod */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_match_rpc_error
-*
-* Generate an error for multiple matches
-*
-* INPUTS:
-*   mod == module struct to check (may be NULL)
-*   modname == module name if mod not set
-*           == NULL to match all modules
-*   rpcname == RPC name to match
-*   match == TRUE to match partial command names
-*            FALSE for exact match only
-*   firstmsg == TRUE to do the first log_error banner msg
-*               FALSE to skip this step
-*********************************************************************/
+/**
+ * \fn ncx_match_rpc_error
+ * \brief Generate an error for multiple matches
+ * \param mod module struct to check (may be NULL)
+ * \param modname module name if mod not set
+ *                NULL to match all modules
+ * \param rpcname RPC name to match
+ * \param match TRUE to match partial command names
+ *              FALSE for exact match only
+ * \param firstmsg TRUE to do the first log_error banner msg
+ *                 FALSE to skip this step
+ * \return none 
+ */
 void
     ncx_match_rpc_error (ncx_module_t *mod,
                          const xmlChar *modname,
@@ -2091,12 +1878,7 @@ void
                          boolean firstmsg)
 {
 
-#ifdef DEBUG
-    if (rpcname == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( rpcname && " param rpcname is NULL" );
 
     if (firstmsg) {
         if (match) {
@@ -2119,42 +1901,29 @@ void
         for (mod = ncx_get_first_module();
              mod != NULL;
              mod =  ncx_get_next_module(mod)) {
-            do_match_rpc_error(mod, rpcname, match);
+             do_match_rpc_error(mod, rpcname, match);
         }
     }
 
 }   /* ncx_match_rpc_error */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_any_object
-*
-* Check if an obj_template_t in in any module that
-* matches the object name string
-*
-* INPUTS:
-*   objname == object name to match
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_any_object
+ * \brief Check if an obj_template_t in in any module that
+ * matches the object name string
+ * \param objname object name to match
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_find_any_object (const xmlChar *objname)
 {
-    obj_template_t *obj;
-    ncx_module_t   *mod;
-    boolean         useses;
+    assert ( objname && " param objname is NULL" );
 
-#ifdef DEBUG
-    if (!objname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    obj = NULL;
-    mod = NULL;
-    useses = FALSE;
+    obj_template_t *obj = NULL;
+    ncx_module_t   *mod = NULL;
+    boolean        useses = FALSE;
 
     if (ncx_sesmodQ != NULL) {
         mod = (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
@@ -2197,46 +1966,30 @@ obj_template_t *
 
 }   /* ncx_find_any_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_match_any_object
-*
-* Check if an obj_template_t in in any module that
-* matches the object name string
-*
-* INPUTS:
-*   objname == object name to match
-*   name_match == name match mode enumeration
-*   alt_names == TRUE if alternate names should be checked
-*                after regular names; FALSE if not
-*   retres == address of return status
-*
-* OUTPUTS:
-*   *retres set to return status
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_match_any_object
+ * \brief Check if an obj_template_t in in any module that
+ * matches the object name string
+ * \param objname object name to match
+ * \param name_match name match mode enumeration
+ * \param alt_names TRUE if alternate names should be checked
+ *                  after regular names; FALSE if not
+ * \param retres address of return status
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_match_any_object (const xmlChar *objname,
                           ncx_name_match_t name_match,
                           boolean alt_names,
                           status_t *retres)
 {
-    obj_template_t *obj;
-    ncx_module_t   *mod;
-    boolean         useses;
+    assert ( objname && " param objname is NULL" );
 
-#ifdef DEBUG
-    if (objname == NULL || retres == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    obj = NULL;
-    mod = NULL;
-    useses = FALSE;
+    obj_template_t *obj = NULL;
+    ncx_module_t   *mod = NULL;
+    boolean        useses = FALSE;
 
     /* find a queue of modules to use; get first entry */
     if (ncx_sesmodQ != NULL) {
@@ -2295,35 +2048,26 @@ obj_template_t *
 
 }   /* ncx_match_any_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_any_object_que
-*
-* Check if an obj_template_t in in any module that
-* matches the object name string
-*
-* INPUTS:
-*   modQ == Q of modules to check
-*   objname == object name to match
-*
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_any_object_que 
+ * \brief Check if an obj_template_t in in any module that
+ * matches the object name string
+ * \param modQ Q of modules to check
+ * \param objname object name to match
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_find_any_object_que (dlq_hdr_t *modQ,
                              const xmlChar *objname)
 {
-    obj_template_t *obj;
+    assert ( modQ && " param modQ is NULL" );
+    assert ( objname && " param objname is NULL" );
+
+    obj_template_t *obj = NULL;
     ncx_module_t   *mod;
 
-#ifdef DEBUG
-    if (!modQ || !objname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    obj = NULL;
     for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
          mod != NULL;
          mod = (ncx_module_t *)dlq_nextEntry(mod)) {
@@ -2339,65 +2083,48 @@ obj_template_t *
 
 }   /* ncx_find_any_object_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_object
-*
-* Find a top level module object
-*
-* INPUTS:
-*   mod == ncx_module to check
-*   typname == type name
-* RETURNS:
-*  pointer to struct if present, NULL otherwise
-*********************************************************************/
+/**
+ * \fn ncx_find_object
+ * \brief Find a top level module object
+ * \param mod ncx_module to check
+ * \param typname type name
+ * \return pointer to struct if present, NULL otherwise
+ */
 obj_template_t *
     ncx_find_object (ncx_module_t *mod,
                      const xmlChar *objname)
 {
-#ifdef DEBUG
-    if (!mod || !objname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+    assert ( objname && " param objname is NULL" );
 
     return obj_find_template_top(mod, mod->name, objname);
 
 }  /* ncx_find_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_add_namespace_to_registry
-*
-* Add the namespace and prefix to the registry
-* or retrieve it if already set
-* 
-* INPUTS:
-*   mod == module to add to registry
-*   tempmod == TRUE if this is a temporary add mode
-*              FALSE if this is a real registry add
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn ncx_add_namespace_to_registry
+ * \brief Add the namespace and prefix to the registry
+ * or retrieve it if already set
+ * \param mod module to add to registry
+ * \param tempmod TRUE if this is a temporary add mode
+ *                FALSE if this is a real registry add
+ * \return status of the operation
+ */
 status_t 
     ncx_add_namespace_to_registry (ncx_module_t *mod,
                                    boolean tempmod)
 {
+    assert ( mod && " param mod is NULL" );
+
     xmlns_t        *ns;
-    xmlChar        *buffer, *p;
     const xmlChar  *modname;
     status_t        res;
     xmlns_id_t      nsid;
-    uint32          prefixlen, i;
     boolean         isnetconf;
-
-#ifdef DEBUG
-    if (!mod) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
 
     if (!mod->ismod) {
         return NO_ERR;
@@ -2437,20 +2164,22 @@ status_t
                     ncx_inc_warnings(mod);
                 }
                 
-                /* redo the module xmlprefix */
-                prefixlen = xml_strlen(mod->prefix);
-                buffer = m__getMem(prefixlen + 6);
+                /* redo the module xmlprefix, the length is the length of the 
+                 * prefix + 6 characters for the suffix value and a NULL */
+                uint32 buflen = xml_strlen(mod->prefix) + 6;
+                xmlChar *buffer = m__getMem(buflen + 6);
                 if (!buffer) {
                     return ERR_INTERNAL_MEM;
                 }
-                p = buffer;
+                xmlChar* p = buffer;
                 p += xml_strcpy(p, mod->prefix);
 
                 /* keep adding numbers to end of prefix until
                  * 1 is unused or run out of numbers
                  */
-                for (i=1; i<10000 && nsid; i++) {
-                    sprintf((char *)p, "%u", i);
+                uint32 i = 1;
+                for ( ; i<10000 && nsid; ++i) {
+                    snprintf((char *)p, 6, "%u", i);
                     nsid = xmlns_find_ns_by_prefix(buffer);
                 }
                 if (nsid) {
@@ -2515,37 +2244,26 @@ status_t
 
 }  /* ncx_add_namespace_to_registry */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_add_to_registry
-*
-* Add all the definitions stored in an ncx_module_t to the registry
-* This step is deferred to keep the registry stable as possible
-* and only add modules in an all-or-none fashion.
-* 
-* INPUTS:
-*   mod == module to add to registry
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn ncx_add_to_registry
+ * \brief Add all the definitions stored in an ncx_module_t to the registry
+ * registry This step is deferred to keep the registry stable as possible
+ * and only add modules in an all-or-none fashion.
+ * \param mod module to add to registry
+ * \return status of the operation
+ */
 status_t 
     ncx_add_to_registry (ncx_module_t *mod)
 {
-    yang_node_t    *node;
-    status_t        res;
-
-#ifdef DEBUG
-    if (!mod) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
 
     if (!mod->ismod) {
         return NO_ERR;
     }
 
-    res = NO_ERR;
+    status_t res = NO_ERR;
 
     /* check module parse code */
     if (mod->status != NO_ERR) {
@@ -2571,6 +2289,8 @@ status_t
     }
 
     /* add all the submodules included in this module */
+    yang_node_t    *node;
+
     for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -2611,28 +2331,20 @@ status_t
 
 }  /* ncx_add_to_registry */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_add_to_modQ
-*
-* Add module to the current module Q
-* Used by yangdiff to bypass add_to_registry to support
-* N different module trees
-*
-* INPUTS:
-*   mod == module to add to current module Q
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn ncx_add_to_modQ
+ * \brief Add module to the current module Q
+ * Used by yangdiff to bypass add_to_registry to support
+ * N different module trees
+ * \param mod module to add to current module Q
+ * \return status of the operation
+ */
 status_t 
     ncx_add_to_modQ (ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
 
     if (mod->ismod) {
         add_to_modQ(mod, ncx_curQ);
@@ -2642,30 +2354,23 @@ status_t
 
 } /* ncx_add_to_modQ */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_is_duplicate
-* 
-* Search the specific module for the specified definition name.
-* This function is for modules in progress which have not been
-* added to the registry yet.
-*
-* INPUTS:
-*     mod == ncx_module_t to check
-*     defname == name of definition to find
-* RETURNS:
-*    TRUE if found, FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_is_duplicate
+ * \brief Search the specific module for the specified definition name.
+ * This function is for modules in progress which have not been
+ * added to the registry yet.
+ * \param mod ncx_module_t to check
+ * \param defname name of definition to find
+ * \return TRUE if found, FALSE otherwise
+ */
 boolean
     ncx_is_duplicate (ncx_module_t *mod,
                       const xmlChar *defname)
 {
-#ifdef DEBUG
-    if (!mod || !defname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+    assert ( defname && " param defname is NULL" );
 
     if (ncx_find_type(mod, defname, TRUE)) {
         return TRUE;
@@ -2677,21 +2382,17 @@ boolean
 
 }  /* ncx_is_duplicate */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_first_module
-* 
-* Get the first module in the ncx_modQ
-* 
-* RETURNS:
-*   pointer to the first entry or NULL if empty Q
-*********************************************************************/
+/**
+ * \fn ncx_get_first_module
+ * \brief Get the first module in the ncx_modQ
+ * \return pointer to the first entry or NULL if empty Q
+ */
 ncx_module_t *
     ncx_get_first_module (void)
 {
-    ncx_module_t *mod;
-
-    mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
+    ncx_module_t *mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
     while (mod) {
         if (mod->defaultrev) {
             return mod;
@@ -2702,31 +2403,20 @@ ncx_module_t *
 
 }  /* ncx_get_first_module */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_next_module
-* 
-* Get the next module in the ncx_modQ
-* 
-* INPUTS:
-*   mod == current module to find next 
-*
-* RETURNS:
-*   pointer to the first entry or NULL if empty Q
-*********************************************************************/
+/**
+ * \fn ncx_get_next_module
+ * \brief Get the next module in the ncx_modQ
+ * \param mod current module to find next 
+ * \return pointer to the first entry or NULL if empty Q
+ */
 ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod)
 {
-    ncx_module_t *nextmod;
+    assert ( mod && " param mod is NULL" );
 
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    nextmod = (ncx_module_t *)dlq_nextEntry(mod);
+    ncx_module_t *nextmod = (ncx_module_t *)dlq_nextEntry(mod);
     while (nextmod) {
         if (nextmod->defaultrev) {
             return nextmod;
@@ -2737,101 +2427,72 @@ ncx_module_t *
 
 }  /* ncx_get_next_module */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_first_session_module
-* 
-* Get the first module in the ncx_sesmodQ
-* 
-* RETURNS:
-*   pointer to the first entry or NULL if empty Q
-*********************************************************************/
+/**
+ * \fn ncx_get_first_session_module
+ * \brief Get the first module in the ncx_sesmodQ
+ * \return pointer to the first entry or NULL if empty Q
+ */
 ncx_module_t *
     ncx_get_first_session_module (void)
 {
-    ncx_module_t *mod;
-
     if (ncx_sesmodQ == NULL) {
         return NULL;
     }
 
-    mod = (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
+    ncx_module_t *mod = (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
     return mod;
 
 }  /* ncx_get_first_session_module */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_next_session_module
-* 
-* Get the next module in the ncx_sesmodQ
-* 
-* RETURNS:
-*   pointer to the first entry or NULL if empty Q
-*********************************************************************/
+/**
+ * \fn ncx_get_next_session_module
+ * \brief Get the next module in the ncx_sesmodQ
+ * \param mod module to get next session 
+ * \return pointer to the first entry or NULL if empty Q
+ */
 ncx_module_t *
     ncx_get_next_session_module (const ncx_module_t *mod)
 {
-    ncx_module_t *nextmod;
+    assert ( mod && " param mod is NULL" );
 
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    nextmod = (ncx_module_t *)dlq_nextEntry(mod);
+    ncx_module_t *nextmod = (ncx_module_t *)dlq_nextEntry(mod);
     return nextmod;
 
 }  /* ncx_get_next_session_module */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_modname
-* 
-* Get the main module name
-* 
-* INPUTS:
-*   mod == module or submodule to get main module name
-*
-* RETURNS:
-*   main module name or NULL if error
-*********************************************************************/
+/**
+ * \fn ncx_get_modname
+ * \brief Get the main module name
+ * \param mod module or submodule to get main module name
+ * \return main module name or NULL if error
+ */
 const xmlChar *
     ncx_get_modname (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
     return (mod->ismod) ? mod->name : mod->belongs;
 
 }  /* ncx_get_modname */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_mod_nsid
-* 
-* Get the main module namespace ID
-* 
-* INPUTS:
-*   mod == module or submodule to get main module namespace ID
-*
-* RETURNS:
-*   namespace id number
-*********************************************************************/
+/**
+ * \fn  ncx_get_mod_nsid
+ * \brief Get the main module namespace ID
+ * \param mod module or submodule to get main module namespace ID
+ * \return namespace id number
+ */
 xmlns_id_t
     ncx_get_mod_nsid (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
+
     while (mod->parent != NULL) {
         mod = mod->parent;
     }
@@ -2840,102 +2501,68 @@ xmlns_id_t
 }  /* ncx_get_mod_nsid */
 
 
-/********************************************************************
-* FUNCTION ncx_get_modversion
-* 
-* Get the [sub]module version
-*
-* INPUTS:
-*   mod == module or submodule to get module version
-* 
-* RETURNS:
-*   module version or NULL if error
-*********************************************************************/
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn ncx_get_modversion
+ * \brief Get the [sub]module version
+ * \param mod module or submodule to get module version
+ * \return module version or NULL if error
+ */
 const xmlChar *
     ncx_get_modversion (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL");
     return mod->version;
 
 }  /* ncx_get_modversion */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_modnamespace
-* 
-* Get the module namespace URI
-*
-* INPUTS:
-*   mod == module or submodule to get module namespace
-* 
-* RETURNS:
-*   module namespace or NULL if error
-*********************************************************************/
+/**
+ * \fn ncx_get_modnamespace
+ * \brief Get the module namespace URI
+ * \param mod module or submodule to get module namespace
+ * \return module namespace or NULL if error
+ */
 const xmlChar *
     ncx_get_modnamespace (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL");
     return mod->ns;
 
 }  /* ncx_get_modnamespace */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_modsource
-* 
-* Get the module filespec source string
-*
-* INPUTS:
-*   mod == module or submodule to use
-* 
-* RETURNS:
-*   module filespec source string
-*********************************************************************/
+/**
+ * \fn ncx_get_modsource
+ * \brief Get the module filespec source string
+ * \param mod module or submodule to use
+ * \return module filespec source string
+ */
 const xmlChar *
     ncx_get_modsource (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL");
     return mod->source;
 
 }  /* ncx_get_modsource */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_mainmod
-* 
-* Get the main module
-* 
-* INPUTS:
-*   mod == submodule to get main module
-*
-* RETURNS:
-*   main module NULL if error
-*********************************************************************/
+/**
+ * \fn ncx_get_mainmod
+ * \brief Get the main module
+ * \param mod submodule to get main module
+ * \return main module NULL if error
+ */
 ncx_module_t *
     ncx_get_mainmod (ncx_module_t *mod)
 {
 
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL");
+
     if (mod->ismod) {
         return mod;
     }
@@ -2945,32 +2572,21 @@ ncx_module_t *
 
 }  /* ncx_get_mainmod */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_first_object
-* 
-* Get the first object in the datadefQs for the specified module
-* Get any object with a name
-* 
-* INPUTS:
-*   mod == module to search for the first object
-*
-* RETURNS:
-*   pointer to the first object or NULL if empty Q
-*********************************************************************/
+/**
+ * \fn ncx_get_first_object
+ * \brief Get the first object in the datadefQs for the specified module
+ * Get any object with a name
+ * \param mod module to search for the first object
+ * \return pointer to the first object or NULL if empty Q
+ */
 obj_template_t *
     ncx_get_first_object (ncx_module_t *mod)
 {
+    assert ( mod && " param mod is NULL");
+
     obj_template_t *obj;
-    yang_node_t    *node;
-
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -2987,6 +2603,7 @@ obj_template_t *
         return NULL;
     }
 
+    yang_node_t    *node;
     for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -3016,35 +2633,24 @@ obj_template_t *
 
 }  /* ncx_get_first_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_next_object
-* 
-* Get the next object in the specified module
-* Get any object with a name
-*
-* INPUTS:
-*    mod == module struct to get the next object from
-*    curobj == pointer to the current object to get the next for
-*
-* RETURNS:
-*   pointer to the next object or NULL if none
-*********************************************************************/
+/**
+ * \fn ncx_get_next_object
+ * \brief Get the next object in the specified module
+ * Get any object with a name
+ * \param mod module struct to get the next object from
+ * \param curobj pointer to the current object to get the next for
+ * \return pointer to the next object or NULL if none
+ */
 obj_template_t *
     ncx_get_next_object (ncx_module_t *mod,
                          obj_template_t *curobj)
 {
+    assert ( mod && " param mod is NULL" );
+    assert ( curobj && " param curobj is NULL" );
+
     obj_template_t *obj;
-    yang_node_t    *node;
-    boolean         start;
-
-#ifdef DEBUG
-    if (!mod || !curobj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (obj = (obj_template_t *)dlq_nextEntry(curobj);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -3059,12 +2665,12 @@ obj_template_t *
         return obj;
     }
 
-    start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
-
+    boolean start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
     if (!mod->ismod) {
         return NULL;
     }
 
+    yang_node_t    *node;
     for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -3101,32 +2707,21 @@ obj_template_t *
 
 }  /* ncx_get_next_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_first_data_object
-* 
-* Get the first database object in the datadefQs 
-* for the specified module
-* 
-* INPUTS:
-*   mod == module to search for the first object
-*
-* RETURNS:
-*   pointer to the first object or NULL if empty Q
-*********************************************************************/
+/**
+ * \fn ncx_get_first_data_object
+ * \brief Get the first database object in the datadefQs 
+ * for the specified module
+ * \param mod module to search for the first object 
+ * \return pointer to the first object or NULL if empty Q
+ */
 obj_template_t *
     ncx_get_first_data_object (ncx_module_t *mod)
 {
+    assert ( mod && " param mod is NULL");
+
     obj_template_t *obj;
-    yang_node_t    *node;
-
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -3145,6 +2740,7 @@ obj_template_t *
         return NULL;
     }
 
+    yang_node_t    *node;
     for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -3176,34 +2772,22 @@ obj_template_t *
 
 }  /* ncx_get_first_data_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_next_data_object
-* 
-* Get the next database object in the specified module
-* 
-* INPUTS:
-*    mod == pointer to module to get object from
-*    curobj == pointer to current object to get next from
-*
-* RETURNS:
-*   pointer to the next object or NULL if none
-*********************************************************************/
+/**
+ * \fn ncx_get_next_data_object
+ * \brief Get the next database object in the specified module
+ * \param mod pointer to module to get object from
+ * \param curobj pointer to current object to get next from
+ * \return pointer to the next object or NULL if none
+ */
 obj_template_t *
     ncx_get_next_data_object (ncx_module_t *mod,
                               obj_template_t *curobj)
 {
+    assert ( mod && " param mod is NULL");
+
     obj_template_t *obj;
-    yang_node_t    *node;
-    boolean         start;
-
-#ifdef DEBUG
-    if (!mod || !curobj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (obj = (obj_template_t *)dlq_nextEntry(curobj);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -3224,8 +2808,8 @@ obj_template_t *
         return NULL;
     }
 
-    start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
-
+    boolean start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
+    yang_node_t    *node;
     for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -3264,21 +2848,17 @@ obj_template_t *
 
 }  /* ncx_get_next_data_object */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_import
-* 
-* Malloc and initialize the fields in a ncx_import_t
-*
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
-*********************************************************************/
+/**
+ * \fn ncx_new_import
+ * \brief Malloc and initialize the fields in a ncx_import_t
+ * \return pointer to the malloced and initialized struct or NULL if an error
+ */
 ncx_import_t * 
     ncx_new_import (void)
 {
-    ncx_import_t  *import;
-
-    import = m__getObj(ncx_import_t);
+    ncx_import_t  *import = m__getObj(ncx_import_t);
     if (!import) {
         return NULL;
     }
@@ -3288,27 +2868,21 @@ ncx_import_t *
 
 }  /* ncx_new_import */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_import
-* 
-* Scrub the memory in a ncx_import_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-* The struct must be removed from any queue it is in before
-* this function is called.
-*
-* INPUTS:
-*    import == ncx_import_t data structure to free
-*********************************************************************/
+/**
+ * \fn ncx_free_import
+ * \brief Scrub the memory in a ncx_import_t by freeing all
+ * the sub-fields and then freeing the entire struct itself 
+ * The struct must be removed from any queue it is in before
+ * this function is called.
+ * \param import ncx_import_t data structure to free
+ * \return none 
+ */
 void 
     ncx_free_import (ncx_import_t *import)
 {
-#ifdef DEBUG
-    if (!import) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( import && " param import is NULL");
 
     if (import->module) {
         m__free(import->module);
@@ -3329,60 +2903,42 @@ void
 
 }  /* ncx_free_import */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_import
-* 
-* Search the importQ for a specified module name
-* 
-* INPUTS:
-*   mod == module to search (mod->importQ)
-*   module == module name to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_import
+ * \brief Search the importQ for a specified module name
+ * \param mod module to search (mod->importQ)
+ * \param module module name to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_import_t * 
     ncx_find_import (const ncx_module_t *mod,
                      const xmlChar *module)
 {
-#ifdef DEBUG
-    if (!mod || !module) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
+    assert ( mod && " param mod is NULL");
+    assert ( module && " param module is NULL");
     return ncx_find_import_que(&mod->importQ, module);
 
 } /* ncx_find_import */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_import_que
-* 
-* Search the specified importQ for a specified module name
-* 
-* INPUTS:
-*   importQ == Q of ncx_import_t to search
-*   module == module name to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_import_que
+ * \brief Search the specified importQ for a specified module name
+ * \param importQ Q of ncx_import_t to search
+ * \param module module name to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_import_t * 
     ncx_find_import_que (const dlq_hdr_t *importQ,
                          const xmlChar *module)
 {
+    assert ( importQ && " param importQ is NULL");
+    assert ( module && " param module is NULL");
+
     ncx_import_t  *import;
-
-#ifdef DEBUG
-    if (!importQ || !module) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (import = (ncx_import_t *)dlq_firstEntry(importQ);
          import != NULL;
          import = (ncx_import_t *)dlq_nextEntry(import)) {
@@ -3395,33 +2951,24 @@ ncx_import_t *
 
 } /* ncx_find_import_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_import_test
-* 
-* Search the importQ for a specified module name
+/**
+ * \fn ncx_find_import_test
+ * \brief Search the importQ for a specified module name
 * Do not set used flag
-*
-* INPUTS:
-*   mod == module to search (mod->importQ)
-*   module == module name to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+ * \param mod module to search (mod->importQ)
+ * \param module module name to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_import_t * 
     ncx_find_import_test (const ncx_module_t *mod,
                           const xmlChar *module)
 {
+    assert ( mod && " param mod is NULL");
+    assert ( module && " param module is NULL");
+
     ncx_import_t  *import;
-
-#ifdef DEBUG
-    if (!mod || !module) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
          import != NULL;
          import = (ncx_import_t *)dlq_nextEntry(import)) {
@@ -3433,60 +2980,42 @@ ncx_import_t *
 
 } /* ncx_find_import_test */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_pre_import
-* 
-* Search the importQ for a specified prefix value
-* 
-* INPUTS:
-*   mod == module to search (mod->importQ)
-*   prefix == prefix string to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_pre_import
+ * \brief Search the importQ for a specified prefix value
+ * \param mod module to search (mod->importQ)
+ * \param prefix prefix string to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_import_t * 
     ncx_find_pre_import (const ncx_module_t *mod,
                          const xmlChar *prefix)
 {
-#ifdef DEBUG
-    if (!mod || !prefix) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
+    assert ( mod && " param mod is NULL");
+    assert ( prefix && " param prefix is NULL");
     return ncx_find_pre_import_que(&mod->importQ, prefix);
 
 } /* ncx_find_pre_import */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_pre_import_que
-* 
-* Search the specified importQ for a specified prefix value
-* 
-* INPUTS:
-*   importQ == Q of ncx_import_t to search
-*   prefix == prefix string to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_pre_import_que
+ * \brief Search the specified importQ for a specified prefix value
+ * \param importQ Q of ncx_import_t to search
+ * \param prefix prefix string to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_import_t * 
     ncx_find_pre_import_que (const dlq_hdr_t *importQ,
                              const xmlChar *prefix)
 {
+    assert ( importQ && " param importQ is NULL");
+    assert ( prefix && " param prefix is NULL");
+
     ncx_import_t  *import;
-
-#ifdef DEBUG
-    if (!importQ || !prefix) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (import = (ncx_import_t *)dlq_firstEntry(importQ);
          import != NULL;
          import = (ncx_import_t *)dlq_nextEntry(import)) {
@@ -3499,33 +3028,24 @@ ncx_import_t *
 
 } /* ncx_find_pre_import_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_pre_import_test
-* 
-* Search the importQ for a specified prefix value
+/**
+ * \fn ncx_find_pre_import_test
+ * \brief Search the importQ for a specified prefix value
 * Test only, do not set used flag
-*
-* INPUTS:
-*   mod == module to search (mod->importQ)
-*   prefix == prefix string to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+ * \param mod module to search (mod->importQ)
+ * \param prefix prefix string to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_import_t * 
     ncx_find_pre_import_test (const ncx_module_t *mod,
                               const xmlChar *prefix)
 {
+    assert ( mod && " param mod is NULL");
+    assert ( prefix && " param prefix is NULL");
+
     ncx_import_t  *import;
-
-#ifdef DEBUG
-    if (!mod || !prefix) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
          import != NULL;
          import = (ncx_import_t *)dlq_nextEntry(import)) {
@@ -3537,70 +3057,52 @@ ncx_import_t *
 
 }  /* ncx_find_pre_import_test */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_locate_modqual_import
-* 
-* Search the specific module for the specified definition name.
-*
-* Okay for YANG or NCX
-*
-*  - typ_template_t (NCX_NT_TYP)
-*  - grp_template_t (NCX_NT_GRP)
-*  - obj_template_t (NCX_NT_OBJ)
-*  - rpc_template_t  (NCX_NT_RPC)
-*  - not_template_t (NCX_NT_NOTIF)
-*
-* INPUTS:
-*     pcb == parser control block to use
-*     imp == NCX import struct to use
-*     defname == name of definition to find
-*     *deftyp == specified type or NCX_NT_NONE if any will do
-*
-* OUTPUTS:
-*    imp->mod may get set if not already
-*    *deftyp == type retrieved if NO_ERR
-*
-* RETURNS:
-*    pointer to the located definition or NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_locate_modqual_import
+ * \brief Search the specific module for the specified definition name.
+ * Okay for YANG or NCX
+ *  - typ_template_t (NCX_NT_TYP)
+ *  - grp_template_t (NCX_NT_GRP)
+ *  - obj_template_t (NCX_NT_OBJ)
+ *  - rpc_template_t  (NCX_NT_RPC)
+ *  - not_template_t (NCX_NT_NOTIF)
+ * \param pcb parser control block to use
+ * \param imp NCX import struct to use; imp->mod may get set if not already
+ * \param defname name of definition to find
+ * \param *deftyp specified type or NCX_NT_NONE if any will do; set to type
+ * retrieved if NO_ERR
+ * \return pointer to the located definition or NULL if not found
+ */
 void *
     ncx_locate_modqual_import (yang_pcb_t *pcb,
                                ncx_import_t *imp,
                                const xmlChar *defname,
                                ncx_node_t *deftyp)
 {
+    assert ( imp && " param imp is NULL");
+    assert ( defname && " param defname is NULL");
+    assert ( deftyp && " param deftyp is NULL");
+
     void *dptr;
-    status_t  res;
-
-#ifdef DEBUG
-    if (!imp || !defname || !deftyp) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    res = check_moddef(pcb, imp, defname, deftyp, &dptr);
+    status_t  res = check_moddef(pcb, imp, defname, deftyp, &dptr);
     return (res==NO_ERR) ? dptr : NULL;
     /*** error res is lost !!! ***/
 
 }  /* ncx_locate_modqual_import */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_include
-* 
-* Malloc and initialize the fields in a ncx_include_t
-*
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
-*********************************************************************/
+/**
+ * \fn ncx_new_include
+ * \brief Malloc and initialize the fields in a ncx_include_t
+ * \return pointer to the malloced and initialized struct or NULL if an error
+ */
 ncx_include_t * 
     ncx_new_include (void)
 {
-    ncx_include_t  *inc;
-
-    inc = m__getObj(ncx_include_t);
+    ncx_include_t  *inc = m__getObj(ncx_include_t);
     if (!inc) {
         return NULL;
     }
@@ -3610,27 +3112,21 @@ ncx_include_t *
 
 }  /* ncx_new_include */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_include
-* 
-* Scrub the memory in a ncx_include_t by freeing all
-* the sub-fields and then freeing the entire struct itself 
-* The struct must be removed from any queue it is in before
-* this function is called.
-*
-* INPUTS:
-*    inc == ncx_include_t data structure to free
-*********************************************************************/
+/**
+ * \fn ncx_free_include
+ * \brief Scrub the memory in a ncx_include_t by freeing all
+ * the sub-fields and then freeing the entire struct itself 
+ * The struct must be removed from any queue it is in before
+ * this function is called.
+ * \param inc ncx_include_t data structure to free
+ * \return none 
+ */
 void 
     ncx_free_include (ncx_include_t *inc)
 {
-#ifdef DEBUG
-    if (!inc) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( inc && " param inc is NULL");
 
     if (inc->submodule) {
         m__free(inc->submodule);
@@ -3645,31 +3141,23 @@ void
 
 }  /* ncx_free_include */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_include
-* 
-* Search the includeQ for a specified submodule name
-* 
-* INPUTS:
-*   mod == module to search (mod->includeQ)
-*   submodule == submodule name to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_include
+ * \brief Search the includeQ for a specified submodule name
+ * \param mod module to search (mod->includeQ)
+ * \param submodule submodule name to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_include_t * 
     ncx_find_include (const ncx_module_t *mod,
                       const xmlChar *submodule)
 {
+    assert ( mod && " param mod is NULL");
+    assert ( submodule && " param submodule is NULL");
+
     ncx_include_t  *inc;
-
-#ifdef DEBUG
-    if (!mod || !submodule) {
-        return NULL;
-    }
-#endif
-
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
          inc != NULL;
          inc = (ncx_include_t *)dlq_nextEntry(inc)) {
@@ -3681,24 +3169,18 @@ ncx_include_t *
 
 } /* ncx_find_include */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_binary
-*
-* Malloc and fill in a new ncx_binary_t struct
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   pointer to malloced and initialized ncx_binary_t struct
-*   NULL if malloc error
-*********************************************************************/
+/**
+ * \fn ncx_new_binary
+ * \brief Malloc and fill in a new ncx_binary_t struct
+ * \return pointer to malloced and initialized ncx_binary_t struct
+ *  NULL if malloc error
+ */
 ncx_binary_t *
     ncx_new_binary (void)
 {
-    ncx_binary_t  *binary;
-    
-    binary = m__getObj(ncx_binary_t);
+    ncx_binary_t  *binary = m__getObj(ncx_binary_t);
     if (!binary) {
         return NULL;
     }
@@ -3708,49 +3190,35 @@ ncx_binary_t *
 
 }  /* ncx_new_binary */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_init_binary
-* 
-* Init the memory of a ncx_binary_t struct
-*
-* INPUTS:
-*    binary == ncx_binary_t struct to init
-*********************************************************************/
+/**
+ * \fn ncx_init_binary
+ * \brief Init the memory of a ncx_binary_t struct
+ * \param binary ncx_binary_t struct to init
+ * \return none 
+ */
 void
     ncx_init_binary (ncx_binary_t *binary)
 {
-
-#ifdef DEBUG
-    if (!binary) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( binary && " param binary is NULL");
     memset(binary, 0x0, sizeof(ncx_binary_t));
 
 } /* ncx_init_binary */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_clean_binary
-* 
-* Scrub the memory of a ncx_binary_t but do not delete it
-*
-* INPUTS:
-*    binary == ncx_binary_t struct to clean
-*********************************************************************/
+/**
+ * \fn ncx_clean_binary
+ * \brief Scrub the memory of a ncx_binary_t but do not delete it
+ * \param binary ncx_binary_t struct to clean
+ * \return none
+ */
 void
     ncx_clean_binary (ncx_binary_t *binary)
 {
+    assert ( binary && " param binary is NULL");
 
-#ifdef DEBUG
-    if (!binary) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
     if (binary->ustr) {
         m__free(binary->ustr);
     }
@@ -3758,48 +3226,35 @@ void
 
 } /* ncx_clean_binary */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_binary
-*
-* Free all the memory in a  ncx_binary_t struct
-*
-* INPUTS:
-*   binary == struct to clean and free
-*
-*********************************************************************/
+/**
+ * \fn ncx_free_binary
+ * \brief Free all the memory in a  ncx_binary_t struct
+ * \param binary struct to clean and free
+ * \return none
+ */
 void
     ncx_free_binary (ncx_binary_t *binary)
 {
-#ifdef DEBUG
-    if (!binary) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( binary && " param binary is NULL");
     ncx_clean_binary(binary);
     m__free(binary);
 
 }  /* ncx_free_binary */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_identity
-* 
-* Get a new ncx_identity_t struct
-*
-* INPUTS:
-*    none
-* RETURNS:
-*    pointer to a malloced ncx_identity_t struct,
-*    or NULL if malloc error
-*********************************************************************/
+/**
+ * \fn ncx_new_identity
+ * \brief Get a new ncx_identity_t struct
+ * \return pointer to a malloced ncx_identity_t struct,
+ * or NULL if malloc error
+ */
 ncx_identity_t *
     ncx_new_identity (void)
 {
-    ncx_identity_t *identity;
-
-    identity = m__getObj(ncx_identity_t);
+    ncx_identity_t *identity = m__getObj(ncx_identity_t);
     if (!identity) {
         return NULL;
     }
@@ -3812,26 +3267,18 @@ ncx_identity_t *
 
 } /* ncx_new_identity */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_identity
-* 
-* Free a malloced ncx_identity_t struct
-*
-* INPUTS:
-*    identity == struct to free
-*
-*********************************************************************/
+/**
+ * \fn ncx_free_identity
+ * \brief Free a malloced ncx_identity_t struct
+ * \param identity struct to free
+ * \return none
+ */
 void 
     ncx_free_identity (ncx_identity_t *identity)
 {
-
-#ifdef DEBUG
-    if (!identity) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( identity && " param identity is NULL");
 
     /*** !!! ignoring the back-ptr Q threading the
      *** !!! idlink headers; do not delete from system
@@ -3871,46 +3318,36 @@ void
     
 } /* ncx_free_identity */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_identity
-* 
-* Find a ncx_identity_t struct in the module and perhaps
-* any of its submodules
-*
-* INPUTS:
-*    mod == module to search
-*    name == identity name to find
-*    useall == TRUE if all submodules should be checked
-*              FALSE if only visible included submodules
-*              should be checked
-* RETURNS:
-*    pointer to found feature or NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_identity
+ * \brief Find a ncx_identity_t struct in the module and perhaps
+ * any of its submodules
+ * \param mod module to search
+ * \param name identity name to find
+ * \param useall TRUE if all submodules should be checked
+ *               FALSE if only visible included submodules
+ *               should be checked
+ * \return pointer to found feature or NULL if not found
+ */
 ncx_identity_t *
     ncx_find_identity (ncx_module_t *mod,
                        const xmlChar *name,
                        boolean useall)
 {
-    ncx_identity_t  *identity;
-    dlq_hdr_t       *que;
-    yang_node_t     *node;
-    ncx_include_t   *inc;
+    assert ( mod && " param mod is NULL");
+    assert ( name && " param name NULL");
 
-#ifdef DEBUG
-    if (!mod || !name) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    identity = ncx_find_identity_que(&mod->identityQ, name);
+    ncx_identity_t *identity = ncx_find_identity_que(&mod->identityQ, name);
     if (identity) {
         return identity;
     }
 
-    que = ncx_get_allincQ(mod);
+    dlq_hdr_t *que = ncx_get_allincQ(mod);
 
+    yang_node_t     *node;
+    ncx_include_t   *inc;
     if (useall) {
         for (node = (yang_node_t *)dlq_firstEntry(que);
              node != NULL;
@@ -3958,32 +3395,23 @@ ncx_identity_t *
 
 } /* ncx_find_identity */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_identity_que
-* 
-* Find a ncx_identity_t struct in the specified Q
-*
-* INPUTS:
-*    identityQ == Q of ncx_identity_t to search
-*    name == identity name to find
-*
-* RETURNS:
-*    pointer to found identity or NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_identity_que
+ * \brief Find a ncx_identity_t struct in the specified Q
+ * \param identityQ Q of ncx_identity_t to search
+ * \param name identity name to find
+ * \return pointer to found identity or NULL if not found
+ */
 ncx_identity_t *
     ncx_find_identity_que (dlq_hdr_t *identityQ,
                            const xmlChar *name)
 {
+    assert ( identityQ && " param identityQ is NULL");
+    assert ( name && " param name is NULL");
+
     ncx_identity_t *identity;
-
-#ifdef DEBUG
-    if (!identityQ || !name) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     for (identity = (ncx_identity_t *)dlq_firstEntry(identityQ);
          identity != NULL;
          identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
@@ -3996,18 +3424,14 @@ ncx_identity_t *
          
 } /* ncx_find_identity_que */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_filptr
-* 
-* Get a new ncx_filptr_t struct
-*
-* INPUTS:
-*    none
-* RETURNS:
-*    pointer to a malloced or cached ncx_filptr_t struct,
-*    or NULL if none available
-*********************************************************************/
+/**
+ * \fn ncx_new_filptr
+ * \brief Get a new ncx_filptr_t struct
+ * \return pointer to a malloced or cached ncx_filptr_t struct,
+ * or NULL if none available
+ */
 ncx_filptr_t *
     ncx_new_filptr (void)
 {
@@ -4031,31 +3455,21 @@ ncx_filptr_t *
 
 } /* ncx_new_filptr */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_filptr
-* 
-* Free a new ncx_filptr_t struct or add to the cache if room
-*
-* INPUTS:
-*    filptr == struct to free
-* RETURNS:
-*    none
-*********************************************************************/
+/**
+ * \fn ncx_free_filptr
+ * \brief Free a new ncx_filptr_t struct or add to the cache if room
+ * \param filptr struct to free
+ * \return none
+ */
 void 
     ncx_free_filptr (ncx_filptr_t *filptr)
 {
-
-    ncx_filptr_t *fp;
-
-#ifdef DEBUG
-    if (!filptr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( filptr && " param filptr is NULL");
+ 
     /* recursively clean out the child Queues */
+    ncx_filptr_t *fp;
     while (!dlq_empty(&filptr->childQ)) {
         fp = (ncx_filptr_t *)dlq_deque(&filptr->childQ);
         ncx_free_filptr(fp);
@@ -4079,21 +3493,17 @@ void
     
 } /* ncx_free_filptr */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_revhist
-* 
-* Create a revision history entry
-*
-* RETURNS:
-*    malloced revision history entry or NULL if malloc error
-*********************************************************************/
+/**
+ * \fn ncx_new_revhist
+ * \brief Create a revision history entry
+ * \return malloced revision history entry or NULL if malloc error
+ */
 ncx_revhist_t *
     ncx_new_revhist (void)
 {
-    ncx_revhist_t *revhist;
-
-    revhist = m__getObj(ncx_revhist_t);
+    ncx_revhist_t *revhist = m__getObj(ncx_revhist_t);
     if (!revhist) {
         return NULL;
     }
@@ -4102,24 +3512,18 @@ ncx_revhist_t *
 
 }  /* ncx_new_revhist */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_revhist
-* 
-* Free a revision history entry
-*
-* INPUTS:
-*    revhist == ncx_revhist_t data structure to free
-*********************************************************************/
+/**
+ * \fn ncx_free_revhist
+ * \brief Free a revision history entry
+ * \param revhist ncx_revhist_t data structure to free
+ * \return none
+ */
 void 
     ncx_free_revhist (ncx_revhist_t *revhist)
 {
-#ifdef DEBUG
-    if (!revhist) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( revhist && " param revhist is NULL");
 
     if (revhist->version) {
         m__free(revhist->version);
@@ -4134,31 +3538,23 @@ void
 
 }  /* ncx_free_revhist */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_revhist
-* 
-* Search the revhistQ for a specified revision
-* 
-* INPUTS:
-*   mod == module to search (mod->importQ)
-*   ver == version string to find
-*
-* RETURNS:
-*   pointer to the node if found, NULL if not found
-*********************************************************************/
+/**
+ * \fn ncx_find_revhist
+ * \brief Search the revhistQ for a specified revision
+ * \param mod module to search (mod->importQ)
+ * \param ver version string to find
+ * \return pointer to the node if found, NULL if not found
+ */
 ncx_revhist_t * 
     ncx_find_revhist (const ncx_module_t *mod,
                       const xmlChar *ver)
 {
+    assert ( mod && " param mod is NULL");
+    assert ( ver && " param ver is NULL");
+
     ncx_revhist_t  *revhist;
-
-#ifdef DEBUG
-    if (!mod || !ver) {
-        return NULL;
-    }
-#endif
-
     for (revhist = (ncx_revhist_t *)dlq_firstEntry(&mod->revhistQ);
          revhist != NULL;
          revhist = (ncx_revhist_t *)dlq_nextEntry(revhist)) {
@@ -4173,49 +3569,36 @@ ncx_revhist_t *
 
 /********************** ncx_enum_t *********************/
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_init_enum
-* 
-* Init the memory of a ncx_enum_t
-*
-* INPUTS:
-*    enu == ncx_enum_t struct to init
-*********************************************************************/
+/**
+ * \fn ncx_init_enum
+ * \brief Init the memory of a ncx_enum_t
+ * \param enu ncx_enum_t struct to init
+ * \return none
+ */
 void
     ncx_init_enum (ncx_enum_t *enu)
 {
-#ifdef DEBUG
-    if (!enu) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( enu && " param enu is NULL" );
     enu->name = NULL;
     enu->dname = NULL;
     enu->val = 0;
 
 } /* ncx_init_enum */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_clean_enum
-* 
-* Scrub the memory of a ncx_enum_t but do not delete it
-*
-* INPUTS:
-*    enu == ncx_enum_t struct to clean
-*********************************************************************/
+/**
+ * \fn ncx_clean_enum
+ * \brief Scrub the memory of a ncx_enum_t but do not delete it
+ * \param enu ncx_enum_t struct to clean
+ * \return none
+ */
 void
     ncx_clean_enum (ncx_enum_t *enu)
 {
-#ifdef DEBUG
-    if (!enu) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( enu && " param enu is NULL" );
 
     enu->name = NULL;
     if (enu->dname) {
@@ -4226,70 +3609,47 @@ void
 
 } /* ncx_clean_enum */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_compare_enums
-* 
-* Compare 2 enum values
-*
-* INPUTS:
-*    enu1 == first  ncx_enum_t check
-*    enu2 == second ncx_enum_t check
-*   
-* RETURNS:
-*     -1 if enu1 is < enu2
-*      0 if enu1 == enu2
-*      1 if enu1 is > enu2
-
-*********************************************************************/
+/**
+ * \fn ncx_compare_enums
+ * \brief Compare 2 enum values
+ * \param enu1 first  ncx_enum_t check
+ * \param enu2 second ncx_enum_t check
+ * \return-1 if enu1 is < enu2 
+ *         0 if enu1 == enu2
+ *         1 if enu1 is > enu2
+ */
 int32
     ncx_compare_enums (const ncx_enum_t *enu1,
                        const ncx_enum_t *enu2)
 {
-#ifdef DEBUG
-    if (!enu1 || !enu2) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
-
+    assert ( enu1 && " param enu1 is NULL" );
+    assert ( enu2 && " param enu2 is NULL" );
     /* just check strings exact match */
     return xml_strcmp(enu1->name, enu2->name);
 
 } /* ncx_compare_enums */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_set_enum
-* 
-* Parse an enumerated integer string into an ncx_enum_t
-* without matching it against any typdef
-*
-* Mallocs a copy of the enum name, using the enu->dname field
-*
-* INPUTS:
-*    enumval == enum string value to parse
-*    retenu == pointer to return enuym variable to fill in
-*    
-* OUTPUTS:
-*    *retenu == enum filled in
-*
-* RETURNS:
-*    status
-*********************************************************************/
+/**
+ * \fn ncx_set_enum
+ * \brief Parse an enumerated integer string into an ncx_enum_t
+ * without matching it against any typdef
+ * Mallocs a copy of the enum name, using the enu->dname field
+ * \param enumval enum string value to parse
+ * \param retenu pointer to return enum variable to fill in 
+ * \return status 
+ */
 status_t
     ncx_set_enum (const xmlChar *enumval,
                   ncx_enum_t *retenu)
 {
-    xmlChar       *str;
+    assert ( enumval && " param enumval is NULL" );
+    assert ( retenu && " param retenu is NULL" );
 
-#ifdef DEBUG
-    if (!enumval ||!retenu) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    str = xml_strdup(enumval);
+    xmlChar       *str = xml_strdup(enumval);
     if (!str) {
         return ERR_INTERNAL_MEM;
     }
@@ -4309,49 +3669,36 @@ status_t
 
 /********************** ncx_bit_t *********************/
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_init_bit
-* 
-* Init the memory of a ncx_bit_t
-*
-* INPUTS:
-*    bit == ncx_bit_t struct to init
-*********************************************************************/
+/**
+ * \fn ncx_init_bit
+ * \brief Init the memory of a ncx_bit_t
+ * \param bit ncx_bit_t struct to init
+ * \return none
+ */
 void
     ncx_init_bit (ncx_bit_t *bit)
 {
-#ifdef DEBUG
-    if (!bit) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( bit && " param bit is NULL" );
     bit->name = NULL;
     bit->dname = NULL;
     bit->pos = 0;
 
 } /* ncx_init_bit */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_clean_bit
-* 
-* Scrub the memory of a ncx_bit_t but do not delete it
-*
-* INPUTS:
-*    bit == ncx_bit_t struct to clean
-*********************************************************************/
+/**
+ * \fn ncx_clean_bit
+ * \brief Scrub the memory of a ncx_bit_t but do not delete it
+ * \param bit ncx_bit_t struct to clean
+ * \return none
+ */
 void
     ncx_clean_bit (ncx_bit_t *bit)
 {
-#ifdef DEBUG
-    if (!bit) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( bit && " param bit is NULL" );
 
     if (bit->dname) {
         m__free(bit->dname);
@@ -4362,32 +3709,23 @@ void
 
 } /* ncx_clean_bit */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_compare_bits
-* 
-* Compare 2 bit values by their schema order position
-*
-* INPUTS:
-*    bitone == first ncx_bit_t check
-*    bitone == second ncx_bit_t check
-*   
-* RETURNS:
-*     -1 if bitone is < bittwo
-*      0 if bitone == bittwo
-*      1 if bitone is > bittwo
-*
-*********************************************************************/
+/**
+ * \fn ncx_compare_bits
+ * \brief Compare 2 bit values by their schema order position
+ * \param bitone first ncx_bit_t check
+ * \param bittwo second ncx_bit_t check
+ * \return -1 if bitone is < bittwo
+ *          0 if bitone == bittwo
+ *          1 if bitone is > bittwo
+ */
 int32
     ncx_compare_bits (const ncx_bit_t *bitone,
                       const ncx_bit_t *bittwo)
 {
-#ifdef DEBUG
-    if (!bitone || !bittwo) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
+    assert ( bitone && " param bitone is NULL" );
+    assert ( bittwo && " param bittwo is NULL" );
 
     if (bitone->pos < bittwo->pos) {
         return -1;
@@ -4403,21 +3741,17 @@ int32
 
 /********************** ncx_typname_t *********************/
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_typname
-* 
-*   Malloc and init a typname struct
-*
-* RETURNS:
-*   malloced struct or NULL if memory error
-*********************************************************************/
+/**
+ * \fn ncx_new_typname
+ * \brief Malloc and init a typname struct
+ * \return malloced struct or NULL if memory error
+ */
 ncx_typname_t *
     ncx_new_typname (void)
 {
-    ncx_typname_t  *tn;
-
-    tn = m__getObj(ncx_typname_t);
+    ncx_typname_t  *tn = m__getObj(ncx_typname_t);
     if (!tn) {
         return NULL;
     }
@@ -4426,25 +3760,19 @@ ncx_typname_t *
 
 } /* ncx_new_typname */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_typname
-* 
-*   Free a typname struct
-*
-* INPUTS:
-*    typnam == ncx_typname_t struct to free
-*
-*********************************************************************/
+/**
+ * \fn ncx_free_typname
+ * \brief Free a typname struct
+ * \param typnam ncx_typname_t struct to free
+ * \return none
+ */
 void
     ncx_free_typname (ncx_typname_t *typnam)
 {
-#ifdef DEBUG
-    if (!typnam) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( typnam && " param typnam is NULL" );
+
     if (typnam->typname_malloc) {
         m__free(typnam->typname_malloc);
     }
@@ -4452,31 +3780,23 @@ void
 
 } /* ncx_free_typname */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_typname
-* 
-*   Find a typname struct in the specified Q for a typ pointer
-*
-* INPUTS:
-*    que == Q of ncx_typname_t struct to check
-*    typ == matching type template to find
-*
-* RETURNS:
-*   name assigned to this type template
-*********************************************************************/
+/**
+ * \fn ncx_find_typname
+ * \brief Find a typname struct in the specified Q for a typ pointer
+ * \param que Q of ncx_typname_t struct to check
+ * \param typ matching type template to find
+ * \return name assigned to this type template
+ */
 const xmlChar *
     ncx_find_typname (const typ_template_t *typ,
                       const dlq_hdr_t *que)
 {
-    const ncx_typname_t  *tn;
+    assert ( typ && " param typ is NULL" );
+    assert ( que && " param que is NULL" );
 
-#ifdef DEBUG
-    if (!typ || !que) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    const ncx_typname_t  *tn;
 
     for (tn = (const ncx_typname_t *)dlq_firstEntry(que);
          tn != NULL;
@@ -4489,32 +3809,24 @@ const xmlChar *
 
 } /* ncx_find_typname */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_find_typname_type
-* 
-*   Find a typ_template_t pointer in a typename mapping, 
-*   in the specified Q
-*
-* INPUTS:
-*    que == Q of ncx_typname_t struct to check
-*    typname == matching type name to find
-*
-* RETURNS:
-*   pointer to the stored typstatus
-*********************************************************************/
+/**
+ * \fn ncx_find_typname_type
+ * \brief Find a typ_template_t pointer in a typename mapping, 
+ * in the specified Q
+ * \param que Q of ncx_typname_t struct to check
+ * \param typname matching type name to find
+ * \return pointer to the stored typstatus
+ */
 const typ_template_t *
     ncx_find_typname_type (const dlq_hdr_t *que,
                            const xmlChar *typname)
 {
-    const ncx_typname_t  *tn;
+    assert ( que && " param que is NULL" );
+    assert ( typname && " param typname is NULL" );
 
-#ifdef DEBUG
-    if (!que || !typname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    const ncx_typname_t  *tn;
 
     for (tn = (const ncx_typname_t *)dlq_firstEntry(que);
          tn != NULL;
@@ -4527,27 +3839,20 @@ const typ_template_t *
 
 }  /* ncx_find_typname_type */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_clean_typnameQ
-* 
-*   Delete all the Q entries, of typname mapping structs
-*
-* INPUTS:
-*    que == Q of ncx_typname_t struct to delete
-*
-*********************************************************************/
+/**
+ * \fn ncx_clean_typnameQ
+ * \brief Delete all the Q entries, of typname mapping structs
+ * \param que Q of ncx_typname_t struct to delete
+ * \return none
+ */
 void
     ncx_clean_typnameQ (dlq_hdr_t *que)
 {
-    ncx_typname_t  *tn;
+    assert ( que && " param que is NULL" );
 
-#ifdef DEBUG
-    if (!que) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    ncx_typname_t  *tn;
 
     while (!dlq_empty(que)) {
         tn = (ncx_typname_t *)dlq_deque(que);
@@ -4556,15 +3861,13 @@ void
 
 }  /* ncx_clean_typnameQ */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_gen_anyxml
-* 
-* Get the object template for the NCX generic anyxml container
-*
-* RETURNS:
-*   pointer to generic anyxml object template
-*********************************************************************/
+/**
+ * \fn ncx_get_gen_anyxml
+ * \brief Get the object template for the NCX generic anyxml container
+ * \return pointer to generic anyxml object template
+ */
 obj_template_t *
     ncx_get_gen_anyxml (void)
 {
@@ -4572,15 +3875,13 @@ obj_template_t *
 
 } /* ncx_get_gen_anyxml */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_gen_container
-* 
-* Get the object template for the NCX generic container
-*
-* RETURNS:
-*   pointer to generic container object template
-*********************************************************************/
+/**
+ * \fn ncx_get_gen_container
+ * \brief Get the object template for the NCX generic container
+ * \return pointer to generic container object template
+ */
 obj_template_t *
     ncx_get_gen_container (void)
 {
@@ -4588,15 +3889,13 @@ obj_template_t *
 
 } /* ncx_get_gen_container */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_gen_string
-* 
-* Get the object template for the NCX generic string leaf
-*
-* RETURNS:
-*   pointer to generic string object template
-*********************************************************************/
+/**
+ * \fn ncx_get_gen_string
+ * \brief Get the object template for the NCX generic string leaf
+ * \return pointer to generic string object template
+ */
 obj_template_t *
     ncx_get_gen_string (void)
 {
@@ -4604,15 +3903,13 @@ obj_template_t *
 
 } /* ncx_get_gen_string */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_gen_empty
-* 
-* Get the object template for the NCX generic empty leaf
-*
-* RETURNS:
-*   pointer to generic empty object template
-*********************************************************************/
+/**
+ * \fn ncx_get_gen_empty
+ * \brief Get the object template for the NCX generic empty leaf
+ * \return pointer to generic empty object template
+ */
 obj_template_t *
     ncx_get_gen_empty (void)
 {
@@ -4620,15 +3917,13 @@ obj_template_t *
 
 } /* ncx_get_gen_empty */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_gen_root
-* 
-* Get the object template for the NCX generic root container
-*
-* RETURNS:
-*   pointer to generic root container object template
-*********************************************************************/
+/**
+ * \fn ncx_get_gen_root
+ * \brief Get the object template for the NCX generic root container
+ * \return pointer to generic root container object template
+ */
 obj_template_t *
     ncx_get_gen_root (void)
 {
@@ -4637,14 +3932,13 @@ obj_template_t *
 } /* ncx_get_gen_root */
 
 
-/********************************************************************
-* FUNCTION ncx_get_gen_binary
-* 
-* Get the object template for the NCX generic binary leaf
-*
-* RETURNS:
-*   pointer to generic binary object template
-*********************************************************************/
+// ----------------------------------------------------------------------------!
+
+/**
+ * \fn ncx_get_gen_binary
+ * \brief Get the object template for the NCX generic binary leaf
+ * \return pointer to generic binary object template
+ */
 obj_template_t *
     ncx_get_gen_binary (void)
 {
@@ -4652,19 +3946,15 @@ obj_template_t *
 
 } /* ncx_get_gen_binary */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_layer
-*
-* translate ncx_layer_t enum to a string
-* Get the ncx_layer_t string
-*
-* INPUTS:
-*   layer == ncx_layer_t to convert to a string
-*
-* RETURNS:
-*  const pointer to the string value
-*********************************************************************/
+/**
+ * \fn ncx_get_layer
+ * \brief Translate ncx_layer_t enum to a string
+ * Get the ncx_layer_t string
+ * \param layer ncx_layer_t to convert to a string
+ * \return const pointer to the string value
+ */
 const xmlChar *
     ncx_get_layer (ncx_layer_t  layer)
 {
@@ -4685,38 +3975,26 @@ const xmlChar *
     }
 }  /* ncx_get_layer */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_name_segment
-* 
-* Get the name string between the dots
-*
-* INPUTS:
-*    str == scoped string
-*    buff == address of return buffer
-*    buffsize == buffer size
-*
-* OUTPUTS:
-*    buff is filled in with the namestring segment
-*
-* RETURNS:
-*    current string pointer after operation
-*********************************************************************/
+/**
+ * \fn ncx_get_name_segment
+ * \brief Get the name string between the dots
+ * \param str scoped string
+ * \param buff address of return buffer
+ * \param buffsize buffer size
+ * \return current string pointer after operation
+ */
 const xmlChar *
     ncx_get_name_segment (const xmlChar *str,
                           xmlChar  *buff,
                           uint32 buffsize)
 {
-    const xmlChar *teststr;
 
-#ifdef DEBUG
-    if (!str || !buff) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( str && " param str is NULL" );
+    assert ( buff && " param buff is NULL" );
 
-    teststr = str;
+    const xmlChar *teststr = str;
     while (*teststr && *teststr != NCX_SCOPE_CH) {
         teststr++;
     }
@@ -4734,27 +4012,18 @@ const xmlChar *
 
 } /* ncx_get_name_segment */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_cvttyp_enum
-* 
-* Get the enum for the string name of a ncx_cvttyp_t enum
-* 
-* INPUTS:
-*   str == string name of the enum value 
-*
-* RETURNS:
-*   enum value
-*********************************************************************/
+/**
+ * \fn ncx_get_cvttyp_enum
+ * \brief Get the enum for the string name of a ncx_cvttyp_t enum
+ * \param str string name of the enum value 
+ * \return enum value
+ */
 ncx_cvttyp_t
     ncx_get_cvttyp_enum (const char *str)
 {
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_CVTTYP_NONE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!xml_strcmp(NCX_EL_XSD, (const xmlChar *)str)) {
         return NCX_CVTTYP_XSD;
@@ -4793,27 +4062,18 @@ ncx_cvttyp_t
 
 }  /* ncx_get_cvttype_enum */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_status_enum
-* 
-* Get the enum for the string name of a ncx_status_t enum
-* 
-* INPUTS:
-*   str == string name of the enum value 
-*
-* RETURNS:
-*   enum value
-*********************************************************************/
+/**
+ * \fn ncx_get_status_enum
+ * \brief Get the enum for the string name of a ncx_status_t enum
+ * \param str string name of the enum value 
+ * \return enum value
+ */
 ncx_status_t
     ncx_get_status_enum (const xmlChar *str)
 {
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_STATUS_NONE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!xml_strcmp(NCX_EL_CURRENT, str)) {
         return NCX_STATUS_CURRENT;
@@ -4828,18 +4088,14 @@ ncx_status_t
 
 }  /* ncx_get_status_enum */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_status_string
-* 
-* Get the string for the enum value of a ncx_status_t enum
-* 
-* INPUTS:
-*   status == enum value
-*
-* RETURNS:
-*   string name of the enum value 
-*********************************************************************/
+/**
+ * \fn ncx_get_status_string
+ * \brief Get the string for the enum value of a ncx_status_t enum
+ * \param status enum value
+ * \return string name of the enum value 
+ */
 const xmlChar *
     ncx_get_status_string (ncx_status_t status)
 {
@@ -4859,19 +4115,15 @@ const xmlChar *
 
 }  /* ncx_get_status_string */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_check_yang_status
-* 
-* Check the backward compatibility of the 2 YANG status fields
-* 
-* INPUTS:
-*   mystatus == enum value for the node to be tested
-*   depstatus == status value of the dependency
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn ncx_check_yang_status
+ * \brief Check the backward compatibility of the 2 YANG status fields
+ * \param mystatus enum value for the node to be tested
+ * \param depstatus status value of the dependency
+ * \return status of the operation
+ */
 status_t
     ncx_check_yang_status (ncx_status_t mystatus,
                            ncx_status_t depstatus)
@@ -4917,36 +4169,30 @@ status_t
 
 }  /* ncx_check_yang_status */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_save_descr
-* 
-* Get the value of the save description strings variable
-*
-* RETURNS:
-*    TRUE == descriptive strings should be save
-*    FALSE == descriptive strings should not be saved
-*********************************************************************/
+/**
+ * \fn ncx_save_descr
+ * \brief Get the value of the save description strings variable
+ * \return TRUE descriptive strings should be saved
+ *         FALSE descriptive strings should not be saved
+ */
 boolean 
     ncx_save_descr (void)
 {
     return save_descr;
 }  /* ncx_save_descr */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_print_errormsg
-* 
-*   Print an parse error message to STDOUT
-*
-* INPUTS:
-*   tkc == token chain   (may be NULL)
-*   mod == module in progress  (may be NULL)
-*   res == error status
-*
-* RETURNS:
-*   none
-*********************************************************************/
+/**
+ * \fn ncx_print_errormsg
+ * \brief Print an parse error message to STDOUT
+ * \param tkc token chain   (may be NULL)
+ * \param mod module in progress  (may be NULL)
+ * \param res error status
+ * \return none
+ */
 void
     ncx_print_errormsg (tk_chain_t *tkc,
                         ncx_module_t  *mod,
@@ -4956,23 +4202,19 @@ void
 
 } /* ncx_print_errormsg */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_print_errormsg_ex
-* 
-*   Print an parse error message to STDOUT (Extended)
-*
-* INPUTS:
-*   tkc == token chain   (may be NULL)
-*   mod == module in progress  (may be NULL)
-*   res == error status
-*   filename == script finespec
-*   linenum == script file number
-*   fineoln == TRUE if finish with a newline, FALSE if not
-*
-* RETURNS:
-*   none
-*********************************************************************/
+/**
+ * \fn ncx_print_errormsg_ex
+ * \brief Print an parse error message to STDOUT (Extended)
+ * \param tkc token chain (may be NULL)
+ * \param mod module in progress (may be NULL)
+ * \param res error status
+ * \param filename script finespec
+ * \param linenum script file number
+ * \param fineoln TRUE if finish with a newline, FALSE if not
+ * \return none
+ */
 void
     ncx_print_errormsg_ex (tk_chain_t *tkc,
                            ncx_module_t  *mod,
@@ -4981,23 +4223,18 @@ void
                            uint32 linenum,
                            boolean fineoln)
 {
-    boolean      iserr;
-
     if (res == NO_ERR) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }
 
-    iserr = (res <= ERR_LAST_USR_ERR) ? TRUE : FALSE;
+    boolean iserr = (res <= ERR_LAST_USR_ERR) ? TRUE : FALSE;
 
     if (!iserr && !ncx_warning_enabled(res)) {
-        if (LOGDEBUG3) {
-            log_debug3("\nSuppressed warning %d (%s.%u)",
-                       res, 
-                       get_error_string(res),
-                       mod->name,
-                       linenum);
-        }
+         log_debug3("\nSuppressed warning %d (%s.%u)", res, 
+               get_error_string(res),
+               ( mod ? (const xmlChar*)mod->name : (const xmlChar*)"UNKNOWN" ),
+               linenum);
         return;
     }
 
@@ -5068,18 +4305,16 @@ void
 
 } /* ncx_print_errormsg_ex */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_conf_exp_err
-* 
-* Print an error for wrong token, expected a different token
-* 
-* INPUTS:
-*   tkc == token chain
-*   result == error code
-*   expstr == expected token description
-*
-*********************************************************************/
+/**
+ * \fn ncx_conf_exp_err
+ * \brief Print an error for wrong token, expected a different token
+ * \param tkc token chain
+ * \param result error code
+ * \param expstr expected token description
+ * \return none
+ */
 void
     ncx_conf_exp_err (tk_chain_t  *tkc,
                       status_t result,
@@ -5097,19 +4332,17 @@ void
 
 }  /* ncx_conf_exp_err */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_mod_exp_err
-* 
-* Print an error for wrong token, expected a different token
-* 
-* INPUTS:
-*   tkc == token chain
-*   mod == module in progress
-*   result == error code
-*   expstr == expected token description
-*
-*********************************************************************/
+/**
+ * \fn ncx_mod_exp_err
+ * \brief Print an error for wrong token, expected a different token
+ * \param tkc token chain
+ * \param mod module in progress
+ * \param result error code
+ * \param expstr expected token description
+ * \return none
+ */
 void
     ncx_mod_exp_err (tk_chain_t  *tkc,
                      ncx_module_t *mod,
@@ -5118,11 +4351,8 @@ void
 {
     const char *gotval;
     tk_type_t   tktyp;
-    boolean     skip, done;
-    uint32      skipcount;
-    status_t    res;
+    boolean skip = FALSE;
 
-    skip = FALSE;
     if (TK_CUR(tkc)) {
         tktyp = TK_CUR_TYP(tkc);
     } else {
@@ -5162,9 +4392,9 @@ void
          * will end the parent section, which causes
          * a false 'unexpected EOF' error
          */
-        skipcount = 1;
-        done = FALSE;
-        res = NO_ERR;
+        uint32 skipcount = 1;
+        boolean done = FALSE;
+        status_t res = NO_ERR;
         while (!done && res == NO_ERR) {
             res = TK_ADV(tkc);
             if (res == NO_ERR) {
@@ -5183,33 +4413,24 @@ void
 
 }  /* ncx_mod_exp_err */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_mod_missing_err
-* 
-* Print an error for wrong token, mandatory
-* sub-statement is missing
-* 
-* INPUTS:
-*   tkc == token chain
-*   mod == module in progress
-*   stmtstr == parent statement
-*   expstr == expected sub-statement
-*
-*********************************************************************/
+/**
+ * \fn ncx_mod_missing_err
+ * \brief Print an error for wrong token, mandatory
+ * sub-statement is missing
+ * \param tkc token chain
+ * \param mod module in progress
+ * \param stmtstr parent statement
+ * \param expstr expected sub-statement
+ * \return none
+ */
 void
     ncx_mod_missing_err (tk_chain_t  *tkc,
                          ncx_module_t *mod,
                          const char *stmtstr,
                          const char *expstr)
 {
-    tk_type_t   tktyp;
-    boolean     skip, done;
-    uint32      skipcount;
-    status_t    res;
-
-    skip = FALSE;
-
     if (LOGERROR) {
         if (stmtstr && expstr) {
             log_error("\nError: '%s' statement missing "
@@ -5229,55 +4450,22 @@ void
         log_error("\n");
     }
 
-    if (skip) {
-        /* got an unexpected left brace, so skip to the
-         * end of this unknown section to resynch;
-         * otherwise the first unknown closing right brace
-         * will end the parent section, which causes
-         * a false 'unexpected EOF' error
-         */
-        skipcount = 1;
-        done = FALSE;
-        res = NO_ERR;
-        while (!done && res == NO_ERR) {
-            res = TK_ADV(tkc);
-            if (res == NO_ERR) {
-                tktyp = TK_CUR_TYP(tkc);
-                if (tktyp == TK_TT_LBRACE) {
-                    skipcount++;
-                } else if (tktyp == TK_TT_RBRACE) {
-                    skipcount--;
-                }
-                if (!skipcount) {
-                    done = TRUE;
-                }
-            }
-        }
-    }
-
 }  /* ncx_mod_missing_err */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_node
-* 
-* Delete a node based on its type
-*
-* INPUTS:
-*     nodetyp == NCX node type
-*     node == node top free
-*
-*********************************************************************/
+/**
+ * \fn ncx_free_node
+ * \brief Delete a node based on its type
+ * \param nodetyp NCX node type
+ * \param node node top free
+ * \return none
+ */
 void
     ncx_free_node (ncx_node_t nodetyp,
                    void *node)
 {
-#ifdef DEBUG
-    if (!node) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( node && " param node is NULL" );
 
     switch (nodetyp) {
     case NCX_NT_NONE:                          /* uninitialized */
@@ -5311,18 +4499,14 @@ void
 
 } /* ncx_free_node */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_data_class_enum
-* 
-* Get the enum for the string name of a ncx_data_class_t enum
-* 
-* INPUTS:
-*   str == string name of the enum value 
-*
-* RETURNS:
-*   enum value
-*********************************************************************/
+/**
+ * \fn ncx_get_data_class_enum
+ * \brief Get the enum for the string name of a ncx_data_class_t enum
+ * \param str string name of the enum value 
+ * \return enum value
+ */
 ncx_data_class_t
     ncx_get_data_class_enum (const xmlChar *str)
 {
@@ -5341,18 +4525,14 @@ ncx_data_class_t
 
 }  /* ncx_get_data_class_enum */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_data_class_str
-* 
-* Get the string value for the ncx_data_class_t enum
-* 
-* INPUTS:
-*   dataclass == enum value to convert
-*
-* RETURNS:
-*   striong value for the enum
-*********************************************************************/
+/**
+ * \fn ncx_get_data_class_str
+ * \brief Get the string value for the ncx_data_class_t enum
+ * \param dataclass enum value to convert
+ * \return string value for the enum
+ */
 const xmlChar *
     ncx_get_data_class_str (ncx_data_class_t dataclass)
 {
@@ -5371,18 +4551,14 @@ const xmlChar *
 
 }  /* ncx_get_data_class_str */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_access_str
-* 
-* Get the string name of a ncx_access_t enum
-* 
-* INPUTS:
-*   access == enum value
-*
-* RETURNS:
-*   string value
-*********************************************************************/
+/**
+ * \fn ncx_get_access_str
+ * \brief Get the string name of a ncx_access_t enum
+ * \param access == enum value
+ * \return string value
+ */
 const xmlChar * 
     ncx_get_access_str (ncx_access_t max_access)
 {
@@ -5397,27 +4573,18 @@ const xmlChar *
 
 }  /* ncx_get_access_str */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_access_enum
-* 
-* Get the enum for the string name of a ncx_access_t enum
-* 
-* INPUTS:
-*   str == string name of the enum value 
-*
-* RETURNS:
-*   enum value
-*********************************************************************/
+/**
+ * \fn ncx_get_access_enum
+ * \brief Get the enum for the string name of a ncx_access_t enum
+ * \param str string name of the enum value 
+ * \return enum value
+ */
 ncx_access_t
     ncx_get_access_enum (const xmlChar *str)
 {
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_ACCESS_NONE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!xml_strcmp(NCX_EL_ACCESS_RO, str)) {
         return NCX_ACCESS_RO;
@@ -5433,17 +4600,14 @@ ncx_access_t
 
 }  /* ncx_get_access_enum */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_tclass
-* 
-* Get the token class
-*
-* INPUTS:
-*     btyp == base type enum
-* RETURNS:
-*     tclass enum
-*********************************************************************/
+/**
+ * \fn ncx_get_tclass
+ * \brief Get the token class
+ * \param btyp base type enum
+ * \return tclass enum 
+ */
 ncx_tclass_t
     ncx_get_tclass (ncx_btype_t btyp)
 {
@@ -5482,16 +4646,14 @@ ncx_tclass_t
     }
 }  /* ncx_get_tclass */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_valid_name_ch
-* 
-* Check if an xmlChar is a valid NCX name string char
-* INPUTS:
-*   ch == xmlChar to check
-* RETURNS:
-*   TRUE if a valid name char, FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_valid_name_ch
+ * \brief Check if an xmlChar is a valid NCX name string char
+ * \param ch xmlChar to check
+ * \return TRUE if a valid name char, FALSE otherwise
+ */
 boolean
     ncx_valid_name_ch (uint32 ch)
 {
@@ -5508,17 +4670,14 @@ boolean
     /*NOTREACHED*/
 } /* ncx_valid_name_ch */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_valid_fname_ch
-* 
-* Check if an xmlChar is a valid NCX name string first char
-*
-* INPUTS:
-*   ch == xmlChar to check
-* RETURNS:
-*   TRUE if a valid first name char, FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_valid_fname_ch
+ * \brief Check if an xmlChar is a valid NCX name string first char
+ * \param ch xmlChar to check
+ * \return TRUE if a valid first name char, FALSE otherwise
+ */
 boolean
     ncx_valid_fname_ch (uint32 ch)
 {
@@ -5533,30 +4692,20 @@ boolean
     /*NOTREACHED*/
 } /* ncx_valid_fname_ch */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_valid_name
-* 
-* Check if an xmlChar string is a valid YANG identifier value
-*
-* INPUTS:
-*   str == xmlChar string to check
-*   len == length of the string to check (in case of substr)
-* RETURNS:
-*   TRUE if a valid name string, FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_valid_name
+ * \brief Check if an xmlChar string is a valid YANG identifier value
+ * \param str xmlChar string to check
+ * \param len length of the string to check (in case of substr)
+ * \return TRUE if a valid name string, FALSE otherwise 
+ */
 boolean
     ncx_valid_name (const xmlChar *str, 
                     uint32 len)
 {
-    uint32  i;
-
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (len == 0 || len > NCX_MAX_NLEN) {
         return FALSE;
@@ -5564,6 +4713,8 @@ boolean
     if (!ncx_valid_fname_ch(*str)) {
         return FALSE;
     }
+
+    uint32  i;
     for (i=1; i<len; i++) {
         if (!ncx_valid_name_ch(str[i])) {
             return FALSE;
@@ -5581,68 +4732,46 @@ boolean
 
 } /* ncx_valid_name */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_valid_name2
-* 
-* Check if an xmlChar string is a valid NCX name
-*
-* INPUTS:
-*   str == xmlChar string to check (zero-terminated)
-
-* RETURNS:
-*   TRUE if a valid name string, FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_valid_name2
+ * \brief Check if an xmlChar string is a valid NCX name
+ * \param str xmlChar string to check (zero-terminated)
+ * \return TRUE if a valid name string, FALSE otherwise
+ */
 boolean
     ncx_valid_name2 (const xmlChar *str)
 {
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
+    assert ( str && " param str is NULL" );
     return ncx_valid_name(str, xml_strlen(str));
 
 } /* ncx_valid_name2 */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_parse_name
-* 
-* Check if the next N chars represent a valid NcxName
-* Will end on the first non-name char
-*
-* INPUTS:
-*   str == xmlChar string to check
-*   len == address of name length
-*
-* OUTPUTS:
-*   *len == 0 if no valid name parsed
-*         > 0 for the numbers of chars in the NcxName
-*
-* RETURNS:
-*   status_t  (error if name too long)
-*********************************************************************/
+/**
+ * \fn ncx_parse_name
+ * \brief Check if the next N chars represent a valid NcxName
+ * Will end on the first non-name char
+ * \param str xmlChar string to check 
+ * \param len address of name length
+ *       set to 0 if no valid name parsed
+ *       set to > 0 for the numbers of chars in the NcxName
+ * \return status_t i(error if name too long)
+ */
 status_t
     ncx_parse_name (const xmlChar *str,
                     uint32 *len)
 {
-    const xmlChar *s;
-
-#ifdef DEBUG
-    if (!str || !len) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!ncx_valid_fname_ch(*str)) {
         *len = 0;
         return ERR_NCX_INVALID_NAME;
     }
 
-    s = str+1;
+    const xmlChar *s = str+1;
 
     while (ncx_valid_name_ch(*s)) {
         s++;
@@ -5656,28 +4785,19 @@ status_t
 
 } /* ncx_parse_name */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_is_true
-* 
-* Check if an xmlChar string is a string OK for XSD boolean
-*
-* INPUTS:
-*   str == xmlChar string to check
-*
-* RETURNS:
-*   TRUE if a valid boolean value indicating true
-*   FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_is_true
+ * \brief Check if an xmlChar string is a string OK for XSD boolean
+ * \param str xmlChar string to check
+ * \return TRUE if a valid boolean value indicating true
+ * FALSE otherwise
+ */
 boolean
     ncx_is_true (const xmlChar *str)
 {
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!xml_strcmp(str, (const xmlChar *)"true") ||
         !xml_strcmp(str, (const xmlChar *)"1")) {
@@ -5688,28 +4808,19 @@ boolean
 
 } /* ncx_is_true */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_is_false
-* 
-* Check if an xmlChar string is a string OK for XSD boolean
-*
-* INPUTS:
-*   str == xmlChar string to check
-*
-* RETURNS:
-*   TRUE if a valid boolean value indicating false
-*   FALSE otherwise
-*********************************************************************/
+/**
+ * \fn ncx_is_false
+ * \brief Check if an xmlChar string is a string OK for XSD boolean
+ * \param str xmlChar string to check
+ * \return TRUE if a valid boolean value indicating false
+ * FALSE otherwise
+ */
 boolean
     ncx_is_false (const xmlChar *str)
 {
-#ifdef DEBUG
-    if (!str) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!xml_strcmp(str, (const xmlChar *)"false") ||
         !xml_strcmp(str, (const xmlChar *)"0")) {
@@ -5723,40 +4834,29 @@ boolean
 
 /*********   P A R S E R   H E L P E R   F U N C T I O N S   *******/
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_consume_tstring
-* 
-* Consume a TK_TT_TSTRING with the specified value
-*
+/**
+ * \fn ncx_consume_tstring
+ * \brief Consume a TK_TT_TSTRING with the specified value
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   tkc == token chain 
-*   mod == module in progress (NULL if none)
-*   name == token name
-*   opt == TRUE for optional param
-*       == FALSE for mandatory param
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+ * \param tkc token chain 
+ * \param mod module in progress (NULL if none)
+ * \param name token name
+ * \param opt TRUE for optional param
+ *        FALSE for mandatory param
+ * \return status of the operation
+ */
 status_t 
     ncx_consume_tstring (tk_chain_t *tkc,
                          ncx_module_t *mod,
                          const xmlChar *name,
                          ncx_opt_t opt)
 {
-    status_t     res;
+    assert ( tkc && " param tkc is NULL" );
 
-#ifdef DEBUG
-    if (!tkc || !name) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    } 
-#endif
-
-    res = TK_ADV(tkc);
-
+    status_t res = TK_ADV(tkc);
     if (res == NO_ERR) {
         if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
             if (opt==NCX_OPT) {
@@ -5785,34 +4885,25 @@ status_t
 
 } /* ncx_consume_tstring */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_consume_name
-* 
-* Consume a TK_TSTRING that matches the 'name', then
-* retrieve the next TK_TSTRING token into the namebuff
-* If ctk specified, then consume the specified close token
-*
-* Store the results in a malloced buffer
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   tkc == token chain 
-*   mod == module in progress (NULL if none)
-*   name == first token name
-*   namebuff == ptr to output name string
-*   opt == NCX_OPT for optional param
-*       == NCX_REQ for mandatory param
-*   ctyp == close token (use TK_TT_NONE to skip this part)
-*
-* OUTPUTS:
-*   *namebuff points at the malloced name string
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn ncx_consume_name
+ * \brief Consume a TK_TSTRING that matches the 'name', then
+ * retrieve the next TK_TSTRING token into the namebuff
+ * If ctk specified, then consume the specified close token
+ * Store the results in a malloced buffer
+ * Error messages are printed by this function!!
+ * Do not duplicate error messages upon error return
+ * \param tkc token chain 
+ * \param mod module in progress (NULL if none)
+ * \param name first token name
+ * \param namebuff ptr to OUTPUT name string
+ * \param opt NCX_OPT for optional param
+ *            NCX_REQ for mandatory param
+ * \param ctyp close token (use TK_TT_NONE to skip this part)
+ * \return status of the operation
+ */
 status_t 
     ncx_consume_name (tk_chain_t *tkc,
                       ncx_module_t *mod,
@@ -5821,20 +4912,15 @@ status_t
                       ncx_opt_t opt,
                       tk_type_t  ctyp)
 {
-    const char  *expstr;
-    status_t     res, retres;
+    assert ( tkc && " param tkc is NULL" );
+    assert ( name && " param name is NULL" );
+    assert ( namebuff && " param namebuff is NULL" );
 
-#ifdef DEBUG
-    if (!tkc || !name || !namebuff) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    retres = NO_ERR;
-    expstr = "name string";
+    status_t retres = NO_ERR;
+    const char *expstr = "name string";
 
     /* check 'name' token */
-    res = TK_ADV(tkc);
+    status_t res = TK_ADV(tkc);
     if (res != NO_ERR) {
         ncx_mod_exp_err(tkc, mod, res, expstr);
         return res;
@@ -5902,40 +4988,30 @@ status_t
 
 } /* ncx_consume_name */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_consume_token
-* 
-* Consume the next token which should be a 1 or 2 char token
-* without any value. However this function does not check the value,
-* just the token type.
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   tkc == token chain 
-*   mod == module in progress (NULL if none)
-*   ttyp == token type
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
+/**
+ * \fn ncx_consume_token
+ * \brief Consume the next token which should be a 1 or 2 char token
+ * without any value. However this function does not check the value,
+ * just the token type.
+ * Error messages are printed by this function!!
+ * Do not duplicate error messages upon error return
+ * \param tkc token chain 
+ * \param mod module in progress (NULL if none)
+ * \param ttyp token type
+ * \return status of the operation
+ */
 status_t 
     ncx_consume_token (tk_chain_t *tkc,
                        ncx_module_t *mod,
                        tk_type_t  ttyp)
 {
+    assert ( tkc && " param tkc is NULL" );
+
     const char  *tkname;
-    status_t     res;
 
-#ifdef DEBUG
-    if (!tkc) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    res = TK_ADV(tkc);
+    status_t res = TK_ADV(tkc);
     if (res != NO_ERR) {
         ncx_print_errormsg(tkc, mod, res);
         return res;
@@ -5992,21 +5068,17 @@ status_t
 
 } /* ncx_consume_token */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_new_errinfo
-* 
-* Malloc and init a new ncx_errinfo_t
-*
-* RETURNS:
-*    pointer to malloced ncx_errinfo_t, or NULL if memory error
-*********************************************************************/
+/**
+ * \fn ncx_new_errinfo
+ * \brief Malloc and init a new ncx_errinfo_t
+ * \return pointer to malloced ncx_errinfo_t, or NULL if memory error
+ */
 ncx_errinfo_t *
     ncx_new_errinfo (void)
 {
-    ncx_errinfo_t *err;
-
-    err = m__getObj(ncx_errinfo_t);
+    ncx_errinfo_t *err = m__getObj(ncx_errinfo_t);
     if (!err) {
         return NULL;
     }
@@ -6015,48 +5087,35 @@ ncx_errinfo_t *
 
 }  /* ncx_new_errinfo */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_init_errinfo
-* 
-* Init the fields in an ncx_errinfo_t struct
-*
-* INPUTS:
-*    err == ncx_errinfo_t data structure to init
-*********************************************************************/
+/**
+ * \fn ncx_init_errinfo
+ * \brief Init the fields in an ncx_errinfo_t struct
+ * \param err ncx_errinfo_t data structure to init
+ * \return none
+ */
 void 
     ncx_init_errinfo (ncx_errinfo_t *err)
 {
-#ifdef DEBUG
-    if (!err) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( err && " param err is NULL" );
     memset(err, 0x0, sizeof(ncx_errinfo_t));
 
 }  /* ncx_init_errinfo */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_clean_errinfo
-* 
-* Scrub the memory in a ncx_errinfo_t by freeing all
-* the sub-fields
-*
-* INPUTS:
-*    err == ncx_errinfo_t data structure to clean
-*********************************************************************/
+/**
+ * \fn ncx_clean_errinfo
+ * \brief Scrub the memory in a ncx_errinfo_t by freeing all
+ * the sub-fields
+ * \param err ncx_errinfo_t data structure to clean
+ * \return none
+ */
 void 
     ncx_clean_errinfo (ncx_errinfo_t *err)
 {
-#ifdef DEBUG
-    if (!err) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert ( err && " param err is NULL" );
 
     if (err->descr) {
         m__free(err->descr);
@@ -6077,56 +5136,39 @@ void
 
 }  /* ncx_clean_errinfo */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_free_errinfo
-* 
-* Scrub the memory in a ncx_errinfo_t by freeing all
-* the sub-fields, then free the errinfo struct
-*
-* INPUTS:
-*    err == ncx_errinfo_t data structure to free
-*********************************************************************/
+/**
+ * \fn ncx_free_errinfo
+ * \brief Scrub the memory in a ncx_errinfo_t by freeing all
+ * the sub-fields, then free the errinfo struct
+ * \param err ncx_errinfo_t data structure to free
+ * \return none
+ */
 void 
     ncx_free_errinfo (ncx_errinfo_t *err)
 {
-#ifdef DEBUG
-    if (!err) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( err && " param err is NULL" );
     ncx_clean_errinfo(err);
     m__free(err);
 
 }  /* ncx_free_errinfo */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_errinfo_set
-* 
-* Check if error-app-tag or error-message set
-* Check if the errinfo struct is set or empty
-* Checks only the error_app_tag and error_message fields
-*
-* INPUTS:
-*    errinfo == ncx_errinfo_t struct to check
-*
-* RETURNS:
-*   TRUE if at least one field set
-*   FALSE if the errinfo struct is empty
-*********************************************************************/
+/**
+ * \fn ncx_errinfo_set
+ * \brief Check if error-app-tag or error-message set
+ * Check if the errinfo struct is set or empty
+ * Checks only the error_app_tag and error_message fields
+ * \param errinfo ncx_errinfo_t struct to check
+ * \return TRUE if at least one field set
+ *         FALSE if the errinfo struct is empty
+ */
 boolean
     ncx_errinfo_set (const ncx_errinfo_t *errinfo)
 {
-
-#ifdef DEBUG
-    if (!errinfo) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
+    assert( errinfo && "errinfo is NULL" );
 
     if (errinfo->error_app_tag || errinfo->error_message) {
         return TRUE;
@@ -6136,31 +5178,21 @@ boolean
 
 }  /* ncx_errinfo_set */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_copy_errinfo
-* 
-* Copy the fields from one errinfo to a blank errinfo
-*
-* INPUTS:
-*    src == struct with starting contents
-*    dest == struct to get copy of src contents
-*
-* OUTPUTS:
-*    *dest fields set which are set in src
-*
-* RETURNS:
-*   status
-*********************************************************************/
+/**
+ * \fn ncx_copy_errinfo
+ * \brief Copy the fields from one errinfo to a blank errinfo
+ * \param src struct with starting contents
+ * \param src struct with starting contents
+ * \return status
+ */
 status_t
     ncx_copy_errinfo (const ncx_errinfo_t *src,
                       ncx_errinfo_t *dest)
 {
-#ifdef DEBUG
-    if (!src || !dest) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( src && " param src is NULL" );
+    assert ( dest && " param dest is NULL" );
 
     if (src->descr) {
         if (dest->descr) {
@@ -6206,62 +5238,46 @@ status_t
 
 }  /* ncx_copy_errinfo */
 
+// ----------------------------------------------------------------------------!
 
-/********************************************************************
-* FUNCTION ncx_get_source_ex
-* 
-* Get a malloced buffer containing the complete filespec
-* for the given input string.  If this is a complete dirspec,
-* this this will just strdup the value.
-*
-* This is just a best effort to get the full spec.
-* If the full spec is greater than 1500 bytes,
-* then a NULL value (error) will be returned
-*
-*   - Change ./ --> cwd/
-*   - Remove ~/  --> $HOME
-*   - add trailing '/' if not present
-*
-* INPUTS:
-*    fspec == input filespec
-*    expand_cwd == TRUE if foo should be expanded to /cur/dir/foo
-*                  FALSE if not
-*    res == address of return status
-*
-* OUTPUTS:
-*   *res == return status, NO_ERR if return is non-NULL
-*
-* RETURNS:
-*   malloced buffer containing possibly expanded full filespec
-*********************************************************************/
+/**
+ * \fn ncx_get_source_ex
+ * \brief Get a malloced buffer containing the complete filespec
+ * for the given input string.  If this is a complete dirspec,
+ * this this will just strdup the value.
+ * This is just a best effort to get the full spec.
+ * If the full spec is greater than 1500 bytes,
+ * then a NULL value (error) will be returned
+ *   - Change ./ --> cwd/
+ *   - Remove ~/  --> $HOME
+ *   - add trailing '/' if not present
+ * \param fspec input filespec
+ * \param expand_cwd TRUE if foo should be expanded to /cur/dir/foo
+ *                   FALSE if not
+ * \param res address of return status OUTPUT
+ * \return malloced buffer containing possibly expanded full filespec
+ */
 xmlChar *
     ncx_get_source_ex (const xmlChar *fspec,
                        boolean expand_cwd,
                        status_t *res)
 {
-    const xmlChar  *p, *start, *user;
-    xmlChar        *buff, *bp;
-    uint32          bufflen, userlen, len;
-    boolean         with_dot;
-
 #define DIRBUFF_SIZE 1500
 
-#ifdef DEBUG
-    if (!fspec || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-    if (!*fspec) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-#endif
+    assert ( fspec && " param fspec is NULL" );
+    assert ( res && " param res is NULL" );
+    assert ( *fspec && " data referenced by param fspec is NULL" );
+
+    const xmlChar  *start;
+    xmlChar        *bp;
+    uint32          bufflen, userlen;
+    boolean         with_dot;
 
     *res = NO_ERR;
-    buff = NULL;
-    user = NULL;
-    len = 0;
-    p = fspec;
+    xmlChar *buff = NULL;
+    const xmlChar *user = NULL;
+    uint32 len = 0;
+    const xmlChar *p = fspec;
 
     if (*p == NCXMOD_PSCHAR) {
         /* absolute path */
@@ -6443,13 +5459,7 @@ xmlChar *
 void
     ncx_set_cur_modQ (dlq_hdr_t *que)
 {
-#ifdef DEBUG
-    if (!que) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( que && " param que is NULL");
     ncx_curQ = que;
 
 }  /* ncx_set_cur_modQ */
@@ -6487,13 +5497,7 @@ void
 void
     ncx_set_session_modQ (dlq_hdr_t *que)
 {
-#ifdef DEBUG
-    if (!que) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( que && " param que is NULL");
     ncx_sesmodQ = que;
 
 }  /* ncx_set_sesion_modQ */
@@ -6589,12 +5593,7 @@ boolean
 ncx_bad_data_t
     ncx_get_baddata_enum (const xmlChar *valstr)
 {
-#ifdef DEBUG
-    if (!valstr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_BAD_DATA_NONE;
-    }
-#endif
+    assert ( valstr && " param valstr is NULL");
 
     if (!xml_strcmp(valstr, E_BAD_DATA_IGNORE)) {
         return NCX_BAD_DATA_IGNORE;
@@ -6695,12 +5694,7 @@ const xmlChar *
 ncx_withdefaults_t
     ncx_get_withdefaults_enum (const xmlChar *withdefstr)
 {
-#ifdef DEBUG
-    if (!withdefstr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_WITHDEF_NONE;
-    }
-#endif
+    assert ( withdefstr && " param withdefstr is NULL");
 
     if (!xml_strcmp(withdefstr, NCX_EL_REPORT_ALL)) {
         return NCX_WITHDEF_REPORT_ALL;
@@ -6731,13 +5725,7 @@ ncx_withdefaults_t
 const xmlChar *
     ncx_get_mod_prefix (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
+    assert ( mod && " param mod is NULL");
     return mod->prefix;
 
 }  /* ncx_get_mod_prefix */
@@ -6757,12 +5745,7 @@ const xmlChar *
 const xmlChar *
     ncx_get_mod_xmlprefix (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL");
 
     if (mod->xmlprefix) {
         return mod->xmlprefix;
@@ -6788,12 +5771,7 @@ const xmlChar *
 ncx_display_mode_t
     ncx_get_display_mode_enum (const xmlChar *dmstr)
 {
-#ifdef DEBUG
-    if (!dmstr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_DISPLAY_MODE_NONE;
-    }
-#endif
+    assert ( dmstr && " param dmstr is NULL" );
 
     if (!xml_strcmp(dmstr, NCX_EL_PLAIN)) {
         return NCX_DISPLAY_MODE_PLAIN;
@@ -6937,14 +5915,9 @@ void
                           ncx_module_t *mod,
                           const xmlChar *id)
 {
-    uint32   idlen;
+    assert ( id && " param id is NULL" );
 
-#ifdef DEBUG
-    if (!id) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    uint32   idlen;
 
     if (!warn_idlen) {
         return;
@@ -6982,15 +5955,10 @@ void
                             ncx_module_t *mod,
                             const xmlChar *line)
 {
+    assert ( line && " param line is NULL" );
+
     const xmlChar   *str;
     uint32           len;
-
-#ifdef DEBUG
-    if (!line) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
 
     if (!warn_linelen) {
         return;
@@ -7129,14 +6097,10 @@ status_t
     xmlChar     numbuff[NCX_MAX_NUMLEN];
 #endif
     
-#ifdef DEBUG
-    if (!buffer) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert ( buffer && " param buffer is NULL" );
 
 #ifdef RELEASE
-    sprintf((char *)numbuff, "%d", RELEASE);
+    snprintf((char *)numbuff, sizeof(numbuff), "%d", RELEASE);
 
     versionlen = xml_strlen(YUMA_VERSION) +
         xml_strlen(numbuff) + 1;
@@ -7189,14 +6153,10 @@ ncx_save_deviations_t *
                              const xmlChar *devnamespace,
                              const xmlChar *devprefix)
 {
-    ncx_save_deviations_t  *savedev;
+    assert ( devmodule && " param devmodule is NULL" );
+    assert ( devnamespace && " param devnamespace is NULL" );
 
-#ifdef DEBUG
-    if (!devmodule || !devnamespace) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    ncx_save_deviations_t  *savedev;
 
     savedev = m__getObj(ncx_save_deviations_t);
     if (savedev == NULL) {
@@ -7251,15 +6211,10 @@ ncx_save_deviations_t *
 void
     ncx_free_save_deviations (ncx_save_deviations_t *savedev)
 {
+    assert ( savedev && " param savedev is NULL" );
+
     ncx_import_t      *import;
     obj_deviation_t   *deviation;
-
-#ifdef DEBUG
-    if (!savedev) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
 
     while (!dlq_empty(&savedev->importQ)) {
         import = (ncx_import_t *)
@@ -7330,19 +6285,12 @@ void
 * OUTPUTS:
 *   *tkerr is filled in
 *********************************************************************/
-void
-    ncx_set_error (ncx_error_t *tkerr,
-                   ncx_module_t *mod,
-                   uint32 linenum,
-                   uint32 linepos)
+void ncx_set_error( ncx_error_t *tkerr,
+                    ncx_module_t *mod,
+                    uint32 linenum,
+                    uint32 linepos )
 {
-#ifdef DEBUG
-    if (!tkerr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }   
-#endif
-
+    assert ( tkerr && " param tkerr is NULL" );
     tkerr->mod = mod;
     tkerr->linenum = linenum;
     tkerr->linepos = linepos;
@@ -7362,13 +6310,7 @@ void
 void
     ncx_set_temp_modQ (dlq_hdr_t *modQ)
 {
-#ifdef DEBUG
-    if (!modQ) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }   
-#endif
-
+    assert ( modQ && " param modQ is NULL" );
     temp_modQ = modQ;
 
 }  /* ncx_set_temp_modQ */
@@ -7470,14 +6412,9 @@ const xmlChar *
 uint32
     ncx_mod_revision_count (const xmlChar *modname)
 {
-    uint32        count;
+    assert ( modname && " param modname is NULL" );
 
-#ifdef DEBUG
-    if (modname == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
+    uint32        count;
 
     if (ncx_sesmodQ != NULL) {
         count = ncx_mod_revision_count_que(ncx_sesmodQ, modname);
@@ -7507,16 +6444,12 @@ uint32
     ncx_mod_revision_count_que (dlq_hdr_t *modQ,
                                 const xmlChar *modname)
 {
+    assert ( modQ && " param modQ is NULL" );
+    assert ( modname && " param modname is NULL" );
+
     ncx_module_t *mod;
     uint32        count;
     int32         retval;
-
-#ifdef DEBUG
-    if (modQ == NULL || modname == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
 
     count = 0;
     for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
@@ -7548,12 +6481,7 @@ uint32
 dlq_hdr_t *
     ncx_get_allincQ (ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (mod == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
 
     while (mod->parent != NULL) {
         mod = mod->parent;
@@ -7578,12 +6506,7 @@ dlq_hdr_t *
 const dlq_hdr_t *
     ncx_get_const_allincQ (const ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (mod == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
 
     while (mod->parent != NULL) {
         mod = mod->parent;
@@ -7608,12 +6531,7 @@ const dlq_hdr_t *
 ncx_module_t *
     ncx_get_parent_mod (ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (mod == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert ( mod && " param mod is NULL" );
 
     while (mod->parent != NULL) {
         mod = mod->parent;
@@ -7660,15 +6578,11 @@ int32
     ncx_compare_base_uris (const xmlChar *str1,
                            const xmlChar *str2)
 { 
+    assert ( str1 && " param str1 is NULL" );
+    assert ( str2 && " param str2 is NULL" );
+
     const xmlChar *s;
     uint32  len1, len2; 
-
-#ifdef DEBUG
-    if (str1 == NULL || str2 == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return -1;
-    }
-#endif
 
     s = str1;
     while (*s && *s != '?') {
@@ -7776,13 +6690,7 @@ void
 void
     ncx_inc_warnings (ncx_module_t *mod)
 {
-#ifdef DEBUG
-    if (mod == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
+    assert ( mod && " param mod is NULL" );
     mod->warnings++;
 
 }   /* ncx_inc_warnings */
@@ -7883,32 +6791,49 @@ void
     ncx_delete_all_obsolete_objects (void)
 {
     ncx_module_t   *mod;
-    yang_node_t    *node;
 
     for (mod = ncx_get_first_module();
          mod != NULL;
          mod = ncx_get_next_module(mod)) {
 
-        obj_delete_obsolete(&mod->datadefQ);
-
-        if (!mod->ismod) {
-            continue;
-        }
-
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
-             node != NULL;
-             node = (yang_node_t *)dlq_nextEntry(node)) {
-
-            if (node->submod == NULL) {
-                SET_ERROR(ERR_INTERNAL_PTR);
-                continue;
-            }
-
-            obj_delete_obsolete(&node->submod->datadefQ);
-        }
+        ncx_delete_mod_obsolete_objects(mod);
     }
 
 }  /* ncx_delete_all_obsolete_objects */
+
+
+/********************************************************************
+* FUNCTION ncx_delete_mod_obsolete_objects
+* 
+* Go through one module and delete the obsolete nodes
+* 
+* INPUTS:
+*    mod == module to check
+*********************************************************************/
+void
+    ncx_delete_mod_obsolete_objects (ncx_module_t *mod)
+{
+    yang_node_t    *node;
+
+    obj_delete_obsolete(&mod->datadefQ);
+
+    if (!mod->ismod) {
+        return;
+    }
+
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
+
+        if (node->submod == NULL) {
+            SET_ERROR(ERR_INTERNAL_PTR);
+            continue;
+        }
+
+        obj_delete_obsolete(&node->submod->datadefQ);
+    }
+
+}  /* ncx_delete_mod_obsolete_objects */
 
 
 /********************************************************************
@@ -7925,12 +6850,7 @@ void
 ncx_name_match_t
     ncx_get_name_match_enum (const xmlChar *str)
 {
-#ifdef DEBUG
-    if (str == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_MATCH_NONE;
-    }
-#endif
+    assert ( str && " param str is NULL" );
 
     if (!xml_strcmp(NCX_EL_EXACT, str)) {
         return NCX_MATCH_EXACT;
@@ -8010,6 +6930,36 @@ void
         }
     }
 }  /* ncx_write_tracefile */
+
+
+/********************************************************************
+* FUNCTION ncx_set_top_mandatory_allowed
+* 
+* Allow or disallow modules with top-level mandatory object
+* to be loaded; used by the server when agt_running_error is TRUE
+*
+* INPUTS:
+*   allowed == value to set T: to allow; F: to disallow
+*********************************************************************/
+void
+    ncx_set_top_mandatory_allowed (boolean allowed)
+{
+    allow_top_mandatory = allowed;
+}
+
+/********************************************************************
+* FUNCTION ncx_get_top_mandatory_allowed
+* 
+* Check if top-level mandatory objects are allowed or not
+*
+* RETURNS:
+*   T: allowed; F: disallowed
+*********************************************************************/
+boolean
+    ncx_get_top_mandatory_allowed (void)
+{
+    return allow_top_mandatory;
+}
 
 
 /* END file ncx.c */

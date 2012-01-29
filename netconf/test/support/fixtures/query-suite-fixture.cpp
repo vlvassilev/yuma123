@@ -16,6 +16,7 @@
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/nc-session/abstract-nc-session-factory.h"
 #include "test/support/callbacks/abstract-cb-checker-factory.h"
+#include "test/support/fixtures/abstract-fixture-helper-factory.h"
 #include "test/support/misc-util/log-utils.h"
 #include "test/support/checkers/string-presence-checkers.h"
 
@@ -33,8 +34,10 @@ QuerySuiteFixture::QuerySuiteFixture()
     : BaseSuiteFixture()
     , sessionFactory_( testContext_->sessionFactory_ )
     , cbCheckerFactory_( testContext_->cbCheckerFactory_ )
+    , fixtureHelperFactory_( testContext_->fixtureHelperFactory_ )
     , primarySession_( sessionFactory_->createSession() )
     , cbChecker_( cbCheckerFactory_->createChecker() )
+    , fixtureHelper_( fixtureHelperFactory_->createHelper() )
     , messageBuilder_( new NCMessageBuilder() )
     , queryEngine_( new NCQueryTestEngine( messageBuilder_ ) )
 {
@@ -74,6 +77,12 @@ QuerySuiteFixture::getFullLock( std::shared_ptr<AbstractNCSession> session )
             NCDbScopedLock( queryEngine_, session, "candidate" ) ) );
     }
 
+    if( useStartup() )
+    {
+        locks.push_back( std::unique_ptr< NCDbScopedLock >( new  
+            NCDbScopedLock( queryEngine_, session, "startup" ) ) );
+    }
+
     return locks;
 }
 
@@ -84,7 +93,40 @@ void QuerySuiteFixture::commitChanges(
     if( useCandidate() )
     {
         // send a commit
-        queryEngine_->commit( primarySession_ );
+        queryEngine_->commit( session );
+    }
+
+    if( useStartup() )
+    {
+        assert( session );
+        vector<string> expPresent{ "ok" };
+        vector<string> expNotPresent{ "error", "rpc-error" };
+        StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+        // send a copy-config
+        queryEngine_->tryCopyConfig( session, "startup", "running", checker );
+    }
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::commitChangesFailure( 
+        std::shared_ptr<AbstractNCSession> session )
+{
+    if( useCandidate() )
+    {
+        // send a commit
+        queryEngine_->commitFailure( session );
+    }
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::confirmedCommitChanges( 
+        std::shared_ptr<AbstractNCSession> session,
+        const int timeout )
+{
+    if( useCandidate() )
+    {
+        // send a confirmed-commit
+        queryEngine_->confirmedCommit( session, timeout );
     }
 }
 
@@ -115,6 +157,90 @@ void QuerySuiteFixture::runFailedEditQuery(
     StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
     queryEngine_->tryEditConfig( session, query, writeableDbName_, 
                                  checker );
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::runValidateCommand( 
+        shared_ptr<AbstractNCSession> session )
+{
+    assert( session );
+    vector<string> expPresent{ "ok" };
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryValidateDatabase( session, writeableDbName_, checker );
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::runGetMySession( 
+         shared_ptr<AbstractNCSession> session,
+         const string& expIndent,
+         const string& expLinesize,
+         const string& expWithDefaults )
+{
+    assert(session);
+
+    vector<string> expPresent{ "rpc-reply", expIndent, expLinesize, expWithDefaults };
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryGetMySession( session, checker );
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::runSetMySession( 
+         shared_ptr<AbstractNCSession> session,
+         const string& indent,
+         const string& linesize,
+         const string& withDefaults )
+{
+    assert(session);
+
+    vector<string> expPresent{ "rpc-reply", "ok"};
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->trySetMySession( session, indent, linesize, withDefaults, checker );
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::runShutdown( shared_ptr<AbstractNCSession> session )
+{
+    assert(session);
+
+    vector<string> expPresent{ "rpc-reply", "ok" };
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryShutdown( session, checker );
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::runRestart( shared_ptr<AbstractNCSession> session )
+{
+    assert(session);
+
+    vector<string> expPresent{ "rpc-reply", "ok" };
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryRestart( session, checker );
+
+    fixtureHelper_->mimicRestart();
+}
+
+// ---------------------------------------------------------------------------|
+void QuerySuiteFixture::runNoSession( 
+         shared_ptr<AbstractNCSession> session )
+{
+    assert(session);
+
+    //If no response expect to check against sent message"
+    vector<string> expPresent{ "rpc", "get-my-session" };
+    vector<string> expNotPresent{ "rpc-reply", "rpc-error", "ok" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryGetMySession( session, checker );
 }
 
 } // namespace YumaTest

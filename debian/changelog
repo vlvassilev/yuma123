@@ -1,95 +1,212 @@
-yuma (2.1-3) unstable; urgency=medium
+yuma (2.2-1) stable; urgency=high
   * netconfd
-   * fixed bug in partial-lock module; remove write access
-     requirement in order to allow user to create a partial lock
-   * fixed bug in split SIL generation; local vars now being used
-     to force the given agt_get_key_value invocation order.
-   * add --home parameter to override $HOME variable
-   * fixed bug in database editing where list entries with
-     missing key leafs were allowed to be created anyway
-   * fixed bug in validating identityref input, where
-     the session modules were not checked and a valid
-     identityref value (without a prefix) could be
-     treated as an invalid value
-   * fix bug where an empty string as a key leaf was not being
-     added to the index queue which rippled to other errors
-     during editing
-   * added checks for trying to delete a key leaf
-   * Changed SIL callback behavior for replace operation
-     If the parent node contains the operation="replace"
-     attribute, and at least one child node changed,
-     then the SIL-replace callbacks will be invoked
-     for all the child nodes, not just the changed child nodes.
-   * Changed SIL callback behavior for 'apply' phase
-     The SIL callbacks are no longer called for the candidate
-     database, just the running database.  This prevents
-     double-call (during edit-config and then again in commit).
-     It also prevents SIL resource allocation that will not be
-     cleaned up if <discard-changes> is called.
-   * fixing bug 3426015:
-     The server incorrectly returned an error for a missing current node
-     even if there are no effective operations in the entire request
-     (default-operation='none' and no nc:operation attributes present)
-   * Added 'Commit-Complete' callback support.
-     This change introduces a mechanism that allows SIL modules to
-     register for notification when a commit operation has completed.
-     See API documentation in agt_commit_complete.h
-   * fix bug where replace edit operation was not done
-     at the correct level, so the result was the merge of a
-     complex child node, not a replace as requested
-   * fixed bug in agt_yuma_arp where the /arp/dynamic-arps container
-     was getting created on reboot, if the /arp container was in the
-     startup config
+    * Added server regression testing and Coverity static code cleanup
+      by Marc Pashley, James Parkin, and Joe Handford
+    * fix error-path generation so it conforms to RFC 6241
+     - XPath code does not find nc:rpc so false warning generated
+    * agt_val_root_check rewrite:
+      Commit tests (see RFC 6020, Sec. 8.3.3) are separated out
+      from agt_val_instance_check), instead of searching the
+      target config for nodes that need commit tests.
+      Started undo_rec based test pruning.
+    * fix bug where RPC SIL validate or invoke callback returns an error
+      but does not call agt_record_error; server returns <ok>
+      and ignores the error return status; now adding an
+      <rpc-error> if none, when RPC SIL validate or invoke callback returns
+      an error.
+    * fixed bug in load module where a module with errors could
+      sometimes be loaded anyway.  Now server will exit if
+      initial modules loaded have errors, even if YANG parse
+      returns NO_ERR for a module with a non-zero error count
+    * fixed bug where unknown namespace error caused server to incorrectly
+      skip the entire rest of the XML message.  During load_running_config
+      it is possible the server is configured to remove bad nodes
+      and continue to the next XML sibling node.
+    * implemented recoverable edits in agt_val.c;
+      * add transactions to cfg.c; now saving an auto-incrementing
+        transaction ID across reboots so new ID always used any time
+        a config edit request is processed;
+      * val_merge is now always non-destructive to the source value
+      * newval and curval are always rooted in a source XML tree
+      * add VAL_FL_DELETED to mark curval as deleted and not remove
+        until commit finalized
+      * update undo record handling so it is always used and supports
+        recoverable edits
+      * refactor edit code and move some ncx code to new module
+        agt/agt_cfg.c
+    * fixed bug where error-path is not getting set if the
+      error node is the <url> parameter
+    * fixed bug in delete_config_validate where error path and
+      error info parms are reversed; set errval for <url> if needed
+    * update commit procedure to use VAL_FL_SUBTREE_DIRTY flag
+      to prune unchanged subtrees in the candidate config
+      instead of expensive subtree-compare.
+    * updated agt_acm debug logging
+    * remove all #ifdefs around log_debug code
+    * now cleaning all edit records from candidate so commit
+      will not get fooled by delete x, then create x
+    * fix object ID for XPath so choices and cases are removed
+      from the path extression; also add module prefix to prevent
+      external augment with same local-name from matching expression
+    * fix bug where deleting a default leaf did not re-mark the leaf
+      as set-by-default
+    * remove agt_val_split_root_check code
+      * callback states AGT_CB_COMMIT_CHECK and AGT_CB_TEST_APPLY
+        have been removed and the agt_val code simplified
+      * val_clone removed; changed applied to real data tree and
+        undone if needed; no special test phase, just recoverable apply phase
+    * fix bug in commit code where newval was not checked for NULL
+      before accessing a field in it
+    * change output buffer logging from debug4 to debug3
+    * fixed bug in error-path generation where /nc:config node
+      was incorrectly added as the starting node, instead of the
+      top-level YANG object from the database
+    * fixed bug in XML generation where XML-safe string was not
+      generated in string node content
+    * fixed bug in copy-config where copy from inline to
+      candidate was not getting fully validated or applied correctly
+    * fix new bug where apply rollback after timeout did not work
+    * changed user SID to 0 (for superuser) when a commit is rolled
+      back; the old user id should not be used; must force all edits
+      to be reverted.
+    * fix bug in val_set_canonical_order where list sometimes not
+      inserted in sorted order
+    * fixed new bug where YANG choices were not always getting validated
+      in a root-check
+    * fixed bug in load_config where invoke could be called even
+      if validate phase failed
+    * fixed new bug where rollback would fail because there is
+      already a transaction in progress
+    * now olnly restoring backup if rollback failed, not if commit failed
+    * fixed bug where error-path = '/' was not generated correctly
+      so that field would be missing for <validate> and other rpc-error
+      responses
+    * add reverse_edit to send SIL callbacks for a reverse edit
+      during a rollback; needed when the SIL already returned
+      NO_ERR for a COMMIT callback
+    * add ncx:user-write extension
+      see extension 'user-write' in yuma-ncx.yang for details
+      Server will block user access to specific edit operations
+      if this extension is present in a YANG database node definition
+    * added agt_log_acm_reads and agt_log_acm_writes
+      to the agt_profile to control log output for NACM access
+    * optimized 'applyhere' compares to test just child nodes
+      and not all descendent nodes to speed up agt_val processing
+    * attempt to fix SIL callback sequence integ-test failures,
+      but test-simple-edit-candidate is still failing
+      due to vaidate callbacks during commit_validate
+    * add /system/sysNetconfServerCLI monitoring data to
+      inspect the CLI parameters used at boot-time
+    * add boolean flags to agt_profile to track load-config
+      error progress so startup-error and running-error parameters
+      can be processed correctly:
+       - agt_load_validate_errors    (OK if --startup-error=continue)
+       - agt_load_rootcheck_errors   (OK if --running-error=continue)
+       - agt_load_apply_errors       (fatal error if SIL apply/commit fails)
+    * optimize unique-stmt checking to minimize data retrieval
+      and test duplication
+    * fix bug in new root-check code where leaf and container
+      instance-checks were sometimes missed
+    * fix memory leak in generating unique-error
+    * updated error message for list within the path of a
+      unique statement component; clarified with YANG author that
+      lists not allowed since nodes from different lists cannot
+      be in the same unique test tuple
+    * fixed bug 3476123; leafrefs not getting written to XML correctly
+    * add code to prune commit tests for objects do not need new
+      tests because they have not changed value;
+    * fixed bug where inherited when-stmt and if-feature
+      statements (from choice or case nodes) were not
+      checked when deleting dead nodes
+    * optimized instance_check so if-feature and when-stmts
+      do not need to be evaluated again (done pre-root-check)
+    * fixed bug in check_editop where create on duplicate leaf-list was not
+      properly rejected with a data-exists error
+    * added support to make sure modules with top-level mandatory nodes
+      are rejected by the server if the --running-error parameter is
+      set to 'stop'.  This prevents a user from loading such a module
+      and causing the server to shutdown.
+    * added a <bad-value> element to the <error-info> for a
+      missing value instance error (310), containing the name of the
+      missing node.
+    * added agt_validate_all (d:T) to agt_profile to control
+      <validate> op behavior.  Set to false to have <validate> only
+      call SILs for the nodes that are changed in the candidate,
+      which is how <commit> validate works.
+    * fix bug in NACM where read or write access was wrongly denied
+      when read-default=deny and write-default=deny
+    * fixed bug where the server would terminate the <load-config> op
+      if parse or rpc-instance-check errors occurred, even though
+      --startup-error=continue and the nodes with errors were optional
+      so they could be removed without making the running config invalid
 
-  * yangdump
-    * Added format=cpp_test parameter for yangdump to allow generation
-      of cpp test module source containing callback logging.
-      Used by regression test code.
-    * add --home parameter to override $HOME variable
-   * add support for ncx:sil-delete-children-first
-  * fix memory leaks and potential use-after-free bugs
-    found by Coverity static analysis
+  * yangcli:
+    * fixed bug in filling database content for a OBJ_TYP_CASE
+      when the 1 and only case member was a complex type
+    * fix bug deleting containers or lists where mandatory child nodes
+      were incorrectly filled in, instead of skipped
+    * enhance CLI parsing so container can be something other
+      than a choice of empty leafs. e.g:
+        validate source=@myconfig.xml
+        myconfig.xml:
+        <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+           ...
+        </config>
+      This does not work if a 'source' parameter is given by
+      selecting a case number when filling in a choice.
+    * fix bug where user is prompted for a case number even if
+       there is only 1 enabled case in the choice
+    * fix bug where user is prompted if flag should be set y/n
+      when editing a leaf of type 'empty'; leaf value already
+      implicitly entered by selecting this leaf as the edit target
+    * fix bug in val_set_canonical_order where list sometimes not
+      inserted in sorted order
+    * fixed bug 3476123; leafrefs not getting written to XML correctly
+    * added XPath tab completion provided by Zesi Cai (thanks!)
+      When a '/' is entered instead of the start of a command,
+      the tab key will show all top-level objects available.
+      After each '/', the tab shows the next level of child nodes.
+      Does not support index (predicate) insertion.
 
-  * yangcli
-    * Added support for command aliases and persistent user variables
-    * Add CLI parameters:
-       --aliases-file
-       --autoaliases
-       --autouservars
-       --uservars-file
-     * Add yangcli local commands:
-       alias
-       aliases
-       unset
-       uservars
-    * yangcli now saving global user variables ($$foo) in an XML file
-    * yangcli now saving command aliases in a text file
-    * add --home parameter to override $HOME variable
-    * fixed bug in validating identityref input, where
-      the session modules were not checked and a valid
-      identityref value (without a prefix) could be
-      treated as an invalid value
-    * fixed bug in file assignment gave wrong top element name:
-      $$a = xget /system
-      @foo.xml = $$a
-    * fix bug where index chains for lists created with
-      the fill command were not being created; This caused
-      show var commands to display the list as if it were
-      a container
-    * fix memory leaks and potential use-after-free bugs
-      found by Coverity static analysis
+  * yangdump:
+    * fix segfault bug where stale backptr was accessed that
+      contained heap garbage
+    * fixed memory leak where submodule with errors was not freed
+      correctly after it was processed
+    * added '--full' parameter to yangdump --identifiers to show
+      identifiers with module name of each node expanded
 
-  * yangdiff
-    * add --home parameter to override $HOME variable
-    * fix memory leaks and potential use-after-free bugs
-      found by Coverity static analysis
+  * YANG Parse:
+    * fixed bug where conditional descendant nodes specified in
+      a unique-stmt are treated as an error.  This is only an error
+      is a key-stmt test fails; For unique-stmt, missing nodes
+      in a unique test tuple cause the test to be skipped
+    * fix bug where nested leafref types within unions were not always getting
+      checked in final resolve steps
+    * fix off-by-1 bug in object-id generation when module names
+      are added
+    * Remove memory leak from consume_revision
+    * fix bug where default value for union data type sometimes
+      incorrectly flagged as invalid value; can cause segfault
+    * fix bug where checking if a parameter is set to its default for
+      an identityref, bits, or leafref always returned FALSE
+    * fixed bug where XPath context node for when-stmt
+      in an augment-stmt was not set correctly
+    * fixed bug where errors in consume_body_stmts were not
+      always rippled all the way back to ncxmod.c, causing
+      mod->res == NO_ERR but mod->errors > 0
 
-  * YANG Parse
-   * fix bug 3422752:
-     revision-stmt ending in semi-colon was not accepted;
-     e.g.;   revision 2011-01-01;
-
- -- Andy Bierman <andy@netconfcentral.org>  Sat, 29 Oct 2011 19:00:00 -0700
+  * Build
+    * Fixed makefile.sil so that yuma symbols are always
+      checked first before standard library module names
+      Also removed extra libraries libagt and libncx from
+      the SIL link command.  This is not needed and will
+      cause an error if these libraries are not found.
+   * Fixed bug in several Makefiles where libm is not explicitly
+      declared in the link command.  This causes STATIC=1 builds
+      to fail on Ubuntu 11.10 (symbol 'round' not found from libm)
+   * Cleaned up static build of yangcli
+ -- Andy Bierman <andy@netconfcentral.org>  Fri, 27 Jan 2012 19:55:00 -0800
 yuma (2.1-2) unstable; urgency=medium
   * Build
     * fix bug added recently that breaks build in libtoaster

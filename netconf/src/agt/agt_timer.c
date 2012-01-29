@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -35,30 +35,12 @@ date         init     comment
 #include <errno.h>
 #include <sys/time.h>
 
-
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_timer
 #include "agt_timer.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
+#include "status.h"
 
 
 /********************************************************************
@@ -66,10 +48,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#ifdef DEBUG
-#define AGT_TIMER_DEBUG 1
-#endif
 
 #define AGT_TIMER_SKIP_COUNT 10
 
@@ -147,6 +125,7 @@ static uint32
         if (timer_cb == NULL) {
             return id;
         }
+        id++;
     }
     return 0;
 

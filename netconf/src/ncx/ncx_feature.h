@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -126,6 +126,21 @@ extern ncx_iffeature_t *
 *********************************************************************/
 extern void 
     ncx_free_iffeature (ncx_iffeature_t *iffeature);
+
+
+/********************************************************************
+* FUNCTION ncx_clone_iffeature
+* 
+* Clone a new ncx_iffeature_t struct
+*
+* INPUTS:
+*    srciff == ifffeature struct to clone
+* RETURNS:
+*    pointer to a malloced ncx_iffeature_t struct,
+*    or NULL if malloc error
+*********************************************************************/
+extern ncx_iffeature_t *
+    ncx_clone_iffeature (ncx_iffeature_t *srciff);
 
 
 /********************************************************************

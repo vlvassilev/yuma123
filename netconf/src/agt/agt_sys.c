@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -85,110 +85,36 @@ date         init     comment
 #include <unistd.h>
 #include <errno.h>
 #include <sys/utsname.h>
+#include <assert.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include  "agt.h"
-#endif
-
-#ifndef _H_agt_cap
-#include  "agt_cap.h"
-#endif
-
-#ifndef _H_agt_cb
-#include  "agt_cb.h"
-#endif
-
-#ifndef _H_agt_not
-#include  "agt_not.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_ses
-#include  "agt_ses.h"
-#endif
-
-#ifndef _H_agt_sys
-#include  "agt_sys.h"
-#endif
-
-#ifndef _H_agt_util
-#include  "agt_util.h"
-#endif
-
-#ifndef _H_cfg
-#include  "cfg.h"
-#endif
-
-#ifndef _H_getcb
-#include  "getcb.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
-#include  "ncxtypes.h"
-#endif
-
-#ifndef _H_rpc
-#include  "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
-#include  "rpc_err.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
-#include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_yangconst
-#include  "yangconst.h"
-#endif
+#include "procdefs.h"
+#include "agt.h"
+#include "agt_cap.h"
+#include "agt_cb.h"
+#include "agt_cfg.h"
+#include "agt_cli.h"
+#include "agt_not.h"
+#include "agt_rpc.h"
+#include "agt_ses.h"
+#include "agt_sys.h"
+#include "agt_util.h"
+#include "cfg.h"
+#include "getcb.h"
+#include "log.h"
+#include "ncxmod.h"
+#include "ncxtypes.h"
+#include "rpc.h"
+#include "rpc_err.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "tstamp.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_util.h"
+#include "xml_wr.h"
+#include "yangconst.h"
 
 
 /********************************************************************
@@ -196,10 +122,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#ifdef DEBUG
-#define AGT_SYS_DEBUG 1
-#endif
-
 
 #define system_N_system (const xmlChar *)"system"
 #define system_N_sysName (const xmlChar *)"sysName"
@@ -207,6 +129,7 @@ date         init     comment
 #define system_N_sysBootDateTime (const xmlChar *)"sysBootDateTime"
 #define system_N_sysLogLevel (const xmlChar *)"sysLogLevel"
 #define system_N_sysNetconfServerId (const xmlChar *)"sysNetconfServerId"
+#define system_N_sysNetconfServerCLI (const xmlChar *)"sysNetconfServerCLI"
 
 #define system_N_sysStartup (const xmlChar *)"sysStartup"
 
@@ -224,8 +147,7 @@ date         init     comment
 #define system_N_sessionId (const xmlChar *)"sessionId"
 #define system_N_remoteHost (const xmlChar *)"remoteHost"
 #define system_N_killedBy (const xmlChar *)"killedBy"
-#define system_N_terminationReason (const xmlChar *)\
-    "terminationReason"
+#define system_N_terminationReason (const xmlChar *)"terminationReason"
 
 #define system_N_confirmEvent (const xmlChar *)"confirmEvent"
 
@@ -275,6 +197,26 @@ static obj_template_t *sysCapabilityChangeobj;
 static obj_template_t *sysSessionStartobj;
 static obj_template_t *sysSessionEndobj;
 static obj_template_t *sysConfirmedCommitobj;
+
+
+
+/********************************************************************
+* FUNCTION payload_error
+*
+* Generate an error for a payload leaf that failed
+*
+* INPUTS:
+*    name == leaf name that failed
+*    res == error status
+*********************************************************************/
+static void
+    payload_error (const xmlChar *name,
+                        status_t res)
+{
+    log_error( "\nError: cannot make payload leaf '%s' (%s)", 
+               name, get_error_string(res) );
+
+}  /* payload_error */
 
 
 /********************************************************************
@@ -420,73 +362,61 @@ static void
     obj_template_t        *bootErrorobj;
     status_t               res;
 
-    if (LOGDEBUG) {
-        log_debug("\nagt_sys: generating <sysStartup> "
-                  "notification");
-    }
+    log_debug("\nagt_sys: generating <sysStartup> notification");
 
     not = agt_not_new_notification(sysStartupobj);
     if (!not) {
-        log_error("\nError: malloc failed; cannot "
-                  "send <sysStartup>");
+        log_error("\nError: malloc failed; cannot send <sysStartup>");
         return;
     }
 
     /* add sysStartup/startupSource */
     cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    if (!cfg) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-    } else if (cfg->src_url) {
-        leafval = agt_make_leaf(sysStartupobj,
-                                (const xmlChar *)"startupSource",
-                                cfg->src_url,
-                                &res);
-        if (leafval) {
-            agt_not_add_to_payload(not, leafval);
-        } else {
-            log_error("\nError: cannot make payload leaf (%s)",
-                      get_error_string(res));
-        }
-    }
-
-    /* add sysStartup/bootError for each error recorded */
-    if (!dlq_empty(&cfg->load_errQ)) {
-        /* get the bootError object */
-        bootErrorobj = obj_find_child(sysStartupobj,
-                                      AGT_SYS_MODULE,
-                                      (const xmlChar *)"bootError");
-        if (!bootErrorobj) {
-            SET_ERROR(ERR_INTERNAL_VAL);
-        } else {
-            for (rpcerror = (rpc_err_rec_t *)
-                     dlq_firstEntry(&cfg->load_errQ);
-                 rpcerror != NULL;
-                 rpcerror = (rpc_err_rec_t *)
-                     dlq_nextEntry(rpcerror)) {
-                /* make the bootError value struct */
-                bootErrorval = val_new_value();
-                if (!bootErrorval) {
-                    log_error("\nError: malloc failed; cannot "
-                              "make <bootError> struct");
-                } else {
-                    val_init_from_template(bootErrorval, 
-                                           bootErrorobj);
-                    res = agt_rpc_fill_rpc_error(rpcerror,
-                                                 bootErrorval);
-                    if (res != NO_ERR) {
-                        log_error("\nError: problems making "
-                                  "<bootError> (%s)",
-                                  get_error_string(res));
-                    }
-                    /* add even if there are some missing leafs */
-                    agt_not_add_to_payload(not, bootErrorval);
-                }
+    if (cfg) {
+        if (cfg->src_url) {
+            leafval = agt_make_leaf(sysStartupobj, 
+                    (const xmlChar *)"startupSource", cfg->src_url, &res);
+            if (leafval) {
+                agt_not_add_to_payload(not, leafval);
+            } else {
+                payload_error((const xmlChar *)"startupSource", res);
             }
         }
+    
+        /* add sysStartup/bootError for each error recorded */
+        if (!dlq_empty(&cfg->load_errQ)) {
+            /* get the bootError object */
+            bootErrorobj = obj_find_child( sysStartupobj, AGT_SYS_MODULE, 
+                                           (const xmlChar *)"bootError");
+            if (bootErrorobj) {
+                rpcerror = (rpc_err_rec_t *)dlq_firstEntry(&cfg->load_errQ);
+                for ( ; rpcerror;
+                     rpcerror = (rpc_err_rec_t *)dlq_nextEntry(rpcerror)) {
+                    /* make the bootError value struct */
+                    bootErrorval = val_new_value();
+                    if (!bootErrorval) {
+                        payload_error((const xmlChar *)"bootError", 
+                                      ERR_INTERNAL_MEM);
+                    } else {
+                        val_init_from_template(bootErrorval, bootErrorobj);
+                        res = agt_rpc_fill_rpc_error(rpcerror, bootErrorval);
+                        if (res != NO_ERR) {
+                            log_error("\nError: problems making <bootError> "
+                                      "(%s)", get_error_string(res));
+                        }
+                        /* add even if there are some missing leafs */
+                        agt_not_add_to_payload(not, bootErrorval);
+                    }
+                }
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     agt_not_queue_notification(not);
-
 } /* send_sysStartup */
 
 
@@ -519,9 +449,7 @@ static void
         if (leafval) {
             agt_not_add_to_payload(not, leafval);
         } else {
-            log_error("\nError: cannot make payload leaf <%s> (%s)",
-                      system_N_userName,
-                      get_error_string(res));
+            payload_error(system_N_userName, res);
         }
     }
 
@@ -545,11 +473,7 @@ static void
     if (leafval) {
         agt_not_add_to_payload(not, leafval);
     } else {
-        log_error("\nError: cannot make payload leaf <%s> "
-                  "for session %u (%s)",
-                  system_N_sessionId,
-                  use_sid,
-                  get_error_string(res));
+        payload_error(system_N_sessionId, res);
     }
 
     /* add remoteHost */
@@ -561,9 +485,7 @@ static void
         if (leafval) {
             agt_not_add_to_payload(not, leafval);
         } else {
-            log_error("\nError: cannot make payload leaf <%s> (%s)",
-                      system_N_remoteHost,
-                      get_error_string(res));
+            payload_error(system_N_remoteHost, res);
         }
     }
 
@@ -615,11 +537,9 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-#ifdef AGT_SYS_DEBUG
     if (LOGDEBUG2) {
         log_debug2("\nagt_sys: Loading notifications module");
     }
-#endif
 
     agt_profile = agt_get_profile();
     init_static_sys_vars();
@@ -713,7 +633,7 @@ status_t
 status_t
     agt_sys_init2 (void)
 {
-    val_value_t           *topval, *unameval, *childval;
+    val_value_t           *topval, *unameval, *childval, *tempval;
     cfg_template_t        *runningcfg;
     const xmlChar         *myhostname;
     obj_template_t        *unameobj;
@@ -747,10 +667,7 @@ status_t
     if (!myhostname) {
         myhostname = (const xmlChar *)"localhost";
     }
-    childval = agt_make_leaf(systemobj,
-                             system_N_sysName,
-                             myhostname,
-                             &res);
+    childval = agt_make_leaf(systemobj, system_N_sysName, myhostname, &res);
     if (childval) {
         val_add_child(childval, topval);
     } else {
@@ -758,10 +675,8 @@ status_t
     }
 
     /* add /system/sysCurrentDateTime */
-    childval = agt_make_virtual_leaf(systemobj,
-                                     system_N_sysCurrentDateTime,
-                                     get_currentDateTime,
-                                     &res);
+    childval = agt_make_virtual_leaf(systemobj, system_N_sysCurrentDateTime,
+                                     get_currentDateTime, &res);
     if (childval) {
         val_add_child(childval, topval);
     } else {
@@ -770,10 +685,8 @@ status_t
 
     /* add /system/sysBootDateTime */
     tstamp_datetime(tstampbuff);
-    childval = agt_make_leaf(systemobj,
-                             system_N_sysBootDateTime,
-                             tstampbuff,
-                             &res);
+    childval = agt_make_leaf(systemobj, system_N_sysBootDateTime,
+                             tstampbuff, &res);
     if (childval) {
         val_add_child(childval, topval);
     } else {
@@ -781,10 +694,8 @@ status_t
     }
 
     /* add /system/sysLogLevel */
-    childval = agt_make_virtual_leaf(systemobj,
-                                     system_N_sysLogLevel,
-                                     get_currentLogLevel,
-                                     &res);
+    childval = agt_make_virtual_leaf(systemobj, system_N_sysLogLevel,
+                                     get_currentLogLevel, &res);
     if (childval) {
         val_add_child(childval, topval);
     } else {
@@ -801,10 +712,8 @@ status_t
 
     res = ncx_get_version(p, 247);
     if (res == NO_ERR) {
-        childval = agt_make_leaf(systemobj,
-                                 system_N_sysNetconfServerId,
-                                 buffer,
-                                 &res);
+        childval = agt_make_leaf(systemobj, system_N_sysNetconfServerId,
+                                 buffer, &res);
         m__free(buffer);
         if (childval) {
             val_add_child(childval, topval);
@@ -817,15 +726,29 @@ status_t
     }
     buffer = NULL;
 
+    /* add /system/sysNetconfServerCLI */
+    tempval = val_clone(agt_cli_get_valset());
+    if (tempval == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    val_change_nsid(tempval, topval->nsid);
+
+    childval = agt_make_object(systemobj, system_N_sysNetconfServerCLI, &res);
+    if (childval == NULL) {
+        val_free_value(tempval);
+        return ERR_INTERNAL_MEM;
+    }
+    val_move_children(tempval, childval);
+    val_free_value(tempval);
+    val_add_child(childval, topval);
+
     /* get the system information */
     memset(&utsbuff, 0x0, sizeof(utsbuff));
     retval = uname(&utsbuff);
     if (retval) {
         log_warn("\nWarning: <uname> data not available");
     } else {
-        unameobj = obj_find_child(systemobj,
-                                  AGT_SYS_MODULE,
-                                  system_N_uname);
+        unameobj = obj_find_child(systemobj, AGT_SYS_MODULE, system_N_uname);
         if (!unameobj) {
             return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         } 
@@ -839,10 +762,8 @@ status_t
         val_add_child(unameval, topval);
 
         /* add /system/uname/sysname */
-        childval = agt_make_leaf(unameobj,
-                                 system_N_sysname,
-                                 (const xmlChar *)utsbuff.sysname,
-                                 &res);
+        childval = agt_make_leaf(unameobj, system_N_sysname,
+                                 (const xmlChar *)utsbuff.sysname, &res);
         if (childval) {
             val_add_child(childval, unameval);
         } else {
@@ -850,10 +771,8 @@ status_t
         }
 
         /* add /system/uname/release */
-        childval = agt_make_leaf(unameobj,
-                                 system_N_release,
-                                 (const xmlChar *)utsbuff.release,
-                                 &res);
+        childval = agt_make_leaf(unameobj, system_N_release,
+                                 (const xmlChar *)utsbuff.release, &res);
         if (childval) {
             val_add_child(childval, unameval);
         } else {
@@ -861,10 +780,8 @@ status_t
         }
 
         /* add /system/uname/version */
-        childval = agt_make_leaf(unameobj,
-                                 system_N_version,
-                                 (const xmlChar *)utsbuff.version,
-                                 &res);
+        childval = agt_make_leaf(unameobj, system_N_version,
+                                 (const xmlChar *)utsbuff.version, &res);
         if (childval) {
             val_add_child(childval, unameval);
         } else {
@@ -872,10 +789,8 @@ status_t
         }
         
         /* add /system/uname/machine */
-        childval = agt_make_leaf(unameobj,
-                                 system_N_machine,
-                                 (const xmlChar *)utsbuff.machine,
-                                 &res);
+        childval = agt_make_leaf(unameobj, system_N_machine,
+                                 (const xmlChar *)utsbuff.machine, &res);
         if (childval) {
             val_add_child(childval, unameval);
         } else {
@@ -883,10 +798,8 @@ status_t
         }
 
         /* add /system/uname/nodename */
-        childval = agt_make_leaf(unameobj,
-                                 system_N_nodename,
-                                 (const xmlChar *)utsbuff.nodename,
-                                 &res);
+        childval = agt_make_leaf(unameobj, system_N_nodename,
+                                 (const xmlChar *)utsbuff.nodename, &res);
         if (childval) {
             val_add_child(childval, unameval);
         } else {
@@ -961,71 +874,21 @@ void
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysSessionEnd
+* FUNCTION getTermReasonStr
 *
-* Queue the <sysSessionEnd> notification
+* Convert the termination reason enum to a string
 *
 * INPUTS:
-*   scb == session control block to use for payload values
 *   termreason == enum for the terminationReason leaf
-*   killedby == session-id for killedBy leaf if termreason == "killed"
-*               ignored otherwise
 *
 * OUTPUTS:
-*   notification generated and added to notificationQ
+*   the termination reason string
 *
 *********************************************************************/
-void
-    agt_sys_send_sysSessionEnd (const ses_cb_t *scb,
-                                ses_term_reason_t termreason,
-                                ses_id_t killedby)
+static const xmlChar*
+    getTermReasonStr ( ses_term_reason_t termreason)
 {
-    agt_not_msg_t         *not;
-    val_value_t           *leafval;
     const xmlChar         *termreasonstr;
-    status_t               res;
-
-#ifdef DEBUG
-    if (!scb || !termreason) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (LOGDEBUG) {
-        log_debug("\nagt_sys: generating <sysSessionEnd> "
-                  "notification");
-    }
-
-    not = agt_not_new_notification(sysSessionEndobj);
-    if (!not) {
-        log_error("\nError: malloc failed; cannot "
-                  "send <sysSessionEnd>");
-        return;
-    }
-
-    if (termreason == SES_TR_BAD_START) {
-        /* session did not start; just being killed
-         * in the <ncxconnect> message handler
-         */
-        ;
-    } else {
-        add_common_session_parms(scb, not);
-    }
-
-    /* add sysSessionEnd/killedBy */
-    if (termreason == SES_TR_KILLED) {
-        leafval = agt_make_uint_leaf(sysSessionEndobj,
-                                     system_N_killedBy,
-                                     killedby,
-                                     &res);
-        if (leafval) {
-            agt_not_add_to_payload(not, leafval);
-        } else {
-            log_error("\nError: cannot make payload leaf (%s)",
-                      get_error_string(res));
-        }
-    }
 
     switch (termreason) {
     case SES_TR_NONE:
@@ -1058,20 +921,73 @@ void
         termreasonstr = (const xmlChar *)"other";
     }
 
+    return termreasonstr;
+}
+
+
+/********************************************************************
+* FUNCTION agt_sys_send_sysSessionEnd
+*
+* Queue the <sysSessionEnd> notification
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*   termreason == enum for the terminationReason leaf
+*   killedby == session-id for killedBy leaf if termreason == "killed"
+*               ignored otherwise
+*
+* OUTPUTS:
+*   notification generated and added to notificationQ
+*
+*********************************************************************/
+void
+    agt_sys_send_sysSessionEnd (const ses_cb_t *scb,
+                                ses_term_reason_t termreason,
+                                ses_id_t killedby)
+{
+    agt_not_msg_t         *not;
+    val_value_t           *leafval;
+    const xmlChar         *termreasonstr;
+    status_t               res;
+
+    assert(scb && "agt_sys_send_sysSessionEnd() - param scb is NULL");
+
+    log_debug("\nagt_sys: generating <sysSessionEnd> notification");
+
+    not = agt_not_new_notification(sysSessionEndobj);
+    if (!not) {
+        log_error("\nError: malloc failed; cannot send <sysSessionEnd>");
+        return;
+    }
+
+    /* session started;  not just being killed
+     * in the <ncxconnect> message handler */
+    if (termreason != SES_TR_BAD_START) {
+        add_common_session_parms(scb, not);
+    }
+
+    /* add sysSessionEnd/killedBy */
+    if (termreason == SES_TR_KILLED) {
+        leafval = agt_make_uint_leaf( sysSessionEndobj, system_N_killedBy, 
+                                      killedby, &res );
+        if (leafval) {
+            agt_not_add_to_payload(not, leafval);
+        } else {
+            payload_error(system_N_killedBy, res);
+        }
+    }
+
     /* add sysSessionEnd/terminationReason */
-    leafval = agt_make_leaf(sysSessionEndobj,
-                            system_N_terminationReason,
-                            termreasonstr,
-                            &res);
+    termreasonstr = getTermReasonStr(termreason);
+    leafval = agt_make_leaf( sysSessionEndobj, system_N_terminationReason, 
+                             termreasonstr, &res );
     if (leafval) {
         agt_not_add_to_payload(not, leafval);
     } else {
-        log_error("\nError: cannot make payload leaf (%s)",
-                  get_error_string(res));
+        payload_error(system_N_terminationReason, res);
     }
 
     agt_not_queue_notification(not);
-
 } /* agt_sys_send_sysSessionEnd */
 
 
@@ -1083,7 +999,7 @@ void
 *
 * INPUTS:
 *   scb == session control block to use for payload values
-*   auditrecQ == Q of rpc_audit_rec_t structs to use
+*   auditrecQ == Q of agt_cfg_audit_rec_t structs to use
 *                for the notification payload contents
 *
 * OUTPUTS:
@@ -1095,7 +1011,7 @@ void
                                   dlq_hdr_t *auditrecQ)
 {
     agt_not_msg_t         *not;
-    rpc_audit_rec_t       *auditrec;
+    agt_cfg_audit_rec_t   *auditrec;
     val_value_t           *leafval, *listval;
     obj_template_t        *listobj;
     status_t               res;
@@ -1127,15 +1043,14 @@ void
     if (listobj == NULL) {
         SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     } else {
-        for (auditrec = (rpc_audit_rec_t *)dlq_firstEntry(auditrecQ);
+        for (auditrec = (agt_cfg_audit_rec_t *)dlq_firstEntry(auditrecQ);
              auditrec != NULL;
-             auditrec = (rpc_audit_rec_t *)dlq_nextEntry(auditrec)) {
+             auditrec = (agt_cfg_audit_rec_t *)dlq_nextEntry(auditrec)) {
 
             /* add sysConfigChange/edit */
             listval = val_new_value();
             if (listval == NULL) {
-                log_error("\nError: cannot make auditrec payload (%s)",
-                          get_error_string(ERR_INTERNAL_MEM));
+                payload_error(system_N_edit, ERR_INTERNAL_MEM);
             } else {
                 val_init_from_template(listval, listobj);
 
@@ -1150,8 +1065,7 @@ void
                 if (leafval) {
                     val_add_child(leafval, listval);
                 } else {
-                    log_error("\nError: cannot make payload leaf (%s)",
-                              get_error_string(res));
+                    payload_error(system_N_target, res);
                 }
 
                 /* add sysConfigChange/edit/operation */
@@ -1162,8 +1076,7 @@ void
                 if (leafval) {
                     val_add_child(leafval, listval);
                 } else {
-                    log_error("\nError: cannot make payload leaf (%s)",
-                              get_error_string(res));
+                    payload_error(system_N_operation, res);
                 }
             }
         }
@@ -1251,8 +1164,7 @@ void
             if (leafval) {
                 val_add_child(leafval, changedbyval);
             } else {
-                log_error("\nError: cannot make payload leaf (%s)",
-                          get_error_string(res));
+                payload_error(system_N_userName, res);
             }
         }
 
@@ -1264,8 +1176,7 @@ void
         if (leafval) {
             val_add_child(leafval, changedbyval);
         } else {
-            log_error("\nError: cannot make payload leaf (%s)",
-                      get_error_string(res));
+            payload_error(system_N_sessionId, res);
         }
 
         /* add remoteHost */
@@ -1277,8 +1188,7 @@ void
             if (leafval) {
                 val_add_child(leafval, changedbyval);
             } else {
-                log_error("\nError: cannot make payload leaf (%s)",
-                          get_error_string(res));
+                payload_error(system_N_remoteHost, res);
             }
         }
     } else {
@@ -1289,8 +1199,7 @@ void
         if (leafval) {
             val_add_child(leafval, changedbyval);
         } else {
-            log_error("\nError: cannot make payload leaf (%s)",
-                      get_error_string(res));
+            payload_error(NCX_EL_SERVER, res);
         }
     }
 
@@ -1310,8 +1219,8 @@ void
     if (leafval) {
         agt_not_add_to_payload(not, leafval);
     } else {
-        log_error("\nError: cannot make payload leaf (%s)",
-                  get_error_string(res));
+        payload_error(is_add ? system_N_added_capability :
+                      system_N_deleted_capability, res);
     }
 
     agt_not_queue_notification(not);
@@ -1375,8 +1284,7 @@ void
     if (leafval) {
         agt_not_add_to_payload(not, leafval);
     } else {
-        log_error("\nError: cannot make payload leaf (%s)",
-                  get_error_string(res));
+        payload_error(system_N_confirmEvent, res);
     }
 
     agt_not_queue_notification(not);

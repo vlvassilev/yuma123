@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -153,11 +153,11 @@ extern status_t
 *    msg == incoming rpc_msg_t in progress
 *    methnode == XML node for RPC method (for errors)
 *    returl == address of return URL string pointer
-* 
+*    retval == address of value node from input used
 * OUTPUTS:
 *   *returl is set to the address of the URL string
 *   pointing to the memory inside the found parameter
-*
+*   *retval is set to parm node found, if return NO_ERR
 * RETURNS:
 *    status
 *********************************************************************/
@@ -165,7 +165,8 @@ extern status_t
     agt_get_url_from_parm (const xmlChar *parmname,
                            rpc_msg_t *msg,
                            xml_node_t *methnode,
-                           const xmlChar **returl);
+                           const xmlChar **returl,
+                           val_value_t **retval);
 
 
 /********************************************************************
@@ -802,6 +803,28 @@ extern val_value_t *
 
 
 /********************************************************************
+* FUNCTION agt_make_object
+*
+* make a val_value_t struct for a specified node
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   objname == name of the object to find (namespace hardwired)
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct for the list or NULL if some error
+*********************************************************************/
+extern val_value_t *
+    agt_make_object (obj_template_t *parentobj,
+                     const xmlChar *objname,
+                     status_t *res);
+
+
+/********************************************************************
 * FUNCTION agt_make_virtual_leaf
 *
 * make a val_value_t struct for a specified virtual 
@@ -1135,6 +1158,27 @@ extern val_value_t *
 */
 extern boolean
     agt_any_operations_set (val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION agt_apply_this_node
+* 
+* Check if the write operation applies to the current node
+*
+* INPUTS:
+*    editop == edit operation value
+*    newnode == pointer to new node (if any)
+*    curnode == pointer to current value node (if any)
+*                (just used to check if non-NULL or compare leaf)
+*
+* RETURNS:
+*    TRUE if the current node needs the write operation applied
+*    FALSE if this is a NO=OP node (either explicit or special merge)
+*********************************************************************/
+extern boolean
+    agt_apply_this_node (op_editop_t editop,
+                         const val_value_t *newnode,
+                         const val_value_t *curnode);
 
 
 #ifdef __cplusplus

@@ -166,12 +166,12 @@ BOOST_AUTO_TEST_CASE( edit_slt_entries_test_delete )
             "Procedure: \n"
             "\t1  - Create the top level container\n"
             "\t2  - Create a keyed entry with key = entry1Key\n"
-            "\t3  - Set the value coressponding to entry1Key\n"
+            "\t3  - Set the value corresponding to entry1Key\n"
             "\t4  - Create a keyed entry with key = entry2Key\n"
-            "\t5  - Set the value coressponding to entry2Key\n"
+            "\t5  - Set the value corresponding to entry2Key\n"
             "\t6  - Delete the first key/value pair\n"
             "\t7  - Verify entry deleted\n"
-            "\t8  - Attempt to delete non-existant key/value pair\n"
+            "\t8  - Attempt to delete non-existent key/value pair\n"
             "\t9  - Verify error message\n"
             "\t10 - Delete the second key/value pair\n"
             "\t11 - Delete the list\n"
@@ -208,13 +208,8 @@ BOOST_AUTO_TEST_CASE( edit_slt_entries_test_delete )
     cbChecker_->resetModuleCallbacks("simple_list_test");
     cbChecker_->resetExpectedCallbacks();            
 
-    // TODO - delete non-existant list entry
-    // Requires update of simple-container-module-fixture - either:
-    // a. add new func deleteEntryValuePairFailed;
-    // b. pass success/fail param to deleteEntryValuePair
-
-
-    // deleteEntryValuePair( primarySession_, "entryKey3", "entryVal3" );
+    // Attempt to delete non-existent list entry
+    deleteEntryValuePairFailed( primarySession_, "entryKey3", "entryVal3" );
 
     // Delete second entry
     deleteEntryValuePair( primarySession_, "entryKey2", "entryVal2" );

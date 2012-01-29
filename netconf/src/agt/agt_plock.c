@@ -1,6 +1,6 @@
 /* 
  * 
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -178,9 +178,7 @@ static status_t
                              NCX_NT_VAL,
                              select_val);
             retres = res;
-            if (result != NULL) {
-                xpath_free_result(result);
-            }
+            xpath_free_result(result);
         } else if (result->restype != XP_RT_NODESET) {
             res = ERR_NCX_XPATH_NOT_NODESET;
             agt_record_error(scb,
@@ -253,34 +251,7 @@ static status_t
              * access be required to create a partial lock
              * In fact -- a user may want to lock a node
              * to do a stable read
-             */
-#if 0
-            /* RFC 5717 says to check that the user access
-             * write access to each node in the nodeset
-             * so check that now;  this is a different
-             * procedure than the NACM filtering done
-             * silently on get* retrievals
-             *
-             * !!! just checking if the user has Update
-             * !!! permissions, not checking Create and Delete
-             */
-            if (!agt_acm_val_write_allowed(&msg->mhdr,
-                                           SES_MY_USERNAME(scb),
-                                           testval,
-                                           OP_EDITOP_MERGE)) {
-                res = ERR_NCX_ACCESS_DENIED;
-                agt_record_error(scb,
-                                 &msg->mhdr,
-                                 NCX_LAYER_OPERATION,
-                                 res,
-                                 methnode,
-                                 NCX_NT_NONE,
-                                 NULL,
-                                 NCX_NT_NONE,
-                                 NULL);
-                retres = res;
-            }
-#endif
+             **** deleted agt_acm check ***/
 
             /* make sure there is a plock slot available
              * and no part of this subtree is already locked
@@ -682,11 +653,13 @@ status_t
     y_ietf_netconf_partial_lock_init_static_vars();
 
     /* change if custom handling done */
-    if (xml_strcmp(modname, y_ietf_netconf_partial_lock_M_ietf_netconf_partial_lock)) {
+    if (xml_strcmp(modname, 
+                   y_ietf_netconf_partial_lock_M_ietf_netconf_partial_lock)) {
         return ERR_NCX_UNKNOWN_MODULE;
     }
 
-    if (revision && xml_strcmp(revision, y_ietf_netconf_partial_lock_R_ietf_netconf_partial_lock)) {
+    if (revision && xml_strcmp
+        (revision, y_ietf_netconf_partial_lock_R_ietf_netconf_partial_lock)) {
         return ERR_NCX_WRONG_VERSION;
     }
 

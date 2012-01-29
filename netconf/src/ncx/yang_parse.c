@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,93 +46,29 @@ date         init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_dlq
-#include  "dlq.h"
-#endif
-
-#ifndef _H_log
+#include "procdefs.h"
+#include "dlq.h"
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_appinfo
 #include "ncx_appinfo.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include "ncx_feature.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_typ
-#include  "typ.h"
-#endif
-
-#ifndef _H_xml_util
+#include "status.h"
+#include "tstamp.h"
+#include "typ.h"
 #include "xml_util.h"
-#endif
-
-#ifndef _H_yang
 #include "yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yang_ext
 #include "yang_ext.h"
-#endif
-
-#ifndef _H_yang_grp
 #include "yang_grp.h"
-#endif
-
-#ifndef _H_yang_obj
 #include "yang_obj.h"
-#endif
-
-#ifndef _H_yang_parse
 #include "yang_parse.h"
-#endif
-
-#ifndef _H_yang_typ
 #include "yang_typ.h"
-#endif
-
-#ifndef _H_yinyang
 #include "yinyang.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -187,10 +123,7 @@ static status_t
          imp != NULL;
          imp = (ncx_import_t *)dlq_nextEntry(imp)) {
 
-        res = ncx_resolve_appinfoQ(pcb,
-                                   tkc, 
-                                   mod, 
-                                   &imp->appinfoQ);
+        res = ncx_resolve_appinfoQ(pcb, tkc, mod, &imp->appinfoQ);
         CHK_EXIT(res, retres);
     }
 
@@ -198,10 +131,7 @@ static status_t
          inc != NULL;
          inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-        res = ncx_resolve_appinfoQ(pcb,
-                                   tkc, 
-                                   mod, 
-                                   &inc->appinfoQ);
+        res = ncx_resolve_appinfoQ(pcb, tkc, mod, &inc->appinfoQ);
         CHK_EXIT(res, retres);
     }
 
@@ -209,10 +139,7 @@ static status_t
          feature != NULL;
          feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-        res = ncx_resolve_appinfoQ(pcb, 
-                                   tkc, 
-                                   mod, 
-                                   &feature->appinfoQ);
+        res = ncx_resolve_appinfoQ(pcb, tkc, mod, &feature->appinfoQ);
         CHK_EXIT(res, retres);
     }
 
@@ -369,17 +296,11 @@ static status_t
     /* check missing mandatory sub-clauses */
     if (!mod->ns) {
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "mod-hdr", 
-                            "namespace");
+        ncx_mod_missing_err(tkc, mod, "mod-hdr", "namespace");
     }
     if (!mod->prefix) {
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "mod-hdr", 
-                            "prefix");
+        ncx_mod_missing_err(tkc, mod, "mod-hdr", "prefix");
     }
 
     return retres;
@@ -509,10 +430,7 @@ static status_t
 
     if (!mod->prefix) {
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "belongs-to", 
-                            "prefix");
+        ncx_mod_missing_err(tkc, mod, "belongs-to", "prefix");
     }
 
     return retres;
@@ -1338,10 +1256,7 @@ static status_t
     /* check missing mandatory sub-clause */
     if (!mod->belongs) {
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "submod-hdr", 
-                            "belongs-to");
+        ncx_mod_missing_err(tkc, mod, "submod-hdr", "belongs-to");
     }
 
     return retres;
@@ -2210,8 +2125,6 @@ static status_t
                                            node->mod,
                                            node->mod->name,
                                            allQ);
-                            } else {
-                                SET_ERROR(ERR_INTERNAL_VAL);
                             }
                         }
                     }
@@ -2602,6 +2515,7 @@ static status_t
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
         ncx_print_errormsg(tkc, mod, res);
+        ncx_free_revhist(rev);
         return res;
     }
     switch (TK_CUR_TYP(tkc)) {
@@ -2904,15 +2818,9 @@ static status_t
                         tk_chain_t *tkc,
                         ncx_module_t  *mod)
 {
-    const xmlChar *val;
-    const char    *expstr;
-    tk_type_t      tktyp;
-    status_t       res;
-    boolean        done;
-
-    expstr = "body statement";
-    res = NO_ERR;
-    done = FALSE;
+    const char    *expstr = "body statement";
+    status_t       res = NO_ERR, retres = NO_ERR;
+    boolean        done = FALSE;
 
     while (!done) {
 
@@ -2926,8 +2834,8 @@ static status_t
             return res;
         }
 
-        tktyp = TK_CUR_TYP(tkc);
-        val = TK_CUR_VAL(tkc);
+        tk_type_t tktyp = TK_CUR_TYP(tkc);
+        const xmlChar *val = TK_CUR_VAL(tkc);
 
         /* check the current token type */
         switch (tktyp) {
@@ -2938,20 +2846,17 @@ static status_t
         case TK_TT_RBRACE:
             /* found end of module */
             TK_BKUP(tkc);
-            return res;
+            return retres;
         case TK_TT_MSTRING:
             /* vendor-specific clause found instead */
             res = ncx_consume_appinfo(tkc, mod, &mod->appinfoQ);
-            if ( ERR_NCX_EOF == res 
-                 || ( res < ERR_LAST_SYS_ERR && NO_ERR != res ) ) {
-                done = TRUE;
-            }
+            CHK_EXIT(res, retres);
             continue;
         case TK_TT_TSTRING:
             break;  /* YANG clause assumed */
         default:
-            res = ERR_NCX_WRONG_TKTYPE;
-            ncx_mod_exp_err(tkc, mod, res, expstr);
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
             yang_skip_statement(tkc, mod);
             continue;
         }
@@ -2984,17 +2889,12 @@ static status_t
             res = yang_obj_consume_datadef( pcb, tkc, mod, &mod->datadefQ, 
                                             NULL );
         }
-        if ( ERR_NCX_EOF == res 
-             || ( res < ERR_LAST_SYS_ERR && NO_ERR != res ) ) {
-            done = TRUE;
-        }
+        CHK_EXIT(res, retres);
     }
 
-    return res;
+    return retres;
 
 }  /* consume_body_stmts */
-
-
 
 
 /********************************************************************
@@ -3256,14 +3156,22 @@ static status_t
         return retres;
     }
 
+    if (mod->ismod && mod->ns == NULL) {
+        if (retres == NO_ERR) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            retres = ERR_NCX_INVALID_VALUE;
+        }
+        log_error("\nError: cannot continue without module namespace set");
+        return retres;
+    }
+
     /* set the namespace and the XML prefix now,
      * so all namespace assignments in XPath
      * expressions will be valid when first parsed
      */
     if (!(pcb->deviationmode || pcb->diffmode || pcb->searchmode)) {
         /* add real or temp module NS to the registry */
-        res = ncx_add_namespace_to_registry(mod, 
-                                            pcb->parsemode);
+        res = ncx_add_namespace_to_registry(mod, pcb->parsemode);
         CHK_EXIT(res, retres);
     }
 
@@ -3338,8 +3246,8 @@ static status_t
 
     /* Get the definition statements */
     res = consume_body_stmts(pcb, tkc, mod);
+    CHK_EXIT(res, retres);
     if (res != ERR_NCX_EOF) {
-        CHK_EXIT(res, retres);
         if (res != ERR_NCX_MISSING_RBRACE) {
             /* the next node should be the '(sub)module' end node */
             res = ncx_consume_token(tkc, mod, TK_TT_RBRACE);
@@ -3357,7 +3265,6 @@ static status_t
             }
         }
     }  /* else errors already reported; inside body-stmts */
-
 
     /**************** Module Validation *************************/
 
@@ -3377,10 +3284,7 @@ static status_t
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve appinfoQ");
     }
-    res = ncx_resolve_appinfoQ(pcb,
-                               tkc, 
-                               mod, 
-                               &mod->appinfoQ);
+    res = ncx_resolve_appinfoQ(pcb, tkc, mod, &mod->appinfoQ);
     CHK_EXIT(res, retres);
 
     /* check all the module level extension usage
@@ -3420,10 +3324,7 @@ static status_t
          identity != NULL;
          identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
 
-        res = resolve_identity(pcb,
-                               tkc, 
-                               mod, 
-                               identity);
+        res = resolve_identity(pcb, tkc, mod, identity);
         CHK_EXIT(res, retres);
     }
 
@@ -3440,63 +3341,42 @@ static status_t
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve typedefs");
     }
-    res = yang_typ_resolve_typedefs(pcb,
-                                    tkc,
-                                    mod, 
-                                    &mod->typeQ,
-                                    NULL);
+    res = yang_typ_resolve_typedefs(pcb, tkc, mod, &mod->typeQ, NULL);
     CHK_EXIT(res, retres);
 
     /* Validate any module-level groupings */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve groupings");
     }
-    res = yang_grp_resolve_groupings(pcb,
-                                     tkc, 
-                                     mod, 
-                                     &mod->groupingQ, 
-                                     NULL);
+    res = yang_grp_resolve_groupings(pcb, tkc, mod, &mod->groupingQ, NULL);
     CHK_EXIT(res, retres);
 
     /* Validate any module-level data-def-stmts */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve datadefs");
     }
-    res = yang_obj_resolve_datadefs(pcb,
-                                    tkc, 
-                                    mod, 
-                                    &mod->datadefQ);
+    res = yang_obj_resolve_datadefs(pcb, tkc, mod, &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level groupings */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve groupings complete");
     }
-    res = yang_grp_resolve_complete(pcb,
-                                    tkc, 
-                                    mod, 
-                                    &mod->groupingQ, 
-                                    NULL);
+    res = yang_grp_resolve_complete(pcb, tkc, mod, &mod->groupingQ, NULL);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level datadefs */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve uses");
     }
-    res = yang_obj_resolve_uses(pcb,
-                                tkc, 
-                                mod, 
-                                &mod->datadefQ);
+    res = yang_obj_resolve_uses(pcb, tkc, mod, &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any augment-stmts within module-level datadefs */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve augments");
     }
-    res = yang_obj_resolve_augments(pcb,
-                                    tkc, 
-                                    mod, 
-                                    &mod->datadefQ);
+    res = yang_obj_resolve_augments(pcb, tkc, mod, &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any deviation-stmts within the module
@@ -3509,39 +3389,27 @@ static status_t
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve deviations");
     }
-    res = yang_obj_resolve_deviations(pcb, 
-                                      tkc, 
-                                      mod);
+    res = yang_obj_resolve_deviations(pcb, tkc, mod);
     CHK_EXIT(res, retres);
 
     /* remove any nodes that were marked as deleted by deviations */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: remove deleted nodes");
     }
-    res = yang_obj_remove_deleted_nodes(pcb,
-                                        tkc,
-                                        mod,
-                                        &mod->datadefQ);
+    res = yang_obj_remove_deleted_nodes(pcb, tkc, mod, &mod->datadefQ);
 
     /* One final check for grouping integrity */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve grp final");
     }
-    res = yang_grp_resolve_final(pcb,
-                                 tkc, 
-                                 mod, 
-                                 &mod->groupingQ);
+    res = yang_grp_resolve_final(pcb, tkc, mod, &mod->groupingQ);
     CHK_EXIT(res, retres);
 
     /* Final check for object integrity */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve obj final");
     }
-    res = yang_obj_resolve_final(pcb,
-                                 tkc, 
-                                 mod, 
-                                 &mod->datadefQ,
-                                 FALSE);
+    res = yang_obj_resolve_final(pcb, tkc, mod, &mod->datadefQ, FALSE);
     CHK_EXIT(res, retres);
 
     /* Validate all the XPath expressions within all cooked objects */
@@ -3564,15 +3432,12 @@ static status_t
              node = (yang_node_t *)dlq_nextEntry(node)) {
 
             if (node->submod) {
-                res = yang_obj_top_resolve_final(pcb, 
-                                                 tkc,
-                                                 node->submod,
+                res = yang_obj_top_resolve_final(pcb, tkc, node->submod,
                                                  &node->submod->datadefQ);
                 CHK_EXIT(res, retres);
 
                 /* resolve XPath in submodules */
-                res = yang_obj_resolve_xpath(tkc,
-                                             node->submod,
+                res = yang_obj_resolve_xpath(tkc, node->submod,
                                              &node->submod->datadefQ);
                 CHK_EXIT(res, retres);
             }
@@ -3585,10 +3450,7 @@ static status_t
         if (LOGDEBUG4) {
             log_debug4("\nyang_parse: resolve augments final");
         }
-        res = yang_obj_resolve_augments_final(pcb,
-                                              tkc, 
-                                              mod, 
-                                              &mod->datadefQ);
+        res = yang_obj_resolve_augments_final(pcb, tkc, mod, &mod->datadefQ);
         CHK_EXIT(res, retres);
 
         /* fill in all the list keys in cross-submodule augments */
@@ -3601,9 +3463,7 @@ static status_t
             }
 
             /* check submod augmenting external modules */
-            res = yang_obj_resolve_augments_final(pcb,
-                                                  tkc, 
-                                                  node->submod, 
+            res = yang_obj_resolve_augments_final(pcb, tkc, node->submod, 
                                                   &node->submod->datadefQ);
             CHK_EXIT(res, retres);
         }
@@ -3616,10 +3476,7 @@ static status_t
         if (LOGDEBUG4) {
             log_debug4("\nyang_parse: resolve XPath final");
         }
-        res = yang_obj_resolve_xpath_final(pcb,
-                                           tkc, 
-                                           mod, 
-                                           &mod->datadefQ);
+        res = yang_obj_resolve_xpath_final(pcb, tkc, mod, &mod->datadefQ);
         CHK_EXIT(res, retres);
 
         /* final XPath check for all sub-modules */
@@ -3632,9 +3489,7 @@ static status_t
             }
 
             /* check submod augmenting external modules */
-            res = yang_obj_resolve_xpath_final(pcb,
-                                               tkc, 
-                                               node->submod, 
+            res = yang_obj_resolve_xpath_final(pcb, tkc, node->submod, 
                                                &node->submod->datadefQ);
             CHK_EXIT(res, retres);
         }
@@ -3656,8 +3511,7 @@ static status_t
             }
 
             /* check submod augmenting external modules */
-            res = yang_typ_resolve_typedefs_final(tkc, 
-                                                  node->submod, 
+            res = yang_typ_resolve_typedefs_final(tkc, node->submod, 
                                                   &node->submod->typeQ);
             CHK_EXIT(res, retres);
         }
@@ -3892,9 +3746,6 @@ static ncx_module_t*
     mod = ncx_new_module();
     if (mod) {
         set_source(mod, filename); /* hand off 'str' malloced memory here */
-
-        /* set the back-ptr to Q of all the import files */
-        mod->allimpQ = &pcb->allimpQ;
 
         /* set the back-ptr to parent of this submodule 
          * or NULL if this is not a submodule

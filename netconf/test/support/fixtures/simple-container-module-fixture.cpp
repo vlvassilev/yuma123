@@ -129,6 +129,7 @@ SimpleContainerModuleFixture::SimpleContainerModuleFixture()
     , runningEntries_( new EntryMap_T() )
     , candidateEntries_( useCandidate() ? SharedPtrEntryMap_T( new EntryMap_T() )
                                         : runningEntries_ )
+    ,rollbackEntries_( new EntryMap_T() )
 {
     // ensure the module is loaded
     queryEngine_->loadModule( primarySession_, "simple_list_test" );
@@ -137,20 +138,6 @@ SimpleContainerModuleFixture::SimpleContainerModuleFixture()
 // ---------------------------------------------------------------------------|
 SimpleContainerModuleFixture::~SimpleContainerModuleFixture() 
 {
-}
-
-// ---------------------------------------------------------------------------|
-void SimpleContainerModuleFixture::runEditQuery( 
-        shared_ptr<AbstractNCSession> session,
-        const string& query )
-{
-    assert( session );
-    vector<string> expPresent{ "ok" };
-    vector<string> expNotPresent{ "error", "rpc-error" };
-    
-    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
-    queryEngine_->tryEditConfig( session, query, writeableDbName_, 
-                                 checker );
 }
 
 // ---------------------------------------------------------------------------|
@@ -274,6 +261,17 @@ void SimpleContainerModuleFixture::replaceEntryValuePair(
 }
 
 // ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::noOpEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    addEntry( session, entryKeyStr, "" );
+    addEntryValue( session, entryKeyStr, entryValStr, "" );
+}
+
+// ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::deleteEntry(
     std::shared_ptr<AbstractNCSession> session,
     const string& entryKeyStr )
@@ -283,6 +281,18 @@ void SimpleContainerModuleFixture::deleteEntry(
     string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
             messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
     runEditQuery( session, query );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryFailed(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr )
+{
+    assert( session );
+
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
+    runFailedEditQuery( session, query, "data missing" );
 }
 
 // ---------------------------------------------------------------------------|
@@ -301,6 +311,21 @@ void SimpleContainerModuleFixture::deleteEntryValue(
 }
 
 // ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValueFailed(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, "delete" ) ) );
+    
+    runFailedEditQuery( session, query, "data missing" );
+}
+
+// ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::deleteEntryValuePair(
     std::shared_ptr<AbstractNCSession> session,
     const string& entryKeyStr,
@@ -313,6 +338,17 @@ void SimpleContainerModuleFixture::deleteEntryValuePair(
 
     it=candidateEntries_->find(entryKeyStr);
     candidateEntries_->erase(it);
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValuePairFailed(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    deleteEntryValueFailed( session, entryKeyStr, entryValStr );
+    deleteEntryFailed( session, entryKeyStr );
 }
 
 // ---------------------------------------------------------------------------|
@@ -433,6 +469,49 @@ void SimpleContainerModuleFixture::commitChanges(
     }
 
 }
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::commitChangesFailure(
+    std::shared_ptr<AbstractNCSession> session )
+{
+    QuerySuiteFixture::commitChangesFailure( session );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::confirmedCommitChanges(
+    std::shared_ptr<AbstractNCSession> session, const int timeout, bool extend )
+{
+    QuerySuiteFixture::confirmedCommitChanges( session, timeout );
+    
+    // copy the editted changes to the running changes and store the original
+    if ( useCandidate() && !extend )
+    {
+        rollbackEntries_->clear();
+        rollbackEntries_->insert( runningEntries_->begin(),
+                                  runningEntries_->end() );
+        runningEntries_->clear();
+        runningEntries_->insert( candidateEntries_->begin(), 
+                                 candidateEntries_->end() );
+    }
+
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::runDeleteStartupConfig( 
+        shared_ptr<AbstractNCSession> session )
+{
+    if( useStartup() )
+    {
+        assert( session );
+        vector<string> expPresent{ "ok" };
+        vector<string> expNotPresent{ "error", "rpc-error" };
+        StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+        // send a delete-config
+        queryEngine_->tryDeleteConfig( session, "startup", checker );
+        rollbackEntries_->clear();
+    }
+}
+
 // ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::discardChanges()
 {
@@ -442,6 +521,50 @@ void SimpleContainerModuleFixture::discardChanges()
         candidateEntries_->clear();
         candidateEntries_->insert( runningEntries_->begin(), 
                                    runningEntries_->end() );
+    }
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::rollbackChanges(
+        shared_ptr<AbstractNCSession> session )
+{
+    // rollback the changes
+    if ( useCandidate() )
+    {
+        vector<string> expPresent{ "data" };
+        vector<string> expNotPresent{ "error", "rpc-error" };
+
+        // Add all expected elements to expPresent
+        EntriesConvertFunctor conv( expPresent );
+        for_each( rollbackEntries_->begin(), rollbackEntries_->end(), conv );
+
+        BOOST_TEST_MESSAGE("EXPECTED PRESENT:\n");
+        for (unsigned int i = 0; i < expPresent.size(); i++)
+        {
+            BOOST_TEST_MESSAGE(expPresent.at(i) + "\n");
+        }
+
+        // now add all elements from the running that are not in the
+        // rollback entries to the expectedNotPresent list
+        AddDifferingEntriesFunctor diff( expNotPresent, rollbackEntries_ );
+        for_each( runningEntries_->begin(), runningEntries_->end(), diff );
+        
+        BOOST_TEST_MESSAGE("EXPECTED NOT PRESENT:\n");
+        for (unsigned int i = 0; i < expNotPresent.size(); i++)
+        {
+            BOOST_TEST_MESSAGE(expNotPresent.at(i) + "\n");
+        }
+
+        StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+        queryEngine_->tryGetConfigXpath( session, containerName_, "running", 
+                                         checker );
+
+        runningEntries_->clear();
+        runningEntries_->insert( rollbackEntries_->begin(), 
+                                 rollbackEntries_->end() );
+        candidateEntries_->clear();
+        candidateEntries_->insert( rollbackEntries_->begin(), 
+                                   rollbackEntries_->end() );
     }
 }
 

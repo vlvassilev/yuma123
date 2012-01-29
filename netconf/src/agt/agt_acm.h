@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -233,7 +233,10 @@ extern boolean
 * INPUTS:
 *   msg == XML header from incoming message in progress
 *   user == user name string
-*   val  == val_value_t in progress to check
+*   newval  == val_value_t in progress to check
+*                (may be NULL, if curval set)
+*   curval  == val_value_t in progress to check
+*                (may be NULL, if newval set)
 *   editop == requested CRUD operation
 *
 * RETURNS:
@@ -242,28 +245,9 @@ extern boolean
 extern boolean 
     agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
 			       const xmlChar *user,
-			       const val_value_t *val,
+			       const val_value_t *newval,
+			       const val_value_t *curval,
                                op_editop_t editop);
-
-
-/********************************************************************
-* FUNCTION agt_acm_val_write_lock_allowed
-*
-* Check if the specified user is allowed to get a write lock on
-* a value node
-* 
-* INPUTS:
-*   msg == XML header from incoming message in progress
-*   user == user name string
-*   val  == val_value_t in progress to check
-*
-* RETURNS:
-*   TRUE if user allowed this level of access to the value node
-*********************************************************************/
-extern boolean 
-    agt_acm_val_write_lock_allowed (xml_msg_hdr_t *msg,
-                                    const xmlChar *user,
-                                    const val_value_t *val);
 
 
 /********************************************************************

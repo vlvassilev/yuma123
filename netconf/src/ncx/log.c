@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -28,29 +28,13 @@ date         init     comment
 *********************************************************************/
 #include <stdio.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_status
+#include "procdefs.h"
+#include "log.h"
+#include "ncxconst.h"
 #include "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include "tstamp.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -58,6 +42,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+/* #define LOG_DEBUG_TRACE 1 */
 
 /********************************************************************
 *                                                                   *
@@ -471,6 +456,30 @@ void
 
 } /* log_alt_indent */
 
+/********************************************************************
+* FUNCTION vlog_error
+*
+*   Generate a LOG_DEBUG_ERROR log entry
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   valist == any additional arguments for printf
+*
+*********************************************************************/
+void vlog_error (const char *fstr, va_list args )
+{
+    if (log_get_debug_level() < LOG_DEBUG_ERROR) {
+        return;
+    }
+
+    if (logfile) {
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
+    } else {
+        vprintf(fstr, args);
+        fflush(stdout);
+    }
+}  /* log_error */
 
 /********************************************************************
 * FUNCTION log_error
@@ -482,27 +491,14 @@ void
 *   ... == any additional arguments for printf
 *
 *********************************************************************/
-void 
-    log_error (const char *fstr, ...)
+void log_error (const char *fstr, ...)
 {
     va_list args;
-
-    if (log_get_debug_level() < LOG_DEBUG_ERROR) {
-        return;
-    }
-
     va_start(args, fstr);
 
-    if (logfile) {
-        vfprintf(logfile, fstr, args);
-        fflush(logfile);
-    } else {
-        vprintf(fstr, args);
-        fflush(stdout);
-    }
+    vlog_error( fstr, args );
 
     va_end(args);
-
 }  /* log_error */
 
 
@@ -711,6 +707,24 @@ void
 
 
 /********************************************************************
+* FUNCTION log_noop
+*
+*  Do not generate any log message NO-OP
+*  Used to set logfn_t to no-loggging option
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
+void 
+    log_noop (const char *fstr, ...)
+{
+    (void)fstr;
+}  /* log_noop */
+
+
+/********************************************************************
 * FUNCTION log_set_debug_level
 * 
 * Set the global debug filter threshold level
@@ -722,15 +736,18 @@ void
 void
     log_set_debug_level (log_debug_t dlevel)
 {
-#ifdef DEBUG
     if (dlevel > LOG_DEBUG_DEBUG4) {
-        SET_ERROR(ERR_INTERNAL_VAL);
         dlevel = LOG_DEBUG_DEBUG4;
-        return;
     }
-#endif
 
-    debug_level = dlevel;
+    if (dlevel != debug_level) {
+#ifdef LOG_DEBUG_TRACE
+        log_write("\n\nChanging log-level from '%s' to '%s'\n",
+                  log_get_debug_level_string(debug_level),
+                  log_get_debug_level_string(dlevel));
+#endif
+        debug_level = dlevel;
+    }
 
 }  /* log_set_debug_level */
 
@@ -772,29 +789,21 @@ log_debug_t
     }
 #endif
 
-    if (!xml_strcmp((const xmlChar *)str,
-                    LOG_DEBUG_STR_OFF)) {
+    if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_OFF)) {
         return LOG_DEBUG_OFF;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_ERROR)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_ERROR)) {
         return LOG_DEBUG_ERROR;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_WARN)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_WARN)) {
         return LOG_DEBUG_WARN;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_INFO)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_INFO)) {
         return LOG_DEBUG_INFO;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_DEBUG)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_DEBUG)) {
         return LOG_DEBUG_DEBUG;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_DEBUG2)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_DEBUG2)) {
         return LOG_DEBUG_DEBUG2;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_DEBUG3)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_DEBUG3)) {
         return LOG_DEBUG_DEBUG3;
-    } else if (!xml_strcmp((const xmlChar *)str,
-                           LOG_DEBUG_STR_DEBUG4)) {
+    } else if (!xml_strcmp((const xmlChar *)str, LOG_DEBUG_STR_DEBUG4)) {
         return LOG_DEBUG_DEBUG4;
     } else {
         return LOG_DEBUG_NONE;
@@ -819,6 +828,7 @@ const xmlChar *
     log_get_debug_level_string (log_debug_t level)
 {
     switch (level) {
+    case LOG_DEBUG_NONE:
     case LOG_DEBUG_OFF:
         return LOG_DEBUG_STR_OFF;
     case LOG_DEBUG_ERROR:

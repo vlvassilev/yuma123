@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -33,132 +33,43 @@ date         init     comment
 #include <time.h>
 #include <memory.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
+#include "procdefs.h"
+#include "agt_acm.h"
+#include "agt_cfg.h"
+#include "agt_cli.h"
+#include "agt_rpc.h"
+#include "agt_rpcerr.h"
+#include "agt_ses.h"
+#include "agt_sys.h"
+#include "agt_util.h"
+#include "agt_val.h"
+#include "agt_val_parse.h"
+#include "agt_xml.h"
+#include "dlq.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncx_num.h"
+#include "ncxconst.h"
+#include "obj.h"
+#include "rpc.h"
+#include "rpc_err.h"
+#include "ses.h"
+#include "status.h"
+#include "top.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_msg.h"
+#include "xml_util.h"
+#include "xml_wr.h"
+#include "yangconst.h"
 
-#ifndef _H_agt_acm
-#include  "agt_acm.h"
-#endif
-
-#ifndef _H_agt_cli
-#include  "agt_cli.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_rpcerr
-#include  "agt_rpcerr.h"
-#endif
-
-#ifndef _H_agt_ses
-#include  "agt_ses.h"
-#endif
-
-#ifndef _H_agt_sys
-#include  "agt_sys.h"
-#endif
-
-#ifndef _H_agt_util
-#include  "agt_util.h"
-#endif
-
-#ifndef _H_agt_val
-#include  "agt_val.h"
-#endif
-
-#ifndef _H_agt_val_parse
-#include  "agt_val_parse.h"
-#endif
-
-#ifndef _H_agt_xml
-#include  "agt_xml.h"
-#endif
-
-#ifndef _H_dlq
-#include  "dlq.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
-#include  "ncx_num.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_obj
-#include  "obj.h"
-#endif
-
-#ifndef _H_rpc
-#include  "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
-#include  "rpc_err.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_top
-#include  "top.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_msg
-#include  "xml_msg.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_yangconst
-#include  "yangconst.h"
-#endif
 
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#ifdef DEBUG
-#define AGT_RPC_DEBUG 1
-#endif
-
 
 /* hack for <error-path> for a couple corner case errors */
 #define RPC_ROOT ((const xmlChar *)"/nc:rpc")
@@ -177,6 +88,22 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 static boolean agt_rpc_init_done = FALSE;
+
+
+/********************************************************************
+* FUNCTION free_msg
+*
+* Free an rpc_msg_t
+* 
+* INPUTS:
+*   msg == rpc_msg_t to delete
+*********************************************************************/
+static void
+    free_msg (rpc_msg_t *msg)
+{
+    agt_cfg_free_transaction(msg->rpc_txcb);
+    rpc_free_msg(msg);
+}  /* free_msg */
 
 
 /********************************************************************
@@ -329,11 +256,7 @@ static void
     }
 
     /* generate the <error-info> end tag */
-    xml_wr_end_elem(scb, 
-                    msg, 
-                    ncid, 
-                    NCX_EL_ERROR_INFO, 
-                    indent);
+    xml_wr_end_elem(scb, msg, ncid, NCX_EL_ERROR_INFO, indent);
 
 }  /* send_rpc_error_info */
 
@@ -456,7 +379,7 @@ static status_t
     } else if (err->error_res != NO_ERR) {
         /* use the internal error code instead */
         *buff = 0;
-        sprintf((char *)buff, "%u", err->error_res);
+        snprintf((char *)buff, sizeof(buff), "%u", err->error_res);
         if (*buff) {
             xml_wr_string_elem(scb, 
                                msg, 
@@ -578,9 +501,7 @@ static status_t
         }
 
         /* make a new attr and add it to rpc_in_attrs */
-        res = xml_add_attr(msg->rpc_in_attrs,
-                           0,
-                           NCX_EL_LAST_MODIFIED,
+        res = xml_add_attr(msg->rpc_in_attrs, 0, NCX_EL_LAST_MODIFIED,
                            cfg->last_ch_time);
 
         return res;
@@ -631,9 +552,7 @@ static void
     }
 
     if (res == NO_ERR) { 
-        res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
-                                      msg->rpc_in_attrs,
-                                      errsend);
+        res = xml_msg_gen_xmlns_attrs(&msg->mhdr, msg->rpc_in_attrs, errsend);
     }
 
     if (res != NO_ERR) {
@@ -671,12 +590,7 @@ static void
     /* check which reply variant needs to be sent */
     if (dlq_empty(&msg->mhdr.errQ) && !datasend) {
         /* no errors and no data, so send <ok> variant */
-        xml_wr_empty_elem(scb, 
-                          &msg->mhdr, 
-                          ncid, 
-                          ncid,
-                          NCX_EL_OK, 
-                          indent);
+        xml_wr_empty_elem(scb, &msg->mhdr, ncid, ncid, NCX_EL_OK, indent);
     } else {
         /* send rpcResponse variant
          * 0 or <rpc-error> elements followed by
@@ -705,11 +619,7 @@ static void
          */
         if (datasend) {
             if (msg->rpc_data_type == RPC_DATA_STD) {
-                xml_wr_begin_elem(scb, 
-                                  &msg->mhdr, 
-                                  ncid, 
-                                  rpcid,
-                                  NCX_EL_DATA, 
+                xml_wr_begin_elem(scb, &msg->mhdr, ncid, rpcid, NCX_EL_DATA, 
                                   indent);
                 if (indent > 0) {
                     indent += ses_indent_count(scb);
@@ -744,21 +654,14 @@ static void
                 if (indent > 0) {
                     indent -= ses_indent_count(scb);
                 }
-                xml_wr_end_elem(scb, 
-                                &msg->mhdr, 
-                                rpcid, 
-                                NCX_EL_DATA, 
+                xml_wr_end_elem(scb, &msg->mhdr, rpcid, NCX_EL_DATA, 
                                 (datawritten) ? indent : -1);
             }
         }
     } 
 
     /* generate the <rpc-reply> end tag */
-    xml_wr_end_elem(scb, 
-                    &msg->mhdr, 
-                    ncid, 
-                    NCX_EL_RPC_REPLY, 
-                    0);
+    xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_RPC_REPLY, 0);
 
     /* finish the message */
     ses_finish_msg(scb);
@@ -832,25 +735,17 @@ static status_t
     res = NO_ERR;
 
     /* check if there is an input parmset specified */
-    obj = obj_find_template(obj_get_datadefQ(rpcobj),
-                            NULL, 
-                            YANG_K_INPUT);
+    obj = obj_find_template(obj_get_datadefQ(rpcobj), NULL, YANG_K_INPUT);
     if (obj && obj_get_child_count(obj)) {
         msg->rpc_agt_state = AGT_RPC_PH_PARSE;
-        res = agt_val_parse_nc(scb, 
-                               &msg->mhdr, 
-                               obj, 
-                               method,
-                               NCX_DC_CONFIG, 
+        res = agt_val_parse_nc(scb, &msg->mhdr, obj, method, NCX_DC_CONFIG, 
                                msg->rpc_input);
 
-#ifdef AGT_RPC_DEBUG
         if (LOGDEBUG3) {
             log_debug3("\nagt_rpc: parse RPC input state");
             rpc_err_dump_errors(msg);
             val_dump_value(msg->rpc_input, 0);
         }
-#endif
     }
 
     return res;
@@ -899,17 +794,11 @@ static status_t
          * in the rpc/input section and flag them
          * as unexpected-element errors
          */
-        res = agt_val_rpc_xpath_check(scb,
-                                      msg,
-                                      &msg->mhdr,
-                                      msg->rpc_input,
+        res = agt_val_rpc_xpath_check(scb, msg, &msg->mhdr, msg->rpc_input,
                                       msg->rpc_method);
+    }
 
-        if (res != NO_ERR && NEED_EXIT(res)) {
-            return res;
-        } /* else non-fatal errors already recorded */
-
-
+    if (res == NO_ERR) {
         /* check that the number of instances of the parameters
          * is reasonable and only one member from any choice is
          * present (if applicable)
@@ -918,10 +807,7 @@ static status_t
          * any missing choices would be incorrectly interpreted
          * as multiple missing parameter errors
          */
-        res = agt_val_instance_check(scb, 
-                                     &msg->mhdr, 
-                                     msg->rpc_input, 
-                                     msg->rpc_input,
+        res = agt_val_instance_check(scb, &msg->mhdr, msg->rpc_input, 
                                      NCX_LAYER_OPERATION);
     }
 
@@ -938,14 +824,15 @@ static status_t
 * and OP_EDITOP_REPLACE to restore running from backup
 *
 *    - Create a dummy session and RPC message
-*    - Call a special agt_ps_parse function to parse the config file
+*    - Create a config transaction control block
+*    - Call a special agt_val_parse function to parse the config file
 *    - Call the special agt_ncx function to invoke the proper 
 *      parmset and application 'validate' callback functions, and 
 *      record all the error/warning messages
-*    - Call the special ncx_agt function to invoke all the 'apply'
+*    - Call the special agt_ncx function to invoke all the 'apply'
 *      callbacks as needed
 *    - transfer any error messages to the cfg->load_errQ
-*
+*    - Dispose the transaction CB (do not send to audit)
 * INPUTS:
 *   filespec == XML config filespec to load
 *   cfg == cfg_template_t to fill in
@@ -975,54 +862,50 @@ static status_t
                       val_value_t **configval,
                       dlq_hdr_t *errorQ)
 {
-    ses_cb_t        *scb;
-    rpc_msg_t       *msg;
-    obj_template_t  *rpcobj;
-    agt_rpc_cbset_t *cbset;
-    val_value_t     *testval;
-    xml_node_t       method;
-    status_t         res, retres;
-    boolean          valdone;
-
-    retres = NO_ERR;
-
     /* first make sure the load-config RPC is registered */
-    rpcobj = find_rpc(NC_MODULE, NCX_EL_LOAD_CONFIG);
+    obj_template_t *rpcobj = find_rpc(NC_MODULE, NCX_EL_LOAD_CONFIG);
     if (!rpcobj) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* make sure the agent callback set for this RPC is ok */
-    cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
+    agt_rpc_cbset_t *cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
     if (!cbset) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    /* make sure no transaction already in progress unless it is a 
+     * rollback by the system (SID==0)    */
+    if (agt_cfg_txid_in_progress(NCX_CFGID_RUNNING) && use_sid) {
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+    }
+
     /* create a dummy session control block */
-    scb = agt_ses_new_dummy_session();
+    ses_cb_t *scb = agt_ses_new_dummy_session();
     if (!scb) {
         return ERR_INTERNAL_MEM;
     }
 
+    status_t retres = NO_ERR;
+
     /* set the ACM profile to use for rollback */
-    res = agt_ses_set_dummy_session_acm(scb, use_sid);
+    status_t res = agt_ses_set_dummy_session_acm(scb, use_sid);
     if (res != NO_ERR) {
         agt_ses_free_dummy_session(scb);        
         return res;
     }
 
     /* create a dummy RPC msg */
-    msg = rpc_new_msg();
+    rpc_msg_t *msg = rpc_new_msg();
     if (!msg) {
         agt_ses_free_dummy_session(scb);
         return ERR_INTERNAL_MEM;
     }
 
     /* setup the config file as the xmlTextReader input */
-    res = xml_get_reader_from_filespec((const char *)filespec, 
-                                       &scb->reader);
+    res = xml_get_reader_from_filespec((const char *)filespec, &scb->reader);
     if (res != NO_ERR) {
-        rpc_free_msg(msg);
+        free_msg(msg);
         agt_ses_free_dummy_session(scb);
         return res;
     }
@@ -1030,6 +913,7 @@ static status_t
     msg->rpc_in_attrs = NULL;
 
     /* create a dummy method XML node */
+    xml_node_t  method;
     xml_init_node(&method);
     method.nodetyp = XML_NT_START;
     method.nsid = xmlns_nc_id();
@@ -1037,7 +921,7 @@ static status_t
 
     method.qname = xml_strdup(NCX_EL_LOAD_CONFIG);
     if (method.qname == NULL) {
-        rpc_free_msg(msg);
+        free_msg(msg);
         agt_ses_free_dummy_session(scb);
         return ERR_INTERNAL_MEM;
     }
@@ -1054,39 +938,52 @@ static status_t
         msg->rpc_top_editop = OP_EDITOP_REPLACE;
     }
 
-    res = NO_ERR;
-    valdone = FALSE;
-
     /* parse the config file as a root object */
-    if (res == NO_ERR) {
-        res = parse_rpc_input(scb, msg, rpcobj, &method);
+    res = parse_rpc_input(scb, msg, rpcobj, &method);
+    if (res != NO_ERR) {
+        retres = res;
+    }
+    if (!(NEED_EXIT(res) || res==ERR_XML_READER_EOF)) {
+        /* keep going if there were errors in the input
+         * in case more errors can be found or 
+         * continue-on-error is in use
+         * Each value node has a status field (val->res)
+         * which will retain the error status 
+         */
+        res = post_psd_state(scb, msg, res);
         if (res != NO_ERR) {
             retres = res;
         }
-        if (!(NEED_EXIT(res) || res==ERR_XML_READER_EOF)) {
-            /* keep going if there were errors in the input
-             * in case more errors can be found or 
-             * continue-on-error is in use
-             * Each value node has a status field (val->res)
-             * which will retain the error status 
-             */
-            res = post_psd_state(scb, msg, res);
-            if (res != NO_ERR) {
-                retres = res;
-            }
+    }
+
+    if (retres != NO_ERR) {
+        agt_profile_t *profile = agt_get_profile();
+        if (NEED_EXIT(retres)) {
+            res = retres; // force exit
+            log_error("\nError: Parse <load-config> failed with fatal errors");
+        } else if (profile->agt_startup_error) {
+            res = retres; // force exit
+            log_error("\nError: Parse <load-config> failed and "
+                      "--startup-error=stop");
+        } else {
+            log_warn("\nWarning: Parse <load-config> failed and "
+                     "--startup-error=continue");
+            retres = NO_ERR;
         }
     }
 
     /* call all the object validate callbacks
      * but only if there were no parse errors so far
      */
+    boolean valdone = FALSE;
     if (res == NO_ERR && cbset->acb[AGT_RPC_PH_VALIDATE]) {
         msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
         res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
         if (res != NO_ERR) {
             retres = res;
+        } else {
+            valdone = TRUE;
         }
-        valdone = TRUE;
     }
 
     /* get rid of the error nodes after the validation and instance
@@ -1094,24 +991,25 @@ static status_t
      * be done by now,
      * Also set the canonical order for the root node
      */
-    testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
-    if (testval) {
-        val_purge_errors_from_root(testval);
-        val_set_canonical_order(testval);
+    if (valdone) {
+        val_value_t *testval = val_find_child(msg->rpc_input, NULL, 
+                                              NCX_EL_CONFIG);
+        if (testval) {
+            //val_purge_errors_from_root(testval); !! already done
+            val_set_canonical_order(testval);
 
-        if (justval) {
-            /* remove this node and return it */
-            val_remove_child(testval);
-            *configval = testval;
+            if (justval) {
+                /* remove this node and return it */
+                val_remove_child(testval);
+                *configval = testval;
+            }
         }
     }
 
     /* call all the object invoke callbacks, only callbacks for valid
      * subtrees will be called; skip if valonly mode
      */
-    if (!justval &&
-        valdone && 
-        cbset->acb[AGT_RPC_PH_INVOKE]) {
+    if (!justval && valdone && cbset->acb[AGT_RPC_PH_INVOKE]) {
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
         res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
         if (res != NO_ERR) {
@@ -1120,20 +1018,18 @@ static status_t
         }
     }
 
-#ifdef AGT_RPC_DEBUG
     if (LOGDEBUG) {
         if (!dlq_empty(&msg->mhdr.errQ)) {
             rpc_err_dump_errors(msg);
         }
     }
-#endif
 
     /* move any error messages to the config error Q */
     dlq_block_enque(&msg->mhdr.errQ, errorQ);
 
     /* cleanup and exit */
     xml_clean_node(&method);
-    rpc_free_msg(msg);
+    free_msg(msg);
     agt_ses_free_dummy_session(scb);
 
     return retres;
@@ -1162,9 +1058,7 @@ status_t
     status_t  res;
 
     if (!agt_rpc_init_done) {
-        res = top_register_node(NC_MODULE, 
-                                NCX_EL_RPC, 
-                                agt_rpc_dispatch);
+        res = top_register_node(NC_MODULE, NCX_EL_RPC, agt_rpc_dispatch);
         if (res != NO_ERR) {
             return res;
         }
@@ -1418,9 +1312,7 @@ void
         }
         agttotals->stats.inBadRpcs++;
         agttotals->droppedSessions++;
-        agt_ses_request_close(scb, 
-                              scb->sid, 
-                              SES_TR_DROPPED);
+        agt_ses_request_close(scb, scb->sid, SES_TR_DROPPED);
 
         return;
     }
@@ -1438,9 +1330,7 @@ void
                      res, 
                      get_error_string(res));
         }
-        agt_ses_request_close(scb, 
-                              scb->sid, 
-                              SES_TR_DROPPED);
+        agt_ses_request_close(scb, scb->sid, SES_TR_DROPPED);
         return;
     }
 
@@ -1457,7 +1347,7 @@ void
                      get_error_string(res));
         }
         agt_ses_request_close(scb, scb->sid, SES_TR_OTHER);
-        rpc_free_msg(msg);
+        free_msg(msg);
         return;
     }
 
@@ -1527,16 +1417,13 @@ void
     if (res != NO_ERR || res2 != NO_ERR) {
         send_rpc_reply(scb, msg);
         agt_acm_clear_msg_cache(&msg->mhdr);
-        rpc_free_msg(msg);
+        free_msg(msg);
         return;
     }
     
     /* get the next XML node, which is the RPC method name */
     xml_init_node(&method);
-    res = agt_xml_consume_node(scb, 
-                               &method,
-                               NCX_LAYER_RPC, 
-                               &msg->mhdr);
+    res = agt_xml_consume_node(scb, &method, NCX_LAYER_RPC, &msg->mhdr);
     if (res != NO_ERR) {
         errdone = TRUE;
     } else {
@@ -1556,8 +1443,8 @@ void
             log_debug("\nagt_rpc: <%s> for %u=%s@%s (m:%s) [%s]", 
                       method.elname,
                       scb->sid,
-                      scb->username,
-                      scb->peeraddr,
+                      scb->username ? scb->username : NCX_EL_NONE,
+                      scb->peeraddr ? scb->peeraddr : NCX_EL_NONE,
                       msgid,
                       tstampbuff);
             if (LOGDEBUG2) {
@@ -1578,8 +1465,8 @@ void
                 res = ERR_NCX_DEF_NOT_FOUND;
             } else if (!rpc->supported) {
                 res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-            } else if (!agt_acm_rpc_allowed(&msg->mhdr,
-                                            scb->username, 
+            } else if (scb->username && 
+                       !agt_acm_rpc_allowed(&msg->mhdr, scb->username, 
                                             rpcobj)) {
                 res = ERR_NCX_ACCESS_DENIED;
             } else {
@@ -1620,7 +1507,7 @@ void
         }
         send_rpc_reply(scb, msg);
         agt_acm_clear_msg_cache(&msg->mhdr);
-        rpc_free_msg(msg);
+        free_msg(msg);
         xml_clean_node(&method);
         return;
     }
@@ -1636,13 +1523,9 @@ void
     /* read in a node which should be the endnode to match 'top' */
     xml_init_node(&testnode);
     if (res == NO_ERR) {
-        res = agt_xml_consume_node(scb, 
-                                   &testnode,
-                                   NCX_LAYER_RPC, 
-                                   &msg->mhdr);
+        res = agt_xml_consume_node(scb, &testnode, NCX_LAYER_RPC, &msg->mhdr);
     }
     if (res == NO_ERR) {
-#ifdef AGT_RPC_DEBUG
         if (LOGDEBUG2) {
             log_debug2("\nagt_rpc: expecting %s end node", 
                        top->qname);
@@ -1650,7 +1533,6 @@ void
         if (LOGDEBUG3) {
             xml_dump_node(&testnode);
         }
-#endif
         res = xml_endnode_match(top, &testnode);
     }
     xml_clean_node(&testnode);
@@ -1663,10 +1545,7 @@ void
         res = NO_ERR;
         while (res==NO_ERR) {
             /* do not add errors such as unknown namespace */
-            res = agt_xml_consume_node(scb, 
-                                       &testnode,
-                                       NCX_LAYER_NONE,
-                                       NULL);
+            res = agt_xml_consume_node(scb, &testnode, NCX_LAYER_NONE, NULL);
             if (res==NO_ERR) {
                 res = ERR_NCX_UNKNOWN_ELEMENT;
                 errstr = (char *)xml_strdup((const xmlChar *)RPC_ROOT);
@@ -1709,6 +1588,22 @@ void
          */
         msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
         res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
+        if (res != NO_ERR) {
+            /* make sure there is an error recorded in case
+             * the validate phase callback did not add one
+             */
+            if (!rpc_err_any_errors(msg)) {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_RPC, 
+                                 res, 
+                                 &method, 
+                                 NCX_NT_NONE, 
+                                 NULL, 
+                                 NCX_NT_OBJ, 
+                                 msg->rpc_method);
+            }
+        }
     }
 
     /* there does not always have to be an invoke callback,
@@ -1718,10 +1613,27 @@ void
     if ((res==NO_ERR) && cbset && cbset->acb[AGT_RPC_PH_INVOKE]) {
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
         res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
+        if (res != NO_ERR) {
+            /* make sure there is an error recorded in case
+             * the invoke phase callback did not add one
+             */
+            if (!rpc_err_any_errors(msg)) {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_RPC, 
+                                 res, 
+                                 &method, 
+                                 NCX_NT_NONE, 
+                                 NULL, 
+                                 NCX_NT_OBJ, 
+                                 msg->rpc_method);
+            }
+        }
     }
 
 
-    /* make sure the prefix map is correct for report-all-tagged mode */
+    /* make sure the prefix map is correct for report-all-tagged mode
+     * OK to skip this if there was an error exit */
     if (res == NO_ERR) {
         res = xml_msg_finish_prefix_map(&msg->mhdr, 
                                         msg->rpc_in_attrs);
@@ -1743,8 +1655,8 @@ void
     /* check if there is any auditQ because changes to 
      * the running config were made
      */
-    if (!dlq_empty(&msg->rpc_auditQ)) {
-        agt_sys_send_sysConfigChange(scb, &msg->rpc_auditQ);
+    if (msg->rpc_txcb && !dlq_empty(&msg->rpc_txcb->auditQ)) {
+        agt_sys_send_sysConfigChange(scb, &msg->rpc_txcb->auditQ);
     }
 
     /* only reset the session state to idle if was not changed
@@ -1757,12 +1669,10 @@ void
     /* cleanup and exit */
     xml_clean_node(&method);
     agt_acm_clear_msg_cache(&msg->mhdr);
-    rpc_free_msg(msg);
+    free_msg(msg);
 
-#ifdef AGT_RPC_DEBUG
     print_errors();
     clear_errors();
-#endif
 
 } /* agt_rpc_dispatch */
 
@@ -1807,12 +1717,7 @@ status_t
     }
 #endif
 
-    res = load_config_file(filespec,
-                           cfg,
-                           isload,
-                           use_sid,
-                           FALSE,
-                           NULL,
+    res = load_config_file(filespec, cfg, isload, use_sid, FALSE, NULL,
                            &cfg->load_errQ);
 
     return res;
@@ -1870,13 +1775,8 @@ val_value_t *
 #endif
 
     retval = NULL;
-    *res = load_config_file(filespec,
-                            targetcfg,
-                            FALSE,
-                            use_sid,
-                            TRUE,
-                            &retval,
-                            errorQ);
+    *res = load_config_file(filespec, targetcfg, FALSE, use_sid,  TRUE,
+                            &retval, errorQ);
 
     return retval;
 

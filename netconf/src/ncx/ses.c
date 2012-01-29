@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,46 +34,18 @@ date         init     comment
 #include <unistd.h>
 #include <errno.h>
 #include <ctype.h>
+#include  <assert.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include  "log.h"
-#endif
-
-#ifndef _H_ncx
 #include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include  "ncx_num.h"
-#endif
-
-#ifndef _H_ses
 #include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
 #include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include  "tstamp.h"
-#endif
-
-#ifndef _H_val
 #include  "val.h"
-#endif
-
-#ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -829,6 +801,9 @@ static void
     char    tempbuff[4];
     int     i, j, k;
 
+    /* save the first 3 chars in the temp buffer */
+    memset(tempbuff, 0x0, 4);
+
     switch (msg->prolog_state) {
     case SES_PRST_NONE:
         if ((endpos - buff->buffpos) < 3) {
@@ -860,8 +835,6 @@ static void
         } else {
             msg->prolog_state = SES_PRST_DONE;
 
-            /* save the first 3 chars in the temp buffer */
-            memset(tempbuff, 0x0, 4);
             strncpy(tempbuff, buffer, *retlen);
             for (i = *retlen, j=buff->buffpos; i <= 3; i++, j++) {
                 tempbuff[i] = (char)buff->buff[j];
@@ -1023,18 +996,12 @@ ses_cb_t *
 * RETURNS:
 *   none
 *********************************************************************/
-void 
-    ses_free_scb (ses_cb_t *scb)
+void ses_free_scb (ses_cb_t *scb)
 {
     ses_msg_t *msg;
     ses_msg_buff_t *buff;
 
-#ifdef DEBUG
-    if (scb == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     if (scb->start_time) {
         m__free(scb->start_time);
@@ -1562,16 +1529,9 @@ void
 * RETURNS:
 *   none
 *********************************************************************/
-void
-    ses_set_mode (ses_cb_t *scb,
-                  ses_mode_t mode)
+void ses_set_mode (ses_cb_t *scb, ses_mode_t mode)
 {
-#ifdef DEBUG
-    if (scb == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     scb->mode = mode;
 } /* ses_set_mode */
@@ -1588,15 +1548,9 @@ void
 * RETURNS:
 *   session mode value
 *********************************************************************/
-ses_mode_t
-    ses_get_mode (ses_cb_t *scb)
+ses_mode_t ses_get_mode (ses_cb_t *scb)
 {
-#ifdef DEBUG
-    if (scb == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return SES_MODE_NONE;
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     return scb->mode;
 } /* ses_get_mode */
@@ -1613,15 +1567,9 @@ ses_mode_t
 * RETURNS:
 *   status
 *********************************************************************/
-status_t
-    ses_start_msg (ses_cb_t *scb)
+status_t ses_start_msg (ses_cb_t *scb)
 {
-
-#ifdef DEBUG
-    if (scb == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     /* check if this session will allow a msg to start now */
     if (scb->state >= SES_ST_SHUTDOWN) {
@@ -1646,16 +1594,9 @@ status_t
 * RETURNS:
 *   none
 *********************************************************************/
-void
-    ses_finish_msg (ses_cb_t *scb)
+void ses_finish_msg (ses_cb_t *scb)
 {
-
-#ifdef DEBUG
-    if (scb == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
 
     /* add the NETCONF EOM marker */
     if (scb->transport==SES_TRANSPORT_SSH ||
@@ -2336,8 +2277,6 @@ boolean
     return ret;
 
 }  /* ses_protocol_requested */
-
-
 
 
 /* END file ses.c */

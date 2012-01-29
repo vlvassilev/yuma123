@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -219,8 +219,10 @@ static status_t
                                server_cb->runstack_context);
         if (pcb == NULL) {
             res = ERR_INTERNAL_MEM;
-        } else if ((isif && runstack_get_cond_state(server_cb->runstack_context)) ||
-                   (!isif && !runstack_get_if_used(server_cb->runstack_context))) {
+        } else if ((isif && 
+                    runstack_get_cond_state(server_cb->runstack_context)) ||
+                   (!isif && 
+                    !runstack_get_if_used(server_cb->runstack_context))) {
 
             /* figure out if this if or elif block is enabled or not */
             result = xpath1_eval_expr(pcb, 
@@ -233,9 +235,7 @@ static status_t
                 /* get new condition state for this loop */
                 cond = xpath_cvt_boolean(result);
             } 
-            if (result != NULL) {
-                xpath_free_result(result);
-            }
+            xpath_free_result(result);
         }
 
         if (res == NO_ERR) {

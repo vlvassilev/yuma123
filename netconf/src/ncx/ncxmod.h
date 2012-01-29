@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -302,6 +302,10 @@ extern void
 *
 * Determine the location of the specified module
 * and then load it into the system, if not already loaded
+*
+* This is the only load module variant that checks if there
+* are any errors recorded in the module or any of its dependencies
+* !!! ONLY RETURNS TRUE IF MODULE AND ALL IMPORTS ARE LOADED OK !!!
 *
 * Module Search order:
 *

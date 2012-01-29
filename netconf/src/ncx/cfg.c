@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -40,82 +40,32 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_cfg
-#include  "cfg.h"
-#endif
-
-#ifndef _H_dlq
-#include  "dlq.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx_list
-#include  "ncx_list.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_plock
-#include  "plock.h"
-#endif
-
-#ifndef _H_plock_cb
-#include  "plock_cb.h"
-#endif
-
-#ifndef _H_rpc
-#include  "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
-#include  "rpc_err.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xpath
-#include  "xpath.h"
-#endif
+#include "procdefs.h"
+#include "cfg.h"
+#include "dlq.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncx_list.h"
+#include "ncx_num.h"
+#include "ncxconst.h"
+#include "ncxmod.h"
+#include "plock.h"
+#include "plock_cb.h"
+#include "rpc.h"
+#include "rpc_err.h"
+#include "ses.h"
+#include "status.h"
+#include "tstamp.h"
+#include "val.h"
+#include "xmlns.h"
+#include "xml_util.h"
+#include "xpath.h"
 
 
 /********************************************************************
@@ -208,12 +158,6 @@ static void
     if (cfg->src_url) {
         m__free(cfg->src_url);
     }
-    if (cfg->lock_time) {
-        m__free(cfg->lock_time);
-    }
-    if (cfg->last_ch_time) {
-        m__free(cfg->last_ch_time);
-    } 
 
     while (!dlq_empty(&cfg->load_errQ)) {
         err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
@@ -276,19 +220,6 @@ static cfg_template_t *
         return NULL;
     }
 
-    cfg->lock_time = m__getMem(TSTAMP_MIN_SIZE);
-    if (!cfg->lock_time) {
-        free_template(cfg);
-        return NULL;
-    }
-    memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
-
-    cfg->last_ch_time = m__getMem(TSTAMP_MIN_SIZE);
-    if (!cfg->last_ch_time) {
-        free_template(cfg);
-        return NULL;
-    }
-    memset(cfg->last_ch_time, 0x0, TSTAMP_MIN_SIZE);
     /* give each config a valid last changed time */
     cfg_update_last_ch_time(cfg);
 
@@ -309,6 +240,8 @@ static cfg_template_t *
     return cfg;
 
 } /* new_template */
+
+
 
 
 /***************** E X P O R T E D    F U N C T I O N S  ***********/
@@ -577,6 +510,29 @@ cfg_template_t *
 } /* cfg_get_config */
 
 
+
+/********************************************************************
+* FUNCTION cfg_get_config_name
+*
+* Get the config name from its ID
+*
+* INPUTS:
+*    cfgid == config ID
+* RETURNS:
+*    pointer to config name or NULL if not found
+*********************************************************************/
+const xmlChar *
+    cfg_get_config_name (ncx_cfg_t cfgid)
+{
+    cfg_template_t *cfg = cfg_get_config_id(cfgid);
+    if (cfg) {
+        return cfg->name;
+    }
+    return NULL;
+
+}   /* cfg_get_config_name */
+
+
 /********************************************************************
 * FUNCTION cfg_get_config_id
 *
@@ -664,6 +620,8 @@ status_t
     res = NO_ERR;
     candidate->root = val_clone_config_data(running->root, &res);
     candidate->flags &= ~CFG_FL_DIRTY;
+    candidate->last_txid = running->last_txid;
+    candidate->cur_txid = 0;
     return res;
 
 } /* cfg_fill_candidate_from_running */
@@ -709,6 +667,8 @@ status_t
         res = ERR_INTERNAL_MEM;
     }
     candidate->flags &= ~CFG_FL_DIRTY;
+    candidate->last_txid = startup->last_txid;
+    candidate->cur_txid = 0;
 
     return res;
 
@@ -1389,18 +1349,15 @@ void
 *    cfg == config target
 *    newroot == new config tree
 *
-* RETURNS:
-*    status
 *********************************************************************/
-status_t
+void
     cfg_apply_load_root (cfg_template_t *cfg,
                          val_value_t *newroot)
 {
+    assert ( cfg && "cfg is NULL!" );
+
     if (cfg->root && val_child_cnt(cfg->root)) {
-        /* root already set with child nodes
-         * this function can only be called once
-         */
-        return SET_ERROR(ERR_INTERNAL_VAL);
+        log_warn("\nWarning: config root already has child nodes");
     }
 
     cfg_update_last_ch_time(cfg);
@@ -1409,8 +1366,6 @@ status_t
         val_free_value(cfg->root);
     }
     cfg->root = newroot;
-
-    return NO_ERR;
 
 } /* cfg_apply_load_root */
 
@@ -1429,6 +1384,24 @@ void
     tstamp_datetime(cfg->last_ch_time);
 
 } /* cfg_update_last_ch_time */
+
+
+/********************************************************************
+* FUNCTION cfg_update_last_txid
+*
+* Update the last good transaction ID
+*
+* INPUTS:
+*    cfg == config target
+*    txid == trnasaction ID to use
+*********************************************************************/
+void
+    cfg_update_last_txid (cfg_template_t *cfg,
+                          cfg_transaction_id_t txid)
+{
+    cfg->last_txid = txid;
+
+} /* cfg_update_last_txid */
 
 
 /********************************************************************

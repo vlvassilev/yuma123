@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -156,30 +156,20 @@ void
 
 
 /********************************************************************
-* FUNCTION grp_clean_groupingQ
-* 
-* Clean a queue of grp_template_t structs
-*
-* INPUTS:
-*    que == Q of grp_template_t data structures to free
-*********************************************************************/
-void 
-    grp_clean_groupingQ (dlq_hdr_t *que)
+ * Clean a queue of grp_template_t structs
+ *
+ * \param que Q of grp_template_t data structures to free
+ *********************************************************************/
+void grp_clean_groupingQ (dlq_hdr_t *que)
 {
-    grp_template_t *grp;
-
-#ifdef DEBUG
     if (!que) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
     while (!dlq_empty(que)) {
-        grp = (grp_template_t *)dlq_deque(que);
+        grp_template_t *grp = (grp_template_t *)dlq_deque(que);
         grp_free_template(grp);
     }
-
 }  /* grp_clean_groupingQ */
 
 

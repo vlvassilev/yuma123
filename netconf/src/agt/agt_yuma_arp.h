@@ -3,7 +3,7 @@
 #define _H_agt_yuma_arp
 /* 
 
- * Copyright (c) 2008 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -50,7 +50,7 @@ extern "C" {
 *********************************************************************/
 
 #define y_yuma_arp_M_yuma_arp (const xmlChar *)"yuma-arp"
-#define y_yuma_arp_R_yuma_arp (const xmlChar *)"2011-08-25"
+#define y_yuma_arp_R_yuma_arp (const xmlChar *)"2012-01-13"
 
 #define y_yuma_arp_N_arp (const xmlChar *)"arp"
 #define y_yuma_arp_N_arp_settings (const xmlChar *)"arp-settings"

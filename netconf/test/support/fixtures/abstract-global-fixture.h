@@ -37,6 +37,13 @@ protected:
      */
     TestContext::TargetDbConfig getTargetDbConfig();
 
+    /**
+     * Determine whether the startup capability is in use
+     *
+     * \return true if the startup capability is in use and false otherwise
+     */
+    bool usingStartupCapability();
+
 protected:
     int numArgs_;           ///< The number of spoofed command line arguments
     const char** argv_;     ///< the spoofed command line arguments

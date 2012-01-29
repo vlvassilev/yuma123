@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------|
 #include "test/support/db-models/device-test-db.h"
 #include "test/support/misc-util/ptree-utils.h"
+#include "test/support/misc-util/base64.h"
 
 // ---------------------------------------------------------------------------|
 // Standard includes
@@ -12,60 +13,16 @@
 // ---------------------------------------------------------------------------|
 // Boost includes
 // ---------------------------------------------------------------------------|
-#include <boost/foreach.hpp>
-#include <boost/iterator/zip_iterator.hpp>
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind.hpp>
-#include <boost/phoenix/operator.hpp> 
-#include <boost/phoenix/fusion/at.hpp> 
-#include <boost/fusion/include/std_pair.hpp>
-#include <boost/fusion/include/tuple.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-
-// ---------------------------------------------------------------------------|
-// Boost includes
-// ---------------------------------------------------------------------------|
 #include <boost/test/unit_test.hpp>
+
+#include "test/support/db-models/db-check-utils.h"
+
 
 // ---------------------------------------------------------------------------|
 // File wide namespace use
 // ---------------------------------------------------------------------------|
 using namespace std;
 using boost::property_tree::ptree;
-
-namespace ph = boost::phoenix;
-namespace ph_arg = boost::phoenix::arg_names;
-
-// ---------------------------------------------------------------------------|
-namespace 
-{
-
-// ---------------------------------------------------------------------------|
-// TODO: Move to utility and make checkEqual function configurable
-// TODO: possible by making this a functor...
-template <class T>
-void MapZipContainerHelper( const boost::tuple< const T&, const T& >& zIter )
-{
-    BOOST_CHECK_EQUAL( zIter.get<0>().first, zIter.get<1>().first );
-    checkEqual( zIter.get<0>().second, zIter.get<1>().second );
-}
-
-// ---------------------------------------------------------------------------|
-template <class T>
-void CheckMaps( const T& lhs, const T& rhs )
-{
-    BOOST_REQUIRE_EQUAL( lhs.size(), rhs.size() );
-
-    auto begZip = boost::make_zip_iterator( boost::make_tuple( lhs.begin(), rhs.begin() ) );
-    auto endZip = boost::make_zip_iterator( boost::make_tuple( lhs.end(), rhs.end() ) );
-
-    typedef typename T::value_type value_type;
-    for_each( begZip, endZip, 
-            ph::bind( &MapZipContainerHelper<value_type>, ph_arg::arg1 ) );
-    
-}
-
-} // anonymous namespace
 
 // ---------------------------------------------------------------------------|
 namespace YumaTest
@@ -191,6 +148,9 @@ void checkEqual( const StreamConnectionItem& lhs, const StreamConnectionItem& rh
 ResourceNode::ResourceNode() : id_(0)
                              , channelId_(0)
                              , resourceType_(0)
+                             , configuration_()
+                             , statusConfig_()
+                             , alarmConfig_()
                              , physicalPath_()
 {}
 
@@ -199,6 +159,9 @@ ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
     : id_(0)
     , channelId_(0)
     , resourceType_()
+    , configuration_()
+    , statusConfig_()
+    , alarmConfig_()
     , physicalPath_()
 {
     BOOST_FOREACH( const ptree::value_type& v, pt )
@@ -215,6 +178,18 @@ ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
         {
             resourceType_ = v.second.get_value<uint32_t>();
         }
+        else if ( v.first == "configuration" )
+        {
+            configuration_ = base64_decode( v.second.get_value<string>() );
+        }
+        else if ( v.first == "statusConfig" )
+        {
+            statusConfig_ = base64_decode( v.second.get_value<string>() );
+        }
+        else if ( v.first == "alarmConfig" )
+        {
+            alarmConfig_ = base64_decode( v.second.get_value<string>() );
+        }
         else if ( v.first == "physicalPath" )
         {
             physicalPath_ = v.second.get_value<string>();
@@ -230,9 +205,12 @@ ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
 void checkEqual( const ResourceNode& lhs, const ResourceNode& rhs )
 {
     BOOST_CHECK_EQUAL( lhs.id_, rhs.id_ );
-    BOOST_CHECK_EQUAL( lhs.resourceType_, rhs.resourceType_ );
-    BOOST_CHECK_EQUAL( lhs.physicalPath_, rhs.physicalPath_ );
     BOOST_CHECK_EQUAL( lhs.channelId_, rhs.channelId_ );
+    BOOST_CHECK_EQUAL( lhs.resourceType_, rhs.resourceType_ );
+    BOOST_CHECK_EQUAL( lhs.configuration_, rhs.configuration_ );
+    BOOST_CHECK_EQUAL( lhs.statusConfig_, rhs.statusConfig_ );
+    BOOST_CHECK_EQUAL( lhs.alarmConfig_, rhs.alarmConfig_ );
+    BOOST_CHECK_EQUAL( lhs.physicalPath_, rhs.physicalPath_ );
 }
 
 // ===========================================================================|

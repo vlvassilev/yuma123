@@ -4,6 +4,9 @@ EDIT_TEST_SUITE_SOURCES := $(YUMA_TEST_SUITE_COMMON)/device-tests-misc.cpp \
                            $(YUMA_TEST_SUITE_COMMON)/device-tests-create.cpp \
                            $(YUMA_TEST_SUITE_COMMON)/device-tests-merge.cpp \
                            $(YUMA_TEST_SUITE_COMMON)/device-tests-replace.cpp \
+                           $(YUMA_TEST_SUITE_COMMON)/device-tests-get.cpp \
+                           $(YUMA_TEST_SUITE_COMMON)/device-tests-delete.cpp \
+                           $(YUMA_TEST_SUITE_INTEG)/base-64-tests.cpp \
                            device-edit-running.cpp \
 
 ALL_SOURCES += $(EDIT_TEST_SUITE_SOURCES) 

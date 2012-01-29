@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -83,6 +83,14 @@ typedef enum log_debug_t_ {
     LOG_DEBUG_DEBUG3,                       /* debug level 3 */
     LOG_DEBUG_DEBUG4                        /* debug level 3 */
 }  log_debug_t;
+
+
+/* logging function template to switch between
+ * log_stdout and log_write
+ */
+typedef void (*logfn_t) (const char *fstr, ...);
+
+
 
 /********************************************************************
 *								    *
@@ -286,9 +294,19 @@ extern void
 *   ... == any additional arguments for printf
 *
 *********************************************************************/
-extern void 
-    log_error (const char *fstr, ...);
+extern void log_error (const char *fstr, ...);
 
+/********************************************************************
+* FUNCTION log_error
+*
+*   Generate a LOG_DEBUG_ERROR log entry
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   args == any additional arguments for printf
+*
+*********************************************************************/
+extern void vlog_error (const char *fstr, va_list args );
 
 /********************************************************************
 * FUNCTION log_warn
@@ -372,6 +390,21 @@ extern void
 *********************************************************************/
 extern void 
     log_debug4 (const char *fstr, ...);
+
+
+/********************************************************************
+* FUNCTION log_noop
+*
+*  Do not generate any log message NO-OP
+*  Used to set logfn_t to no-loggging option
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
+extern void 
+    log_noop (const char *fstr, ...);
 
 
 /********************************************************************

@@ -17,6 +17,7 @@
 // File wide namespace use
 // ---------------------------------------------------------------------------|
 using namespace std;
+using namespace rel_ops;
 
 // ---------------------------------------------------------------------------|
 namespace YumaTest
@@ -45,6 +46,7 @@ void CallbackChecker::addExpectedCallback(const string& modName,
 // ---------------------------------------------------------------------------|
 void CallbackChecker::checkCallbacks(const std::string& modName)
 {
+    bool callbackError = false;
     SILCallbackLog& cbLog = SILCallbackLog::getInstance();
     SILCallbackLog::ModuleCallbackData actualCallbacks = cbLog.getModuleCallbacks(modName);
 
@@ -53,13 +55,36 @@ void CallbackChecker::checkCallbacks(const std::string& modName)
         it_act != actualCallbacks.end() && it_exp !=  expectedCallbacks_.end();
         ++it_act, ++it_exp)
     {
-        BOOST_CHECK(*it_act == *it_exp);    
+        BOOST_CHECK(*it_act == *it_exp);
+        if (*it_act != *it_exp)
+        {
+            callbackError = true;
+        }    
     } 
 
     BOOST_CHECK_MESSAGE(actualCallbacks.size() <= expectedCallbacks_.size(),
                         "Unexpected callbacks were logged"); 
     BOOST_CHECK_MESSAGE(actualCallbacks.size() >= expectedCallbacks_.size(),
                         "Further callbacks were expected"); 
+    if (actualCallbacks.size() != expectedCallbacks_.size())
+    {
+        callbackError = true;
+    }    
+  
+    // Debug output to help understand failures
+    if (callbackError)
+    {
+        cout << "\nActual Callbacks:\n";
+        for(it_act = actualCallbacks.begin(); it_act != actualCallbacks.end(); ++it_act)
+        {
+            cout << it_act->cbName << ", " << it_act->cbType << ", " << it_act->cbPhase << "\n";      
+        } 
+        cout << "\nExpected Callbacks:\n";
+        for(it_exp = expectedCallbacks_.begin(); it_exp != expectedCallbacks_.end(); ++it_exp)
+        {
+            cout << it_exp->cbName << ", " << it_exp->cbType << ", " << it_exp->cbPhase << "\n";      
+        }
+    } 
 }
 
 // ---------------------------------------------------------------------------|

@@ -30,17 +30,12 @@ using namespace std;
 // ---------------------------------------------------------------------------|
 namespace YumaTest {
 
-BOOST_FIXTURE_TEST_SUITE( simple_get_test_suite_running, SimpleContainerModuleFixture )
+BOOST_FIXTURE_TEST_SUITE( default_op_none, SimpleContainerModuleFixture )
 
-// ---------------------------------------------------------------------------|
-// Add some data and check that it was added correctly
-// ---------------------------------------------------------------------------|
-//TODO Expected failures should be removed when underlying issue is solved
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( default_none_test_create, 3 )
 BOOST_AUTO_TEST_CASE(default_none_test_create )
 {
     DisplayTestDescrption( 
-            "Demonstrate modification of a simple container with default operation none.",
+            "Demonstrate no modification of a simple container with default operation none.",
             "Procedure: \n"
             "\t1 - Verify container not created with no nc operation\n"
             "\t2 - Create the top level container\n"
@@ -59,16 +54,25 @@ BOOST_AUTO_TEST_CASE(default_none_test_create )
     // Set default operation to none
     messageBuilder_->setDefaultOperation("none");
     
-    // create the top level container
+    // no operation on the top level container
     mainContainerOp( primarySession_, "" );
+
+    checkEntries( primarySession_ );
     
-    // Check callbacks
-    cbChecker_->checkCallbacks("simple_list_test");                             
-    cbChecker_->resetModuleCallbacks("simple_list_test");
-    cbChecker_->resetExpectedCallbacks();
+    // create the top level container
+    createMainContainer( primarySession_ );
 
     checkEntries( primarySession_ );
 
+    // No operation on an entry
+    noOpEntryValuePair( primarySession_, "entryKey1", "entryVal1" );
+    
+    checkEntries( primarySession_ );
+    
+    // remove all entries
+    deleteMainContainer( primarySession_ );
+    
+    checkEntries( primarySession_ );
 }
 
 // ---------------------------------------------------------------------------|

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,49 +34,17 @@ date         init     comment
 #include  <stdio.h>
 #include  <stdlib.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt_cli
+#include "procdefs.h"
 #include "agt_cli.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_conf
 #include "conf.h"
-#endif
-
-#ifndef _H_help
 #include "help.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_val
+#include "status.h"
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
 
 
 /********************************************************************
@@ -131,9 +99,7 @@ static void
      */
 
     /* get access-control param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_ACCESS_CONTROL);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_ACCESS_CONTROL);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_accesscontrol = VAL_ENUM_NAME(val);
     }
@@ -160,14 +126,11 @@ static void
                 AGT_ACMOD_ENFORCING;
         }
     } else {
-        agt_profile->agt_accesscontrol_enum = 
-            AGT_ACMOD_ENFORCING;
+        agt_profile->agt_accesscontrol_enum = AGT_ACMOD_ENFORCING;
     }
 
     /* get default-style param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_DEFAULT_STYLE);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DEFAULT_STYLE);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_defaultStyle = VAL_ENUM_NAME(val);
         agt_profile->agt_defaultStyleEnum = 
@@ -183,8 +146,7 @@ static void
      */
 
     /* get delete-empty-npcontainters param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE,
+    val = val_find_child(valset, AGT_CLI_MODULE,
                          AGT_CLI_DELETE_EMPTY_NPCONTAINERS);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_delete_empty_npcontainers = VAL_BOOL(val);
@@ -247,17 +209,13 @@ static void
     }
 
     /* get hello-timeout param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_HELLO_TIMEOUT);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_HELLO_TIMEOUT);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_hello_timeout = VAL_UINT(val);
     }
 
     /* get idle-timeout param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_IDLE_TIMEOUT);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_IDLE_TIMEOUT);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_idle_timeout = VAL_UINT(val);
     }
@@ -266,6 +224,15 @@ static void
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_MAX_BURST);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_maxburst = VAL_UINT(val);
+    }
+
+    /* running-error param */
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_RUNNING_ERROR);
+    if (val && val->res == NO_ERR) {
+        if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        AGT_CLI_STARTUP_STOP)) {
+            agt_profile->agt_running_error = TRUE;
+        }
     }
 
     /* start choice:
@@ -284,16 +251,13 @@ static void
     }
 
     /* start choice 3: OR get factory-startup param */
-    val = val_find_child(valset, AGT_CLI_MODULE, 
-                         AGT_CLI_FACTORY_STARTUP);
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_FACTORY_STARTUP);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_factorystartup = TRUE;
     }
 
     /* startup-error param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         AGT_CLI_STARTUP_ERROR);
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP_ERROR);
     if (val && val->res == NO_ERR) {
         if (!xml_strcmp(VAL_ENUM_NAME(val),
                         AGT_CLI_STARTUP_STOP)) {
@@ -319,9 +283,7 @@ static void
     }
 
     /* get the :startup capability setting */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_WITH_STARTUP);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_WITH_STARTUP);
     if (val && val->res == NO_ERR) {
         if (VAL_BOOL(val)) {
             agt_profile->agt_start = NCX_AGT_START_DISTINCT;
@@ -338,25 +300,19 @@ static void
     /* version param handled externally */
 
     /* get usexmlorder param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_USEXMLORDER);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_USEXMLORDER);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_xmlorder = TRUE;
     }
 
     /* get the :url capability setting */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_WITH_URL);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_WITH_URL);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_useurl = VAL_BOOL(val);
     }
 
     /* get with-validate param */
-    val = val_find_child(valset, 
-                         AGT_CLI_MODULE, 
-                         NCX_EL_WITH_VALIDATE);
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_WITH_VALIDATE);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_usevalidate = VAL_BOOL(val);
     }

@@ -77,6 +77,31 @@ void NCQueryTestEngine::commit( shared_ptr<AbstractNCSession> session )
 }
 
 // ---------------------------------------------------------------------------|
+void NCQueryTestEngine::commitFailure( shared_ptr<AbstractNCSession> session )
+{
+    vector<string> expPresent = { "error", "rpc-error" };
+    vector<string> expNotPresent = { "ok" };
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+
+    string queryStr = messageBuilder_->buildCommitMessage( 
+            session->allocateMessageId() );
+    runQuery( session, queryStr, checker );
+}
+
+// ---------------------------------------------------------------------------|
+void NCQueryTestEngine::confirmedCommit( shared_ptr<AbstractNCSession> session,
+                                         const int timeout )
+{
+    vector<string> expPresent = { "ok" };
+    vector<string> expNotPresent = { "error", "rpc-error" };
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+
+    string queryStr = messageBuilder_->buildConfirmedCommitMessage( 
+            timeout, session->allocateMessageId() );
+    runQuery( session, queryStr, checker );
+}
+
+// ---------------------------------------------------------------------------|
 void NCQueryTestEngine::loadModule( shared_ptr<AbstractNCSession> session,
                                     const string& moduleName )
 {

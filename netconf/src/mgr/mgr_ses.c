@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,65 +46,21 @@ date         init     comment
 #include <netdb.h>
 #include <libssh2.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_hello
 #include "mgr_hello.h"
-#endif
-
-#ifndef _H_mgr_io
 #include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_mgr_top
 #include "mgr_top.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_ses_msg
 #include "ses_msg.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -565,9 +521,9 @@ static void
     ses_putstr(scb, (const xmlChar *)"10000");
 
     ses_putstr(scb, (const xmlChar *)";tcp;");
-    sprintf(buffer, "%u;", (uint32)getuid());
+    snprintf(buffer, sizeof(buffer), "%u;", (uint32)getuid());
     ses_putstr(scb, (const xmlChar *)buffer);
-    sprintf(buffer, "%u;", (uint32)getgid());
+    snprintf(buffer, sizeof(buffer), "%u;", (uint32)getgid());
     ses_putstr(scb, (const xmlChar *)buffer);
 
     /* additional group IDs is empty */

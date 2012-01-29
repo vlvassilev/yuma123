@@ -49,6 +49,17 @@ public:
                  testContext_->targetDbConfig_ );
     }
 
+    /** 
+     * Utility to check if the startup capability is in use.
+     *
+     * \return true if the startup capability is in use.
+     */
+    bool useStartup() const
+    {
+
+        return ( testContext_->usingStartup_ );
+    }
+
     /** the test context */
     std::shared_ptr<TestContext> testContext_;
 

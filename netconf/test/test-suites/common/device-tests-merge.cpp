@@ -82,7 +82,11 @@ BOOST_AUTO_TEST_CASE( ComplexNewItems )
 
     initialise2Profiles();
     configureResourceDescrption( primarySession_, 3, 1, 1, 
-              ResourceNodeConfig{ 100,  string( "/card[0]/sdiConnector[0]" ) },
+              ResourceNodeConfig{ 100,  
+                                  boost::optional<string>(),
+                                  boost::optional<string>(),
+                                  boost::optional<string>(),
+                                  string( "/card[0]/sdiConnector[0]" ) },
               "merge" );
     commitChanges( primarySession_ );
     checkConfig();
@@ -147,7 +151,11 @@ BOOST_AUTO_TEST_CASE( ComplexExistingItems )
 
     initialise2Profiles();
     configureResourceDescrption( primarySession_, 3, 1, 1, 
-              ResourceNodeConfig{ 100,  string( "/card[0]/sdiConnector[0]" ) },
+              ResourceNodeConfig{ 100,  
+                                  boost::optional<string>(),
+                                  boost::optional<string>(),
+                                  boost::optional<string>(),
+                                  string( "/card[0]/sdiConnector[0]" ) },
               "merge" );
     configureResourceConnection( primarySession_, 3, 1, 1, 
              ConnectionItemConfig{ 100, 200, 300, boost::optional<uint32_t>(),

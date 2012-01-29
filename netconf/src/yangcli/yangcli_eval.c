@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -379,32 +379,21 @@ status_t
     }
     
     /* cleanup and exit */
-    if (valset) {
-        val_free_value(valset);
-    }
-    if (pcb) {
-        xpath_free_pcb(pcb);
-    }
-    if (result) {
-        xpath_free_result(result);
-    }
-    if (resultval) {
-        val_free_value(resultval);
-    }
+    val_free_value(valset);
+    xpath_free_pcb(pcb);
+    xpath_free_result(result);
+    val_free_value(resultval);
     if (resultstr) {
         m__free(resultstr);
     }
-    if (dummydoc) {
-        val_free_value(dummydoc);
-    }
+    val_free_value(dummydoc);
 
     if (res != NO_ERR) {
-        log_error("\nError: XPath evaluation failed (%s)",
+        log_error("\nError: XPath evaluation failed (%s)", 
                   get_error_string(res));
     }
 
     return res;
-
 }  /* do_eval */
 
 

@@ -2,6 +2,7 @@
 // Test Harness includes
 // ---------------------------------------------------------------------------|
 #include "test/support/msg-util/xpo-query-builder.h"
+#include "test/support/misc-util/base64.h"
 
 // ---------------------------------------------------------------------------|
 // Boost includes
@@ -113,8 +114,7 @@ string XPOQueryBuilder::genXPOQuery( const string& op ) const
 string XPOQueryBuilder::genSetActiveProfileIdQuery( const uint16_t profileId,
        const string& op ) const
 {
-    string query = genOperationText( "activeProfile", 
-                boost::lexical_cast<string>( profileId ), op );
+    string query = genOperationText( "activeProfile", profileId, op );
 
     return genModuleOperationText( "xpo", moduleNs_, query );
 }
@@ -182,14 +182,31 @@ string XPOQueryBuilder::configureVResourceNode(
 
     if ( config.resourceType_ )
     {
-        oss << genOperationText( "resourceType", 
-                boost::lexical_cast<string>( *config.resourceType_), op );
+        oss << genOperationText( "resourceType", *config.resourceType_, op );
     }
 
     if ( config.physicalPath_ )
     {
         oss << genOperationText( "physicalPath", 
                 *config.physicalPath_, op );
+    }
+
+    if ( config.configuration_ )
+    {
+        oss << genOperationText( "configuration", 
+                base64_encode( *config.configuration_ ), op );
+    }
+
+    if ( config.statusConfig_ )
+    {
+        oss << genOperationText( "statusConfig", 
+                base64_encode( *config.statusConfig_ ), op );
+    }
+
+    if ( config.alarmConfig_ )
+    {
+        oss << genOperationText( "alarmConfig", 
+                base64_encode( *config.alarmConfig_ ), op );
     }
 
     return oss.str();
@@ -213,32 +230,27 @@ string XPOQueryBuilder::configureConnectionItem(
 
     if ( config.sourceId_ )
     {
-        oss << genOperationText( "sourceId", 
-                boost::lexical_cast<string>( *config.sourceId_), op );
+        oss << genOperationText( "sourceId", *config.sourceId_, op );
     }
 
     if ( config.sourcePinId_ )
     {
-        oss << genOperationText( "sourcePinId", 
-                boost::lexical_cast<string>( *config.sourcePinId_ ), op );
+        oss << genOperationText( "sourcePinId", *config.sourcePinId_, op );
     }
 
     if ( config.destinationId_ )
     {
-        oss << genOperationText( "destinationId", 
-                boost::lexical_cast<string>( *config.destinationId_ ), op );
+        oss << genOperationText( "destinationId", *config.destinationId_, op );
     }
 
     if ( config.destinationPinId_ )
     {
-        oss << genOperationText( "destinationPinId", 
-                boost::lexical_cast<string>( *config.destinationPinId_ ), op );
+        oss << genOperationText( "destinationPinId", *config.destinationPinId_, op );
     }
 
     if ( config.bitrate_ )
     {
-        oss << genOperationText( "bitrate", 
-                boost::lexical_cast<string>( *config.bitrate_ ), op );
+        oss << genOperationText( "bitrate", *config.bitrate_, op );
     }
 
     return oss.str();
@@ -254,16 +266,33 @@ string XPOQueryBuilder::configureStreamConnection(
     oss << configureConnectionItem( config, op );
     if ( config.sourceStreamId_ )
     {
-        oss << genOperationText( "sourceStreamId", 
-                boost::lexical_cast<string>( *config.sourceStreamId_), op );
+        oss << genOperationText( "sourceStreamId", *config.sourceStreamId_, op );
     }
 
     if ( config.destinationStreamId_ )
     {
-        oss << genOperationText( "destinationStreamId", 
-                boost::lexical_cast<string>( *config.destinationStreamId_), op );
+        oss << genOperationText( "destinationStreamId", *config.destinationStreamId_, op );
     }
 
+    return oss.str();
+}
+
+// ---------------------------------------------------------------------------|
+string XPOQueryBuilder::buildCustomRPC( const string& rpcName,
+                                        const string& params ) const
+{
+    ostringstream oss;
+
+    oss << "<" << rpcName << " " << genXmlNsText( moduleNs_ );
+    if ( params.empty() )
+    {
+        oss << " />" ;
+    }
+    else
+    {
+        oss << ">\n" << params;
+        oss << "</" << rpcName << ">";
+    }
     return oss.str();
 }
 

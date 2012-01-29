@@ -2,7 +2,7 @@
 /* 
  * agt_time_filter.c
  *
- * Copyright (c) 2009 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -25,49 +25,18 @@
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_agt
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_cb
 #include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_timer
 #include "agt_timer.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_agt_time_filter
 #include "agt_time_filter.h"
-#endif
+
 
 /* module static variables */
 static ncx_module_t *yuma_time_filter_mod;
@@ -118,7 +87,8 @@ status_t
         return ERR_NCX_UNKNOWN_MODULE;
     }
 
-    if (revision && xml_strcmp(revision, y_yuma_time_filter_R_yuma_time_filter)) {
+    if (revision && 
+        xml_strcmp(revision, y_yuma_time_filter_R_yuma_time_filter)) {
         return ERR_NCX_WRONG_VERSION;
     }
 

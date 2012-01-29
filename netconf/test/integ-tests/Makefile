@@ -16,12 +16,15 @@ BASE_SOURCES := $(ALL_SOURCES)
 # Include makefiles for test executables
 include simple-edit-running.mk
 include simple-edit-candidate.mk
+include simple-edit-startup-true.mk
+include simple-edit-startup-false.mk
 include lock-load-running.mk
 include lock-load-candidate.mk
 include device-edit-running.mk
 include device-edit-candidate.mk
-include default-none-running.mk
-include discard-changes.mk
+include state-edit-running.mk
+include state-edit-candidate.mk
+include simple-yang.mk
 
 # ----------------------------------------------------------------------------|
 include $(YUMA_TEST_ROOT)/make-rules/common-rules.mk

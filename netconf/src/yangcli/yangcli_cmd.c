@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -29,6 +29,7 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,6 +90,15 @@ date         init     comment
 #include "yangcli_timer.h"
 #include "yangcli_uservars.h"
 #include "yangcli_util.h"
+
+/* get_case needs to recurse */
+static status_t
+    fill_valset (server_cb_t *server_cb,
+                 obj_template_t *rpc,
+                 val_value_t *valset,
+                 val_value_t *oldvalset,
+                 boolean iswrite,
+                 boolean isdelete);
 
 
 /********************************************************************
@@ -1134,11 +1144,11 @@ static status_t
 *
 * INPUTS:
 *   server_cb == server control block to use
-*   rpc == RPC template in progress
 *   cas == case object template header
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*   iswrite == TRUE if write op; FALSE if read op
+*   iswrite == TRUE if write op; FALSE if not
+*   isdelete == TRUE if delete op; FALSE if not
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
 *
@@ -1147,18 +1157,14 @@ static status_t
 *********************************************************************/
 static status_t
     get_case (server_cb_t *server_cb,
-              obj_template_t *rpc,
               obj_template_t *cas,
               val_value_t *valset,
               val_value_t *oldvalset,
-              boolean iswrite)
+              boolean iswrite,
+              boolean isdelete)
 {
-    obj_template_t          *parm;
-    val_value_t             *pval;
-    xmlChar                 *objbuff;
-    const xmlChar           *str;
-    status_t                 res;
-    boolean                  saveopt;
+    status_t                 res = NO_ERR;
+    boolean                  saveopt = server_cb->get_optional;
 
     /* make sure a case was selected or found */
     if (!obj_is_config(cas) || obj_is_abstract(cas)) {
@@ -1166,12 +1172,9 @@ static status_t
         return ERR_NCX_SKIPPED;
     }
 
-    saveopt = server_cb->get_optional;
-
-    res = NO_ERR;
-
     if (obj_is_data_db(cas)) {
-        objbuff = NULL;
+        xmlChar *objbuff = NULL;
+        const xmlChar *str = NULL;
         res = obj_gen_object_id(cas, &objbuff);
         if (res != NO_ERR) {
             log_error("\nError: generate object ID failed (%s)",
@@ -1196,41 +1199,96 @@ static status_t
      * e.g., <source> and <target> parms
      */
     if (obj_get_child_count(cas) == 1) {
-        parm = obj_first_child(cas);
+        obj_template_t *parm = obj_first_child(cas);
         if (parm && obj_get_basetype(parm)==NCX_BT_EMPTY) {
-            return cli_parse_parm(server_cb->runstack_context,
-                                  valset, parm, NULL, FALSE);
+            /* user picked a case that is an empty flag so
+             * do not call fill_valset for this corner-case
+             * because the user will be prompted again
+             * 'should this flag be set? y/n'
+             * Instead, call cli_parse_parm directly
+             */
+            val_value_t *parmval = val_find_child(valset,
+                                                  obj_get_mod_name(parm),
+                                                  obj_get_name(parm));
+            if (parmval == NULL || 
+                parmval->obj->objtype == OBJ_TYP_LEAF_LIST) {
+                return cli_parse_parm(server_cb->runstack_context,
+                                      valset, parm, NULL, FALSE);
+            }
         }
     }
 
-    /* finish the selected case */
-    for (parm = obj_first_child(cas);
-         parm != NULL && res == NO_ERR;
-         parm = obj_next_child(parm)) {
-
-        if ((!server_cb->get_optional && !iswrite) ||
-            !need_get_parm(parm)) {
-            continue;
-        }
-
-        pval = val_find_child(valset, obj_get_mod_name(parm),
-                              obj_get_name(parm));
-        if (pval) {
-            continue;
-        }
-
-        /* node is config and not already set */
-        res = get_parm(server_cb, rpc, parm, valset, oldvalset);
-
-        if (res == ERR_NCX_SKIPPED) {
-            res = NO_ERR;
-        }
-    }
+    res = fill_valset(server_cb, cas, valset, oldvalset, iswrite, isdelete);
 
     server_cb->get_optional = saveopt;
     return res;
 
 } /* get_case */
+
+
+/********************************************************************
+* FUNCTION enabled_case_count
+* 
+* Get the number of enabled cases
+*
+* INPUTS:
+*   server_cb == server control block to use
+*   choic == choice object template header
+*   iswrite == TRUE for write operation
+* RETURNS:
+*   number of enabled cases
+*********************************************************************/
+static uint32
+    enabled_case_count (server_cb_t *server_cb,
+                        obj_template_t *choic,
+                        boolean iswrite)
+{
+    uint32 case_count = 0;
+    obj_template_t *cas = obj_first_child(choic); 
+    for (; cas != NULL; cas = obj_next_child(cas)) {
+        if ((!server_cb->get_optional && !iswrite) || !need_get_parm(cas)) {
+            continue;
+        }
+        obj_template_t *parm = obj_first_child(cas);
+        if (parm) {
+            case_count++;
+        }
+    }
+    return case_count;
+
+}  /* enabled_case_count */
+
+
+/********************************************************************
+* FUNCTION first_enabled_case
+* 
+* Get the first enabled case
+*
+* INPUTS:
+*   server_cb == server control block to use
+*   choic == choice object template header
+*   iswrite == TRUE for write operation
+* RETURNS:
+*   number of enabled cases
+*********************************************************************/
+static obj_template_t *
+    first_enabled_case (server_cb_t *server_cb,
+                        obj_template_t *choic,
+                        boolean iswrite)
+{
+    obj_template_t *cas = obj_first_child(choic); 
+    for (; cas != NULL; cas = obj_next_child(cas)) {
+        if ((!server_cb->get_optional && !iswrite) || !need_get_parm(cas)) {
+            continue;
+        }
+        obj_template_t *parm = obj_first_child(cas);
+        if (parm) {
+            return cas;
+        }
+    }
+    return NULL;
+
+}  /* first_enabled_case */
 
 
 /********************************************************************
@@ -1247,7 +1305,8 @@ static status_t
 *   choic == choice object template header
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*   iswrite == TRUE if write op; FALSE if read op
+*   iswrite == TRUE if write op; FALSE if not
+*   isdelete == TRUE if delete op; FALSE if not
 *
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
@@ -1261,14 +1320,12 @@ static status_t
                 obj_template_t *choic,
                 val_value_t *valset,
                 val_value_t *oldvalset,
-                boolean iswrite)
+                boolean iswrite,
+                boolean isdelete)
 {
-    obj_template_t          *parm, *cas, *usecase;
-    val_value_t             *pval;
-    xmlChar                 *myline, *str, *objbuff;
-    status_t                 res;
-    int                      casenum, num;
-    boolean                  first, done, usedef, redo, saveopt;
+    obj_template_t  *cas = NULL;
+    status_t         res = NO_ERR;
+    boolean          done = FALSE;
 
     if (!obj_is_config(choic) || obj_is_abstract(choic)) {
         log_stdout("\nError: choice '%s' has no configurable parameters",
@@ -1276,11 +1333,10 @@ static status_t
         return ERR_NCX_ACCESS_DENIED;
     }
 
-    casenum = 0;
-    res = NO_ERR;
+    int casenum = 0;
 
     if (obj_is_data_db(choic)) {
-        objbuff = NULL;
+        xmlChar *objbuff = NULL;
         res = obj_gen_object_id(choic, &objbuff);
         if (res != NO_ERR) {
             log_error("\nError: generate object ID failed (%s)",
@@ -1293,7 +1349,7 @@ static status_t
         m__free(objbuff);
     }
 
-    saveopt = server_cb->get_optional;
+    boolean saveopt = server_cb->get_optional;
 
     /* only force optional=true if this is a mandatory choice
      * otherwise, a mandatory choice of all optional cases
@@ -1306,7 +1362,7 @@ static status_t
     }
 
     /* first check the partial block corner case */
-    pval = val_get_choice_first_set(valset, choic);
+    val_value_t *pval = val_get_choice_first_set(valset, choic);
     if (pval != NULL) {
         /* found something set from this choice, finish the case */
         log_stdout("\nEnter more parameters to complete the choice:");
@@ -1316,9 +1372,8 @@ static status_t
             server_cb->get_optional = saveopt;
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
-        for (parm = obj_first_child(cas); 
-             parm != NULL;
-             parm = obj_next_child(parm)) {
+        obj_template_t *parm = obj_first_child(cas); 
+        for (; parm != NULL; parm = obj_next_child(parm)) {
 
             if ((!server_cb->get_optional && !iswrite) ||
                 !need_get_parm(parm)) {
@@ -1350,10 +1405,14 @@ static status_t
         return NO_ERR;
     }
 
+    /* get number of enabled cases */
+    uint32 case_count = enabled_case_count(server_cb, choic, iswrite);
+    boolean usedef = FALSE;
+
     /* check corner-case -- choice with no cases defined */
     cas = obj_first_child(choic);
     if (cas == NULL) {
-        if (obj_get_child_count(choic)) {
+        if (case_count) {
             log_stdout("\nNo case nodes enabled for choice %s\n",
                    obj_get_name(choic));
         } else {
@@ -1364,114 +1423,113 @@ static status_t
         return NO_ERR;
     }
 
+    if (case_count == 1) {
+        cas = first_enabled_case(server_cb, choic, iswrite);
+    } else {
+        /* else not a partial block corner case but a normal
+         * situation where no case has been selected at all
+         */
+        log_stdout("\nEnter the number of the selected case statement:\n");
 
-    /* else not a partial block corner case but a normal
-     * situation where no case has been selected at all
-     */
-    log_stdout("\nEnter the number of the selected case statement:\n");
+        int num = 1;
 
-    num = 1;
-    usedef = FALSE;
+        for (; cas != NULL; cas = obj_next_child(cas)) {
 
-    for (; cas != NULL;
-         cas = obj_next_child(cas)) {
-
-        if ((!server_cb->get_optional && !iswrite) ||
-            !need_get_parm(cas)) {
-            continue;
-        }
-
-        first = TRUE;
-        for (parm = obj_first_child(cas);
-             parm != NULL;
-             parm = obj_next_child(parm)) {
-
-            if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+            if ((!server_cb->get_optional && !iswrite) || !need_get_parm(cas)) {
                 continue;
             }
 
-            if (first) {
-                log_stdout("\n  %d: case %s:", num++, obj_get_name(cas));
-                first = FALSE;
+            boolean first = TRUE;
+            obj_template_t *parm = obj_first_child(cas);
+            for (; parm != NULL; parm = obj_next_child(parm)) {
+
+                if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+                    continue;
+                }
+
+                if (first) {
+                    log_stdout("\n  %d: case %s:", num++, obj_get_name(cas));
+                    first = FALSE;
+                }
+
+                log_stdout("\n       %s %s", obj_get_typestr(parm),
+                           obj_get_name(parm));
             }
-
-            log_stdout("\n       %s %s", obj_get_typestr(parm),
-                       obj_get_name(parm));
-        }
-    }
-
-    done = FALSE;
-    log_stdout("\n");
-    while (!done) {
-
-        redo = FALSE;
-
-        /* Pick a prompt, depending on the choice default case */
-        if (obj_get_default(choic)) {
-            log_stdout("\nEnter choice number [%d - %d], "
-                       "[ENTER] for default (%s): ",
-                       1, num-1, obj_get_default(choic));
-        } else {
-            log_stdout("\nEnter choice number [%d - %d]: ", 1, num-1);
         }
 
-        /* get input from the user STDIN */
-        myline = get_cmd_line(server_cb, &res);
-        if (!myline) {
-            server_cb->get_optional = saveopt;
-            return res;
-        }
+        done = FALSE;
+        log_stdout("\n");
+        while (!done) {
 
-        /* strip leading whitespace */
-        str = myline;
-        while (*str && xml_isspace(*str)) {
-            str++;
-        }
+            boolean redo = FALSE;
 
-        /* convert to a number, check [ENTER] for default */
-        if (!*str) {
-            usedef = TRUE;
-        } else if (*str == '?') {
-            redo = TRUE;
-            if (str[1] == '?') {
-                obj_dump_template(choic, HELP_MODE_FULL, 0,
-                                  server_cb->defindent);
-            } else if (str[1] == 'C' || str[1] == 'c') {
-                log_stdout("\n%s command canceled\n",
-                           obj_get_name(rpc));
-                server_cb->get_optional = saveopt;
-                return ERR_NCX_CANCELED;
-            } else if (str[1] == 'S' || str[1] == 's') {
-                log_stdout("\n%s choice skipped\n", obj_get_name(choic));
-                server_cb->get_optional = saveopt;
-                return ERR_NCX_SKIPPED;
-            } else {
-                obj_dump_template(choic, HELP_MODE_NORMAL, 4,
-                                  server_cb->defindent);
-            }
-            log_stdout("\n");
-        } else {
-            casenum = atoi((const char *)str);
-            usedef = FALSE;
-        }
-
-        if (redo) {
-            continue;
-        }
-
-        /* check if default requested */
-        if (usedef) {
+            /* Pick a prompt, depending on the choice default case */
             if (obj_get_default(choic)) {
-                done = TRUE;
+                log_stdout("\nEnter choice number [%d - %d], "
+                           "[ENTER] for default (%s): ",
+                           1, num-1, obj_get_default(choic));
             } else {
-                log_stdout("\nError: Choice does not have "
-                           "a default case\n");
+                log_stdout("\nEnter choice number [%d - %d]: ", 1, num-1);
+            }
+
+            /* get input from the user STDIN */
+            xmlChar *myline = get_cmd_line(server_cb, &res);
+            if (!myline) {
+                server_cb->get_optional = saveopt;
+                return res;
+            }
+
+            /* strip leading whitespace */
+            xmlChar *str = myline;
+            while (*str && xml_isspace(*str)) {
+                str++;
+            }
+
+            /* convert to a number, check [ENTER] for default */
+            if (!*str) {
+                usedef = TRUE;
+            } else if (*str == '?') {
+                redo = TRUE;
+                if (str[1] == '?') {
+                    obj_dump_template(choic, HELP_MODE_FULL, 0,
+                                      server_cb->defindent);
+                } else if (str[1] == 'C' || str[1] == 'c') {
+                    log_stdout("\n%s command canceled\n",
+                               obj_get_name(rpc));
+                    server_cb->get_optional = saveopt;
+                    return ERR_NCX_CANCELED;
+                } else if (str[1] == 'S' || str[1] == 's') {
+                    log_stdout("\n%s choice skipped\n", obj_get_name(choic));
+                    server_cb->get_optional = saveopt;
+                    return ERR_NCX_SKIPPED;
+                } else {
+                    obj_dump_template(choic, HELP_MODE_NORMAL, 4,
+                                      server_cb->defindent);
+                }
+                log_stdout("\n");
+            } else {
+                casenum = atoi((const char *)str);
                 usedef = FALSE;
             }
-        } else if (casenum < 0 || casenum >= num) {
-            log_stdout("\nError: invalid value '%s'\n", str);
-        } else {
-            done = TRUE;
+
+            if (redo) {
+                continue;
+            }
+
+            /* check if default requested */
+            if (usedef) {
+                if (obj_get_default(choic)) {
+                    done = TRUE;
+                } else {
+                    log_stdout("\nError: Choice does not have "
+                               "a default case\n");
+                    usedef = FALSE;
+                }
+            } else if (casenum < 0 || casenum >= num) {
+                log_stdout("\nError: invalid value '%s'\n", str);
+            } else {
+                done = TRUE;
+            }
         }
     }
 
@@ -1481,11 +1539,11 @@ static status_t
     if (usedef) {
         cas = obj_find_child(choic, obj_get_mod_name(choic),
                              obj_get_default(choic));
-    } else {
+    } else if (case_count > 1) {
 
-        num = 1;
+        int num = 1;
         done = FALSE;
-        usecase = NULL;
+        obj_template_t *usecase = NULL;
 
         for (cas = obj_first_child(choic); 
              cas != NULL && !done;
@@ -1519,7 +1577,7 @@ static status_t
         return ERR_NCX_SKIPPED;
     }
 
-    res = get_case(server_cb, rpc, cas, valset, oldvalset, iswrite);
+    res = get_case(server_cb, cas, valset, oldvalset, iswrite, isdelete);
     switch (res) {
     case NO_ERR:
         break;
@@ -1659,8 +1717,8 @@ static val_value_t *
 *   rpc == RPC method that is being called
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*   iswrite == TRUE if write command
-*              FALSE if not a write command
+*   iswrite == TRUE if write command; FALSE if not
+*   isdelete == TRUE if delete operation; FALSE if not
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
 *
@@ -1672,22 +1730,33 @@ static status_t
                  obj_template_t *rpc,
                  val_value_t *valset,
                  val_value_t *oldvalset,
-                 boolean iswrite)
+                 boolean iswrite,
+                 boolean isdelete)
 {
-    obj_template_t        *parm;
-    val_value_t           *val, *oldval;
-    xmlChar               *objbuff;
-    status_t               res;
-    boolean                done;
-    uint32                 yesnocode;
+    obj_template_t *parm, *target;
+    val_value_t    *val, *oldval;
+    val_value_t    *firstchoice = NULL;
+    status_t        res = NO_ERR;
+    boolean         done;
+    uint32          yesnocode;
 
-    res = NO_ERR;
-    server_cb->cli_fn = obj_get_name(rpc);
+    if (rpc->objtype == OBJ_TYP_CASE) {
+        /* called by get_case */
+        target = rpc;
+    } else if (rpc->objtype == OBJ_TYP_RPC) {
+        /* called by RPC invocation or fill data fn */
+        server_cb->cli_fn = obj_get_name(rpc);
+        target = valset->obj;
+    } else {
+        /* called by fill data fn */
+        target = valset->obj;
+    }
 
-    if (!(valset->obj->objtype == OBJ_TYP_RPC ||
-          valset->obj->objtype == OBJ_TYP_RPCIO)) {
-        objbuff = NULL;
-        res = obj_gen_object_id(valset->obj, &objbuff);
+    if (!(target->objtype == OBJ_TYP_RPC ||
+          target->objtype == OBJ_TYP_RPCIO ||
+          target->objtype == OBJ_TYP_CASE)) {
+        xmlChar *objbuff = NULL;
+        res = obj_gen_object_id(target, &objbuff);
         if (res != NO_ERR) {
             log_error("\nError: generate object ID failed (%s)",
                       get_error_string(res));
@@ -1695,13 +1764,11 @@ static status_t
         }
 
         /* let the user know about the new nest level */
-        log_stdout("\nFilling %s %s:",
-                   obj_get_typestr(valset->obj), 
-                   objbuff);
+        log_stdout("\nFilling %s %s:", obj_get_typestr(target), objbuff);
         m__free(objbuff);
     }
 
-    for (parm = obj_first_child(valset->obj);
+    for (parm = obj_first_child(target);
          parm != NULL && res==NO_ERR;
          parm = obj_next_child(parm)) {
 
@@ -1710,6 +1777,10 @@ static status_t
             if (oldvalset != NULL) {
                 res = clone_old_parm(oldvalset, valset, parm);
             }
+            continue;
+        }
+
+        if (isdelete && !obj_is_key(parm)) {
             continue;
         }
 
@@ -1728,16 +1799,21 @@ static status_t
             }
         }
 
-        set_completion_state(&server_cb->completion_state,
-                             rpc,
-                             parm,
-                             CMD_STATE_GETVAL);                             
+        set_completion_state(&server_cb->completion_state, rpc, parm,
+                             CMD_STATE_GETVAL);
 
         switch (parm->objtype) {
         case OBJ_TYP_CHOICE:
-            if (!val_choice_is_set(valset, parm)) {
-                res = get_choice(server_cb, rpc, parm, valset, 
-                                 oldvalset, iswrite);
+            firstchoice = val_get_choice_first_set(valset, parm);
+            if (firstchoice) {
+                assert( firstchoice->casobj && "case backptr is NULL!" );
+
+                /* a case is already selected so try finishing that */
+                res = get_case(server_cb, firstchoice->casobj, valset,
+                               oldvalset, iswrite, isdelete);
+            } else {
+                res = get_choice(server_cb, rpc, parm, valset, oldvalset,
+                                 iswrite, isdelete);
                 switch (res) {
                 case NO_ERR:
                     break;
@@ -1835,7 +1911,7 @@ static status_t
             }
 
             /* recurse with the child nodes */
-            res = fill_valset(server_cb, rpc, val, oldval, iswrite);
+            res = fill_valset(server_cb, parm, val, oldval, iswrite, isdelete);
 
             switch (res) {
             case NO_ERR:
@@ -1865,8 +1941,8 @@ static status_t
                 /* recurse with the child node -- NO OLD VALUE
                  * TBD: get keys, then look up old matching entry
                  */
-                res = fill_valset(server_cb, rpc, val, NULL, iswrite);
-
+                res = fill_valset(server_cb, parm, val, NULL, iswrite, 
+                                  isdelete);
                 switch (res) {
                 case NO_ERR:
                     /* prompt for more list entries */
@@ -3158,7 +3234,7 @@ static status_t
         }
         if (res == NO_ERR) {
             res = get_choice(server_cb, rpc, targobj, newparm, 
-                             curparm, iswrite);
+                             curparm, iswrite, FALSE);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -3176,7 +3252,7 @@ static status_t
                 val_init_from_template(newparm, targobj);
             }
         }
-        res = get_case(server_cb, rpc, targobj, newparm, curparm, iswrite);
+        res = get_case(server_cb, targobj, newparm, curparm, iswrite, FALSE);
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }
@@ -3193,7 +3269,7 @@ static status_t
                 val_init_from_template(newparm, targobj);
             }
         }
-        res = fill_valset(server_cb, rpc, newparm, curparm, TRUE);
+        res = fill_valset(server_cb, rpc, newparm, curparm, TRUE, FALSE);
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }
@@ -4150,12 +4226,8 @@ static status_t
      */
     if (valroot) {
         val_add_child(valroot, filter);
-        res = complete_path_content(server_cb, 
-                                    rpc,
-                                    valroot,
-                                    get_content,
-                                    dofill,
-                                    FALSE);
+        res = complete_path_content(server_cb, rpc, valroot, get_content,
+                                    dofill, FALSE);
         if (res != NO_ERR) {
             val_free_value(valroot);
             val_free_value(reqdata);
@@ -4163,13 +4235,9 @@ static status_t
         }
     } else if (get_content) {
         dummy_parm = NULL;
-        res = add_filter_from_content_node(server_cb,
-                                           rpc,
-                                           get_content,
-                                           get_content->obj,
-                                           filter, 
-                                           dofill,
-                                           &dummy_parm);
+        res = add_filter_from_content_node(server_cb, rpc, get_content,
+                                           get_content->obj, filter, 
+                                           dofill, &dummy_parm);
         if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
             /*  val_free_value(get_content); already freed! */
             val_free_value(reqdata);
@@ -4537,6 +4605,9 @@ static val_value_t *
         case OBJ_TYP_LEAF:
             if (isdelete) {
                 dofill = FALSE;
+            } else if (obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+                /* already filled in the target value by creating it */
+                dofill = FALSE;
             } else if (!iswrite && !server_cb->get_optional) {
                 /* for get operations, need --optional
                  *  set to prompt for the target leaf
@@ -4586,7 +4657,11 @@ static val_value_t *
             }  /* else going to use targval, not newval */
             break;
         case OBJ_TYP_CHOICE:
-            if (targval == NULL) {
+            if (isdelete) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                log_error("\nError: delete operation not supported "
+                          "for choice");
+            } else if (targval == NULL) {
                 newparm = val_new_value();
                 if (!newparm) {
                     log_error("\nError: malloc failure");
@@ -4598,11 +4673,15 @@ static val_value_t *
             if (res == NO_ERR && dofill) {
                 res = get_choice(server_cb, rpc, targobj,
                                  (newparm) ? newparm : targval,
-                                 curparm, iswrite);
+                                 curparm, iswrite, isdelete);
             }
             break;
         case OBJ_TYP_CASE:
-            if (targval == NULL) {
+            if (isdelete) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                log_error("\nError: delete operation not supported "
+                          "for case");
+            } else if (targval == NULL) {
                 newparm = val_new_value();
                 if (!newparm) {
                     log_error("\nError: malloc failure");
@@ -4612,12 +4691,17 @@ static val_value_t *
                 }
             }
             if (res == NO_ERR && dofill) {
-                res = get_case(server_cb, rpc, targobj,
+                res = get_case(server_cb, targobj,
                                (newparm) ? newparm : targval, 
-                               curparm, iswrite);
+                               curparm, iswrite, isdelete);
             }
             break;
         default:
+            if (targobj->objtype == OBJ_TYP_LIST) {
+                ; // if delete, need to fill in just the keys
+            } else if (isdelete) {
+                dofill = FALSE;
+            }
             if (targval == NULL) {
                 newparm = val_new_value();
                 if (!newparm) {
@@ -4649,7 +4733,8 @@ static val_value_t *
                         res = val_replace(curparm, mytarg);
                     } /* else should not happen */
                 } else if (!get_batchmode()){
-                    res = fill_valset(server_cb, rpc, mytarg, curparm, iswrite);
+                    res = fill_valset(server_cb, rpc, mytarg, curparm, 
+                                      iswrite, isdelete);
                 }
             }
         }
@@ -4936,15 +5021,10 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
     val_init_from_template(metaval, operobj);
-    val_set_qname(metaval, yangid,
-                  YANG_K_INSERT,
-                  xml_strlen(YANG_K_INSERT));
+    val_set_qname(metaval, yangid, YANG_K_INSERT, xml_strlen(YANG_K_INSERT));
 
     /* set the meta variable value and other fields */
-    res = val_set_simval(metaval,
-                         metaval->typdef,
-                         yangid,
-                         YANG_K_INSERT,
+    res = val_set_simval(metaval, metaval->typdef, yangid, YANG_K_INSERT,
                          insopstr);
     if (res != NO_ERR) {
         val_free_value(metaval);
@@ -4963,12 +5043,10 @@ static status_t
 
         /* set the attribute name */
         if (val->obj->objtype==OBJ_TYP_LEAF_LIST) {
-            val_set_qname(metaval, yangid,
-                          YANG_K_VALUE,
+            val_set_qname(metaval, yangid, YANG_K_VALUE,
                           xml_strlen(YANG_K_VALUE));
         } else {
-            val_set_qname(metaval, yangid,
-                          YANG_K_KEY,
+            val_set_qname(metaval, yangid, YANG_K_KEY,
                           xml_strlen(YANG_K_KEY));
         }
 
@@ -5115,15 +5193,10 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      isdelete,
-                                      dofill,
-                                      TRUE,
-                                      &res,
-                                      &valroot);
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      isdelete, dofill,
+                                      TRUE, /* iswrite */
+                                      &res, &valroot);
     if (content == NULL) {
         if (res != NO_ERR) {
             if (LOGDEBUG2) {
@@ -5252,15 +5325,11 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      FALSE,
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      FALSE,  /* isdelete */
                                       dofill,
-                                      TRUE,
-                                      &res,
-                                      &valroot);
+                                      TRUE,  /* iswrite */
+                                      &res, &valroot);
     if (!content) {
         val_free_value(valset);
         return (res == NO_ERR) ? ERR_NCX_MISSING_PARM : res;
@@ -5340,11 +5409,8 @@ static status_t
     /* send the PDU, hand off the content node */
     if (res == NO_ERR) {
         /* construct an edit-config PDU with default parameters */
-        res = send_edit_config_to_server(server_cb, 
-                                         valroot,
-                                         content, 
-                                         timeoutval,
-                                         server_cb->defop);
+        res = send_edit_config_to_server(server_cb, valroot, content, 
+                                         timeoutval, server_cb->defop);
         if (res != NO_ERR) {
             log_error("\nError: send create operation failed (%s)",
                       get_error_string(res));
@@ -5440,29 +5506,19 @@ static status_t
     }
     
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      FALSE,
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      FALSE,  /* isdelete */
                                       dofill,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+                                      FALSE,  /* iswrite */
+                                      &res, &valroot);
     if (res != NO_ERR) {
         val_free_value(valset);
         return (res==NO_ERR) ? ERR_NCX_MISSING_PARM : res;
     }
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_server(server_cb, 
-                             valroot,
-                             content, 
-                             NULL, 
-                             NULL, 
-                             timeoutval, 
-                             dofill,
-                             withdef);
+    res = send_get_to_server(server_cb, valroot, content, NULL, NULL, 
+                             timeoutval, dofill, withdef);
     if (res != NO_ERR) {
         log_error("\nError: send get operation failed (%s)",
                   get_error_string(res));
@@ -5559,15 +5615,11 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      FALSE,
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      FALSE,  /* isdelete */
                                       dofill,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+                                      FALSE, /* iswrite */
+                                      &res, &valroot);
     if (res != NO_ERR) {
         val_free_value(valset);
         return res;
@@ -5578,14 +5630,10 @@ static status_t
     val_change_nsid(source, xmlns_nc_id());
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_server(server_cb, 
-                            valroot,
-                            content, 
-                            NULL, 
-                            source, 
-                            timeoutval, 
+    res = send_get_to_server(server_cb, valroot, content, NULL, source, 
+                             timeoutval, 
                              FALSE,  /* dofill; don't fill again */
-                            withdef);
+                             withdef);
     if (res != NO_ERR) {
         log_error("\nError: send get-config operation failed (%s)",
                   get_error_string(res));
@@ -5681,8 +5729,7 @@ static status_t
             log_warn("\nWarning: server does not have :xpath support");
             res = get_yesno(server_cb,
                             (const xmlChar *)"Send request anyway?",
-                            YESNO_NO,
-                            &retcode);
+                            YESNO_NO, &retcode);
             if (res == NO_ERR) {
                 switch (retcode) {
                 case YESNO_CANCEL:
@@ -5715,15 +5762,12 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+    content = get_content_from_choice(server_cb, rpc, valset,
+                                      FALSE,  /* getoptional */
+                                      FALSE,  /* isdelete */
+                                      FALSE,  /* dofill */
+                                      FALSE,  /* iswrite */
+                                      &res, &valroot);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
             str = VAL_STR(content);
@@ -5738,14 +5782,8 @@ static status_t
                  * as the filter 
                  * !! passing off content memory even on error !!
                  */
-                res = send_get_to_server(server_cb, 
-                                        valroot,
-                                        NULL, 
-                                        content, 
-                                        NULL, 
-                                        timeoutval,
-                                        FALSE,
-                                        withdef);
+                res = send_get_to_server(server_cb, valroot, NULL, content, 
+                                        NULL, timeoutval, FALSE, withdef);
                 content = NULL;
                 if (res != NO_ERR) {
                     log_error("\nError: send get operation"
@@ -5896,15 +5934,12 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+    content = get_content_from_choice(server_cb, rpc, valset,
+                                      FALSE,  /* getoptional */
+                                      FALSE,  /* isdelete */
+                                      FALSE,  /* dofill */
+                                      FALSE,  /* iswrite */
+                                      &res, &valroot);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
             str = VAL_STR(content);
@@ -5991,10 +6026,7 @@ static status_t
         format = "\n  [%N]\t%H";
     }
 
-    glstatus = gl_show_history(server_cb->cli_gl,
-                               outputfile,
-                               format,
-                               1,
+    glstatus = gl_show_history(server_cb->cli_gl, outputfile, format, 1,
                                maxlines);
     if (glstatus) {
         log_error("\nError: show history failed");
@@ -6183,9 +6215,7 @@ static status_t
         parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SHOW);
         if (parm) {
             /* do show history */
-            res = do_history_show(server_cb,
-                                  VAL_INT(parm), 
-                                  mode);
+            res = do_history_show(server_cb, VAL_INT(parm), mode);
             done = TRUE;
         }
 
@@ -6355,8 +6385,7 @@ static status_t
 
         if (eventindex >= startindex) {
 
-            sequence_id = val_find_child(notif->notification,
-                                         NULL,
+            sequence_id = val_find_child(notif->notification, NULL,
                                          NCX_EL_SEQUENCE_ID);
 
 
@@ -6398,13 +6427,10 @@ static status_t
             }
 
             if (mode == HELP_MODE_FULL) {
-                val_dump_value_max(notif->notification,
-                                   0,
+                val_dump_value_max(notif->notification, 0,
                                    server_cb->defindent,
                                    (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
-                                   server_cb->display_mode,
-                                   FALSE,
-                                   FALSE);
+                                   server_cb->display_mode, FALSE, FALSE);
                 (*logfn)("\n");
             }
             eventsdone++;
@@ -6525,10 +6551,8 @@ static status_t
         parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SHOW);
         if (parm) {
             /* do show eventlog  */
-            res = do_eventlog_show(server_cb,
-                                   VAL_INT(parm),
-                                   (start) ? VAL_UINT(start) : 0,
-                                   mode);
+            res = do_eventlog_show(server_cb, VAL_INT(parm),
+                                   (start) ? VAL_UINT(start) : 0, mode);
             done = TRUE;
         }
 
@@ -6547,10 +6571,8 @@ static status_t
         }
 
         if (!done) {
-            res = do_eventlog_show(server_cb, 
-                                   -1, 
-                                   (start) ? VAL_UINT(start) : 0, 
-                                   mode);
+            res = do_eventlog_show(server_cb, -1, 
+                                   (start) ? VAL_UINT(start) : 0, mode);
         }
     }
 
@@ -7066,7 +7088,7 @@ status_t
         /* fill in any missing parameters from the CLI */
         if (res == NO_ERR) {
             if (interactive_mode()) {
-                res = fill_valset(server_cb, rpc, valset, NULL, TRUE);
+                res = fill_valset(server_cb, rpc, valset, NULL, TRUE, FALSE);
                 if (res == ERR_NCX_SKIPPED) {
                     res = NO_ERR;
                 }
@@ -7507,14 +7529,11 @@ status_t
     }
 
     /* make sure the 3 required parms are set */
-    s1 = val_find_child(valset,
-                        YANGCLI_MOD, 
+    s1 = val_find_child(valset, YANGCLI_MOD, 
                         YANGCLI_SERVER) ? TRUE : FALSE;
-    s2 = val_find_child(valset, 
-                        YANGCLI_MOD,
+    s2 = val_find_child(valset, YANGCLI_MOD,
                         YANGCLI_USER) ? TRUE : FALSE;
-    s3 = val_find_child(valset, 
-                        YANGCLI_MOD,
+    s3 = val_find_child(valset, YANGCLI_MOD,
                         YANGCLI_PASSWORD) ? TRUE : FALSE;
 
     /* check the transport parameter */
@@ -7539,7 +7558,8 @@ status_t
                 log_debug3("\nyangcli: CLI direct connect mode");
             }
         } else {
-            res = fill_valset(server_cb, rpc, valset, connect_valset, TRUE);
+            res = fill_valset(server_cb, rpc, valset, connect_valset, 
+                              TRUE, FALSE);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -7817,16 +7837,10 @@ void *
         if (prefix != NULL) {
             if (modname != NULL) {
                 /* try to match a command from this module */
-                def = ncx_match_any_rpc(modname, 
-                                        defname,
-                                        &matchcount);
+                def = ncx_match_any_rpc(modname, defname, &matchcount);
                 if (matchcount > 1) {
                     res = ERR_NCX_AMBIGUOUS_CMD;
-                    ncx_match_rpc_error(NULL, 
-                                        modname, 
-                                        defname,
-                                        TRUE,
-                                        TRUE);
+                    ncx_match_rpc_error(NULL, modname, defname, TRUE, TRUE);
                 } /* else 0 or 1 matches found */
             } /* else module not found error already done */
         } else {
@@ -7841,8 +7855,7 @@ void *
                          modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
                         tempcount = 0;
-                        def = ncx_match_any_rpc_mod(modptr->mod, 
-                                                    defname,
+                        def = ncx_match_any_rpc_mod(modptr->mod, defname,
                                                     &tempcount);
                         if (def) {
                             lastmatch = def;
@@ -7977,9 +7990,7 @@ val_value_t *
     len = 0;
 
     set_completion_state(&server_cb->completion_state,
-                         rpc,
-                         NULL,
-                         CMD_STATE_GETVAL);
+                         rpc, NULL, CMD_STATE_GETVAL);
 
     /* skip leading whitespace */
     while (line[len] && xml_isspace(line[len])) {
@@ -7988,10 +7999,7 @@ val_value_t *
 
     /* check any non-whitespace entered after RPC method name */
     if (line[len]) {
-        valset = parse_rpc_cli(server_cb,
-                               rpc, 
-                               &line[len], 
-                               res);
+        valset = parse_rpc_cli(server_cb, rpc, &line[len], res);
         if (*res == ERR_NCX_SKIPPED) {
             log_stdout("\nError: no parameters defined for '%s' command",
                        obj_get_name(rpc));
@@ -8024,7 +8032,7 @@ val_value_t *
 
     /* fill in any missing parameters from the CLI */
     if (*res==NO_ERR && interactive_mode()) {
-        *res = fill_valset(server_cb, rpc, valset, NULL, TRUE);
+        *res = fill_valset(server_cb, rpc, valset, NULL, TRUE, FALSE);
     }
 
     if (*res==NO_ERR) {
@@ -8056,9 +8064,7 @@ status_t
 
     server_cb->history_line_active = FALSE;
     memset(&history_line, 0x0, sizeof(GlHistoryLine));
-    glstatus = gl_lookup_history(server_cb->cli_gl,
-                                 num,
-                                 &history_line);
+    glstatus = gl_lookup_history(server_cb->cli_gl, num, &history_line);
 
     if (glstatus == 0) {
         log_error("\nError: lookup command line history failed");
@@ -8073,8 +8079,7 @@ status_t
      * to get_line
      */
 
-    server_cb->history_line = 
-        xml_strdup((const xmlChar *)history_line.line);
+    server_cb->history_line = xml_strdup((const xmlChar *)history_line.line);
     if (!server_cb->history_line) {
         return ERR_INTERNAL_MEM;
     }
@@ -8131,15 +8136,12 @@ status_t
          curindex >= history_range.oldest && !done;
          curindex--) {
 
-        glstatus = gl_lookup_history(server_cb->cli_gl,
-                                     curindex,
+        glstatus = gl_lookup_history(server_cb->cli_gl, curindex,
                                      &history_line);
         if (glstatus == 0) {
             continue;
         }
-        if (!xml_strnicmp((const xmlChar *)history_line.line,
-                          line,
-                          len)) {
+        if (!xml_strnicmp((const xmlChar *)history_line.line, line, len)) {
             done = TRUE;
             continue;
         }

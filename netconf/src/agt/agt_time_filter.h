@@ -3,7 +3,7 @@
 #define _H_agt_time_filter
 /* 
 
- * Copyright (c) 2009 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -42,7 +42,8 @@
 extern "C" {
 #endif
 
-#define y_yuma_time_filter_M_yuma_time_filter (const xmlChar *)"yuma-time-filter"
+#define y_yuma_time_filter_M_yuma_time_filter \
+    (const xmlChar *)"yuma-time-filter"
 #define y_yuma_time_filter_R_yuma_time_filter (const xmlChar *)"2011-08-13"
 
 

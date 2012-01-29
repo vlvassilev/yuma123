@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -2696,8 +2696,8 @@ static void
                          * check if the namespace also matches
                          */
                         if (searchresult->namespacestr) {
-                            if (ncx_compare_base_uris(searchresult->namespacestr,
-                                                      namespacestr)) {
+                            if (ncx_compare_base_uris
+                                (searchresult->namespacestr, namespacestr)) {
                                 /* cannot use this local file because
                                  * it has a different namespace
                                  */

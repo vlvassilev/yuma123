@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -581,6 +581,33 @@ void
     }
 
 } /* rpc_err_clean_errQ */
+
+
+/********************************************************************
+* FUNCTION rpc_err_any_errors
+*
+* Check if there are any errors in the RPC message error Q
+*
+* INPUTS:
+*   msg == rpc_msg_t struct to check for errors
+*
+* RETURNS:
+*   TRUE if any errors recorded; FALSE if none
+*********************************************************************/
+boolean
+    rpc_err_any_errors (const rpc_msg_t  *msg)
+{
+
+#ifdef DEBUG
+    if (!msg) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (dlq_empty(&msg->mhdr.errQ)) ? FALSE : TRUE;
+
+}  /* rpc_err_any_errors */
 
 
 /* END file rpc_err.c */

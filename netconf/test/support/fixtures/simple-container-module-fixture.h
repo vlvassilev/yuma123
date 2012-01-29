@@ -46,15 +46,6 @@ public:
      */
     ~SimpleContainerModuleFixture();
 
-    /**
-     * Run an edit query.
-     *
-     * \param session the session running the query
-     * \param query the query to run
-     */
-    void runEditQuery( std::shared_ptr<AbstractNCSession> session,
-                       const std::string& query );
-
     /** 
      * Create the top level container.
      *
@@ -136,14 +127,33 @@ public:
                                 const std::string& entryValStr );
 
     /** 
+     * No operation on an entry key and value.
+     *
+     * \param session the session running the query.
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     */
+    void noOpEntryValuePair( std::shared_ptr<AbstractNCSession> session,
+                             const std::string& entryKeyStr,
+                             const std::string& entryValStr );
+
+    /** 
      * Delete an entry.
      *
      * \param session the session running the query
-     * \param entryKeyStr the name of the entry key to add.
-     * \param operationStr the type of addition - add, merge, replace.
+     * \param entryKeyStr the name of the entry key to delete.
      */
     void deleteEntry( std::shared_ptr<AbstractNCSession> session,
                       const std::string& entryKeyStr );
+
+    /** 
+     * Fail to delete an entry.
+     *
+     * \param session the session running the query
+     * \param entryKeyStr the name of the entry key to delete.
+     */
+    void deleteEntryFailed( std::shared_ptr<AbstractNCSession> session,
+                            const std::string& entryKeyStr );
 
     /** 
      * Delete an entry value.
@@ -151,14 +161,24 @@ public:
      * \param session the session running the query
      * \param entryKeyStr the name of the entry key.
      * \param entryValStr the value of the entry.
-     * \param operationStr the type of addition - add, merge, replace.
      */
     void deleteEntryValue( std::shared_ptr<AbstractNCSession> session,
                         const std::string& entryKeyStr,
                         const std::string& entryValStr );
 
     /** 
-     * delete an entry key and value.
+     * Fail to delete an entry value.
+     *
+     * \param session the session running the query
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     */
+    void deleteEntryValueFailed( std::shared_ptr<AbstractNCSession> session,
+                                 const std::string& entryKeyStr,
+                                 const std::string& entryValStr );
+
+    /** 
+     * Delete an entry key and value.
      *
      * \param session the session running the query.
      * \param entryKeyStr the name of the entry key.
@@ -167,6 +187,17 @@ public:
     void deleteEntryValuePair( std::shared_ptr<AbstractNCSession> session,
                             const std::string& entryKeyStr,
                             const std::string& entryValStr );
+
+    /** 
+     * Fail to delete an entry key and value.
+     *
+     * \param session the session running the query.
+     * \param entryKeyStr the name of the entry key.
+     * \param entryValStr the value of the entry.
+     */
+    void deleteEntryValuePairFailed( std::shared_ptr<AbstractNCSession> session,
+                                     const std::string& entryKeyStr,
+                                     const std::string& entryValStr );
 
     /**
      * Populate the database with the entries. This function creates
@@ -235,9 +266,35 @@ public:
     /**
      * Commit the changes.
      *
-     * \param session  the session requesting the locks
+     * \param session  the session
      */
     virtual void commitChanges( std::shared_ptr<AbstractNCSession> session );
+
+    /**
+     * Fail to commit the changes.
+     *
+     * \param session  the session
+     */
+    virtual void commitChangesFailure( std::shared_ptr<AbstractNCSession> session );
+
+    /**
+     * Confirmed commit of the changes.
+     *
+     * \param session  the session requesting the locks
+     * \param timeout  the confirm-timeout of the message in seconds 
+     * \param extend   true if the operation should extend an existing timeout 
+     */
+    virtual void confirmedCommitChanges( 
+                      std::shared_ptr<AbstractNCSession> session,
+                      const int timeout,
+                      const bool extend = false );
+
+    /**
+     * Run a delete-config with startup as the target .
+     *
+     * \param session the session running the query.
+     */
+    void runDeleteStartupConfig( std::shared_ptr<AbstractNCSession> session );
 
     /**
      * Let the test harness know that changes should be discarded
@@ -245,11 +302,18 @@ public:
      */
     void discardChanges();
 
+    /**
+     * Check the running database to confirm a rollback has taken place
+     * and update the test harness internal lists to reflect this.
+     */
+    void rollbackChanges( std::shared_ptr<AbstractNCSession> session );
+
     const std::string moduleNs_;        ///< the module namespace
     const std::string containerName_;   ///< the container name 
 
     SharedPtrEntryMap_T runningEntries_; /// Running Db Entries 
     SharedPtrEntryMap_T candidateEntries_; /// CandidateTarget Db Entries 
+    SharedPtrEntryMap_T rollbackEntries_; /// Db Entries reloaded by rollback 
 };
 
 } // namespace YumaTest

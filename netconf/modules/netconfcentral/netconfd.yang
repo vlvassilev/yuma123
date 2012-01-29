@@ -21,6 +21,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-12-15 {
+       description 
+         "Add --running-error parameter.";
+    }
+
     revision 2011-10-08 {
        description 
          "Add --home parameter.";
@@ -130,7 +135,9 @@ module netconfd {
 
       leaf access-control {
         description
-          "Controls how access control is enforced by the server.";
+          "Controls how access control is initially enforced by the 
+           server.";
+
         type enumeration {
            enum enforcing {
              description 
@@ -306,13 +313,41 @@ module netconfd {
 
       uses ncxapp:DatapathParm;
 
+      leaf running-error {
+        description
+          "Controls the server behavior if any errors are 
+           encountered while validating the running database
+           during the initial load of the running configuration
+           at boot-time.";
+         type enumeration {
+           enum stop {
+             description
+               "Terminate the program if any errors are
+                encountered in the running configuration.";
+           }
+           enum continue {
+             description
+               "Continue the program if any errors are
+                encountered in the running configuration.
+                Altering the running configuration will fail
+                until the commit validation tests succeed.";
+           }
+        }
+        default stop;
+      }
+
       uses StartupChoice;
 
       leaf startup-error {
         description
           "Controls the server behavior if any errors are 
            encountered while loading the startup configuration
-           file into the running configuration at boot-time.";
+           file into the running configuration at boot-time.
+           It is possible for the startup configuration
+           to contain errors within optional nodes.  If this
+           parameter is set to 'continue', then the validation
+           tests on the running config (controlled by running-error)
+           should not fail due to missing optional nodes.";
          type enumeration {
            enum stop {
              description

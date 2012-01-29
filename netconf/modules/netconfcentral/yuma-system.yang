@@ -27,6 +27,11 @@ module yuma-system {
     description 
       "NETCONF Basic System Group.";
 
+    revision 2012-01-15 {
+        description  
+          "Add sysNetconfServerCLI monitoring data.";
+    }
+
     revision 2010-05-24 {
         description  
           "Change SessionId to standard session-id-type.";
@@ -96,6 +101,17 @@ module yuma-system {
               "The name and version ID for the NETCONF server
                running on this system.";
             type string;
+        }
+
+        anyxml sysNetconfServerCLI {
+            nacm:very-secure;
+            description
+              "The boot-time CLI and configuration parameters that
+               were used by the server running on this system.
+               The format is the 'netconfd' container, defined in
+               netconfd.yang.  By default, only client-set
+               parameters are shown.  Use with-defaults=report-all
+               to see all CLI parameter values in effect.";
         }
 
         container uname {

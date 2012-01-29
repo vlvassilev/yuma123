@@ -124,15 +124,6 @@ echo "Check the user manuals in /usr/share/doc/yuma"
   * netconfd
     * Added server regression testing and Coverity static code cleanup
       by Marc Pashley, James Parkin, and Joe Handford
-    * fix error-path generation so it conforms to RFC 6241
-     - XPath code does not find nc:rpc so false warning generated
-      (Ignore warning for child node not found in 
-       sysStartup notification)
-    * agt_val_root_check rewrite:
-      Commit tests (see RFC 6020, Sec. 8.3.3) are separated out
-      from agt_val_instance_check), instead of searching the
-      target config for nodes that need commit tests.
-      Started undo_rec based test pruning.
     * fix bug where RPC SIL validate or invoke callback returns an error
       but does not call agt_record_error; server returns <ok>
       and ignores the error return status; now adding an
@@ -142,7 +133,6 @@ echo "Check the user manuals in /usr/share/doc/yuma"
       sometimes be loaded anyway.  Now server will exit if
       initial modules loaded have errors, even if YANG parse
       returns NO_ERR for a module with a non-zero error count
-      (root cause in parser to be fixed later)
     * fixed bug where unknown namespace error caused server to incorrectly
       skip the entire rest of the XML message.  During load_running_config
       it is possible the server is configured to remove bad nodes
@@ -150,7 +140,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
     * implemented recoverable edits in agt_val.c;
       * add transactions to cfg.c; now saving an auto-incrementing
         transaction ID across reboots so new ID always used any time
-        a config edit request is processed; 
+        a config edit request is processed;
       * val_merge is now always non-destructive to the source value
       * newval and curval are always rooted in a source XML tree
       * add VAL_FL_DELETED to mark curval as deleted and not remove
@@ -159,67 +149,83 @@ echo "Check the user manuals in /usr/share/doc/yuma"
         recoverable edits
       * refactor edit code and move some ncx code to new module
         agt/agt_cfg.c
-    * fixed bug where error-path is not getting set if the
-      error node is the <url> parameter
+      * agt_val_root_check rewrite:
+        Commit tests (see RFC 6020, Sec. 8.3.3) are separated out
+        from agt_val_instance_check), instead of searching the
+        target config for nodes that need commit tests.
+        Started undo_rec based test pruning.
+      * update commit procedure to use VAL_FL_SUBTREE_DIRTY flag
+        to prune unchanged subtrees in the candidate config
+        instead of expensive subtree-compare.
+      * now cleaning all edit records from candidate so commit
+        will not get fooled by delete x, then create x
+      * remove agt_val_split_root_check code
+        * callback states AGT_CB_COMMIT_CHECK and AGT_CB_TEST_APPLY
+          have been removed and the agt_val code simplified
+        * val_clone removed; changed applied to real data tree and
+          undone if needed; no special test phase, just recoverable apply phase
+      * changed user SID to 0 (for superuser) when a commit is rolled
+        back; the old user id should not be used; must force all edits
+        to be reverted.
+      * now only restoring backup from disk if rollback failed,
+        not if commit failed
+      * add reverse_edit to send SIL callbacks for a reverse edit
+        during a rollback; needed when the SIL already returned
+        NO_ERR for a COMMIT callback
+      * optimized 'applyhere' compares to test just child nodes
+        and not all descendent nodes to speed up agt_val processing
+      * optimize unique-stmt checking to minimize data retrieval
+        and test duplication
+      * add code to prune commit tests for objects do not need new
+        tests because they have not changed value;
+      * optimized instance_check so if-feature and when-stmts
+        do not need to be evaluated again (done pre-root-check)
     * fixed bug in delete_config_validate where error path and
       error info parms are reversed; set errval for <url> if needed
-    * update commit procedure to use VAL_FL_SUBTREE_DIRTY flag
-      to prune unchanged subtrees in the candidate config
-      instead of expensive subtree-compare.
-    * updated agt_acm debug logging
-    * remove all #ifdefs around log_debug code
-    * now cleaning all edit records from candidate so commit
-      will not get fooled by delete x, then create x
     * fix object ID for XPath so choices and cases are removed
       from the path extression; also add module prefix to prevent
       external augment with same local-name from matching expression
     * fix bug where deleting a default leaf did not re-mark the leaf
       as set-by-default
-    * remove agt_val_split_root_check code
-      * callback states AGT_CB_COMMIT_CHECK and AGT_CB_TEST_APPLY
-        have been removed and the agt_val code simplified
-      * val_clone removed; changed applied to real data tree and
-        undone if needed; no special test phase, just recoverable apply phase
     * fix bug in commit code where newval was not checked for NULL
       before accessing a field in it
     * change output buffer logging from debug4 to debug3
+    * updated agt_acm debug logging
+    * remove all #ifdefs around log_debug code
+    * added agt_log_acm_reads and agt_log_acm_writes
+      to the agt_profile to control log output for NACM access
     * fixed bug in error-path generation where /nc:config node
       was incorrectly added as the starting node, instead of the
       top-level YANG object from the database
+    * fixed bug where error-path is not getting set if the
+      error node is the <url> parameter
+    * fixed bug where error-path = '/' was not generated correctly
+      so that field would be missing for <validate> and other rpc-error
+      responses
+    * fix error-path generation so it conforms to RFC 6241
+    * fix memory leak in generating unique-error
+    * updated error message for list within the path of a
+      unique statement component; clarified with YANG author that
+      lists not allowed since nodes from different lists cannot
+      be in the same unique test tuple
+    * added a <bad-value> element to the <error-info> for a
+      missing value instance error (310), containing the name of the
+      missing node.
+    * fix bug where no namespace ID is set for an <rpc-error>
+      where the 'select' attribute in the <filter> parameter
+      is invalid; set to NETCONF instead of 0
     * fixed bug in XML generation where XML-safe string was not
       generated in string node content
     * fixed bug in copy-config where copy from inline to
       candidate was not getting fully validated or applied correctly
-    * fix new bug where apply rollback after timeout did not work
-    * changed user SID to 0 (for superuser) when a commit is rolled
-      back; the old user id should not be used; must force all edits
-      to be reverted.
     * fix bug in val_set_canonical_order where list sometimes not
       inserted in sorted order
-    * fixed new bug where YANG choices were not always getting validated
-      in a root-check
     * fixed bug in load_config where invoke could be called even
       if validate phase failed
-    * fixed new bug where rollback would fail because there is
-      already a transaction in progress
-    * now olnly restoring backup if rollback failed, not if commit failed
-    * fixed bug where error-path = '/' was not generated correctly
-      so that field would be missing for <validate> and other rpc-error
-      responses 
-    * add reverse_edit to send SIL callbacks for a reverse edit
-      during a rollback; needed when the SIL already returned
-      NO_ERR for a COMMIT callback
     * add ncx:user-write extension
       see extension 'user-write' in yuma-ncx.yang for details
       Server will block user access to specific edit operations
       if this extension is present in a YANG database node definition
-    * added agt_log_acm_reads and agt_log_acm_writes
-      to the agt_profile to control log output for NACM access
-    * optimized 'applyhere' compares to test just child nodes
-      and not all descendent nodes to speed up agt_val processing
-    * attempt to fix SIL callback sequence integ-test failures,
-      but test-simple-edit-candidate is still failing
-      due to vaidate callbacks during commit_validate
     * add /system/sysNetconfServerCLI monitoring data to
       inspect the CLI parameters used at boot-time
     * add boolean flags to agt_profile to track load-config
@@ -228,32 +234,16 @@ echo "Check the user manuals in /usr/share/doc/yuma"
        - agt_load_validate_errors    (OK if --startup-error=continue)
        - agt_load_rootcheck_errors   (OK if --running-error=continue)
        - agt_load_apply_errors       (fatal error if SIL apply/commit fails)
-    * optimize unique-stmt checking to minimize data retrieval
-      and test duplication
-    * fix bug in new root-check code where leaf and container
-      instance-checks were sometimes missed
-    * fix memory leak in generating unique-error
-    * updated error message for list within the path of a
-      unique statement component; clarified with YANG author that
-      lists not allowed since nodes from different lists cannot
-      be in the same unique test tuple
     * fixed bug 3476123; leafrefs not getting written to XML correctly
-    * add code to prune commit tests for objects do not need new
-      tests because they have not changed value;
     * fixed bug where inherited when-stmt and if-feature
       statements (from choice or case nodes) were not
       checked when deleting dead nodes
-    * optimized instance_check so if-feature and when-stmts
-      do not need to be evaluated again (done pre-root-check)
     * fixed bug in check_editop where create on duplicate leaf-list was not
       properly rejected with a data-exists error
     * added support to make sure modules with top-level mandatory nodes
       are rejected by the server if the --running-error parameter is
       set to 'stop'.  This prevents a user from loading such a module
       and causing the server to shutdown.
-    * added a <bad-value> element to the <error-info> for a
-      missing value instance error (310), containing the name of the
-      missing node.
     * added agt_validate_all (d:T) to agt_profile to control
       <validate> op behavior.  Set to false to have <validate> only
       call SILs for the nodes that are changed in the candidate,
@@ -270,10 +260,10 @@ echo "Check the user manuals in /usr/share/doc/yuma"
       when the 1 and only case member was a complex type
     * fix bug deleting containers or lists where mandatory child nodes
       were incorrectly filled in, instead of skipped
-    * enhance CLI parsing so container can be something other 
+    * enhance CLI parsing so container can be something other
       than a choice of empty leafs. e.g:
         validate source=@myconfig.xml
-        myconfig.xml:     
+        myconfig.xml:
         <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
            ...
         </config>
@@ -281,7 +271,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
       selecting a case number when filling in a choice.
     * fix bug where user is prompted for a case number even if
        there is only 1 enabled case in the choice
-    * fix bug where user is prompted if flag should be set y/n 
+    * fix bug where user is prompted if flag should be set y/n
       when editing a leaf of type 'empty'; leaf value already
       implicitly entered by selecting this leaf as the edit target
     * fix bug in val_set_canonical_order where list sometimes not
@@ -331,6 +321,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
       declared in the link command.  This causes STATIC=1 builds
       to fail on Ubuntu 11.10 (symbol 'round' not found from libm)
    * Cleaned up static build of yangcli
+
 * Tue Sep 27 2011 Andy Bierman <andy at netconfcentral.org> 2.1-2 [1457]
   * Build
     * fix bug added recently that breaks build in libtoaster

@@ -1,5 +1,5 @@
 The Yuma Test Harness
-=========================================================================================
+===============================================================================
 
 1: Pre-requisites:
     Operating System	Ubuntu 10.04 or later	
@@ -65,11 +65,13 @@ To build and run this test harness:
        --module=device_test
        --module=simple_list_test
        --module=simple_yang_test
-       --access-control=off OR --superuser=superuser
+       --access-control=off OR --superuser=<user>
        --target=candidate OR --target=running
+       --no-startup
     6: run ./configure-env.py to configure the test client
-       make sure to give IP addresses as numbers, such as
-       127.0.0.1 instead of localhost.
+       - make sure to give IP addresses as numbers, such as
+         127.0.0.1 instead of localhost.
+       - enter the same user name as the <name> in step 5.
     7: source ./config.sh
     8: run either all-candidate.py or all-running.py, depending on
        which target was selected in step 5.

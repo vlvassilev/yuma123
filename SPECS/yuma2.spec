@@ -23,46 +23,6 @@ Requires: libssh2
 
 %define debug_package %{nil}
 
-%package dev
-
-Summary:  YANG-based Unified Modular Automation Tools (Developer)
-
-%description dev
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  This package contains H files, scripts,
-and other files needed to create SIL code for use with
-the netconfd server.
-
-%post dev
-echo "Yuma developer files installed."
-
-%files dev
-%defattr(-,root,root,-)
-%{_bindir}/make_sil_dir
-%{_mandir}/man1/make_sil_dir.1.gz
-%{_includedir}/yuma/
-%{_datadir}/yuma/util/
-%{_datadir}/yuma/src/libtoaster/
-
-
-%package doc
-
-Summary:  YANG-based Unified Modular Automation Tools (Documentation)
-
-%description doc
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  This package contains the Yuma user manuals
-in PDF and HTML format.
-
-%post doc
-echo "Yuma documentation files installed."
-
-%files doc
-%defattr(-,root,root,-)
-/usr/share/doc/yuma/server-call-chain.txt
-/usr/share/doc/yuma/pdf/
-/usr/share/doc/yuma/html/
-
 
 # main package rules
 
@@ -531,4 +491,45 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 	* NETCONF base:1.1 support (RFC 6241 and RFC 6242)
 	* with-defaults 'report-all-tagged' mode (RFC 6243)
 	* --urltarget path selection mechanism (UrlPath)
+
+
+%package devel
+BuildArch: noarch
+Summary:  YANG-based Unified Modular Automation Tools (Developer)
+
+%description devel
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains H files, scripts,
+and other files needed to create SIL code for use with
+the netconfd server.
+
+%post devel
+echo "Yuma developer files installed."
+
+%files devel
+%defattr(-,root,root,-)
+%{_bindir}/make_sil_dir
+%{_mandir}/man1/make_sil_dir.1.gz
+%{_includedir}/yuma/
+%{_datadir}/yuma/util/
+%{_datadir}/yuma/src/libtoaster/
+
+
+%package doc
+BuildArch: noarch
+Summary:  YANG-based Unified Modular Automation Tools (Documentation)
+
+%description doc
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains the Yuma user manuals
+in PDF and HTML format.
+
+%post doc
+echo "Yuma documentation files installed."
+
+%files doc
+%defattr(-,root,root,-)
+/usr/share/doc/yuma/server-call-chain.txt
+/usr/share/doc/yuma/pdf/
+/usr/share/doc/yuma/html/
 

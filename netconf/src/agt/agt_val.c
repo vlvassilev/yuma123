@@ -3739,6 +3739,7 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   obj == object template for child node in valset to check
 *   val == val_value_t list, leaf-list, or container to check
+*   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -3755,6 +3756,7 @@ static status_t
                     xml_msg_hdr_t *msg,
                     obj_template_t *obj,
                     val_value_t *val,
+                    val_value_t *valroot,
                     ncx_layer_t layer)
 {
     /* skip this node if it is non-config */
@@ -3788,7 +3790,9 @@ static status_t
     // do not need to check again to see if conditional object is present
     //iqual = val_get_cond_iqualval(val, valroot, obj);
     ncx_iqual_t iqual = obj_get_iqualval(obj);
-
+    boolean cond = FALSE;
+    boolean whendone = FALSE;
+    uint32 whencnt = 0;
     boolean minerr = FALSE;
     boolean maxerr = FALSE;
     uint32 minelems = 0;
@@ -3848,10 +3852,33 @@ static status_t
 
     if (minset) {
         if (cnt < minelems) {
+            if (cnt == 0) {
+                /* need to check if this node is conditional because
+                 * of when stmt, and if so, whether when-cond is false  */
+                res = val_check_obj_when(val, valroot, NULL, obj, 
+                                         &cond, &whencnt);
+                if (res == NO_ERR) {
+                    whendone = TRUE;
+                    if (whencnt && !cond) {
+                        if (LOGDEBUG2) {
+                            log_debug2("\nwhen_chk: skip false when-stmt for "
+                                       "node '%s:%s'", obj_get_mod_name(obj), 
+                                       obj_get_name(obj));
+                        }
+                        return NO_ERR;
+                    }
+                } else {
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                                     NULL, NCX_NT_VAL, errval);
+                    return res;
+                }
+            }
+
             /* not enough instances error */
             minerr = TRUE;
             res = ERR_NCX_MIN_ELEMS_VIOLATION;
             val->res = res;
+
             if (cnt) {
                 /* use the first child instance as the
                  * value node for the error-path
@@ -3860,6 +3887,8 @@ static status_t
                                         obj_get_name(obj));
                 agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
                                  NULL, NCX_NT_VAL, errval);
+
+
             } else {
                 /* need to construct a string error-path */
                 instbuff = NULL;
@@ -3914,7 +3943,30 @@ static status_t
     switch (iqual) {
     case NCX_IQUAL_ONE:
     case NCX_IQUAL_1MORE:
-        if (cnt < 1 && !minerr) {
+        if (cnt == 0 && !minerr) {
+            /* need to check if this node is conditional because
+             * of when stmt, and if so, whether when-cond is false  */
+            if (!whendone) {
+                cond = FALSE;
+                whencnt = 0;
+                res = val_check_obj_when(val, valroot, NULL, obj, 
+                                         &cond, &whencnt);
+                if (res == NO_ERR) {
+                    if (whencnt && !cond) {
+                        if (LOGDEBUG2) {
+                            log_debug2("\nwhen_chk: skip false when-stmt for "
+                                       "node '%s:%s'", obj_get_mod_name(obj), 
+                                       obj_get_name(obj));
+                        }
+                        return NO_ERR;
+                    }
+                } else {
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_NONE, 
+                                     NULL, NCX_NT_VAL, errval);
+                    return res;
+                }
+            }
+
             /* missing single parameter (13.5) */
             res = ERR_NCX_MISSING_VAL_INST;
             val->res = res;
@@ -3998,6 +4050,7 @@ static status_t
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   choicobj == object template for the choice to check
 *   val == parent val_value_t list or container to check
+*   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -4014,6 +4067,7 @@ static status_t
                       xml_msg_hdr_t *msg,
                       obj_template_t *choicobj,
                       val_value_t *val,
+                      val_value_t *valroot,
                       ncx_layer_t   layer)
 {
     status_t               res = NO_ERR, retres = NO_ERR;
@@ -4053,7 +4107,7 @@ static status_t
      */
     obj_template_t *testobj = obj_first_child(chval->casobj);
     for (; testobj != NULL; testobj = obj_next_child(testobj)) {
-        res = instance_check(scb, msg, testobj, val, layer);
+        res = instance_check(scb, msg, testobj, val, valroot, layer);
         CHK_EXIT(res, retres);
         /* errors already recorded if other than NO_ERR */
     }
@@ -4992,6 +5046,7 @@ static uint32
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
+*   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -5007,6 +5062,7 @@ static status_t
     run_instance_check (ses_cb_t *scb,
                         xml_msg_hdr_t *msg,
                         val_value_t *valset,
+                        val_value_t *valroot,
                         ncx_layer_t layer)
 {
     assert( valset && "valset is NULL!" );
@@ -5030,7 +5086,7 @@ static status_t
 
             if (!(obj_is_root(chval->obj) || obj_is_leafy(chval->obj))) {
                 /* recurse for all object types except root, leaf, leaf-list */
-                res = run_instance_check(scb, msg, chval, layer);
+                res = run_instance_check(scb, msg, chval, valroot, layer);
                 CHK_EXIT(res, retres);
             }
         }
@@ -5045,9 +5101,9 @@ static status_t
         }
 
         if (chobj->objtype == OBJ_TYP_CHOICE) {
-            res = choice_check_agt(scb, msg, chobj, valset, layer);
+            res = choice_check_agt(scb, msg, chobj, valset, valroot, layer);
         } else {
-            res = instance_check(scb, msg, chobj, valset, layer);
+            res = instance_check(scb, msg, chobj, valset, valroot, layer);
         }
         if (res != NO_ERR && valset->res == NO_ERR) {
             valset->res = res;
@@ -5118,7 +5174,7 @@ static status_t
 
         /* need to run the instance tests on the 'val' node */
         if (ct) {
-            res = run_instance_check(scb, msghdr, val, NCX_LAYER_CONTENT);
+            res = run_instance_check(scb, msghdr, val, root, NCX_LAYER_CONTENT);
             CHK_EXIT(res, retres);
         } else {
             /* TBD: figure out how to use the gen_root object
@@ -5138,10 +5194,10 @@ static status_t
 
                     /* just run instance check on the top level object */
                     if (obj->objtype == OBJ_TYP_CHOICE) {
-                        res = choice_check_agt(scb, msghdr, obj, val,
+                        res = choice_check_agt(scb, msghdr, obj, val, root,
                                                NCX_LAYER_CONTENT);
                     } else {
-                        res = instance_check(scb, msghdr, obj, val,
+                        res = instance_check(scb, msghdr, obj, val, root,
                                              NCX_LAYER_CONTENT);
                     }
                     CHK_EXIT(res, retres);
@@ -5323,6 +5379,7 @@ status_t
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
+*   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -5338,9 +5395,10 @@ status_t
     agt_val_instance_check (ses_cb_t *scb,
                             xml_msg_hdr_t *msg,
                             val_value_t *valset,
+                            val_value_t *valroot,
                             ncx_layer_t layer)
 {
-    return run_instance_check(scb, msg, valset, layer);
+    return run_instance_check(scb, msg, valset, valroot, layer);
     
 }  /* agt_val_instance_check */
 

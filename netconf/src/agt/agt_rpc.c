@@ -808,7 +808,7 @@ static status_t
          * as multiple missing parameter errors
          */
         res = agt_val_instance_check(scb, &msg->mhdr, msg->rpc_input, 
-                                     NCX_LAYER_OPERATION);
+                                     msg->rpc_input, NCX_LAYER_OPERATION);
     }
 
     return res;

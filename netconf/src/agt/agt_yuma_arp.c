@@ -1415,7 +1415,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_edit);
     if (res != NO_ERR) {
         return res;
@@ -1424,7 +1424,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/arp-settings",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_arp_settings_edit);
     if (res != NO_ERR) {
         return res;
@@ -1433,7 +1433,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/arp-settings/maximum-entries",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_arp_settings_maximum_entries_edit);
     if (res != NO_ERR) {
         return res;
@@ -1442,7 +1442,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/arp-settings/validity-timeout",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_arp_settings_validity_timeout_edit);
     if (res != NO_ERR) {
         return res;
@@ -1451,7 +1451,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_edit);
     if (res != NO_ERR) {
         return res;
@@ -1460,7 +1460,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps/static-arp",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_static_arp_edit);
     if (res != NO_ERR) {
         return res;
@@ -1469,7 +1469,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps/static-arp/ip-address",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_static_arp_ip_address_edit);
     if (res != NO_ERR) {
         return res;
@@ -1478,7 +1478,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps/static-arp/mac-address",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_static_arp_mac_address_edit);
     if (res != NO_ERR) {
         return res;

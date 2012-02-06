@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "October 7, 2011" Linux "netconfd 2.1"
+.TH netconfd 1 "February 6, 2012" Linux "netconfd 2.2"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -133,6 +133,7 @@ Selects whether the server will keep or delete empty
 non-presence containers in the running and startup 
 configurations. Set to true to delete these containers,
 and false to keep them.  Default: false.
+This parameter is deprecated!  It is ignored by the server!
 .IP --\fBdeviation\fP=string
  This parameter identifies a YANG module that
 should only be checked for deviation statements
@@ -210,7 +211,7 @@ Only meaningful if the \fBlog\fP parameter is
 also present.
 .IP --\fBlog-level\fP=enum
 Sets the debug logging level for the program.
-.IP --\fBmaxburst\fP=number
+.IP --\fBmax-burst\fP=number
 Specifies the maximum number of notifications
 that should be sent to one session, within a
 one second time interval.  The value 0 indicates 
@@ -268,6 +269,11 @@ The default is to enable both NETCONF protocol versions.
 .IP --\fBrunpath\fP=pathlist
 Internal file search path for executable modules.
 Overrides the YUMA_RUNPATH environment variable.
+.IP --\fBrunning-error\fP=enum
+If 'stop', then errors in the running configuration will be
+treated as fatal errors.  If 'continue', the server will attempt
+to continue if any validataion errors are found in the
+running configuration at startup.  The default is 'stop'.
 .IP --\fBstartup\fP=filespec
 The full or relative filespec of the startup config file to use.
 If present, overrides the default startup config
@@ -292,10 +298,11 @@ Force the NV-storage startup to
 contain the factory default configuration.
 If this parameter is present,
 then the --no-startup and --startup parameters cannot be present.
-.IP --\fBstartup-error\fP=boolean
-If true, then errors in the startup configuration will be
-treated as fatal errors.  If false, the server will attempt
-to continue if any startup errors are found.
+.IP --\fBstartup-error\fP=enum
+If 'stop', then any errors in the startup configuration will be
+treated as fatal errors.  If 'continue', the server will attempt
+to continue if any errors are found in the database loaded 
+from NV-storage to running at boot-time.
 .IP --\fBsubdirs\fP=boolean
 If false, the file search paths for modules, scripts, and data
 files will not include sub-directories if they exist in the

@@ -186,6 +186,7 @@ extern status_t
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   valset == val_value_t list, leaf-list, or container to check
+*   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
 *
 * OUTPUTS:
@@ -201,6 +202,7 @@ extern status_t
     agt_val_instance_check (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
 			    val_value_t *valset,
+			    val_value_t *valroot,
 			    ncx_layer_t layer);
 
 

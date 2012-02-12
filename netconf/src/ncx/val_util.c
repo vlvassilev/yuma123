@@ -2297,22 +2297,22 @@ status_t
 * OUTPUTS:
 *  prints an error message if a warn-off record cannot be added
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_warning_parms (val_value_t *parentval)
 {
     val_value_t        *parmval;
-    status_t            res;
+    status_t            res = NO_ERR;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2350,6 +2350,8 @@ void
         }
     }
 
+    return res;
+
 }  /* val_set_warning_parms */
 
 
@@ -2370,24 +2372,24 @@ void
 * OUTPUTS:
 *  prints an error message if any errors occur
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_logging_parms (val_value_t *parentval)
 {
     val_value_t        *val;
     char               *logfilename;
-    status_t            res;
+    status_t            res = NO_ERR;
     boolean             logappend;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2404,11 +2406,11 @@ void
         if (log_get_debug_level() == LOG_DEBUG_NONE) {
             log_error("\nError: invalid log-level value (%s)",
                       (const char *)VAL_ENUM_NAME(val));
+            return ERR_NCX_INVALID_VALUE;
         }
     }
 
-    val = val_find_child(parentval, 
-                         val_get_mod_name(parentval),
+    val = val_find_child(parentval, val_get_mod_name(parentval),
                          NCX_EL_LOGAPPEND);
     if (val && val->res == NO_ERR) {
         logappend = TRUE;
@@ -2434,6 +2436,8 @@ void
         }
     }
 
+    return res;
+
 }  /* val_set_logging_parms */
 
 
@@ -2452,22 +2456,21 @@ void
 * INPUTS:
 *   parentval == CLI container to check for the runpath,
 *                 modpath, and datapath variables
-*
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_path_parms (val_value_t *parentval)
 {
     val_value_t        *val;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2494,7 +2497,9 @@ void
     if (val && val->res == NO_ERR) {
         ncxmod_set_runpath(VAL_STR(val));
     }
-    
+
+    return NO_ERR;
+
 }  /* val_set_path_parms */
 
 
@@ -2507,21 +2512,21 @@ void
 * INPUTS:
 *   parentval == CLI container to check for the subdirs parm
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_subdirs_parm (val_value_t *parentval)
 {
     val_value_t        *val;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2532,7 +2537,9 @@ void
     if (val && val->res == NO_ERR) {
         ncxmod_set_subdirs(VAL_BOOL(val));
     }
-    
+
+    return NO_ERR;
+
 }  /* val_set_subdirs_parm */
 
 
@@ -2553,22 +2560,22 @@ void
 * INPUTS:
 *   parentval == CLI container to check for the feature parms
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_feature_parms (val_value_t *parentval)
 {
     val_value_t        *val;
-    status_t            res;
+    status_t   res = NO_ERR;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2584,7 +2591,7 @@ void
                                NCX_EL_STATIC)) {
             ncx_set_feature_code_default(NCX_FEATURE_CODE_STATIC);
         } else {
-            SET_ERROR(ERR_INTERNAL_VAL);
+            return ERR_NCX_INVALID_VALUE;
         }
     }
 
@@ -2604,7 +2611,7 @@ void
         res = ncx_set_feature_code_entry(VAL_STR(val),
                                          NCX_FEATURE_CODE_STATIC);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2621,7 +2628,7 @@ void
         res = ncx_set_feature_code_entry(VAL_STR(val),
                                          NCX_FEATURE_CODE_DYNAMIC);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2638,7 +2645,7 @@ void
     while (val && val->res == NO_ERR) {
         res = ncx_set_feature_enable_entry(VAL_STR(val), TRUE);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2654,7 +2661,7 @@ void
     while (val && val->res == NO_ERR) {
         res = ncx_set_feature_enable_entry(VAL_STR(val), FALSE);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2663,7 +2670,8 @@ void
                                   val);
     }
 
-    
+    return res;
+
 }  /* val_set_feature_parms */
 
 

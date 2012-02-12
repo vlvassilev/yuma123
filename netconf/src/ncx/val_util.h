@@ -635,8 +635,10 @@ extern status_t
 * OUTPUTS:
 *  prints an error message if a warn-off record cannot be added
 *
+* RETURNS:
+*  status
 *********************************************************************/
-extern void
+extern status_t
     val_set_warning_parms (val_value_t *parentval);
 
 
@@ -657,8 +659,10 @@ extern void
 * OUTPUTS:
 *  prints an error message if any errors occur
 *
+* RETURNS:
+*  status
 *********************************************************************/
-extern void
+extern status_t
     val_set_logging_parms (val_value_t *parentval);
 
 
@@ -677,9 +681,10 @@ extern void
 * INPUTS:
 *   parentval == CLI container to check for the runpath,
 *                 modpath, and datapath variables
-*
+* RETURNS:
+*  status
 *********************************************************************/
-extern void
+extern status_t
     val_set_path_parms (val_value_t *parentval);
 
 
@@ -692,8 +697,10 @@ extern void
 * INPUTS:
 *   parentval == CLI container to check for the subdirs parm
 *
+* RETURNS:
+*  status
 *********************************************************************/
-extern void
+extern status_t
     val_set_subdirs_parm (val_value_t *parentval);
 
 
@@ -714,8 +721,10 @@ extern void
 * INPUTS:
 *   parentval == CLI container to check for the feature parms
 *
+* RETURNS:
+*  status
 *********************************************************************/
-extern void
+extern status_t
     val_set_feature_parms (val_value_t *parentval);
 
 

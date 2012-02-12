@@ -996,7 +996,7 @@ void
     /* banner comments */
     ses_putstr(scb, START_COMMENT);
 
-    ses_putstr_indent(scb, COPYRIGHT_HEADER, 0);
+    ses_putstr(scb, COPYRIGHT_HEADER);
 
     /* generater tag */
     write_banner_session_ex(scb, FALSE);
@@ -1516,27 +1516,18 @@ status_t
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (!obj_has_name(obj) || 
-            obj_is_cli(obj) ||
-            !obj_is_enabled(obj) ||
-            obj_is_abstract(obj)) {
+        if (!obj_has_name(obj) || obj_is_cli(obj) || obj_is_abstract(obj)) {
             continue;
         }
 
-        res = save_path_cdefine(savecdefQ,
-                                ncx_get_modname(mod), 
-                                obj,
-                                cmode);
+        res = save_path_cdefine(savecdefQ, ncx_get_modname(mod), obj, cmode);
         if (res != NO_ERR) {
             return res;
         }
 
         childdatadefQ = obj_get_datadefQ(obj);
         if (childdatadefQ) {
-            res = save_c_objects(mod,
-                                 childdatadefQ,
-                                 savecdefQ,
-                                 cmode);
+            res = save_c_objects(mod, childdatadefQ, savecdefQ, cmode);
             if (res != NO_ERR) {
                 return res;
             }
@@ -1611,7 +1602,6 @@ boolean
     skip_c_top_object (obj_template_t *obj)
 {
     if (!obj_has_name(obj) ||
-        !obj_is_enabled(obj) ||
         !obj_is_config(obj) ||
         obj_is_cli(obj) || 
         obj_is_abstract(obj) ||
@@ -1764,6 +1754,98 @@ void
     obj_traverse_keys(obj, &parms, NULL, write_key_value);
 
 } /* write_c_key_params */
+
+
+/********************************************************************
+* FUNCTION write_h_iffeature_start
+* 
+* Generate the start C for 1 if-feature conditional;
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_feature_t to use
+*
+*********************************************************************/
+void
+    write_h_iffeature_start (ses_cb_t *scb,
+                             const dlq_hdr_t *iffeatureQ)
+{
+    ncx_iffeature_t   *iffeature, *nextif;
+    uint32             iffeaturecnt;
+
+    iffeaturecnt = dlq_count(iffeatureQ);
+
+    /* check if conditional wrapper needed */
+    if (iffeaturecnt == 1) {
+        iffeature = (ncx_iffeature_t *)
+            dlq_firstEntry(iffeatureQ);
+
+        ses_putchar(scb, '\n');
+        ses_putstr(scb, POUND_IFDEF);
+        write_identifier(scb, iffeature->feature->tkerr.mod->name,
+                         BAR_FEAT, iffeature->feature->name, TRUE);
+    } else if (iffeaturecnt > 1) {
+        ses_putchar(scb, '\n');
+        ses_putstr(scb, POUND_IF);
+        ses_putchar(scb, '(');
+
+        for (iffeature = (ncx_iffeature_t *)
+                 dlq_firstEntry(iffeatureQ);
+             iffeature != NULL;
+             iffeature = nextif) {
+
+            nextif = (ncx_iffeature_t *)dlq_nextEntry(iffeature);
+
+            ses_putstr(scb, START_DEFINED);
+            write_identifier(scb, iffeature->feature->tkerr.mod->name,
+                             BAR_FEAT, iffeature->feature->name, TRUE);
+            ses_putchar(scb, ')');
+
+            if (nextif) {
+                ses_putstr(scb, (const xmlChar *)" && ");
+            }
+        }
+        ses_putchar(scb, ')');
+    }
+
+}  /* write_h_iffeature_start */
+
+
+/********************************************************************
+* FUNCTION write_h_iffeature_end
+* 
+* Generate the end C for 1 if-feature conditiona;
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_feature_t to use
+*
+*********************************************************************/
+void
+    write_h_iffeature_end (ses_cb_t *scb,
+                           const dlq_hdr_t *iffeatureQ)
+{
+    if (!dlq_empty(iffeatureQ)) {
+        ses_putstr(scb, POUND_ENDIF);
+        ses_putstr(scb, (const xmlChar *)" /* ");
+
+        ncx_iffeature_t *iffeature = 
+            (ncx_iffeature_t *)dlq_firstEntry(iffeatureQ);
+        ncx_iffeature_t *nexif = NULL;
+
+        for (; iffeature != NULL; iffeature = nexif) {
+            write_identifier(scb, iffeature->feature->tkerr.mod->name,
+                             BAR_FEAT, iffeature->feature->name, TRUE);
+            nexif = (ncx_iffeature_t *)dlq_nextEntry(iffeature);
+            if (nexif) {
+                ses_putstr(scb, (const xmlChar *)", ");
+            }
+        }
+
+        ses_putstr(scb, (const xmlChar *)" */");
+    }
+
+}  /* write_h_iffeature_end */
 
 
 /* END c_util.c */

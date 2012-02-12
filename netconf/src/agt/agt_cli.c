@@ -483,19 +483,34 @@ status_t
         }
 
         /* set the file search path parms */
-        val_set_path_parms(valset);
+        res = val_set_path_parms(valset);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         /* set the warning control parameters */
-        val_set_warning_parms(valset);
+        res = val_set_warning_parms(valset);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         /* set the feature code generation parameters */
-        val_set_feature_parms(valset);
+        res = val_set_feature_parms(valset);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         /* check the subdirs parameter */
-        val_set_subdirs_parm(valset);
+        res = val_set_subdirs_parm(valset);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         /* check the protocols parameter */
         res = val_set_protocols_parm(valset);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         /* check the system-sorted param */
         val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_SYSTEM_SORTED);

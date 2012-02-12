@@ -85,6 +85,7 @@ extern "C" {
 #define POUND_IFDEF   (const xmlChar *)"\n#ifdef "
 #define POUND_IFNDEF  (const xmlChar *)"\n#ifndef "
 #define POUND_INCLUDE (const xmlChar *)"\n#include "
+#define POUND_ELSE    (const xmlChar *)"\n#else"
 
 #define START_DEFINED (const xmlChar *)"defined("
 #define START_TYPEDEF (const xmlChar *)"\ntypedef "
@@ -123,7 +124,7 @@ extern "C" {
 #define PARM_ERRORVAL (const xmlChar *)"errorval"
 
 #define FN_BANNER_START (const xmlChar *)\
-    "\n\n/*******************************************************"\
+    "\n/*******************************************************"\
     "*************\n* FUNCTION "
 
 #define FN_BANNER_LN (const xmlChar *)"\n* "
@@ -717,6 +718,36 @@ extern void
                         dlq_hdr_t *objnameQ, 
                         uint32 keycount,
                         int32 startindent);
+
+
+/********************************************************************
+* FUNCTION write_h_iffeature_start
+* 
+* Generate the start C for 1 if-feature conditional;
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_feature_t to use
+*
+*********************************************************************/
+extern void
+    write_h_iffeature_start (ses_cb_t *scb,
+                             const dlq_hdr_t *iffeatureQ);
+
+
+/********************************************************************
+* FUNCTION write_h_iffeature_end
+* 
+* Generate the end C for 1 if-feature conditiona;
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_feature_t to use
+*
+*********************************************************************/
+extern void
+    write_h_iffeature_end (ses_cb_t *scb,
+                           const dlq_hdr_t *iffeatureQ);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

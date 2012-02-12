@@ -1281,10 +1281,17 @@ status_t
     if (fentry != NULL) {
         if (fentry->enable_set) {
             if (fentry->enable != flag) {
-                log_info("\nFeature '%s' already %s so ignoring new value",
-                         (flag) ? "disabled" : "enabled", name);
-                res = ERR_NCX_INVALID_VALUE;
-            }
+                if (flag) {
+                    /* SIL enabled, so previous CLI disable is allowed */
+                    log_debug("\nFeature '%s' already disabled from CLI, "
+                             "ignoring SIL disable", name);
+                } else {
+                    /* SIL disabled so override CLI enable */
+                    log_info("\nFeature '%s' disabled in SIL, "
+                             "overriding CLI enable", name);
+                    fentry->enable = FALSE;
+                }
+            } /* else same value so ignore */
         } else {
             fentry->enable_set = TRUE;
             fentry->enable = flag;

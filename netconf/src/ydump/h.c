@@ -95,87 +95,23 @@ date         init     comment
 *********************************************************************/
 
 
-
 /********************************************************************
-* FUNCTION write_h_iffeature_start
+* FUNCTION write_end_cplusplus
 * 
-* Generate the start C for 1 if-feature conditional;
+* Generate the end __cplusplus wrapper
 *
 * INPUTS:
 *   scb == session control block to use for writing
-*   iffeatureQ == Q of ncx_feature_t to use
-*   cp == conversion parms to use
 *
 *********************************************************************/
 static void
-    write_h_iffeature_start (ses_cb_t *scb,
-                             const dlq_hdr_t *iffeatureQ,
-                             const yangdump_cvtparms_t *cp)
+    write_end_cplusplus (ses_cb_t *scb)
 {
-    ncx_iffeature_t   *iffeature, *nextif;
-    uint32             iffeaturecnt;
+    ses_putstr(scb, (const xmlChar *)"\n#ifdef __cplusplus");
+    ses_putstr(scb, (const xmlChar *)"\n} /* end extern 'C' */");
+    ses_putstr(scb, (const xmlChar *)"\n#endif");
 
-    iffeaturecnt = dlq_count(iffeatureQ);
-
-    /* check if conditional wrapper needed */
-    if (iffeaturecnt == 1) {
-        iffeature = (ncx_iffeature_t *)
-            dlq_firstEntry(iffeatureQ);
-
-        ses_putstr(scb, POUND_IFDEF);
-        write_identifier(scb, 
-                         iffeature->feature->tkerr.mod->name,
-                         BAR_FEAT,
-                         iffeature->feature->name,
-                         cp->isuser);
-    } else if (iffeaturecnt > 1) {
-        ses_putstr(scb, POUND_IF);
-        ses_putchar(scb, '(');
-
-        for (iffeature = (ncx_iffeature_t *)
-                 dlq_firstEntry(iffeatureQ);
-             iffeature != NULL;
-             iffeature = nextif) {
-
-            nextif = (ncx_iffeature_t *)dlq_nextEntry(iffeature);
-
-            ses_putstr(scb, START_DEFINED);
-            write_identifier(scb, 
-                             iffeature->feature->tkerr.mod->name,
-                             BAR_FEAT,
-                             iffeature->feature->name,
-                             cp->isuser);
-            ses_putchar(scb, ')');
-
-            if (nextif) {
-                ses_putstr(scb, (const xmlChar *)" && ");
-            }
-        }
-        ses_putchar(scb, ')');
-    }
-
-}  /* write_h_iffeature_start */
-
-
-/********************************************************************
-* FUNCTION write_h_iffeature_end
-* 
-* Generate the end C for 1 if-feature conditiona;
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   iffeatureQ == Q of ncx_feature_t to use
-*
-*********************************************************************/
-static void
-    write_h_iffeature_end (ses_cb_t *scb,
-                           const dlq_hdr_t *iffeatureQ)
-{
-    if (!dlq_empty(iffeatureQ)) {
-        ses_putstr(scb, POUND_ENDIF);
-    }
-
-}  /* write_h_iffeature_end */
+}  /* write_end_cplusplus */
 
 
 /********************************************************************
@@ -195,25 +131,6 @@ static void
     ses_putstr(scb, (const xmlChar *)"\n#endif");
 
 }  /* write_start_cplusplus */
-
-
-/********************************************************************
-* FUNCTION write_end_cplusplus
-* 
-* Generate the end __cplusplus wrapper
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*
-*********************************************************************/
-static void
-    write_end_cplusplus (ses_cb_t *scb)
-{
-    ses_putstr(scb, (const xmlChar *)"\n#ifdef __cplusplus");
-    ses_putstr(scb, (const xmlChar *)"\n} /* end extern 'C' */");
-    ses_putstr(scb, (const xmlChar *)"\n#endif");
-
-}  /* write_end_cplusplus */
 
 
 /********************************************************************
@@ -256,8 +173,10 @@ static void
 
     btyp = obj_get_basetype(obj);
 
-    /* generate the YOID as a comment */
     ses_putchar(scb, '\n');
+    write_h_iffeature_start(scb, &obj->iffeatureQ);
+
+    /* generate the YOID as a comment */
     write_c_oid_comment(scb, obj);
 
     /* start a new line and a C type definition */
@@ -309,10 +228,11 @@ static void
 
             if (!obj_has_name(childobj) || 
                 obj_is_cli(childobj) ||
-                !obj_is_enabled(childobj) ||
                 obj_is_abstract(childobj)) {
                 continue;
             }
+
+            write_h_iffeature_start(scb, &childobj->iffeatureQ);
 
             if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
                 ses_indent(scb, ses_indent_count(scb));
@@ -325,6 +245,9 @@ static void
                 write_c_objtype_ex(scb, childobj,  cdefQ, ';',
                                    FALSE, FALSE);
             }
+
+            write_h_iffeature_end(scb, &childobj->iffeatureQ);
+
         }
     }
 
@@ -332,6 +255,8 @@ static void
     ses_putchar(scb, ' ');
     ses_putstr(scb, cdef->idstr);
     ses_putchar(scb, ';');
+
+    write_h_iffeature_end(scb, &obj->iffeatureQ);
 
 }  /* write_h_object_typdef */
 
@@ -345,11 +270,13 @@ static void
 *   scb == session control block to use for writing
 *   datadefQ == Q of obj_template_t to use
 *   typcdefQ == Q of typename binding c_define_t structs
+*   cp == conversion parms to use
 *********************************************************************/
 static void
     write_h_objects (ses_cb_t *scb,
                      dlq_hdr_t *datadefQ,
-                     dlq_hdr_t *typcdefQ)
+                     dlq_hdr_t *typcdefQ,
+                     const yangdump_cvtparms_t *cp)
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childdatadefQ;
@@ -358,16 +285,13 @@ static void
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (!obj_has_name(obj) || 
-            obj_is_cli(obj) ||
-            !obj_is_enabled(obj) ||
-            obj_is_abstract(obj)) {
+        if (!obj_has_name(obj) || obj_is_cli(obj) || obj_is_abstract(obj)) {
             continue;
         }
 
         childdatadefQ = obj_get_datadefQ(obj);
         if (childdatadefQ) {
-            write_h_objects(scb, childdatadefQ, typcdefQ);
+            write_h_objects(scb, childdatadefQ, typcdefQ, cp);
         }
 
         write_h_object_typdef(scb, obj, typcdefQ);
@@ -524,7 +448,6 @@ static status_t
          obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
         if (obj_has_name(obj) && 
-            obj_is_enabled(obj) &&
             !obj_is_cli(obj) &&
             !obj_is_abstract(obj)) {
 
@@ -560,35 +483,28 @@ static status_t
 * INPUTS:
 *   scb == session control block to use for writing
 *   feature == ncx_feature_t to use
-*   cp == conversion parameters to use
-*
 *********************************************************************/
 static void
     write_h_feature (ses_cb_t *scb,
-                     const ncx_feature_t *feature,
-                     const yangdump_cvtparms_t *cp)
+                     const ncx_feature_t *feature)
 {
-
-#ifdef NOT_IMPLEMENTED_YET
-    if (!feature->enabled) {
-        return;
-    }
-#endif
-
-    write_h_iffeature_start(scb, &feature->iffeatureQ, cp);
+    write_h_iffeature_start(scb, &feature->iffeatureQ);
 
     /* define feature constant */
+    ses_putstr(scb, (const xmlChar *)"\n/* Feature ");
+    ses_putstr(scb,  feature->tkerr.mod->name);
+    ses_putchar(scb, ':');
+    ses_putstr(scb,  feature->name);
+    ses_putstr(scb, (const xmlChar *)"\n * Comment out to disable */");
     ses_putstr(scb, POUND_DEFINE);
-    write_identifier(scb, 
-                     feature->tkerr.mod->name,
-                     BAR_FEAT,
-                     feature->name,
-                     cp->isuser);
+    write_identifier(scb, feature->tkerr.mod->name, BAR_FEAT,
+                     feature->name, TRUE);
     ses_putchar(scb, ' ');
     ses_putchar(scb, '1');
 
     write_h_iffeature_end(scb, &feature->iffeatureQ);
-    
+    ses_putchar(scb, '\n');
+
 }  /* write_h_feature */
 
 
@@ -600,13 +516,11 @@ static void
 * INPUTS:
 *   scb == session control block to use for writing
 *   featureQ == que of ncx_feature_t to use
-*   cp == conversion parameters to use
 *
 *********************************************************************/
 static void
     write_h_features (ses_cb_t *scb,
-                      const dlq_hdr_t *featureQ,
-                      const yangdump_cvtparms_t *cp)
+                      const dlq_hdr_t *featureQ)
 {
     const ncx_feature_t *feature;
 
@@ -620,7 +534,7 @@ static void
          feature = (const ncx_feature_t *)
              dlq_nextEntry(feature)) {
 
-        write_h_feature(scb, feature, cp);
+        write_h_feature(scb, feature);
     }
     ses_putchar(scb, '\n');
 
@@ -779,20 +693,24 @@ static status_t
         }
         ses_putchar(scb, '"');
         ses_putchar(scb, '\n');
-    
+    }
+
+    if (cp->format == NCX_CVTTYP_H || cp->format == NCX_CVTTYP_UH) {
         /* 1) features */
-        write_h_features(scb, &mod->featureQ, cp);
+        write_h_features(scb, &mod->featureQ);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
                      dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
-                    write_h_features(scb, &node->submod->featureQ, cp);
+                    write_h_features(scb, &node->submod->featureQ);
                 }
             }
         }
+    }
 
+    if (!cp->isuser) {
         /* 2) identities */
         write_h_identities(scb, &mod->identityQ, cp);
         if (cp->unified && mod->ismod) {
@@ -848,16 +766,18 @@ static status_t
         }
     }
 
-    if (res == NO_ERR && !cp->isuser) {
+    if (res == NO_ERR && 
+        (cp->format == NCX_CVTTYP_H || cp->format == NCX_CVTTYP_UH)) {
         /* write typedefs for objects, not actually used in SIL code */
-        write_h_objects(scb, &mod->datadefQ, &typenameQ);
+        write_h_objects(scb, &mod->datadefQ, &typenameQ, cp);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
                      dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
-                    write_h_objects(scb, &node->submod->datadefQ, &typenameQ);
+                    write_h_objects(scb, &node->submod->datadefQ, 
+                                    &typenameQ, cp);
                 }
             }
         }

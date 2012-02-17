@@ -1756,7 +1756,7 @@ status_t
                           val_value_t  *curval,
                           boolean      *done)
 {
-    return agt_test_apply_write_val(parent, newval, curval, done);
+    return test_apply_write_val(parent, newval, curval, done);
 }
 
 

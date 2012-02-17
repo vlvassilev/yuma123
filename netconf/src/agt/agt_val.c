@@ -1551,15 +1551,15 @@ static status_t
     /* check if this node needs the edit operation applied */
     if (*done) {
         applyhere = FALSE;
-    } else if (newval->editvars->editop == OP_EDITOP_COMMIT) {
+    } else if (cur_editop == OP_EDITOP_COMMIT) {
         applyhere = val_get_dirty_flag(newval);
         *done = applyhere;
-    } else if (newval->editvars->editop == OP_EDITOP_DELETE ||
-               newval->editvars->editop == OP_EDITOP_REMOVE) {
+    } else if (cur_editop == OP_EDITOP_DELETE ||
+               cur_editop == OP_EDITOP_REMOVE) {
         applyhere = TRUE;
         *done = TRUE;
     } else {
-        applyhere = apply_this_node(newval->editvars->editop, 
+        applyhere = apply_this_node(cur_editop, 
                                     newval, 
                                     curval);
         *done = applyhere;
@@ -1618,7 +1618,7 @@ static status_t
     if (applyhere) {
 
         if (LOGDEBUG3) {
-            log_debug3("\ntest_apply_write_val: %s start", newval->name);
+            log_debug3("\ntest_apply_write_val: %s start", newval?newval->name:curval->name);
         }
 
         /* make sure the node is not a virtual value */
@@ -1629,7 +1629,7 @@ static status_t
             return NO_ERR;
         }
 
-        switch (newval->editvars->editop) {
+        switch (cur_editop) {
         case OP_EDITOP_MERGE:
             if (testval == NULL) {
                 testval = val_clone(newval);
@@ -1731,9 +1731,9 @@ static status_t
 
     if (res == NO_ERR 
         && applyhere == TRUE
+        && cur_editop == OP_EDITOP_MERGE
         && newval->btyp == NCX_BT_LIST
-        && newval->editvars->insertstr 
-        && newval->editvars->editop == OP_EDITOP_MERGE) {
+        && newval->editvars->insertstr) {
 
         /* move the list entry after the merge is done
          * only the editvars are used from the newval
@@ -1750,6 +1750,14 @@ static status_t
 
 }  /* test_apply_write_val */
 
+status_t
+    agt_test_apply_write_val (val_value_t  *parent,
+                          val_value_t  *newval,
+                          val_value_t  *curval,
+                          boolean      *done)
+{
+    return agt_test_apply_write_val(parent, newval, curval, done);
+}
 
 
 /********************************************************************

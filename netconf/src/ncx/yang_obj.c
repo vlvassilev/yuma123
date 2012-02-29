@@ -5071,6 +5071,10 @@ static status_t
         context = obj->def.augment->targobj;
     }
 
+    if (context == NULL) {
+        return ERR_NCX_DEF_NOT_FOUND;
+    }
+
     return xpath1_validate_expr_ex(mod, context, when, FALSE);
 
 }  /* resolve_when */

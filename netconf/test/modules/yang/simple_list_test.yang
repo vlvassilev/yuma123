@@ -13,5 +13,20 @@ module simple_list_test {
         leaf theKey { type string; }
         leaf theVal { type string; }
       }
-   }
+    }
+
+    rpc inc-counter {
+        description "Increments a counter.";
+    }
+
+    rpc get-counter {
+        description "Gets the current count.";
+
+        output {
+            leaf count {
+                description "The current count.";
+                type uint32;
+            }
+        }
+    }
 }

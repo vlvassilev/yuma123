@@ -182,8 +182,7 @@ module ietf-routing {
       "Routing parameters.";
     list router {
       key "name";
-      //following is invalid YANG so commented out
-      //unique "interfaces/interface/name";
+      unique "interfaces/interface/name";
       description
         "Each list entry is a container for configuration and
          operational state data of a single (logical) router.";

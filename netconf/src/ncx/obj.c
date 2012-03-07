@@ -2273,6 +2273,7 @@ static boolean
 * 
 * INPUTS:
 *   obj == node to generate the instance ID for
+*   stopobj == ancestor node to treat as root (may be NULL)
 *   buff == buffer to use (may be NULL)
 *   bufflen == length of buffer to use (0 to ignore check)
 *   normalmode == TRUE for a real Xpath OID
@@ -2294,6 +2295,7 @@ static boolean
 *********************************************************************/
 static status_t
     get_object_string (const obj_template_t *obj,
+                       const obj_template_t *stopobj,
                        xmlChar  *buff,
                        uint32 bufflen,
                        boolean normalmode,
@@ -2305,14 +2307,19 @@ static status_t
     *retlen = 0;
 
     boolean addmodname = withmodname || forcexpath;
+    boolean topnode = FALSE;
 
-    if (obj->parent && !obj_is_root(obj->parent)) {
-        status_t res = get_object_string(obj->parent, buff, bufflen, 
+    if (obj->parent && 
+        obj->parent != stopobj && 
+        !obj_is_root(obj->parent)) {
+        status_t res = get_object_string(obj->parent, stopobj, buff, bufflen, 
                                          normalmode, mod, retlen, 
                                          withmodname, forcexpath);
         if (res != NO_ERR) {
             return res;
         }
+    } else {
+        topnode = TRUE;
     }
 
     if (!obj_has_name(obj)) {
@@ -2346,7 +2353,7 @@ static status_t
 
     /* get the name and check the added length */
     const xmlChar *name = obj_get_name(obj);
-    uint32 namelen = xml_strlen(name);
+    uint32 namelen = xml_strlen(name), seplen = 1;
 
     if (addmodname) {
         if (bufflen &&
@@ -2359,30 +2366,36 @@ static status_t
         }
     }
 
+    if (topnode && stopobj) {
+        seplen = 0;
+    }
+
     /* copy the name string recusively, letting the stack
      * keep track of the next child node to write 
      */
     if (buff) {
         /* node separator char */
-        if (normalmode) {
+        if (topnode && stopobj) {
+            ;
+        } else if (normalmode) {
             buff[*retlen] = '/';
         } else {
             buff[*retlen] = '.';
         }
 
         if (addmodname) {
-            xml_strcpy(&buff[*retlen + 1], modname);
-            buff[*retlen + modnamelen + 1] = 
+            xml_strcpy(&buff[*retlen + seplen], modname);
+            buff[*retlen + modnamelen + seplen] = 
                 (forcexpath || withmodname) ? ':' : '_';
-            xml_strcpy(&buff[*retlen + modnamelen + 2], name);
+            xml_strcpy(&buff[*retlen + modnamelen + seplen + 1], name);
         } else {
-            xml_strcpy(&buff[*retlen + 1], name);
+            xml_strcpy(&buff[*retlen + seplen], name);
         }
     }
     if (addmodname) {
-        *retlen += (namelen + modnamelen + 2);
+        *retlen += (namelen + modnamelen + seplen + 1);
     } else {
-        *retlen += (namelen + 1);
+        *retlen += (namelen + seplen);
     }
     return NO_ERR;
 
@@ -7570,7 +7583,8 @@ status_t obj_gen_object_id (const obj_template_t *obj, xmlChar  **buff)
     *buff = NULL;
 
     /* figure out the length of the object ID */
-    res = get_object_string(obj, NULL, 0, TRUE, NULL, &len, FALSE, FALSE);
+    res = get_object_string(obj, NULL, NULL, 0, TRUE, NULL, &len, 
+                            FALSE, FALSE);
     if (res != NO_ERR) {
         return res;
     }
@@ -7582,7 +7596,8 @@ status_t obj_gen_object_id (const obj_template_t *obj, xmlChar  **buff)
     }
 
     /* get the object ID for real this time */
-    res = get_object_string(obj, *buff, len+1, TRUE, NULL, &len, FALSE, FALSE);
+    res = get_object_string(obj, NULL, *buff, len+1, TRUE, NULL, &len, 
+                            FALSE, FALSE);
     if (res != NO_ERR) {
         m__free(*buff);
         *buff = NULL;
@@ -7618,7 +7633,7 @@ status_t obj_gen_object_id_xpath (const obj_template_t *obj, xmlChar  **buff)
     *buff = NULL;
 
     /* figure out the length of the object ID */
-    res = get_object_string(obj, NULL, 0, TRUE, NULL, &len, FALSE, TRUE);
+    res = get_object_string(obj, NULL, NULL, 0, TRUE, NULL, &len, FALSE, TRUE);
     if (res != NO_ERR) {
         return res;
     }
@@ -7630,7 +7645,8 @@ status_t obj_gen_object_id_xpath (const obj_template_t *obj, xmlChar  **buff)
     }
 
     /* get the object ID for real this time */
-    res = get_object_string(obj, *buff, len+1, TRUE, NULL, &len, FALSE, TRUE);
+    res = get_object_string(obj, NULL, *buff, len+1, TRUE, NULL, &len, 
+                            FALSE, TRUE);
     if (res != NO_ERR) {
         m__free(*buff);
         *buff = NULL;
@@ -7640,6 +7656,54 @@ status_t obj_gen_object_id_xpath (const obj_template_t *obj, xmlChar  **buff)
     return NO_ERR;
 
 }  /* obj_gen_object_id_xpath */
+
+
+/********************************************************************
+ * Malloc and Generate the object ID for a unique-stmt test
+ *
+ * \param obj the node to generate the instance ID for
+ * \param stopobj the ancestor node to stop at
+ * \param buff the pointer to address of buffer to use
+ * \return status
+ *********************************************************************/
+status_t obj_gen_object_id_unique (const obj_template_t *obj, 
+                                   const obj_template_t *stopobj,
+                                   xmlChar  **buff)
+{
+    uint32    len;
+    status_t  res;
+
+    assert( obj && "obj is NULL!" );
+    assert( stopobj && "stopobj is NULL!" );
+    assert( buff && "buff is NULL!" );
+
+    *buff = NULL;
+
+    /* figure out the length of the object ID */
+    res = get_object_string(obj, stopobj, NULL, 0, TRUE, NULL, &len, 
+                            FALSE, TRUE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* get a buffer to fit the instance ID string */
+    *buff = (xmlChar *)m__getMem(len+1);
+    if (!*buff) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* get the object ID for real this time */
+    res = get_object_string(obj, stopobj, *buff, len+1, TRUE, NULL, &len, 
+                            FALSE, TRUE);
+    if (res != NO_ERR) {
+        m__free(*buff);
+        *buff = NULL;
+        return SET_ERROR(res);
+    }
+
+    return NO_ERR;
+
+}  /* obj_gen_object_id_unique */
 
 
 /********************************************************************
@@ -7677,7 +7741,7 @@ status_t
     *buff = NULL;
 
     /* figure out the length of the object ID */
-    res = get_object_string(obj, NULL, 0, TRUE, mod, &len, FALSE, FALSE);
+    res = get_object_string(obj, NULL, NULL, 0, TRUE, mod, &len, FALSE, FALSE);
     if (res != NO_ERR) {
         return res;
     }
@@ -7689,7 +7753,8 @@ status_t
     }
 
     /* get the object ID for real this time */
-    res = get_object_string(obj, *buff, len+1, TRUE, mod, &len, FALSE, FALSE);
+    res = get_object_string(obj, NULL, *buff, len+1, TRUE, mod, &len, 
+                            FALSE, FALSE);
     if (res != NO_ERR) {
         m__free(*buff);
         *buff = NULL;
@@ -7733,7 +7798,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-    return get_object_string(obj, buff, bufflen, TRUE, NULL, reallen, 
+    return get_object_string(obj, NULL, buff, bufflen, TRUE, NULL, reallen, 
                              FALSE, FALSE);
 
 }  /* obj_copy_object_id */
@@ -7771,7 +7836,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-    return get_object_string(obj, buff, bufflen, TRUE, NULL, reallen, 
+    return get_object_string(obj, NULL, buff, bufflen, TRUE, NULL, reallen, 
                              TRUE, FALSE);
 
 }  /* obj_copy_object_id_mod */
@@ -7811,7 +7876,8 @@ status_t
     *buff = NULL;
 
     /* figure out the length of the aughook ID */
-    res = get_object_string(obj, NULL, 0, FALSE, NULL, &len, FALSE, FALSE);
+    res = get_object_string(obj, NULL, NULL, 0, FALSE, NULL, &len, 
+                            FALSE, FALSE);
     if (res != NO_ERR) {
         return res;
     }
@@ -7830,7 +7896,8 @@ status_t
     p += xml_strcpy(p, NCX_AUGHOOK_START);
     
     /* add the aughook ID to the buffer */
-    res = get_object_string(obj, p, len+1, FALSE, NULL, &len, FALSE, FALSE);
+    res = get_object_string(obj, NULL, p, len+1, FALSE, NULL, &len, 
+                            FALSE, FALSE);
     if (res != NO_ERR) {
         m__free(*buff);
         *buff = NULL;

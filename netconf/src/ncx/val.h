@@ -419,7 +419,7 @@ typedef struct val_index_t_ {
 /* one unique-stmt component test value node */
 typedef struct val_unique_t_ {
     dlq_hdr_t     qhdr;
-    val_value_t  *valptr;
+    struct xpath_pcb_t_ *pcb;  // live XPath CB w/ result
 } val_unique_t;
 
 

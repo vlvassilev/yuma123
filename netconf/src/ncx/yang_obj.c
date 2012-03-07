@@ -5933,24 +5933,30 @@ static status_t
          * object is all static object types
          *   container, leaf, choice, case
          */
-        obj_template_t *testobj = uniobj->parent;
-        res = NO_ERR;
-        while (testobj && (testobj != obj) && (res == NO_ERR)) {
-            if (testobj->objtype == OBJ_TYP_LIST) {
-                log_error("\nError: list node (%s) "
-                          "within unique stmt '%s' for node '%s'",
-                          obj_get_name(testobj), uni->xpath, savestr);
-                res =  set_tkc_error( tkc, mod, tkerr, 
-                        ERR_NCX_INVALID_UNIQUE_NODE );
-            }
-
-            testobj = testobj->parent;
-        }
-        if (res != NO_ERR) {
-            m__free(savestr);
-            CHK_EXIT(res, retres);
-            continue;
-        }
+        /*******************
+         * this code is removed because NETMOD WG decided that list
+         * is allowed to be within the unique node path.
+         * the eval result will contain a node-set, not 1 val_value_t
+         *
+         *obj_template_t *testobj = uniobj->parent;
+         *res = NO_ERR;
+         *while (testobj && (testobj != obj) && (res == NO_ERR)) {
+         *   if (testobj->objtype == OBJ_TYP_LIST) {
+         *       log_error("\nError: list node (%s) "
+         *                 "within unique stmt '%s' for node '%s'",
+         *                 obj_get_name(testobj), uni->xpath, savestr);
+         *       res =  set_tkc_error( tkc, mod, tkerr, 
+         *               ERR_NCX_INVALID_UNIQUE_NODE );
+         *   }
+         *
+         *   testobj = testobj->parent;
+         *}
+         *if (res != NO_ERR) {
+         *   m__free(savestr);
+         *   CHK_EXIT(res, retres);
+         *   continue;
+         *}
+         */
 
         uniobj->flags |= OBJ_FL_UNIQUE;
 

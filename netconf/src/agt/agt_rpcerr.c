@@ -48,6 +48,7 @@ date         init     comment
 #include  "val_util.h"
 #include  "xmlns.h"
 #include  "xml_util.h"
+#include  "xpath.h"
 
 /********************************************************************
 *                                                                   *
@@ -1469,7 +1470,17 @@ rpc_err_rec_t *
          unival = (val_unique_t *)dlq_nextEntry(unival)) {
 
         pathbuff = NULL;
-        res = val_gen_instance_id(msghdr, unival->valptr, NCX_IFMT_XPATH1, 
+        xpath_resnode_t *resnode = xpath_get_first_resnode(unival->pcb->result);
+        if (resnode == NULL) {
+            // should not happen!
+            continue;
+        }
+        val_value_t *valptr = xpath_get_resnode_valptr(resnode);
+        if (valptr == NULL) {
+            // should not happen!
+            continue;
+        }
+        res = val_gen_instance_id(msghdr, valptr, NCX_IFMT_XPATH1, 
                                   &pathbuff);
         if (res == NO_ERR) {
             res = enque_error_info(err, xmlns_yang_id(), NCX_EL_NON_UNIQUE, 

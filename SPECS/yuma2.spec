@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -21,8 +21,11 @@ Requires: ncurses
 Requires: libxml2
 Requires: libssh2
 
+# do not build the yuma-debug packages
 %define debug_package %{nil}
 
+# set to release number above
+%define myrel 2
 
 # main package rules
 
@@ -34,17 +37,17 @@ cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
 %ifarch x86_64
-make LIB64=1 RELEASE=1 %{?_smp_mflags}
+make LIB64=1 RELEASE=%{myrel} %{?_smp_mflags}
 %else
-make RELEASE=1 %{?_smp_mflags}
+make RELEASE=%{myrel} %{?_smp_mflags}
 %endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %ifarch x86_64
-make install LDFLAGS+=--build-id LIB64=1 RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id LIB64=1 RELEASE=%{myrel} DESTDIR=$RPM_BUILD_ROOT
 %else
-make install LDFLAGS+=--build-id RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id RELEASE=%{myrel} DESTDIR=$RPM_BUILD_ROOT
 %endif
 
 %clean
@@ -80,6 +83,65 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Fri Mar 09 2012 Andy Bierman <andy at netconfcentral.org> 2.2-2 [1737]
+  * netconfd
+    * enhanced unique-stmt checking to support embedded lists
+      change val_unique_t to hold XPath struct instead of value back-ptr
+      Note:  <non-unique> value in error reporting for unique-error may not
+      be correct if list with multiple instances has error.  Will indicate
+      the first node in the node-set with an error, which may not be
+      the instance that caused a non-unique error within a nested list
+    * fix bug in yuma-arp: SIL callbacks not getting loaded
+      properly because revision date was wrong
+    * fix bug in new instance_check code where false when-stmt may
+      get ignored and falsely flag a missing mandatory node error
+
+  * yangdump
+    * fix bug where xpath is checked for an external augment
+      even if context node is NULL because of some error in the
+      external module, so target node not available
+    * removed the list-in-unique-path error check
+    * add auto-generated code for YANG features
+      Conditional code allows features to be enabled
+      at compile-time, boot-time, and/or module-load time
+      Usage:
+       1) Compile-time
+         The H file will contain a #define for <mod>_F_<feature>
+         The default is to enable features at compile-time.
+         To disable, comment out this #define.  All code related
+         to the feature will be #ifdef removed from the image.
+       2) Boot-time
+         If --feature-enable-default=true (d), then --feature-disable
+         parameters should be added to turn features off.
+         If --feature-enable-default=false, then --feature-enable
+         parameters should be added to turn features on.
+       3) Module Load time
+         During the module SIL init callback, the module features
+         will be enabled or disabled according to the #define
+         constancts in step 1.  However these settings will
+         not override any CLI/conf settings in step 2 (at this time)
+    * fixed bug where --feature-enable-default=false would
+      cause the server to shutdown if any modules with features
+      were loaded
+    * now allowing just feature name in --feature-enable and
+      --feature-disable parameters instead of only module-name:feature-name
+    * --format=uc or --format=uh now cause the notification send functions
+      to be generated in the user SIL files, not the yuma SIL files.
+      All code which may be edited by the user is now in the user SIL files
+      if make_sil_dir --split is used
+    * deprecated --feature-code-default parameter.  This is ignored
+      by yangdump. Same init sequence is always generated.
+    * deprecated --feature-static and feature-dynamic parameters.
+      These ares ignored by yangdump.  See Usage section above for new
+      YANG feature management procedure.
+
+  * YANG modules
+    * update latest NETMOD WG modules
+    * add 2 new test modules used to test recent code additions
+
+  * Documentation
+    * update developer manual
+    * update utility scripts and man pages
 * Fri Jan 27 2012 Andy Bierman <andy at netconfcentral.org> 2.2-1 [1712]
   * netconfd
     * Added server regression testing and Coverity static code cleanup

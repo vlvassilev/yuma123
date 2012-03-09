@@ -5,13 +5,11 @@ module ietf-netconf-acm {
   prefix "nacm";
 
   import ietf-yang-types {
-
     prefix yang;
   }
 
   organization
     "IETF NETCONF (Network Configuration) Working Group";
-
 
   contact
     "WG Web:   <http://tools.ietf.org/wg/netconf/>
@@ -24,7 +22,7 @@ module ietf-netconf-acm {
                <mailto:bertietf@bwijnen.net>
 
      Editor:   Andy Bierman
-               <mailto:andy@netconfcentral.org>
+               <mailto:andy@yumaworks.com>
 
      Editor:   Martin Bjorklund
                <mailto:mbj@tail-f.com>";
@@ -32,8 +30,8 @@ module ietf-netconf-acm {
   description
     "NETCONF Access Control Model.
 
-     Copyright (c) 2011 IETF Trust and the persons identified as
-     authors of the code. All rights reserved.
+     Copyright (c) 2012 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
      without modification, is permitted pursuant to, and subject
@@ -42,21 +40,14 @@ module ietf-netconf-acm {
      Legal Provisions Relating to IETF Documents
      (http://trustee.ietf.org/license-info).
 
-     This version of this YANG module is part of RFC XXXX; see
+     This version of this YANG module is part of RFC 6536; see
      the RFC itself for full legal notices.";
-  // RFC Ed.: replace XXXX with actual RFC number and
-  // remove this note
 
-  // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netconf-access-control-07.txt
-
-  // RFC Ed.: please update the date to the date of publication
-  revision "2011-12-23" {
+  revision "2012-02-22" {
     description
       "Initial version";
-
     reference
-      "RFC XXXX: Network Configuration Protocol
+      "RFC 6536: Network Configuration Protocol (NETCONF)
                  Access Control Model";
   }
 
@@ -103,9 +94,8 @@ module ietf-netconf-acm {
     type string {
       length "1..max";
     }
-
     description
-      "General Purpose User Name string.";
+      "General Purpose Username string.";
   }
 
   typedef matchall-string-type {
@@ -152,7 +142,6 @@ module ietf-netconf-acm {
     type string {
       length "1..max";
       pattern "[^\*].*";
-
     }
     description
       "Name of administrative group to which
@@ -190,19 +179,18 @@ module ietf-netconf-acm {
 
        This XPath expression is evaluated in the following context:
 
-         o  The set of namespace declarations are those in scope on
-            the leaf element where this type is used.
+        o  The set of namespace declarations are those in scope on
+           the leaf element where this type is used.
 
-         o  The set of variable bindings contains one variable,
-            'USER', which contains the name of user of the current
-             session.
+        o  The set of variable bindings contains one variable,
+           'USER', which contains the name of the user of the current
+            session.
 
-         o  The function library is the core function library, but
-            note that due to the syntax restrictions of an
-            instance-identifier, no functions are allowed.
+        o  The function library is the core function library, but
+           note that due to the syntax restrictions of an
+           instance-identifier, no functions are allowed.
 
-
-         o  The context node is the root node in the data tree.";
+        o  The context node is the root node in the data tree.";
   }
 
   /*
@@ -219,7 +207,7 @@ module ietf-netconf-acm {
       type boolean;
       default true;
       description
-        "Enable or disable all NETCONF access control
+        "Enables or disables all NETCONF access control
          enforcement.  If 'true', then enforcement
          is enabled.  If 'false', then enforcement
          is disabled.";
@@ -267,8 +255,8 @@ module ietf-netconf-acm {
       config false;
       mandatory true;
       description
-        "Number of times a protocol operation request was denied
-         since the server last restarted.";
+        "Number of times since the server last restarted that a
+         protocol operation request was denied.";
     }
 
     leaf denied-data-writes {
@@ -276,9 +264,9 @@ module ietf-netconf-acm {
       config false;
       mandatory true;
       description
-        "Number of times a protocol operation request to alter
-         a configuration datastore was denied, since the
-         server last restarted.";
+        "Number of times since the server last restarted that a
+         protocol operation request to alter
+         a configuration datastore was denied.";
     }
 
     leaf denied-notifications {
@@ -286,10 +274,9 @@ module ietf-netconf-acm {
       config false;
       mandatory true;
       description
-        "Number of times a notification was dropped
-         for a subscription because access to
-         the event type was denied, since the server
-         last restarted.";
+        "Number of times since the server last restarted that
+         a notification was dropped for a subscription because
+         access to the event type was denied.";
     }
 
     container groups {
@@ -298,7 +285,6 @@ module ietf-netconf-acm {
 
       list group {
         key name;
-
 
         description
           "One NACM Group Entry.  This list will only contain
@@ -314,7 +300,7 @@ module ietf-netconf-acm {
         leaf-list user-name {
           type user-name-type;
           description
-            "Each entry identifies the user name of
+            "Each entry identifies the username of
              a member of the group associated with
              this entry.";
         }
@@ -348,7 +334,6 @@ module ietf-netconf-acm {
            entry.";
       }
 
-
       list rule {
         key "name";
         ordered-by user;
@@ -357,7 +342,7 @@ module ietf-netconf-acm {
 
            Rules are processed in user-defined order until a match is
            found.  A rule matches if 'module-name', 'rule-type', and
-           'access-operations' matches the request.  If a rule
+           'access-operations' match the request.  If a rule
            matches, the 'action' leaf determines if access is granted
            or not.";
 
@@ -378,14 +363,14 @@ module ietf-netconf-acm {
           description
             "Name of the module associated with this rule.
 
-             This leaf matches if it has the value '*', or if the
+             This leaf matches if it has the value '*' or if the
              object being accessed is defined in the module with the
              specified module name.";
         }
         choice rule-type {
           description
             "This choice matches if all leafs present in the rule
-             matches the request.  If no leafs are present, the
+             match the request.  If no leafs are present, the
              choice matches all requests.";
           case protocol-operation {
             leaf rpc-name {
@@ -394,10 +379,9 @@ module ietf-netconf-acm {
                 type string;
               }
               description
-                "This leaf matches if it has the value '*', or if
+                "This leaf matches if it has the value '*' or if
                  its value equals the requested protocol operation
                  name.";
-
             }
           }
           case notification {
@@ -407,7 +391,7 @@ module ietf-netconf-acm {
                 type string;
               }
               description
-                "This leaf matches if it has the value '*', or if its
+                "This leaf matches if it has the value '*' or if its
                  value equals the requested notification name.";
             }
           }
@@ -424,8 +408,8 @@ module ietf-netconf-acm {
                  complete instance identifier is required for this
                  type of path value.
 
-                 The special value '/' refers to all possible data
-                 store contents.";
+                 The special value '/' refers to all possible
+                 datastore contents.";
             }
           }
         }
@@ -439,14 +423,13 @@ module ietf-netconf-acm {
           description
             "Access operations associated with this rule.
 
-             This leaf matches if it has the value '*', or if the
+             This leaf matches if it has the value '*' or if the
              bit corresponding to the requested operation is set.";
         }
 
         leaf action {
           type action-type;
           mandatory true;
-
           description
             "The access control action associated with the
              rule.  If a rule is determined to match a

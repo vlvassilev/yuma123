@@ -485,6 +485,33 @@ extern boolean
 				     ncx_num_t *numval,
 				     status_t *res);
 
+
+/********************************************************************
+* FUNCTION xpath1_compare_nodeset_results
+* 
+* Compare an XPath result to another result
+*
+*    result1 = node-set
+*    result2 = node-set
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result1 == result struct to compare
+*    result2 == result struct to compare
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*     equality relation result (TRUE or FALSE)
+*********************************************************************/
+extern boolean
+    xpath1_compare_nodeset_results (xpath_pcb_t *pcb,
+                                    xpath_result_t *result1,
+                                    xpath_result_t *result2,
+                                    status_t *res);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

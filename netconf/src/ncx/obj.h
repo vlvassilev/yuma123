@@ -1914,6 +1914,19 @@ extern status_t
 
 
 /********************************************************************
+ * Malloc and Generate the object ID for a unique-stmt test
+ *
+ * \param obj the node to generate the instance ID for
+ * \param stopobj the ancestor node to stop at
+ * \param buff the pointer to address of buffer to use
+ * \return status
+ *********************************************************************/
+extern status_t obj_gen_object_id_unique (const obj_template_t *obj, 
+                                          const obj_template_t *stopobj,
+                                          xmlChar  **buff);
+
+
+/********************************************************************
 * FUNCTION obj_gen_object_id_code
 * 
 * Malloc and Generate the object ID for an object node

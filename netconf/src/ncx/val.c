@@ -9860,13 +9860,12 @@ val_unique_t *
 void
     val_free_unique (val_unique_t *valuni)
 {
-#ifdef DEBUG
     if (!valuni) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
-
+    if (valuni->pcb) {
+        xpath_free_pcb(valuni->pcb);
+    }
     m__free(valuni);
 
 }  /* val_free_unique */

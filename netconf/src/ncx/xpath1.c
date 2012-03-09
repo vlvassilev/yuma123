@@ -9740,4 +9740,43 @@ boolean
 }  /* xpath1_compare_result_to_number */
 
 
+/********************************************************************
+* FUNCTION xpath1_compare_nodeset_results
+* 
+* Compare an XPath result to another result
+*
+*    result1 = node-set
+*    result2 = node-set
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result1 == result struct to compare
+*    result2 == result struct to compare
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*     equality relation result (TRUE or FALSE)
+*********************************************************************/
+boolean
+    xpath1_compare_nodeset_results (xpath_pcb_t *pcb,
+                                    xpath_result_t *result1,
+                                    xpath_result_t *result2,
+                                    status_t *res)
+{
+    /* only compare real results, not objects */
+    if (!pcb->val) {
+        return TRUE;
+    }
+
+    *res = NO_ERR;
+    boolean retval = compare_results(pcb, result1, result2,
+                                     XP_EXOP_EQUAL, res);
+    return retval;
+
+}  /* xpath1_compare_nodeset_results */
+
+
 /* END xpath1.c */

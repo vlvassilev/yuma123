@@ -3280,8 +3280,16 @@ static boolean
     val_unique_t *uni2 = (val_unique_t *)dlq_firstEntry(uni2Q);
 
     while (uni1 && uni2) {
-        int cmpval = val_compare(uni1->valptr, uni2->valptr);
-        if (cmpval) {
+        status_t res = NO_ERR;
+        boolean cmpval = xpath1_compare_nodeset_results(uni1->pcb,
+                                                        uni1->pcb->result,
+                                                        uni2->pcb->result,
+                                                        &res);
+        if (res != NO_ERR) {
+            // log_error()!!
+            return FALSE;
+        }
+        if (!cmpval) {
             return FALSE;
         }
         uni1 = (val_unique_t *)dlq_nextEntry(uni1);
@@ -3345,10 +3353,8 @@ static void free_unique_set (unique_set_t *uset)
 *
 * INPUTS:
 *   curval == value to run test for
-*          If test needed, all following-sibling nodes will be 
-*          checked to see if they are the same list object instance
-*          and if they have a complete tuple to compare, 
 *   unidef == obj_unique_t to process
+*   root == XPath docroot to use
 *   resultQ == Queue header to store the val_unique_t records
 *   freeQ == Queue of free val_unique_t records to check first
 *
@@ -3362,29 +3368,23 @@ static void free_unique_set (unique_set_t *uset)
 static status_t 
     make_unique_testset (val_value_t *curval,
                          obj_unique_t *unidef,
+                         val_value_t *root,
                          dlq_hdr_t *resultQ,
                          dlq_hdr_t *freeQ)
 {
-    obj_unique_comp_t  *unicomp;
-    val_unique_t       *unival;
-    val_value_t        *targval;
-    ncx_module_t       *mod;
-    status_t            res, retres;
-
-    retres = NO_ERR;
-
-    unicomp = obj_first_unique_comp(unidef);
-    if (!unicomp) {
-        /* really should not happen */
-        return ERR_NCX_CANCELED;
-    }
-
     /* need to get a non-const pointer to the module */
     if (curval->obj == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    mod = curval->obj->tkerr.mod;
+    ncx_module_t       *mod = curval->obj->tkerr.mod;
+    status_t            retres = NO_ERR;
+
+    obj_unique_comp_t  *unicomp = obj_first_unique_comp(unidef);
+    if (!unicomp) {
+        /* really should not happen */
+        return ERR_NCX_CANCELED;
+    }
 
     /* for each unique component, get the descendant
      * node that is specifies and save it in a val_unique_t
@@ -3395,24 +3395,34 @@ static status_t
             continue;
         }
 
-        res = xpath_find_val_unique(curval, mod, unicomp->xpath, FALSE,
-                                    &targval);
-
+        xpath_pcb_t *targpcb = NULL;
+        status_t res = xpath_find_val_unique(curval, mod, unicomp->xpath,
+                                             root, FALSE, &targpcb);
         if (res != NO_ERR) {
             retres = ERR_NCX_CANCELED;
+            xpath_free_pcb(targpcb);
             continue;
         }
 
-        unival = (val_unique_t *)dlq_deque(freeQ);
+        /* skip the entire unique test for this list entry
+         * if this is an empty node-set */
+        if (xpath_get_first_resnode(targpcb->result) == NULL) {
+            retres = ERR_NCX_CANCELED;
+            xpath_free_pcb(targpcb);
+            continue;
+        }
+
+        val_unique_t *unival = (val_unique_t *)dlq_deque(freeQ);
         if (!unival) {
             unival = val_new_unique();
             if (!unival) {
                 retres = ERR_INTERNAL_MEM;
+                xpath_free_pcb(targpcb);
                 continue;
             }
         }
 
-        unival->valptr = targval;
+        unival->pcb = targpcb;
         dlq_enque(unival, resultQ);
 
         unicomp = obj_next_unique_comp(unicomp);
@@ -3433,6 +3443,7 @@ static status_t
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use
+*   root == XPath docroot to use
 *   unidef == obj_unique_t to process
 *   uninum == ordinal ID for this unique-stmt
 *
@@ -3449,6 +3460,7 @@ static status_t
     one_unique_stmt_check (ses_cb_t *scb,
                            xml_msg_hdr_t *msg,
                            agt_cfg_commit_test_t *ct,
+                           val_value_t *root,
                            obj_unique_t *unidef,
                            uint32 uninum)
 {
@@ -3480,7 +3492,8 @@ static status_t
 
         val_value_t *valnode = xpath_get_resnode_valptr(resnode);
 
-        status_t res = make_unique_testset(valnode, unidef, &uniQ, &freeQ);
+        status_t res = make_unique_testset(valnode, unidef, root, &uniQ,
+                                           &freeQ);
         if (res == NO_ERR) {
             /* this valnode provided a complete tuple so it will be
              * used in the compare test   */
@@ -3560,7 +3573,7 @@ static status_t
 *   msg == xml_msg_hdr t from msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use
-*   child == object to run test for, if any unique-stmts
+*   root == XPath docroot to use
 *
 * OUTPUTS:
 *   if msg not NULL:
@@ -3574,7 +3587,8 @@ static status_t
 static status_t 
     unique_stmt_check (ses_cb_t *scb,
                        xml_msg_hdr_t *msg,
-                       agt_cfg_commit_test_t *ct)
+                       agt_cfg_commit_test_t *ct,
+                       val_value_t *root)
 {
     obj_unique_t *unidef = obj_first_unique(ct->obj);
     uint32 uninum = 0;
@@ -3586,7 +3600,8 @@ static status_t
         ++uninum;
 
         if (unidef->isconfig) {
-            status_t res = one_unique_stmt_check(scb, msg, ct, unidef, uninum);
+            status_t res = one_unique_stmt_check(scb, msg, ct, root,
+                                                 unidef, uninum);
             CHK_EXIT(res, retres);
         }
 
@@ -5237,7 +5252,7 @@ static status_t
 *   msghdr == XML message header in progress 
 *          == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   ct == commit test record to use (NULL == root test)
-*
+*   root == docroot for XPath
 * OUTPUTS:
 *   if msghdr not NULL:
 *      msghdr->msg_errQ may have rpc_err_rec_t 
@@ -5250,13 +5265,14 @@ static status_t
 static status_t 
     run_obj_unique_tests (ses_cb_t *scb,
                           xml_msg_hdr_t *msghdr,
-                          agt_cfg_commit_test_t *ct)
+                          agt_cfg_commit_test_t *ct,
+                          val_value_t *root)
 {
     status_t res = NO_ERR;
 
     if (ct->testflags & AGT_TEST_FL_UNIQUE) {
         log_debug2("\nrun unique tests for %s", ct->objpcb->exprstr);
-        res = unique_stmt_check(scb, msghdr, ct);
+        res = unique_stmt_check(scb, msghdr, ct, root);
     }
 
     return res;
@@ -5522,7 +5538,7 @@ status_t
 
         /* check if any unique tests, which are handled all at once
          * instead of one instance at a time  */
-        res = run_obj_unique_tests(scb, msghdr, ct);
+        res = run_obj_unique_tests(scb, msghdr, ct, root);
         if (res != NO_ERR) {
             CHK_EXIT(res, retres);
         }

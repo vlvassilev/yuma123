@@ -25,7 +25,7 @@
 
 //#include <xmlstring.h>
 
-#ifndef CYGWIN
+#if !defined(CYGWIN) && !defined(MACOSX)
 #define BUILD_ARP 1
 #endif
 

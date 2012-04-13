@@ -3891,8 +3891,12 @@ status_t
     if (pcb->top == mod) {
         pcb->topadded = wasadd;
         pcb->retmod = NULL;
-    } else {
+    } else if (pcb->top) {
+        /* just parsed an import or include */
         pcb->retmod = mod;
+    } else {
+        /* the module did not start correctly */
+        pcb->retmod = NULL;
     }
 
     if (res != NO_ERR) {
@@ -3910,11 +3914,11 @@ status_t
             }
         } 
 
-        if (mod != NULL && !wasadd && !pcb->keepmode) {
+        if (mod != NULL && (pcb->top == NULL || (!wasadd && !pcb->keepmode))) {
             /* module was not added to registry so it is live this will be 
              * skipped for an include file because wasadd is always set to 
-             * TRUE for submods */
-            if ( pcb->top == mod) {
+             * TRUE for submods; this is an invalid module if top not set */
+            if (pcb->top == mod) {
                 pcb->top = NULL;
             }
             pcb->retmod = NULL;

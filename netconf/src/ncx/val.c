@@ -7252,6 +7252,9 @@ int
 *                  FALSE to compare all nodes
 *    childonly == TRUE to look just 1 level for comparison
 *                 FALSE to compare all descendant nodes of complex types
+*    editing == TRUE to compare for editing
+*               FALSE to compare just the values, so a set by
+*               default and value=default are the same value
 *
 * RETURNS:
 *   compare result
@@ -7263,7 +7266,8 @@ int32
     val_compare_max (const val_value_t *val1,
                      const val_value_t *val2,
                      boolean configonly,
-                     boolean childonly)
+                     boolean childonly,
+                     boolean editing)
 {
     ncx_btype_t  btyp;
     const val_value_t *ch1, *ch2;
@@ -7283,7 +7287,7 @@ int32
     /* normally ignore all meta-data, except when checking
      * for nested operations
      */
-    if (configonly) {
+    if (configonly && editing) {
         /* if there was an nc:operation or YANG attribute in the
          * node, then do not treat the nodes as equal   */
         if (val1->editvars && val1->editvars->operset) {
@@ -7422,7 +7426,7 @@ int32
 
             if (!childonly || typ_is_simple(ch1->btyp)) {
                 /* check if they have same value */
-                ret = val_compare_max(ch1, ch2, configonly, childonly);
+                ret = val_compare_max(ch1, ch2, configonly, childonly, editing);
                 if (ret) {
                     return ret;
                 }
@@ -7481,7 +7485,7 @@ int32
                     const val_value_t *val2,
                     boolean configonly)
 {
-    return val_compare_max(val1, val2, configonly, FALSE);
+    return val_compare_max(val1, val2, configonly, FALSE, TRUE);
 }
 
 
@@ -7512,7 +7516,7 @@ int32
     val_compare (const val_value_t *val1,
                  const val_value_t *val2)
 {
-    return val_compare_max(val1, val2, FALSE, FALSE);
+    return val_compare_max(val1, val2, FALSE, FALSE, TRUE);
 }  /* val_compare */
 
 

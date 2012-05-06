@@ -1291,12 +1291,7 @@ status_t
     p = buffer;
     p += xml_strcpy(p, (const xmlChar *)"lib");    
     p += xml_strcpy(p, modname);
-
-#ifdef MACOSX
-    xml_strcpy(p, (const xmlChar *)".dylib");
-#else
     xml_strcpy(p, (const xmlChar *)".so");
-#endif
 
     /* try to find it directly for loading */
     pathspec = ncxmod_find_sil_file(buffer, FALSE, &res);

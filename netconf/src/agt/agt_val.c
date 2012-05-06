@@ -3982,26 +3982,42 @@ static status_t
                 }
             }
 
-            /* missing single parameter (13.5) */
-            res = ERR_NCX_MISSING_VAL_INST;
-            val->res = res;
-
-            /* need to construct a string error-path */
-            instbuff = NULL;
-            res2 = val_gen_split_instance_id(msg, val, NCX_IFMT_XPATH1,
-                                             obj_get_nsid(obj),
-                                             obj_get_name(obj),
-                                             FALSE, &instbuff);
-            if (res2 == NO_ERR && instbuff) {
-                agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ,
-                                 obj, NCX_NT_STRING, instbuff);
+            /* make sure this object is not an NP container with
+             * mandatory descendant nodes which also have a when-stmt
+             * !!! For now, not clear if when-stmt and mandatory-stmt
+             * !!! together can be enforced if the context node does
+             * !!! not exist; creating a dummy context node changes
+             * !!! the data model.    */
+            if (obj_is_np_container(obj) &&
+                !obj_is_mandatory_when_ex(obj, TRUE)) {
+                /* this NP container is mandatory but there are when-stmts
+                 * that go with the mandatory nodes, so do not generate
+                 * an error for this NP container.  If this container
+                 * is non-empty then the when-tests will be run for
+                 * those runs after test for this node exits  */
+                ;
             } else {
-                agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ,
-                                 obj, NCX_NT_VAL, val);
-            }
+                /* missing single parameter (13.5) */
+                res = ERR_NCX_MISSING_VAL_INST;
+                val->res = res;
 
-            if (instbuff) {
-                m__free(instbuff);
+                /* need to construct a string error-path */
+                instbuff = NULL;
+                res2 = val_gen_split_instance_id(msg, val, NCX_IFMT_XPATH1,
+                                                 obj_get_nsid(obj),
+                                                 obj_get_name(obj),
+                                                 FALSE, &instbuff);
+                if (res2 == NO_ERR && instbuff) {
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ,
+                                     obj, NCX_NT_STRING, instbuff);
+                } else {
+                    agt_record_error(scb, msg, layer, res, NULL, NCX_NT_OBJ,
+                                     obj, NCX_NT_VAL, val);
+                }
+
+                if (instbuff) {
+                    m__free(instbuff);
+                }
             }
         }
         if (iqual == NCX_IQUAL_1MORE) {

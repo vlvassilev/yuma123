@@ -968,7 +968,9 @@ static status_t
                 keynum = get_key_number(pcb->targobj, pcb->varobj);
             }
             if (keynum == -1) {
-                SET_ERROR(ERR_INTERNAL_VAL);
+                ;
+                /* SET_ERROR(ERR_INTERNAL_VAL); */
+                /* not key value but still OK to have as predicate */
             } else if (keynum < MAX_KEYS) {
                 keybit = (uint64)(1 << keynum);
                 if (keyflags & keybit) {
@@ -1095,7 +1097,7 @@ static status_t
     }
 
     if (pcb->obj) {
-        if (loopcount != keytotal) {
+        if (loopcount < keytotal) {
             if (keycount < keytotal) {
                 if (pcb->flags & XP_FL_SCHEMA_INSTANCEID ||
                     pcb->source == XP_SRC_LEAFREF) {

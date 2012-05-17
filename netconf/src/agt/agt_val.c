@@ -1944,6 +1944,7 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
                 obj_get_mod_name(newval->obj), newval->name);
 
     /* check and adjust the operation attribute */
+    boolean is_validate = msg->rpc_txcb->is_validate;
     ncx_iqual_t iqual = val_get_iqualval(newval);
     op_editop_t cur_editop = OP_EDITOP_NONE;
     op_editop_t cvtop = cvt_editop(editop, newval, curval);
@@ -1952,7 +1953,7 @@ static status_t invoke_simval_cb_validate( op_editop_t editop,
     if (cur_editop == OP_EDITOP_NONE) {
         cur_editop = editop;
     }
-    if (editop != OP_EDITOP_COMMIT) {
+    if (editop != OP_EDITOP_COMMIT && !is_validate) {
         newval->editop = cur_editop;
     }
 
@@ -2226,10 +2227,21 @@ static status_t
 
             res = agt_check_editop(cvtop, &cur_editop, newval, curval, 
                                    iqual, ses_get_protocol(scb));
-            if (editop != OP_EDITOP_COMMIT) {
+
+            if (editop != OP_EDITOP_COMMIT ) {
+                /* need to check the max-access but not over-write
+                 * the newval->editop if this is a validate operation
+                 * do not care about parent operation in agt_check_max_access
+                 * because the operation is expected to be OP_EDITOP_LOAD
+                 */
+                boolean is_validate = msg->rpc_txcb->is_validate;
+                op_editop_t saveop = editop;
                 newval->editop = cur_editop;
                 if (res == NO_ERR) {
                     res = agt_check_max_access(newval, (curval != NULL));
+                }
+                if (is_validate) {
+                    newval->editop = saveop;
                 }
             }
         }

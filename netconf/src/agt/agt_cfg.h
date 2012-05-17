@@ -137,6 +137,7 @@ typedef struct agt_cfg_transaction_t_ {
     boolean              start_bad;   // running config has errors
     boolean              rootcheck;
     boolean              commitcheck;
+    boolean              is_validate;
 
     /* each distinct effective edit point in the data tree will
      * have a separate undo record in the undoQ   */
@@ -225,16 +226,21 @@ typedef struct agt_cfg_commit_test_t_ {
 *    rootcheck == TRUE if root_check needs to be done before commit
 *                 during agt_val_apply_write; FALSE if it is done
 *                 manually via agt_val_root_check
+*    is_validate == TRUE if this is a <validate> operation
+*                   the target data nodes will not be altered
+*                   at all during the transaction
+*                   FALSE if this is some sort of real edit
 *    res == address of return status
 * OUTPUTS:
 *    *res == return status
 * RETURNS:
 *    malloced transaction struct; need to call agt_cfg_free_transaction
 *********************************************************************/
-extern agt_cfg_transaction_t *
+agt_cfg_transaction_t *
     agt_cfg_new_transaction (ncx_cfg_t cfgid,
                              agt_cfg_edit_type_t edit_type,
                              boolean rootcheck,
+                             boolean is_validate,
                              status_t *res);
 
 

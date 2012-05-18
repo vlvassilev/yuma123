@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        2.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -25,7 +25,7 @@ Requires: libssh2
 %define debug_package %{nil}
 
 # set to release number above
-%define myrel 2
+%define myrel 3
 
 # main package rules
 
@@ -83,6 +83,41 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Fri May 18 2012 Andy Bierman <andy at netconfcentral.org> 2.2-3 [1749]
+  * netconfd
+    * fix bug in agt_val_root_check where a 'missing-instance'
+      error is incorrectly generated sometimes for an NP-container.
+      This can happen if the NP container has children (or nested
+      NP-container children) which are mandatory (or min-elements > 0)
+      but there are also when-stmts that affect the node.
+      Do not generate an error for NP-container here; if child nodes
+      exist then instance_check for those nodes will check must/when nodes
+    * add 'editing' parameter to val_compare_max because it assumed
+      config=true meant test for editing, so any change will cause
+      the 2 val_value_t nodes to be different (meta-data such as
+      set-by-default vs. client-set-to-default).
+      To simply compare the values and just the config=true nodes,
+      use val_compare_max(val1, val2, TRUE, TRUE, FALSE)
+    * fix bug where edits to candidate are not applied to running
+      during the commit if validate is done on the candidate, e.g.:
+         1) create /foo
+         2) validate source=candidate
+         3) commit
+    * change yuma_arp  so it does not build on MACOSX
+    * fix yuma_arp so it does not include any system files on MAC
+    * change SIL makefile for MacOSX to make bundle instead of dynamiclib
+    * change agt.c to load .so file for Mac instead of .dylib for a SIL library
+    * add check to prevent false SET_ERROR trace from  occurring in when-check
+
+  * YANG Parse
+    * fixed bug 3517498
+      memory leak occurs when the file parsed starts with an
+      invalid token (not a valid module name string)
+    * added NULL pointer checks in typ.c to prevent SET_ERROR
+      and referencing a non-existent typedef in a named type.
+      This can happen sometimes if the YANG module has errors like
+      a leaf that uses a type that does not exist
+
 * Fri Mar 09 2012 Andy Bierman <andy at netconfcentral.org> 2.2-2 [1737]
   * netconfd
     * enhanced unique-stmt checking to support embedded lists

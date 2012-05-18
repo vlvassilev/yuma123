@@ -25,7 +25,7 @@
 
 //#include <xmlstring.h>
 
-#ifndef CYGWIN
+#if !defined(CYGWIN) && !defined(MACOSX)
 #define BUILD_ARP 1
 #endif
 
@@ -34,14 +34,13 @@
 
 #ifdef BUILD_ARP
 #include <net/if_arp.h>
-#endif  // BUILD_ARP
-
 #include <net/if.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <dirent.h>
+#endif
 
 #include "procdefs.h"
 #include "agt.h"

@@ -3271,7 +3271,8 @@ boolean
             } else if (newnode->editvars != NULL &&
                        newnode->editvars->insertop != OP_INSOP_NONE) {
                 retval = TRUE;
-            } else if (val_compare_max(newnode, curnode, TRUE, TRUE) != 0) {
+            } else if (val_compare_max(newnode, curnode, TRUE, TRUE, TRUE)
+                       != 0) {
                 retval = TRUE;
             } /* else if this is a complex node, keep checking
                * all the descendents in case an insert operation

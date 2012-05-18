@@ -994,7 +994,7 @@ status_t
         /* allocate a transaction control block */
         agt_cfg_transaction_t *txcb = 
             agt_cfg_new_transaction(NCX_CFGID_RUNNING, AGT_CFG_EDIT_TYPE_FULL,
-                                    FALSE, &res);
+                                    FALSE, FALSE, &res);
         if (txcb == NULL || res != NO_ERR) {
             if (res == NO_ERR) {
                 res = ERR_NCX_OPERATION_FAILED;
@@ -1291,12 +1291,7 @@ status_t
     p = buffer;
     p += xml_strcpy(p, (const xmlChar *)"lib");    
     p += xml_strcpy(p, modname);
-
-#ifdef MACOSX
-    xml_strcpy(p, (const xmlChar *)".dylib");
-#else
     xml_strcpy(p, (const xmlChar *)".so");
-#endif
 
     /* try to find it directly for loading */
     pathspec = ncxmod_find_sil_file(buffer, FALSE, &res);

@@ -2468,6 +2468,9 @@ extern int
 *                  FALSE to compare all nodes
 *    childonly == TRUE to look just 1 level for comparison
 *                 FALSE to compare all descendant nodes of complex types
+*    editing == TRUE to compare for editing
+*               FALSE to compare just the values, so a set by
+*               default and value=default are the same value
 *
 * RETURNS:
 *   compare result
@@ -2479,7 +2482,8 @@ extern int32
     val_compare_max (const val_value_t *val1,
                      const val_value_t *val2,
                      boolean configonly,
-                     boolean childonly);
+                     boolean childonly,
+                     boolean editing);
 
 
 /********************************************************************

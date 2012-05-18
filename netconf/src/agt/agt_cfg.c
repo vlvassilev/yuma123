@@ -455,6 +455,10 @@ static void
 *    rootcheck == TRUE if root_check needs to be done before commit
 *                 during agt_val_apply_write; FALSE if it is done
 *                 manually via agt_val_root_check
+*    is_validate == TRUE if this is a <validate> operation
+*                   the target data nodes will not be altered
+*                   at all during the transaction
+*                   FALSE if this is some sort of real edit
 *    res == address of return status
 * OUTPUTS:
 *    *res == return status
@@ -465,6 +469,7 @@ agt_cfg_transaction_t *
     agt_cfg_new_transaction (ncx_cfg_t cfgid,
                              agt_cfg_edit_type_t edit_type,
                              boolean rootcheck,
+                             boolean is_validate,
                              status_t *res)
 {
 
@@ -497,6 +502,7 @@ agt_cfg_transaction_t *
     txcb->cfg_id = cfgid;
     txcb->rootcheck = rootcheck;
     txcb->edit_type = edit_type;
+    txcb->is_validate = is_validate;
     txcb->apply_res = ERR_NCX_SKIPPED;
     txcb->commit_res = ERR_NCX_SKIPPED;
     txcb->rollback_res = ERR_NCX_SKIPPED;

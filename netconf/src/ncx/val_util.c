@@ -2065,8 +2065,12 @@ status_t
         }
     }
 
-    if (val->parent == NULL) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
+    if (val == valroot || val->parent == NULL) {
+        if (whencount) {
+            *whencount = cnt;
+        }
+        *condresult = FALSE;
+        return NO_ERR;
     }
 
     /* all other when-stmts inherited from various sources use

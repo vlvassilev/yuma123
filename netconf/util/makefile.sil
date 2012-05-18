@@ -64,8 +64,6 @@ ifdef MAC
   CFLAGS += -DMACOSX=1
 endif
 
-LBASE=../lib
-
 ifdef DESTDIR
 OWNER=
 else
@@ -151,11 +149,7 @@ endif
 ifdef STATIC
 LIBSUFFIX=a
 else
-ifdef MAC
-LIBSUFFIX=dylib
-else
 LIBSUFFIX=so
-endif
 endif
 
 CC?=gcc
@@ -167,7 +161,7 @@ LINTFLAGS= '-weak -macrovarprefix "m_"'
 LIBTOOL=ar
 #LFLAGS=-v --no-as-needed
 LFLAGS=-lm
-LPATH=-L$(LBASE)
+LPATH=-L$(LIB_INST)
 
 CEES = $(wildcard *.c)
 
@@ -195,7 +189,7 @@ $(TARGET)/%.o: %.c
 
 # Common library rule
 
-$(LBASE)/lib%.a: $(OBJS)
+$(LIB_INST)/lib%.a: $(OBJS)
 	$(LIBTOOL) cr $@ $(OBJS)
 	ranlib $@
 
@@ -258,15 +252,16 @@ superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
+ifndef MAC
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
 	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS)
-
-
-$(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -dynamiclib -std=gnu99 \
+else
+$(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -bundle -std=gnu99 \
 	-current_version 1.0 \
 	-undefined dynamic_lookup \
-	-o $@ -install_name lib$(SUBDIR_NM).dylib $(OBJS)
+	-o $@ -install_name lib$(SUBDIR_NM).so $(OBJS)
+endif
 
 code:
 	yangdump format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h

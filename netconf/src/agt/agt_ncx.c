@@ -629,7 +629,7 @@ static status_t
         /* allocate a new transaction control block */
         msg->rpc_txcb = 
             agt_cfg_new_transaction(target->cfg_id, AGT_CFG_EDIT_TYPE_PARTIAL,
-                                    rootcheck, &res);
+                                    rootcheck, FALSE, &res);
         if (msg->rpc_txcb == NULL || res != NO_ERR) {
             if (res == NO_ERR) {
                 res = ERR_NCX_OPERATION_FAILED;
@@ -1105,7 +1105,7 @@ static status_t
         /* allocate a transaction control block */
         msg->rpc_txcb = 
             agt_cfg_new_transaction(destcfg->cfg_id, AGT_CFG_EDIT_TYPE_FULL,
-                                    FALSE, &res);
+                                    FALSE, FALSE, &res);
         if (msg->rpc_txcb == NULL || res != NO_ERR) {
             if (res == NO_ERR) {
                 res = ERR_NCX_OPERATION_FAILED;
@@ -1928,7 +1928,7 @@ static status_t
          * be ignored if this is an inline validate   */
         msg->rpc_txcb = 
             agt_cfg_new_transaction(target ? target->cfg_id : NCX_CFGID_RUNNING,
-                                    AGT_CFG_EDIT_TYPE_FULL, FALSE, &res);
+                                    AGT_CFG_EDIT_TYPE_FULL, FALSE, TRUE, &res);
         if (msg->rpc_txcb == NULL || res != NO_ERR) {
             if (res == NO_ERR) {
                 res = ERR_NCX_OPERATION_FAILED;
@@ -2054,7 +2054,8 @@ static status_t
             /* allocate a transaction control block */
             msg->rpc_txcb = 
                 agt_cfg_new_transaction(NCX_CFGID_RUNNING, 
-                                        AGT_CFG_EDIT_TYPE_FULL, FALSE, &res);
+                                        AGT_CFG_EDIT_TYPE_FULL, FALSE, 
+                                        FALSE, &res);
             if (msg->rpc_txcb == NULL || res != NO_ERR) {
                 if (res == NO_ERR) {
                     res = ERR_NCX_OPERATION_FAILED;
@@ -2742,7 +2743,7 @@ static status_t
     /* create a transaction CB */
     msg->rpc_txcb = 
         agt_cfg_new_transaction(NCX_CFGID_RUNNING, AGT_CFG_EDIT_TYPE_FULL,
-                                FALSE, &res);
+                                FALSE, FALSE, &res);
     if (msg->rpc_txcb == NULL || res != NO_ERR) {
         if (res == NO_ERR) {
             res = ERR_NCX_OPERATION_FAILED;

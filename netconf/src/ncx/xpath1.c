@@ -3646,7 +3646,7 @@ static xpath_result_t *
 /********************************************************************
 * FUNCTION substring_fn
 * 
-* string substring-after(string, number, number?) function [4.2]
+* string substring(string, number, number?) function [4.2]
 *
 * INPUTS:
 *    pcb == parser control block to use

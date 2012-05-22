@@ -1,4 +1,4 @@
-yuma (2.2-2) stable; urgency=medium
+yuma (2.2-3) stable; urgency=medium
   * netconfd
     * fix bug in agt_val_root_check where a 'missing-instance'
       error is incorrectly generated sometimes for an NP-container.

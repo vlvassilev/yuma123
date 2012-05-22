@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,6 +34,7 @@ date             init     comment
 17-apr-11    abb      Bumped version to 1.15
 29-may-11    abb      Bumped trunk version to 2.0
 25-sep-11    abb      Bumped trunk version to 2.1
+25-jan-12    abb      Bumped trunk version to 2.2
 */
 
 #ifdef __cplusplus
@@ -46,7 +47,7 @@ extern "C" {
 *                                                                   *
 *********************************************************************/
 
-#define YUMA_VERSION  (const xmlChar *)"2.1"
+#define YUMA_VERSION  (const xmlChar *)"2.2"
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

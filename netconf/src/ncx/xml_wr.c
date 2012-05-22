@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -27,78 +27,29 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-#include  <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
+#include <assert.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_dlq
+#include "procdefs.h"
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
-#include  "ncx_num.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_obj
-#include  "obj.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_msg
-#include  "xml_msg.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
-#include  "xpath.h"
-#endif
-
-#ifndef _H_xpath_wr
-#include  "xpath_wr.h"
-#endif
-
-#ifndef _H_xpath_yang
-#include  "xpath_yang.h"
-#endif
+#include "ncx.h"
+#include "ncx_num.h"
+#include "ncxconst.h"
+#include "obj.h"
+#include "ses.h"
+#include "status.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_msg.h"
+#include "xml_util.h"
+#include "xml_wr.h"
+#include "xpath.h"
+#include "xpath_wr.h"
+#include "xpath_yang.h"
 
 
 /********************************************************************
@@ -112,8 +63,6 @@ date         init     comment
 #endif
 
 #define XML_WR_MAX_LINESTR   34
-
-
 
 /********************************************************************
 * FUNCTION fit_on_line
@@ -251,10 +200,8 @@ static status_t
     *retcount = 0;
     num_nsids = 0;
 
-    res = xpath_yang_get_namespaces(xpathpcb,
-                                    nsid_array,
-                                    XML_WR_MAX_NAMESPACES,
-                                    &num_nsids);
+    res = xpath_yang_get_namespaces(xpathpcb, nsid_array,
+                                    XML_WR_MAX_NAMESPACES, &num_nsids);
     if (res != NO_ERR) {
         /* not expecting anything except a buffer overflow
          * from too many namespaces in the same XPath expr
@@ -277,10 +224,7 @@ static status_t
         /* force this namespace to have a prefix and
          * xmlns attribute
          */
-        write_xmlns_decl(scb,
-                         defpfix,
-                         cur_nsid,
-                         indent);
+        write_xmlns_decl(scb, defpfix, cur_nsid, indent);
     }
 
     *retcount = num_nsids;
@@ -377,16 +321,10 @@ static void
             }
         } else if (attr_nsid) {
             /* prefix:attribute-name format */
-            pfix = xml_msg_get_prefix(msg, 
-                                      elem_nsid, 
-                                      attr_nsid, 
-                                      curelem,
+            pfix = xml_msg_get_prefix(msg, elem_nsid, attr_nsid, curelem,
                                       &xneeded);
             if (xneeded) {
-                write_xmlns_decl(scb, 
-                                 pfix, 
-                                 attr_nsid, 
-                                 indent);
+                write_xmlns_decl(scb, pfix, attr_nsid, indent);
             }
 
             /* deal with indent again */
@@ -410,9 +348,7 @@ static void
                  * for the content following this start tag to be valid
                  */
                 retcount = 0;
-                res = handle_xpath_start_tag(scb,
-                                             val->xpathpcb,
-                                             indent,
+                res = handle_xpath_start_tag(scb, val->xpathpcb, indent,
                                              &retcount);
                 if (res != NO_ERR) {
                     /* not expecting anything except a buffer overflow
@@ -424,17 +360,11 @@ static void
                 }
             } else if (val->btyp == NCX_BT_IDREF) {
                 xneeded = FALSE;
-                pfix = xml_msg_get_prefix(msg, 
-                                          (val->parent) ?
+                pfix = xml_msg_get_prefix(msg, (val->parent) ?
                                           val_get_nsid(val->parent) : 0,
-                                          VAL_IDREF_NSID(val), 
-                                          val, 
-                                          &xneeded);
+                                          VAL_IDREF_NSID(val), val, &xneeded);
                 if (xneeded) {
-                    write_xmlns_decl(scb, 
-                                     pfix, 
-                                     VAL_IDREF_NSID(val), 
-                                     indent);
+                    write_xmlns_decl(scb, pfix, VAL_IDREF_NSID(val), indent);
                 }
             }
         }
@@ -457,9 +387,7 @@ static void
                 if (buffer == NULL) {
                     SET_ERROR(ERR_INTERNAL_MEM);
                 } else {
-                    res = val_sprintf_simval_nc(buffer,
-                                                val,
-                                                &bufferlen);
+                    res = val_sprintf_simval_nc(buffer, val, &bufferlen);
                     if (res != NO_ERR) {
                         SET_ERROR(res);
                     } else {
@@ -539,11 +467,7 @@ static void
 
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
-    pfix = xml_msg_get_prefix(msg, 
-                              parent_nsid, 
-                              nsid, 
-                              val, 
-                              &xneeded);
+    pfix = xml_msg_get_prefix(msg, parent_nsid, nsid, val, &xneeded);
     if (pfix && msg->useprefix) {
         ses_putstr(scb, pfix);
         ses_putchar(scb, ':');
@@ -561,10 +485,7 @@ static void
         const xmlChar *wpfix;
         boolean xneeded2;
 
-        wpfix = xml_msg_get_prefix(msg, 
-                                   parent_nsid,
-                                   xmlns_wda_id(), 
-                                   NULL, 
+        wpfix = xml_msg_get_prefix(msg, parent_nsid, xmlns_wda_id(), NULL, 
                                    &xneeded2);
         if (wpfix) {
             ses_putchar(scb, ' ');
@@ -582,22 +503,14 @@ static void
         }
 
         if (attrQ) {
-            write_attrs(scb, 
-                        msg, 
-                        attrQ,
-                        FALSE,
-                        val,
-                        indent,
-                        nsid);
+            write_attrs(scb, msg, attrQ, FALSE, val, indent, nsid);
         }
 
         if (xneeded) {
             if (!attrQ || dlq_empty(attrQ)) {
                 indent = -1;
             }
-            write_xmlns_decl(scb,
-                             (msg->useprefix) ? pfix : NULL,
-                             nsid,
+            write_xmlns_decl(scb, (msg->useprefix) ? pfix : NULL, nsid,
                              indent);
         }
 
@@ -605,10 +518,7 @@ static void
             /* generate all the default xmlns directives needed
              * for the content following this start tag to be valid
              */
-            res = handle_xpath_start_tag(scb,
-                                         xpathpcb,
-                                         indent,
-                                         &retcount);
+            res = handle_xpath_start_tag(scb, xpathpcb, indent, &retcount);
             /* don't care about the retcount value 
              * terminating the start tag here no matter what
              */
@@ -635,6 +545,281 @@ static void
 
 }  /* begin_elem_val */
 
+/******************************************************************************/
+/**
+ * Write out an NCX Enum value.
+ * 
+ * \param scb the session control block.
+ * \param out the value to write.
+ */
+static void write_enum_val( ses_cb_t *scb,
+                            const val_value_t* out )
+{
+    if (VAL_ENUM_NAME(out)) {
+        ses_putstr(scb, VAL_ENUM_NAME(out));
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX Numeric value.
+ * 
+ * \param scb the session control block.
+ * \param out the value to write.
+ */
+static void write_num_val( ses_cb_t *scb,
+                           const val_value_t* out )
+{
+    xmlChar buff[NCX_MAX_NUMLEN];
+    uint32 len;
+    status_t res;
+
+    res = ncx_sprintf_num( buff, &out->v.num, out->btyp, &len );
+    if (res == NO_ERR) {
+        ses_putstr(scb, buff); 
+    } else {
+        SET_ERROR(res);
+    }
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX String or InstanceID value.
+ * 
+ * \param scb the session control block.
+ * \param out the value to write.
+ * \param indent the start indent amount if indent is enabled.
+ */
+static void write_string_val( ses_cb_t *scb,
+                              const val_value_t* out,
+                              int32 indent )
+{
+    /* if the content has XPath or QName content, then the begin_elem_val 
+     * function should have already printed all the required xmlns 
+     * attributes so just print the string value with prefixes and all */
+    if (VAL_STR(out)) {
+        if ( !fit_on_line(scb, out) && (indent > 0) ) {
+            ses_indent(scb, indent);
+        }
+        ses_putcstr(scb, VAL_STR(out), indent);
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX ID Ref value.
+ * 
+ * \param scb the session control block.
+ * \param msg the message (xml_msg_hdr_t) being processed.
+ * \param out the value to write.
+ */
+static void write_idref_val( ses_cb_t *scb,
+                             xml_msg_hdr_t *msg,
+                             val_value_t* out )
+{
+    const xmlChar      *pfix;
+    bool xneeded;
+
+    /* counting on xmlns decl to be in ancestor node because the xneeded node 
+     * is being ignored here. */
+    pfix = xml_msg_get_prefix( msg, ( (out->parent) ? out->parent->nsid : 0 ),
+                               out->v.idref.nsid, out, &xneeded );
+    if (pfix) {
+        /* need the prefix all the time on XML content */
+        ses_putstr(scb, pfix);
+        ses_putchar(scb, XMLNS_SEPCH);
+    }
+    ses_putstr(scb, out->v.idref.name);
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX Binary value.
+ * 
+ * \param scb the session control block.
+ * \param out the value to write.
+ * \param indent the start indent amount if indent is enabled.
+ */
+static void write_binary_val( ses_cb_t *scb,
+                              const val_value_t* out,
+                              int32 indent )
+{
+    xmlChar* binStr = val_make_sprintf_string( out );
+    if ( !binStr )
+    {
+        SET_ERROR(ERR_INTERNAL_MEM);
+        return;
+    }
+
+    ses_putcstr(scb, binStr, indent);
+    m__free(binStr);
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX String from a list or bits value.
+ * 
+ * \param scb the session control block.
+ * \param listmem the value to write.
+ * \param indent the start indent amount if indent is enabled.
+ * \param first flag indicating if his is the first element in the list.
+ */
+static void write_slist_bits_string_val( ses_cb_t *scb,
+                                         const ncx_lmem_t* listmem,
+                                         int32 indent,
+                                         boolean first )
+{
+    boolean wspace = FALSE;
+    uint32 len;
+
+    /* handle indent+double quote or space for non-strings */
+    /* get len and whitespace flag */
+    len = xml_strlen_sp( listmem->val.str, &wspace);
+
+    /* check special case -- empty string handle it here instead of 
+     * going through the loop */
+    if (!len) {
+        if ( !first ) {
+            ses_putstr(scb, (const xmlChar *)" \"\"");
+        } else {
+            ses_putstr(scb, (const xmlChar *)"\"\"");
+        }
+        return;
+    }
+
+    /* check if double quotes needed */
+    if (wspace) {
+        ses_putchar(scb, '\"');
+    }
+
+    /* print the list member content as a string */
+    ses_putcstr( scb, listmem->val.str, indent );
+
+    /* check finish quoted string */
+    if (wspace) {
+        ses_putchar(scb, '\"');
+    }
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX numeric value from a list or bits value.
+ * 
+ * \param scb the session control block.
+ * \param listmem the value to write.
+ * \param numtype the type of numeric value to write.
+ * \param indent the start indent amount if indent is enabled.
+ */
+static void write_slist_bits_num_val( ses_cb_t *scb,
+                                      const ncx_lmem_t* listmem,
+                                      ncx_btype_t numtype,
+                                      int32 indent )
+{
+    // Number type
+    xmlChar buff[NCX_MAX_NUMLEN];
+    uint32 len;
+
+    (void)ncx_sprintf_num( buff, &listmem->val.num, numtype, &len );
+    ses_putcstr(scb, buff, indent);
+}
+                
+/******************************************************************************/
+/**
+ * Write out an NCX Binary value.
+ * 
+ * \param scb the session control block.
+ * \param out the value to write.
+ * \param indent the start indent amount if indent is enabled.
+ */
+static void write_slist_bits_val( ses_cb_t *scb,
+                                  const val_value_t* out,
+                                  int32 indent )
+{
+    boolean first = TRUE;
+    const ncx_lmem_t *listmem;
+    
+    for( listmem = (const ncx_lmem_t *) dlq_firstEntry(&out->v.list.memQ);
+         listmem != NULL;
+         listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) 
+    {
+        if ( !first ) {
+            if (SES_LINELEN(scb) > SES_LINESIZE(scb)) {
+                ses_indent(scb, indent);
+            } else {
+                ses_putchar(scb, ' ');
+            }           
+        }
+
+        switch ( out->v.list.btyp ) {
+            case NCX_BT_STRING:
+            case NCX_BT_INSTANCE_ID:
+            case NCX_BT_LEAFREF:   /* FALL THRU */
+                // String type
+                write_slist_bits_string_val( scb, listmem, indent, first );
+                break;
+
+            case NCX_BT_INT8:
+            case NCX_BT_INT16:
+            case NCX_BT_INT32:
+            case NCX_BT_INT64:
+            case NCX_BT_UINT8:
+            case NCX_BT_UINT16:
+            case NCX_BT_UINT32:
+            case NCX_BT_UINT64:
+            case NCX_BT_DECIMAL64:
+            case NCX_BT_FLOAT64:
+                // numeric type
+                write_slist_bits_num_val( scb, listmem, out->v.list.btyp, 
+                                          indent );
+                break;
+
+            case NCX_BT_BITS:
+                ses_putstr(scb, listmem->val.bit.name);
+                break;
+            case NCX_BT_ENUM:
+                ses_putcstr(scb, listmem->val.enu.name, -1); 
+                break;
+            case NCX_BT_BOOLEAN:
+                ses_putcstr( scb, 
+                             ( listmem->val.boo ?  NCX_EL_TRUE : NCX_EL_FALSE ),
+                             indent );
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        first = false;
+    }
+}
+
+/******************************************************************************/
+/**
+ * Write out an NCX String from a list or InstanceID value.
+ * 
+ * \param scb the session control block.
+ * \param msg the message (xml_msg_hdr_t) being processed.
+ * \param out the value to write.
+ * \param indent the start indent amount if indent is enabled.
+*  \param testfn callback function to use, NULL if not used
+ */
+static void write_child_values( ses_cb_t *scb,
+                                xml_msg_hdr_t *msg,
+                                val_value_t *out,
+                                int32 indent,
+                                val_nodetest_fn_t testfn )
+{
+    val_value_t  *chval;
+
+    for (chval = val_get_first_child(out);
+         chval != NULL;
+         chval = val_get_next_child(chval)) {
+        xml_wr_full_check_val( scb, msg, chval, indent, testfn );
+    } 
+}
 
 /********************************************************************
 * FUNCTION write_check_val
@@ -667,30 +852,20 @@ static void
 * RETURNS:
 *   none
 *********************************************************************/
-static void
-    write_check_val (ses_cb_t *scb,
-                     xml_msg_hdr_t *msg,
-                     val_value_t *val,
-                     int32  indent,
-                     val_nodetest_fn_t testfn,
-                     boolean acmcheck)
+static void write_check_val ( ses_cb_t *scb,
+                              xml_msg_hdr_t *msg,
+                              val_value_t *val,
+                              int32  indent,
+                              val_nodetest_fn_t testfn,
+                              boolean acmcheck )
 {
-    const ncx_lmem_t   *listmem;
-    const xmlChar      *pfix;
-    val_value_t        *chval, *out;
-    xmlChar            *binbuff;
-    uint32              len;
-    status_t            res = NO_ERR;
-    boolean             first, wspace, xneeded, malloced = FALSE;
-    ncx_btype_t         listbtyp;
-    xmlChar             buff[NCX_MAX_NUMLEN];
+    val_value_t *out;
+    status_t res = NO_ERR;
+    boolean malloced = FALSE;
 
+    // Handle virtual values and check access control
     out = val_get_value(scb, msg, val, testfn, acmcheck, &malloced, &res);
-
-    if (res != NO_ERR) {
-        if (res == ERR_NCX_SKIPPED) {
-            res = NO_ERR;
-        }
+    if ( !out || res != NO_ERR) {
         if (out && malloced) {
             val_free_value(out);
         }
@@ -702,33 +877,27 @@ static void
     case NCX_BT_EXTERN:
         val_write_extern(scb, out);
         break;
+
     case NCX_BT_INTERN:
         val_write_intern(scb, out);
         break;
+
     case NCX_BT_ENUM:
-        if (VAL_ENUM_NAME(out)) {
-            ses_putstr(scb, VAL_ENUM_NAME(out));
-        } else {
-            SET_ERROR(ERR_INTERNAL_VAL);
-        }
+        write_enum_val( scb, out );
         break;
+
     case NCX_BT_EMPTY:
         if (out->v.boo) {
-            xml_wr_empty_elem(scb,
-                              msg,
-                              val_get_parent_nsid(out),
-                              out->nsid,
-                              out->name,
-                              -1);
+            xml_wr_empty_elem( scb, msg, val_get_parent_nsid(out), out->nsid,
+                               out->name, -1 );
         }
         break;
+
     case NCX_BT_BOOLEAN:
-        if (out->v.boo) {
-            ses_putcstr(scb, NCX_EL_TRUE, indent);
-        } else {
-            ses_putcstr(scb, NCX_EL_FALSE, indent);
-        }
+         ses_putcstr( scb, ( out->v.boo ? NCX_EL_TRUE : NCX_EL_FALSE ), 
+                      indent );
         break;
+
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -739,157 +908,35 @@ static void
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-        res = ncx_sprintf_num(buff, &out->v.num, out->btyp, &len);
-        if (res == NO_ERR) {
-            ses_putstr(scb, buff); 
-        } else {
-            SET_ERROR(res);
-        }
+        write_num_val( scb, out );
         break;
+
+    case NCX_BT_LEAFREF:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_STRING:
-        /* if the content has XPath or QName content, then
-         * the begin_elem_val function should have already
-         * printed all the required xmlns attributes
-         * so just print the string value with prefixes and all
-         */
-        if (VAL_STR(out)) {
-            if (!fit_on_line(scb, out) && (indent > 0)) {
-                ses_indent(scb, indent);
-            }
-            ses_putcstr(scb, VAL_STR(out), indent);
-        }
+        write_string_val( scb, out, indent );
         break;
+        
     case NCX_BT_IDREF:
-        /* counting on xmlns decl to be in ancestor node
-         * because the xneeded node is being ignored here
-         */
-        pfix = xml_msg_get_prefix(msg,
-                                  (out->parent) 
-                                  ? out->parent->nsid : 0,
-                                  out->v.idref.nsid, 
-                                  out, 
-                                  &xneeded);
-        if (pfix) {
-            /* need the prefix all the time on XML content */
-            ses_putstr(scb, pfix);
-            ses_putchar(scb, XMLNS_SEPCH);
-        }
-        ses_putstr(scb, out->v.idref.name);
+        write_idref_val( scb, msg, out );
         break;
+        
     case NCX_BT_BINARY:
-        if (out->v.binary.ustr) {
-            res = val_sprintf_simval_nc(NULL, out, &len);
-            if (res == NO_ERR) {
-                binbuff = m__getMem(len);
-                if (!binbuff) {
-                    res = ERR_INTERNAL_MEM;
-                } else {
-                    res = val_sprintf_simval_nc(binbuff, out, &len); 
-                    if (res == NO_ERR) {
-                        ses_putcstr(scb, binbuff, indent);
-                    }
-                    m__free(binbuff);
-                }
-            }
-        }
+        write_binary_val( scb, out , indent );
         break;
+
     case NCX_BT_BITS:
     case NCX_BT_SLIST:
-        listbtyp = out->v.list.btyp;
-        first = TRUE;
-        for (listmem = (const ncx_lmem_t *)
-                 dlq_firstEntry(&out->v.list.memQ);
-             listmem != NULL;
-             listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
-
-            wspace = FALSE;
-
-            /* handle indent+double quote or space for non-strings */
-            if (typ_is_string(listbtyp)) {
-
-                /* get len and whitespace flag */
-                len = xml_strlen_sp(listmem->val.str, &wspace);
-
-                /* check special case -- empty string
-                 * handle it here instead of going through the loop
-                 */
-                if (!len) {
-                    if (!first) {
-                        ses_putstr(scb, (const xmlChar *)" \"\"");
-                    } else {
-                        ses_putstr(scb, (const xmlChar *)"\"\"");
-                        first = FALSE;
-                    }
-                    continue;
-                }
-            }
-
-            /* handle newline+indent or space between list elements */
-            if (first) {
-                first = FALSE;
-            } else if (SES_LINELEN(scb) > SES_LINESIZE(scb)) {
-                ses_indent(scb, indent);
-            } else {
-                ses_putchar(scb, ' ');
-            }           
-
-            /* check if double quotes needed */
-            if (wspace) {
-                ses_putchar(scb, '\"');
-            }
-
-            /* print the list member content as a string */
-            if (typ_is_string(listbtyp)) {
-                ses_putcstr(scb, listmem->val.str, indent);
-            } else if (typ_is_number(listbtyp)) {
-                (void)ncx_sprintf_num(buff, 
-                                      &listmem->val.num, 
-                                      listbtyp, 
-                                      &len);
-                ses_putcstr(scb, buff, indent);
-            } else {
-                switch (listbtyp) {
-                case NCX_BT_BITS:
-                    ses_putstr(scb, listmem->val.bit.name);
-                    break;
-                case NCX_BT_ENUM:
-                    ses_putstr(scb, listmem->val.enu.name); 
-                    break;
-                case NCX_BT_BOOLEAN:
-                    ses_putcstr(scb,
-                                (listmem->val.boo) ?
-                                NCX_EL_TRUE : NCX_EL_FALSE,
-                                indent);
-                    break;
-                default:
-                    SET_ERROR(ERR_INTERNAL_VAL);
-                }
-            }
-
-            /* check finish quoted string */
-            if (wspace) {
-                ses_putchar(scb, '\"');
-            }
-        }
+        write_slist_bits_val( scb, out, indent );
         break;
+
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
-        for (chval = val_get_first_child(out);
-             chval != NULL;
-             chval = val_get_next_child(chval)) {
-
-            xml_wr_full_check_val(scb, 
-                                  msg,
-                                  chval,
-                                  indent,
-                                  testfn);
-        } 
+        write_child_values( scb, msg, out, indent, testfn );
         break;
-    case NCX_BT_LEAFREF:
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -897,7 +944,6 @@ static void
     if (malloced && out) {
         val_free_value(out);
     }
-
 }  /* write_check_val */
 
 
@@ -955,11 +1001,7 @@ static void
 
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
-    pfix = xml_msg_get_prefix(msg, 
-                              parent_nsid,
-                              nsid, 
-                              NULL, 
-                              &xneeded);
+    pfix = xml_msg_get_prefix(msg, parent_nsid, nsid, NULL, &xneeded);
     if (pfix && msg->useprefix) {
         ses_putstr(scb, pfix);
         ses_putchar(scb, ':');
@@ -977,11 +1019,8 @@ static void
         const xmlChar *wpfix;
         boolean xneeded2;
 
-        wpfix = xml_msg_get_prefix(msg, 
-                                   parent_nsid,
-                                   xmlns_wda_id(), 
-                                   NULL, 
-                                   &xneeded2);
+        wpfix = xml_msg_get_prefix(msg, parent_nsid, xmlns_wda_id(), 
+                                   NULL, &xneeded2);
         if (wpfix) {
             ses_putchar(scb, ' ');
             ses_putstr(scb, wpfix);
@@ -996,22 +1035,14 @@ static void
             indent += ses_indent_count(scb);
         }
         if (attrQ) {
-            write_attrs(scb, 
-                        msg, 
-                        attrQ, 
-                        isattrq, 
-                        NULL, 
-                        indent, 
-                        nsid);
+            write_attrs(scb, msg, attrQ, isattrq, NULL, indent, nsid);
         }
         if (xneeded) {
             if (!attrQ || dlq_empty(attrQ)) {
                 indent = -1;
             }
-            write_xmlns_decl(scb, 
-                             (msg->useprefix) ? pfix  : NULL, 
-                             nsid, 
-                             indent);
+            write_xmlns_decl(scb, (msg->useprefix) ? pfix  : NULL, 
+                             nsid, indent);
         }
         if (qname_nsid) {
             qname_pfix = xml_msg_get_prefix_xpath(msg, qname_nsid);
@@ -1019,10 +1050,7 @@ static void
                 SET_ERROR(ERR_INTERNAL_VAL);
             } else {
                 /* force an xmlns attribute with a prefix */
-                write_xmlns_decl(scb, 
-                                 qname_pfix, 
-                                 qname_nsid, 
-                                 indent);
+                write_xmlns_decl(scb, qname_pfix, qname_nsid, indent);
             }
         }
     }
@@ -1066,12 +1094,8 @@ void
 
     uint32  i;
 
-#ifdef DEBUG
-    if (!scb || !buff) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL!" );
+    assert( buff && "buff is NULL!" );
 
     for (i=0; i<bufflen; i++) {
         ses_putchar(scb, *buff++);
@@ -1115,24 +1139,12 @@ void
                           int32 indent,
                           boolean empty)
 {
-#ifdef DEBUG
-    if (!scb || !msg || !elname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( elname && "elname is NULL" );
 
-    begin_elem_ex(scb,
-                  msg,
-                  parent_nsid,
-                  nsid,
-                  elname,
-                  attrQ,
-                  isattrq,
-                  indent,
-                  empty,
-                  0,
-                  FALSE);
+    begin_elem_ex(scb, msg, parent_nsid, nsid, elname, attrQ,
+                  isattrq, indent, empty, 0, FALSE);
 
 }  /* xml_wr_begin_elem_ex */
 
@@ -1163,24 +1175,12 @@ void
                        const xmlChar *elname,
                        int32 indent)
 {
-#ifdef DEBUG
-    if (!scb || !msg || !elname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( elname && "elname is NULL" );
 
-    begin_elem_ex(scb, 
-                  msg, 
-                  parent_nsid,
-                  nsid,
-                  elname,
-                  NULL,
-                  FALSE,
-                  indent,
-                  FALSE,
-                  0,
-                  FALSE);
+    begin_elem_ex(scb, msg, parent_nsid, nsid, elname, NULL, FALSE,
+                  indent, FALSE, 0, FALSE);
 
 } /* xml_wr_begin_elem */
 
@@ -1211,24 +1211,12 @@ void
                        const xmlChar *elname,
                        int32 indent)
 {
-#ifdef DEBUG
-    if (!scb || !msg || !elname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( elname && "elname is NULL" );
 
-    begin_elem_ex(scb, 
-                  msg, 
-                  parent_nsid, 
-                  nsid, 
-                  elname,
-                  NULL, 
-                  FALSE, 
-                  indent,
-                  TRUE,
-                  0,
-                  FALSE);
+    begin_elem_ex(scb, msg, parent_nsid, nsid, elname, NULL, FALSE, 
+                  indent, TRUE, 0, FALSE);
 
 } /* xml_wr_empty_elem */
 
@@ -1263,12 +1251,9 @@ void
     const xmlChar       *pfix;
     boolean              xneeded;
 
-#ifdef DEBUG
-    if (!scb || !msg || !elname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( elname && "elname is NULL" );
 
     ses_indent(scb, indent);
 
@@ -1277,11 +1262,7 @@ void
     ses_putchar(scb, '/');
     pfix = NULL;
     if (nsid && msg->useprefix) {
-        pfix = xml_msg_get_prefix(msg, 
-                                  0, 
-                                  nsid, 
-                                  NULL, 
-                                  &xneeded);
+        pfix = xml_msg_get_prefix(msg, 0, nsid, NULL, &xneeded);
         if (pfix) {
             ses_putstr(scb, pfix);
             ses_putchar(scb, ':');
@@ -1335,31 +1316,15 @@ void
                         boolean isattrq,
                         int32 indent)
 {
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( str && "str is NULL" );
+    assert( elname && "elname is NULL" );
 
-#ifdef DEBUG
-    if (!scb || !msg || !str || !elname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    begin_elem_ex(scb, 
-                  msg, 
-                  parent_nsid, 
-                  nsid, 
-                  elname, 
-                  attrQ,
-                  isattrq, 
-                  indent,
-                  FALSE,
-                  0,
-                  FALSE);
-    ses_putstr(scb, str);
-    xml_wr_end_elem(scb, 
-                    msg, 
-                    nsid,
-                    elname,
-                    -1);
+    begin_elem_ex(scb, msg, parent_nsid, nsid, elname, attrQ, isattrq, 
+                  indent, FALSE, 0, FALSE);
+    ses_putcstr(scb, str, -1);
+    xml_wr_end_elem(scb, msg, nsid,  elname, -1);
 
 }  /* xml_wr_string_elem */
 
@@ -1407,24 +1372,13 @@ void
 {
     const xmlChar  *pfix;
 
-#ifdef DEBUG
-    if (!scb || !msg || !str || !elname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( str && "str is NULL" );
+    assert( elname && "elname is NULL" );
 
-    begin_elem_ex(scb,
-                  msg,
-                  parent_nsid, 
-                  nsid,
-                  elname,
-                  attrQ,
-                  isattrq, 
-                  indent,
-                  FALSE,
-                  val_nsid,
-                  isdefault);
+    begin_elem_ex(scb, msg, parent_nsid, nsid, elname, attrQ, isattrq, 
+                  indent, FALSE, val_nsid, isdefault);
 
     pfix = xml_msg_get_prefix_xpath(msg, val_nsid);
     if (pfix) {
@@ -1436,13 +1390,9 @@ void
         ses_putstr(scb, pfix);
         ses_putchar(scb, XMLNS_SEPCH);
     }
-    ses_putstr(scb, str);
+    ses_putcstr(scb, str, -1);
 
-    xml_wr_end_elem(scb,
-                    msg,
-                    nsid,
-                    elname,
-                    -1);
+    xml_wr_end_elem(scb, msg, nsid, elname, -1);
 
 }  /* xml_wr_qname_elem */
 
@@ -1484,19 +1434,11 @@ void
                       int32  indent,
                       val_nodetest_fn_t testfn)
 {
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( val && "val is NULL" );
 
-#ifdef DEBUG
-    if (!scb || !msg || !val) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-    write_check_val(scb, 
-                    msg, 
-                    val, 
-                    indent, 
-                    testfn, 
-                    TRUE);
+    write_check_val(scb, msg, val, indent, testfn, TRUE);
 
 }  /* xml_wr_check_val */
 
@@ -1524,11 +1466,7 @@ void
                 val_value_t *val,
                 int32  indent)
 {
-    xml_wr_check_val(scb, 
-                     msg, 
-                     val, 
-                     indent, 
-                     NULL);
+    xml_wr_check_val(scb, msg, val, indent, NULL);
 
 }  /* xml_wr_val */
 
@@ -1561,21 +1499,21 @@ void
     status_t           res;
     boolean            isdefault, malloced;
 
-#ifdef DEBUG
-    if (!scb || !msg || !val) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
+    assert( val && "val is NULL" );
 
     malloced = FALSE;
     res = NO_ERR;
     out = val_get_value(scb, msg, val, testfn, TRUE, &malloced, &res);
+    if (!out)
+        return;
+
     if (res != NO_ERR) {
         if (res == ERR_NCX_SKIPPED) {
-            res = NO_ERR;
+            res = NO_ERR;  /* retained (see next comment) */
         }
-        if (out && malloced) {
+        if (malloced) {
             val_free_value(out);
         }
         /* FIXME: error exit ignored */
@@ -1592,47 +1530,26 @@ void
         ;
     } else if (out->btyp == NCX_BT_IDREF) {
         /* write a complete QName element */
-        xml_wr_qname_elem(scb, 
-                          msg, 
-                          out->v.idref.nsid,
-                          out->v.idref.name,
-                          (out->parent) ? out->parent->nsid : 0,
-                          out->nsid, 
-                          out->name,
-                          &out->metaQ, 
-                          FALSE, 
-                          indent,
-                          isdefault);
+        xml_wr_qname_elem(scb, msg, out->v.idref.nsid, out->v.idref.name,
+                          (out->parent) ? out->parent->nsid : 0, out->nsid, 
+                           out->name, &out->metaQ, FALSE, indent, isdefault);
     } else if (val_has_content(out)) {
         /* write the top-level start node */
-        begin_elem_val(scb, 
-                       msg, 
-                       out, 
-                       indent);
+        begin_elem_val(scb, msg, out, indent);
 
         /* write the value node contents; skip ACM on this node */
-        write_check_val(scb, 
-                        msg, 
-                        out, 
-                        indent+ses_indent_count(scb), 
-                        testfn,
+        write_check_val(scb, msg, out, indent+ses_indent_count(scb), testfn,
                         FALSE);
 
         /* write the top-level end node */
-        xml_wr_end_elem(scb, 
-                        msg, 
-                        out->nsid, 
-                        out->name, 
+        xml_wr_end_elem(scb, msg, out->nsid, out->name, 
                         fit_on_line(scb, out) ? -1 : indent);
     } else {
         /* write the top-level empty node */
-        begin_elem_val(scb, 
-                       msg, 
-                       out, 
-                       indent);
+        begin_elem_val(scb, msg, out, indent);
     }
 
-    if (malloced && out) {
+    if (malloced) {
         val_free_value(out);
     }
 
@@ -1660,11 +1577,7 @@ void
                      val_value_t *val,
                      int32  indent)
 {
-    xml_wr_full_check_val(scb, 
-                          msg, 
-                          val, 
-                          indent, 
-                          NULL);
+    xml_wr_full_check_val(scb, msg, val, indent, NULL);
                                 
 } /* xml_wr_full_val */
 
@@ -1702,65 +1615,53 @@ status_t
                             int32  indent,
                             val_nodetest_fn_t testfn)
 {
-    ses_cb_t   *scb;
-    rpc_msg_t  *msg;
-    xml_attrs_t myattrs;
-    status_t    res;
-    ses_mode_t  sesmode;
-    boolean     anyout, fitoneline, hascontent;
+    assert( fp && "fp is NULL" );
+    assert( val && "val is NULL" );
 
-#ifdef DEBUG
-    if (!fp || !val) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    res = NO_ERR;
-    msg = NULL;
-    anyout = FALSE;
-    hascontent = TRUE;
     indent = min(indent, 9);
-    sesmode = SES_MODE_NONE;
-    xml_init_attrs(&myattrs);
 
     /* get a dummy session control block */
-    scb = ses_new_dummy_scb();
+    ses_cb_t *scb = ses_new_dummy_scb();
     if (!scb) {
-        res = ERR_INTERNAL_MEM;
-    } else {
-        scb->fp = fp;
-        scb->indent = indent;
+        return ERR_INTERNAL_MEM;
     }
+    scb->fp = fp;
+    scb->indent = indent;
 
     if (withns == FALSE) {
         ses_set_xml_nons(scb);
     }
 
     /* get a dummy output message */
-    if (res == NO_ERR) {
-        msg = rpc_new_out_msg();
-        if (!msg) {
-            res = ERR_INTERNAL_MEM;
-        } else {
-            /* hack -- need a queue because there is no top
-             * element which this usually shadows
-             */
-            msg->rpc_in_attrs = (attrs) ? attrs : &myattrs;
-            if (withns == FALSE) {
-                /* probably already false, but make sure */
-                msg->mhdr.useprefix = FALSE;
-            }
-        }
+    rpc_msg_t *msg = rpc_new_out_msg();
+    if (!msg) {
+        scb->fp = NULL;   /* do not close the file */
+        ses_free_scb(scb);
+        return ERR_INTERNAL_MEM;
     }
 
+    /* hack -- need a queue because there is no top
+     * element which this usually shadows
+     */
+    xml_attrs_t myattrs;
+    xml_init_attrs(&myattrs);
+    msg->rpc_in_attrs = (attrs) ? attrs : &myattrs;
+    if (withns == FALSE) {
+        /* probably already false, but make sure */
+        msg->mhdr.useprefix = FALSE;
+    }
+
+    ses_mode_t sesmode = SES_MODE_NONE;
     /* XML output mode will add more whitespace if this is ncxdump calling */
-    if (res == NO_ERR && docmode) {
+    if (docmode) {
         sesmode = ses_get_mode(scb);
         ses_set_mode(scb, SES_MODE_XMLDOC);
     }
-    
+
+    status_t res = NO_ERR;
+    boolean anyout = FALSE;
     /* send the XML declaration */
-    if (res == NO_ERR && xmlhdr) {
+    if (xmlhdr) {
         res = ses_start_msg(scb);
         if (res == NO_ERR) {
             anyout = TRUE;
@@ -1769,9 +1670,7 @@ status_t
 
     /* setup an empty prefix map */
     if (res == NO_ERR) {
-        res = xml_msg_build_prefix_map(&msg->mhdr,
-                                       msg->rpc_in_attrs, 
-                                       FALSE, 
+        res = xml_msg_build_prefix_map(&msg->mhdr, msg->rpc_in_attrs, FALSE,
                                        FALSE);
     }
 
@@ -1782,61 +1681,35 @@ status_t
      * !!! not handling i-i and XPath strings yet !!!
      */
     if (res == NO_ERR) {
+        boolean hascontent = TRUE;
+
         if (!val_has_content(val)) {
             /* print empty element */
-            xml_wr_begin_elem_ex(scb, 
-                                 &msg->mhdr,
-                                 0, 
-                                 val->nsid, 
-                                 val->name, 
-                                 attrs, 
-                                 TRUE, 
-                                 startindent, 
-                                 TRUE);
+            xml_wr_begin_elem_ex(scb, &msg->mhdr, 0, val->nsid, val->name, 
+                                 attrs, TRUE, startindent, TRUE);
             hascontent = FALSE;
         } else if (val->btyp == NCX_BT_IDREF) {
             /* print start QName element */
-            xml_wr_qname_elem(scb, 
-                              &msg->mhdr,
-                              val->v.idref.nsid,
-                              val->v.idref.name, 
-                              0,
-                              val->nsid, 
-                              val->name,
-                              attrs, 
-                              TRUE, 
-                              startindent,
-                              FALSE);
+            xml_wr_qname_elem(scb, &msg->mhdr, val->v.idref.nsid,
+                              val->v.idref.name, 0, val->nsid, val->name,
+                              attrs, TRUE, startindent, FALSE);
         } else {
             /* print start normal string node element */
-            xml_wr_begin_elem_ex(scb, 
-                                 &msg->mhdr,
-                                 0, 
-                                 val->nsid, 
-                                 val->name, 
-                                 attrs, 
-                                 TRUE, 
-                                 startindent, 
-                                 FALSE);
+            xml_wr_begin_elem_ex(scb, &msg->mhdr, 0, val->nsid, val->name, 
+                                 attrs, TRUE, startindent, FALSE);
         }
 
         anyout = TRUE;
 
         if (hascontent) {
-            fitoneline = fit_on_line(scb, val);
+            boolean fitoneline = fit_on_line(scb, val);
 
             /* output the contents of the value */
-            xml_wr_check_val(scb, 
-                             &msg->mhdr, 
-                             val, 
-                             (fitoneline) ? -1 : indent, 
-                             testfn);
+            xml_wr_check_val(scb, &msg->mhdr, val, 
+                             (fitoneline) ? -1 : indent, testfn);
 
             /* generate the <foo> end tag */
-            xml_wr_end_elem(scb, 
-                            &msg->mhdr, 
-                            val->nsid, 
-                            val->name,
+            xml_wr_end_elem(scb, &msg->mhdr, val->nsid, val->name,
                             (fitoneline) ? -1 : startindent);
         }
     }
@@ -1846,18 +1719,16 @@ status_t
         ses_finish_msg(scb);
     }
 
-    if (res == NO_ERR && docmode) {
+    if (docmode) {
         ses_set_mode(scb, sesmode);
     }
 
     /* clean up and exit */
-    if (msg) {
-        rpc_free_msg(msg);
-    }
-    if (scb) {
-        scb->fp = NULL;   /* do not close the file */
-        ses_free_scb(scb);
-    }
+    rpc_free_msg(msg);
+
+    scb->fp = NULL;   /* do not close the file */
+    ses_free_scb(scb);
+
     xml_clean_attrs(&myattrs);
 
     return res;
@@ -1901,26 +1772,17 @@ status_t
     FILE       *fp;
     status_t    res;
 
-#ifdef DEBUG
-    if (!filespec || !val || !attrs) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( filespec && "filespec is NULL" );
+    assert( val && "val is NULL" );
+    assert( attrs && "attrs is NULL" );
 
     fp = fopen((const char *)filespec, "w");
     if (!fp) {
         log_error("\nError: Cannot open XML file '%s'", filespec);
         return ERR_FIL_OPEN;
     }
-    res = xml_wr_check_open_file(fp,
-                                 val,
-                                 attrs,
-                                 docmode,
-                                 xmlhdr,
-                                 withns,
-                                 startindent,
-                                 indent,
-                                 testfn);
+    res = xml_wr_check_open_file(fp, val, attrs, docmode, xmlhdr, withns,
+                                 startindent, indent, testfn);
     fclose(fp);
 
     return res;
@@ -1959,24 +1821,9 @@ status_t
                  int32 startindent,
                  int32 indent)
 {
-#ifdef DEBUG
-    if (!filespec || !val || !attrs) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    return xml_wr_check_file(filespec, 
-                             val, 
-                             attrs, 
-                             docmode, 
-                             xmlhdr, 
-                             withns,
-                             startindent,
-                             indent, 
-                             NULL);
+    return xml_wr_check_file(filespec, val, attrs, docmode, xmlhdr, withns,
+                             startindent, indent, NULL);
 
 } /* xml_wr_file */
-
-
 
 /* END file xml_wr.c */

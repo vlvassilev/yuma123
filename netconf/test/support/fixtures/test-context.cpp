@@ -1,5 +1,4 @@
 #include "test/support/fixtures/test-context.h"
-#include "test/support/nc-query-util/nc-query-test-engine.h"
 
 // ---------------------------------------------------------------------------|
 namespace YumaTest 
@@ -11,14 +10,25 @@ std::shared_ptr<TestContext> TestContext::testContext_;
 
 // ---------------------------------------------------------------------------|
 TestContext::TestContext( 
+        bool isIntegTest,
         TargetDbConfig targetDbConfig,
-         std::shared_ptr<AbstractNCSessionFactory> sessionFactory )
-    : targetDbConfig_( targetDbConfig )
-    , queryEngine_( new NCQueryTestEngine() )
+        bool usingStartup,
+        int argc,
+        const char** argv,
+        std::shared_ptr<AbstractNCSessionFactory> sessionFactory,
+        std::shared_ptr<AbstractCBCheckerFactory> cbCheckerFactory,
+        std::shared_ptr<AbstractFixtureHelperFactory> fixtureHelperFactory )
+    : isIntegTest_( isIntegTest )
+    , targetDbConfig_( targetDbConfig )
+    , usingStartup_( usingStartup )
     , writeableDbName_( 
             targetDbConfig == TestContext::CONFIG_WRITEABLE_RUNNNIG ?
-            "running" : "candidate" ) 
+            "running" : "candidate" )
+    , numArgs_( argc )
+    , argv_( argv ) 
     , sessionFactory_( sessionFactory )
+    , cbCheckerFactory_( cbCheckerFactory )
+    , fixtureHelperFactory_( fixtureHelperFactory )
 {
 }
 

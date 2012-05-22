@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,73 +32,23 @@ date         init     comment
 #include <stdlib.h>
 #include <time.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_cap
 #include "agt_cap.h"
-#endif
-
-#ifndef _H_agt_hello
 #include "agt_hello.h"
-#endif
-
-#ifndef _H_agt_ses
 #include "agt_ses.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_agt_val_parse
 #include "agt_val_parse.h"
-#endif
-
-#ifndef _H_cap
 #include "cap.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_top
+#include "status.h"
 #include "top.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_xml_wr
+#include "val.h"
 #include "xml_wr.h"
-#endif
 
 
 /********************************************************************
@@ -106,10 +56,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#ifdef DEBUG
-#define AGT_HELLO_DEBUG 1
-#endif
 
 #define CLIENT_HELLO_CON ((const xmlChar *)"client-hello")
 
@@ -269,12 +215,12 @@ void
     }
 #endif
 
-#ifdef AGT_HELLO_DEBUG
     if (LOGDEBUG2) {
         log_debug2("\nagt_hello got node");
-        xml_dump_node(top);
+        if (LOGDEBUG3) {
+            xml_dump_node(top);
+        }
     }
-#endif
 
     /* only process this message in hello wait state */
     if (scb->state != SES_ST_HELLO_WAIT) {
@@ -460,7 +406,7 @@ status_t
                           ses_indent_count(scb));
     }
     if (res == NO_ERR) {
-        sprintf((char *)numbuff, "%d", scb->sid);
+        snprintf((char *)numbuff, sizeof(numbuff), "%d", scb->sid);
         ses_putstr(scb, numbuff);
     }
     if (res == NO_ERR) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -172,6 +172,16 @@ static void configure_logging( int argc, char** argv )
 * RETURNS:
 *   status
 *********************************************************************/
+
+/********************************************************************
+* FUNCTION init_subsys
+*
+* Initialize the subsystem, and get it ready to send and receive
+* the first message of any kind
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 static status_t
     init_subsys (int argc, char** argv)
 {
@@ -302,7 +312,6 @@ static status_t
 
 } /* init_subsys */
 
-
 /********************************************************************
 * FUNCTION cleanup_subsys
 *
@@ -345,15 +354,8 @@ static status_t
     "address=\"%s\" magic=\"%s\" transport=\"ssh\" port=\"%s\" />\n%s";
 
     memset(msgbuff, 0x0, BUFFLEN);
-    sprintf(msgbuff, 
-            connectmsg,
-            (const char *)XML_START_MSG, 
-            NCX_URN, 
-            user, 
-            client_addr, 
-            NCX_SERVER_MAGIC, 
-            port, 
-            NC_SSH_END);
+    snprintf(msgbuff, BUFFLEN, connectmsg, (const char *)XML_START_MSG, 
+             NCX_URN, user, client_addr, NCX_SERVER_MAGIC, port, NC_SSH_END);
 
     res = send_buff(ncxsock, msgbuff, strlen(msgbuff));
     return res;
@@ -440,19 +442,20 @@ static status_t
         ret = select(FD_SETSIZE, &fds, NULL, NULL, NULL);
         if (ret < 0) {
             if ( errno != EINTR ) {
-                SUBSYS_TRACE1( "ERROR: io_loop(): select() failed with error: %s\n", 
-                               strerror( errno ) );
+                SUBSYS_TRACE1( "ERROR: io_loop(): select() "
+                               "failed with error: %s\n", strerror( errno ) );
                 res = ERR_NCX_OPERATION_FAILED;
                 done = TRUE;
             }
             else
             {
-                SUBSYS_TRACE2( "INFO: io_loop(): select() failed with error: %s\n", 
-                               strerror( errno  ) );
+                SUBSYS_TRACE2( "INFO: io_loop(): select() "
+                               "failed with error: %s\n", strerror( errno  ) );
             }
             continue;
         } else if (ret == 0) {
-            SUBSYS_TRACE1( "ERROR: io_loop(): select() returned 0, exiting...\n" );
+            SUBSYS_TRACE1( "ERROR: io_loop(): select() "
+                           "returned 0, exiting...\n" );
             res = NO_ERR;
             done = TRUE;
             continue;
@@ -533,7 +536,7 @@ int main (int argc, char **argv)
 
     configure_logging( argc, argv );
 
-    res = init_subsys(argc, argv);
+    res = init_subsys();
     if (res != NO_ERR) {
         msg = "init failed";
     }

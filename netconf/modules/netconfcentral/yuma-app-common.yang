@@ -14,6 +14,12 @@ module yuma-app-common {
     description 
        "Common CLI parameters used in all yuma applications.";
 
+    revision 2011-10-06 {
+       description 
+         "Add HomeParm grouping.
+          Split CommonFeatureParms from NcxAppCommon grouping.";
+    }
+
     revision 2011-04-24 {
        description 
          "Remove empty featureParms grouping.
@@ -111,28 +117,6 @@ module yuma-app-common {
            type string;
         }
 
-        leaf feature-enable-default {
-          description
-            "If true, then features will be enabled by default.
-             If false, then features will be disabled by default.";
-          type boolean;
-          default true;
-        }
-
-        leaf-list feature-enable {
-          description
-            "Identifies a feature which should be considered
-             enabled.";
-          type yt:FeatureSpec;
-        }
-
-        leaf-list feature-disable {
-          description
-            "Identifies a feature which should be considered
-             disabled.";
-          type yt:FeatureSpec;
-        }
-
         leaf help {
           description "Print program help file and exit.";
           type empty;
@@ -222,6 +206,31 @@ module yuma-app-common {
               entered, then the YUMA_HOME environment variable
               will be ignored.";
           type string;
+        }
+    }
+
+    grouping CommonFeatureParms {
+
+        leaf feature-enable-default {
+          description
+            "If true, then features will be enabled by default.
+             If false, then features will be disabled by default.";
+          type boolean;
+          default true;
+        }
+
+        leaf-list feature-enable {
+          description
+            "Identifies a feature which should be considered
+             enabled.";
+          type yt:FeatureSpec;
+        }
+
+        leaf-list feature-disable {
+          description
+            "Identifies a feature which should be considered
+             disabled.";
+          type yt:FeatureSpec;
         }
     }
 
@@ -415,6 +424,16 @@ module yuma-app-common {
            /* default "netconf1.0 netconf1.1"; */
         }
     }
+
+    grouping HomeParm {
+        leaf home {
+           description
+              "Directory specification for the home directory
+               to use instead of HOME.";
+           type string { length "1..max"; }
+        }
+    }
+
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -553,6 +553,21 @@ extern const xmlChar *
 *********************************************************************/
 extern void 
     rpc_err_clean_errQ (dlq_hdr_t *errQ);
+
+
+/********************************************************************
+* FUNCTION rpc_err_any_errors
+*
+* Check if there are any errors in the RPC message error Q
+*
+* INPUTS:
+*   msg == rpc_msg_t struct to check for errors
+*
+* RETURNS:
+*   TRUE if any errors recorded; FALSE if none
+*********************************************************************/
+extern boolean
+    rpc_err_any_errors (const rpc_msg_t  *msg);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

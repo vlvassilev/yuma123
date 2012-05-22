@@ -11,6 +11,11 @@ module yuma-types {
 
     description "Yuma Common Data Types";
 
+    revision 2011-12-18 {
+       description 
+         "Added TransactionId data type.";
+    }
+
     revision 2010-11-28 {
        description 
          "Change default indent from 3 to 2.";
@@ -291,6 +296,17 @@ module yuma-types {
          of a module-name, colon character ':' and then
          a feature name (e.g., 'foo:bar')";
       type NcxQName;
+    }
+
+    typedef TransactionId {
+      description
+        "Database edit transaction identifier.
+         This is not a permanent identifier, and should only
+         be used for 'equal or not-equal' comparison tests.
+         The value will wrap after the maximum value is reached.";
+      type uint64 {
+        range "1 .. max";
+      }
     }
 }
 

@@ -1,6 +1,7 @@
 # ----------------------------------------------------------------------------|
 # Simple Edit tests
 EDIT_TEST_SUITE_SOURCES := $(YUMA_TEST_SUITE_COMMON)/simple-edit-tests.cpp \
+                           $(YUMA_TEST_SUITE_COMMON)/default-none-tests.cpp \
                            simple-edit-running.cpp \
 
 ALL_SOURCES += $(EDIT_TEST_SUITE_SOURCES) 

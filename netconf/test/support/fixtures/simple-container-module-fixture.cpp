@@ -123,14 +123,13 @@ namespace YumaTest
 
 // ---------------------------------------------------------------------------|
 SimpleContainerModuleFixture::SimpleContainerModuleFixture() 
-    : BaseSuiteFixture()
-    , wrBuilder_()
-    , moduleName_( "simple_list_test" )
+    : QuerySuiteFixture()
     , moduleNs_( "http://netconfcentral.org/ns/simple_list_test" )
     , containerName_( "simple_list" )
     , runningEntries_( new EntryMap_T() )
     , candidateEntries_( useCandidate() ? SharedPtrEntryMap_T( new EntryMap_T() )
                                         : runningEntries_ )
+    ,rollbackEntries_( new EntryMap_T() )
 {
     // ensure the module is loaded
     queryEngine_->loadModule( primarySession_, "simple_list_test" );
@@ -142,25 +141,11 @@ SimpleContainerModuleFixture::~SimpleContainerModuleFixture()
 }
 
 // ---------------------------------------------------------------------------|
-void SimpleContainerModuleFixture::runEditQuery( 
-        shared_ptr<AbstractNCSession> session,
-        const string& query )
-{
-    assert( session );
-    vector<string> expPresent{ "ok" };
-    vector<string> expNotPresent{ "error", "rpc-error" };
-    
-    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
-    queryEngine_->tryEditConfig( session, query, writeableDbName_, 
-                                 checker );
-}
-
-// ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::createMainContainer(
     std::shared_ptr<AbstractNCSession> session )
 {
     assert( session );
-    string query = wrBuilder_.genTopLevelContainerText( 
+    string query = messageBuilder_->genTopLevelContainerText( 
             containerName_, moduleNs_, "create" );
     runEditQuery( session, query );
 }
@@ -169,7 +154,7 @@ void SimpleContainerModuleFixture::createMainContainer(
 void SimpleContainerModuleFixture::deleteMainContainer(
     std::shared_ptr<AbstractNCSession> session )
 {
-    string query = wrBuilder_.genTopLevelContainerText( 
+    string query = messageBuilder_->genTopLevelContainerText( 
             containerName_, moduleNs_, "delete" );
     runEditQuery( session, query );
 
@@ -177,14 +162,26 @@ void SimpleContainerModuleFixture::deleteMainContainer(
 }
 
 // ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::mainContainerOp(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& op )
+{
+    assert( session );
+    string query = messageBuilder_->genTopLevelContainerText( 
+            containerName_, moduleNs_, op );
+    runEditQuery( session, query );
+}
+
+// ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::addEntry(
     std::shared_ptr<AbstractNCSession> session,
-    const string& entryKeyStr )
+    const string& entryKeyStr,
+    const string& operationStr )
 {
     assert( session );
 
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyOperationText( "theList", "theKey", entryKeyStr, "create" ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, operationStr ) );
     runEditQuery( session, query );
 }
 
@@ -192,13 +189,14 @@ void SimpleContainerModuleFixture::addEntry(
 void SimpleContainerModuleFixture::addEntryValue(
     std::shared_ptr<AbstractNCSession> session,
     const string& entryKeyStr,
-    const string& entryValStr )
+    const string& entryValStr,
+    const string& operationStr )
 {
     assert( session );
 
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
-                wrBuilder_.genOperationText( "theVal", entryValStr, "create" ) ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, operationStr ) ) );
     
     runEditQuery( session, query );
 }
@@ -210,10 +208,147 @@ void SimpleContainerModuleFixture::addEntryValuePair(
     const string& entryValStr )
 {
     assert( session );
-    addEntry( session, entryKeyStr );
-    addEntryValue( session, entryKeyStr, entryValStr );
+    addEntry( session, entryKeyStr, "create" );
+    addEntryValue( session, entryKeyStr, entryValStr, "create" );
 
     (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::mergeEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    addEntry( session, entryKeyStr, "merge" );
+    addEntryValue( session, entryKeyStr, entryValStr, "merge" );
+
+//    if (candidateEntries_->find(entryKeyStr) == candidateEntries_->end())
+//    {
+        (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+//    }
+
+//DEBUG
+    EntryMap_T::iterator it;
+    BOOST_TEST_MESSAGE("JOE DEBUG OP (MERGE) - " << entryKeyStr << ". " << entryValStr << ":");
+    for (it = candidateEntries_->begin(); it != candidateEntries_->end(); it++)
+    {
+        BOOST_TEST_MESSAGE((*it).first << " => " << (*it).second << "\n");
+    }
+//DEBUG
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::replaceEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    addEntry( session, entryKeyStr, "replace" );
+    addEntryValue( session, entryKeyStr, entryValStr, "replace" );
+
+    (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+//DEBUG
+    EntryMap_T::iterator it;
+    BOOST_TEST_MESSAGE("JOE DEBUG OP (REPLACE) - " << entryKeyStr << ". " << entryValStr << ":\n");
+    for (it = candidateEntries_->begin(); it != candidateEntries_->end(); it++)
+    {
+        BOOST_TEST_MESSAGE((*it).first << " => " << (*it).second << "\n");
+    }
+//DEBUG
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::noOpEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    addEntry( session, entryKeyStr, "" );
+    addEntryValue( session, entryKeyStr, entryValStr, "" );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntry(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr )
+{
+    assert( session );
+
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
+    runEditQuery( session, query );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryFailed(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr )
+{
+    assert( session );
+
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyOperationText( "theList", "theKey", entryKeyStr, "delete" ) );
+    runFailedEditQuery( session, query, "data missing" );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValue(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, "delete" ) ) );
+    
+    runEditQuery( session, query );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValueFailed(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, "delete" ) ) );
+    
+    runFailedEditQuery( session, query, "data missing" );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValuePair(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    EntryMap_T::iterator it;
+    assert( session );
+    deleteEntryValue( session, entryKeyStr, entryValStr );
+    deleteEntry( session, entryKeyStr );
+
+    it=candidateEntries_->find(entryKeyStr);
+    candidateEntries_->erase(it);
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::deleteEntryValuePairFailed(
+    std::shared_ptr<AbstractNCSession> session,
+    const string& entryKeyStr,
+    const string& entryValStr )
+{
+    assert( session );
+    deleteEntryValueFailed( session, entryKeyStr, entryValStr );
+    deleteEntryFailed( session, entryKeyStr );
 }
 
 // ---------------------------------------------------------------------------|
@@ -238,14 +373,29 @@ void SimpleContainerModuleFixture::editEntryValue(
     const string& entryValStr )
 {
     assert(session);
-    string query = wrBuilder_.genModuleOperationText( containerName_, moduleNs_,
-            wrBuilder_.genKeyParentPathText( "theList", "theKey", entryKeyStr,
-                wrBuilder_.genOperationText( "theVal", entryValStr, "replace" ) ) );
+    string query = messageBuilder_->genModuleOperationText( containerName_, moduleNs_,
+            messageBuilder_->genKeyParentPathText( "theList", "theKey", entryKeyStr,
+                messageBuilder_->genOperationText( "theVal", entryValStr, "replace" ) ) );
     
 
     runEditQuery( session, query );
 
     (*candidateEntries_)[ entryKeyStr ] = entryValStr;
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::discardChangesOperation( 
+    std::shared_ptr<AbstractNCSession> session )
+{
+    assert(session);
+
+    vector<string> expPresent{ "rpc-reply", "ok" };
+    vector<string> expNotPresent{ "error", "rpc-error" };
+    
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryDiscardChanges( session, checker );
+
+    discardChanges();
 }
 
 // ---------------------------------------------------------------------------|
@@ -265,12 +415,23 @@ void SimpleContainerModuleFixture::checkEntriesImpl(
     EntriesConvertFunctor conv( expPresent );
     for_each( refMap->begin(), refMap->end(), conv );
 
+    BOOST_TEST_MESSAGE("EXPECTED PRESENT:\n");
+    for (unsigned int i = 0; i < expPresent.size(); i++)
+    {
+        BOOST_TEST_MESSAGE(expPresent.at(i) + "\n");
+    }
+
     // now add all elements from the running that are not in the
     // candidate to the expectedNotPresent list
     if ( useCandidate() )
     {
         AddDifferingEntriesFunctor diff( expNotPresent, refMap );
         for_each( otherMap->begin(), otherMap->end(), diff );
+    }
+    BOOST_TEST_MESSAGE("EXPECTED NOT PRESENT:\n");
+    for (unsigned int i = 0; i < expNotPresent.size(); i++)
+    {
+        BOOST_TEST_MESSAGE(expNotPresent.at(i) + "\n");
     }
 
     StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
@@ -297,7 +458,7 @@ void SimpleContainerModuleFixture::checkEntries(
 void SimpleContainerModuleFixture::commitChanges(
     std::shared_ptr<AbstractNCSession> session )
 {
-    BaseSuiteFixture::commitChanges( session );
+    QuerySuiteFixture::commitChanges( session );
     
     // copy the editted changes to the running changes
     if ( useCandidate() )
@@ -308,6 +469,49 @@ void SimpleContainerModuleFixture::commitChanges(
     }
 
 }
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::commitChangesFailure(
+    std::shared_ptr<AbstractNCSession> session )
+{
+    QuerySuiteFixture::commitChangesFailure( session );
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::confirmedCommitChanges(
+    std::shared_ptr<AbstractNCSession> session, const int timeout, bool extend )
+{
+    QuerySuiteFixture::confirmedCommitChanges( session, timeout );
+    
+    // copy the editted changes to the running changes and store the original
+    if ( useCandidate() && !extend )
+    {
+        rollbackEntries_->clear();
+        rollbackEntries_->insert( runningEntries_->begin(),
+                                  runningEntries_->end() );
+        runningEntries_->clear();
+        runningEntries_->insert( candidateEntries_->begin(), 
+                                 candidateEntries_->end() );
+    }
+
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::runDeleteStartupConfig( 
+        shared_ptr<AbstractNCSession> session )
+{
+    if( useStartup() )
+    {
+        assert( session );
+        vector<string> expPresent{ "ok" };
+        vector<string> expNotPresent{ "error", "rpc-error" };
+        StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+        // send a delete-config
+        queryEngine_->tryDeleteConfig( session, "startup", checker );
+        rollbackEntries_->clear();
+    }
+}
+
 // ---------------------------------------------------------------------------|
 void SimpleContainerModuleFixture::discardChanges()
 {
@@ -317,6 +521,50 @@ void SimpleContainerModuleFixture::discardChanges()
         candidateEntries_->clear();
         candidateEntries_->insert( runningEntries_->begin(), 
                                    runningEntries_->end() );
+    }
+}
+
+// ---------------------------------------------------------------------------|
+void SimpleContainerModuleFixture::rollbackChanges(
+        shared_ptr<AbstractNCSession> session )
+{
+    // rollback the changes
+    if ( useCandidate() )
+    {
+        vector<string> expPresent{ "data" };
+        vector<string> expNotPresent{ "error", "rpc-error" };
+
+        // Add all expected elements to expPresent
+        EntriesConvertFunctor conv( expPresent );
+        for_each( rollbackEntries_->begin(), rollbackEntries_->end(), conv );
+
+        BOOST_TEST_MESSAGE("EXPECTED PRESENT:\n");
+        for (unsigned int i = 0; i < expPresent.size(); i++)
+        {
+            BOOST_TEST_MESSAGE(expPresent.at(i) + "\n");
+        }
+
+        // now add all elements from the running that are not in the
+        // rollback entries to the expectedNotPresent list
+        AddDifferingEntriesFunctor diff( expNotPresent, rollbackEntries_ );
+        for_each( runningEntries_->begin(), runningEntries_->end(), diff );
+        
+        BOOST_TEST_MESSAGE("EXPECTED NOT PRESENT:\n");
+        for (unsigned int i = 0; i < expNotPresent.size(); i++)
+        {
+            BOOST_TEST_MESSAGE(expNotPresent.at(i) + "\n");
+        }
+
+        StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+        queryEngine_->tryGetConfigXpath( session, containerName_, "running", 
+                                         checker );
+
+        runningEntries_->clear();
+        runningEntries_->insert( rollbackEntries_->begin(), 
+                                 rollbackEntries_->end() );
+        candidateEntries_->clear();
+        candidateEntries_->insert( rollbackEntries_->begin(), 
+                                   rollbackEntries_->end() );
     }
 }
 

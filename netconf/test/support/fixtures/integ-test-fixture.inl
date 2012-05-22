@@ -3,10 +3,12 @@
 // ---------------------------------------------------------------------------|
 #include "test/support/fixtures/integ-test-fixture.h"
 #include "test/support/fixtures/test-context.h"
+#include "test/support/fixtures/integ-fixture-helper-factory.h"
 #include "test/support/misc-util/log-utils.h"
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/nc-query-util/yuma-op-policies.h"
 #include "test/support/nc-session/spoof-nc-session-factory.h"
+#include "test/support/callbacks/integ-cb-checker-factory.h"
 
 // ---------------------------------------------------------------------------|
 // Standard includes
@@ -52,20 +54,17 @@ IntegrationTestFixture<SpoofedArgs, OpPolicy>::IntegrationTestFixture()
     // TODO: Ensure that the Traits target and Spoofed Args Targets match
 
     configureTestContext();
-    initialiseNCXEngine();
-    loadBaseSchemas();
-    stage1AgtInitialisation();
-    loadCoreSchema();
-    stage2AgtInitialisation();
+
+    fixtureHelper_ = TestContext::getTestContext()->
+                                     fixtureHelperFactory_->createHelper();
+    fixtureHelper_->mimicStartup();
 }
 
 // ---------------------------------------------------------------------------|
 template<class SpoofedArgs, class OpPolicy>
 IntegrationTestFixture<SpoofedArgs, OpPolicy>::~IntegrationTestFixture()
 {
-    BOOST_TEST_MESSAGE( "IntegrationTestFixture() Cleaning Up..." );
-    agt_cleanup();
-    ncx_cleanup();
+    fixtureHelper_->mimicShutdown();
 }
 
 // ---------------------------------------------------------------------------|
@@ -83,71 +82,20 @@ void IntegrationTestFixture<SpoofedArgs, OpPolicy>::configureTestContext()
    shared_ptr< AbstractNCSessionFactory > sessionFactory(
            new SpoofNCSessionFactory( queryLogPolicy ) ) ;
 
+   shared_ptr< AbstractCBCheckerFactory > cbCheckerFactory(
+           new IntegCBCheckerFactory( getTargetDbConfig()==TestContext::CONFIG_USE_CANDIDATE) ) ;
+
+   shared_ptr< AbstractFixtureHelperFactory > fixtureHelperFactory(
+           new IntegFixtureHelperFactory() );
+
    shared_ptr< TestContext > testContext( 
-           new TestContext( getTargetDbConfig(), sessionFactory ) );
+           new TestContext( true, getTargetDbConfig(), usingStartupCapability(), 
+                            numArgs_, argv_, sessionFactory, cbCheckerFactory, 
+                            fixtureHelperFactory ) );
 
    assert( testContext );
 
    TestContext::setTestContext( testContext );
-}
-
-// ---------------------------------------------------------------------------|
-template<class SpoofedArgs, class OpPolicy>
-void IntegrationTestFixture<SpoofedArgs, OpPolicy>::initialiseNCXEngine()
-{
-    BOOST_TEST_MESSAGE( "Initialising the NCX Engine..." );
-    assert( "NCX Engine Failed to initialise" &&
-            NO_ERR == ncx_init( FALSE, LOG_DEBUG_INFO, FALSE, 0, numArgs_, 
-                                const_cast<char**>( argv_ ) ) ); 
-}
-
-// ---------------------------------------------------------------------------|
-template<class SpoofedArgs, class OpPolicy>
-void IntegrationTestFixture<SpoofedArgs, OpPolicy>::loadBaseSchemas()
-{
-    BOOST_TEST_MESSAGE( "Loading base schema..." );
-    assert( "ncxmod_load_module( NCXMOD_YUMA_NETCONF ) failed!" &&
-            NO_ERR == ncxmod_load_module( NCXMOD_YUMA_NETCONF, NULL, NULL, NULL ) );
-
-    assert( "ncx_modload_module( NCXMOD_NETCONFD ) failed!" &&
-            NO_ERR == ncxmod_load_module( NCXMOD_NETCONFD, NULL, NULL, NULL ) );
-}
-
-// ---------------------------------------------------------------------------|
-template<class SpoofedArgs, class OpPolicy>
-void IntegrationTestFixture<SpoofedArgs, OpPolicy>::loadCoreSchema()
-{
-    BOOST_TEST_MESSAGE( "Loading core schemas..." );
-    agt_profile_t* profile = agt_get_profile();
-    assert ( "agt_get_profile() returned a null profile" && profile );
-    assert( "ncxmod_load_module( NCXMOD_WITH_DEFAULTS ) failed!" &&
-            NO_ERR == ncxmod_load_module( NCXMOD_YUMA_NETCONF, NULL, 
-                                          &profile->agt_savedevQ, NULL ) );
-
-    assert( "ncx_modload_module( NCXMOD_NETCONFD failed!" &&
-            NO_ERR == ncxmod_load_module( NCXMOD_NETCONFD, NULL, NULL, NULL ) );
-}
-
-// ---------------------------------------------------------------------------|
-template<class SpoofedArgs, class OpPolicy>
-void IntegrationTestFixture<SpoofedArgs, OpPolicy>::stage1AgtInitialisation()
-{
-    BOOST_TEST_MESSAGE( "AGT Initialisation stage 1..." );
-    boolean showver = FALSE;
-    help_mode_t showhelpmode = HELP_MODE_NONE;
-
-    assert( "agt_init1() failed!" &&
-            NO_ERR == agt_init1( numArgs_, const_cast<char**>( argv_ ),
-                                 &showver, &showhelpmode ) );  
-}
-
-// ---------------------------------------------------------------------------|
-template<class SpoofedArgs, class OpPolicy>
-void IntegrationTestFixture<SpoofedArgs, OpPolicy>::stage2AgtInitialisation()
-{
-    BOOST_TEST_MESSAGE( "AGT Initialisation stage 2..." );
-
-    assert( "agt_init2() failed!" && NO_ERR == agt_init2() );
 }
 
 } // namespace YumaTest

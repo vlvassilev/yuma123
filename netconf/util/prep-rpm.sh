@@ -20,7 +20,11 @@ VER="1.15"
 URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1
 SPEC=yuma.spec
 elif [ $1 = 2 ]; then
-VER="2.1"
+VER="2.2"
+URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v2
+SPEC=yuma2.spec
+elif [ $1 = 3 ]; then
+VER="2.2"
 URL=https://yuma.svn.sourceforge.net/svnroot/yuma/trunk
 SPEC=yuma2.spec
 else
@@ -42,5 +46,11 @@ chmod 775 yuma-$VER/configure
 
 tar cvf yuma-$VER.tar yuma-$VER/
 gzip yuma-$VER.tar
+
+mkdir -p ~/rpmbuild/SPECS
+mkdir -p ~/rpmbuild/SOURCES
+mkdir -p ~/rpmbuild/SRPMS
+mkdir -p ~/rpmbuild/RPMS
+
 cp yuma-$VER.tar.gz ~/rpmbuild/SOURCES
 cp yuma-$VER/SPECS/$SPEC ~/rpmbuild/SPECS

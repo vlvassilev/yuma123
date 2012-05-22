@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -672,6 +672,10 @@ const char *
         return "multiple matches found";
     case ERR_NCX_NO_DEFAULT:
         return "no schema default for this node";
+    case ERR_NCX_MISSING_KEY:
+        return "expected key leaf in list";
+    case ERR_NCX_TOP_LEVEL_MANDATORY_FAILED:
+        return "top-level mandatory objects are not allowed";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -774,6 +778,8 @@ const char *
         return "top-level object is mandatory";
     case ERR_NCX_FILE_MOD_MISMATCH:
         return "file name does not match [sub]module name";
+    case ERR_NCX_UNIQUE_CONDITIONAL_MISMATCH:
+        return "unique-stmt component conditions do not match parent list";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

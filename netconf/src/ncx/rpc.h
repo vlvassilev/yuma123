@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,6 +32,7 @@ date             init     comment
 */
 
 #include <xmlstring.h>
+
 
 #ifndef _H_dlq
 #include "dlq.h"
@@ -91,60 +92,12 @@ extern "C" {
 *********************************************************************/
 
 
-/* From the NCX module rpc-type parameter */
-typedef enum rpc_type_t_ {
-    RPC_TYP_NONE,
-    RPC_TYP_OTHER,
-    RPC_TYP_CONFIG,
-    RPC_TYP_EXEC,
-    RPC_TYP_MONITOR,
-    RPC_TYP_DEBUG
-} rpc_type_t;
-
-
-/* Type of the NCX module rpc.out-data parameter */
-typedef enum rpc_outtyp_t_ {
-    RPC_OT_NONE,
-    RPC_OT_TYPE,
-    RPC_OT_PSD,
-    RPC_OT_MON
-} rpc_outtyp_t;
-
-
 /* Type of the <rpc-reply> data source */
 typedef enum rpc_data_t_ {
     RPC_DATA_NONE,
     RPC_DATA_STD,
     RPC_DATA_YANG
 } rpc_data_t;
-
-
-/* struct of params to undo an edit-config opration
- * The actual nodes used depend on the edit operation value
- */
-typedef struct rpc_undo_rec_t_ {
-    dlq_hdr_t       qhdr;
-    boolean         ismeta;
-    boolean         free_newnode;
-    boolean         free_curnode;
-    op_editop_t     editop;
-    val_value_t    *newnode; 
-    val_value_t    *curnode;
-    val_value_t    *curnode_clone;
-    val_value_t    *parentnode; 
-    dlq_hdr_t       extra_deleteQ;     
-    status_t        res;
-} rpc_undo_rec_t;
-
-
-/* struct of params to use when generating sysConfigChange
- * notification.
- */
-typedef struct rpc_audit_rec_t_ {
-    dlq_hdr_t       qhdr;
-    xmlChar        *target;
-    op_editop_t     editop;
-} rpc_audit_rec_t;
 
 
 /* NETCONF Server and Client RPC Request/Reply Message Header */
@@ -159,7 +112,7 @@ typedef struct rpc_msg_t_ {
 
     /* incoming: 
      * 2nd-level method name element data, used in agt_output_filter
-     * to check get or get-config
+     * to check get or get-config; cannot import obj.h here!
      */
     struct obj_template_t_ *rpc_method; 
 
@@ -188,17 +141,10 @@ typedef struct rpc_msg_t_ {
     dlq_hdr_t       rpc_dataQ;       /* data reply: Q of val_value_t */
     op_filter_t     rpc_filter;        /* backptrs for get* methods */
 
-    /* incoming: rollback or commit phase support builtin
-     * As an edit-config (or other RPC) is processed, a
-     * queue of 'undo records' is collected.
-     * If the apply phase succeeds then it is discarded,
-     * otherwise if rollback-on-error is requested,
-     * it is used to undo each change that did succeed (if any)
-     * before an error occured in the apply phase.
+    /* incoming: agent database edit transaction control block
+     * must be freed by an upper layer if set to malloced data
      */
-    boolean          rpc_need_undo;   /* set by edit_config_validate */
-    dlq_hdr_t        rpc_undoQ;       /* Q of rpc_undo_rec_t */
-    dlq_hdr_t        rpc_auditQ;       /* Q of rpc_audit_rec_t */
+    struct agt_cfg_transaction_t_ *rpc_txcb;
 
 } rpc_msg_t;
 
@@ -251,144 +197,6 @@ extern rpc_msg_t *
 *********************************************************************/
 extern void 
     rpc_free_msg (rpc_msg_t *msg);
-
-
-/********************************************************************
-* FUNCTION rpc_get_rpctype_str
-* 
-* Get the string for the enum value for the RPC type
-* 
-* INPUTS:
-*   rpctyp == enum for the RPC type
-*
-* RETURNS:
-*   string name of the specified enum
-*********************************************************************/
-extern const xmlChar *
-    rpc_get_rpctype_str (rpc_type_t rpctyp);
-
-
-/********************************************************************
-* FUNCTION rpc_new_undorec
-*
-* Malloc and initialize a new rpc_undo_rec_t struct
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   pointer to struct or NULL or memory error
-*********************************************************************/
-extern rpc_undo_rec_t *
-    rpc_new_undorec (void);
-
-
-/********************************************************************
-* FUNCTION rpc_init_undorec
-*
-* Initialize a new rpc_undo_rec_t struct
-*
-* INPUTS:
-*   undo == rpc_undo_rec_t memory to initialize
-* RETURNS:
-*   none
-*********************************************************************/
-extern void
-    rpc_init_undorec (rpc_undo_rec_t *undo);
-
-
-/********************************************************************
-* FUNCTION rpc_free_undorec
-*
-* Free all the memory used by the specified rpc_undo_rec_t
-*
-* INPUTS:
-*   undo == rpc_undo_rec_t to clean and delete
-* RETURNS:
-*   none
-*********************************************************************/
-extern void
-    rpc_free_undorec (rpc_undo_rec_t *undorec);
-
-
-/********************************************************************
-* FUNCTION rpc_clean_undorec
-*
-* Clean all the memory used by the specified rpc_undo_rec_t
-* but do not free the struct itself
-*
-*  !!! The caller must free internal pointers that were malloced
-*  !!! instead of copied.  This function does not check them!!!
-*  
-* INPUTS:
-*   undo == rpc_undo_rec_t to clean
-* RETURNS:
-*   none
-*********************************************************************/
-extern void 
-    rpc_clean_undorec (rpc_undo_rec_t *undo);
-
-
-/********************************************************************
-* FUNCTION rpc_set_undorec_free_newnode
-*
-* Set the undo rec status so the newnode will
-* be deleted when commit or undo phase is completed
-* The newnode is no longer in the tree, so skip 
-* val_remove_child step
-*
-* INPUTS:
-*   undo == rpc_undo_rec_t to set
-*********************************************************************/
-extern void 
-    rpc_set_undorec_free_newnode (rpc_undo_rec_t *undo);
-
-
-/********************************************************************
-* FUNCTION rpc_set_undorec_free_curnode
-*
-* Set the undo rec status so the curnode will
-* be deleted when commit or undo phase is completed
-* The curnode is no longer in the tree, so skip 
-* val_remove_child step
-*
-* INPUTS:
-*   undo == rpc_undo_rec_t to set
-*********************************************************************/
-extern void 
-    rpc_set_undorec_free_curnode (rpc_undo_rec_t *undo);
-
-
-
-/********************************************************************
-* FUNCTION rpc_new_auditrec
-*
-* Malloc and initialize a new rpc_audit_rec_t struct
-*
-* INPUTS:
-*   target == i-i string of edit target
-*   editop == edit operation enum
-*
-* RETURNS:
-*   pointer to struct or NULL or memory error
-*********************************************************************/
-extern rpc_audit_rec_t *
-    rpc_new_auditrec (const xmlChar *target,
-                      op_editop_t editop);
-
-
-/********************************************************************
-* FUNCTION rpc_free_auditrec
-*
-* Free all the memory used by the specified rpc_audit_rec_t
-*
-* INPUTS:
-*   auditrec == rpc_audit_rec_t to clean and delete
-*
-* RETURNS:
-*   none
-*********************************************************************/
-extern void 
-    rpc_free_auditrec (rpc_audit_rec_t *auditrec);
 
 
 #ifdef __cplusplus

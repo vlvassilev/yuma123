@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -39,85 +39,26 @@ date         init     comment
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_cfg
+#include "procdefs.h"
 #include "cfg.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_typ
+#include "status.h"
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xsd_typ
 #include "xsd_typ.h"
-#endif
-
-#ifndef _H_xsd_util
 #include "xsd_util.h"
-#endif
-
-#ifndef _H_yang
 #include "yang.h"
-#endif
 
 
 /********************************************************************
@@ -405,7 +346,7 @@ static status_t
         }
     }
 
-    /* add the constructed tree the the restrcition node passed in */
+    /* add the constructed tree to the restriction node passed in */
     val_add_child(curtop, val);
 
     /* add the last pattern as a sibling of the new simpleType tree */
@@ -414,7 +355,6 @@ static status_t
     return res;
 
 }   /* add_patterns */
-
 
 
 /********************************************************************
@@ -913,6 +853,7 @@ static status_t
         res = typ_get_rangebounds_con(rtypdef, &range_btyp,&lb, &ub);
         if (res != NO_ERR) {
             /* should not happen since rtypdef is non-NULL */
+            val_free_value(top);
             return SET_ERROR(res);
         }
 

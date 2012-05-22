@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -340,6 +340,8 @@ status_t
     uint32    mlen, plen;
     status_t  res;
 
+    
+
 #ifdef DEBUG
     if (!ns || !modname || !ns_id) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -352,16 +354,14 @@ status_t
         plen = xml_strlen(pfix);
     } else {
         buff[0] = 'n';
-        sprintf(&buff[1], "%d", xmlns_next_id);
+        snprintf(&buff[1], sizeof(buff) - 1, "%d", xmlns_next_id);
         pfix = (xmlChar *)buff;
         plen = xml_strlen(pfix);
     }
 
-#ifdef DEBUG
     if (!mlen || !plen) {
         return ERR_NCX_WRONG_LEN;
     }
-#endif
 
     if (!xmlns_next_id || xmlns_next_id > XMLNS_MAX_NS) {
         return ERR_TOO_MANY_ENTRIES;

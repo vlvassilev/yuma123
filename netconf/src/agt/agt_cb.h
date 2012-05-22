@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,29 +32,12 @@ date	     init     comment
 01-aug-08    abb      Remove NCX specific stuff; YANG only now
 */
 
-#ifndef _H_agt
 #include "agt.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------|
 // Yuma Test Harness includes
 // ---------------------------------------------------------------------------|
-#include "test/support/fixtures/base-suite-fixture.h"
+#include "test/support/fixtures/query-suite-fixture.h"
 #include "test/support/misc-util/log-utils.h"
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/checkers/string-presence-checkers.h"
@@ -28,7 +28,7 @@ using namespace std;
 // ---------------------------------------------------------------------------|
 namespace YumaTest {
 
-BOOST_FIXTURE_TEST_SUITE( db_lock_test_suite_running, BaseSuiteFixture )
+BOOST_FIXTURE_TEST_SUITE( db_lock_test_suite_running, QuerySuiteFixture )
 
 // ---------------------------------------------------------------------------|
 // Simple lock and unlock of the target and running database

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -89,42 +89,17 @@ date	     init     comment
 */
 
 #include <xmlstring.h>
+#include <time.h>
 
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_plock_cb
 #include "plock_cb.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -195,6 +170,14 @@ extern "C" {
  */
 #define VAL_FL_WITHDEF   bit8
 
+/* if set, value has been deleted or moved and awaiting commit or rollback */
+#define VAL_FL_DELETED   bit9
+
+/* if set, there was an edit operation in a descendant node;
+ * Used by agt_val_root_check to prune trees for faster processing
+ */
+#define VAL_FL_SUBTREE_DIRTY bit10
+
 /* set the virtualval lifetime to 3 seconds */
 #define VAL_VIRTUAL_CACHE_TIME   3
 
@@ -226,6 +209,10 @@ extern "C" {
 
 #define VAL_INT16(V)   ((int16)((V)->v.num.i))
 
+#define VAL_INT32(V)   ((V)->v.num.i)
+
+#define VAL_INT64(V)  ((V)->v.num.l)
+
 #define VAL_STR(V)     ((V)->v.str)
 
 #define VAL_INSTANCE_ID(V) ((V)->v.str)
@@ -242,7 +229,11 @@ extern "C" {
 
 #define VAL_UINT16(V)   ((uint16)((V)->v.num.u))
 
-#define VAL_ULONG(V)   ((V)->v.num.ul)
+#define VAL_UINT32(V)   ((V)->v.num.u)
+
+#define VAL_UINT64(V)   ((V)->v.num.ul)
+
+#define VAL_ULONG(V)    ((V)->v.num.ul)
 
 #define VAL_DEC64(V)   ((V)->v.num.dec.val)
 
@@ -251,6 +242,12 @@ extern "C" {
 #define VAL_BITS VAL_LIST
 
 #define VAL_EXTERN(V)  ((V)->v.fname)
+
+#define VAL_IS_DELETED(V) ((V)->flags & VAL_FL_DELETED)
+
+#define VAL_MARK_DELETED(V) (V)->flags |= VAL_FL_DELETED
+
+#define VAL_UNMARK_DELETED(V) (V)->flags &= ~VAL_FL_DELETED
 
 
 /********************************************************************
@@ -275,7 +272,7 @@ typedef struct val_editvars_t_ {
      * curparent == parent of curnode for merge
      */
     struct val_value_t_  *curparent;      
-    op_editop_t    editop;            /* effective edit operation */
+    //op_editop_t    editop;            /* effective edit operation */
     op_insertop_t  insertop;             /* YANG insert operation */
     xmlChar       *insertstr;          /* saved value or key attr */
     struct xpath_pcb_t_ *insertxpcb;       /* key attr for insert */
@@ -319,7 +316,8 @@ typedef struct val_value_t_ {
     dlq_hdr_t        metaQ;                      /* Q of val_value_t */
 
     /* value editing variables */
-    val_editvars_t  *editvars;              /* edit-in-progress vars */
+    val_editvars_t  *editvars;               /* edit-vars from attrs */
+    op_editop_t      editop;                 /* needed for all edits */ 
     status_t         res;                       /* validation result */
 
     /* Used by Agent only:
@@ -421,7 +419,7 @@ typedef struct val_index_t_ {
 /* one unique-stmt component test value node */
 typedef struct val_unique_t_ {
     dlq_hdr_t     qhdr;
-    val_value_t  *valptr;
+    struct xpath_pcb_t_ *pcb;  // live XPath CB w/ result
 } val_unique_t;
 
 
@@ -1589,21 +1587,13 @@ extern val_value_t *
 *
 * INPUTS:
 *    src == val to merge from
-*
-*       !!! destructive -- entries will be moved, not copied !!!
-*       !!! Must be dequeued before calling this function !!!
-*       !!! Must not use src pointer value again if *freesrc == FALSE
-
 *    dest == val to merge into
 *
 * RETURNS:
-*       TRUE if the source value needs to be deleted because the
-*          memory was not transfered to the parent val childQ.
-*       FALSE if the source value should not be freed because 
-*         the memory is still in use, but transferred to the target
+*    status
 *********************************************************************/
-extern boolean
-    val_merge (val_value_t *src,
+extern status_t
+    val_merge (const val_value_t *src,
 	       val_value_t *dest);
 
 
@@ -1666,6 +1656,7 @@ extern val_value_t *
 * FUNCTION val_replace
 * 
 * Replace a specified val_value_t struct and sub-trees
+* !!! this can be destructive to the source 'val' parameter !!!!
 *
 * INPUTS:
 *    val == value to clone from
@@ -1738,77 +1729,6 @@ extern void
 extern void
     val_add_child_sorted (val_value_t *child,
                           val_value_t *parent);
-
-
-/********************************************************************
-* FUNCTION val_add_child_clean
-* 
-*  add an object and delete any extra cases
-*  Add a child value node to a parent value node
-*  This is only called by the agent when adding nodes
-*  to a target database.
-*
-*  If the child node being added is part of a choice/case,
-*  then all sibling nodes in other cases within the same
-*  choice will be deleted
-*
-*  The insert operation will also be check to see
-*  if the child is a list oo a leaf-list, which is ordered-by user
-*
-*  The default insert mode is always 'last'
-*
-* INPUTS:
-*    child == node to store in the parent
-*    parent == complex value node with a childQ
-*    cleanQ == address of Q to receive any deleted sibling nodes
-*
-* OUTPUTS:
-*    cleanQ may have nodes added if the child being added
-*    is part of a case.  All other cases will be deleted
-*    from the parent Q and moved to the cleanQ
-*
-*********************************************************************/
-extern void
-    val_add_child_clean (val_value_t *child,
-			 val_value_t *parent,
-			 dlq_hdr_t *cleanQ);
-
-
-/********************************************************************
-* FUNCTION val_add_child_clean_editvars
-* 
-*  Add a child value node to a parent value node
-*  This is only called by the agent when adding nodes
-*  to a target database.
-*
-*   Pass in the editvar to use
-*
-*  If the child node being added is part of a choice/case,
-*  then all sibling nodes in other cases within the same
-*  choice will be deleted
-*
-*  The insert operation will also be check to see
-*  if the child is a list oo a leaf-list, which is ordered-by user
-*
-*  The default insert mode is always 'last'
-*
-* INPUTS:
-*    editvars == val_editvars_t struct to use
-*    child == node to store in the parent
-*    parent == complex value node with a childQ
-*    cleanQ == address of Q to receive any deleted sibling nodes
-*
-* OUTPUTS:
-*    cleanQ may have nodes added if the child being added
-*    is part of a case.  All other cases will be deleted
-*    from the parent Q and moved to the cleanQ
-*
-*********************************************************************/
-extern void
-    val_add_child_clean_editvars (val_editvars_t *editvars,
-				  val_value_t *child,
-				  val_value_t *parent,
-				  dlq_hdr_t *cleanQ);
 
 
 /********************************************************************
@@ -1945,6 +1865,31 @@ extern val_value_t *
     val_find_child (const val_value_t  *parent,
 		    const xmlChar  *modname,
 		    const xmlChar *childname);
+
+
+/********************************************************************
+* FUNCTION val_find_child_que
+* 
+* Find the first instance of the specified child node in the
+* specified child Q
+*
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
+extern val_value_t *
+    val_find_child_que (const dlq_hdr_t *childQ,
+                        const xmlChar *modname,
+                        const xmlChar *childname);
 
 
 /********************************************************************
@@ -2478,8 +2423,8 @@ extern uint32
 *   TRUE if the index chains match
 *********************************************************************/
 extern boolean
-    val_index_match (val_value_t *val1,
-		     val_value_t *val2);
+    val_index_match (const val_value_t *val1,
+		     const val_value_t *val2);
 
 
 /********************************************************************
@@ -2498,8 +2443,47 @@ extern boolean
 *   -1 , - or 1 for compare value
 *********************************************************************/
 extern int
-    val_index_compare (val_value_t *val1,
-                       val_value_t *val2);
+    val_index_compare (const val_value_t *val1,
+                       const val_value_t *val2);
+
+
+/********************************************************************
+* FUNCTION val_compare_max
+* 
+* Compare 2 val_value_t struct value contents
+* Check all or config only
+* Check just child nodes or all descendant nodes
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* Handle NCX_CL_COMPLEX by checking the index if needed
+* and then checking all the child nodes recursively
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    val2 == second value to check
+*    configonly == TRUE to compare config=true nodes only
+*                  FALSE to compare all nodes
+*    childonly == TRUE to look just 1 level for comparison
+*                 FALSE to compare all descendant nodes of complex types
+*    editing == TRUE to compare for editing
+*               FALSE to compare just the values, so a set by
+*               default and value=default are the same value
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
+extern int32
+    val_compare_max (const val_value_t *val1,
+                     const val_value_t *val2,
+                     boolean configonly,
+                     boolean childonly,
+                     boolean editing);
 
 
 /********************************************************************
@@ -2529,8 +2513,8 @@ extern int
 *      1: val1 is greater than val2
 *********************************************************************/
 extern int32
-    val_compare_ex (val_value_t *val1,
-                    val_value_t *val2,
+    val_compare_ex (const val_value_t *val1,
+                    const val_value_t *val2,
                     boolean configonly);
 
 
@@ -2558,8 +2542,8 @@ extern int32
 *      1: val1 is greater than val2
 *********************************************************************/
 extern int32
-    val_compare (val_value_t *val1,
-		 val_value_t *val2);
+    val_compare (const val_value_t *val1,
+		 const val_value_t *val2);
 
 
 /********************************************************************
@@ -2587,7 +2571,7 @@ extern int32
 *      1: val1 is greater than val2
 *********************************************************************/
 extern int32
-    val_compare_to_string (val_value_t *val1,
+    val_compare_to_string (const val_value_t *val1,
 			   const xmlChar *strval2,
 			   status_t *res);
 
@@ -2613,8 +2597,8 @@ extern int32
 *      1: val1 is greater than val2
 *********************************************************************/
 extern int32
-    val_compare_for_replace (val_value_t *val1,
-                             val_value_t *val2);
+    val_compare_for_replace (const val_value_t *val1,
+                             const val_value_t *val2);
 
 
 /********************************************************************
@@ -2988,7 +2972,7 @@ extern val_value_t *
 *   val == value to check
 *
 * SIDE EFFECTS:
-*   val->flags may be adjsuted
+*   val->flags may be adjusted
 *         VAL_FL_DEFVALSET will be set if not set already
 *         VAL_FL_DEFVAL will be set or cleared if 
 *            VAL_FL_DEFSETVAL is not already set,
@@ -3151,6 +3135,21 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION val_get_subtree_dirty_flag
+* 
+* Get the subtree dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is subtree dirty, false otherwise
+*********************************************************************/
+extern boolean
+    val_get_subtree_dirty_flag (const val_value_t *val);
+
+
+/********************************************************************
 * FUNCTION val_set_dirty_flag
 * 
 * Set the dirty flag for this value node
@@ -3178,6 +3177,22 @@ extern void
 *********************************************************************/
 extern void
     val_clear_dirty_flag (val_value_t *val);
+
+
+
+/********************************************************************
+* FUNCTION val_dirty_subtree
+* 
+* Check the dirty or subtree_dirty flag
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty or any subtree may be dirty, false otherwise
+*********************************************************************/
+extern boolean
+    val_dirty_subtree (const val_value_t *val);
 
 
 /********************************************************************
@@ -3597,6 +3612,52 @@ extern val_index_t *
 extern val_index_t *
     val_get_next_key (val_index_t *curkey);
 
+
+/********************************************************************
+* FUNCTION val_new_deleted_value
+* 
+* Malloc and initialize the fields in a val_value_t to be used
+* as a deleted node marker
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+extern val_value_t * 
+    val_new_deleted_value (void);
+
+
+/********************************************************************
+* FUNCTION val_new_editvars
+* 
+* Malloc and initialize the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is malloced and initialized
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_new_editvars (val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_free_editvars
+* 
+* Free the editing variables for the value node
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is freed if set
+*    val->editop set to OP_EDITOP_NONE
+*********************************************************************/
+extern void
+    val_free_editvars (val_value_t *val);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -44,97 +44,29 @@ date         init     comment
 
 #include "libtecla.h"
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_obj_help
 #include "obj_help.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xml_wr
 #include "xml_wr.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
-#endif
-
-#ifndef _H_yangcli_show
 #include "yangcli_show.h"
-#endif
-
-#ifndef _H_yangcli_util
 #include "yangcli_util.h"
-#endif
 
 
 /********************************************************************
@@ -431,8 +363,7 @@ static status_t
 
     /* Global Script Variables */
     if (!shortmode || isglobal) {
-        que = runstack_get_que(server_cb->runstack_context,
-                               ISGLOBAL);
+        que = runstack_get_que(server_cb->runstack_context, ISGLOBAL);
         first = TRUE;
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL;
@@ -446,11 +377,8 @@ static status_t
                 (*logfn)("\nGlobal variables\n");
                 first = FALSE;
             }
-            show_user_var(server_cb,
-                          var->name,
-                          var->vartype,
-                          var->val,
-                          mode);
+            show_user_var(server_cb, var->name,  var->vartype,
+                          var->val, mode);
         }
         if (first) {
             (*logfn)("\nNo global variables\n");
@@ -460,8 +388,7 @@ static status_t
 
     /* Local Script Variables */
     if (!shortmode || !isglobal || isany) {
-        que = runstack_get_que(server_cb->runstack_context,
-                               ISLOCAL);
+        que = runstack_get_que(server_cb->runstack_context, ISLOCAL);
         first = TRUE;
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL;
@@ -470,11 +397,8 @@ static status_t
                 (*logfn)("\nLocal variables\n");
                 first = FALSE;
             }
-            show_user_var(server_cb,
-                          var->name, 
-                          var->vartype,
-                          var->val,
-                          mode);
+            show_user_var(server_cb, var->name, var->vartype,
+                          var->val, mode);
         }
         if (first) {
             (*logfn)("\nNo local variables\n");
@@ -529,20 +453,17 @@ static status_t
             vartype = VAR_TYP_LOCAL;
         } else {
             val = var_get(server_cb->runstack_context,
-                          name, 
-                          VAR_TYP_GLOBAL);
+                          name, VAR_TYP_GLOBAL);
             if (val) {
                 vartype = VAR_TYP_GLOBAL;
             } else {
                 val = var_get(server_cb->runstack_context,
-                              name, 
-                              VAR_TYP_CONFIG);
+                              name, VAR_TYP_CONFIG);
                 if (val) {
                     vartype = VAR_TYP_CONFIG;
                 } else {
                     val = var_get(server_cb->runstack_context,
-                                  name, 
-                                  VAR_TYP_SYSTEM);
+                                  name, VAR_TYP_SYSTEM);
                     if (val) {
                         vartype = VAR_TYP_SYSTEM;
                     }
@@ -550,9 +471,7 @@ static status_t
             }
         }
     } else {
-        val = var_get(server_cb->runstack_context,
-                      name, 
-                      vartype);
+        val = var_get(server_cb->runstack_context, name, vartype);
     }
 
     if (val) {
@@ -879,15 +798,11 @@ status_t
         mode = HELP_MODE_NORMAL;
 
         /* check if the 'brief' flag is set first */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_BRIEF);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
         if (parm && parm->res == NO_ERR) {
             mode = HELP_MODE_BRIEF;
         } else {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_FULL);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
             if (parm && parm->res == NO_ERR) {
                 mode = HELP_MODE_FULL;
             }
@@ -897,9 +812,7 @@ status_t
         done = FALSE;
 
         /* show cli */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD,
-                              YANGCLI_CLI);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_CLI);
         if (parm) {
             do_show_cli(server_cb);
             done = TRUE;
@@ -907,39 +820,26 @@ status_t
 
         /* show local <foo> */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_LOCAL);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_LOCAL);
             if (parm) {
-                res = do_show_var(server_cb,
-                                  VAL_STR(parm), 
-                                  VAR_TYP_LOCAL, 
-                                  FALSE, 
-                                  mode);
+                res = do_show_var(server_cb, VAL_STR(parm),  VAR_TYP_LOCAL, 
+                                  FALSE, mode);
                 done = TRUE;
             }
         }
 
         /* show locals */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_LOCALS);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_LOCALS);
             if (parm) {
-                res = do_show_vars(server_cb,
-                                   mode, 
-                                   TRUE, 
-                                   FALSE, 
-                                   FALSE);
+                res = do_show_vars(server_cb, mode, TRUE, FALSE, FALSE);
                 done = TRUE;
             }
         }
 
         /* show objects */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_OBJECTS);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OBJECTS);
             if (parm) {
                 res = do_show_objects(server_cb, mode);
                 done = TRUE;
@@ -948,47 +848,32 @@ status_t
 
         /* show global */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_GLOBAL);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_GLOBAL);
             if (parm) {
-                res = do_show_var(server_cb,
-                                  VAL_STR(parm), 
-                                  VAR_TYP_GLOBAL, 
-                                  FALSE, 
-                                  mode);
+                res = do_show_var(server_cb, VAL_STR(parm), VAR_TYP_GLOBAL, 
+                                  FALSE, mode);
                 done = TRUE;
             }
         }
 
         /* show globals */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_GLOBALS);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_GLOBALS);
             if (parm) {
-                res = do_show_vars(server_cb,
-                                   mode, 
-                                   TRUE, 
-                                   TRUE, 
-                                   FALSE);
+                res = do_show_vars(server_cb, mode, TRUE, TRUE, FALSE);
                 done = TRUE;
             }
         }
 
         /* show session */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD,
-                              YANGCLI_SESSION);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SESSION);
         if (parm) {
             do_show_session(server_cb, mode);
             done = TRUE;
         }
 
         /* show system */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD,
-                              YANGCLI_SYSTEM);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SYSTEM);
         if (parm) {
             do_show_system(server_cb, mode);
             done = TRUE;
@@ -996,39 +881,26 @@ status_t
 
         /* show var <foo> */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_VAR);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VAR);
             if (parm) {
-                res = do_show_var(server_cb,
-                                  VAL_STR(parm), 
-                                  VAR_TYP_NONE, 
-                                  TRUE, 
-                                  mode);
+                res = do_show_var(server_cb, VAL_STR(parm), VAR_TYP_NONE, 
+                                  TRUE, mode);
                 done = TRUE;
             }
         }
 
         /* show vars */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_VARS);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VARS);
             if (parm) {
-                res = do_show_vars(server_cb,
-                                   mode, 
-                                   FALSE, 
-                                   FALSE, 
-                                   TRUE);
+                res = do_show_vars(server_cb, mode, FALSE, FALSE, TRUE);
                 done = TRUE;
             }
         }
 
         /* show module <foo> */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_MODULE);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_MODULE);
             if (parm) {
                 mod = find_module(server_cb, VAL_STR(parm));
                 if (mod) {
@@ -1048,9 +920,7 @@ status_t
 
         /* show modules */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  YANGCLI_MODULES);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_MODULES);
             if (parm) {
                 res = do_show_modules(server_cb, mode);
                 done = TRUE;
@@ -1059,19 +929,14 @@ status_t
 
         /* show version */
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD,
-                                  NCX_EL_VERSION);
+            parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_VERSION);
             if (parm) {
-                res = ncx_get_version(versionbuffer, 
-                                      NCX_VERSION_BUFFSIZE);
+                res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
                 if (res == NO_ERR) {
                     if (imode) {
-                        log_stdout("\nyangcli version %s\n", 
-                                   versionbuffer);
+                        log_stdout("\nyangcli version %s\n", versionbuffer);
                     } else {
-                        log_write("\nyangcli version %s\n", 
-                                  versionbuffer);
+                        log_write("\nyangcli version %s\n", versionbuffer);
                     }
                 }
                 done = TRUE;

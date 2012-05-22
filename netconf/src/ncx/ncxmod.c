@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -26,6 +26,7 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -37,53 +38,19 @@ date         init     comment
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_help
+#include "procdefs.h"
 #include "help.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_xml_util
+#include "status.h"
+#include "tstamp.h"
 #include "xml_util.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yang_parse
 #include "yang_parse.h"
-#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -120,13 +87,15 @@ static boolean ncxmod_init_done = FALSE;
 
 static const xmlChar *ncxmod_yuma_home;
 
+static xmlChar *ncxmod_home_cli;
+
 static xmlChar *ncxmod_yuma_home_cli;
 
 static xmlChar *ncxmod_yumadir_path;
 
 static const xmlChar *ncxmod_env_install;
 
-static const xmlChar *ncxmod_env_userhome;
+static const xmlChar *ncxmod_home;
 
 static const xmlChar *ncxmod_mod_path = NULL;
 
@@ -284,10 +253,10 @@ static status_t
     }
 
     if (*path == NCXMOD_HMCHAR && path[1] == NCXMOD_PSCHAR) {
-        if (!ncxmod_env_userhome) {
+        if (!ncxmod_home) {
             return ERR_FIL_BAD_FILENAME;
         } else {
-            total += (xml_strlen(ncxmod_env_userhome) - 1);
+            total += (xml_strlen(ncxmod_home) - 1);
         }
     }
 
@@ -300,7 +269,7 @@ static status_t
     str = buff;
 
     if (*path == NCXMOD_HMCHAR && path[1] == NCXMOD_PSCHAR) {
-        str += xml_strcpy(str, ncxmod_env_userhome);
+        str += xml_strcpy(str, ncxmod_home);
         str += xml_strcpy(str, &path[1]);
     } else {
         str += xml_strcpy(str, path);
@@ -853,11 +822,7 @@ static status_t
     buffleft = bufflen - pathlen;
 
     /* try YANG first */
-    res = yang_copy_filename(modname,
-                             revision,
-                             &buff[pathlen],
-                             buffleft,
-                             TRUE);
+    res = yang_copy_filename(modname, revision, &buff[pathlen], buffleft, TRUE);
     if (res != NO_ERR) {
         return res;
     }
@@ -875,10 +840,7 @@ static status_t
     buff[pathlen] = 0;
 
     /* try YIN next */
-    res = yang_copy_filename(modname,
-                             revision,
-                             &buff[pathlen],
-                             buffleft,
+    res = yang_copy_filename(modname, revision, &buff[pathlen], buffleft,
                              FALSE);
     if (res != NO_ERR) {
         return res;
@@ -973,12 +935,7 @@ static status_t
         buff[pathlen] = 0;
     }
 
-    res = check_module_in_dir(buff, 
-                              bufflen,
-                              pathlen,
-                              modname,
-                              revision,
-                              done);
+    res = check_module_in_dir(buff, bufflen, pathlen, modname, revision, done);
     if (*done || res != NO_ERR) {
         return res;
     }
@@ -1021,10 +978,7 @@ static status_t
                 } else {
                     xml_strcpy(&buff[pathlen], 
                                (const xmlChar *)ep->d_name);
-                    res = search_subdirs(buff, 
-                                         bufflen, 
-                                         modname, 
-                                         revision, 
+                    res = search_subdirs(buff, bufflen, modname, revision, 
                                          done);
                     if (*done) {
                         dirdone = TRUE;
@@ -1266,12 +1220,8 @@ static status_t
                     *str++ = NCXMOD_PSCHAR;
                     *str = '\0';
 
-                    res = list_subdirs(buff, 
-                                       bufflen, 
-                                       searchtype,
-                                       helpmode,
-                                       logstdout,
-                                       TRUE);
+                    res = list_subdirs(buff, bufflen, searchtype, helpmode,
+                                       logstdout, TRUE);
                     /* erase the filename and keep trying */
                     buff[pathlen] = 0;
                     if (res != NO_ERR) {
@@ -1345,11 +1295,7 @@ static status_t
         }
 
         /* list all the requested files in this path */
-        res = list_subdirs(buff,
-                           bufflen,
-                           searchtype,
-                           helpmode,
-                           logstdout,
+        res = list_subdirs(buff, bufflen, searchtype, helpmode, logstdout,
                            FALSE);
 
         if (res != NO_ERR) {
@@ -1487,11 +1433,7 @@ static status_t
         }
 
         /* try YANG or YIN file */
-        res = search_subdirs(buff, 
-                             bufflen, 
-                             modname,
-                             revision,
-                             done);
+        res = search_subdirs(buff, bufflen, modname, revision, done);
         if (*done && res == NO_ERR) {
 
             res = try_module(buff, 
@@ -2044,7 +1986,7 @@ static status_t
 
     if (ncx_get_cwd_subdirs()) {
         /* CHECK THE CURRENT DIR AND ANY SUBDIRS
-         * 3) try current working directory and subdirs if the subdirs parameter 
+         * 3) try cur working directory and subdirs if the subdirs parameter
          *    is true
          * check before the modpath, which can cause the wrong version to be 
          * picked, depending * on the CWD used by the application.  */
@@ -2074,8 +2016,8 @@ static status_t
     }
 
     /* 5) HOME/modules directory */
-    if (!done && ncxmod_env_userhome) {
-        res = check_module_path( ncxmod_env_userhome, buff, bufflen, modname,
+    if (!done && ncxmod_home) {
+        res = check_module_path( ncxmod_home, buff, bufflen, modname,
                                  revision, pcb, ptyp, FALSE, &done );
     }
 
@@ -2116,7 +2058,9 @@ static status_t
                 *retmod = pcb->retmod;
             } else if (ptyp == YANG_PT_TOP) {
                 *retmod = pcb->top;
-            } 
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
         } else if (res != NO_ERR && pcb->retmod) {
             log_debug( "\nFree retmod import %p (%s)", 
                        pcb->retmod, pcb->retmod->name);
@@ -2326,20 +2270,12 @@ static status_t
      * does not get passed over for a generic foo.yang
      * later on in the search path
      */
-    res = load_module(modname, 
-                      revision,
-                      pcb, 
-                      ptyp, 
-                      &testmod);
+    res = load_module(modname, revision, pcb, ptyp, &testmod);
 
     if (res == ERR_NCX_MOD_NOT_FOUND) {
         if (revision && *revision) {
             /* try filenames without revision dates in them */
-            res = load_module(modname, 
-                              NULL,
-                              pcb, 
-                              ptyp, 
-                              &testmod);
+            res = load_module(modname, NULL, pcb, ptyp, &testmod);
             if (res == NO_ERR && testmod) {
                 if (testmod->version == NULL) {
                     /* asked for a specific revision; 
@@ -2356,7 +2292,14 @@ static status_t
         }
     }
 
-    if (retmod) {
+    if (res == NO_ERR && testmod && testmod->errors) {
+        log_debug("\nParser returned OK but module '%s' has errors",
+                  testmod->name);
+        res = ERR_NCX_OPERATION_FAILED;
+        if (!testmod->ismod && (pcb->top != testmod)) {
+            ncx_free_module(testmod);
+        }
+    } else if (retmod) {
         *retmod = testmod;
     }
 
@@ -2634,11 +2577,8 @@ static status_t
     retmod = NULL;
     searchresult = NULL;
 
-    res = try_load_module(pcb, 
-                          YANG_PT_TOP,
-                          (const xmlChar *)fullspec, 
-                          NULL, 
-                          &retmod);
+    res = try_load_module(pcb, YANG_PT_TOP, (const xmlChar *)fullspec, 
+                          NULL, &retmod);
 
     if (res != NO_ERR || retmod == NULL) {
         if (LOGDEBUG2) {
@@ -2696,12 +2636,14 @@ status_t
     ncxmod_env_install = (const xmlChar *)getenv(NCXMOD_INSTALL);
 
     /* try to get the user HOME environment variable */
-    ncxmod_env_userhome = (const xmlChar *)getenv(USER_HOME);
+    ncxmod_home = (const xmlChar *)getenv(USER_HOME);
+
+    ncxmod_home_cli = NULL;
 
     /* try to get the module search path variable */
     ncxmod_mod_path = (const xmlChar *)getenv(NCXMOD_MODPATH);
 
-    if (ncxmod_env_userhome != NULL) {
+    if (ncxmod_home != NULL) {
         ncxmod_yumadir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
     } else {
         ncxmod_yumadir_path = xml_strdup(NCXMOD_TEMP_YUMA_DIR);
@@ -2751,10 +2693,14 @@ void
      
     ncxmod_yuma_home = NULL;
     ncxmod_env_install = NULL;
-    ncxmod_env_userhome = NULL;
+    ncxmod_home = NULL;
     ncxmod_mod_path = NULL;
     ncxmod_data_path = NULL;
     ncxmod_run_path = NULL;
+
+    if (ncxmod_home_cli) {
+        m__free(ncxmod_home_cli);
+    }
 
     if (ncxmod_yuma_home_cli) {
         m__free(ncxmod_yuma_home_cli);
@@ -2787,6 +2733,10 @@ void
 * Determine the location of the specified module
 * and then load it into the system, if not already loaded
 *
+* This is the only load module variant that checks if there
+* are any errors recorded in the module or any of its dependencies
+* !!! ONLY RETURNS TRUE IF MODULE AND ALL IMPORTS ARE LOADED OK !!!
+*
 * Module Search order:
 *
 * 1) YUMA_MODPATH environment var (or set by modpath CLI var)
@@ -2813,28 +2763,24 @@ status_t
                         dlq_hdr_t *savedevQ,
                         ncx_module_t **retmod)
 {
-    yang_pcb_t      *pcb;
-    status_t         res;
 
-#ifdef DEBUG
-    if (!modname) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
+
+
+    assert( modname && "modname is NULL!" );
+
+    if (retmod) {
+        *retmod = NULL;
     }
-#endif
 
-    res = NO_ERR;
-
-    pcb = yang_new_pcb();
+    status_t res = NO_ERR;
+    yang_pcb_t *pcb = yang_new_pcb();
     if (!pcb) {
         res = ERR_INTERNAL_MEM;
     } else {
         pcb->revision = revision;
         pcb->savedevQ = savedevQ;
-        res = try_load_module(pcb, 
-                              YANG_PT_TOP,
-                              modname, 
-                              revision, 
-                              retmod);
+
+        res = try_load_module(pcb, YANG_PT_TOP, modname, revision, retmod);
     }
 
     if (LOGINFO && res != NO_ERR) {
@@ -2913,11 +2859,7 @@ status_t
         pcb->revision = revision;
         pcb->savedevQ = savedevQ;
         pcb->parsemode = TRUE;
-        res = try_load_module(pcb, 
-                              YANG_PT_TOP,
-                              modname, 
-                              revision, 
-                              retmod);
+        res = try_load_module(pcb, YANG_PT_TOP, modname, revision, retmod);
     }
 
     if (LOGINFO && res != NO_ERR) {
@@ -2994,11 +2936,7 @@ ncxmod_search_result_t *
     retmod = NULL;
     searchresult = NULL;
 
-    res = try_load_module(pcb, 
-                          YANG_PT_TOP,
-                          modname, 
-                          revision, 
-                          &retmod);
+    res = try_load_module(pcb, YANG_PT_TOP, modname, revision, &retmod);
 
     if (res != NO_ERR || retmod == NULL) {
         if (LOGDEBUG2) {
@@ -3087,8 +3025,8 @@ status_t
     }
 
     /* 2) HOME/modules directory */
-    if (res == NO_ERR && ncxmod_env_userhome) {
-        res = search_module_path(ncxmod_env_userhome,
+    if (res == NO_ERR && ncxmod_home) {
+        res = search_module_path(ncxmod_home,
                                  buff,
                                  bufflen,
                                  search_subtree_callback,
@@ -3200,11 +3138,7 @@ status_t
     } else {
         pcb->deviationmode = TRUE;
         pcb->savedevQ = deviationQ;
-        res = try_load_module(pcb, 
-                              YANG_PT_TOP,
-                              deviname, 
-                              NULL, 
-                              &retmod);
+        res = try_load_module(pcb, YANG_PT_TOP, deviname, NULL, &retmod);
     }
 
     if (res != NO_ERR) {
@@ -3287,11 +3221,7 @@ status_t
     pcb->revision = revision;
     pcb->parentparm = parent;
 
-    res = try_load_module(pcb, 
-                          ptyp,
-                          modname,
-                          revision,
-                          retmod);
+    res = try_load_module(pcb, ptyp, modname, revision, retmod);
 
     pcb->revision = savedrev;
 
@@ -3357,11 +3287,7 @@ yang_pcb_t *
         pcb->with_submods = with_submods;
         pcb->savetkc = savetkc;
         pcb->docmode = docmode;
-        *res = try_load_module(pcb,
-                               YANG_PT_TOP,
-                               modname, 
-                               revision, 
-                               NULL);
+        *res = try_load_module(pcb, YANG_PT_TOP, modname, revision, NULL);
     }
 
     return pcb;
@@ -3420,11 +3346,7 @@ yang_pcb_t *
         if (modpath) {
             ncxmod_set_altpath(modpath);
         }
-        *res = try_load_module(pcb,
-                               YANG_PT_TOP,
-                               modname, 
-                               revision,
-                               NULL);
+        *res = try_load_module(pcb, YANG_PT_TOP, modname, revision, NULL);
         if (modpath) {
             ncxmod_clear_altpath();
         }
@@ -3507,11 +3429,7 @@ xmlChar *
      * only if it is not an absolute path string
      */
     if (ncxmod_data_path && (*fname != NCXMOD_PSCHAR)) {
-        if (test_pathlist(ncxmod_data_path, 
-                          buff, 
-                          bufflen, 
-                          fname, 
-                          NULL)) {
+        if (test_pathlist(ncxmod_data_path, buff, bufflen, fname, NULL)) {
             return buff;
         }
     }
@@ -3522,62 +3440,41 @@ xmlChar *
     }
 
     /* 3) HOME/data directory */
-    if (ncxmod_env_userhome) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_env_userhome, 
-                      NCXMOD_DATA_DIR, 
-                      fname)) {
+    if (ncxmod_home) {
+        if (test_file(buff, bufflen, ncxmod_home, NCXMOD_DATA_DIR, fname)) {
             return buff;
         }
     }
 
     /* 4) YUMA_HOME/data directory */
     if (ncxmod_yuma_home) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_yuma_home,
-                      NCXMOD_DATA_DIR, 
+        if (test_file(buff, bufflen, ncxmod_yuma_home, NCXMOD_DATA_DIR, 
                       fname)) {
             return buff;
         }
     }
 
     /* 5) HOME/.yuma directory */
-    if (ncxmod_env_userhome) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_env_userhome, 
-                      NCXMOD_YUMA_DIRNAME,
-                      fname)) {
+    if (ncxmod_home) {
+        if (test_file(buff, bufflen, ncxmod_home, NCXMOD_YUMA_DIRNAME, fname)) {
             return buff;
         }
     }
 
     /* 6a) YUMA_INSTALL/data directory */
     if (ncxmod_env_install) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_env_install,
-                      NCXMOD_DATA_DIR, 
+        if (test_file(buff, bufflen, ncxmod_env_install, NCXMOD_DATA_DIR, 
                       fname)) {
             return buff;
         }
-    } else if (test_file(buff, 
-                         bufflen, 
-                         NCXMOD_DEFAULT_INSTALL,
-                         NCXMOD_DATA_DIR, 
-                         fname)) {
+    } else if (test_file(buff, bufflen, NCXMOD_DEFAULT_INSTALL,
+                         NCXMOD_DATA_DIR, fname)) {
         /* 6b) default YUMA_INSTALL data directory */
         return buff;
     }
 
     /* 7) default Yuma data directory */
-    if (test_file(buff, 
-                  bufflen, 
-                  NCXMOD_ETC_DATA,
-                  NULL,
-                  fname)) {
+    if (test_file(buff, bufflen, NCXMOD_ETC_DATA, NULL, fname)) {
         return buff;
     }
 
@@ -3808,11 +3705,8 @@ xmlChar *
     }
 
     /* 2) HOME/data directory */
-    if (ncxmod_env_userhome) {
-        if (test_file_make(buff, 
-                           bufflen, 
-                           ncxmod_env_userhome, 
-                           NCXMOD_DATA_DIR, 
+    if (ncxmod_home) {
+        if (test_file_make(buff, bufflen, ncxmod_home, NCXMOD_DATA_DIR, 
                            fname) == NO_ERR) {
             return buff;
         }
@@ -3820,21 +3714,15 @@ xmlChar *
 
     /* 3) YUMA_HOME/data directory */
     if (ncxmod_yuma_home) {
-        if (test_file_make(buff, 
-                           bufflen, 
-                           ncxmod_yuma_home,
-                           NCXMOD_DATA_DIR, 
+        if (test_file_make(buff, bufflen, ncxmod_yuma_home, NCXMOD_DATA_DIR, 
                            fname) == NO_ERR) {
             return buff;
         }
     }
 
     /* 4) HOME/.yuma directory */
-    if (ncxmod_env_userhome) {
-        if (test_file_make(buff, 
-                           bufflen, 
-                           ncxmod_env_userhome, 
-                           NCXMOD_YUMA_DIRNAME, 
+    if (ncxmod_home) {
+        if (test_file_make(buff, bufflen, ncxmod_home, NCXMOD_YUMA_DIRNAME, 
                            fname) == NO_ERR) {
             return buff;
         }
@@ -3842,29 +3730,19 @@ xmlChar *
 
     /* 5) YUMA_INSTALL/data directory */
     if (ncxmod_env_install) {
-        if (test_file_make(buff, 
-                           bufflen, 
-                           ncxmod_env_install,
-                           NCXMOD_DATA_DIR, 
+        if (test_file_make(buff, bufflen, ncxmod_env_install, NCXMOD_DATA_DIR, 
                            fname) == NO_ERR) {
             return buff;
         }
     } else {
-        if (test_file_make(buff, 
-                           bufflen, 
-                           NCXMOD_DEFAULT_INSTALL,
-                           NCXMOD_DATA_DIR, 
-                           fname) == NO_ERR) {
+        if (test_file_make(buff, bufflen, NCXMOD_DEFAULT_INSTALL,
+                           NCXMOD_DATA_DIR, fname) == NO_ERR) {
             return buff;
         }
     }
 
     /* 6) current directory */
-    if (test_file_make(buff, 
-                       bufflen, 
-                       NULL,
-                       NULL, 
-                       fname) == NO_ERR) {
+    if (test_file_make(buff, bufflen, NULL, NULL, fname) == NO_ERR) {
         return buff;
     }
 
@@ -4028,32 +3906,21 @@ xmlChar *
      * 2) check YUMA_RUNPATH env-var or runpath CLI param 
      */
     if (ncxmod_run_path) {
-        if (test_pathlist(ncxmod_run_path, 
-                          buff, 
-                          bufflen, 
-                          fname, 
-                          NULL)) {
+        if (test_pathlist(ncxmod_run_path, buff, bufflen, fname, NULL)) {
             return buff;
         }
     }
 
     /* 3) try HOME/scripts/fname */
-    if (ncxmod_env_userhome) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_env_userhome, 
-                      NCXMOD_SCRIPT_DIR, 
-                      fname)) {
+    if (ncxmod_home) {
+        if (test_file(buff, bufflen, ncxmod_home, NCXMOD_SCRIPT_DIR, fname)) {
             return buff;
         }
     }
 
     /* 4) try YUMA_HOME/scripts/fname */
     if (ncxmod_yuma_home) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_yuma_home, 
-                      NCXMOD_SCRIPT_DIR, 
+        if (test_file(buff, bufflen, ncxmod_yuma_home, NCXMOD_SCRIPT_DIR, 
                       fname)) {
             return buff;
         }
@@ -4064,18 +3931,12 @@ xmlChar *
      *    be tried
      */
     if (ncxmod_env_install) {
-        if (test_file(buff, 
-                      bufflen, 
-                      ncxmod_env_install,
-                      NCXMOD_SCRIPT_DIR, 
+        if (test_file(buff, bufflen, ncxmod_env_install, NCXMOD_SCRIPT_DIR, 
                       fname)) {
             return buff;
         }
     } else {
-        if (test_file(buff, 
-                      bufflen, 
-                      NCXMOD_DEFAULT_INSTALL,
-                      NCXMOD_SCRIPT_DIR, 
+        if (test_file(buff, bufflen, NCXMOD_DEFAULT_INSTALL, NCXMOD_SCRIPT_DIR, 
                       fname)) {
             return buff;
         }
@@ -4091,6 +3952,90 @@ xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncxmod_set_home
+* 
+*   Override the HOME env var with the home CLI var
+*
+* THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
+* MALLOC FAILED IGNORED!!!
+*
+* INPUTS:
+*   home == new HOME value
+*        == NULL or empty string to disable
+*********************************************************************/
+void
+    ncxmod_set_home (const xmlChar *home)
+{
+    xmlChar    *savehome = ncxmod_home_cli;
+    xmlChar    *savepath = ncxmod_yumadir_path;
+    status_t    res = NO_ERR;
+
+    if (home && *home) {
+        if (*home == '/') {
+            ncxmod_home_cli = xml_strdup(home);
+            if (ncxmod_home_cli == NULL) {
+                res = ERR_INTERNAL_MEM;
+            }
+        } else {
+            ncxmod_home_cli = ncx_get_source(home, &res);            
+        }
+    } else {
+        log_error("\nError: cannot set 'home' to empty string\n");
+        return;
+    }
+
+    if (ncxmod_home_cli == NULL) {
+        log_error("\nError: set home to '%s' failed (%s)\n", 
+                  home, get_error_string(res));
+        ncxmod_home_cli = savehome;
+        return;
+    }
+        
+    ncxmod_home = ncxmod_home_cli;
+    if (savehome) {
+        m__free(savehome);
+    }
+
+    /* reset the yumadir path if needed */
+    if (ncxmod_home != NULL) {
+        ncxmod_yumadir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
+    } else {
+        ncxmod_yumadir_path = xml_strdup(NCXMOD_TEMP_YUMA_DIR);
+        if (ncxmod_yumadir_path == NULL) {
+            res = ERR_INTERNAL_MEM;
+        }
+    }
+    if (ncxmod_yumadir_path == NULL) {
+        log_error("\nError: set yumadir_path to '%s' failed (%s)\n", 
+                  home, get_error_string(res));
+        ncxmod_yumadir_path = savepath;
+        return;
+    }
+    if (savepath) {
+        m__free(savepath);
+    }
+    
+}  /* ncxmod_set_home */
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_home
+*
+*  Get the HOME or --home parameter value,
+*  whichever is in effect, if any
+*
+* RETURNS:
+*   const point to the home variable, or NULL if not set
+*********************************************************************/
+const xmlChar *
+    ncxmod_get_home (void)
+{
+    return ncxmod_home;
+
+}  /* ncxmod_get_home */
+
+
+/********************************************************************
 * FUNCTION ncxmod_set_yuma_home
 * 
 *   Override the YUMA_HOME env var with the yuma-home CLI var
@@ -4100,21 +4045,36 @@ xmlChar *
 *
 * INPUTS:
 *   yumahome == new YUMA_HOME value
-*            == NULL or empty string to disable
 *********************************************************************/
 void
     ncxmod_set_yuma_home (const xmlChar *yumahome)
 {
-    if (ncxmod_yuma_home_cli) {
-        m__free(ncxmod_yuma_home_cli);
-        ncxmod_yuma_home_cli = NULL;        
-    }
+    xmlChar *savehome = ncxmod_yuma_home_cli;
+    status_t res = NO_ERR;
 
     if (yumahome && *yumahome) {
-        /* ignoring possible malloc failed!! */
-        ncxmod_yuma_home_cli = xml_strdup(yumahome);
+        if (*yumahome == '/') {
+            ncxmod_yuma_home_cli = xml_strdup(yumahome);
+            if (ncxmod_yuma_home_cli == NULL) {
+                res = ERR_INTERNAL_MEM;
+            }
+        } else {
+            ncxmod_yuma_home_cli = ncx_get_source(yumahome, &res);
+        }
+        if (ncxmod_yuma_home_cli == NULL) {
+            log_error("\nError: set yuma home to '%s' failed (%s)",
+                      yumahome, get_error_string(res));
+            return;
+        }
+
+        ncxmod_yuma_home = ncxmod_yuma_home_cli;
+        if (savehome) {
+            m__free(savehome);
+        }
+    } else {
+        log_error("\nError: cannot set yuma home to empty string\n");
+        return;
     }
-    ncxmod_yuma_home = ncxmod_yuma_home_cli;
     
 }  /* ncxmod_set_yuma_home */
 
@@ -4406,7 +4366,7 @@ const xmlChar *
     }
 
     if (!user) {
-        return (const xmlChar *)ncxmod_env_userhome;
+        return (const xmlChar *)ncxmod_home;
     }
 
     strncpy(buff, (const char *)user, userlen);
@@ -4564,11 +4524,11 @@ status_t
     }
 
     /* 3) HOME/data directory */
-    if (ncxmod_env_userhome) {
-        pathlen = xml_strlen(ncxmod_env_userhome);
+    if (ncxmod_home) {
+        pathlen = xml_strlen(ncxmod_home);
         if (pathlen + 6 < bufflen) {
             p = buff;
-            p += xml_strcpy(p, ncxmod_env_userhome);
+            p += xml_strcpy(p, ncxmod_home);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"data");
             *p++ = NCXMOD_PSCHAR;
@@ -4712,11 +4672,11 @@ status_t
     }
 
     /* 3) HOME/scripts directory */
-    if (ncxmod_env_userhome) {
-        pathlen = xml_strlen(ncxmod_env_userhome);
+    if (ncxmod_home) {
+        pathlen = xml_strlen(ncxmod_home);
         if (pathlen + 9 < bufflen) {
             p = buff;
-            p += xml_strcpy(p, ncxmod_env_userhome);
+            p += xml_strcpy(p, ncxmod_home);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"scripts");
             *p++ = NCXMOD_PSCHAR;
@@ -4859,11 +4819,11 @@ status_t
     }
 
     /* 3) HOME/modules directory */
-    if (ncxmod_env_userhome) {
-        pathlen = xml_strlen(ncxmod_env_userhome);
+    if (ncxmod_home) {
+        pathlen = xml_strlen(ncxmod_home);
         if (pathlen + 9 < bufflen) {
             p = buff;
-            p += xml_strcpy(p, ncxmod_env_userhome);
+            p += xml_strcpy(p, ncxmod_home);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"modules");
             *p++ = NCXMOD_PSCHAR;

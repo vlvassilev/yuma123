@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -137,6 +137,20 @@ extern void
 *********************************************************************/
 extern void
     var_clean_varQ (dlq_hdr_t *varQ);
+
+
+/********************************************************************
+* FUNCTION var_clean_type_from_varQ
+* 
+* Clean all entries of one type from a Q of ncx_var_t
+* 
+* INPUTS:
+*   varQ == Q of var structs to free
+*   vartype == variable type to delete
+*********************************************************************/
+extern void
+    var_clean_type_from_varQ (dlq_hdr_t *varQ, 
+                              var_type_t vartype);
 
 
 /********************************************************************
@@ -617,6 +631,9 @@ extern val_value_t *
 *
 * INPUTS:
 *   rcxt == runstack context to use
+*   parentobj == container or list real node parent of 'obj'
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
 *   obj == expected type template 
 *          == NULL and will be set to NCX_BT_STRING for
 *             simple types
@@ -641,6 +658,7 @@ extern val_value_t *
 *********************************************************************/
 extern val_value_t *
     var_get_script_val_ex (runstack_context_t *rcxt,
+                           obj_template_t *parentobj,
                            obj_template_t *obj,
                            val_value_t *val,
                            const xmlChar *strval,

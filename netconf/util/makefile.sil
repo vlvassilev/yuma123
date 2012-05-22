@@ -40,7 +40,7 @@ all: sil_dummy sil_lib
 #################### PLATFORM DEFINITIONS ############
 CINCBASE=$(DESTDIR)$(PREFIX)/include
 
-CINC = -I. -I$(CINCBASE) -I$(CINCBASE)/libxml2 -I$(CINCBASE)/libxml2/libxml
+CINC = -I.
 
 ifdef FORCE_YUMA_HOME
 CINC += -I$(YUMA_HOME)/src/platform -I$(YUMA_HOME)/src/ncx \
@@ -49,6 +49,8 @@ else
 CINC += -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx \
      -I$(CINCBASE)/yuma/agt 
 endif
+
+CINC += -I$(CINCBASE) -I$(CINCBASE)/libxml2 -I$(CINCBASE)/libxml2/libxml
 
 ifdef FREEBSD
 CINC += -I/usr/local/include -I/usr/local/include/libxml2 \
@@ -61,8 +63,6 @@ ifdef MAC
   CINC +=-I/sw/include
   CFLAGS += -DMACOSX=1
 endif
-
-LBASE=../lib
 
 ifdef DESTDIR
 OWNER=
@@ -149,11 +149,7 @@ endif
 ifdef STATIC
 LIBSUFFIX=a
 else
-ifdef MAC
-LIBSUFFIX=dylib
-else
 LIBSUFFIX=so
-endif
 endif
 
 CC?=gcc
@@ -165,17 +161,11 @@ LINTFLAGS= '-weak -macrovarprefix "m_"'
 LIBTOOL=ar
 #LFLAGS=-v --no-as-needed
 LFLAGS=-lm
-LPATH=-L$(LBASE)
+LPATH=-L$(LIB_INST)
 
 CEES = $(wildcard *.c)
 
 HEES = $(wildcard *.h)
-
-ifdef FORCE_YUMA_HOME
-YUMALIBS= -L$(YUMA_HOME)/target/lib -lagt -lncx
-else
-YUMALIBS= -L$(REAL_BASE) -lagt -lncx
-endif
 
 
 ################ OBJS RULE #############
@@ -199,7 +189,7 @@ $(TARGET)/%.o: %.c
 
 # Common library rule
 
-$(LBASE)/lib%.a: $(OBJS)
+$(LIB_INST)/lib%.a: $(OBJS)
 	$(LIBTOOL) cr $@ $(OBJS)
 	ranlib $@
 
@@ -262,15 +252,16 @@ superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
+ifndef MAC
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) $(YUMALIBS)
-
-
-$(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -dynamiclib -std=gnu99 \
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS)
+else
+$(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -bundle -std=gnu99 \
 	-current_version 1.0 \
 	-undefined dynamic_lookup \
-	-o $@ -install_name lib$(SUBDIR_NM).dylib $(OBJS) -lxml2
+	-o $@ -install_name lib$(SUBDIR_NM).so $(OBJS)
+endif
 
 code:
 	yangdump format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h

@@ -7,7 +7,7 @@
 # environment vars, so it works in plain debuild, rpmbuild
 #
 LIBNCX_MAJOR_VERSION=2
-LIBNCX_MINOR_VERSION=1
+LIBNCX_MINOR_VERSION=2
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 # default DESTDIR is NULL; it is only used by packaging builds
@@ -83,7 +83,6 @@ else
 WERROR=
 endif
 
-#std=gnu99 is only used for floating point libraries
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
@@ -98,9 +97,13 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -O3 changed to -O2 due to code bloat from inline functions
 
 ifdef WINDOWS
-CDEFS=-DDEBUG=1 -DWINDOWS=1 -DGCC=1
+CDEFS=-DWINDOWS=1 -DGCC=1
 else
-CDEFS=-DDEBUG=1 -DLINUX=1 -DGCC=1
+CDEFS=-DLINUX=1 -DGCC=1
+endif
+
+ifndef PRODUCTION
+CDEFS += -DDEBUG
 endif
 
 ifdef FREEBSD

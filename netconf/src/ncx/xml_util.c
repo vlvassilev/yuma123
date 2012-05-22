@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,6 +32,7 @@ date         init     comment
 #include <stdlib.h>
 #include <memory.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include <xmlstring.h>
 #include <xmlreader.h>
@@ -2316,10 +2317,7 @@ void
     xmlChar *str, *ns;
 
     str = node->simfree;
-    if (!str && node->simval) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
+    assert( str && "str is NULL" );
 
     /* find the first colon char */
     while (*str && *str != ':') {

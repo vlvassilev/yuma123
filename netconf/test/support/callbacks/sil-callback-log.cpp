@@ -13,11 +13,12 @@ namespace YumaTest
 {
 
 // ---------------------------------------------------------------------------|
-bool SILCallbackLog::CallbackInfo::operator==(const SILCallbackLog::CallbackInfo& cbInfo)
+bool SILCallbackLog::CallbackInfo::operator==(const SILCallbackLog::CallbackInfo& cbInfo) const
 {
     return ((this->cbName == cbInfo.cbName) && (this->cbType == cbInfo.cbType) &&
             (this->cbPhase == cbInfo.cbPhase));
 }
+
 // ---------------------------------------------------------------------------|
 void SILCallbackLog::addCallback(const string& modName, CallbackInfo cbInfo)
 {

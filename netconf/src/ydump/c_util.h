@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -85,6 +85,7 @@ extern "C" {
 #define POUND_IFDEF   (const xmlChar *)"\n#ifdef "
 #define POUND_IFNDEF  (const xmlChar *)"\n#ifndef "
 #define POUND_INCLUDE (const xmlChar *)"\n#include "
+#define POUND_ELSE    (const xmlChar *)"\n#else"
 
 #define START_DEFINED (const xmlChar *)"defined("
 #define START_TYPEDEF (const xmlChar *)"\ntypedef "
@@ -123,7 +124,8 @@ extern "C" {
 #define PARM_ERRORVAL (const xmlChar *)"errorval"
 
 #define FN_BANNER_START (const xmlChar *)\
-    "\n\n/********************************************************************\n* FUNCTION "
+    "\n/*******************************************************"\
+    "*************\n* FUNCTION "
 
 #define FN_BANNER_LN (const xmlChar *)"\n* "
 
@@ -673,9 +675,9 @@ extern void
 
 
 /********************************************************************
-* FUNCTION write_c_key_values
+* FUNCTION write_c_key_vars
 * 
-* Write all the keys in call-C-function-to-get-key-value format
+* Write all the local key variables in the SIL C function
 *
 * INPUTS:
 *   scb == session to use
@@ -688,12 +690,64 @@ extern void
 *
 *********************************************************************/
 extern void
+    write_c_key_vars (ses_cb_t *scb, 
+                      obj_template_t *obj, 
+                      dlq_hdr_t *objnameQ, 
+                      const xmlChar *parmname,
+                      uint32 keycount,
+                      int32 startindent);
+
+
+/********************************************************************
+* FUNCTION write_c_key_values
+* 
+* Write all the keys in call-C-function-to-get-key-value format
+*
+* INPUTS:
+*   scb == session to use
+*   obj == object to start from (ancestor-or-self)
+*   objnameQ == Q of name-to-idstr mappings
+*   keycount == number of key leafs expected; used to
+*               identify last key to suppress ending comma
+*   startindent == start indent count
+*
+*********************************************************************/
+extern void
     write_c_key_values (ses_cb_t *scb, 
                         obj_template_t *obj, 
                         dlq_hdr_t *objnameQ, 
-                        const xmlChar *parmname,
                         uint32 keycount,
                         int32 startindent);
+
+
+/********************************************************************
+* FUNCTION write_h_iffeature_start
+* 
+* Generate the start C for 1 if-feature conditional;
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_feature_t to use
+*
+*********************************************************************/
+extern void
+    write_h_iffeature_start (ses_cb_t *scb,
+                             const dlq_hdr_t *iffeatureQ);
+
+
+/********************************************************************
+* FUNCTION write_h_iffeature_end
+* 
+* Generate the end C for 1 if-feature conditiona;
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   iffeatureQ == Q of ncx_feature_t to use
+*
+*********************************************************************/
+extern void
+    write_h_iffeature_end (ses_cb_t *scb,
+                           const dlq_hdr_t *iffeatureQ);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

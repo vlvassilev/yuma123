@@ -1,1 +1,8 @@
-echo "#define RELEASE 2" > platform/curversion.h
+#!/bin/sh
+#
+# get the subversion build number
+
+echo "#define SVNVERSION \"`svnversion`\"" > platform/curversion.h
+
+
+

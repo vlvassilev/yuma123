@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -29,6 +29,7 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,177 +45,60 @@ date         init     comment
 
 #include "libtecla.h"
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_conf
 #include "conf.h"
-#endif
-
-#ifndef _H_help
 #include "help.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_io
 #include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_load
 #include "mgr_load.h"
-#endif
-
-#ifndef _H_mgr_not
 #include "mgr_not.h"
-#endif
-
-#ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_obj_help
 #include "obj_help.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xml_wr
 #include "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_autolock
+#include "yangcli_alias.h"
 #include "yangcli_autolock.h"
-#endif
-
-#ifndef _H_yangcli_cond
 #include "yangcli_cond.h"
-#endif
-
-#ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
-#endif
-
-#ifndef _H_yangcli_eval
 #include "yangcli_eval.h"
-#endif
-
-#ifndef _H_yangcli_list
 #include "yangcli_list.h"
-#endif
-
-#ifndef _H_yangcli_save
 #include "yangcli_save.h"
-#endif
-
-#ifndef _H_yangcli_show
 #include "yangcli_show.h"
-#endif
-
-#ifndef _H_yangcli_tab
 #include "yangcli_tab.h"
-#endif
-
-#ifndef _H_yangcli_timer
 #include "yangcli_timer.h"
-#endif
-
-#ifndef _H_yangcli_util
+#include "yangcli_uservars.h"
 #include "yangcli_util.h"
-#endif
+
+/* get_case needs to recurse */
+static status_t
+    fill_valset (server_cb_t *server_cb,
+                 obj_template_t *rpc,
+                 val_value_t *valset,
+                 val_value_t *oldvalset,
+                 boolean iswrite,
+                 boolean isdelete);
 
 
 /********************************************************************
@@ -590,6 +474,7 @@ static xmlChar *
         if (server_cb->returncode == MGR_IO_RC_DROPPED ||
             server_cb->returncode == MGR_IO_RC_DROPPED_NOW) {
             log_write("\nSession was dropped by the server");
+            clear_server_cb_session(server_cb);
             return NULL;
         }
 
@@ -759,9 +644,7 @@ static status_t
     res = NO_ERR;
 
     set_completion_state(&server_cb->completion_state,
-                         NULL,
-                         NULL,
-                         CMD_STATE_YESNO);
+                         NULL, NULL, CMD_STATE_YESNO);
 
     if (prompt) {
         log_stdout("\n%s", prompt);
@@ -1026,9 +909,7 @@ static status_t
         if (*start == '?') {
             if (start[1] == '?') {
                 /* ?? == full help */
-                obj_dump_template(parm, 
-                                  HELP_MODE_FULL, 
-                                  0,
+                obj_dump_template(parm, HELP_MODE_FULL, 0,
                                   server_cb->defindent);
             } else if (start[1] == 'C' || start[1] == 'c') {
                 /* ?c or ?C == cancel the operation */
@@ -1042,9 +923,7 @@ static status_t
                 return ERR_NCX_SKIPPED;
             } else {
                 /* ? == normal help mode */
-                obj_dump_template(parm, 
-                                  HELP_MODE_NORMAL, 
-                                  4,
+                obj_dump_template(parm, HELP_MODE_NORMAL, 4,
                                   server_cb->defindent);
             }
             log_stdout("\n");
@@ -1197,9 +1076,7 @@ static status_t
                 } else if (*start2 == '?') {
                     if (start2[1] == '?') {
                         /* ?? == full help */
-                        obj_dump_template(parm, 
-                                          HELP_MODE_FULL, 
-                                          0,
+                        obj_dump_template(parm, HELP_MODE_FULL, 0,
                                           server_cb->defindent);
                     } else if (start2[1] == 'C' || start2[1] == 'c') {
                         /* ?c or ?C == cancel the operation */
@@ -1217,9 +1094,7 @@ static status_t
                         done = TRUE;
                     } else {
                         /* ? == normal help mode */
-                        obj_dump_template(parm, 
-                                          HELP_MODE_NORMAL, 
-                                          4,
+                        obj_dump_template(parm, HELP_MODE_NORMAL, 4,
                                           server_cb->defindent);
                     }
                     log_stdout("\n");
@@ -1237,11 +1112,7 @@ static status_t
                 } else if (*start2 == 'N' || *start2 == 'n') {
                     /* recurse: try again for a different input */
                     m__free(saveline);
-                    res = get_parm(server_cb, 
-                                   rpc, 
-                                   parm, 
-                                   valset, 
-                                   oldvalset);
+                    res = get_parm(server_cb, rpc, parm, valset, oldvalset);
                     done = TRUE;
                 } else {
                     log_stdout("\nInvalid input.");
@@ -1273,11 +1144,11 @@ static status_t
 *
 * INPUTS:
 *   server_cb == server control block to use
-*   rpc == RPC template in progress
 *   cas == case object template header
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*   iswrite == TRUE if write op; FALSE if read op
+*   iswrite == TRUE if write op; FALSE if not
+*   isdelete == TRUE if delete op; FALSE if not
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
 *
@@ -1286,18 +1157,14 @@ static status_t
 *********************************************************************/
 static status_t
     get_case (server_cb_t *server_cb,
-              obj_template_t *rpc,
               obj_template_t *cas,
               val_value_t *valset,
               val_value_t *oldvalset,
-              boolean iswrite)
+              boolean iswrite,
+              boolean isdelete)
 {
-    obj_template_t          *parm;
-    val_value_t             *pval;
-    xmlChar                 *objbuff;
-    const xmlChar           *str;
-    status_t                 res;
-    boolean                  saveopt;
+    status_t                 res = NO_ERR;
+    boolean                  saveopt = server_cb->get_optional;
 
     /* make sure a case was selected or found */
     if (!obj_is_config(cas) || obj_is_abstract(cas)) {
@@ -1305,12 +1172,9 @@ static status_t
         return ERR_NCX_SKIPPED;
     }
 
-    saveopt = server_cb->get_optional;
-
-    res = NO_ERR;
-
     if (obj_is_data_db(cas)) {
-        objbuff = NULL;
+        xmlChar *objbuff = NULL;
+        const xmlChar *str = NULL;
         res = obj_gen_object_id(cas, &objbuff);
         if (res != NO_ERR) {
             log_error("\nError: generate object ID failed (%s)",
@@ -1325,9 +1189,7 @@ static status_t
             str = (const xmlChar *)"optional";
         }
 
-        log_stdout("\nFilling %s case %s:", 
-                   str,
-                   objbuff);
+        log_stdout("\nFilling %s case %s:", str, objbuff);
             
         m__free(objbuff);
     }
@@ -1337,45 +1199,96 @@ static status_t
      * e.g., <source> and <target> parms
      */
     if (obj_get_child_count(cas) == 1) {
-        parm = obj_first_child(cas);
+        obj_template_t *parm = obj_first_child(cas);
         if (parm && obj_get_basetype(parm)==NCX_BT_EMPTY) {
-            return cli_parse_parm(server_cb->runstack_context,
-                                  valset, 
-                                  parm, 
-                                  NULL, 
-                                  FALSE);
+            /* user picked a case that is an empty flag so
+             * do not call fill_valset for this corner-case
+             * because the user will be prompted again
+             * 'should this flag be set? y/n'
+             * Instead, call cli_parse_parm directly
+             */
+            val_value_t *parmval = val_find_child(valset,
+                                                  obj_get_mod_name(parm),
+                                                  obj_get_name(parm));
+            if (parmval == NULL || 
+                parmval->obj->objtype == OBJ_TYP_LEAF_LIST) {
+                return cli_parse_parm(server_cb->runstack_context,
+                                      valset, parm, NULL, FALSE);
+            }
         }
     }
 
-    /* finish the selected case */
-    for (parm = obj_first_child(cas);
-         parm != NULL && res == NO_ERR;
-         parm = obj_next_child(parm)) {
-
-        if ((!server_cb->get_optional && !iswrite) ||
-            !need_get_parm(parm)) {
-            continue;
-        }
-
-        pval = val_find_child(valset, 
-                              obj_get_mod_name(parm),
-                              obj_get_name(parm));
-        if (pval) {
-            continue;
-        }
-
-        /* node is config and not already set */
-        res = get_parm(server_cb, rpc, parm, valset, oldvalset);
-
-        if (res == ERR_NCX_SKIPPED) {
-            res = NO_ERR;
-        }
-    }
+    res = fill_valset(server_cb, cas, valset, oldvalset, iswrite, isdelete);
 
     server_cb->get_optional = saveopt;
     return res;
 
 } /* get_case */
+
+
+/********************************************************************
+* FUNCTION enabled_case_count
+* 
+* Get the number of enabled cases
+*
+* INPUTS:
+*   server_cb == server control block to use
+*   choic == choice object template header
+*   iswrite == TRUE for write operation
+* RETURNS:
+*   number of enabled cases
+*********************************************************************/
+static uint32
+    enabled_case_count (server_cb_t *server_cb,
+                        obj_template_t *choic,
+                        boolean iswrite)
+{
+    uint32 case_count = 0;
+    obj_template_t *cas = obj_first_child(choic); 
+    for (; cas != NULL; cas = obj_next_child(cas)) {
+        if ((!server_cb->get_optional && !iswrite) || !need_get_parm(cas)) {
+            continue;
+        }
+        obj_template_t *parm = obj_first_child(cas);
+        if (parm) {
+            case_count++;
+        }
+    }
+    return case_count;
+
+}  /* enabled_case_count */
+
+
+/********************************************************************
+* FUNCTION first_enabled_case
+* 
+* Get the first enabled case
+*
+* INPUTS:
+*   server_cb == server control block to use
+*   choic == choice object template header
+*   iswrite == TRUE for write operation
+* RETURNS:
+*   number of enabled cases
+*********************************************************************/
+static obj_template_t *
+    first_enabled_case (server_cb_t *server_cb,
+                        obj_template_t *choic,
+                        boolean iswrite)
+{
+    obj_template_t *cas = obj_first_child(choic); 
+    for (; cas != NULL; cas = obj_next_child(cas)) {
+        if ((!server_cb->get_optional && !iswrite) || !need_get_parm(cas)) {
+            continue;
+        }
+        obj_template_t *parm = obj_first_child(cas);
+        if (parm) {
+            return cas;
+        }
+    }
+    return NULL;
+
+}  /* first_enabled_case */
 
 
 /********************************************************************
@@ -1392,7 +1305,8 @@ static status_t
 *   choic == choice object template header
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*   iswrite == TRUE if write op; FALSE if read op
+*   iswrite == TRUE if write op; FALSE if not
+*   isdelete == TRUE if delete op; FALSE if not
 *
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
@@ -1406,14 +1320,12 @@ static status_t
                 obj_template_t *choic,
                 val_value_t *valset,
                 val_value_t *oldvalset,
-                boolean iswrite)
+                boolean iswrite,
+                boolean isdelete)
 {
-    obj_template_t          *parm, *cas, *usecase;
-    val_value_t             *pval;
-    xmlChar                 *myline, *str, *objbuff;
-    status_t                 res;
-    int                      casenum, num;
-    boolean                  first, done, usedef, redo, saveopt;
+    obj_template_t  *cas = NULL;
+    status_t         res = NO_ERR;
+    boolean          done = FALSE;
 
     if (!obj_is_config(choic) || obj_is_abstract(choic)) {
         log_stdout("\nError: choice '%s' has no configurable parameters",
@@ -1421,11 +1333,10 @@ static status_t
         return ERR_NCX_ACCESS_DENIED;
     }
 
-    casenum = 0;
-    res = NO_ERR;
+    int casenum = 0;
 
     if (obj_is_data_db(choic)) {
-        objbuff = NULL;
+        xmlChar *objbuff = NULL;
         res = obj_gen_object_id(choic, &objbuff);
         if (res != NO_ERR) {
             log_error("\nError: generate object ID failed (%s)",
@@ -1438,7 +1349,7 @@ static status_t
         m__free(objbuff);
     }
 
-    saveopt = server_cb->get_optional;
+    boolean saveopt = server_cb->get_optional;
 
     /* only force optional=true if this is a mandatory choice
      * otherwise, a mandatory choice of all optional cases
@@ -1451,7 +1362,7 @@ static status_t
     }
 
     /* first check the partial block corner case */
-    pval = val_get_choice_first_set(valset, choic);
+    val_value_t *pval = val_get_choice_first_set(valset, choic);
     if (pval != NULL) {
         /* found something set from this choice, finish the case */
         log_stdout("\nEnter more parameters to complete the choice:");
@@ -1461,17 +1372,15 @@ static status_t
             server_cb->get_optional = saveopt;
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
-        for (parm = obj_first_child(cas); 
-             parm != NULL;
-             parm = obj_next_child(parm)) {
+        obj_template_t *parm = obj_first_child(cas); 
+        for (; parm != NULL; parm = obj_next_child(parm)) {
 
             if ((!server_cb->get_optional && !iswrite) ||
                 !need_get_parm(parm)) {
                 continue;
             }
 
-            pval = val_find_child(valset,
-                                  obj_get_mod_name(parm),
+            pval = val_find_child(valset, obj_get_mod_name(parm),
                                   obj_get_name(parm));
             if (pval) {
                 continue;   /* node within case already set */
@@ -1496,10 +1405,14 @@ static status_t
         return NO_ERR;
     }
 
+    /* get number of enabled cases */
+    uint32 case_count = enabled_case_count(server_cb, choic, iswrite);
+    boolean usedef = FALSE;
+
     /* check corner-case -- choice with no cases defined */
     cas = obj_first_child(choic);
     if (cas == NULL) {
-        if (obj_get_child_count(choic)) {
+        if (case_count) {
             log_stdout("\nNo case nodes enabled for choice %s\n",
                    obj_get_name(choic));
         } else {
@@ -1510,126 +1423,113 @@ static status_t
         return NO_ERR;
     }
 
+    if (case_count == 1) {
+        cas = first_enabled_case(server_cb, choic, iswrite);
+    } else {
+        /* else not a partial block corner case but a normal
+         * situation where no case has been selected at all
+         */
+        log_stdout("\nEnter the number of the selected case statement:\n");
 
-    /* else not a partial block corner case but a normal
-     * situation where no case has been selected at all
-     */
-    log_stdout("\nEnter the number of the selected case statement:\n");
+        int num = 1;
 
-    num = 1;
-    usedef = FALSE;
+        for (; cas != NULL; cas = obj_next_child(cas)) {
 
-    for (; cas != NULL;
-         cas = obj_next_child(cas)) {
-
-        if ((!server_cb->get_optional && !iswrite) ||
-            !need_get_parm(cas)) {
-            continue;
-        }
-
-        first = TRUE;
-        for (parm = obj_first_child(cas);
-             parm != NULL;
-             parm = obj_next_child(parm)) {
-
-            if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+            if ((!server_cb->get_optional && !iswrite) || !need_get_parm(cas)) {
                 continue;
             }
 
-            if (first) {
-                log_stdout("\n  %d: case %s:", 
-                           num++, 
-                           obj_get_name(cas));
-                first = FALSE;
+            boolean first = TRUE;
+            obj_template_t *parm = obj_first_child(cas);
+            for (; parm != NULL; parm = obj_next_child(parm)) {
+
+                if (!obj_is_config(parm) || obj_is_abstract(parm)) {
+                    continue;
+                }
+
+                if (first) {
+                    log_stdout("\n  %d: case %s:", num++, obj_get_name(cas));
+                    first = FALSE;
+                }
+
+                log_stdout("\n       %s %s", obj_get_typestr(parm),
+                           obj_get_name(parm));
             }
-
-            log_stdout("\n       %s %s",
-                       obj_get_typestr(parm),
-                       obj_get_name(parm));
-        }
-    }
-
-    done = FALSE;
-    log_stdout("\n");
-    while (!done) {
-
-        redo = FALSE;
-
-        /* Pick a prompt, depending on the choice default case */
-        if (obj_get_default(choic)) {
-            log_stdout("\nEnter choice number [%d - %d], "
-                       "[ENTER] for default (%s): ",
-                       1, 
-                       num-1,
-                       obj_get_default(choic));
-        } else {
-            log_stdout("\nEnter choice number [%d - %d]: ",
-                       1, 
-                       num-1);
         }
 
-        /* get input from the user STDIN */
-        myline = get_cmd_line(server_cb, &res);
-        if (!myline) {
-            server_cb->get_optional = saveopt;
-            return res;
-        }
+        done = FALSE;
+        log_stdout("\n");
+        while (!done) {
 
-        /* strip leading whitespace */
-        str = myline;
-        while (*str && xml_isspace(*str)) {
-            str++;
-        }
+            boolean redo = FALSE;
 
-        /* convert to a number, check [ENTER] for default */
-        if (!*str) {
-            usedef = TRUE;
-        } else if (*str == '?') {
-            redo = TRUE;
-            if (str[1] == '?') {
-                obj_dump_template(choic, 
-                                  HELP_MODE_FULL, 
-                                  0,
-                                  server_cb->defindent);
-            } else if (str[1] == 'C' || str[1] == 'c') {
-                log_stdout("\n%s command canceled\n",
-                           obj_get_name(rpc));
-                server_cb->get_optional = saveopt;
-                return ERR_NCX_CANCELED;
-            } else if (str[1] == 'S' || str[1] == 's') {
-                log_stdout("\n%s choice skipped\n",
-                           obj_get_name(choic));
-                server_cb->get_optional = saveopt;
-                return ERR_NCX_SKIPPED;
-            } else {
-                obj_dump_template(choic, 
-                                  HELP_MODE_NORMAL,
-                                  4,
-                                  server_cb->defindent);
-            }
-            log_stdout("\n");
-        } else {
-            casenum = atoi((const char *)str);
-            usedef = FALSE;
-        }
-
-        if (redo) {
-            continue;
-        }
-
-        /* check if default requested */
-        if (usedef) {
+            /* Pick a prompt, depending on the choice default case */
             if (obj_get_default(choic)) {
-                done = TRUE;
+                log_stdout("\nEnter choice number [%d - %d], "
+                           "[ENTER] for default (%s): ",
+                           1, num-1, obj_get_default(choic));
             } else {
-                log_stdout("\nError: Choice does not have "
-                           "a default case\n");
+                log_stdout("\nEnter choice number [%d - %d]: ", 1, num-1);
+            }
+
+            /* get input from the user STDIN */
+            xmlChar *myline = get_cmd_line(server_cb, &res);
+            if (!myline) {
+                server_cb->get_optional = saveopt;
+                return res;
+            }
+
+            /* strip leading whitespace */
+            xmlChar *str = myline;
+            while (*str && xml_isspace(*str)) {
+                str++;
+            }
+
+            /* convert to a number, check [ENTER] for default */
+            if (!*str) {
+                usedef = TRUE;
+            } else if (*str == '?') {
+                redo = TRUE;
+                if (str[1] == '?') {
+                    obj_dump_template(choic, HELP_MODE_FULL, 0,
+                                      server_cb->defindent);
+                } else if (str[1] == 'C' || str[1] == 'c') {
+                    log_stdout("\n%s command canceled\n",
+                               obj_get_name(rpc));
+                    server_cb->get_optional = saveopt;
+                    return ERR_NCX_CANCELED;
+                } else if (str[1] == 'S' || str[1] == 's') {
+                    log_stdout("\n%s choice skipped\n", obj_get_name(choic));
+                    server_cb->get_optional = saveopt;
+                    return ERR_NCX_SKIPPED;
+                } else {
+                    obj_dump_template(choic, HELP_MODE_NORMAL, 4,
+                                      server_cb->defindent);
+                }
+                log_stdout("\n");
+            } else {
+                casenum = atoi((const char *)str);
                 usedef = FALSE;
             }
-        } else if (casenum < 0 || casenum >= num) {
-            log_stdout("\nError: invalid value '%s'\n", str);
-        } else {
-            done = TRUE;
+
+            if (redo) {
+                continue;
+            }
+
+            /* check if default requested */
+            if (usedef) {
+                if (obj_get_default(choic)) {
+                    done = TRUE;
+                } else {
+                    log_stdout("\nError: Choice does not have "
+                               "a default case\n");
+                    usedef = FALSE;
+                }
+            } else if (casenum < 0 || casenum >= num) {
+                log_stdout("\nError: invalid value '%s'\n", str);
+            } else {
+                done = TRUE;
+            }
         }
     }
 
@@ -1637,14 +1537,13 @@ static status_t
      * now get the object template for the correct case 
      */
     if (usedef) {
-        cas = obj_find_child(choic,
-                             obj_get_mod_name(choic),
+        cas = obj_find_child(choic, obj_get_mod_name(choic),
                              obj_get_default(choic));
-    } else {
+    } else if (case_count > 1) {
 
-        num = 1;
+        int num = 1;
         done = FALSE;
-        usecase = NULL;
+        obj_template_t *usecase = NULL;
 
         for (cas = obj_first_child(choic); 
              cas != NULL && !done;
@@ -1678,12 +1577,7 @@ static status_t
         return ERR_NCX_SKIPPED;
     }
 
-    res = get_case(server_cb, 
-                   rpc, 
-                   cas, 
-                   valset, 
-                   oldvalset, 
-                   iswrite);
+    res = get_case(server_cb, cas, valset, oldvalset, iswrite, isdelete);
     switch (res) {
     case NO_ERR:
         break;
@@ -1761,8 +1655,7 @@ static val_value_t *
         if (newval->obj != parm) {
             /* force the new value to have the QName of 'parm' */
             val_change_nsid(newval, obj_get_nsid(parm));
-            val_set_name(newval, 
-                         obj_get_name(parm),
+            val_set_name(newval, obj_get_name(parm),
                          xml_strlen(obj_get_name(parm)));
         }
         return newval;
@@ -1793,9 +1686,7 @@ static val_value_t *
     server_cb->get_optional = TRUE;
 
     set_completion_state(&server_cb->completion_state,
-                         rpc,
-                         parm,
-                         CMD_STATE_GETVAL);
+                         rpc, parm, CMD_STATE_GETVAL);
 
     *res = get_parm(server_cb, rpc, parm, dummy, NULL);
     server_cb->get_optional = saveopt;
@@ -1826,8 +1717,8 @@ static val_value_t *
 *   rpc == RPC method that is being called
 *   valset == value set to fill
 *   oldvalset == last set of values (or NULL if none)
-*   iswrite == TRUE if write command
-*              FALSE if not a write command
+*   iswrite == TRUE if write command; FALSE if not
+*   isdelete == TRUE if delete operation; FALSE if not
 * OUTPUTS:
 *    new val_value_t nodes may be added to valset
 *
@@ -1839,22 +1730,33 @@ static status_t
                  obj_template_t *rpc,
                  val_value_t *valset,
                  val_value_t *oldvalset,
-                 boolean iswrite)
+                 boolean iswrite,
+                 boolean isdelete)
 {
-    obj_template_t        *parm;
-    val_value_t           *val, *oldval;
-    xmlChar               *objbuff;
-    status_t               res;
-    boolean                done;
-    uint32                 yesnocode;
+    obj_template_t *parm, *target;
+    val_value_t    *val, *oldval;
+    val_value_t    *firstchoice = NULL;
+    status_t        res = NO_ERR;
+    boolean         done;
+    uint32          yesnocode;
 
-    res = NO_ERR;
-    server_cb->cli_fn = obj_get_name(rpc);
+    if (rpc->objtype == OBJ_TYP_CASE) {
+        /* called by get_case */
+        target = rpc;
+    } else if (rpc->objtype == OBJ_TYP_RPC) {
+        /* called by RPC invocation or fill data fn */
+        server_cb->cli_fn = obj_get_name(rpc);
+        target = valset->obj;
+    } else {
+        /* called by fill data fn */
+        target = valset->obj;
+    }
 
-    if (!(valset->obj->objtype == OBJ_TYP_RPC ||
-          valset->obj->objtype == OBJ_TYP_RPCIO)) {
-        objbuff = NULL;
-        res = obj_gen_object_id(valset->obj, &objbuff);
+    if (!(target->objtype == OBJ_TYP_RPC ||
+          target->objtype == OBJ_TYP_RPCIO ||
+          target->objtype == OBJ_TYP_CASE)) {
+        xmlChar *objbuff = NULL;
+        res = obj_gen_object_id(target, &objbuff);
         if (res != NO_ERR) {
             log_error("\nError: generate object ID failed (%s)",
                       get_error_string(res));
@@ -1862,13 +1764,11 @@ static status_t
         }
 
         /* let the user know about the new nest level */
-        log_stdout("\nFilling %s %s:",
-                   obj_get_typestr(valset->obj), 
-                   objbuff);
+        log_stdout("\nFilling %s %s:", obj_get_typestr(target), objbuff);
         m__free(objbuff);
     }
 
-    for (parm = obj_first_child(valset->obj);
+    for (parm = obj_first_child(target);
          parm != NULL && res==NO_ERR;
          parm = obj_next_child(parm)) {
 
@@ -1877,6 +1777,10 @@ static status_t
             if (oldvalset != NULL) {
                 res = clone_old_parm(oldvalset, valset, parm);
             }
+            continue;
+        }
+
+        if (isdelete && !obj_is_key(parm)) {
             continue;
         }
 
@@ -1895,20 +1799,21 @@ static status_t
             }
         }
 
-        set_completion_state(&server_cb->completion_state,
-                             rpc,
-                             parm,
-                             CMD_STATE_GETVAL);                             
+        set_completion_state(&server_cb->completion_state, rpc, parm,
+                             CMD_STATE_GETVAL);
 
         switch (parm->objtype) {
         case OBJ_TYP_CHOICE:
-            if (!val_choice_is_set(valset, parm)) {
-                res = get_choice(server_cb, 
-                                 rpc, 
-                                 parm, 
-                                 valset, 
-                                 oldvalset,
-                                 iswrite);
+            firstchoice = val_get_choice_first_set(valset, parm);
+            if (firstchoice) {
+                assert( firstchoice->casobj && "case backptr is NULL!" );
+
+                /* a case is already selected so try finishing that */
+                res = get_case(server_cb, firstchoice->casobj, valset,
+                               oldvalset, iswrite, isdelete);
+            } else {
+                res = get_choice(server_cb, rpc, parm, valset, oldvalset,
+                                 iswrite, isdelete);
                 switch (res) {
                 case NO_ERR:
                     break;
@@ -1924,8 +1829,7 @@ static status_t
             break;
         case OBJ_TYP_ANYXML:
         case OBJ_TYP_LEAF:
-            val = val_find_child(valset, 
-                                 obj_get_mod_name(parm),
+            val = val_find_child(valset, obj_get_mod_name(parm),
                                  obj_get_name(parm));
             if (val == NULL) {
                 res = get_parm(server_cb, rpc, parm, valset, oldvalset);
@@ -1983,16 +1887,14 @@ static status_t
             /* if the parm is not already set and is not read-only
              * then try to get a value from the user at the CLI
              */
-            val = val_find_child(valset, 
-                                 obj_get_mod_name(parm),
+            val = val_find_child(valset, obj_get_mod_name(parm),
                                  obj_get_name(parm));
             if (val) {
                 break;
             }
                         
             if (oldvalset) {
-                oldval = val_find_child(oldvalset, 
-                                        obj_get_mod_name(parm),
+                oldval = val_find_child(oldvalset, obj_get_mod_name(parm),
                                         obj_get_name(parm));
             } else {
                 oldval = NULL;
@@ -2009,7 +1911,7 @@ static status_t
             }
 
             /* recurse with the child nodes */
-            res = fill_valset(server_cb, rpc, val, oldval, iswrite);
+            res = fill_valset(server_cb, parm, val, oldval, iswrite, isdelete);
 
             switch (res) {
             case NO_ERR:
@@ -2039,8 +1941,8 @@ static status_t
                 /* recurse with the child node -- NO OLD VALUE
                  * TBD: get keys, then look up old matching entry
                  */
-                res = fill_valset(server_cb, rpc, val, NULL, iswrite);
-
+                res = fill_valset(server_cb, parm, val, NULL, iswrite, 
+                                  isdelete);
                 switch (res) {
                 case NO_ERR:
                     /* prompt for more list entries */
@@ -2112,7 +2014,6 @@ static void
     status_t                res;
     uint16                  port;
     boolean                 startedsession, tcp, portbydefault;
-    boolean                 tcp_direct_enable;
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
@@ -2153,9 +2054,8 @@ static void
 
     /* retrieving the parameters should not fail */
     username = NULL;
-    val =  val_find_child(server_cb->connect_valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_USER);
+    val =  val_find_child(server_cb->connect_valset,
+                          YANGCLI_MOD, YANGCLI_USER);
     if (val && val->res == NO_ERR) {
         username = VAL_STR(val);
     } else {
@@ -2165,8 +2065,7 @@ static void
 
     server = NULL;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, 
-                         YANGCLI_SERVER);
+                         YANGCLI_MOD, YANGCLI_SERVER);
     if (val && val->res == NO_ERR) {
         server = VAL_STR(val);
     } else {
@@ -2176,8 +2075,7 @@ static void
 
     password = NULL;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, 
-                         YANGCLI_PASSWORD);
+                         YANGCLI_MOD, YANGCLI_PASSWORD);
     if (val && val->res == NO_ERR) {
         password = VAL_STR(val);
     }
@@ -2185,8 +2083,7 @@ static void
     port = 0;
     portbydefault = FALSE;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, 
-                         YANGCLI_NCPORT);
+                         YANGCLI_MOD, YANGCLI_NCPORT);
     if (val && val->res == NO_ERR) {
         port = VAL_UINT16(val);
         portbydefault = val_set_by_default(val);
@@ -2194,42 +2091,26 @@ static void
 
     publickey = NULL;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, 
-                         YANGCLI_PUBLIC_KEY);
+                         YANGCLI_MOD, YANGCLI_PUBLIC_KEY);
     if (val && val->res == NO_ERR) {
         publickey = (const char *)VAL_STR(val);
     }
 
     privatekey = NULL;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, 
-                         YANGCLI_PRIVATE_KEY);
+                         YANGCLI_MOD, YANGCLI_PRIVATE_KEY);
     if (val && val->res == NO_ERR) {
         privatekey = (const char *)VAL_STR(val);
     }
 
     tcp = FALSE;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, 
-                         YANGCLI_TRANSPORT);
+                         YANGCLI_MOD, YANGCLI_TRANSPORT);
     if (val != NULL && 
         val->res == NO_ERR && 
         !xml_strcmp(VAL_ENUM_NAME(val),
                     (const xmlChar *)"tcp")) {
         tcp = TRUE;
-    
-        tcp_direct_enable = FALSE;
-        val = val_find_child(server_cb->connect_valset,
-                             YANGCLI_MOD, 
-                             YANGCLI_TCP_DIRECT_ENABLE);
-        if(val == NULL) printf("val is NULL.\n");
-        if(val->res == NO_ERR) printf("val->res is NO_ERR.\n");
-
-        if (val != NULL && 
-            val->res == NO_ERR && 
-            VAL_BOOL(val)) {
-            tcp_direct_enable = TRUE;
-        }
     }
 
     if (tcp) {
@@ -2254,7 +2135,7 @@ static void
                               privatekey,
                               server, 
                               port,
-                              (tcp) ? ((tcp_direct_enable) ? SES_TRANSPORT_TCP_DIRECT : SES_TRANSPORT_TCP) 
+                              (tcp) ? SES_TRANSPORT_TCP 
                               : SES_TRANSPORT_SSH,
                               server_cb->temp_progcb,
                               &server_cb->mysid,
@@ -2334,16 +2215,11 @@ static status_t
         logfn = log_write;
     }
         
-    valset = get_valset(server_cb, 
-                        rpc, 
-                        &line[len], 
-                        &res);
+    valset = get_valset(server_cb, rpc, &line[len], &res);
 
     /* get the module name */
     if (res == NO_ERR) {
-        modval = val_find_child(valset, 
-                                YANGCLI_MOD, 
-                                NCX_EL_MODULE);
+        modval = val_find_child(valset, YANGCLI_MOD, NCX_EL_MODULE);
         if (!modval) {
             res = ERR_NCX_DEF_NOT_FOUND;
         } else if (modval->res != NO_ERR) {
@@ -2353,9 +2229,7 @@ static status_t
 
     /* get the module revision */
     if (res == NO_ERR) {
-        revval = val_find_child(valset, 
-                                YANGCLI_MOD, 
-                                NCX_EL_REVISION);
+        revval = val_find_child(valset, YANGCLI_MOD, NCX_EL_REVISION);
     }
 
 
@@ -2380,19 +2254,12 @@ static status_t
 
     /* check if there are any deviation parameters to load first */
     if (res == NO_ERR) {
-        for (devval = val_find_child(valset,
-                                     YANGCLI_MOD,
-                                     NCX_EL_DEVIATION);
+        for (devval = val_find_child(valset, YANGCLI_MOD, NCX_EL_DEVIATION);
              devval != NULL && res == NO_ERR;
-             devval = val_find_next_child(valset,
-                                          YANGCLI_MOD,
-                                          NCX_EL_DEVIATION,
-                                          devval)) {
+             devval = val_find_next_child(valset, YANGCLI_MOD,
+                                          NCX_EL_DEVIATION, devval)) {
 
-
-            res = ncxmod_load_deviation(VAL_STR(devval),
-                                        &savedevQ);
-
+            res = ncxmod_load_deviation(VAL_STR(devval), &savedevQ);
         }
     }
 
@@ -2567,32 +2434,22 @@ static status_t
     mode = HELP_MODE_NORMAL;
 
     /* look for the 'brief' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_BRIEF);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
     if (parm && parm->res == NO_ERR) {
         mode = HELP_MODE_BRIEF;
     } else {
         /* look for the 'full' parameter */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_FULL);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
         if (parm && parm->res == NO_ERR) {
             mode = HELP_MODE_FULL;
         }
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_COMMAND);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMAND);
     if (parm && parm->res == NO_ERR) {
         dtyp = NCX_NT_OBJ;
         res = NO_ERR;
-        obj = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen, &res);
         if (obj != NULL) {
             if (obj->objtype == OBJ_TYP_RPC && 
                 !obj_is_hidden(obj)) {
@@ -2637,26 +2494,18 @@ static status_t
     }
 
     /* look for the specific definition parameters */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_COMMANDS);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_COMMANDS);
     if (parm && parm->res==NO_ERR) {
         res = do_help_commands(server_cb, mode);
         val_free_value(valset);
         return res;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_TYPE);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TYPE);
     if (parm && parm->res==NO_ERR) {
         res = NO_ERR;
         dtyp = NCX_NT_TYP;
-        typ = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        typ = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen, &res);
         if (typ) {
             help_type(typ, mode);
         } else {
@@ -2688,12 +2537,9 @@ static status_t
         return res;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_OBJECT);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_OBJECT);
     if (parm && parm->res == NO_ERR) {
         xmlChar *valstr = VAL_STR(parm);
-
 
         obj = NULL;
         if (valstr && *valstr == '/') {
@@ -2716,11 +2562,7 @@ static status_t
             /* union match NcxIdentifier type */
             res = NO_ERR;
             dtyp = NCX_NT_OBJ;
-            obj = parse_def(server_cb, 
-                            &dtyp, 
-                            valstr,
-                            &dlen,
-                            &res);
+            obj = parse_def(server_cb, &dtyp, valstr, &dlen, &res);
         }
 
         if (obj) {
@@ -2771,18 +2613,11 @@ static status_t
         return res;
     }
 
-
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_NOTIFICATION);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_NOTIFICATION);
     if (parm && parm->res == NO_ERR) {
         res = NO_ERR;
         dtyp = NCX_NT_OBJ;
-        obj = parse_def(server_cb, 
-                        &dtyp, 
-                        VAL_STR(parm), 
-                        &dlen,
-                        &res);
+        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen, &res);
         if (obj != NULL) {
             if (obj->objtype == OBJ_TYP_NOTIF &&
                 !obj_is_hidden(obj)) {
@@ -3295,10 +3130,7 @@ static status_t
     boolean                save_getopt;
 
     res = NO_ERR;
-    valset = get_valset(server_cb, 
-                        rpc, 
-                        &line[len], 
-                        &res);
+    valset = get_valset(server_cb, rpc, &line[len], &res);
     if (res != NO_ERR) {
         if (valset) {
             val_free_value(valset);
@@ -3307,9 +3139,7 @@ static status_t
     }
 
     target = NULL;
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_TARGET);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TARGET);
     if (!parm || parm->res != NO_ERR) {
         val_free_value(valset);
         return ERR_NCX_MISSING_PARM;
@@ -3328,12 +3158,7 @@ static status_t
      * if target == /foo/bar/baz then
      * valroot --> /foo and targobj --> /foo/bar/baz
      */
-    valroot = get_instanceid_parm(target,
-                                  TRUE,
-                                  TRUE,
-                                  &targobj,
-                                  &targval,
-                                  &res);
+    valroot = get_instanceid_parm(target, TRUE, TRUE, &targobj, &targval, &res);
     if (res != NO_ERR) {
         if (valroot) {
             val_free_value(valroot);
@@ -3372,17 +3197,13 @@ static status_t
     }
 
     /* find the value to use as content value or template, if any */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_VALUE);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VALUE);
     if (parm && parm->res == NO_ERR) {
         curparm = parm;
     }
 
     /* find the --optional flag */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_OPTIONAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
         server_cb->get_optional = TRUE;
     }
@@ -3393,11 +3214,7 @@ static status_t
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
         /* make a new leaf, toss the targval if any */
-        newparm = fill_value(server_cb, 
-                             rpc, 
-                             targobj, 
-                             curparm,
-                             &res);
+        newparm = fill_value(server_cb, rpc, targobj, curparm, &res);
         if (targval) {
             val_free_value(targval);
             targval = NULL;
@@ -3416,12 +3233,8 @@ static status_t
             }
         }
         if (res == NO_ERR) {
-            res = get_choice(server_cb, 
-                             rpc, 
-                             targobj, 
-                             newparm, 
-                             curparm,
-                             iswrite);
+            res = get_choice(server_cb, rpc, targobj, newparm, 
+                             curparm, iswrite, FALSE);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -3439,12 +3252,7 @@ static status_t
                 val_init_from_template(newparm, targobj);
             }
         }
-        res = get_case(server_cb, 
-                       rpc, 
-                       targobj, 
-                       newparm, 
-                       curparm,
-                       iswrite);
+        res = get_case(server_cb, targobj, newparm, curparm, iswrite, FALSE);
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }
@@ -3461,11 +3269,7 @@ static status_t
                 val_init_from_template(newparm, targobj);
             }
         }
-        res = fill_valset(server_cb, 
-                          rpc, 
-                          newparm, 
-                          curparm,
-                          TRUE);
+        res = fill_valset(server_cb, rpc, newparm, curparm, TRUE, FALSE);
         if (res == ERR_NCX_SKIPPED) {
             res = NO_ERR;
         }
@@ -3475,11 +3279,14 @@ static status_t
     if (res == NO_ERR) {
         if (server_cb->result_name || 
             server_cb->result_filename) {
+            /* set the index chains because the value is being saved */
+            res = val_build_index_chains(newparm);
+
             /* save the filled in value */
-            res = finish_result_assign(server_cb, 
-                                       newparm, 
-                                       NULL);
-            newparm = NULL;
+            if (res == NO_ERR) {
+                res = finish_result_assign(server_cb, newparm, NULL);
+                newparm = NULL;
+            }
         }
     } else {
         clear_result(server_cb);
@@ -3545,10 +3352,7 @@ static status_t
     newnode = NULL;
 
     set_completion_state(&server_cb->completion_state,
-                         rpc,
-                         curobj,
-                         CMD_STATE_GETVAL);
-
+                         rpc, curobj, CMD_STATE_GETVAL);
 
     /* add content based on the current node type */
     switch (curobj->objtype) {
@@ -3658,14 +3462,11 @@ static status_t
             newnode = val_get_first_child(config_content);
             if (newnode) {
                 val_remove_child(newnode);
-                res = add_content(server_cb, 
-                                  rpc, 
-                                  newnode, 
-                                  newnode->obj, 
-                                  dofill,
-                                  curtop);
+                res = add_content(server_cb, rpc, newnode, newnode->obj, 
+                                  dofill, curtop);
                 if (res != NO_ERR) {
                     val_free_value(newnode);
+                    newnode = NULL;
                     done = TRUE;
                 }
             } else {
@@ -3726,12 +3527,8 @@ static status_t
     /* get to the root of the object chain */
     parent = obj_get_parent(curobj);
     if (parent && !obj_is_root(parent)) {
-        res = add_config_from_content_node(server_cb,
-                                           rpc,
-                                           config_content,
-                                           parent,
-                                           config,
-                                           curtop);
+        res = add_config_from_content_node(server_cb, rpc, config_content,
+                                           parent, config, curtop);
         if (res != NO_ERR) {
             return res;
         }
@@ -3745,13 +3542,7 @@ static status_t
         *curtop = config;
     }
 
-    res = add_content(server_cb, 
-                      rpc, 
-                      config_content, 
-                      curobj, 
-                      TRUE,
-                      curtop);
-
+    res = add_content(server_cb, rpc, config_content, curobj, TRUE, curtop);
     return res;
 
 }  /* add_config_from_content_node */
@@ -3815,21 +3606,16 @@ static status_t
                                         obj_get_mod_name(curkey->keyobj),
                                         obj_get_name(curkey->keyobj));
                 if (keyval == NULL && dofill) {
-                    res = get_parm(server_cb, 
-                                   rpc, 
-                                   curkey->keyobj, 
-                                   curnode, 
-                                   NULL);
+                    res = get_parm(server_cb, rpc, curkey->keyobj, 
+                                   curnode, NULL);
                     if (res == ERR_NCX_SKIPPED) {
                         res = NO_ERR;
                     } else if (res != NO_ERR) {
                         return res;
                     } else {
-                        keyval = val_find_child(curnode,
-                                                obj_get_mod_name
+                        keyval = val_find_child(curnode, obj_get_mod_name
                                                 (curkey->keyobj),
-                                                obj_get_name
-                                                (curkey->keyobj));
+                                                obj_get_name(curkey->keyobj));
                         if (!keyval) {
                             return SET_ERROR(ERR_INTERNAL_VAL);
                         }
@@ -3896,13 +3682,8 @@ static status_t
     /* get to the root of the object chain */
     parent = obj_get_parent(curobj);
     if (parent && !obj_is_root(parent)) {
-        res = add_filter_from_content_node(server_cb,
-                                           rpc,
-                                           get_content,
-                                           parent,
-                                           filter,
-                                           dofill,
-                                           curtop);
+        res = add_filter_from_content_node(server_cb, rpc, get_content,
+                                           parent, filter, dofill, curtop);
         if (res != NO_ERR) {
             return res;
         }
@@ -3916,12 +3697,7 @@ static status_t
         *curtop = filter;
     }
 
-    res = add_content(server_cb, 
-                      rpc, 
-                      get_content, 
-                      curobj, 
-                      dofill,
-                      curtop);
+    res = add_content(server_cb, rpc, get_content, curobj, dofill, curtop);
     return res;
 
 }  /* add_filter_from_content_node */
@@ -4022,8 +3798,7 @@ static status_t
     }
 
     /* construct a method + parameter tree */
-    reqdata = xml_val_new_struct(obj_get_name(rpc), 
-                                 obj_get_nsid(rpc));
+    reqdata = xml_val_new_struct(obj_get_name(rpc), obj_get_nsid(rpc));
     if (!reqdata) {
         if (freeroot) {
             val_free_value(valroot);
@@ -4052,8 +3827,7 @@ static status_t
         val_add_child(parm, reqdata);
     }
 
-    target = xml_val_new_flag(server_cb->default_target,
-                              obj_get_nsid(child));
+    target = xml_val_new_flag(server_cb->default_target, obj_get_nsid(child));
     if (!target) {
         if (freeroot) {
             val_free_value(valroot);
@@ -4069,9 +3843,7 @@ static status_t
     /* set the edit-config/input/default-operation node */
     if (!(def_editop == OP_DEFOP_NOT_USED ||
           def_editop == OP_DEFOP_NOT_SET)) {          
-        child = obj_find_child(input, 
-                               NC_MODULE,
-                               NCX_EL_DEFAULT_OPERATION);
+        child = obj_find_child(input, NC_MODULE, NCX_EL_DEFAULT_OPERATION);
         res = NO_ERR;
         defopstr = op_defop_name(def_editop);
         parm = val_make_simval_obj(child, defopstr, &res);
@@ -4093,9 +3865,7 @@ static status_t
         /* set the edit-config/input/test-option node to
          * the user-specified value
          */
-        child = obj_find_child(input, 
-                               NC_MODULE,
-                               NCX_EL_TEST_OPTION);
+        child = obj_find_child(input, NC_MODULE, NCX_EL_TEST_OPTION);
         res = NO_ERR;
         parm = val_make_simval_obj(child,
                                    op_testop_name(server_cb->testoption),
@@ -4118,9 +3888,7 @@ static status_t
         /* set the edit-config/input/error-option node to
          * the user-specified value
          */
-        child = obj_find_child(input, 
-                               NC_MODULE,
-                               NCX_EL_ERROR_OPTION);
+        child = obj_find_child(input, NC_MODULE, NCX_EL_ERROR_OPTION);
         res = NO_ERR;
         parm = val_make_simval_obj(child,
                                    op_errop_name(server_cb->erroption),
@@ -4139,9 +3907,7 @@ static status_t
     }
 
     /* create the <config> node */
-    child = obj_find_child(input, 
-                           NC_MODULE,
-                           NCX_EL_CONFIG);
+    child = obj_find_child(input, NC_MODULE, NCX_EL_CONFIG);
     parm = val_new_value();
     if (!parm) {
         if (freeroot) {
@@ -4163,12 +3929,8 @@ static status_t
      */
     if (valroot) {
         val_add_child(valroot, parm);
-        res = complete_path_content(server_cb,
-                                    rpc,
-                                    valroot,
-                                    config_content,
-                                    dofill,
-                                    TRUE);
+        res = complete_path_content(server_cb, rpc, valroot, config_content,
+                                    dofill, TRUE);
         if (res != NO_ERR) {
             val_free_value(valroot);
             val_free_value(reqdata);
@@ -4177,11 +3939,8 @@ static status_t
     } else {
         /* !!! use the parm as-is, even if a container !!! */
         dummy_parm = NULL;
-        res = add_config_from_content_node(server_cb,
-                                           rpc, 
-                                           config_content,
-                                           config_content->obj,
-                                           parm, 
+        res = add_config_from_content_node(server_cb, rpc, config_content,
+                                           config_content->obj, parm, 
                                            &dummy_parm);
         if (res != NO_ERR) {
             val_free_value(config_content);
@@ -4239,13 +3998,9 @@ static status_t
     if (res == NO_ERR) {
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_max(reqdata, 
-                               0,
-                               server_cb->defindent,
-                               DUMP_VAL_LOG,
-                               server_cb->display_mode,
-                               FALSE,
-                               FALSE);
+            val_dump_value_max(reqdata, 0, server_cb->defindent,
+                               DUMP_VAL_LOG, server_cb->display_mode,
+                               FALSE, FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */
@@ -4299,10 +4054,7 @@ static status_t
     dlq_enque(metaval, &val->metaQ);
 
     if (selectval) {
-        val_set_qname(selectval,
-                      0,
-                      NCX_EL_SELECT,
-                      xml_strlen(NCX_EL_SELECT));
+        val_set_qname(selectval, 0, NCX_EL_SELECT, xml_strlen(NCX_EL_SELECT));
         dlq_enque(selectval, &val->metaQ);
     }
 
@@ -4474,12 +4226,8 @@ static status_t
      */
     if (valroot) {
         val_add_child(valroot, filter);
-        res = complete_path_content(server_cb,
-                                    rpc,
-                                    valroot,
-                                    get_content,
-                                    dofill,
-                                    FALSE);
+        res = complete_path_content(server_cb, rpc, valroot, get_content,
+                                    dofill, FALSE);
         if (res != NO_ERR) {
             val_free_value(valroot);
             val_free_value(reqdata);
@@ -4487,13 +4235,9 @@ static status_t
         }
     } else if (get_content) {
         dummy_parm = NULL;
-        res = add_filter_from_content_node(server_cb,
-                                           rpc, 
-                                           get_content,
-                                           get_content->obj,
-                                           filter, 
-                                           dofill,
-                                           &dummy_parm);
+        res = add_filter_from_content_node(server_cb, rpc, get_content,
+                                           get_content->obj, filter, 
+                                           dofill, &dummy_parm);
         if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
             /*  val_free_value(get_content); already freed! */
             val_free_value(reqdata);
@@ -4656,38 +4400,24 @@ static val_value_t *
                              status_t *retres,
                              val_value_t **valroot)
 {
-    val_value_t           *parm, *curparm, *newparm;
-    const val_value_t     *userval;
-    val_value_t           *targval;
-    obj_template_t        *targobj;
-    const xmlChar         *fromstr, *target;
-    xmlChar               *fromurl;
-    var_type_t             vartype;
-    boolean                isvarref, iscli, isselect, saveopt;
-    boolean                isextern, alt_names;
-    status_t               res;
-    ncx_name_match_t       match_names;
-
-    /* init locals */
-    targobj = NULL;
-    targval = NULL;
-    newparm = NULL;
-    fromstr = NULL;
-    fromurl = NULL;
-    isvarref = FALSE;
-    iscli = FALSE;
-    isselect = FALSE;
-    isextern = FALSE;
-    res = NO_ERR;
-    vartype = VAR_TYP_NONE;
+    val_value_t           *parm, *curparm = NULL, *newparm = NULL;
+    const val_value_t     *userval = NULL;
+    val_value_t           *targval = NULL;
+    obj_template_t        *targobj = NULL;
+    const xmlChar         *fromstr = NULL, *target = NULL;
+    xmlChar               *fromurl = NULL;
+    var_type_t             vartype = VAR_TYP_NONE;
+    boolean                isvarref = FALSE, iscli = FALSE;
+    boolean                isselect = FALSE, saveopt = FALSE;
+    boolean                isextern = FALSE, alt_names = FALSE;
+    status_t               res = NO_ERR;
+    ncx_name_match_t       match_names = FALSE;
 
     *valroot = NULL;
     *retres = NO_ERR;
 
     /* look for the 'match-names' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_MATCH_NAMES);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_MATCH_NAMES);
     if (parm != NULL) {
         match_names = ncx_get_name_match_enum(VAL_ENUM_NAME(parm));
         if (match_names == NCX_MATCH_NONE) {
@@ -4699,9 +4429,7 @@ static val_value_t *
     }
 
     /* look for the 'alt-names' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_ALT_NAMES);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_ALT_NAMES);
     if (parm != NULL) {
         alt_names = VAL_BOOL(parm);
     } else {
@@ -4709,17 +4437,13 @@ static val_value_t *
     }
 
     /* look for the 'from' parameter variant */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_VARREF);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VARREF);
     if (parm != NULL) {
         /* content = uservar or $varref */
         isvarref = TRUE;
         fromstr = VAL_STR(parm);
     } else {
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              NCX_EL_SELECT);
+        parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_SELECT);
         if (parm != NULL) {
             /* content == select string for xget or xget-config */
             isselect = TRUE;
@@ -4728,14 +4452,10 @@ static val_value_t *
     }
     if (parm == NULL && 
         !iswrite && 
-        !xml_strncmp(obj_get_name(rpc),
-                     (const xmlChar *)"xget",
-                     4)) {
+        !xml_strncmp(obj_get_name(rpc), (const xmlChar *)"xget", 4)) {
 
         /* try urltarget; convert to XPath first */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              NCX_EL_URLTARGET);
+        parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_URLTARGET);
         if (parm != NULL) {
             fromurl = xpath_convert_url_to_path(VAL_STR(parm),
                                                 match_names,
@@ -4770,15 +4490,11 @@ static val_value_t *
         server_cb->get_optional = getoptional;
 
         /* from CLI -- look for the 'target' parameter */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              NCX_EL_TARGET);
+        parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_TARGET);
         if (parm != NULL) {
             target = VAL_STR(parm);
         } else {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  NCX_EL_URLTARGET);
+            parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_URLTARGET);
             if (parm != NULL) {
                 res = NO_ERR;
                 fromurl = xpath_convert_url_to_path(VAL_STR(parm),
@@ -4810,12 +4526,8 @@ static val_value_t *
             return NULL;
         }
 
-        *valroot = get_instanceid_parm(target,
-                                       TRUE,
-                                       iswrite,
-                                       &targobj,
-                                       &targval,
-                                       &res);
+        *valroot = get_instanceid_parm(target, TRUE, iswrite, &targobj,
+                                       &targval, &res);
         if (res != NO_ERR) {
             log_error("\nError: invalid target parameter (%s)",
                       get_error_string(res));
@@ -4843,15 +4555,11 @@ static val_value_t *
         }
         
         curparm = NULL;
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_VALUE);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VALUE);
         if (parm && parm->res == NO_ERR) {
             if (parm->btyp == NCX_BT_EXTERN) {
                 isextern = TRUE;
-                curparm = mgr_load_extern_file(VAL_EXTERN(parm),
-                                               NULL,
-                                               &res);
+                curparm = mgr_load_extern_file(VAL_EXTERN(parm), NULL,  &res);
                 if (res != NO_ERR) {
                     *retres = res;
                     return NULL;
@@ -4897,6 +4605,9 @@ static val_value_t *
         case OBJ_TYP_LEAF:
             if (isdelete) {
                 dofill = FALSE;
+            } else if (obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+                /* already filled in the target value by creating it */
+                dofill = FALSE;
             } else if (!iswrite && !server_cb->get_optional) {
                 /* for get operations, need --optional
                  *  set to prompt for the target leaf
@@ -4909,12 +4620,7 @@ static val_value_t *
                  * value struct because it was the deepest node
                  * specified in the schema-instance string
                  */
-                newparm = fill_value(server_cb, 
-                                     rpc, 
-                                     targobj, 
-                                     curparm,
-                                     &res);
-
+                newparm = fill_value(server_cb, rpc, targobj, curparm, &res);
                 if (newparm && res == NO_ERR) {
                     if (targval) {
                         if (targval == *valroot) {
@@ -4951,7 +4657,11 @@ static val_value_t *
             }  /* else going to use targval, not newval */
             break;
         case OBJ_TYP_CHOICE:
-            if (targval == NULL) {
+            if (isdelete) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                log_error("\nError: delete operation not supported "
+                          "for choice");
+            } else if (targval == NULL) {
                 newparm = val_new_value();
                 if (!newparm) {
                     log_error("\nError: malloc failure");
@@ -4961,16 +4671,17 @@ static val_value_t *
                 }
             }
             if (res == NO_ERR && dofill) {
-                res = get_choice(server_cb, 
-                                 rpc, 
-                                 targobj,
+                res = get_choice(server_cb, rpc, targobj,
                                  (newparm) ? newparm : targval,
-                                 curparm,
-                                 iswrite);
+                                 curparm, iswrite, isdelete);
             }
             break;
         case OBJ_TYP_CASE:
-            if (targval == NULL) {
+            if (isdelete) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                log_error("\nError: delete operation not supported "
+                          "for case");
+            } else if (targval == NULL) {
                 newparm = val_new_value();
                 if (!newparm) {
                     log_error("\nError: malloc failure");
@@ -4980,15 +4691,17 @@ static val_value_t *
                 }
             }
             if (res == NO_ERR && dofill) {
-                res = get_case(server_cb, 
-                               rpc, 
-                               targobj,
+                res = get_case(server_cb, targobj,
                                (newparm) ? newparm : targval, 
-                               curparm,
-                               iswrite);
+                               curparm, iswrite, isdelete);
             }
             break;
         default:
+            if (targobj->objtype == OBJ_TYP_LIST) {
+                ; // if delete, need to fill in just the keys
+            } else if (isdelete) {
+                dofill = FALSE;
+            }
             if (targval == NULL) {
                 newparm = val_new_value();
                 if (!newparm) {
@@ -5020,11 +4733,8 @@ static val_value_t *
                         res = val_replace(curparm, mytarg);
                     } /* else should not happen */
                 } else if (!get_batchmode()){
-                    res = fill_valset(server_cb, 
-                                      rpc,
-                                      mytarg,
-                                      curparm,
-                                      iswrite);
+                    res = fill_valset(server_cb, rpc, mytarg, curparm, 
+                                      iswrite, isdelete);
                 }
             }
         }
@@ -5094,9 +4804,7 @@ static val_value_t *
             log_error("\nError: malloc failed");
         } else {
             val_init_from_template(newparm, parm->obj);
-            res = val_set_simval_obj(newparm,
-                                     parm->obj,
-                                     fromstr);
+            res = val_set_simval_obj(newparm, parm->obj, fromstr);
             if (res != NO_ERR) {
                 log_error("\nError: set 'select' failed (%s)",
                           get_error_string(res));
@@ -5130,9 +4838,7 @@ static val_value_t *
             vartype = VAR_TYP_LOCAL;
         }
         if (fromstr) {
-            userval = var_get(server_cb->runstack_context,
-                              fromstr, 
-                              vartype);
+            userval = var_get(server_cb->runstack_context, fromstr, vartype);
             if (!userval) {
                 log_error("\nError: variable '%s' not found", 
                           fromstr);
@@ -5260,18 +4966,14 @@ static status_t
              childval != NULL;
              childval = val_get_next_child(childval)) {
 
-            res = add_one_operation_attr(server_cb,
-                                         childval, 
-                                         op);
+            res = add_one_operation_attr(server_cb, childval, op);
             if (res != NO_ERR) {
                 return res;
             }
         }
         break;
     default:
-        res = add_one_operation_attr(server_cb,
-                                     val, 
-                                     op);
+        res = add_one_operation_attr(server_cb, val, op);
     }
 
     return res;
@@ -5319,15 +5021,10 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
     val_init_from_template(metaval, operobj);
-    val_set_qname(metaval, yangid,
-                  YANG_K_INSERT,
-                  xml_strlen(YANG_K_INSERT));
+    val_set_qname(metaval, yangid, YANG_K_INSERT, xml_strlen(YANG_K_INSERT));
 
     /* set the meta variable value and other fields */
-    res = val_set_simval(metaval,
-                         metaval->typdef,
-                         yangid,
-                         YANG_K_INSERT,
+    res = val_set_simval(metaval, metaval->typdef, yangid, YANG_K_INSERT,
                          insopstr);
     if (res != NO_ERR) {
         val_free_value(metaval);
@@ -5346,12 +5043,10 @@ static status_t
 
         /* set the attribute name */
         if (val->obj->objtype==OBJ_TYP_LEAF_LIST) {
-            val_set_qname(metaval, yangid,
-                          YANG_K_VALUE,
+            val_set_qname(metaval, yangid, YANG_K_VALUE,
                           xml_strlen(YANG_K_VALUE));
         } else {
-            val_set_qname(metaval, yangid,
-                          YANG_K_KEY,
+            val_set_qname(metaval, yangid, YANG_K_KEY,
                           xml_strlen(YANG_K_KEY));
         }
 
@@ -5402,8 +5097,7 @@ static status_t
              childval != NULL;
              childval = val_get_next_child(childval)) {
 
-            res = add_one_insert_attrs(childval, insop,
-                                       edit_target);
+            res = add_one_insert_attrs(childval, insop, edit_target);
             if (res != NO_ERR) {
                 return res;
             }
@@ -5477,9 +5171,7 @@ static status_t
     }
 
     /* get the timeout parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         timeoutval = VAL_UINT(parm);
     } else {
@@ -5487,9 +5179,7 @@ static status_t
     }
 
     /* get the 'fill-in optional parms' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_OPTIONAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
         getoptional = TRUE;
     } else {
@@ -5497,23 +5187,16 @@ static status_t
     }
 
     /* get the --nofill parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_NOFILL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
     if (parm && parm->res == NO_ERR) {
         dofill = FALSE;
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      isdelete,
-                                      dofill,
-                                      TRUE,
-                                      &res,
-                                      &valroot);
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      isdelete, dofill,
+                                      TRUE, /* iswrite */
+                                      &res, &valroot);
     if (content == NULL) {
         if (res != NO_ERR) {
             if (LOGDEBUG2) {
@@ -5550,10 +5233,7 @@ static status_t
 
     if (doattr) {
         /* add nc:operation attribute to the value node */
-        res = add_operation_attr(server_cb,
-                                 content, 
-                                 editop, 
-                                 topcontainer);
+        res = add_operation_attr(server_cb, content, editop, topcontainer);
         if (res != NO_ERR) {
             log_error("\nError: Creation of nc:operation"
                       " attribute failed");
@@ -5568,11 +5248,8 @@ static status_t
     }
 
     /* construct an edit-config PDU with default parameters */
-    res = send_edit_config_to_server(server_cb, 
-                                     valroot,
-                                     content, 
-                                     timeoutval,
-                                     def_editop);
+    res = send_edit_config_to_server(server_cb, valroot, content, 
+                                     timeoutval, def_editop);
     if (res != NO_ERR) {
         log_error("\nError: send %s operation failed (%s)",
                   op_editop_name(editop),
@@ -5634,9 +5311,7 @@ static status_t
     }
 
     /* get the 'fill-in optional parms' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_OPTIONAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
         getoptional = TRUE;
     } else {
@@ -5644,32 +5319,24 @@ static status_t
     }
 
     /* get the --nofill parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_NOFILL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
     if (parm && parm->res == NO_ERR) {
         dofill = FALSE;
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      FALSE,
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      FALSE,  /* isdelete */
                                       dofill,
-                                      TRUE,
-                                      &res,
-                                      &valroot);
+                                      TRUE,  /* iswrite */
+                                      &res, &valroot);
     if (!content) {
         val_free_value(valset);
         return (res == NO_ERR) ? ERR_NCX_MISSING_PARM : res;
     }
 
     /* get the timeout parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         timeoutval = VAL_UINT(parm);
     } else {
@@ -5677,9 +5344,7 @@ static status_t
     }
 
     /* get the insert order */
-    tempval = val_find_child(valset, 
-                             YANGCLI_MOD,
-                             YANGCLI_ORDER);
+    tempval = val_find_child(valset, YANGCLI_MOD, YANGCLI_ORDER);
     if (tempval && tempval->res == NO_ERR) {
         insertop = op_insertop_id(VAL_ENUM_NAME(tempval));
     } else {
@@ -5687,9 +5352,7 @@ static status_t
     }
 
     /* get the edit-config operation */
-    tempval = val_find_child(valset, 
-                             YANGCLI_MOD,
-                             YANGCLI_OPERATION);
+    tempval = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPERATION);
     if (tempval && tempval->res == NO_ERR) {
         editop = op_editop_id(VAL_ENUM_NAME(tempval));
     } else {
@@ -5699,9 +5362,7 @@ static status_t
     /* get the edit-target parameter only if the
      * order is 'before' or 'after'; ignore otherwise
      */
-    tempval = val_find_child(valset, 
-                             YANGCLI_MOD,
-                             YANGCLI_EDIT_TARGET);
+    tempval = val_find_child(valset, YANGCLI_MOD, YANGCLI_EDIT_TARGET);
     if (tempval && tempval->res == NO_ERR) {
         edit_target = VAL_STR(tempval);
     } else {
@@ -5728,10 +5389,7 @@ static status_t
     }
 
     /* add nc:operation attribute to the value node */
-    res = add_operation_attr(server_cb,
-                             content, 
-                             editop, 
-                             FALSE);
+    res = add_operation_attr(server_cb, content, editop, FALSE);
     if (res != NO_ERR) {
         log_error("\nError: Creation of nc:operation"
                   " attribute failed");
@@ -5741,9 +5399,7 @@ static status_t
      * attribute as well
      */
     if (res == NO_ERR) {
-        res = add_insert_attrs(content, 
-                               insertop,
-                               edit_target);
+        res = add_insert_attrs(content, insertop, edit_target);
         if (res != NO_ERR) {
             log_error("\nError: Creation of yang:insert"
                   " attribute(s) failed");
@@ -5753,11 +5409,8 @@ static status_t
     /* send the PDU, hand off the content node */
     if (res == NO_ERR) {
         /* construct an edit-config PDU with default parameters */
-        res = send_edit_config_to_server(server_cb, 
-                                         valroot,
-                                         content, 
-                                         timeoutval,
-                                         server_cb->defop);
+        res = send_edit_config_to_server(server_cb, valroot, content, 
+                                         timeoutval, server_cb->defop);
         if (res != NO_ERR) {
             log_error("\nError: send create operation failed (%s)",
                       get_error_string(res));
@@ -5826,34 +5479,26 @@ static status_t
         return res;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         timeoutval = VAL_UINT(parm);
     } else {
         timeoutval = server_cb->timeout;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_NOFILL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
     if (parm && parm->res == NO_ERR) {
         dofill = FALSE;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_OPTIONAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
         getoptional = TRUE;
     } else {
         getoptional = server_cb->get_optional;
     }
 
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_WITH_DEFAULTS);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
         withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
     } else {
@@ -5861,29 +5506,19 @@ static status_t
     }
     
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      FALSE,
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      FALSE,  /* isdelete */
                                       dofill,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+                                      FALSE,  /* iswrite */
+                                      &res, &valroot);
     if (res != NO_ERR) {
         val_free_value(valset);
         return (res==NO_ERR) ? ERR_NCX_MISSING_PARM : res;
     }
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_server(server_cb, 
-                             valroot,
-                             content, 
-                             NULL, 
-                             NULL, 
-                             timeoutval, 
-                             dofill,
-                             withdef);
+    res = send_get_to_server(server_cb, valroot, content, NULL, NULL, 
+                             timeoutval, dofill, withdef);
     if (res != NO_ERR) {
         log_error("\nError: send get operation failed (%s)",
                   get_error_string(res));
@@ -5942,9 +5577,7 @@ static status_t
     }
 
     /* get the timeout parameter */
-    parm = val_find_child(valset,
-                          YANGCLI_MOD,
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         timeoutval = VAL_UINT(parm);
     } else {
@@ -5952,9 +5585,7 @@ static status_t
     }
 
     /* get the'fill-in optional' parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_OPTIONAL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_OPTIONAL);
     if (parm && parm->res == NO_ERR) {
         getoptional = TRUE;
     } else {
@@ -5962,9 +5593,7 @@ static status_t
     }
 
     /* get the --nofill parameter */
-    parm = val_find_child(valset,
-                          YANGCLI_MOD,
-                          YANGCLI_NOFILL);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_NOFILL);
     if (parm && parm->res == NO_ERR) {
         dofill = FALSE;
     }
@@ -5978,9 +5607,7 @@ static status_t
     }
 
     /* get the with-defaults parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD,
-                          NCX_EL_WITH_DEFAULTS);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
         withdef = ncx_get_withdefaults_enum(VAL_STR(parm));
     } else {
@@ -5988,15 +5615,11 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      getoptional,
-                                      FALSE,
+    content = get_content_from_choice(server_cb, rpc, valset, getoptional,
+                                      FALSE,  /* isdelete */
                                       dofill,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+                                      FALSE, /* iswrite */
+                                      &res, &valroot);
     if (res != NO_ERR) {
         val_free_value(valset);
         return res;
@@ -6007,14 +5630,10 @@ static status_t
     val_change_nsid(source, xmlns_nc_id());
 
     /* construct a get PDU with the content as the filter */
-    res = send_get_to_server(server_cb, 
-                            valroot,
-                            content, 
-                            NULL, 
-                            source, 
-                            timeoutval, 
+    res = send_get_to_server(server_cb, valroot, content, NULL, source, 
+                             timeoutval, 
                              FALSE,  /* dofill; don't fill again */
-                            withdef);
+                             withdef);
     if (res != NO_ERR) {
         log_error("\nError: send get-config operation failed (%s)",
                   get_error_string(res));
@@ -6082,9 +5701,7 @@ static status_t
     }
 
     /* get the timeout parameter */
-    parm = val_find_child(valset,
-                          YANGCLI_MOD, 
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         timeoutval = VAL_UINT(parm);
     } else {
@@ -6092,9 +5709,7 @@ static status_t
     }
 
     /* get the with-defaults parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_WITH_DEFAULTS);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
         withdef = ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
     } else {
@@ -6114,8 +5729,7 @@ static status_t
             log_warn("\nWarning: server does not have :xpath support");
             res = get_yesno(server_cb,
                             (const xmlChar *)"Send request anyway?",
-                            YESNO_NO,
-                            &retcode);
+                            YESNO_NO, &retcode);
             if (res == NO_ERR) {
                 switch (retcode) {
                 case YESNO_CANCEL:
@@ -6148,15 +5762,12 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+    content = get_content_from_choice(server_cb, rpc, valset,
+                                      FALSE,  /* getoptional */
+                                      FALSE,  /* isdelete */
+                                      FALSE,  /* dofill */
+                                      FALSE,  /* iswrite */
+                                      &res, &valroot);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
             str = VAL_STR(content);
@@ -6171,14 +5782,8 @@ static status_t
                  * as the filter 
                  * !! passing off content memory even on error !!
                  */
-                res = send_get_to_server(server_cb, 
-                                        valroot,
-                                        NULL, 
-                                        content, 
-                                        NULL, 
-                                        timeoutval,
-                                        FALSE,
-                                        withdef);
+                res = send_get_to_server(server_cb, valroot, NULL, content, 
+                                        NULL, timeoutval, FALSE, withdef);
                 content = NULL;
                 if (res != NO_ERR) {
                     log_error("\nError: send get operation"
@@ -6268,9 +5873,7 @@ static status_t
     }
 
     /* get the with-defaults parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_WITH_DEFAULTS);
+    parm = val_find_child(valset, YANGCLI_MOD, NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
         withdef = ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
     } else {
@@ -6278,9 +5881,7 @@ static status_t
     }
 
     /* get the timeout parameter */
-    parm = val_find_child(valset, 
-                          YANGCLI_MOD, 
-                          YANGCLI_TIMEOUT);
+    parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
         timeoutval = VAL_UINT(parm);
     } else {
@@ -6333,15 +5934,12 @@ static status_t
     }
 
     /* get the contents specified in the 'from' choice */
-    content = get_content_from_choice(server_cb, 
-                                      rpc, 
-                                      valset,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      FALSE,
-                                      &res,
-                                      &valroot);
+    content = get_content_from_choice(server_cb, rpc, valset,
+                                      FALSE,  /* getoptional */
+                                      FALSE,  /* isdelete */
+                                      FALSE,  /* dofill */
+                                      FALSE,  /* iswrite */
+                                      &res, &valroot);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
             str = VAL_STR(content);
@@ -6428,10 +6026,7 @@ static status_t
         format = "\n  [%N]\t%H";
     }
 
-    glstatus = gl_show_history(server_cb->cli_gl,
-                               outputfile,
-                               format,
-                               1,
+    glstatus = gl_show_history(server_cb->cli_gl, outputfile, format, 1,
                                maxlines);
     if (glstatus) {
         log_error("\nError: show history failed");
@@ -6605,37 +6200,27 @@ static status_t
         mode = HELP_MODE_NORMAL;
 
         /* check if the 'brief' flag is set first */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_BRIEF);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
         if (parm && parm->res == NO_ERR) {
             mode = HELP_MODE_BRIEF;
         } else {
             /* check if the 'full' flag is set first */
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_FULL);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
             if (parm && parm->res == NO_ERR) {
                 mode = HELP_MODE_FULL;
             }
         }
 
         /* find the 1 of N choice */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_SHOW);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SHOW);
         if (parm) {
             /* do show history */
-            res = do_history_show(server_cb,
-                                  VAL_INT(parm), 
-                                  mode);
+            res = do_history_show(server_cb, VAL_INT(parm), mode);
             done = TRUE;
         }
 
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_CLEAR);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_CLEAR);
             if (parm) {
                 /* do clear history */
                 res = do_history_clear(server_cb);
@@ -6649,18 +6234,14 @@ static status_t
         }
 
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_LOAD);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_LOAD);
             if (parm) {
                 if (!VAL_STR(parm) || !*VAL_STR(parm)) {
                     /* do history load buffer: default filename */
-                    res = do_history_load(server_cb,
-                                          YANGCLI_DEF_HISTORY_FILE);
+                    res = do_history_load(server_cb, YANGCLI_DEF_HISTORY_FILE);
                 } else {
                     /* do history load buffer */
-                    res = do_history_load(server_cb,
-                                          VAL_STR(parm));
+                    res = do_history_load(server_cb, VAL_STR(parm));
                 }
                 done = TRUE;
                 if (res == NO_ERR) {
@@ -6672,18 +6253,14 @@ static status_t
         }
 
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_SAVE);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SAVE);
             if (parm) {
                 if (!VAL_STR(parm) || !*VAL_STR(parm)) {
                     /* do history save buffer: default filename */
-                    res = do_history_save(server_cb,
-                                          YANGCLI_DEF_HISTORY_FILE);
+                    res = do_history_save(server_cb, YANGCLI_DEF_HISTORY_FILE);
                 } else {
                     /* do history save buffer */
-                    res = do_history_save(server_cb,
-                                          VAL_STR(parm));
+                    res = do_history_save(server_cb, VAL_STR(parm));
                 }
                 done = TRUE;
                 if (res == NO_ERR) {
@@ -6695,9 +6272,7 @@ static status_t
         }
 
         if (!done) {
-            res = do_history_show(server_cb,
-                                  YANGCLI_DEF_HISTORY_LINES, 
-                                  mode);
+            res = do_history_show(server_cb, YANGCLI_DEF_HISTORY_LINES, mode);
         }
     }
 
@@ -6810,8 +6385,7 @@ static status_t
 
         if (eventindex >= startindex) {
 
-            sequence_id = val_find_child(notif->notification,
-                                         NULL,
+            sequence_id = val_find_child(notif->notification, NULL,
                                          NCX_EL_SEQUENCE_ID);
 
 
@@ -6853,13 +6427,10 @@ static status_t
             }
 
             if (mode == HELP_MODE_FULL) {
-                val_dump_value_max(notif->notification,
-                                   0,
+                val_dump_value_max(notif->notification, 0,
                                    server_cb->defindent,
                                    (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
-                                   server_cb->display_mode,
-                                   FALSE,
-                                   FALSE);
+                                   server_cb->display_mode, FALSE, FALSE);
                 (*logfn)("\n");
             }
             eventsdone++;
@@ -6962,47 +6533,34 @@ static status_t
         mode = HELP_MODE_NORMAL;
 
         /* check if the 'brief' flag is set first */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_BRIEF);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_BRIEF);
         if (parm && parm->res == NO_ERR) {
             mode = HELP_MODE_BRIEF;
         } else {
             /* check if the 'full' flag is set first */
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_FULL);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_FULL);
             if (parm && parm->res == NO_ERR) {
                 mode = HELP_MODE_FULL;
             }
         }
 
         /* optional start position for show */
-        start = val_find_child(valset, 
-                               YANGCLI_MOD, 
-                               YANGCLI_START);
+        start = val_find_child(valset, YANGCLI_MOD, YANGCLI_START);
 
         /* find the 1 of N choice */
-        parm = val_find_child(valset, 
-                              YANGCLI_MOD, 
-                              YANGCLI_SHOW);
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_SHOW);
         if (parm) {
             /* do show eventlog  */
-            res = do_eventlog_show(server_cb,
-                                   VAL_INT(parm),
-                                   (start) ? VAL_UINT(start) : 0,
-                                   mode);
+            res = do_eventlog_show(server_cb, VAL_INT(parm),
+                                   (start) ? VAL_UINT(start) : 0, mode);
             done = TRUE;
         }
 
         if (!done) {
-            parm = val_find_child(valset, 
-                                  YANGCLI_MOD, 
-                                  YANGCLI_CLEAR);
+            parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_CLEAR);
             if (parm) {
                 /* do clear event log */
-                res = do_eventlog_clear(server_cb,
-                                        VAL_INT(parm));
+                res = do_eventlog_clear(server_cb, VAL_INT(parm));
                 done = TRUE;
                 if (res == NO_ERR) {
                     log_info("\nOK\n");
@@ -7013,10 +6571,8 @@ static status_t
         }
 
         if (!done) {
-            res = do_eventlog_show(server_cb, 
-                                   -1, 
-                                   (start) ? VAL_UINT(start) : 0, 
-                                   mode);
+            res = do_eventlog_show(server_cb, -1, 
+                                   (start) ? VAL_UINT(start) : 0, mode);
         }
     }
 
@@ -7168,7 +6724,15 @@ static status_t
     rpcname = obj_get_name(rpc);
     cond = runstack_get_cond_state(server_cb->runstack_context);
 
-    if (!xml_strcmp(rpcname, YANGCLI_CD)) {
+    if (!xml_strcmp(rpcname, YANGCLI_ALIAS)) {
+        if (cond) {
+            res = do_alias(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_ALIASES)) {
+        if (cond) {
+            res = do_aliases(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_CD)) {
         if (cond) {
             res = do_cd(server_cb, rpc, line, len);
         }
@@ -7264,6 +6828,14 @@ static status_t
     } else if (!xml_strcmp(rpcname, YANGCLI_WHILE)) {
         res = do_while(server_cb, rpc, line, len);
         didcmd = TRUE;
+    } else if (!xml_strcmp(rpcname, YANGCLI_UNSET)) {
+        if (cond) {
+            res = do_unset(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_USERVARS)) {
+        if (cond) {
+            res = do_uservars(server_cb, rpc, line, len);
+        }
     } else {
         res = ERR_NCX_INVALID_VALUE;
         log_error("\nError: The %s command is not allowed in this mode",
@@ -7306,10 +6878,12 @@ status_t
     top_command (server_cb_t *server_cb,
                  xmlChar *line)
 {
-    obj_template_t         *rpc;
-    uint32                 len;
-    ncx_node_t             dtyp;
-    status_t               res;
+    obj_template_t         *rpc = NULL;
+    xmlChar                *newline = NULL;
+    xmlChar                *useline = NULL;
+    uint32                 len = 0;
+    ncx_node_t             dtyp = NCX_NT_OBJ;
+    status_t               res = NO_ERR;
 
 #ifdef DEBUG
     if (!server_cb || !line) {
@@ -7317,21 +6891,33 @@ status_t
     }
 #endif
 
-    res = NO_ERR;
-
-    if (!xml_strlen(line)) {
+    if (xml_strlen(line) == 0) {
         return res;
     }
 
-    dtyp = NCX_NT_OBJ;
-    rpc = (obj_template_t *)parse_def(server_cb,
-                                      &dtyp, 
-                                      line, 
-                                      &len,
-                                      &res);
+    /* first check the command keyword to see if it is an alias */
+    newline = expand_alias(line, &res);
+    if (res == ERR_NCX_SKIPPED) {
+        res = NO_ERR;
+        useline = line;
+    } else if (res == NO_ERR) {
+        if (newline == NULL) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        useline = newline;
+    } else {
+        log_error("\nError: %s\n", get_error_string(res));
+        if (newline) {
+            m__free(newline);
+        }
+        return res;
+    }
+
+    /* look for an RPC command match for the command keyword */
+    rpc = (obj_template_t *)parse_def(server_cb, &dtyp, useline, &len, &res);
     if (rpc==NULL || !obj_is_rpc(rpc)) {
         if (server_cb->result_name || server_cb->result_filename) {
-            res = finish_result_assign(server_cb, NULL, line);
+            res = finish_result_assign(server_cb, NULL, useline);
         } else {
             if (res == ERR_NCX_DEF_NOT_FOUND) {
                 /* this is an unknown command */
@@ -7342,16 +6928,17 @@ status_t
                 log_error("\nError: %s\n", get_error_string(res));
             }
         }
-        return res;
-    }
-
-    /* check  handful of yangcli commands */
-    if (is_yangcli_ns(obj_get_nsid(rpc))) {
-        res = do_local_command(server_cb, rpc, line, len);
+    } else if (is_yangcli_ns(obj_get_nsid(rpc))) {
+        /* check handful of yangcli commands */
+        res = do_local_command(server_cb, rpc, useline, len);
     } else {
         res = ERR_NCX_OPERATION_FAILED;
         log_error("\nError: Not connected to server."
                   "\nLocal commands only in this mode.\n");
+    }
+
+    if (newline) {
+        m__free(newline);
     }
 
     return res;
@@ -7380,12 +6967,13 @@ status_t
                   xmlChar *line)
 {
     obj_template_t        *rpc, *input;
-    mgr_rpc_req_t         *req;
-    val_value_t           *reqdata, *valset, *parm;
+    mgr_rpc_req_t         *req = NULL;
+    val_value_t           *reqdata = NULL, *valset = NULL, *parm;
     ses_cb_t              *scb;
+    xmlChar               *newline, *useline = NULL;
     uint32                 len, linelen;
-    status_t               res;
-    boolean                shut;
+    status_t               res = NO_ERR;
+    boolean                shut = FALSE;
     ncx_node_t             dtyp;
 
 #ifdef DEBUG
@@ -7394,28 +6982,37 @@ status_t
     }
 #endif
 
-    req = NULL;
-    reqdata = NULL;
-    valset = NULL;
-    res = NO_ERR;
-    shut = FALSE;
-
     /* make sure there is something to parse */
     linelen = xml_strlen(line);
     if (!linelen) {
         return res;
     }
 
+    /* first check the command keyword to see if it is an alias */
+    newline = expand_alias(line, &res);
+    if (res == ERR_NCX_SKIPPED) {
+        res = NO_ERR;
+        useline = line;
+    } else if (res == NO_ERR) {
+        if (newline == NULL) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        useline = newline;
+        linelen = xml_strlen(newline);
+    } else {
+        log_error("\nError: %s\n", get_error_string(res));
+        if (newline) {
+            m__free(newline);
+        }
+        return res;
+    }
+
     /* get the RPC method template */
     dtyp = NCX_NT_OBJ;
-    rpc = (obj_template_t *)parse_def(server_cb,
-                                      &dtyp, 
-                                      line, 
-                                      &len,
-                                      &res);
+    rpc = (obj_template_t *)parse_def(server_cb, &dtyp, useline, &len, &res);
     if (rpc == NULL || !obj_is_rpc(rpc)) {
         if (server_cb->result_name || server_cb->result_filename) {
-            res = finish_result_assign(server_cb, NULL, line);
+            res = finish_result_assign(server_cb, NULL, useline);
         } else {
             if (res == ERR_NCX_DEF_NOT_FOUND) {
                 /* this is an unknown command */
@@ -7426,6 +7023,9 @@ status_t
                 log_error("\nError: %s", get_error_string(res));
             }
         }
+        if (newline) {
+            m__free(newline);
+        }
         return res;
     }
 
@@ -7435,10 +7035,13 @@ status_t
             res = ERR_NCX_OPERATION_FAILED;
             log_stdout("\nError: Already connected");
         } else {
-            res = do_local_conn_command(server_cb, rpc, line, len);
+            res = do_local_conn_command(server_cb, rpc, useline, len);
             if (res == ERR_NCX_SKIPPED) {
-                res = do_local_command(server_cb, rpc, line, len);
+                res = do_local_command(server_cb, rpc, useline, len);
             }
+        }
+        if (newline) {
+            m__free(newline);
         }
         return res;
     }
@@ -7448,8 +7051,7 @@ status_t
      */
 
     /* construct a method + parameter tree */
-    reqdata = xml_val_new_struct(obj_get_name(rpc), 
-                                 obj_get_nsid(rpc));
+    reqdata = xml_val_new_struct(obj_get_name(rpc), obj_get_nsid(rpc));
     if (!reqdata) {
         log_error("\nError allocating a new RPC request");
         res = ERR_INTERNAL_MEM;
@@ -7461,15 +7063,12 @@ status_t
 
     /* check if any params are expected */
     if (res == NO_ERR && input) {
-        while (line[len] && xml_isspace(line[len])) {
+        while (useline[len] && xml_isspace(useline[len])) {
             len++;
         }
 
         if (len < linelen) {
-            valset = parse_rpc_cli(server_cb,
-                                   rpc, 
-                                   &line[len], 
-                                   &res);
+            valset = parse_rpc_cli(server_cb, rpc, &useline[len], &res);
             if (res != NO_ERR) {
                 log_error("\nError in the parameters for '%s' command (%s)",
                           obj_get_name(rpc), get_error_string(res));
@@ -7489,11 +7088,7 @@ status_t
         /* fill in any missing parameters from the CLI */
         if (res == NO_ERR) {
             if (interactive_mode()) {
-                res = fill_valset(server_cb, 
-                                  rpc, 
-                                  valset, 
-                                  NULL, 
-                                  TRUE);
+                res = fill_valset(server_cb, rpc, valset, NULL, TRUE, FALSE);
                 if (res == ERR_NCX_SKIPPED) {
                     res = NO_ERR;
                 }
@@ -7546,13 +7141,9 @@ status_t
             if (LOGDEBUG2) {
                 log_debug2("\nabout to send <%s> RPC request with reqdata:",
                            obj_get_name(rpc));
-                val_dump_value_max(reqdata, 
-                                   0,
-                                   server_cb->defindent,
-                                   DUMP_VAL_LOG,
-                                   server_cb->display_mode,
-                                   FALSE,
-                                   FALSE);
+                val_dump_value_max(reqdata, 0, server_cb->defindent,
+                                   DUMP_VAL_LOG, server_cb->display_mode,
+                                   FALSE, FALSE);
             }
 
             /* the request will be stored if this returns NO_ERR */
@@ -7571,6 +7162,10 @@ status_t
 
     if (valset) {
         val_free_value(valset);
+    }
+
+    if (newline) {
+        m__free(newline);
     }
 
     if (res != NO_ERR) {
@@ -7898,10 +7493,7 @@ status_t
             start++;
         }
         if (line[start]) {
-            valset = parse_rpc_cli(server_cb,
-                                   rpc, 
-                                   &line[start], 
-                                   &res);
+            valset = parse_rpc_cli(server_cb, rpc, &line[start], &res);
             if (valset == NULL || res != NO_ERR) {
                 if (valset != NULL) {
                     val_free_value(valset);
@@ -7937,14 +7529,11 @@ status_t
     }
 
     /* make sure the 3 required parms are set */
-    s1 = val_find_child(valset,
-                        YANGCLI_MOD, 
+    s1 = val_find_child(valset, YANGCLI_MOD, 
                         YANGCLI_SERVER) ? TRUE : FALSE;
-    s2 = val_find_child(valset, 
-                        YANGCLI_MOD,
+    s2 = val_find_child(valset, YANGCLI_MOD,
                         YANGCLI_USER) ? TRUE : FALSE;
-    s3 = val_find_child(valset, 
-                        YANGCLI_MOD,
+    s3 = val_find_child(valset, YANGCLI_MOD,
                         YANGCLI_PASSWORD) ? TRUE : FALSE;
 
     /* check the transport parameter */
@@ -7969,11 +7558,8 @@ status_t
                 log_debug3("\nyangcli: CLI direct connect mode");
             }
         } else {
-            res = fill_valset(server_cb, 
-                              rpc, 
-                              valset, 
-                              connect_valset,
-                              TRUE);
+            res = fill_valset(server_cb, rpc, valset, connect_valset, 
+                              TRUE, FALSE);
             if (res == ERR_NCX_SKIPPED) {
                 res = NO_ERR;
             }
@@ -8143,11 +7729,7 @@ void *
         }
         if (modname) {
             /* try exact match in specified module */
-            def = try_parse_def(server_cb,
-                                NULL,
-                                modname, 
-                                defname, 
-                                dtyp);
+            def = try_parse_def(server_cb, NULL, modname, defname, dtyp);
         } else {
             log_error("\nError: no module found for prefix '%s'", 
                       prefix);
@@ -8158,11 +7740,7 @@ void *
          * modules. An unprefixed keyword will match
          * a yangcli command first
          */
-        def = try_parse_def(server_cb,
-                            NULL,
-                            YANGCLI_MOD, 
-                            defname, 
-                            dtyp);
+        def = try_parse_def(server_cb, NULL, YANGCLI_MOD, defname, dtyp);
 
         if (def == NULL) {
             /* 2) try an exact match in the default module
@@ -8175,11 +7753,7 @@ void *
                 /* do not re-check the yangcli and netconf modules */
                 if (xml_strcmp(defmod, NC_MODULE) &&
                     xml_strcmp(defmod, NCXMOD_IETF_NETCONF)) {
-                    def = try_parse_def(server_cb,
-                                        NULL,
-                                        defmod, 
-                                        defname, 
-                                        dtyp);
+                    def = try_parse_def(server_cb, NULL, defmod, defname, dtyp);
                 }
             }
         }
@@ -8196,11 +7770,8 @@ void *
                  modptr != NULL;
                  modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-                def = try_parse_def(server_cb, 
-                                    modptr->mod,
-                                    modptr->mod->name, 
-                                    defname, 
-                                    dtyp);
+                def = try_parse_def(server_cb, modptr->mod, modptr->mod->name, 
+                                    defname, dtyp);
                 if (def != NULL) {
                     matchcount++;
                     lastmatch = def;
@@ -8216,21 +7787,15 @@ void *
                      modptr != NULL;
                      modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-                    ncx_match_rpc_error(modptr->mod,
-                                        modptr->mod->name,
-                                        defname,
-                                        FALSE,
-                                        first);
+                    ncx_match_rpc_error(modptr->mod, modptr->mod->name,
+                                        defname, FALSE, first);
                     if (first) {
                         first = FALSE;
                     }
                 }
                 /* check any matches for local commands too */
-                ncx_match_rpc_error(get_yangcli_mod(),
-                                    NULL,
-                                    defname,
-                                    FALSE,
-                                    FALSE);
+                ncx_match_rpc_error(get_yangcli_mod(), NULL, defname,
+                                    FALSE, FALSE);
             } else {
                 /*  0 or 1 matches found */
                 def = lastmatch;
@@ -8246,11 +7811,7 @@ void *
                  mod != NULL;
                  mod = ncx_get_next_module(mod)) {
 
-                def = try_parse_def(server_cb, 
-                                    mod,
-                                    mod->name, 
-                                    defname, 
-                                    dtyp);
+                def = try_parse_def(server_cb, mod, mod->name, defname, dtyp);
                 if (def != NULL) {
                     lastmatch = def;
                     matchcount++;
@@ -8260,11 +7821,7 @@ void *
             if (matchcount > 1) {
                 /* generate ambiguous command error */
                 res = ERR_NCX_AMBIGUOUS_CMD;
-                ncx_match_rpc_error(NULL, 
-                                    NULL, 
-                                    defname,
-                                    FALSE,
-                                    TRUE);
+                ncx_match_rpc_error(NULL, NULL, defname, FALSE, TRUE);
             } else {
                 /* 0 or 1 matches found */
                 def = lastmatch;
@@ -8280,16 +7837,10 @@ void *
         if (prefix != NULL) {
             if (modname != NULL) {
                 /* try to match a command from this module */
-                def = ncx_match_any_rpc(modname, 
-                                        defname,
-                                        &matchcount);
+                def = ncx_match_any_rpc(modname, defname, &matchcount);
                 if (matchcount > 1) {
                     res = ERR_NCX_AMBIGUOUS_CMD;
-                    ncx_match_rpc_error(NULL, 
-                                        modname, 
-                                        defname,
-                                        TRUE,
-                                        TRUE);
+                    ncx_match_rpc_error(NULL, modname, defname, TRUE, TRUE);
                 } /* else 0 or 1 matches found */
             } /* else module not found error already done */
         } else {
@@ -8304,8 +7855,7 @@ void *
                          modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
                         tempcount = 0;
-                        def = ncx_match_any_rpc_mod(modptr->mod, 
-                                                    defname,
+                        def = ncx_match_any_rpc_mod(modptr->mod, defname,
                                                     &tempcount);
                         if (def) {
                             lastmatch = def;
@@ -8320,21 +7870,15 @@ void *
                                  dlq_firstEntry(&server_cb->modptrQ);
                              modptr != NULL;
                              modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-                            ncx_match_rpc_error(modptr->mod,
-                                                modptr->mod->name,
-                                                defname,
-                                                TRUE,
-                                                first);
+                            ncx_match_rpc_error(modptr->mod, modptr->mod->name,
+                                                defname, TRUE, first);
                             if (first) {
                                 first = FALSE;
                             }
                         }
                         /* list any partial local command matches */
-                        ncx_match_rpc_error(get_yangcli_mod(),
-                                            NULL,
-                                            defname,
-                                            TRUE,
-                                            FALSE);
+                        ncx_match_rpc_error(get_yangcli_mod(), NULL,  defname,
+                                            TRUE, FALSE);
                     }
                 }
 
@@ -8348,11 +7892,7 @@ void *
                     def = ncx_match_any_rpc(NULL, defname, &matchcount);
                     if (matchcount > 1) {
                         res = ERR_NCX_AMBIGUOUS_CMD;
-                        ncx_match_rpc_error(NULL,
-                                            NULL,
-                                            defname,
-                                            TRUE,
-                                            TRUE);
+                        ncx_match_rpc_error(NULL, NULL, defname, TRUE, TRUE);
                     }
                 }
                 break;
@@ -8450,9 +7990,7 @@ val_value_t *
     len = 0;
 
     set_completion_state(&server_cb->completion_state,
-                         rpc,
-                         NULL,
-                         CMD_STATE_GETVAL);
+                         rpc, NULL, CMD_STATE_GETVAL);
 
     /* skip leading whitespace */
     while (line[len] && xml_isspace(line[len])) {
@@ -8461,10 +7999,7 @@ val_value_t *
 
     /* check any non-whitespace entered after RPC method name */
     if (line[len]) {
-        valset = parse_rpc_cli(server_cb,
-                               rpc, 
-                               &line[len], 
-                               res);
+        valset = parse_rpc_cli(server_cb, rpc, &line[len], res);
         if (*res == ERR_NCX_SKIPPED) {
             log_stdout("\nError: no parameters defined for '%s' command",
                        obj_get_name(rpc));
@@ -8497,7 +8032,7 @@ val_value_t *
 
     /* fill in any missing parameters from the CLI */
     if (*res==NO_ERR && interactive_mode()) {
-        *res = fill_valset(server_cb, rpc, valset, NULL, TRUE);
+        *res = fill_valset(server_cb, rpc, valset, NULL, TRUE, FALSE);
     }
 
     if (*res==NO_ERR) {
@@ -8529,9 +8064,7 @@ status_t
 
     server_cb->history_line_active = FALSE;
     memset(&history_line, 0x0, sizeof(GlHistoryLine));
-    glstatus = gl_lookup_history(server_cb->cli_gl,
-                                 num,
-                                 &history_line);
+    glstatus = gl_lookup_history(server_cb->cli_gl, num, &history_line);
 
     if (glstatus == 0) {
         log_error("\nError: lookup command line history failed");
@@ -8546,8 +8079,7 @@ status_t
      * to get_line
      */
 
-    server_cb->history_line = 
-        xml_strdup((const xmlChar *)history_line.line);
+    server_cb->history_line = xml_strdup((const xmlChar *)history_line.line);
     if (!server_cb->history_line) {
         return ERR_INTERNAL_MEM;
     }
@@ -8604,15 +8136,12 @@ status_t
          curindex >= history_range.oldest && !done;
          curindex--) {
 
-        glstatus = gl_lookup_history(server_cb->cli_gl,
-                                     curindex,
+        glstatus = gl_lookup_history(server_cb->cli_gl, curindex,
                                      &history_line);
         if (glstatus == 0) {
             continue;
         }
-        if (!xml_strnicmp((const xmlChar *)history_line.line,
-                          line,
-                          len)) {
+        if (!xml_strnicmp((const xmlChar *)history_line.line, line, len)) {
             done = TRUE;
             continue;
         }

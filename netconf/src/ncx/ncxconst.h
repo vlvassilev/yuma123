@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -265,6 +265,9 @@ extern "C" {
  */
 #define NCX_DEF_VTIMEOUT  2
 
+/* Default startup config transaction ID file name */
+#define NCX_DEF_STARTUP_TXID_FILE  (const xmlChar *)"startup-cfg-txid.txt"
+
 /* Default startup config data file name */
 #define NCX_DEF_STARTUP_FILE  (const xmlChar *)"startup-cfg.xml"
 
@@ -309,13 +312,14 @@ extern "C" {
  * if the XML string starts with a double quote
  * then it will be interpreted as whitespace-allowed
  */
-#define NCX_STR_START   (const xmlChar)'"'
-#define NCX_STR_END     (const xmlChar)'"'
+
+#define NCX_STR_START   (xmlChar)'"'
+#define NCX_STR_END     (xmlChar)'"'
 
 
 /* Enumeration number start and end chars */
-#define NCX_ENU_START   (const xmlChar)'('
-#define NCX_ENU_END     (const xmlChar)')'
+#define NCX_ENU_START   (xmlChar)'('
+#define NCX_ENU_END     (xmlChar)')'
 
 
 /* String names matching psd_pstype_t enums */
@@ -410,6 +414,7 @@ extern "C" {
 #define NCX_EL_BRIEF           (const xmlChar *)"brief"
 #define NCX_EL_BYTE            (const xmlChar *)"byte"
 #define NCX_EL_C               (const xmlChar *)"c"
+#define NCX_EL_CPP_TEST        (const xmlChar *)"cpp_test"
 #define NCX_EL_CANCEL          (const xmlChar *)"cancel"
 #define NCX_EL_CANCEL_COMMIT   (const xmlChar *)"cancel-commit"
 #define NCX_EL_CANDIDATE       (const xmlChar *)"candidate"
@@ -446,6 +451,7 @@ extern "C" {
 #define NCX_EL_DEFAULT         (const xmlChar *)"default"
 #define NCX_EL_DEFAULT_OPERATION (const xmlChar *)"default-operation"
 #define NCX_EL_DEFAULT_PARM    (const xmlChar *)"default-parm"
+#define NCX_EL_DEFAULT_PARM_EQUALS_OK (const xmlChar *)"default-parm-equals-ok"
 #define NCX_EL_DEFAULT_STYLE   (const xmlChar *)"default-style"
 #define NCX_EL_DEFINITIONS     (const xmlChar *)"definitions"
 #define NCX_EL_DEFOP           (const xmlChar *)"default-operation"
@@ -509,6 +515,7 @@ extern "C" {
 #define NCX_EL_HELLO_TIMEOUT   (const xmlChar *)"hello-timeout"
 #define NCX_EL_HELP            (const xmlChar *)"help"
 #define NCX_EL_HIDDEN          (const xmlChar *)"hidden"
+#define NCX_EL_HOME            (const xmlChar *)"home"
 #define NCX_EL_HTML            (const xmlChar *)"html"
 #define NCX_EL_IDENTIFIER      (const xmlChar *)"identifier"
 #define NCX_EL_IDENTITYREF     (const xmlChar *)"identityref"
@@ -633,6 +640,8 @@ extern "C" {
 #define NCX_EL_SHORT           (const xmlChar *)"short"
 #define NCX_EL_SHOW_ERRORS     (const xmlChar *)"show-errors"
 #define NCX_EL_SHUTDOWN        (const xmlChar *)"shutdown"
+#define NCX_EL_SIL_DELETE_CHILDREN_FIRST (const xmlChar *)\
+    "sil-delete-children-first"
 #define NCX_EL_SLIST           (const xmlChar *)"slist"
 #define NCX_EL_SOURCE          (const xmlChar *)"source"
 #define NCX_EL_SQL             (const xmlChar *)"sql"
@@ -678,6 +687,7 @@ extern "C" {
 #define NCX_EL_UNSIGNED_LONG   (const xmlChar *)"unsignedLong"
 #define NCX_EL_UNSIGNED_SHORT  (const xmlChar *)"unsignedShort"
 #define NCX_EL_ULONG           (const xmlChar *)"ulong"
+#define NCX_EL_UPDATE          (const xmlChar *)"update"
 #define NCX_EL_URL             (const xmlChar *)"url"
 #define NCX_EL_URLTARGET       (const xmlChar *)"urltarget"
 #define NCX_EL_USAGE           (const xmlChar *)"usage"
@@ -685,6 +695,7 @@ extern "C" {
 #define NCX_EL_USAGE_M         (const xmlChar *)"mandatory"
 #define NCX_EL_USAGE_O         (const xmlChar *)"optional"
 #define NCX_EL_USER            (const xmlChar *)"user"
+#define NCX_EL_USER_WRITE      (const xmlChar *)"user-write"
 #define NCX_EL_USEXMLORDER     (const xmlChar *)"usexmlorder"
 #define NCX_EL_USTRING         (const xmlChar *)"ustring"
 #define NCX_EL_VALIDATE        (const xmlChar *)"validate"
@@ -749,7 +760,7 @@ extern "C" {
 #define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
 #define COPYRIGHT_STRING \
-    "Copyright (c) 2008-2011, Andy Bierman, All Rights Reserved.\n"
+    "Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.\n"
 
 
 #define Y_PREFIX         (const xmlChar *)"y_"

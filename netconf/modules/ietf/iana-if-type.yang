@@ -1,6 +1,7 @@
-module iana-if-type {
+
+   module iana-if-type {
      namespace "urn:ietf:params:xml:ns:yang:iana-if-type";
-     prefix ift;
+     prefix ianaift;
 
      organization "IANA";
      contact
@@ -36,7 +37,7 @@ module iana-if-type {
 
      // RFC Ed.: update the date below with the date of RFC publication
      // and remove this note.
-     revision 2011-03-30 {
+     revision 2011-09-07 {
        description
          "Initial revision.";
        reference
@@ -1407,6 +1408,16 @@ module iana-if-type {
            value 257;
            description
              "CATV downstream RF port";
+         }
+         enum "vmwareVirtualNic" {
+           value 258;
+           description
+             "VMware Virtual Network Interface";
+         }
+         enum "ieee802154" {
+           value 259;
+           description
+             "IEEE 802.15.4 WPAN interface";
          }
        }
        description

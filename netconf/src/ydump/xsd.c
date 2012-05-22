@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -26,94 +26,35 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
 #include <ctype.h>
 
 #include <xmlstring.h>
 #include <xmlreader.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_cfg
+#include "procdefs.h"
 #include "cfg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_typ
+#include "status.h"
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_xsd
 #include "xsd.h"
-#endif
-
-#ifndef _H_xsd_typ
 #include "xsd_typ.h"
-#endif
-
-#ifndef _H_xsd_util
 #include "xsd_util.h"
-#endif
-
-#ifndef _H_xsd_yang
 #include "xsd_yang.h"
-#endif
-
-#ifndef _H_yang
 #include "yang.h"
-#endif
-
-#ifndef _H_yangdump
 #include "yangdump.h"
-#endif
 
 
 /********************************************************************
@@ -180,10 +121,7 @@ static status_t
      */
     immod = ncx_find_module(modname, revision);
     if (!immod) {
-        res = ncxmod_load_module(modname, 
-                                 revision, 
-                                 pcb->savedevQ,
-                                 &immod);
+        res = ncxmod_load_module(modname, revision, pcb->savedevQ, &immod);
     }
     if (!immod) {
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -370,9 +308,7 @@ status_t
         }
 
         /* set the schema location */
-        str = xsd_make_schema_location(mod, 
-                                       cp->schemaloc, 
-                                       cp->versionnames);
+        str = xsd_make_schema_location(mod, cp->schemaloc, cp->versionnames);
         if (str) {
             res = xml_add_attr(top_attrs, xsi_id, XSD_LOC, str);
             m__free(str);
@@ -409,10 +345,7 @@ status_t
 
     /* set the version attribute */
     if (mod->version) {
-        res = xml_add_attr(top_attrs, 
-                           0, 
-                           NCX_EL_VERSION, 
-                           mod->version);
+        res = xml_add_attr(top_attrs, 0, NCX_EL_VERSION, mod->version);
         if (res != NO_ERR) {
             val_free_value(val);
             return res;
@@ -424,8 +357,7 @@ status_t
      */
     ncx_id = xmlns_ncx_id();
     if (ncx_id != mod->nsid) {
-        res = xml_add_xmlns_attr(top_attrs, 
-                                 ncx_id, 
+        res = xml_add_xmlns_attr(top_attrs, ncx_id, 
                                  xmlns_get_ns_prefix(ncx_id));
         if (res != NO_ERR) {
             val_free_value(val);
@@ -436,8 +368,7 @@ status_t
     /* add the NETCONF NS if any RPC or OBJECT definitions */
     nc_id = xmlns_nc_id();
     if (!dlq_empty(&mod->datadefQ)) {
-        res = xml_add_xmlns_attr(top_attrs, 
-                                 nc_id, 
+        res = xml_add_xmlns_attr(top_attrs, nc_id, 
                                  xmlns_get_ns_prefix(nc_id));
         if (res != NO_ERR) {
             val_free_value(val);
@@ -477,11 +408,10 @@ status_t
         for (impptr = (yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
              impptr != NULL;
              impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
-            res = add_one_prefix(pcb,
-                                 impptr->modname, 
-                                 impptr->revision, 
+            res = add_one_prefix(pcb, impptr->modname, impptr->revision, 
                                  top_attrs);
             if (res != NO_ERR) {
+                val_free_value(val);
                 return res;
             }
         }
@@ -490,11 +420,10 @@ status_t
              import != NULL;
              import = (ncx_import_t *)dlq_nextEntry(import)) {
 
-            res = add_one_prefix(pcb,
-                                 import->module, 
-                                 import->revision, 
+            res = add_one_prefix(pcb, import->module, import->revision, 
                                  top_attrs);
             if (res != NO_ERR) {
+                val_free_value(val);
                 return res;
             }
         }
@@ -609,15 +538,11 @@ status_t
 
     /* setup the local typedefs in all objects */
     if (res == NO_ERR) {
-        res = xsd_do_typedefs_datadefQ(mod, 
-                                       &mod->datadefQ, 
-                                       &mod->typnameQ);
+        res = xsd_do_typedefs_datadefQ(mod, &mod->datadefQ, &mod->typnameQ);
     }
 
     if (res == NO_ERR) {
-        res = xsd_do_typedefs_groupingQ(mod, 
-                                        &mod->groupingQ, 
-                                        &mod->typnameQ);
+        res = xsd_do_typedefs_groupingQ(mod, &mod->groupingQ, &mod->typnameQ);
     }
 
     return res;

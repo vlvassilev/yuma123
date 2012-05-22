@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -28,49 +28,21 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
 
 
 /********************************************************************
@@ -763,6 +735,42 @@ void
     }
 
 }  /* var_clean_varQ */
+
+
+/********************************************************************
+* FUNCTION var_clean_type_from_varQ
+* 
+* Clean all entries of one type from a Q of ncx_var_t
+* 
+* INPUTS:
+*   varQ == Q of var structs to free
+*   vartype == variable type to delete
+*********************************************************************/
+void
+    var_clean_type_from_varQ (dlq_hdr_t *varQ, 
+                              var_type_t vartype)
+{
+    ncx_var_t *var, *nextvar;
+
+#ifdef DEBUG
+    if (!varQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (var = (ncx_var_t *)dlq_firstEntry(varQ);
+         var != NULL;
+         var = nextvar) {
+
+        nextvar = (ncx_var_t *)dlq_nextEntry(var);
+        if (var->vartype == vartype) {
+            dlq_remove(var);
+            var_free(var);
+        }
+    }
+
+}  /* var_clean_type_from_varQ */
 
 
 /********************************************************************
@@ -1747,12 +1755,7 @@ val_value_t *
                         boolean istop,
                         status_t *res)
 {
-    return var_get_script_val_ex (rcxt,
-                                  obj,
-                                  val,
-                                  strval,
-                                  istop,
-                                  NULL,
+    return var_get_script_val_ex (rcxt, NULL, obj, val, strval, istop, NULL, 
                                   res);
 }  /* var_get_script_val */
                                  
@@ -1768,6 +1771,9 @@ val_value_t *
 *
 * INPUTS:
 *   rcxt == runstack context to use
+*   parentobj == container or list real node parent of 'obj'
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
 *   obj == expected type template 
 *          == NULL and will be set to NCX_BT_STRING for
 *             simple types
@@ -1792,6 +1798,7 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     var_get_script_val_ex (runstack_context_t *rcxt,
+                           obj_template_t *parentobj,
                            obj_template_t *obj,
                            val_value_t *val,
                            const xmlChar *strval,
@@ -1806,12 +1813,9 @@ val_value_t *
     uint32                 namelen, len;
     var_type_t             vartype;
     boolean                simtyp;
-#ifdef DEBUG
-    if (!obj || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+
+    assert( obj && "obj is NULL!" );
+    assert( res && "res is NULL!" );
 
     newval = NULL;
     useval = NULL;
@@ -1834,10 +1838,22 @@ val_value_t *
         if (!newval) {
             *res = ERR_INTERNAL_MEM;
             return NULL;
+        } 
+
+        if (obj->objtype == OBJ_TYP_CHOICE || obj->objtype == OBJ_TYP_CASE) {
+            if (parentobj) {
+                val_init_from_template(newval, parentobj);
+            } else {
+                log_error("\nError: container parent not provided for "
+                          "complex type");
+                val_free_value(newval);
+                *res = ERR_NCX_INVALID_VALUE;
+                return NULL;
+            }
         } else {
             val_init_from_template(newval, obj);
-            useval = newval;
         }
+        useval = newval;
     }
 
     /* check if strval is NULL */
@@ -1891,13 +1907,8 @@ val_value_t *
         vartype = VAR_TYP_NONE;
         name = NULL;
         namelen = 0;
-        *res = var_check_ref(rcxt,
-                             strval, 
-                             ISRIGHT, 
-                             &len, 
-                             &vartype, 
-                             &name, 
-                             &namelen);
+        *res = var_check_ref(rcxt, strval, ISRIGHT, &len, &vartype, 
+                             &name, &namelen);
         if (*res == NO_ERR) {
             /* this is a var-reference, so get the variable */
             varval = var_get_str(rcxt, name, namelen, vartype);
@@ -1989,7 +2000,7 @@ val_value_t *
     }
     return useval;
 
-}  /* var_get_script_val */
+}  /* var_get_script_val_ex */
 
 
 /********************************************************************

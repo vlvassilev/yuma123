@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangcli 1 "September 25, 2011" Linux "yangcli 2.1"
+.TH yangcli 1 "February 6, 2012" Linux "yangcli 2.2"
 .SH NAME
 yangcli \- YANG-based NETCONF-over-SSH client application
 
@@ -86,6 +86,22 @@ Some examples of valid command line parameters:
 Partial parameter names can be entered if they are unique.
 
 .SH OPTIONS
+.IP --\fBaliases-file\fP[=filespec]
+Specifies the yangcli command aliases file to use.
+The default is ~/.yuma/.yangcli_aliases.
+.IP --\fBalt-names\fP=boolean
+Altername name match mode to use for UrlPath name searches.
+The default is true (allow matches on alt-name extension).
+.IP --\fBautoaliases\fP=boolean
+Controls whether the yangcli command aliases will
+be saved at exit and loaded at startup.
+If true, the 'aliases-file' parameter will be used if it is set,
+or else the default aliases file will be used
+(~/.yuma/.yangcli_aliases), for loading
+and saving the yangcli command aliases.
+If false, the yangcli command aliases will only be stored
+and loaded manually with the aliases command.
+The default is true.
 .IP --\fBautocomp\fP=boolean
 Controls whether partial keywords will be 
 checked for interactive or script commands.
@@ -109,6 +125,16 @@ upon session startup with a server. This is the
 default value.  If false, the 'load-module' command
 must be used to explicitly load all the desired 
 definition modules.
+.IP --\fBautouservars\fP=boolean
+Controls whether the yangcli user variables will
+be saved at exit and loaded at startup.
+If true, the 'uservars-file' parameter will be used if set,
+or else the default user variables file will be used
+(~/.yuma/yangcli_uservars.xml), for loading
+and saving the yangcli user variables.
+If false, the yangcli user variables will only be stored
+and loaded manually with the uservars command.
+The default is true.
 .IP --\fBbad-data\fP=enum
 Specifies how invalid user input from the CLI
 will be handled when filling PDUs for remote
@@ -116,17 +142,17 @@ operations.
 .nf
 
    enum values:
-      ignore(0)
+      ignore
          Silently accept invalid PDU and data model 
          parameters.  Intended for advanced server
          testing mode only.
-      warn(1)
+      warn
          Warn, but accept invalid PDU and data model 
          parameters.
-      check(2)
+      check
          Prompt the user to keep the invalid value
          or re-enter the value.
-      error(3)
+      error
          Prompt the user to re-enter the invalid value.
 .fi  
 .IP --\fBbatch-mode\fP
@@ -166,16 +192,19 @@ Controls how values are displayed during output
 to STDOUT or a log file.
 .nf
     enum values:
-       plain(0)
+       plain
           Plain identifier without any prefix format.
-       prefix(1)
+       prefix
           Plain text with XML prefix added format.
-       module(2)
+       module
           Plain text with module name as prefix added format.
-       xml(3)
+       xml
           XML format.
-       xml-nons(4)
+       xml-nons
           XML format, but without any namespace (xmlns) attributes.
+       json
+          JSON format.
+
 .fi
 .IP --\fBecho-replies\fP=boolean
 Allow RPC replies to be echoes to the log or STDOUT.
@@ -209,15 +238,18 @@ the default edit target, when both are supported
 by the server.
 .nf
       enum values:
-        candidate(0)
+        candidate
           Force default edit target to be candidate.
-        running(1)
+        running
           Force default edit target to be running.
 .fi
 .IP --\fBhelp\fP
 Print this help text and exit.
 The help-mode choice (--brief, --normal, or --full) may also be present
 to control the amount of help text printed.
+.IP --\fBhome\fP=dirspec
+Directory specification for the home directory
+to use instead of HOME.
 .IP --\fBindent\fP=number
 Number of spaces to indent (0..9) in formatted output.
 The default is 2 spaces.
@@ -237,40 +269,40 @@ also present.
 Sets the debug logging level for the program.
 .nf
       enum values:
-        off(0)
-        error(1)
-        warn(2)
-        info(3)
-        debug(4)
-        debug2(5)
-        debug3(6)
-        debug4(7)
+        off
+        error
+        warn
+        info
+        debug
+        debug2
+        debug3
+        debug4
 .fi
 .IP --\fBmatch-names\fP=enum
 Match mode to use for UrlPath name searches.
 .nf
       enum values:
-        exact(0)
+        exact
           The name must exactly match the node name
           for all characters in both name strings.
-        exact-nocase(1)
+        exact-nocase
           The name must match the node name
           for all characters in both name strings.
           Strings are not case-sensitive.
-        one(2)
+        one
           The name must exactly match the first N
           characters of just one node name, which
           must be the only partial name match found.
-        one-nocase(3)
+        one-nocase
           The name must exactly match the first N
           characters of just one node name, which
           must be the only partial name match found.
           Strings are not case-sensitive.
-        first(4)
+        first
           The name must exactly match the first N
           characters of any node name. The first one
           found will be used.
-        first-nocase(5)
+        first-nocase
           The name must exactly match the first N
           characters of any node name. The first one
           found will be used. Strings are not
@@ -322,9 +354,9 @@ will attempt to use. Empty set is not allowed.
 Default is to enable all protocols.
 .nf
       bit values:
-        netconf1.0(0)
+        netconf1.0
           RFC 4741 base:1.0
-        netconf1.1(1)
+        netconf1.1
           RFC xxxx base:1.1
 .fi
 .IP --\fBpublic-key\fP=string
@@ -372,6 +404,23 @@ log is a file instead of stdout.
 The number of seconds to wait for a response
 from the server before declaring a timeout.
 Zero means do not timeout at all.
+.IP --\fBtransport\fP=enum
+Identifies the transport protocol that should be used.
+This is the default that will be used or the value used
+in auto-connect mode.  The value can also be provided
+when invoking the 'connect' command.
+.nf
+      enum values:
+        ssh
+          NETCONF over SSH.
+          RFC 4742;  RFC 6242
+        tcp
+          NETCONF over TCP.
+          If this enum is selected, then the default --ncport
+          value is set to 2023, and the --protocols value
+          is set to netconf1.0.  The --password value will
+          be ignored.
+.fi
 .IP --\fBuse-xmlheader\fP=
 Specifies how file result variables will be written
 for XML files.  Controls whether the XML preamble
@@ -381,6 +430,9 @@ User name to use for NETCONF sessions.
 This value will be used in auto-startup mode,
 or as the default value when starting a new
 session.
+.IP --\fBuservars-file\fP=filespec
+Specifies the yangcli user variables file to use.
+The default is ~/.yuma/yangcli_uservars.xml.
 .IP --\fBversion\fP
 Print the program version string and exit.
 .IP --\fBwarn-idlen\fP=number
@@ -544,7 +596,33 @@ search path in order for this program to function:
     
   * \fBYANG module library\fP
     default: /usr/share/yuma/modules/
-    
+
+  * \fByangcli command aliases\fP
+    default: ~/.yuma/.yangcli_aliases
+    CLI parameters: --autoaliases, --aliases-file
+    See the 'aliases' and 'alias' command for details.
+    The format of the aliases file is text.
+    A comment is a line that begins with a '#' character,
+    and will be ignored. Comments are not saved if the
+    --autoaliases=true parameter value is used.
+    Single or double quotes can be used.
+.nf
+
+    Example aliases file:
+    ---------------------
+    g=get
+    gc=get-config
+    gcnacm='sget-config --source=running /nacm'
+    geteth0="xget /interfaces/interface[name='eth0']"
+
+.fi
+  * \fByangcli user variables\fP
+    default: ~/.yuma/yangcli_uservars.xml
+    CLI parameters: --autouservars, --uservars-file
+    See the 'uservars' command for details.
+    The format of the uservars file is XML.
+    Refer to the 'vars' container in yangcli.yang
+    for a definition of the XML contents.
 
 .SH DIAGNOSTICS
 Internal diagnostics may generate the following

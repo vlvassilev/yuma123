@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -23,7 +23,8 @@
 date         init     comment
 ----------------------------------------------------------------------
 18-apr-09    abb      begun; split out from yangcli.c
-
+25-jan-12    abb      Add xpath tab completion provided by Zesi Cai
+ 
 *********************************************************************
 *                                                                   *
 *                     I N C L U D E    F I L E S                    *
@@ -45,69 +46,22 @@ date         init     comment
 
 #include "libtecla.h"
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
-#endif
-
-#ifndef _H_yangcli_tab
 #include "yangcli_tab.h"
-#endif
-
-#ifndef _H_yangcli_util
 #include "yangcli_util.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 
 /********************************************************************
@@ -239,14 +193,9 @@ static status_t
         endchar = "";
     }
 
-    retval = 
-        cpl_add_completion(cpl,
-                           line,
-                           word_start,
-                           word_end,
+    retval = cpl_add_completion(cpl, line, word_start, word_end,
                            (const char *)&parmval[parmlen],
-                           (const char *)"",
-                           endchar);
+                           (const char *)"", endchar);
 
     if (retval != 0) {
         return ERR_NCX_OPERATION_FAILED;
@@ -323,31 +272,19 @@ static status_t
             log_debug2("\n*** found enubit  %s ***\n", typenum->name);
 #endif
 
-            res = fill_one_parm_completion(cpl,
-                                           comstate,
-                                           line,
+            res = fill_one_parm_completion(cpl, comstate, line,
                                            (const char *)typenum->name,
-                                           word_start,
-                                           word_end,
-                                           parmlen);
+                                           word_start, word_end, parmlen);
         }
         return res;
     case NCX_BT_BOOLEAN:
-        res = fill_one_parm_completion(cpl,
-                                       comstate,
-                                       line,
+        res = fill_one_parm_completion(cpl, comstate, line,
                                        (const char *)NCX_EL_TRUE,
-                                       word_start,
-                                       word_end,
-                                       parmlen);
+                                       word_start, word_end, parmlen);
         if (res == NO_ERR) {
-            res = fill_one_parm_completion(cpl,
-                                           comstate,
-                                           line,
+            res = fill_one_parm_completion(cpl, comstate, line,
                                            (const char *)NCX_EL_FALSE,
-                                           word_start,
-                                           word_end,
-                                           parmlen);
+                                           word_start, word_end, parmlen);
         }
         return res;
     case NCX_BT_INSTANCE_ID:
@@ -363,18 +300,220 @@ static status_t
      */
     defaultstr = (const char *)obj_get_default(parmobj);
     if (defaultstr) {
-        res = fill_one_parm_completion(cpl,
-                                       comstate,
-                                       line,
-                                       defaultstr,
-                                       word_start,
-                                       word_end,
-                                       parmlen);
+        res = fill_one_parm_completion(cpl, comstate, line, defaultstr,
+                                       word_start, word_end, parmlen);
     }
 
     return NO_ERR;
 
 }  /* fill_parm_completion */
+
+
+static status_t
+    fill_xpath_children_completion (obj_template_t *parentObj,
+        WordCompletion *cpl,
+        const char *line,
+        int word_start,
+        int word_end,
+        int cmdlen)
+{
+  const xmlChar         *pathname;
+  int                    retval;
+  int word_iter = word_start + 1;
+  // line[word_start] == '/'
+  word_start ++;
+  cmdlen --;
+  while(word_iter <= word_end)
+    {
+      if (line[word_iter] == '/')
+        {
+          // The second '/' is found
+          // find the top level obj and fill its child completion
+          char childName[128];
+          int child_name_len = word_iter - word_start;
+          strncpy (childName, &line[word_start], child_name_len);
+          childName[child_name_len] = '\0';
+          if (parentObj == NULL)
+            return NO_ERR;
+          obj_template_t * childObj = obj_find_child(parentObj,
+              obj_get_mod_name(parentObj),
+              (const xmlChar *)childName);
+
+          cmdlen = word_end - word_iter;
+
+          // put the children path with topObj into the recursive 
+          // lookup function
+          return fill_xpath_children_completion (childObj, cpl,line, word_iter,
+                                                 word_end, cmdlen);
+        }
+      word_iter ++;
+    }
+  obj_template_t * childObj = obj_first_child_deep(parentObj);
+  for(;childObj!=NULL; childObj = obj_next_child_deep(childObj))
+    {
+      pathname = obj_get_name(childObj);
+      /* check if there is a partial command name */
+      if (cmdlen > 0 &&
+          strncmp((const char *)pathname,
+                  &line[word_start],
+                  cmdlen)) {
+          /* command start is not the same so skip it */
+          continue;
+      }
+
+      if( !obj_is_data_db(childObj)) {
+          /* object is either rpc or notification*/
+          continue;
+      }
+
+      retval = cpl_add_completion(cpl, line, word_start, word_end,
+                             (const char *)&pathname[cmdlen], "", "");
+      if (retval != 0) {
+          return ERR_NCX_OPERATION_FAILED;
+      }
+    }
+  return NO_ERR;
+}
+
+static obj_template_t * find_xpath_top_obj(
+        const char *line,
+        int word_start,
+        int word_end
+        )
+{
+  // line[word_end] == '/'
+  int cmdlen = (word_end - 1) - word_start;
+  const xmlChar         *pathname;
+  ncx_module_t * mod = ncx_get_first_session_module();
+  for(;mod!=NULL; mod = ncx_get_next_session_module(mod))
+    {
+      obj_template_t * modObj = ncx_get_first_object(mod);
+      for(; modObj!=NULL; modObj = ncx_get_next_object(mod, modObj))
+        {
+          pathname = obj_get_name(modObj);
+          /* check if there is a partial command name */
+          if (cmdlen > 0 &&
+              !strncmp((const char *)pathname,
+                      &line[word_start],
+                      cmdlen)) {
+              // The object is the one looking for
+              return modObj;
+          }
+        }
+    }
+  return NULL;
+}
+
+static status_t
+    fill_xpath_root_completion (
+        WordCompletion *cpl,
+        const char *line,
+        int word_start,
+        int word_end,
+        int cmdlen)
+{
+  const xmlChar         *pathname;
+  int                    retval;
+  ncx_module_t * mod = ncx_get_first_session_module();
+  for(;mod!=NULL; mod = ncx_get_next_session_module(mod))
+    {
+      obj_template_t * modObj = ncx_get_first_object(mod);
+      for(; modObj!=NULL; modObj = ncx_get_next_object(mod, modObj))
+        {
+          pathname = obj_get_name(modObj);
+          /* check if there is a partial command name */
+          if (cmdlen > 0 &&
+              strncmp((const char *)pathname,
+                      &line[word_start],
+                      cmdlen)) {
+              /* command start is not the same so skip it */
+              continue;
+          }
+
+          if( !obj_is_data_db(modObj)) {
+              /* object is either rpc or notification*/
+              continue;
+          }
+
+          retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                      (const char *)&pathname[cmdlen], "", "");
+          if (retval != 0) {
+              return ERR_NCX_OPERATION_FAILED;
+          }
+        }
+    }
+  return NO_ERR;
+}
+
+
+/********************************************************************
+ * TODO:
+ * FUNCTION fill_one_xpath_completion
+ *
+ * fill the command struct for one RPC operation
+ * check all the xpath that match
+ *
+ * command state is CMD_STATE_FULL or CMD_STATE_GETVAL
+ *
+ * INPUTS:
+ *    rpc == rpc operation to use
+ *    cpl == word completion struct to fill in
+ *    line == line passed to callback
+ *    word_start == start position within line of the
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == length of parameter name already entered
+ *              this may not be the same as
+ *              word_end - word_start if the cursor was
+ *              moved within a long line
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_one_xpath_completion (obj_template_t *rpc,
+                                   WordCompletion *cpl,
+                                   const char *line,
+                                   int word_start,
+                                   int word_end,
+                                   int cmdlen)
+{
+    (void)rpc;
+    int word_iter = word_start + 1;
+    // line[word_start] == '/'
+    word_start ++;
+    cmdlen --;
+    while(word_iter <= word_end)
+      {
+//        log_write("%c", line[word_iter]);
+        if (line[word_iter] == '/')
+          {
+            // The second '/' is found
+            // TODO: find the top level obj and fill its child completion
+//            log_write("more than 1\n");
+            obj_template_t * topObj = find_xpath_top_obj(line,
+                word_start,
+                word_iter);
+
+            cmdlen = word_end - word_iter;
+
+            // put the children path with topObj into the recursive 
+            // lookup function
+            return fill_xpath_children_completion (topObj, cpl, line,
+                                                   word_iter, word_end, cmdlen);
+          }
+        word_iter ++;
+      }
+
+    // The second '/' is not found
+    return fill_xpath_root_completion(cpl, line, word_start, word_end, cmdlen);
+
+    //return NO_ERR;
+
+}  /* fill_one_xpath_completion */
 
 
 /********************************************************************
@@ -417,6 +556,11 @@ static status_t
     ncx_btype_t            btyp;
     boolean                hasval;
 
+    if(line[word_start] == '/') {
+        return fill_one_xpath_completion(rpc, cpl, line, word_start,
+                                         word_end, cmdlen);
+    }
+
     inputobj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (inputobj == NULL || !obj_has_children(inputobj)) {
         /* no input parameters */
@@ -431,9 +575,7 @@ static status_t
 
         /* check if there is a partial command name */
         if (cmdlen > 0 &&
-            strncmp((const char *)parmname,
-                    &line[word_start],
-                    cmdlen)) {
+            strncmp((const char *)parmname, &line[word_start], cmdlen)) {
             /* command start is not the same so skip it */
             continue;
         }
@@ -441,14 +583,9 @@ static status_t
         btyp = obj_get_basetype(obj);
         hasval = (btyp == NCX_BT_EMPTY) ? FALSE : TRUE;
 
-        retval = 
-            cpl_add_completion(cpl,
-                               line,
-                               word_start,
-                               word_end,
-                               (const char *)&parmname[cmdlen],
-                               "",
-                               (hasval) ? "=" : " ");
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                    (const char *)&parmname[cmdlen],
+                                    "", (hasval) ? "=" : " ");
 
         if (retval != 0) {
             return ERR_NCX_OPERATION_FAILED;
@@ -524,25 +661,16 @@ static status_t
             continue;
         }
 
-
         /* check if there is a partial command name */
         if (cmdlen > 0 &&
-            strncmp((const char *)cmdname,
-                    &line[word_start],
-                    cmdlen)) {
+            strncmp((const char *)cmdname, &line[word_start], cmdlen)) {
             /* command start is not the same so skip it */
             continue;
         }
 
-        retval = 
-            cpl_add_completion(cpl,
-                               line,
-                               word_start,
-                               word_end,
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
                                (const char *)&cmdname[cmdlen],
-                               (const char *)"",
-                               (const char *)" ");
-
+                               (const char *)"", (const char *)" ");
         if (retval != 0) {
             return ERR_NCX_OPERATION_FAILED;
         }
@@ -598,13 +726,8 @@ static status_t
          * to limit the definitions to that module 
          */
         res = fill_one_module_completion_commands
-            (comstate->cmdmodule,
-             cpl,
-             comstate,
-             line,
-             word_start,
-             word_end,
-             cmdlen);
+            (comstate->cmdmodule, cpl, comstate, line, word_start,
+             word_end, cmdlen);
     } else {
         if (use_servercb(comstate->server_cb)) {
             /* list server commands first */
@@ -614,13 +737,8 @@ static status_t
                  modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
                 res = fill_one_module_completion_commands
-                    (modptr->mod,
-                     cpl,
-                     comstate,
-                     line,
-                     word_start,
-                     word_end,
-                     cmdlen);
+                    (modptr->mod, cpl, comstate, line, word_start,
+                     word_end, cmdlen);
             }
 
             /* list manager loaded commands next */
@@ -630,25 +748,15 @@ static status_t
                  modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
                 res = fill_one_module_completion_commands
-                    (modptr->mod,
-                     cpl,
-                     comstate,
-                     line,
-                     word_start,
-                     word_end,
-                     cmdlen);
+                    (modptr->mod, cpl, comstate, line, word_start,
+                     word_end, cmdlen);
             }
         }
 
         /* use the yangcli top commands every time */
         res = fill_one_module_completion_commands
-            (get_yangcli_mod(),
-             cpl,
-             comstate,
-             line,
-             word_start,
-             word_end,
-             cmdlen);
+            (get_yangcli_mod(), cpl, comstate, line, word_start,
+             word_end, cmdlen);
     }
 
     return res;
@@ -921,21 +1029,17 @@ static status_t
             }
 
             /* try to find this parameter name */
-            childobj = 
-                obj_find_child_str(inputobj,
-                                   NULL,
-                                   (const xmlChar *)seqstart,
-                                   (uint32)(str - seqstart));
+            childobj = obj_find_child_str(inputobj, NULL,
+                                          (const xmlChar *)seqstart,
+                                          (uint32)(str - seqstart));
             if (childobj == NULL) {
                 matchcount = 0;
 
                 /* try to match this parameter name */
-                childobj = 
-                    obj_match_child_str(inputobj,
-                                        NULL,
-                                        (const xmlChar *)seqstart,
-                                        (uint32)(str - seqstart),
-                                        &matchcount);
+                childobj = obj_match_child_str(inputobj, NULL,
+                                               (const xmlChar *)seqstart,
+                                               (uint32)(str - seqstart),
+                                               &matchcount);
 
                 if (childobj && matchcount > 1) {
                     /* ambiguous command error
@@ -985,21 +1089,17 @@ static status_t
         *tokenstart = (int)((equals+1) - line);
 
         /* try to find the parameter name */
-        childobj = 
-            obj_find_child_str(inputobj,
-                               NULL,
-                               (const xmlChar *)seqstart,
-                               (uint32)(equals - seqstart));
+        childobj = obj_find_child_str(inputobj, NULL,
+                                      (const xmlChar *)seqstart,
+                                      (uint32)(equals - seqstart));
         if (childobj == NULL) {
             matchcount = 0;
             
             /* try to match this parameter name */
-            childobj = 
-                obj_match_child_str(inputobj,
-                                    NULL,
-                                    (const xmlChar *)seqstart,
-                                    (uint32)(equals - seqstart),
-                                    &matchcount);
+            childobj = obj_match_child_str(inputobj, NULL,
+                                           (const xmlChar *)seqstart,
+                                           (uint32)(equals - seqstart),
+                                           &matchcount);
 
             if (childobj && matchcount > 1) {
                 /* ambiguous command error
@@ -1103,14 +1203,8 @@ static status_t
     rpc = comstate->cmdobj;
     inputobj = comstate->cmdinput;
 
-    res = find_parm_start(inputobj,
-                          line,
-                          word_start,
-                          word_end,
-                          &expectparm,
-                          &emptyexit,
-                          &parmobj,
-                          &tokenstart);
+    res = find_parm_start(inputobj, line, word_start, word_end, &expectparm,
+                          &emptyexit, &parmobj, &tokenstart);
     if (res != NO_ERR || emptyexit) {
         return res;
     }
@@ -1125,12 +1219,8 @@ static status_t
         log_debug2("\n*** fill one RPC %s parms ***\n", obj_get_name(rpc));
 #endif
 
-        res = fill_one_rpc_completion_parms(rpc,
-                                            cpl,
-                                            line,
-                                            tokenstart,
-                                            word_end,
-                                            word_end - tokenstart);
+        res = fill_one_rpc_completion_parms(rpc, cpl, line, tokenstart,
+                                            word_end, word_end - tokenstart);
     } else if (parmobj) {
         /* have a parameter in progress and the
          * token start is supposed to be the value
@@ -1141,13 +1231,8 @@ static status_t
         log_debug2("\n*** fill one parm in backwards ***\n");
 #endif
 
-        res = fill_parm_completion(parmobj,
-                                   cpl,
-                                   comstate,
-                                   line,
-                                   tokenstart,
-                                   word_end,
-                                   word_end - tokenstart);
+        res = fill_parm_completion(parmobj, cpl, comstate, line, tokenstart,
+                                   word_end, word_end - tokenstart);
     } /* else nothing to do */
 
     return res;
@@ -1200,13 +1285,8 @@ static status_t
     log_debug2("\n*** fill parm values ***\n");
 #endif
 
-    res = fill_parm_completion(comstate->cmdcurparm,
-                               cpl,
-                               comstate,
-                               line,
-                               word_start,
-                               word_end,
-                               word_end - word_start);
+    res = fill_parm_completion(comstate->cmdcurparm, cpl, comstate, line,
+                               word_start, word_end, word_end - word_start);
 
     return res;
 
@@ -1265,16 +1345,10 @@ static status_t
         /* found only spaces so far or
          * nothing entered yet 
          */
-        res = 
-            fill_one_completion_commands(cpl,
-                                         comstate,
-                                         line,
-                                         word_end,
-                                         word_end,
-                                         0);
+        res = fill_one_completion_commands(cpl, comstate, line, word_end,
+                                           word_end, 0);
         if (res != NO_ERR) {
-            cpl_record_error(cpl,
-                             get_error_string(res));
+            cpl_record_error(cpl, get_error_string(res));
         }
         return res;
     }
@@ -1332,16 +1406,10 @@ static status_t
                  */
                 word_start = (int)(str - line);
             } else if (equaldone) {
-                res = 
-                    fill_one_completion_commands(cpl,
-                                                 comstate,
-                                                 line,
-                                                 word_end,
-                                                 word_end,
-                                                 0);
+                res = fill_one_completion_commands(cpl, comstate, line,
+                                                   word_end, word_end, 0);
                 if (res != NO_ERR) {
-                    cpl_record_error(cpl,
-                                     get_error_string(res));
+                    cpl_record_error(cpl, get_error_string(res));
                 }
                 return res;
             } else {
@@ -1377,15 +1445,10 @@ static status_t
         /* get all the commands that start with the same
          * characters for length == 'cmdlen'
          */
-        res = fill_one_completion_commands(cpl,
-                                           comstate,
-                                           line,
-                                           word_start,
-                                           word_end,
-                                           cmdlen);
+        res = fill_one_completion_commands(cpl, comstate, line, word_start,
+                                           word_end, cmdlen);
         if (res != NO_ERR) {
-            cpl_record_error(cpl,
-                             get_error_string(res));
+            cpl_record_error(cpl, get_error_string(res));
         }
         return res;
     }
@@ -1396,12 +1459,11 @@ static status_t
      */
     cmdname = &line[word_start];
 
-    buffer = xml_strndup((const xmlChar *)cmdname,
-                         (uint32)cmdlen);
+    buffer = xml_strndup((const xmlChar *)cmdname, (uint32)cmdlen);
+
     if (buffer == NULL) {
         if (cpl != NULL) {
-            cpl_record_error(cpl,
-                             get_error_string(ERR_INTERNAL_MEM));
+            cpl_record_error(cpl, get_error_string(ERR_INTERNAL_MEM));
         }
         return 1;
     }
@@ -1409,11 +1471,7 @@ static status_t
     dtyp = NCX_NT_OBJ;
     res = NO_ERR;
     comstate->cmdobj = (obj_template_t *)
-        parse_def(comstate->server_cb,
-                  &dtyp,
-                  buffer,
-                  &retlen,
-                  &res);
+        parse_def(comstate->server_cb, &dtyp, buffer, &retlen, &res);
     m__free(buffer);
 
     if (comstate->cmdobj == NULL) {
@@ -1431,29 +1489,22 @@ static status_t
     while (str < &line[word_end] && isspace((int)*str)) {
         str++;
     }
-
     /* set new word_start == word_end */
     word_start = (int)(str - line);
 
     /* check where E-O-WSP search stopped */
     if (str == &line[word_end]) {
         /* stopped before entering any parameters */
-        res = fill_one_rpc_completion_parms
-            (comstate->cmdobj,
-             cpl,
-             line,
-             word_start,
-             word_end,
-             0);
+        res = fill_one_rpc_completion_parms(comstate->cmdobj, cpl, line,
+                                            word_start, word_end, 0);
         return res;
     }
+
 
     /* there is more text entered; check if this rpc
      * really has any input parameters or not
      */
-    inputobj = obj_find_child(comstate->cmdobj,
-                              NULL, 
-                              YANG_K_INPUT);
+    inputobj = obj_find_child(comstate->cmdobj, NULL, YANG_K_INPUT);
     if (inputobj == NULL ||
         !obj_has_children(inputobj)) {
         /* no input parameters expected */
@@ -1519,12 +1570,7 @@ static status_t
      * quoted string so figure out the
      * parm in progress and check for completions
      */
-    res = parse_backwards_parm(cpl,
-                               comstate,
-                               line,
-                               word_start,
-                               word_end);
-
+    res = parse_backwards_parm(cpl, comstate, line, word_start, word_end);
 
     return res;
 
@@ -1573,29 +1619,17 @@ static status_t
          * nothing entered yet 
          */
 
-        retval = 
-            cpl_add_completion(cpl,
-                               line,
-                               word_start,
-                               word_end,
-                               (const char *)NCX_EL_YES,
-                               (const char *)"",
-                               (const char *)" ");
-
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                    (const char *)NCX_EL_YES, 
+                                    (const char *)"", (const char *)" ");
         if (retval != 0) {
             return ERR_NCX_OPERATION_FAILED;
         }
 
 
-        retval = 
-            cpl_add_completion(cpl,
-                               line,
-                               word_start,
-                               word_end,
-                               (const char *)NCX_EL_NO,
-                               (const char *)"",
-                               (const char *)" ");
-
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                    (const char *)NCX_EL_NO,
+                                    (const char *)"", (const char *)" ");
         if (retval != 0) {
             return ERR_NCX_OPERATION_FAILED;
         }
@@ -1675,20 +1709,13 @@ int
 
     switch (comstate->cmdstate) {
     case CMD_STATE_FULL:
-        res = fill_completion_commands(cpl,
-                                       comstate,
-                                       line,
-                                       word_end);
+        res = fill_completion_commands(cpl, comstate, line, word_end);
         if (res != NO_ERR) {
             retval = 1;
         }
         break;
     case CMD_STATE_GETVAL:
-        res = fill_parm_values(cpl,
-                               comstate,
-                               line,
-                               0,
-                               word_end);
+        res = fill_parm_values(cpl, comstate, line, 0, word_end);
         if (res != NO_ERR) {
             retval = 1;
         }

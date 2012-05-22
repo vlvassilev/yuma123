@@ -28,7 +28,7 @@ string extractMessageIdStr( const std::string& query )
 {
     using namespace boost::xpressive;
 
-    sregex re = sregex::compile( "<rpc message-id=\"(\\d+)\"" ); 
+    sregex re = sregex::compile( "message-id=\"(\\d+)\"" ); 
     smatch what;
 
     // find a whole word

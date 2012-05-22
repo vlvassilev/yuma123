@@ -4,7 +4,7 @@
 #include "test/support/callbacks/callback-checker.h"
 
 // ---------------------------------------------------------------------------|
-// Standard includes
+// Boost includes
 // ---------------------------------------------------------------------------|
 #include <boost/foreach.hpp>
 
@@ -17,6 +17,7 @@
 // File wide namespace use
 // ---------------------------------------------------------------------------|
 using namespace std;
+using namespace rel_ops;
 
 // ---------------------------------------------------------------------------|
 namespace YumaTest
@@ -25,29 +26,19 @@ namespace YumaTest
 // ---------------------------------------------------------------------------|
 void CallbackChecker::addExpectedCallback(const string& modName,
                                           const string& containerName,
-                                          vector<string> elementHierarchy,
+                                          const vector<string>& elementHierarchy,
                                           const string& operation,
                                           const string& type,
                                           const string& phase)
 {
-    //TODO Currently ignores commit callbacks to allow test suites to
-    //TODO work on running or candidate dbs.
-    //TODO Create hierarchy to deal with these differences as well as not 
-    //TODO check callbacks for system tests.
-    if (phase != "")
-        return;
-
-    string name = "y_" + modName + "_" + containerName + "_"; 
-    BOOST_FOREACH (string& val, elementHierarchy)
+    string name = modName + "_" + containerName + "_"; 
+    BOOST_FOREACH (const string& val, elementHierarchy)
     {
         name += val + "_";
     }
     name += operation;
 
-    SILCallbackLog::CallbackInfo cbInfo;
-    cbInfo.cbName = name;
-    cbInfo.cbType = type;
-    cbInfo.cbPhase = phase;
+    SILCallbackLog::CallbackInfo cbInfo(name, type, phase);
 
     expectedCallbacks_.push_back(cbInfo);
 }
@@ -55,47 +46,58 @@ void CallbackChecker::addExpectedCallback(const string& modName,
 // ---------------------------------------------------------------------------|
 void CallbackChecker::checkCallbacks(const std::string& modName)
 {
+    bool callbackError = false;
     SILCallbackLog& cbLog = SILCallbackLog::getInstance();
     SILCallbackLog::ModuleCallbackData actualCallbacks = cbLog.getModuleCallbacks(modName);
-
-    //TODO Currently ignores commit callbacks to allow test suites to
-    //TODO work on running or candidate dbs.
-    //TODO Create hierarchy to deal with these differences as well as not 
-    //TODO check callbacks for system tests.
-    int commits = 0;
-    SILCallbackLog::ModuleCallbackData::iterator it;
-    for(it = actualCallbacks.begin(); it != actualCallbacks.end(); ++it)
-    {
-        if (it->cbPhase != "")
-            ++commits;
-    }
 
     SILCallbackLog::ModuleCallbackData::iterator it_act, it_exp;
     for(it_act = actualCallbacks.begin(), it_exp = expectedCallbacks_.begin();
         it_act != actualCallbacks.end() && it_exp !=  expectedCallbacks_.end();
         ++it_act, ++it_exp)
     {
-        //TODO Currently ignores commit callbacks.
-        if (it_act->cbPhase != "")
+        BOOST_CHECK(*it_act == *it_exp);
+        if (*it_act != *it_exp)
         {
-            ++it_act;
-            continue;
-        }
-
-        BOOST_CHECK(*it_act == *it_exp);    
+            callbackError = true;
+        }    
     } 
 
-    //TODO Currently ignores commit callbacks.
-    BOOST_CHECK_MESSAGE(actualCallbacks.size() - commits <= expectedCallbacks_.size(),
+    BOOST_CHECK_MESSAGE(actualCallbacks.size() <= expectedCallbacks_.size(),
                         "Unexpected callbacks were logged"); 
-    BOOST_CHECK_MESSAGE(actualCallbacks.size() - commits >= expectedCallbacks_.size(),
+    BOOST_CHECK_MESSAGE(actualCallbacks.size() >= expectedCallbacks_.size(),
                         "Further callbacks were expected"); 
+    if (actualCallbacks.size() != expectedCallbacks_.size())
+    {
+        callbackError = true;
+    }    
+  
+    // Debug output to help understand failures
+    if (callbackError)
+    {
+        cout << "\nActual Callbacks:\n";
+        for(it_act = actualCallbacks.begin(); it_act != actualCallbacks.end(); ++it_act)
+        {
+            cout << it_act->cbName << ", " << it_act->cbType << ", " << it_act->cbPhase << "\n";      
+        } 
+        cout << "\nExpected Callbacks:\n";
+        for(it_exp = expectedCallbacks_.begin(); it_exp != expectedCallbacks_.end(); ++it_exp)
+        {
+            cout << it_exp->cbName << ", " << it_exp->cbType << ", " << it_exp->cbPhase << "\n";      
+        }
+    } 
 }
 
 // ---------------------------------------------------------------------------|
 void CallbackChecker::resetExpectedCallbacks()
 {
     expectedCallbacks_.clear();
+}
+
+// ---------------------------------------------------------------------------|
+void  CallbackChecker::resetModuleCallbacks(const std::string& modName)
+{
+    SILCallbackLog& cbLog = SILCallbackLog::getInstance();
+    cbLog.resetModuleCallbacks(modName);
 }
 
 } // namespace YumaTest

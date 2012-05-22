@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -43,71 +43,21 @@ date         init     comment
 #include <arpa/inet.h>
 #include <netdb.h>
 
-
-     
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include  "agt.h"
-#endif
-
-#ifndef _H_agt_ncxserver
+#include "procdefs.h"
+#include "agt.h"
 #include "agt_ncxserver.h"
-#endif
-
-#ifndef _H_agt_not
-#include  "agt_not.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_ses
-#include  "agt_ses.h"
-#endif
-
-#ifndef _H_agt_timer
-#include  "agt_timer.h"
-#endif
-
-#ifndef _H_def_reg
-#include  "def_reg.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncxmod
-#include "ncxmod.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
-#include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
+#include "agt_not.h"
+#include "agt_rpc.h"
+#include "agt_ses.h"
+#include "agt_timer.h"
+#include "def_reg.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncxconst.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "xmlns.h"
 
 
 /********************************************************************
@@ -115,9 +65,6 @@ date         init     comment
  *                       C O N S T A N T S                           *
  *                                                                   *
  *********************************************************************/
-#ifdef DEBUG
-#define AGT_NCXSERVER_DEBUG   1
-#endif
 
 /* how often to check for agent shutown (in seconds) */
 #define AGT_NCXSERVER_TIMEOUT  1
@@ -188,9 +135,9 @@ static status_t
 
 /********************************************************************
  * FUNCTION make_tcp_socket
- * 
+ *
  * Create an AF_INET socket for the ncxserver
- * 
+ *
  * INPUTS:
  *    port == port
  *    sock == ptr to return value
@@ -199,7 +146,7 @@ static status_t
  *    *sock == the FD for the socket if return ok
  *
  * RETURNS:
- *    status   
+ *    status
  *********************************************************************/
 static status_t
     make_tcp_socket (const char *server_address, int port, int *sock)
@@ -331,15 +278,15 @@ status_t
                              NCXMOD_NETCONFD,
                              NCX_EL_TCP_DIRECT_PORT);
         if(val != NULL) {
-        	tcp_direct_port = VAL_INT(val);
+            tcp_direct_port = VAL_INT(val);
         }
 
         val = val_find_child(clivalset,
                              NCXMOD_NETCONFD,
                              NCX_EL_TCP_DIRECT_ADDRESS);
         if(val != NULL) {
-        	tcp_direct_address = VAL_STR(val);
-        	if(tcp_direct_port==-1) tcp_direct_port = 2023;
+            tcp_direct_address = VAL_STR(val);
+            if(tcp_direct_port==-1) tcp_direct_port = 2023;
         }
     } else {
             log_error("\n*** agt_ncxserver_run:agt_cli_get_valset failed.\n");
@@ -351,7 +298,7 @@ status_t
             log_error("\n*** Cannot connect to ncxserver socket listen tcp port: %d\n",tcp_direct_port);
             return res;
         }
-    } else { 
+    } else {
         res = make_named_socket(NCXSERVER_SOCKNAME, &ncxsock);
         if (res != NO_ERR) {
             log_error("\n*** Cannot connect to ncxserver socket"
@@ -359,7 +306,7 @@ status_t
                       "\n*** try deleting /tmp/ncxserver.sock\n");
             return res;
         }
-    }    
+    }
     profile = agt_get_profile();
     if (profile == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);

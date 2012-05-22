@@ -3,7 +3,7 @@
 #define _H_agt_plock
 /* 
 
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -40,13 +40,17 @@
 extern "C" {
 #endif
 
-#define y_ietf_netconf_partial_lock_M_ietf_netconf_partial_lock (const xmlChar *)"ietf-netconf-partial-lock"
-#define y_ietf_netconf_partial_lock_R_ietf_netconf_partial_lock (const xmlChar *)"2009-10-19"
+#define y_ietf_netconf_partial_lock_M_ietf_netconf_partial_lock \
+    (const xmlChar *)"ietf-netconf-partial-lock"
+#define y_ietf_netconf_partial_lock_R_ietf_netconf_partial_lock \
+    (const xmlChar *)"2009-10-19"
 
 #define y_ietf_netconf_partial_lock_N_lock_id (const xmlChar *)"lock-id"
 #define y_ietf_netconf_partial_lock_N_locked_node (const xmlChar *)"locked-node"
-#define y_ietf_netconf_partial_lock_N_partial_lock (const xmlChar *)"partial-lock"
-#define y_ietf_netconf_partial_lock_N_partial_unlock (const xmlChar *)"partial-unlock"
+#define y_ietf_netconf_partial_lock_N_partial_lock \
+    (const xmlChar *)"partial-lock"
+#define y_ietf_netconf_partial_lock_N_partial_unlock \
+    (const xmlChar *)"partial-unlock"
 #define y_ietf_netconf_partial_lock_N_select (const xmlChar *)"select"
 
 /* leaf-list /partial-lock/input/select */

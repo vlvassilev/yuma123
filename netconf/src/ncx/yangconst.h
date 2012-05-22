@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,9 +34,8 @@ date	     init     comment
 #include <math.h>
 #include <xmlstring.h>
 
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
+#include "status.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -163,13 +162,23 @@ extern "C" {
 #define YANG_K_YANG_VERSION      (const xmlChar *)"yang-version"
 #define YANG_K_YIN_ELEMENT       (const xmlChar *)"yin-element"
 
+/**
+ * Check if parsing should terminate.
+ *
+ * \param res the current status
+ * \return true if parsing should terminate.
+ */
+static inline boolean terminate_parse( status_t res )
+{
+    return ( res != NO_ERR && ( res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF ));
+}
 
 /* used in parser routines to decide if processing can continue
  * will exit the function if critical error or continue if not
  */
 #define CHK_EXIT(res, retres)			\
     if (res != NO_ERR) { \
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
+	if ( terminate_parse( res ) ) { \
 	    return res; \
 	} else { \
 	    retres = res; \

@@ -16,10 +16,13 @@ if [ $1 = 1 ]; then
 VER="1.15"
 URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1
 elif [ $1 = 2 ]; then
-VER="2.1"
+VER="2.2"
+URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v2
+elif [ $1 = 3 ]; then
+VER="3.0"
 URL=https://yuma.svn.sourceforge.net/svnroot/yuma/trunk
 else
-  echo "Error: major version must be 1 or 2"
+  echo "Error: major version must be 1 to 3"
   echo "Usage: prep-deb.sh <major-version>"
   echo "Example:   prep-deb.sh 2"
   exit 1
@@ -42,6 +45,7 @@ if [ ! -f yuma_$VER.orig.tar.gz ]; then
   cp yuma_$VER.tar.gz yuma_$VER.orig.tar.gz
 fi
 
+rm -rf yuma_$VER
 tar xvf yuma_$VER.tar.gz
 
 

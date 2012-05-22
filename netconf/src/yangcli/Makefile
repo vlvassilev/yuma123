@@ -42,29 +42,27 @@ endif
 DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L../../../libtecla -ltecla \
 	$(LFIRST) -L$(PREFIX)/lib -L/usr/local/lib -lxml2 -lncurses -lssh2 \
-	-L$(PREFIX)/lib -lz 
+	-L$(PREFIX)/lib -lz -lm
+
 ifndef FREEBSD
 DLIBS += -ldl
 endif
 
+# SLIBS used only if FULL_STATIC=1 is set in build
+# (no used anymore in debian packaging)
+SLIBS = -L../../target/lib -lmgr -lncx \
+	-L$(PREFIX)/lib -lxml2 \
+	-l:$(PREFIX)/lib/libssh2.a \
+	-L$(PREFIX)/lib -lgpg-error \
+	-l:../../../libtecla/libtecla.a \
+	-L$(PREFIX)/lib -lncurses -lz -lm
 
 ifdef DEBIAN
-SLIBS = -L../../target/lib -lmgr -lncx \
-	-L$(PREFIX)/lib -lxml2 \
-	-l:$(PREFIX)/lib/libssh2.a \
-	-L$(PREFIX)/lib -lgcrypt \
-	-L$(PREFIX)/lib -lgpg-error \
-	-l:../../../libtecla/libtecla.a \
-	-L$(PREFIX)/lib -lncurses
+SLIBS += -L$(PREFIX)/lib -lgcrypt
 else
-SLIBS = -L../../target/lib -lmgr -lncx \
-	-L$(PREFIX)/lib -lxml2 \
-	-l:$(PREFIX)/lib/libssh2.a \
-	-l:/lib/libgcrypt.a \
-	-L$(PREFIX)/lib -lgpg-error \
-	-l:../../../libtecla/libtecla.a \
-	-L$(PREFIX)/lib -lncurses
+SLIBS += -l:/lib/libgcrypt.a
 endif
+
 
 # set FULL_STATIC=1 to force complete shared libraries
 # except libxml2 which is always installed on linux

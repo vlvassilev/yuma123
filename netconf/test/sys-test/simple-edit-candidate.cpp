@@ -10,8 +10,6 @@ namespace YumaTest {
 const char* SpoofedArgs::argv[] = {
     ( "yuma-test" ),
     ( "--target=candidate" ),
-    //( "--no-startup" ),         // ensure that no configuration from previous 
-                                // tests is present
 };
 
 #include "define-yuma-systest-global-fixture.h"

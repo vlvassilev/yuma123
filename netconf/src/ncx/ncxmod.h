@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -302,6 +302,10 @@ extern void
 *
 * Determine the location of the specified module
 * and then load it into the system, if not already loaded
+*
+* This is the only load module variant that checks if there
+* are any errors recorded in the module or any of its dependencies
+* !!! ONLY RETURNS TRUE IF MODULE AND ALL IMPORTS ARE LOADED OK !!!
 *
 * Module Search order:
 *
@@ -741,6 +745,35 @@ extern xmlChar *
 extern xmlChar *
     ncxmod_find_script_file (const xmlChar *fname,
 			     status_t *res);
+
+
+/********************************************************************
+* FUNCTION ncxmod_set_home
+* 
+*   Override the HOME env var with the home CLI var
+*
+* THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
+* MALLOC FAILED IGNORED!!!
+*
+* INPUTS:
+*   home == new HOME value
+*        == NULL or empty string to disable
+*********************************************************************/
+extern void
+    ncxmod_set_home (const xmlChar *home);
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_home
+*
+*  Get the HOME or --home parameter value,
+*  whichever is in effect, if any
+*
+* RETURNS:
+*   const point to the home variable, or NULL if not set
+*********************************************************************/
+extern const xmlChar *
+    ncxmod_get_home (void);
 
 
 /********************************************************************

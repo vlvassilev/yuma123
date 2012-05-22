@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -147,6 +147,7 @@ typedef enum ses_transport_t_ {
     SES_TRANSPORT_TLS,
     SES_TRANSPORT_TCP,    /* tail-f NETCONF over TCP */
     SES_TRANSPORT_TCP_DIRECT
+    SES_TRANSPORT_TCP    /* tail-f NETCONF over TCP */
 } ses_transport_t;
 
 

@@ -16,6 +16,9 @@ include lock-load-running.mk
 include lock-load-candidate.mk
 include simple-edit-candidate.mk
 include simple-edit-running.mk
+include device-edit-candidate.mk
+include device-edit-running.mk
+include shutdown.mk
 
 # ----------------------------------------------------------------------------|
 # Add additional libraries specific to system testing

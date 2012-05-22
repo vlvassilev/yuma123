@@ -4,6 +4,7 @@ module yuma-interfaces {
 
     prefix "yuma-if";
 
+    import yuma-ncx { prefix ncx; }
     import ietf-yang-types { prefix yang; }
 
     organization  "Netconf Central";
@@ -12,6 +13,11 @@ module yuma-interfaces {
 
     description 
       "Yuma interfaces table.";
+
+    revision 2012-01-13 {
+        description  
+	  "Added ncx:user-write restrictions";
+    }
 
     revision 2009-11-21 {
         description  
@@ -24,6 +30,7 @@ module yuma-interfaces {
     }
 
     container yuma-interfaces {
+      ncx:user-write update;
       description
         "Container for all interfaces information.";
  

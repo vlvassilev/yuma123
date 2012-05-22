@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -126,6 +126,21 @@ extern ncx_iffeature_t *
 *********************************************************************/
 extern void 
     ncx_free_iffeature (ncx_iffeature_t *iffeature);
+
+
+/********************************************************************
+* FUNCTION ncx_clone_iffeature
+* 
+* Clone a new ncx_iffeature_t struct
+*
+* INPUTS:
+*    srciff == ifffeature struct to clone
+* RETURNS:
+*    pointer to a malloced ncx_iffeature_t struct,
+*    or NULL if malloc error
+*********************************************************************/
+extern ncx_iffeature_t *
+    ncx_clone_iffeature (ncx_iffeature_t *srciff);
 
 
 /********************************************************************
@@ -297,6 +312,25 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION ncx_feature_enabled_str
+* 
+* Find a ncx_feature_t struct and check if it is enabled
+*
+* INPUTS:
+*    modname == name of module to search
+*    revision == module revision string (may be NULL)
+*    name == feature name to find
+*
+* RETURNS:
+*    TRUE if feature is enabled
+*********************************************************************/
+extern boolean
+    ncx_feature_enabled_str (const xmlChar *modname,
+                             const xmlChar *revision,
+                             const xmlChar *name);
+
+
+/********************************************************************
 * FUNCTION ncx_set_feature_enable_default
 * 
 * Set the feature_enable_default flag
@@ -313,6 +347,10 @@ extern void
 * 
 * Set the feature_code_default enumeration
 *
+* !!! THIS FUNCTION IS DEPRECATED!!!
+* !!! The --feature-code and --feature-code-default parameters are ignored
+* !!! Feature code generation is not controlled by this parameter 
+*
 * INPUTS:
 *   code == feature code value
 *********************************************************************/
@@ -325,6 +363,10 @@ extern void
 * 
 * Create or set a feature_entry struct for the specified 
 * feature code parameter
+*
+* !!! THIS FUNCTION IS DEPRECATED!!!
+* !!! The --feature-code and --feature-code-default parameters are ignored
+* !!! Feature code generation is not controlled by this parameter 
 *
 * INPUTS:
 *   featstr == feature parameter string
@@ -344,6 +386,8 @@ extern status_t
 * Create or set a feature_entry struct for the specified 
 * feature enabled parameter
 *
+* Called from CLI/conf handler code
+*
 * INPUTS:
 *   featstr == feature parameter string
 *   flag == enabled flag
@@ -354,6 +398,28 @@ extern status_t
 extern status_t
     ncx_set_feature_enable_entry (const xmlChar *featstr,
                                   boolean flag);
+
+
+/********************************************************************
+* FUNCTION ncx_set_feature_enable
+* 
+* Create or set a feature_entry struct for the specified 
+* feature enabled parameter
+*
+* Called from SIL init code
+*
+* INPUTS:
+*   modname == name of module defining the feature
+*   name == feature name
+*   flag == feature enabled flag
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    ncx_set_feature_enable (const xmlChar *modname,
+                            const xmlChar *name,
+                            boolean flag);
 
 
 /********************************************************************

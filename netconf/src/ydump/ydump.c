@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -42,6 +42,7 @@ date         init     comment
 #include "html.h"
 #include "log.h"
 #include "ncx.h"
+#include "ncx_feature.h"
 #include "ncxconst.h"
 #include "ncxmod.h"
 #include "sql.h"
@@ -968,6 +969,7 @@ static void
  *    treeformat == TRUE for tree format; FALSE for list forma
  *    startindent == startindent amount
  *    indent == indent amount
+ *    helpmode == verbosity level
  *
  * RETURNS:
  *    status
@@ -979,7 +981,8 @@ static status_t
                         uint32 bufflen,
                         boolean treeformat,
                         uint32 startindent,
-                        uint32 indent)
+                        uint32 indent,
+                        help_mode_t helpmode)
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childQ;
@@ -996,7 +999,11 @@ static status_t
         }
 
         if (!treeformat) {
-            res = obj_copy_object_id(obj, buff, bufflen, &reallen);
+            if (helpmode == HELP_MODE_FULL) {
+                res = obj_copy_object_id_mod(obj, buff, bufflen, &reallen);
+            } else {
+                res = obj_copy_object_id(obj, buff, bufflen, &reallen);
+            }
             if (res != NO_ERR) {
                 log_error("\nError: copy object ID failed (%s)",
                           get_error_string(res));
@@ -1028,7 +1035,8 @@ static status_t
                                      bufflen,
                                      treeformat,
                                      startindent+indent,
-                                     indent);
+                                     indent,
+                                     helpmode);
             if (res != NO_ERR) {
                 return res;
             }
@@ -1053,6 +1061,7 @@ static status_t
  *    bufflen == size of buff in bytes
  *    treeformat == TRUE for tree format; FALSE for list format
  *    indent == indent amount
+ *    helpmode == verbosity level
  *********************************************************************/
 static void
     output_one_module_identifiers (ncx_module_t *mod,
@@ -1060,7 +1069,8 @@ static void
                                    xmlChar *buff,
                                    uint32 bufflen,
                                    boolean treeformat,
-                                   uint32 indent)
+                                   uint32 indent,
+                                   help_mode_t helpmode)
 {
     status_t  res;
 
@@ -1070,7 +1080,8 @@ static void
                              bufflen,
                              treeformat,
                              indent,
-                             indent);
+                             indent,
+                             helpmode);
     if (res == NO_ERR) {
         ses_putchar(scb, '\n');
     }
@@ -1089,12 +1100,14 @@ static void
  *    cp == conversion parameters to use
  *    scb == session control block for output
  *    treeformat == TRUE for tree format; FALSE for list format
+ *    helpmode == verbosity level
  *********************************************************************/
 static void
     output_module_identifiers (yang_pcb_t *pcb,
                                yangdump_cvtparms_t *cp,
                                ses_cb_t *scb,
-                               boolean treeformat)
+                               boolean treeformat,
+                               help_mode_t helpmode)
 {
     ncx_module_t      *mod;
     yang_node_t       *node; 
@@ -1118,7 +1131,8 @@ static void
                                   (xmlChar *)cp->buff,
                                   cp->bufflen,
                                   treeformat,
-                                  cp->indent);
+                                  cp->indent,
+                                  helpmode);
 
     if ((cp->unified || cp->onemodule) && mod->ismod) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
@@ -1130,7 +1144,8 @@ static void
                                               (xmlChar *)cp->buff,
                                               cp->bufflen,
                                               treeformat,
-                                              cp->indent);
+                                              cp->indent,
+                                              helpmode);
             }
         }
     }
@@ -1318,6 +1333,7 @@ static boolean
     case NCX_CVTTYP_SQLDB:
     case NCX_CVTTYP_H:
     case NCX_CVTTYP_C:
+    case NCX_CVTTYP_CPP_TEST:
     case NCX_CVTTYP_YH:
     case NCX_CVTTYP_YC:
     case NCX_CVTTYP_UH:
@@ -1438,6 +1454,7 @@ static status_t
                   cp->format == NCX_CVTTYP_HTML ||
                   cp->format == NCX_CVTTYP_H ||
                   cp->format == NCX_CVTTYP_C ||
+                  cp->format == NCX_CVTTYP_CPP_TEST ||
                   cp->format == NCX_CVTTYP_UC ||
                   cp->format == NCX_CVTTYP_UH ||
                   cp->format == NCX_CVTTYP_YC ||
@@ -1467,6 +1484,9 @@ static status_t
             log_error("\nError: open session failed (%s)\n",
                       get_error_string(res));
             yang_free_pcb(pcb);
+            if (scb) {
+                ses_free_scb(scb);
+            }
             return res;
         }
 
@@ -1490,11 +1510,11 @@ static status_t
         }
 
         if (cp->identifiers) {
-            output_module_identifiers(pcb, cp, scb, FALSE);
+            output_module_identifiers(pcb, cp, scb, FALSE, cp->helpsubmode);
         }
 
         if (cp->tree_identifiers) {
-            output_module_identifiers(pcb, cp, scb, TRUE);
+            output_module_identifiers(pcb, cp, scb, TRUE, cp->helpsubmode);
         }
 
         if (cp->collect_stats) {
@@ -1694,6 +1714,7 @@ static status_t
             break;
         case NCX_CVTTYP_UC:
         case NCX_CVTTYP_C:
+        case NCX_CVTTYP_CPP_TEST:
         case NCX_CVTTYP_YC:
             cp->isuser = (cp->format == NCX_CVTTYP_UC) ? TRUE : FALSE;
             if (ncx_any_dependency_errors(pcb->top)) {
@@ -1909,7 +1930,7 @@ status_t
     if (res == NO_ERR) {
         res = process_cli_input(argc, argv, cvtparms);
     }
-
+        
     if (res == NO_ERR && cvtparms->collect_stats) {
         res = init_cvtparms_stats(cvtparms);
     }
@@ -1954,34 +1975,34 @@ status_t
     progname = "yangdump";
 
     quickexit = cvtparms->helpmode ||
-	cvtparms->versionmode ||
-	cvtparms->showerrorsmode;
+        cvtparms->versionmode ||
+        cvtparms->showerrorsmode;
 
     if (cvtparms->versionmode || cvtparms->showerrorsmode) {
-	res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
-	if (res == NO_ERR) {
+        res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
+        if (res == NO_ERR) {
 
-	    log_write("\n%s %s", progname, buffer);
-	    if (cvtparms->versionmode) {
-		log_write("\n");
-	    }
-	} else {
-	    SET_ERROR(res);
-	}
+            log_write("\n%s %s", progname, buffer);
+            if (cvtparms->versionmode) {
+                log_write("\n");
+            }
+        } else {
+            SET_ERROR(res);
+        }
     }
 
     if (cvtparms->helpmode) {
-	help_program_module(YANGDUMP_MOD, 
-			    YANGDUMP_CONTAINER, 
-			    cvtparms->helpsubmode);
+        help_program_module(YANGDUMP_MOD, 
+                            YANGDUMP_CONTAINER, 
+                            cvtparms->helpsubmode);
     }
     if (cvtparms->showerrorsmode) {
-	log_write(" errors and warnings\n");
-	print_error_messages();
+        log_write(" errors and warnings\n");
+        print_error_messages();
     }
 
     if (quickexit) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     /* check if the requested format is allowed */
@@ -1993,37 +2014,38 @@ status_t
 
     /* check if subdir search suppression is requested */
     if (!cvtparms->subdirs) {
-	ncxmod_set_subdirs(FALSE);
+        ncxmod_set_subdirs(FALSE);
     }
 
     if (LOGINFO) {
-	/* generate banner everytime yangdump runs */
-	write_banner();
+        /* generate banner everytime yangdump runs */
+        write_banner();
     } else {
-	if (!(cvtparms->format == NCX_CVTTYP_XSD ||
-	      cvtparms->format == NCX_CVTTYP_HTML ||
-	      cvtparms->format == NCX_CVTTYP_H ||
-	      cvtparms->format == NCX_CVTTYP_C)) {
-	    write_banner();
-	}
+        if (!(cvtparms->format == NCX_CVTTYP_XSD ||
+              cvtparms->format == NCX_CVTTYP_HTML ||
+              cvtparms->format == NCX_CVTTYP_H ||
+              cvtparms->format == NCX_CVTTYP_C ||
+              cvtparms->format == NCX_CVTTYP_CPP_TEST)) {
+            write_banner();
+        }
     }
 
     /* first check if there are any deviations to load */
     res = NO_ERR;
     val = val_find_child(cvtparms->cli_val, 
-			 YANGDUMP_MOD, 
-			 YANGDUMP_PARM_DEVIATION);
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_DEVIATION);
     while (val) {
-	res = ncxmod_load_deviation(VAL_STR(val), 
+        res = ncxmod_load_deviation(VAL_STR(val), 
                                     &cvtparms->savedevQ);
-	if (NEED_EXIT(res)) {
-	    val = NULL;
-	} else {
-	    val = val_find_next_child(cvtparms->cli_val,
-				      YANGDUMP_MOD,
-				      YANGDUMP_PARM_DEVIATION,
-				      val);
-	}
+        if (NEED_EXIT(res)) {
+            val = NULL;
+        } else {
+            val = val_find_next_child(cvtparms->cli_val,
+                                      YANGDUMP_MOD,
+                                      YANGDUMP_PARM_DEVIATION,
+                                      val);
+        }
     }
 
     /* save intermediate files to prevent expanded augments, etc.
@@ -2031,49 +2053,63 @@ status_t
      */
     ncx_set_use_deadmodQ();
 
+    /* force the --feature-enable-default=true for generating C code */
+    switch (cvtparms->format) {
+    case NCX_CVTTYP_H:
+    case NCX_CVTTYP_UH:
+    case NCX_CVTTYP_YH:
+    case NCX_CVTTYP_C:
+    case NCX_CVTTYP_UC:
+    case NCX_CVTTYP_YC:
+    case NCX_CVTTYP_CPP_TEST:
+        ncx_set_feature_enable_default(TRUE);
+        break;
+    default:
+        ;
+    }
+
     /* convert one file or N files or 1 subtree */
     res = NO_ERR;
-    val = val_find_child(cvtparms->cli_val, 
-			 YANGDUMP_MOD, 
-			 YANGDUMP_PARM_MODULE);
+    val = val_find_child(cvtparms->cli_val, YANGDUMP_MOD, 
+                         YANGDUMP_PARM_MODULE);
     while (val) {
-	done = TRUE;
-	cvtparms->curmodule = (char *)VAL_STR(val);
+        done = TRUE;
+        cvtparms->curmodule = (char *)VAL_STR(val);
         cvtparms->onemodule = TRUE;
-	res = convert_one(cvtparms);
-	if (NEED_EXIT(res)) {
-	    val = NULL;
-	} else {
-	    val = val_find_next_child(cvtparms->cli_val,
-				      YANGDUMP_MOD,
-				      YANGDUMP_PARM_MODULE,
-				      val);
-	}
+        res = convert_one(cvtparms);
+        if (NEED_EXIT(res)) {
+            val = NULL;
+        } else {
+            val = val_find_next_child(cvtparms->cli_val,
+                                      YANGDUMP_MOD,
+                                      YANGDUMP_PARM_MODULE,
+                                      val);
+        }
     }
 
     cvtparms->onemodule = FALSE;
     if (res == NO_ERR &&
-	cvtparms->subtreecount >= 1) {
-	if (cvtparms->format == NCX_CVTTYP_XSD ||
-	    cvtparms->format == NCX_CVTTYP_HTML ||
-	    cvtparms->format == NCX_CVTTYP_YANG ||
-	    cvtparms->format == NCX_CVTTYP_COPY) {
-	    /* force separate file names in subtree mode */
-	    cvtparms->defnames = TRUE;
-	}
+        cvtparms->subtreecount >= 1) {
+        if (cvtparms->format == NCX_CVTTYP_XSD ||
+            cvtparms->format == NCX_CVTTYP_HTML ||
+            cvtparms->format == NCX_CVTTYP_YANG ||
+            cvtparms->format == NCX_CVTTYP_COPY) {
+            /* force separate file names in subtree mode */
+            cvtparms->defnames = TRUE;
+        }
                    
-	val = val_find_child(cvtparms->cli_val, 
-			     YANGDUMP_MOD, 
-			     YANGDUMP_PARM_SUBTREE);
-	while (val) {
-	    done = TRUE;
+        val = val_find_child(cvtparms->cli_val, 
+                             YANGDUMP_MOD, 
+                             YANGDUMP_PARM_SUBTREE);
+        while (val) {
+            done = TRUE;
 
             /* this var cvtparms->subtree will be non-NULL
              * if there are any subtrees to process;
              * this will cause subtree mode to be true, so
              * a banner is printed after every file
              */
-	    cvtparms->subtree = (const char *)VAL_STR(val);
+            cvtparms->subtree = (const char *)VAL_STR(val);
 
             if (ncxmod_test_subdir((const xmlChar *)cvtparms->subtree)) {
                 res = ncxmod_process_subtree(cvtparms->subtree,
@@ -2084,23 +2120,23 @@ status_t
                 log_error("\nError: directory '%s' not found\n",
                           cvtparms->subtree);
             }
-	    if (NEED_EXIT(res)) {
-		val = NULL;
-	    } else {
-		val = val_find_next_child(cvtparms->cli_val,
-					  YANGDUMP_MOD,
-					  YANGDUMP_PARM_SUBTREE,
-					  val);
-	    }
-	}
+            if (NEED_EXIT(res)) {
+                val = NULL;
+            } else {
+                val = val_find_next_child(cvtparms->cli_val,
+                                          YANGDUMP_MOD,
+                                          YANGDUMP_PARM_SUBTREE,
+                                          val);
+            }
+        }
     }
 
     if (res == NO_ERR && !done) {
-	res = ERR_NCX_MISSING_PARM;
-	log_error("\n%s: Error: missing parameter (%s or %s)\n",
-		  progname,
-		  NCX_EL_MODULE, 
-		  NCX_EL_SUBTREE);
+        res = ERR_NCX_MISSING_PARM;
+        log_error("\n%s: Error: missing parameter (%s or %s)\n",
+                  progname,
+                  NCX_EL_MODULE, 
+                  NCX_EL_SUBTREE);
     }
 
     if (res == NO_ERR && cvtparms->final_stats != NULL) {

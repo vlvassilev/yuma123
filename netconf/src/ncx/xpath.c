@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -27,63 +27,25 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <assert.h>
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_dlq
+#include "procdefs.h"
 #include "dlq.h"
-#endif
-
-#ifndef _H_grp
 #include "grp.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 
 /********************************************************************
@@ -790,8 +752,7 @@ static status_t
 
     /* get the import if there is a real prefix entered */
     if (prefix) {
-        mod = (ncx_module_t *)xmlns_get_modptr
-            (xmlns_find_ns_by_prefix(prefix));
+        mod = (ncx_module_t *)xmlns_get_modptr(xmlns_find_ns_by_prefix(prefix));
         if (!mod) {
             if (prefix) {
                 m__free(prefix);
@@ -802,9 +763,7 @@ static status_t
             return ERR_NCX_INVALID_NAME;
         }
         /* get the first object template */
-        curobj = obj_find_template_top(mod, 
-                                       ncx_get_modname(mod), 
-                                       name);
+        curobj = obj_find_template_top(mod, ncx_get_modname(mod), name);
     } else {
         /* no prefix given, check all top-level objects */
         curobj = ncx_find_any_object(name);
@@ -882,31 +841,21 @@ static status_t
         }
 
         /* make sure the prefix is valid, if present */
-        if (prefix && name) {
+        if (prefix) {
             mod = (ncx_module_t *)xmlns_get_modptr
                 (xmlns_find_ns_by_prefix(prefix));
             if (!mod) {
                 m__free(prefix);
-                if (name) {
-                    m__free(name);
-                }
+                m__free(name);
                 return ERR_NCX_INVALID_NAME;
             }
-            nextobj = obj_find_template(curQ, 
-                                        ncx_get_modname(mod), 
-                                        name);
-        } else if (name) {
-            /* no prefix given; try current module first */
-            nextobj = obj_find_template(curQ, 
-                                        obj_get_mod_name(curobj), 
-                                        name); 
-            if (!nextobj) {
-                nextobj = obj_find_template(curQ, 
-                                            NULL, 
-                                            name); 
-            }
+            nextobj = obj_find_template(curQ, ncx_get_modname(mod), name);
         } else {
-            nextobj = NULL;
+            /* no prefix given; try current module first */
+            nextobj = obj_find_template(curQ, obj_get_mod_name(curobj), name); 
+            if (!nextobj) {
+                nextobj = obj_find_template(curQ, NULL, name); 
+            }
         }
 
         if (prefix) {
@@ -926,12 +875,6 @@ static status_t
         }
     }
 
-    if (prefix) {
-        m__free(prefix);
-    }
-    if (name) {
-        m__free(name);
-    }
     if (targobj) {
         *targobj = curobj;
     }
@@ -1173,6 +1116,7 @@ static status_t
 }  /* find_val_node */
 
 
+#if 0  // NOT USED SINCE UNIQUE ALLOWS NODE-SETS
 /********************************************************************
 * FUNCTION find_val_node_unique
 * 
@@ -1428,6 +1372,259 @@ static status_t
     return NO_ERR;
 
 }  /* find_val_node_unique */
+#endif
+
+
+/********************************************************************
+* FUNCTION find_obj_node_unique
+* 
+* Follow the relative-path schema-nodeid expression
+* and return the object node that it indicates, if any
+* Used in the YANG unique-stmt component
+*
+*  [/] foo/bar/baz
+*
+* No predicates are expected, but choice and case nodes
+* are expected and will be accounted for if present
+*
+* XML mode - unique-smmt processing
+* check first before logging errors;
+*
+* If logerrors:
+*   Error messages are printed by this function!!
+*   Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    startobj == object node to start search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == relative path expr to evaluate
+*    logerrors == TRUE to log_error, FALSE to skip
+*    targobj == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targobj == target object node
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    find_obj_node_unique (obj_template_t *startobj,
+                          ncx_module_t *mod,
+                          const xmlChar *target,
+                          boolean logerrors,
+                          obj_template_t **targobj)
+{
+    ncx_module_t *usemod = NULL;
+    const xmlChar *str = NULL;
+    xmlChar *prefix = NULL;
+    xmlChar *name = NULL;
+    uint32 len = 0;
+
+    /* skip the first fwd slash, if any */
+    if (*target == '/') {
+        str = ++target;
+    } else {
+        str = target;
+    }
+
+    /* get the first QName (prefix, name) */
+    status_t res = next_val_nodeid(str, logerrors, &prefix, &name, &len);
+    if (res != NO_ERR) {
+        if (prefix) {
+            m__free(prefix);
+        }
+        if (name) {
+            m__free(name);
+        }
+        return res;
+    } else {
+        str += len;
+    }
+
+    res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
+    if (res != NO_ERR) {
+        if (prefix) {
+            if (logerrors) {
+                log_error("\nError: module not found for prefix %s"
+                          " in Xpath target %s",
+                          prefix, target);
+            }
+            m__free(prefix);
+        } else {
+            if (logerrors) {
+                log_error("\nError: no module prefix specified"
+                          " in Xpath target %s", target);
+            }
+        }
+        if (name) {
+            m__free(name);
+        }
+        return ERR_NCX_MOD_NOT_FOUND;
+    }
+
+    /* get the first value node */
+    obj_template_t *curobj = obj_find_child(startobj, usemod->name, name);
+    if (!curobj) {
+        if (ncx_valid_name2(name)) {
+            res = ERR_NCX_DEF_NOT_FOUND;
+        } else {
+            res = ERR_NCX_INVALID_NAME;
+        }
+        if (logerrors) {
+            log_error("\nError: value node '%s' not found for module %s"
+                      " in Xpath target %s",
+                      name, usemod->name, target);
+        }
+        if (prefix) {
+            m__free(prefix);
+        }
+        if (name) {
+            m__free(name);
+        }
+        return res;
+    }
+
+    if (prefix) {
+        m__free(prefix);
+        prefix = NULL;
+    }
+    if (name) {
+        m__free(name);
+        name = NULL;
+    }
+    
+    /* got the first object; keep parsing node IDs
+     * until the Xpath expression is done or an error occurs
+     */
+    while (*str == '/') {
+        str++;
+        /* get the next QName (prefix, name) */
+        res = next_val_nodeid(str, logerrors, &prefix, &name, &len);
+        if (res != NO_ERR) {
+            if (prefix) {
+                m__free(prefix);
+            }
+            if (name) {
+                m__free(name);
+            }
+            return res;
+        } else {
+            str += len;
+        }
+
+        res = xpath_get_curmod_from_prefix(prefix, mod, &usemod);
+        if (res != NO_ERR) {
+            if (prefix) {
+                if (logerrors) {
+                    log_error("\nError: module not found for prefix %s"
+                              " in Xpath target %s",
+                              prefix, target);
+                }
+                m__free(prefix);
+            } else {
+                if (logerrors) {
+                    log_error("\nError: no module prefix specified"
+                              " in Xpath target %s", target);
+                }
+            }
+            if (name) {
+                m__free(name);
+            }
+            return ERR_NCX_MOD_NOT_FOUND;
+        }
+
+        /* determine 'nextval' based on [curval, prefix, name] */
+        switch (curobj->objtype) {
+        case OBJ_TYP_CONTAINER:
+        case OBJ_TYP_LIST:
+        case OBJ_TYP_CHOICE:
+        case OBJ_TYP_CASE:
+        case OBJ_TYP_RPC:
+        case OBJ_TYP_RPCIO:
+        case OBJ_TYP_NOTIF:
+            curobj = obj_find_child(curobj, usemod->name, name);
+            if (!curobj) {
+                if (ncx_valid_name2(name)) {
+                    res = ERR_NCX_DEF_NOT_FOUND;
+                } else {
+                    res = ERR_NCX_INVALID_NAME;
+                }
+                if (logerrors) {
+                    log_error("\nError: value node '%s' not found for module %s"
+                              " in Xpath target %s",
+                              (name) ? name : NCX_EL_NONE, 
+                              usemod->name, 
+                              target);
+                }
+                if (prefix) {
+                    m__free(prefix);
+                }
+                if (name) {
+                    m__free(name);
+                }
+                return res;
+            }
+            break;
+        case OBJ_TYP_LEAF:
+        case OBJ_TYP_LEAF_LIST:
+            res = ERR_NCX_DEFSEG_NOT_FOUND;
+            if (logerrors) {
+                log_error("\nError: '%s' in Xpath target '%s' invalid: "
+                          "%s is a %s",
+                          (name) ? name : NCX_EL_NONE, 
+                          target, 
+                          obj_get_name(curobj),
+                          obj_get_typestr(curobj));
+            }
+            if (prefix) {
+                m__free(prefix);
+            }
+            if (name) {
+                m__free(name);
+            }
+            return res;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            if (logerrors) {
+                do_errmsg(NULL, mod, NULL, res);
+            }
+            if (prefix) {
+                m__free(prefix);
+            }
+            if (name) {
+                m__free(name);
+            }
+            return res;
+        }
+
+        if (prefix) {
+            m__free(prefix);
+            prefix = NULL;
+        }
+        if (name) {
+            m__free(name);
+            name = NULL;
+        }
+    }
+
+    if (prefix) {
+        m__free(prefix);
+    }
+    if (name) {
+        m__free(name);
+    }
+
+    if (targobj) {
+        *targobj = curobj;
+    }
+    return NO_ERR;
+
+}  /* find_obj_node_unique */
 
 
 /********************************************************************
@@ -2150,28 +2347,24 @@ status_t
 * internally to identify a config DB node
 * and return the val_value_t that it indicates
 *
-* Expression must be the node-path from root for
-* the desired node.
-*
 * Error messages are logged by this function
 * only if logerrors is TRUE
 *
 * INPUTS:
-*    cfg == configuration to search
+*    startval == starting context node (contains unique-stmt)
 *    mod == module to use for the default context
 *           and prefixes will be relative to this module's
 *           import statements.
 *        == NULL and the default registered prefixes
 *           will be used
 *    target == Xpath expression string to evaluate
+*    root = XPath docroot to use
 *    logerrors == TRUE to use log_error, FALSE to skip it
-*    targval == address of return value  (may be NULL)
+*    retpcb == address of return value
 *
 * OUTPUTS:
-*   if non-NULL inputs and value node found:
-*      *targval == target value node
-*   If non-NULL targval and error exit:
-*      *targval == last good node visited in expression (if any)
+*   if value node found:
+*      *retpcb == malloced XPath PCB with result
 *
 * RETURNS:
 *   status
@@ -2180,21 +2373,54 @@ status_t
     xpath_find_val_unique (val_value_t *startval,
                            ncx_module_t *mod,
                            const xmlChar *target,
+                           val_value_t *root,
                            boolean logerrors,
-                           val_value_t **targval)
+                           xpath_pcb_t **retpcb)
 {
 
-#ifdef DEBUG
-    if (!startval || !target) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( startval && "startval is NULL!" );
+    assert( target && "target is NULL!" );
+    assert( root && "root is NULL!" );
+    assert( retpcb && "retpcb is NULL!" );
 
-    return find_val_node_unique(startval, 
-                                mod, 
-                                target, 
-                                logerrors, 
-                                targval);
+    *retpcb = NULL;
+
+    /* normalize the target by finding the object node and
+     * generating an object ID string; the prefixes in
+     * the node-identifier are relative to the module
+     * containing the unique-stmt
+     */
+    obj_template_t *targobj = NULL;
+    status_t res = find_obj_node_unique(startval->obj, mod, target,
+                                        logerrors, &targobj);
+    if (res != NO_ERR) {
+        return res;
+    }
+    if (targobj == NULL) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    xpath_pcb_t *pcb = xpath_new_pcb(NULL, NULL);
+    if (pcb == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    res = obj_gen_object_id_unique(targobj, startval->obj, &pcb->exprstr);
+    if (res != NO_ERR) {
+        xpath_free_pcb(pcb);
+        return res;
+    }
+
+    pcb->result = xpath1_eval_expr(pcb, startval, root, logerrors, FALSE, &res);
+    if (pcb->result == NULL || res != NO_ERR) {
+        xpath_free_pcb(pcb);
+        if (res == NO_ERR) {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+    } else {
+        *retpcb = pcb;
+    }
+    return res;
 
 }  /* xpath_find_val_unique */
 
@@ -2413,25 +2639,18 @@ xpath_pcb_t *
 
 
 /********************************************************************
-* FUNCTION xpath_free_pcb
-* 
-* Free a malloced XPath parser control block
-*
-* INPUTS:
-*   pcb == pointer to parser control block to free
-*********************************************************************/
-void
-    xpath_free_pcb (xpath_pcb_t *pcb)
+ * Free a malloced XPath parser control block
+ *
+ * \param pcb pointer to parser control block to free
+ *********************************************************************/
+void xpath_free_pcb (xpath_pcb_t *pcb)
 {
     xpath_result_t   *result;
     xpath_resnode_t  *resnode;
 
-#ifdef DEBUG
     if (!pcb) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
     if (pcb->tkc) {
         tk_free_chain(pcb->tkc);
@@ -2545,15 +2764,11 @@ void
 * INPUTS:
 *   result == pointer to result struct to free
 *********************************************************************/
-void
-    xpath_free_result (xpath_result_t *result)
+void xpath_free_result (xpath_result_t *result)
 {
-#ifdef DEBUG
     if (!result) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
     xpath_clean_result(result);
     m__free(result);
@@ -2684,6 +2899,30 @@ void
     m__free(resnode);
 
 }  /* xpath_free_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_delete_resnode
+* 
+* Delete and free a malloced XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to free
+*********************************************************************/
+void
+    xpath_delete_resnode (xpath_resnode_t *resnode)
+{
+#ifdef DEBUG
+    if (!resnode) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+    dlq_remove(resnode);
+    xpath_clean_resnode(resnode);
+    m__free(resnode);
+
+}  /* xpath_delete_resnode */
 
 
 /********************************************************************

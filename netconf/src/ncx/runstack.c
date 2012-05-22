@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -33,50 +33,19 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
 
 
 /********************************************************************
@@ -106,6 +75,18 @@ date         init     comment
 
 static boolean            runstack_init_done = FALSE;
 static runstack_context_t defcxt;
+
+
+static dlq_hdr_t* select_useQ( runstack_context_t* rcxt )
+{
+    runstack_entry_t *se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    // TODO reverse this logic...
+    if ( se == NULL) {
+        return &rcxt->zero_condcbQ;
+    } else {
+        return &se->condcbQ;
+    }
+}
 
 
 /********************************************************************
@@ -277,30 +258,18 @@ static runstack_line_t *
 * RETURNS:
 *   pointer to last cond block with loopcb or NULL if none
 *********************************************************************/
-static runstack_condcb_t *
-    get_loopcb (runstack_context_t *rcxt)
+static runstack_condcb_t *get_loopcb (runstack_context_t *rcxt)
 {
-    runstack_entry_t  *se;
-    dlq_hdr_t         *useQ;
-    runstack_condcb_t *condcb;
+    dlq_hdr_t *useQ = select_useQ( rcxt );
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
-    for (condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
-         condcb != NULL;
-         condcb = (runstack_condcb_t *)dlq_prevEntry(condcb)) {
+    runstack_condcb_t *condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    for (; condcb; condcb = (runstack_condcb_t *)dlq_prevEntry(condcb)) {
         if (condcb->cond_type == RUNSTACK_COND_LOOP) {
             return condcb;
         }
     }
 
     return NULL;
-
 }  /* get_loopcb */
 
 
@@ -315,30 +284,18 @@ static runstack_condcb_t *
 * RETURNS:
 *   pointer to first cond block with loopcb or NULL if none
 *********************************************************************/
-static runstack_condcb_t *
-    get_first_loopcb (runstack_context_t *rcxt)
+static runstack_condcb_t *get_first_loopcb (runstack_context_t *rcxt)
 {
-    runstack_entry_t  *se;
-    dlq_hdr_t         *useQ;
-    runstack_condcb_t *condcb;
+    dlq_hdr_t *useQ = select_useQ( rcxt );
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
-    for (condcb = (runstack_condcb_t *)dlq_firstEntry(useQ);
-         condcb != NULL;
-         condcb = (runstack_condcb_t *)dlq_nextEntry(condcb)) {
+    runstack_condcb_t *condcb = (runstack_condcb_t *)dlq_firstEntry(useQ);
+    for (; condcb; condcb = (runstack_condcb_t *)dlq_nextEntry(condcb)) {
         if (condcb->cond_type == RUNSTACK_COND_LOOP) {
             return condcb;
         }
     }
 
     return NULL;
-
 }  /* get_first_loopcb */
 
 
@@ -503,6 +460,67 @@ static runstack_entry_t *
 
 }  /* new_stack_entry */
 
+/********************************************************************
+ * Utility function for removing the last and deleting and 
+ * entry from a queue.
+ *
+ * \param rcxt the runstack context
+ * \param condcd the runstack control sequence
+ * \return NO_ERR;
+ *
+ ********************************************************************/
+static status_t free_condcb_end( runstack_context_t* rcxt,
+                                 runstack_condcb_t* condcb,
+                                 dlq_hdr_t* useQ )
+{
+    /* this 'end' completes this queue, remove it from the stack and delete it*/
+    dlq_remove(condcb);
+    free_condcb(condcb);
+
+    /* figure out the new conditional state */
+    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if (condcb == NULL) {
+        /* no conditionals at all in this frame now */
+        rcxt->cond_state = TRUE;
+    } else if (condcb->cond_type == RUNSTACK_COND_IF) {
+        rcxt->cond_state = condcb->u.ifcb.curcond;
+    } else {
+        rcxt->cond_state = condcb->u.loopcb.startcond;
+    }
+
+    return NO_ERR;
+}
+
+/********************************************************************
+ * Utility function for selecting the line end entry.
+ *
+ * \param rcxt the runstack context
+ * \param loopcb the loop cb entry
+ * \param useQ the useQ (thius will be updated)
+ * \return the line entry to use.
+ *
+ ********************************************************************/
+static runstack_line_t* select_end_entry( runstack_context_t* rcxt,
+                                          runstack_loopcb_t* loopcb,
+                                          dlq_hdr_t** useQ )
+{            
+    /* get the 'end' entry in the lineq */
+    if (loopcb->collector) {
+        if (rcxt->cur_src == RUNSTACK_SRC_LOOP) {
+            /* looping in the outside loop and collecting in the inside loop
+            * the 'end' command may not be last */
+            return loopcb->collector->cur_line;
+        } else {
+            /* collecting so the 'end' command is last */
+            *useQ = &loopcb->collector->lineQ;
+            return (runstack_line_t *)dlq_lastEntry(*useQ);
+        }
+    } else {
+            /* only loop collecting so the 'end' command is last */
+            *useQ = &loopcb->lineQ;
+            return(runstack_line_t *)dlq_lastEntry(*useQ);
+    }
+}
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
@@ -1185,11 +1203,9 @@ status_t
     runstack_save_line (runstack_context_t *rcxt,
                         const xmlChar *line)
 {
-    runstack_entry_t   *se;
     runstack_condcb_t  *condcb;
     runstack_loopcb_t  *loopcb;
     runstack_line_t    *le;
-    dlq_hdr_t          *useQ;
 
 #ifdef DEBUG
     if (line == NULL) {
@@ -1224,13 +1240,9 @@ status_t
              * need to be set
              */
 
-            se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-            if (se == NULL) {
-                useQ = &rcxt->zero_condcbQ;
-            } else {
-                useQ = &se->condcbQ;
-            }
+            dlq_hdr_t *useQ = select_useQ( rcxt );
             for (condcb = (runstack_condcb_t *)dlq_firstEntry(useQ);
+
                  condcb != NULL;
                  condcb = (runstack_condcb_t *)dlq_nextEntry(condcb)) {
 
@@ -1536,18 +1548,13 @@ status_t
                            xpath_pcb_t *xpathpcb,
                            val_value_t *docroot)
 {
-    runstack_entry_t     *se;
-    dlq_hdr_t            *useQ;
     runstack_condcb_t    *condcb, *testloopcb;
     runstack_loopcb_t    *loopcb;
     xpath_result_t       *result;
     status_t              res;
 
-#ifdef DEBUG
-    if (xpathpcb == NULL || docroot == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( xpathpcb && "xpathpcb == NULL" );
+    assert( docroot && "docroot == NULL ");
 
     res = NO_ERR;
 
@@ -1555,13 +1562,7 @@ status_t
         rcxt = &defcxt;
     }
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
+    dlq_hdr_t *useQ = select_useQ( rcxt );
     condcb = new_condcb(RUNSTACK_COND_LOOP);
     if (condcb == NULL) {
         return ERR_INTERNAL_MEM;
@@ -1633,8 +1634,6 @@ status_t
     runstack_handle_if (runstack_context_t *rcxt,
                         boolean startcond)
 {
-    runstack_entry_t     *se;
-    dlq_hdr_t            *useQ;
     runstack_condcb_t    *condcb;
     runstack_ifcb_t      *ifcb;
 
@@ -1642,13 +1641,7 @@ status_t
         rcxt = &defcxt;
     }
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
+    dlq_hdr_t *useQ = select_useQ( rcxt );
     condcb = new_condcb(RUNSTACK_COND_IF);
     if (condcb == NULL) {
         return ERR_INTERNAL_MEM;
@@ -1690,8 +1683,6 @@ status_t
     runstack_handle_elif (runstack_context_t *rcxt,
                           boolean startcond)
 {
-    runstack_entry_t     *se;
-    dlq_hdr_t            *useQ;
     runstack_condcb_t    *condcb;
     runstack_ifcb_t      *ifcb;
     status_t              res;
@@ -1702,13 +1693,7 @@ status_t
         rcxt = &defcxt;
     }
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
+    dlq_hdr_t *useQ = select_useQ( rcxt );
     condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
     if (condcb == NULL) {
         log_error("\nError: unexpected 'elif' command");
@@ -1779,8 +1764,6 @@ status_t
 status_t
     runstack_handle_else (runstack_context_t *rcxt)
 {
-    runstack_entry_t     *se;
-    dlq_hdr_t            *useQ;
     runstack_condcb_t    *condcb;
     status_t              res;
 
@@ -1790,13 +1773,7 @@ status_t
         rcxt = &defcxt;
     }
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
+    dlq_hdr_t *useQ = select_useQ( rcxt );
     condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
     if (condcb == NULL) {
         log_error("\nError: unexpected 'else' command");
@@ -1852,143 +1829,77 @@ status_t
 * RETURNS:
 *   status
 *********************************************************************/
-status_t
-    runstack_handle_end (runstack_context_t *rcxt)
+status_t runstack_handle_end (runstack_context_t *rcxt)
 {
-    runstack_entry_t     *se;
-    dlq_hdr_t            *useQ;
-    runstack_condcb_t    *condcb;
-    runstack_loopcb_t    *loopcb;
-    runstack_line_t      *le;
-    status_t              res;
-    boolean               need_free_condcb;
-
-    res = NO_ERR;
-    need_free_condcb = FALSE;
-
     if (rcxt == NULL) {
         rcxt = &defcxt;
     }
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
-    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
-    if (condcb == NULL) {
+    dlq_hdr_t *useQ = select_useQ( rcxt );
+    runstack_condcb_t *condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if ( !condcb ) {
         log_error("\nError: unexpected 'end' command");
         return ERR_NCX_INVALID_VALUE;
     }
 
-
     if (condcb->cond_type == RUNSTACK_COND_IF) {
-        if (LOGDEBUG2) {
-            log_debug2("\nrunstack: end for if command");
-        }
-
-        /* this 'end' completes this queue entry
-         * remove it from the stack and delete it
-         */
-        need_free_condcb = TRUE;
+        log_debug2("\nrunstack: end for if command");
+        return free_condcb_end( rcxt, condcb, useQ );
     } else {
-        if (LOGDEBUG2) {
-            log_debug2("\nrunstack: end for while command");
+        log_debug2("\nrunstack: end for while command");
+        runstack_loopcb_t *loopcb = &condcb->u.loopcb;
+
+        if ( ! loopcb || loopcb->loop_state != RUNSTACK_LOOP_COLLECTING) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        } 
+
+        if ( !loopcb->startcond) {
+            return free_condcb_end( rcxt, condcb, useQ );
+        }
+        
+        runstack_line_t *le = select_end_entry( rcxt, loopcb, &useQ );
+        if ( !le ) {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+        } 
+
+        /* check if the first line is this end line */
+        if (loopcb->first_line == le) {
+            loopcb->first_line = NULL;
         }
 
-        loopcb = &condcb->u.loopcb;
-        if (loopcb->loop_state != RUNSTACK_LOOP_COLLECTING) {
-            res = SET_ERROR(ERR_INTERNAL_VAL);
-        } else if (loopcb->startcond) {
-            /* get the 'end' entry in the lineQ */
-            if (loopcb->collector) {
-                if (rcxt->cur_src == RUNSTACK_SRC_LOOP) {
-                    /* looping in the outside loop and
-                     * collecting in the inside loop
-                     * the 'end' command may not be last
-                     */
-                    le = loopcb->collector->cur_line;
-                } else {
-                    /* collecting so the 'end' command is last */
-                    useQ = &loopcb->collector->lineQ;
-                    le = (runstack_line_t *)dlq_lastEntry(useQ);
-                }
-            } else {
-                /* only loop collecting so the 'end' command is last */
-                useQ = &loopcb->lineQ;
-                le = (runstack_line_t *)dlq_lastEntry(useQ);
-            }
+        /* get pointer for loopcb.last_line */
+        if ( !loopcb->collector ) {
+            /* outside loop so need to delete this 'end' line */
+            dlq_remove(le);
+            free_line_entry(le);
 
-            if (le == NULL) {
-                res = SET_ERROR(ERR_INTERNAL_VAL);
-            } else {
-                /* check if the first line is this end line */
-                if (loopcb->first_line == le) {
-                    loopcb->first_line = NULL;
-                }
-
-                /* get pointer for loopcb.last_line */
-                if (loopcb->collector == NULL) {
-                    /* outside loop so need to delete this 'end' line */
-                    dlq_remove(le);
-                    free_line_entry(le);
-
-                    /* get the new last while loop line */
-                    le = (runstack_line_t *)dlq_lastEntry(useQ);
-                } else {
-                    /* get the next to last line */
-                    le = (runstack_line_t *)dlq_prevEntry(le);
-                }
-
-                /* set the last_line pointer for this loopcb */
-                if (le == NULL) {
-                    /* there are no lines in this while loop */
-                    loopcb->empty_block = TRUE;
-                    loopcb->first_line = NULL;
-                    loopcb->last_line = NULL;
-                } else {
-                    loopcb->last_line = le;
-                }
-
-                /* need to go back to the start of the
-                 * while loop and test the eval condition again
-                 */
-                /* loopcb->cur_line = NULL; */
-                loopcb->loop_state = RUNSTACK_LOOP_LOOPING;
-                loopcb->loop_count = 1;
-                rcxt->cur_src = RUNSTACK_SRC_LOOP;
-            }
+            /* get the new last while loop line */
+            le = (runstack_line_t *)dlq_lastEntry(useQ);
         } else {
-            /* this is a FALSE conditional loop so just
-             * delete it and do not go back to the first command
-             */
-            need_free_condcb = TRUE;
+            /* get the next to last line */
+            le = (runstack_line_t *)dlq_prevEntry(le);
         }
+
+        /* set the last_line pointer for this loopcb */
+        if ( !le ) {
+            /* there are no lines in this while loop */
+            loopcb->empty_block = TRUE;
+            loopcb->first_line = NULL;
+            loopcb->last_line = NULL;
+        } else {
+            loopcb->last_line = le;
+        }
+
+        /* need to go back to the start of the while loop and test the eval 
+         * condition again */
+
+        /* loopcb->cur_line = NULL; */
+        loopcb->loop_state = RUNSTACK_LOOP_LOOPING;
+        loopcb->loop_count = 1;
+        rcxt->cur_src = RUNSTACK_SRC_LOOP;
     }
 
-    if (need_free_condcb) {
-        /* this 'end' completes this queue entry
-         * remove it from the stack and delete it
-         */
-        dlq_remove(condcb);
-        free_condcb(condcb);
-
-        /* figure out the new conditional state */
-        condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
-        if (condcb == NULL) {
-            /* no conditionals at all in this frame now */
-            rcxt->cond_state = TRUE;
-        } else if (condcb->cond_type == RUNSTACK_COND_IF) {
-            rcxt->cond_state = condcb->u.ifcb.curcond;
-        } else {
-            rcxt->cond_state = condcb->u.loopcb.startcond;
-        }
-    }
-
-    return res;
-
+    return NO_ERR;
 } /* runstack_handle_end */
 
 
@@ -2008,21 +1919,13 @@ status_t
 boolean
     runstack_get_if_used (runstack_context_t *rcxt)
 {
-    runstack_entry_t  *se;
-    dlq_hdr_t         *useQ;
     runstack_condcb_t *condcb;
 
     if (rcxt == NULL) {
         rcxt = &defcxt;
     }
 
-    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
-    if (se == NULL) {
-        useQ = &rcxt->zero_condcbQ;
-    } else {
-        useQ = &se->condcbQ;
-    }
-
+    dlq_hdr_t *useQ = select_useQ( rcxt );
     condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
     if (condcb == NULL) {
         /* error -- not in any conditional block */

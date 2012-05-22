@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -332,7 +332,8 @@ int main (int argc, char *argv[])
         res = cmn_init( argc, argv, &showver, &showhelpmode );
     
         if (res != NO_ERR) {
-            log_error( "\nnetconfd: init returned (%s)", get_error_string(res) );
+            log_error( "\nnetconfd: init returned (%s)", 
+                       get_error_string(res) );
             agt_request_shutdown(NCX_SHUT_EXIT);
         } else {
             if (showver) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -28,41 +28,15 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include "agt.h"
-#endif
-
-#ifndef _H_agt_cb
 #include "agt_cb.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_xpath
-#include  "xpath.h"
-#endif
-
-#ifndef _H_yang
-#include  "yang.h"
-#endif
+#include "xpath.h"
+#include "yang.h"
 
 /********************************************************************
 *                                                                   *
@@ -70,7 +44,6 @@ date         init     comment
 *                                                                   *
 ********************************************************************/
 
-#define AGT_CB_DEBUG 1
 
 /********************************************************************
 *                                                                   *

@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------|
 #include "test/support/db-models/device-test-db.h"
 #include "test/support/misc-util/ptree-utils.h"
+#include "test/support/misc-util/base64.h"
 
 // ---------------------------------------------------------------------------|
 // Standard includes
@@ -12,20 +13,10 @@
 // ---------------------------------------------------------------------------|
 // Boost includes
 // ---------------------------------------------------------------------------|
-#include <boost/foreach.hpp>
-#include <boost/iterator/zip_iterator.hpp>
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind.hpp>
-#include <boost/phoenix/operator.hpp> 
-#include <boost/phoenix/fusion/at.hpp> 
-#include <boost/fusion/include/std_pair.hpp>
-#include <boost/fusion/include/tuple.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-
-// ---------------------------------------------------------------------------|
-// Boost includes
-// ---------------------------------------------------------------------------|
 #include <boost/test/unit_test.hpp>
+
+#include "test/support/db-models/db-check-utils.h"
+
 
 // ---------------------------------------------------------------------------|
 // File wide namespace use
@@ -33,61 +24,13 @@
 using namespace std;
 using boost::property_tree::ptree;
 
-namespace ph = boost::phoenix;
-namespace ph_arg = boost::phoenix::arg_names;
-
-// ---------------------------------------------------------------------------|
-namespace 
-{
-
-// ---------------------------------------------------------------------------|
-// TODO: Move to utility and make checkEqual function configurable
-// TODO: possible by making this a functor...
-template <class T>
-void MapZipContainerHelper( const boost::tuple< const T&, const T& >& zIter )
-{
-    BOOST_CHECK_EQUAL( zIter.get<0>().first, zIter.get<1>().first );
-    checkEqual( zIter.get<0>().second, zIter.get<1>().second );
-}
-
-// ---------------------------------------------------------------------------|
-template <class T>
-void CheckMaps( const T& lhs, const T& rhs )
-{
-    BOOST_CHECK_EQUAL( lhs.size(), rhs.size() );
-
-    auto begZip = boost::make_zip_iterator( boost::make_tuple( lhs.begin(), rhs.begin() ) );
-    auto endZip = boost::make_zip_iterator( boost::make_tuple( lhs.end(), rhs.end() ) );
-
-    typedef typename T::value_type value_type;
-    for_each( begZip, endZip, 
-            ph::bind( &MapZipContainerHelper<value_type>, ph_arg::arg1 ) );
-    
-}
-
-// ---------------------------------------------------------------------------|
-void UnpackConnectionItem( const ptree::value_type& connItem,
-                           std::map<uint32_t, YumaTest::ConnectionItem>& connMap ) 
-{
-    YumaTest::ConnectionItem conn( connItem.second );
-    
-    uint16_t connId = connItem.second.get<uint16_t>( "id" );
-    BOOST_REQUIRE_MESSAGE( 
-            connMap.end() == 
-            connMap.find( connId ),
-            "ERROR Duplicate connection item found! ID: " << connId );
-    
-    connMap.insert( make_pair( connId, conn ) );
-}
-
-} // anonymous namespace
-
 // ---------------------------------------------------------------------------|
 namespace YumaTest
 {
 
 // ===========================================================================|
-ConnectionItem::ConnectionItem() : sourceId_(0)
+ConnectionItem::ConnectionItem() : id_(0)
+                                 , sourceId_(0)
                                  , sourcePinId_(0)
                                  , destinationId_(0)
                                  , destinationPinId_(0)
@@ -95,8 +38,45 @@ ConnectionItem::ConnectionItem() : sourceId_(0)
 {}
 
 // ---------------------------------------------------------------------------|
+bool ConnectionItem::unpackItem( const ptree::value_type& v )
+{
+    bool res = true;
+
+    if ( v.first == "id" )
+    {
+        id_ = v.second.get_value<uint32_t>();
+    }
+    else if ( v.first == "sourceId" )
+    {
+        sourceId_ = v.second.get_value<uint32_t>();
+    }
+    else if ( v.first == "sourcePinId" )
+    {
+        sourcePinId_ = v.second.get_value<uint32_t>();
+    }
+    else if ( v.first == "destinationId" )
+    {
+        destinationId_ = v.second.get_value<uint32_t>();
+    }
+    else if ( v.first == "destinationPinId" )
+    {
+        destinationPinId_ = v.second.get_value<uint32_t>();
+    }
+    else if ( v.first == "bitrate" )
+    {
+        bitrate_ = v.second.get_value<uint32_t>();
+    }
+    else
+    {
+        res = false;
+    }
+
+    return res;
+}
+// ---------------------------------------------------------------------------|
 ConnectionItem::ConnectionItem( const boost::property_tree::ptree& pt )
-    : sourceId_(0)
+    : id_(0)
+    , sourceId_(0)
     , sourcePinId_(0)
     , destinationId_(0)
     , destinationPinId_(0)
@@ -104,29 +84,9 @@ ConnectionItem::ConnectionItem( const boost::property_tree::ptree& pt )
 {
     BOOST_FOREACH( const ptree::value_type& v, pt )
     {
-        if ( v.first == "sourceId" )
+        if ( !unpackItem( v ) )
         {
-            sourceId_ = v.second.get_value<uint32_t>();
-        }
-        else if ( v.first == "sourcePinId" )
-        {
-            sourcePinId_ = v.second.get_value<uint32_t>();
-        }
-        else if ( v.first == "destinationId" )
-        {
-            destinationId_ = v.second.get_value<uint32_t>();
-        }
-        else if ( v.first == "destinationPinId" )
-        {
-            destinationPinId_ = v.second.get_value<uint32_t>();
-        }
-        else if ( v.first == "bitrate" )
-        {
-            bitrate_ = v.second.get_value<uint32_t>();
-        }
-        else if ( v.first != "id" )
-        {
-            BOOST_FAIL( "Unsupported child for ResourceNode: " << v.first );
+            BOOST_FAIL( "Unsupported child for ConnectionItem: " << v.first );
         }
     }
 }
@@ -134,6 +94,7 @@ ConnectionItem::ConnectionItem( const boost::property_tree::ptree& pt )
 // ---------------------------------------------------------------------------|
 void checkEqual( const ConnectionItem& lhs, const ConnectionItem& rhs )
 {
+    BOOST_CHECK_EQUAL( lhs.id_, rhs.id_ );
     BOOST_CHECK_EQUAL( lhs.sourceId_, rhs.sourceId_ );
     BOOST_CHECK_EQUAL( lhs.sourcePinId_, rhs.sourcePinId_ );
     BOOST_CHECK_EQUAL( lhs.destinationId_, rhs.destinationId_ );
@@ -142,15 +103,65 @@ void checkEqual( const ConnectionItem& lhs, const ConnectionItem& rhs )
 }
 
 // ===========================================================================|
+StreamConnectionItem::StreamConnectionItem() : ConnectionItem()
+                                 , sourceStreamId_(0)
+                                 , destinationStreamId_(0)
+{}
+
+// ---------------------------------------------------------------------------|
+StreamConnectionItem::StreamConnectionItem( const boost::property_tree::ptree& pt )
+    : ConnectionItem()
+    , sourceStreamId_(0)
+    , destinationStreamId_(0)
+{
+    BOOST_FOREACH( const ptree::value_type& v, pt )
+    {
+        if ( !unpackItem( v ) )
+        {
+            if ( v.first == "sourceStreamId" )
+            {
+                sourceStreamId_ = v.second.get_value<uint32_t>();
+            }
+            else if ( v.first == "destinationStreamId" )
+            {
+                destinationStreamId_ = v.second.get_value<uint32_t>();
+            }
+            else 
+            {
+                BOOST_FAIL( "Unsupported child for StreamConnectionItem: " << v.first );
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------|
+void checkEqual( const StreamConnectionItem& lhs, const StreamConnectionItem& rhs )
+{
+    checkEqual( static_cast<const ConnectionItem&>( lhs ), 
+                static_cast<const ConnectionItem&>( rhs ) );
+
+    BOOST_CHECK_EQUAL( lhs.sourceStreamId_, rhs.sourceStreamId_ );
+    BOOST_CHECK_EQUAL( lhs.destinationStreamId_, rhs.destinationStreamId_ );
+}
+
+// ===========================================================================|
 ResourceNode::ResourceNode() : id_(0)
+                             , channelId_(0)
                              , resourceType_(0)
+                             , configuration_()
+                             , statusConfig_()
+                             , alarmConfig_()
                              , physicalPath_()
 {}
 
 // ---------------------------------------------------------------------------|
 ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
     : id_(0)
+    , channelId_(0)
     , resourceType_()
+    , configuration_()
+    , statusConfig_()
+    , alarmConfig_()
     , physicalPath_()
 {
     BOOST_FOREACH( const ptree::value_type& v, pt )
@@ -159,9 +170,25 @@ ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
         {
             id_ = v.second.get_value<uint16_t>();
         }
+        else if ( v.first == "channelId" )
+        {
+            channelId_ = v.second.get_value<uint32_t>();
+        }
         else if ( v.first == "resourceType" )
         {
             resourceType_ = v.second.get_value<uint32_t>();
+        }
+        else if ( v.first == "configuration" )
+        {
+            configuration_ = base64_decode( v.second.get_value<string>() );
+        }
+        else if ( v.first == "statusConfig" )
+        {
+            statusConfig_ = base64_decode( v.second.get_value<string>() );
+        }
+        else if ( v.first == "alarmConfig" )
+        {
+            alarmConfig_ = base64_decode( v.second.get_value<string>() );
         }
         else if ( v.first == "physicalPath" )
         {
@@ -178,21 +205,25 @@ ResourceNode::ResourceNode( const boost::property_tree::ptree& pt )
 void checkEqual( const ResourceNode& lhs, const ResourceNode& rhs )
 {
     BOOST_CHECK_EQUAL( lhs.id_, rhs.id_ );
+    BOOST_CHECK_EQUAL( lhs.channelId_, rhs.channelId_ );
     BOOST_CHECK_EQUAL( lhs.resourceType_, rhs.resourceType_ );
+    BOOST_CHECK_EQUAL( lhs.configuration_, rhs.configuration_ );
+    BOOST_CHECK_EQUAL( lhs.statusConfig_, rhs.statusConfig_ );
+    BOOST_CHECK_EQUAL( lhs.alarmConfig_, rhs.alarmConfig_ );
     BOOST_CHECK_EQUAL( lhs.physicalPath_, rhs.physicalPath_ );
 }
 
 // ===========================================================================|
 StreamItem::StreamItem() : id_(0)
                          , resourceDescription_()
-                         , virtualResourceConnections_()
+                         , resourceConnections_()
 {}
 
 // ---------------------------------------------------------------------------|
 StreamItem::StreamItem( const boost::property_tree::ptree& pt )
     : id_(0)
     , resourceDescription_()
-    , virtualResourceConnections_()
+    , resourceConnections_()
 {
 
     BOOST_FOREACH( const ptree::value_type& v, pt )
@@ -213,9 +244,15 @@ StreamItem::StreamItem( const boost::property_tree::ptree& pt )
 
             resourceDescription_.insert( make_pair( res.id_, res ) );
         }
-        else if ( v.first == "connection" )
+        else if ( v.first == "resourceConnection" )
         {
-            UnpackConnectionItem( v, virtualResourceConnections_ );
+            YumaTest::ConnectionItem conn( v.second );
+    
+            BOOST_REQUIRE_MESSAGE( 
+                resourceConnections_.end() == resourceConnections_.find( conn.id_ ),
+                "ERROR Duplicate connection item found! ID: " << conn.id_);
+    
+            resourceConnections_.insert( make_pair( conn.id_, conn ) );
         }
         else
         {
@@ -236,7 +273,7 @@ void checkEqual( const StreamItem& lhs, const StreamItem& rhs )
     CheckMaps( lhs.resourceDescription_, rhs.resourceDescription_ );
 
     BOOST_TEST_MESSAGE( "Comparing Stream Virtual Connection Resources ..." );
-    CheckMaps( lhs.virtualResourceConnections_, rhs.virtualResourceConnections_ );
+    CheckMaps( lhs.resourceConnections_, rhs.resourceConnections_ );
 }
 
 // ===========================================================================|
@@ -270,7 +307,13 @@ Profile::Profile( const boost::property_tree::ptree& pt)
         }
         else if ( v.first == "streamConnection" )
         {
-            UnpackConnectionItem( v, streamConnections_ );
+            YumaTest::StreamConnectionItem conn( v.second );
+    
+            BOOST_REQUIRE_MESSAGE( 
+                streamConnections_.end() == streamConnections_.find( conn.id_ ),
+                "ERROR Duplicate stream connection item found! ID: " << conn.id_);
+    
+            streamConnections_.insert( make_pair( conn.id_, conn ) );
         }
         else
         {

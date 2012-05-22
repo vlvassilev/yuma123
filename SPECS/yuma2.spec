@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        2.1
-Release:        2%{?dist}
+Version:        2.2
+Release:        3%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -21,48 +21,11 @@ Requires: ncurses
 Requires: libxml2
 Requires: libssh2
 
+# do not build the yuma-debug packages
 %define debug_package %{nil}
 
-%package dev
-
-Summary:  YANG-based Unified Modular Automation Tools (Developer)
-
-%description dev
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  This package contains H files, scripts,
-and other files needed to create SIL code for use with
-the netconfd server.
-
-%post dev
-echo "Yuma developer files installed."
-
-%files dev
-%defattr(-,root,root,-)
-%{_bindir}/make_sil_dir
-%{_mandir}/man1/make_sil_dir.1.gz
-%{_includedir}/yuma/
-%{_datadir}/yuma/util/
-%{_datadir}/yuma/src/libtoaster/
-
-
-%package doc
-
-Summary:  YANG-based Unified Modular Automation Tools (Documentation)
-
-%description doc
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  This package contains the Yuma user manuals
-in PDF and HTML format.
-
-%post doc
-echo "Yuma documentation files installed."
-
-%files doc
-%defattr(-,root,root,-)
-/usr/share/doc/yuma/server-call-chain.txt
-/usr/share/doc/yuma/pdf/
-/usr/share/doc/yuma/html/
-
+# set to release number above
+%define myrel 3
 
 # main package rules
 
@@ -73,11 +36,19 @@ echo "Yuma documentation files installed."
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make RELEASE=2 %{?_smp_mflags}
+%ifarch x86_64
+make LIB64=1 RELEASE=%{myrel} %{?_smp_mflags}
+%else
+make RELEASE=%{myrel} %{?_smp_mflags}
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id RELEASE=2 DESTDIR=$RPM_BUILD_ROOT
+%ifarch x86_64
+make install LDFLAGS+=--build-id LIB64=1 RELEASE=%{myrel} DESTDIR=$RPM_BUILD_ROOT
+%else
+make install LDFLAGS+=--build-id RELEASE=%{myrel} DESTDIR=$RPM_BUILD_ROOT
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -112,6 +83,302 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Fri May 18 2012 Andy Bierman <andy at netconfcentral.org> 2.2-3 [1749]
+  * netconfd
+    * fix bug in agt_val_root_check where a 'missing-instance'
+      error is incorrectly generated sometimes for an NP-container.
+      This can happen if the NP container has children (or nested
+      NP-container children) which are mandatory (or min-elements > 0)
+      but there are also when-stmts that affect the node.
+      Do not generate an error for NP-container here; if child nodes
+      exist then instance_check for those nodes will check must/when nodes
+    * add 'editing' parameter to val_compare_max because it assumed
+      config=true meant test for editing, so any change will cause
+      the 2 val_value_t nodes to be different (meta-data such as
+      set-by-default vs. client-set-to-default).
+      To simply compare the values and just the config=true nodes,
+      use val_compare_max(val1, val2, TRUE, TRUE, FALSE)
+    * fix bug where edits to candidate are not applied to running
+      during the commit if validate is done on the candidate, e.g.:
+         1) create /foo
+         2) validate source=candidate
+         3) commit
+    * change yuma_arp  so it does not build on MACOSX
+    * fix yuma_arp so it does not include any system files on MAC
+    * change SIL makefile for MacOSX to make bundle instead of dynamiclib
+    * change agt.c to load .so file for Mac instead of .dylib for a SIL library
+    * add check to prevent false SET_ERROR trace from  occurring in when-check
+
+  * YANG Parse
+    * fixed bug 3517498
+      memory leak occurs when the file parsed starts with an
+      invalid token (not a valid module name string)
+    * added NULL pointer checks in typ.c to prevent SET_ERROR
+      and referencing a non-existent typedef in a named type.
+      This can happen sometimes if the YANG module has errors like
+      a leaf that uses a type that does not exist
+
+* Fri Mar 09 2012 Andy Bierman <andy at netconfcentral.org> 2.2-2 [1737]
+  * netconfd
+    * enhanced unique-stmt checking to support embedded lists
+      change val_unique_t to hold XPath struct instead of value back-ptr
+      Note:  <non-unique> value in error reporting for unique-error may not
+      be correct if list with multiple instances has error.  Will indicate
+      the first node in the node-set with an error, which may not be
+      the instance that caused a non-unique error within a nested list
+    * fix bug in yuma-arp: SIL callbacks not getting loaded
+      properly because revision date was wrong
+    * fix bug in new instance_check code where false when-stmt may
+      get ignored and falsely flag a missing mandatory node error
+
+  * yangdump
+    * fix bug where xpath is checked for an external augment
+      even if context node is NULL because of some error in the
+      external module, so target node not available
+    * removed the list-in-unique-path error check
+    * add auto-generated code for YANG features
+      Conditional code allows features to be enabled
+      at compile-time, boot-time, and/or module-load time
+      Usage:
+       1) Compile-time
+         The H file will contain a #define for <mod>_F_<feature>
+         The default is to enable features at compile-time.
+         To disable, comment out this #define.  All code related
+         to the feature will be #ifdef removed from the image.
+       2) Boot-time
+         If --feature-enable-default=true (d), then --feature-disable
+         parameters should be added to turn features off.
+         If --feature-enable-default=false, then --feature-enable
+         parameters should be added to turn features on.
+       3) Module Load time
+         During the module SIL init callback, the module features
+         will be enabled or disabled according to the #define
+         constancts in step 1.  However these settings will
+         not override any CLI/conf settings in step 2 (at this time)
+    * fixed bug where --feature-enable-default=false would
+      cause the server to shutdown if any modules with features
+      were loaded
+    * now allowing just feature name in --feature-enable and
+      --feature-disable parameters instead of only module-name:feature-name
+    * --format=uc or --format=uh now cause the notification send functions
+      to be generated in the user SIL files, not the yuma SIL files.
+      All code which may be edited by the user is now in the user SIL files
+      if make_sil_dir --split is used
+    * deprecated --feature-code-default parameter.  This is ignored
+      by yangdump. Same init sequence is always generated.
+    * deprecated --feature-static and feature-dynamic parameters.
+      These ares ignored by yangdump.  See Usage section above for new
+      YANG feature management procedure.
+
+  * YANG modules
+    * update latest NETMOD WG modules
+    * add 2 new test modules used to test recent code additions
+
+  * Documentation
+    * update developer manual
+    * update utility scripts and man pages
+* Fri Jan 27 2012 Andy Bierman <andy at netconfcentral.org> 2.2-1 [1712]
+  * netconfd
+    * Added server regression testing and Coverity static code cleanup
+      by Marc Pashley, James Parkin, and Joe Handford
+    * fix bug where RPC SIL validate or invoke callback returns an error
+      but does not call agt_record_error; server returns <ok>
+      and ignores the error return status; now adding an
+      <rpc-error> if none, when RPC SIL validate or invoke callback returns
+      an error.
+    * fixed bug in load module where a module with errors could
+      sometimes be loaded anyway.  Now server will exit if
+      initial modules loaded have errors, even if YANG parse
+      returns NO_ERR for a module with a non-zero error count
+    * fixed bug where unknown namespace error caused server to incorrectly
+      skip the entire rest of the XML message.  During load_running_config
+      it is possible the server is configured to remove bad nodes
+      and continue to the next XML sibling node.
+    * implemented recoverable edits in agt_val.c;
+      * add transactions to cfg.c; now saving an auto-incrementing
+        transaction ID across reboots so new ID always used any time
+        a config edit request is processed;
+      * val_merge is now always non-destructive to the source value
+      * newval and curval are always rooted in a source XML tree
+      * add VAL_FL_DELETED to mark curval as deleted and not remove
+        until commit finalized
+      * update undo record handling so it is always used and supports
+        recoverable edits
+      * refactor edit code and move some ncx code to new module
+        agt/agt_cfg.c
+      * agt_val_root_check rewrite:
+        Commit tests (see RFC 6020, Sec. 8.3.3) are separated out
+        from agt_val_instance_check), instead of searching the
+        target config for nodes that need commit tests.
+        Started undo_rec based test pruning.
+      * update commit procedure to use VAL_FL_SUBTREE_DIRTY flag
+        to prune unchanged subtrees in the candidate config
+        instead of expensive subtree-compare.
+      * now cleaning all edit records from candidate so commit
+        will not get fooled by delete x, then create x
+      * remove agt_val_split_root_check code
+        * callback states AGT_CB_COMMIT_CHECK and AGT_CB_TEST_APPLY
+          have been removed and the agt_val code simplified
+        * val_clone removed; changed applied to real data tree and
+          undone if needed; no special test phase, just recoverable apply phase
+      * changed user SID to 0 (for superuser) when a commit is rolled
+        back; the old user id should not be used; must force all edits
+        to be reverted.
+      * now only restoring backup from disk if rollback failed,
+        not if commit failed
+      * add reverse_edit to send SIL callbacks for a reverse edit
+        during a rollback; needed when the SIL already returned
+        NO_ERR for a COMMIT callback
+      * optimized 'applyhere' compares to test just child nodes
+        and not all descendent nodes to speed up agt_val processing
+      * optimize unique-stmt checking to minimize data retrieval
+        and test duplication
+      * add code to prune commit tests for objects do not need new
+        tests because they have not changed value;
+      * optimized instance_check so if-feature and when-stmts
+        do not need to be evaluated again (done pre-root-check)
+    * fixed bug in delete_config_validate where error path and
+      error info parms are reversed; set errval for <url> if needed
+    * fix object ID for XPath so choices and cases are removed
+      from the path extression; also add module prefix to prevent
+      external augment with same local-name from matching expression
+    * fix bug where deleting a default leaf did not re-mark the leaf
+      as set-by-default
+    * fix bug in commit code where newval was not checked for NULL
+      before accessing a field in it
+    * change output buffer logging from debug4 to debug3
+    * updated agt_acm debug logging
+    * remove all #ifdefs around log_debug code
+    * added agt_log_acm_reads and agt_log_acm_writes
+      to the agt_profile to control log output for NACM access
+    * fixed bug in error-path generation where /nc:config node
+      was incorrectly added as the starting node, instead of the
+      top-level YANG object from the database
+    * fixed bug where error-path is not getting set if the
+      error node is the <url> parameter
+    * fixed bug where error-path = '/' was not generated correctly
+      so that field would be missing for <validate> and other rpc-error
+      responses
+    * fix error-path generation so it conforms to RFC 6241
+    * fix memory leak in generating unique-error
+    * updated error message for list within the path of a
+      unique statement component; clarified with YANG author that
+      lists not allowed since nodes from different lists cannot
+      be in the same unique test tuple
+    * added a <bad-value> element to the <error-info> for a
+      missing value instance error (310), containing the name of the
+      missing node.
+    * fix bug where no namespace ID is set for an <rpc-error>
+      where the 'select' attribute in the <filter> parameter
+      is invalid; set to NETCONF instead of 0
+    * fixed bug in XML generation where XML-safe string was not
+      generated in string node content
+    * fixed bug in copy-config where copy from inline to
+      candidate was not getting fully validated or applied correctly
+    * fix bug in val_set_canonical_order where list sometimes not
+      inserted in sorted order
+    * fixed bug in load_config where invoke could be called even
+      if validate phase failed
+    * add ncx:user-write extension
+      see extension 'user-write' in yuma-ncx.yang for details
+      Server will block user access to specific edit operations
+      if this extension is present in a YANG database node definition
+    * add /system/sysNetconfServerCLI monitoring data to
+      inspect the CLI parameters used at boot-time
+    * add boolean flags to agt_profile to track load-config
+      error progress so startup-error and running-error parameters
+      can be processed correctly:
+       - agt_load_validate_errors    (OK if --startup-error=continue)
+       - agt_load_rootcheck_errors   (OK if --running-error=continue)
+       - agt_load_apply_errors       (fatal error if SIL apply/commit fails)
+    * fixed bug 3476123; leafrefs not getting written to XML correctly
+    * fixed bug where inherited when-stmt and if-feature
+      statements (from choice or case nodes) were not
+      checked when deleting dead nodes
+    * fixed bug in check_editop where create on duplicate leaf-list was not
+      properly rejected with a data-exists error
+    * added support to make sure modules with top-level mandatory nodes
+      are rejected by the server if the --running-error parameter is
+      set to 'stop'.  This prevents a user from loading such a module
+      and causing the server to shutdown.
+    * added agt_validate_all (d:T) to agt_profile to control
+      <validate> op behavior.  Set to false to have <validate> only
+      call SILs for the nodes that are changed in the candidate,
+      which is how <commit> validate works.
+    * fix bug in NACM where read or write access was wrongly denied
+      when read-default=deny and write-default=deny
+    * fixed bug where the server would terminate the <load-config> op
+      if parse or rpc-instance-check errors occurred, even though
+      --startup-error=continue and the nodes with errors were optional
+      so they could be removed without making the running config invalid
+
+  * yangcli:
+    * fixed bug in filling database content for a OBJ_TYP_CASE
+      when the 1 and only case member was a complex type
+    * fix bug deleting containers or lists where mandatory child nodes
+      were incorrectly filled in, instead of skipped
+    * enhance CLI parsing so container can be something other
+      than a choice of empty leafs. e.g:
+        validate source=@myconfig.xml
+        myconfig.xml:
+        <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+           ...
+        </config>
+      This does not work if a 'source' parameter is given by
+      selecting a case number when filling in a choice.
+    * fix bug where user is prompted for a case number even if
+       there is only 1 enabled case in the choice
+    * fix bug where user is prompted if flag should be set y/n
+      when editing a leaf of type 'empty'; leaf value already
+      implicitly entered by selecting this leaf as the edit target
+    * fix bug in val_set_canonical_order where list sometimes not
+      inserted in sorted order
+    * fixed bug 3476123; leafrefs not getting written to XML correctly
+    * added XPath tab completion provided by Zesi Cai (thanks!)
+      When a '/' is entered instead of the start of a command,
+      the tab key will show all top-level objects available.
+      After each '/', the tab shows the next level of child nodes.
+      Does not support index (predicate) insertion.
+
+  * yangdump:
+    * fix segfault bug where stale backptr was accessed that
+      contained heap garbage
+    * fixed memory leak where submodule with errors was not freed
+      correctly after it was processed
+    * added '--full' parameter to yangdump --identifiers to show
+      identifiers with module name of each node expanded
+
+  * YANG Parse:
+    * fixed bug where conditional descendant nodes specified in
+      a unique-stmt are treated as an error.  This is only an error
+      is a key-stmt test fails; For unique-stmt, missing nodes
+      in a unique test tuple cause the test to be skipped
+    * fix bug where nested leafref types within unions were not always getting
+      checked in final resolve steps
+    * fix off-by-1 bug in object-id generation when module names
+      are added
+    * Remove memory leak from consume_revision
+    * fix bug where default value for union data type sometimes
+      incorrectly flagged as invalid value; can cause segfault
+    * fix bug where checking if a parameter is set to its default for
+      an identityref, bits, or leafref always returned FALSE
+    * fixed bug where XPath context node for when-stmt
+      in an augment-stmt was not set correctly
+    * fixed bug where errors in consume_body_stmts were not
+      always rippled all the way back to ncxmod.c, causing
+      mod->res == NO_ERR but mod->errors > 0
+
+  * Build
+    * Fixed makefile.sil so that yuma symbols are always
+      checked first before standard library module names
+      Also removed extra libraries libagt and libncx from
+      the SIL link command.  This is not needed and will
+      cause an error if these libraries are not found.
+   * Fixed bug in several Makefiles where libm is not explicitly
+      declared in the link command.  This causes STATIC=1 builds
+      to fail on Ubuntu 11.10 (symbol 'round' not found from libm)
+   * Cleaned up static build of yangcli
+
 * Tue Sep 27 2011 Andy Bierman <andy at netconfcentral.org> 2.1-2 [1457]
   * Build
     * fix bug added recently that breaks build in libtoaster
@@ -321,4 +588,45 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 	* NETCONF base:1.1 support (RFC 6241 and RFC 6242)
 	* with-defaults 'report-all-tagged' mode (RFC 6243)
 	* --urltarget path selection mechanism (UrlPath)
+
+
+%package devel
+BuildArch: noarch
+Summary:  YANG-based Unified Modular Automation Tools (Developer)
+
+%description devel
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains H files, scripts,
+and other files needed to create SIL code for use with
+the netconfd server.
+
+%post devel
+echo "Yuma developer files installed."
+
+%files devel
+%defattr(-,root,root,-)
+%{_bindir}/make_sil_dir
+%{_mandir}/man1/make_sil_dir.1.gz
+%{_includedir}/yuma/
+%{_datadir}/yuma/util/
+%{_datadir}/yuma/src/libtoaster/
+
+
+%package doc
+BuildArch: noarch
+Summary:  YANG-based Unified Modular Automation Tools (Documentation)
+
+%description doc
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains the Yuma user manuals
+in PDF and HTML format.
+
+%post doc
+echo "Yuma documentation files installed."
+
+%files doc
+%defattr(-,root,root,-)
+/usr/share/doc/yuma/server-call-chain.txt
+/usr/share/doc/yuma/pdf/
+/usr/share/doc/yuma/html/
 

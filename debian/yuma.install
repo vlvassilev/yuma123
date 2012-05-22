@@ -13,6 +13,7 @@ usr/man/man1/make_sil_dir.sh.1.gz
 usr/share/doc/yuma/
 usr/share/yuma/
 usr/include/yuma/
+usr/lib/yuma/
 etc/yuma/yangcli-sample.conf
 etc/yuma/yangdiff-sample.conf
 etc/yuma/yangdump-sample.conf

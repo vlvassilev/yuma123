@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,65 +46,21 @@ date         init     comment
 #include <netdb.h>
 #include <libssh2.h>
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_hello
 #include "mgr_hello.h"
-#endif
-
-#ifndef _H_mgr_io
 #include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_mgr_top
 #include "mgr_top.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_ses_msg
 #include "ses_msg.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
 
 /********************************************************************
 *                                                                   *
@@ -552,13 +508,8 @@ static void
 #if 0
     char addrbuff[16];
     socklen_t  socklen = 16;
-    int ret = getsockname(scb->fd,
-                          addrbuff,
-                          &socklen);
-    inet_ntop(AF_INET, 
-              addrbuff,
-              buffer,
-              64);
+    int ret = getsockname(scb->fd, addrbuff, &socklen);
+    inet_ntop(AF_INET, addrbuff, buffer, 64);
     ses_putstr(scb, (const xmlChar *)buffer);
 #else
     /* use bogus address for now */
@@ -570,15 +521,16 @@ static void
     ses_putstr(scb, (const xmlChar *)"10000");
 
     ses_putstr(scb, (const xmlChar *)";tcp;");
-    sprintf(buffer, "%u;", (uint32)getuid());
+
+    snprintf(buffer, sizeof(buffer), "%u;", (uint32)getuid());
     ses_putstr(scb, (const xmlChar *)buffer);
-    sprintf(buffer, "%u;", (uint32)getgid());
+    snprintf(buffer, sizeof(buffer), "%u;", (uint32)getgid());
     ses_putstr(scb, (const xmlChar *)buffer);
 
     /* additional group IDs is empty */
     ses_putchar(scb, ';');
     
-    str = getenv("HOME");
+    str = (const char *)ncxmod_get_home();
     if (str != NULL) {
         ses_putstr(scb, (const xmlChar *)str);
         ses_putchar(scb, ';');
@@ -950,7 +902,7 @@ status_t
         if (transport == SES_TRANSPORT_TCP) {
             /* force base:1.0 framing for TCP */
             ses_set_protocols_requested(scb, NCX_PROTO_NETCONF10);
-        }else if (protocols_parent != NULL) {
+        } else if (protocols_parent != NULL) {
             res = val_set_ses_protocols_parm(scb, protocols_parent);
         }
     }
@@ -961,7 +913,6 @@ status_t
     	} else {
             tcp_setup(scb, user);
         }
-
     }
 
     /* send the manager hello to the server */

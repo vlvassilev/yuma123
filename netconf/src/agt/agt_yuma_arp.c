@@ -1,7 +1,7 @@
 
 /* 
 
- * Copyright (c) 2009 - 2011, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -25,7 +25,7 @@
 
 //#include <xmlstring.h>
 
-#ifndef CYGWIN
+#if !defined(CYGWIN) && !defined(MACOSX)
 #define BUILD_ARP 1
 #endif
 
@@ -34,14 +34,13 @@
 
 #ifdef BUILD_ARP
 #include <net/if_arp.h>
-#endif  // BUILD_ARP
-
 #include <net/if.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <dirent.h>
+#endif
 
 #include "procdefs.h"
 #include "agt.h"
@@ -322,13 +321,13 @@ static void modify_arp (
     struct sockaddr_in sa_in;
     int sockfd = 0, i, tmp[HW_OCTETS];
 
-
     memset((char *) &req, 0, sizeof(req));
+    memset(&sa_in, 0, sizeof(sa_in));
 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	log_debug("\nFailed to open a socket for ioctl.\n");
-	*res = SET_ERROR(ERR_NCX_OPERATION_FAILED);
-	return;
+        log_debug("\nFailed to open a socket for ioctl.\n");
+        *res = SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        return;
     }
 
     req.arp_pa.sa_family = AF_INET ;
@@ -338,22 +337,23 @@ static void modify_arp (
     sa_in.sin_port = 0;
     if(inet_pton(AF_INET, 
 		(const char *)(VAL_STR(ipval)) , &sa_in.sin_addr) != 1) {
-	log_debug("\nINET_PTON error: %s\n", strerror(errno));
-	*res = SET_ERROR(ERR_NCX_OPERATION_FAILED);
-	return;
+        log_debug("\nINET_PTON error: %s\n", strerror(errno));
+        *res = SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        return;
     }
     memcpy(&req.arp_pa , &sa_in, sizeof(sa_in));
 
     /* set hw address */
-    if((i = sscanf((const char *)VAL_STR(macval), "%x:%x:%x:%x:%x:%x", 
-		    &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5])) != HW_OCTETS) {
-	log_debug("\nWrong HW mac in data node: mac is %s\n", VAL_STR(macval));
-	*res = SET_ERROR(ERR_NCX_OPERATION_FAILED);
-	return;
+    if(sscanf((const char *)VAL_STR(macval), "%2x:%2x:%2x:%2x:%2x:%2x", 
+          &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]) != HW_OCTETS) {
+        log_debug("\nWrong HW mac in data node: mac is %s\n", VAL_STR(macval));
+        *res = SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        return;
     }
 
-    for(i=0; i<HW_OCTETS;i++)
-	req.arp_ha.sa_data[i] = tmp[i];
+    for(i=0; i<HW_OCTETS;i++) {
+        req.arp_ha.sa_data[i] = tmp[i];
+    }
 
     req.arp_ha.sa_family = ARPHRD_ETHER;
 
@@ -363,20 +363,21 @@ static void modify_arp (
     /* now issue the ioctl with requested action */
     switch(action){
     case(ARP_ADD):
-	if(ioctl(sockfd, SIOCSARP,(caddr_t)&req) < 0) {
-	    log_debug("\nIOCTL error: %s\n", strerror(errno));
-	}
-	break;
+        if(ioctl(sockfd, SIOCSARP,(caddr_t)&req) < 0) {
+            log_debug("\nIOCTL error: %s\n", strerror(errno));
+        }
+        break;
     case(ARP_DEL):
-	if(ioctl(sockfd, SIOCDARP,(caddr_t)&req) <0) {
-	    log_debug("\nIOCTL error: %s\n", strerror(errno));
-	}
-	break;
+        if(ioctl(sockfd, SIOCDARP,(caddr_t)&req) <0) {
+            log_debug("\nIOCTL error: %s\n", strerror(errno));
+        }
+        break;
     default:
-	log_debug("\nrong IOCTL command\n");
-	*res = SET_ERROR(ERR_NCX_WRONG_VAL);
-	break;
+        log_debug("\nrong IOCTL command\n");
+        *res = SET_ERROR(ERR_NCX_WRONG_VAL);
+        break;
     }
+
     return;
 }
 
@@ -410,8 +411,8 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_arp_settings_maximum_entries_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug("\nEnter y_yuma_arp_arp_arp_settings_maximum_entries_edit "
+                "callback for %s phase", agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -506,8 +507,8 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_arp_settings_validity_timeout_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug("\nEnter y_yuma_arp_arp_arp_settings_validity_timeout_edit "
+                "callback for %s phase", agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -525,30 +526,33 @@ static status_t
         break;
     case AGT_CB_COMMIT:
         /* device instrumentation done here */
-	if(editop != OP_EDITOP_DELETE) {
-	    DIR	*dip;
-	    struct dirent  *dit;
-	    char tmp[255];
+        if(editop != OP_EDITOP_DELETE) {
+            DIR *dip;
+            struct dirent *dit;
+            char tmp[255];
 
-	    if ((dip = opendir(NEIGH_DIR)) == NULL) {
-		log_debug("\nCan not open dir %s\n", NEIGH_DIR);
-		return ERR_NCX_OPERATION_FAILED;
-	    }
+            if ((dip = opendir(NEIGH_DIR)) == NULL) {
+                log_debug("\nCan not open dir %s\n", NEIGH_DIR);
+                return ERR_NCX_OPERATION_FAILED;
+            }
 
-	    /* now for each interface update stale time */
-	    while ((dit = readdir(dip)) != NULL)
-	    {
-		/* skip "." and ".." entries */ 
-		if ((strncmp(dit->d_name, ".", strlen(dit->d_name)) == 0) || 
-			strncmp(dit->d_name, "..", strlen(dit->d_name)) == 0)
-		    continue;
+            /* now for each interface update stale time */
+            while ((dit = readdir(dip)) != NULL) {
+                /* skip "." and ".." entries */ 
+                if ((strncmp(dit->d_name, ".", strlen(dit->d_name)) == 0) || 
+                    strncmp(dit->d_name, "..", strlen(dit->d_name)) == 0) {
+                    continue;
+                }
 
-		snprintf(tmp, 255, "/proc/sys/net/ipv4/neigh/%s/gc_stale_time", 
-			dit->d_name);
-		write_file(tmp, VAL_UINT(newval));
-	    }
+                snprintf(tmp, 255, "/proc/sys/net/ipv4/neigh/%s/gc_stale_time",
+                         dit->d_name);
+                write_file(tmp, VAL_UINT(newval));
+            }
 
-	}
+            closedir(dip);
+
+        }
+
         switch (editop) {
         case OP_EDITOP_LOAD:
             break;
@@ -620,8 +624,8 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_arp_settings_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug("\nEnter y_yuma_arp_arp_arp_settings_edit callback "
+                "for %s phase", agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -710,8 +714,9 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_static_arps_static_arp_ip_address_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug(
+           "\nEnter y_yuma_arp_arp_static_arps_static_arp_ip_address_edit "
+           "callback for %s phase", agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -800,8 +805,9 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_static_arps_static_arp_mac_address_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug(
+           "\nEnter y_yuma_arp_arp_static_arps_static_arp_mac_address_edit "
+           "callback for %s phase", agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -890,8 +896,9 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_static_arps_static_arp_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug(
+           "\nEnter y_yuma_arp_arp_static_arps_static_arp_edit callback "
+           "for %s phase", agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -1007,8 +1014,9 @@ static status_t
     errorval = NULL;
     errorstr = NULL;
     if (LOGDEBUG) {
-        log_debug("\nEnter y_yuma_arp_arp_static_arps_edit callback for %s phase",
-            agt_cbtype_name(cbtyp));
+        log_debug(
+           "\nEnter y_yuma_arp_arp_static_arps_edit callback for %s phase",
+          agt_cbtype_name(cbtyp));
     }
 
     /* remove the next line if newval is used */
@@ -1406,7 +1414,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_edit);
     if (res != NO_ERR) {
         return res;
@@ -1415,7 +1423,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/arp-settings",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_arp_settings_edit);
     if (res != NO_ERR) {
         return res;
@@ -1424,7 +1432,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/arp-settings/maximum-entries",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_arp_settings_maximum_entries_edit);
     if (res != NO_ERR) {
         return res;
@@ -1433,7 +1441,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/arp-settings/validity-timeout",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_arp_settings_validity_timeout_edit);
     if (res != NO_ERR) {
         return res;
@@ -1442,7 +1450,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_edit);
     if (res != NO_ERR) {
         return res;
@@ -1451,7 +1459,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps/static-arp",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_static_arp_edit);
     if (res != NO_ERR) {
         return res;
@@ -1460,7 +1468,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps/static-arp/ip-address",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_static_arp_ip_address_edit);
     if (res != NO_ERR) {
         return res;
@@ -1469,7 +1477,7 @@ status_t
     res = agt_cb_register_callback(
         y_yuma_arp_M_yuma_arp,
         (const xmlChar *)"/arp/static-arps/static-arp/mac-address",
-        (const xmlChar *)"2011-08-25",
+        y_yuma_arp_R_yuma_arp,
         y_yuma_arp_arp_static_arps_static_arp_mac_address_edit);
     if (res != NO_ERR) {
         return res;
@@ -1513,11 +1521,12 @@ status_t
         return res;
     }
 
-    /* ignoring 'added' because no default leafs within /arp
-     * so the val_add_defaults function is not needed
-     */
-
-    res = y_yuma_arp_arp_mro(arp_val);
+    if (added) {
+        /* just the top node was created, instead of going through
+         * the SIL edit callback, so make-read-only was not called
+         */
+        res = y_yuma_arp_arp_mro(arp_val);
+    }
     return res;
 #else
     return NO_ERR;

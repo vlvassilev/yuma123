@@ -11,7 +11,7 @@
 // ---------------------------------------------------------------------------|
 // Yuma Test Harness includes
 // ---------------------------------------------------------------------------|
-#include "test/support/fixtures/base-suite-fixture.h"
+#include "test/support/fixtures/query-suite-fixture.h"
 #include "test/support/misc-util/log-utils.h"
 #include "test/support/nc-query-util/nc-query-test-engine.h"
 #include "test/support/checkers/string-presence-checkers.h"
@@ -27,7 +27,7 @@ using namespace std;
 
 namespace YumaTest {
 
-BOOST_FIXTURE_TEST_SUITE( mod_load_suite, BaseSuiteFixture )
+BOOST_FIXTURE_TEST_SUITE( mod_load_suite, QuerySuiteFixture )
 
 // ---------------------------------------------------------------------------|
 // Test cases for loading yang modules
@@ -46,6 +46,24 @@ BOOST_AUTO_TEST_CASE(load_yang_module_from_modpath)
 
     StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
     queryEngine_->tryLoadModule( primarySession_, "test1", checker );
+}
+
+// ---------------------------------------------------------------------------|
+BOOST_AUTO_TEST_CASE(load_bad_yang_module_from_modpath)
+{
+    DisplayTestDescrption( 
+        "Demonstrate loading of a corrupted 'yang' module (missing namespace)"
+        "from the configured --modpath.",
+        "The test1badns module should be found in one of the directories "
+        "specified using the --modpath command line parameter.\n\n"
+        "Note 1: There is no associated SIL for this module so it will be "
+        "loaded as a '.yang' file\n" ); 
+    
+    vector<string> expPresent{ "rpc-error", "error" };
+    vector<string> expNotPresent{ "mod-revision" };
+
+    StringsPresentNotPresentChecker checker( expPresent, expNotPresent );
+    queryEngine_->tryLoadModule( primarySession_, "test1badns", checker );
 }
 
 // ---------------------------------------------------------------------------|

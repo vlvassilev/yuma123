@@ -4,6 +4,7 @@ module yuma-arp {
 
     prefix "arp";
 
+    import yuma-ncx { prefix ncx; }
     import ietf-inet-types { prefix inet; }
     import ietf-yang-types { prefix yang; }
 
@@ -15,6 +16,11 @@ module yuma-arp {
       "This module contains a collection of YANG definitions for
        configuring and monitoring ARP.";
 
+    revision 2012-01-13 {
+      description
+        "Add ncx:user-write restriction to prevent user deletion.";
+     }
+
     revision 2011-08-25 {
       description
         "Initial revision;
@@ -22,8 +28,19 @@ module yuma-arp {
      }
        
     container arp {
+        ncx:user-write update;
+
         description
             "System ARP settings.";
+
+/*
+        leaf collection-enabled {
+          type boolean;
+          default true;
+          description 
+            "Enable dynamic arp collection";
+        }
+*/
 
         grouping arp-entry {
             leaf ip-address {

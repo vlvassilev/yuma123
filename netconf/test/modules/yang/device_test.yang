@@ -22,6 +22,13 @@ module device_test {
                 type uint32;
             }
 
+            leaf channelId {
+                description "Internal comms channel identifier.
+                             Automatically set, can not be set or adjusted
+                             by users.";
+                type uint32;
+            }
+
             leaf configuration {
                 description "Base-64 encoded binary configuration.";
                 type binary;
@@ -44,260 +51,6 @@ module device_test {
                 type string;
             }
         }
-    }
-    
-    container part1 {
-        presence "";
-        description "Top-level container for part related items.";
-        
-        container part1Version {
-            description "The top-level package version for all items contained
-                         in this part.";
-            config false;
-            
-            leaf packageVersion {
-                type string;
-            }             
-            
-            leaf packageValid {
-                description "Indicates if this package version is valid.";
-                type boolean;
-            }
-        }
-        
-        typedef permission1Type {
-            description "Describes the type of the permission.";
-            type enumeration {
-                enum permanent {
-                    description "The permission has no expiry time.";
-                }
-                enum elapsedTime {
-                    description "The permission is valid for a specified period of 
-                                 time since the permission was applied.";
-                }
-                enum runTime {
-                    description "The permission has a specified amount of time for 
-                                 which the permission can be used.";
-                }
-            }
-        }
-        
-        container permission1Information {
-            description "Contains a list of permission features.
-                         The list will only contain those permissions that have
-                         been loaded on to the device, including elapsedTime
-                         and runTime permissions that have expired unless they
-                         have been renewed.";
-            
-            config false;
-            
-            list permission1s {
-                key id;
-                leaf id {
-                    description "The ID number of the permission.";
-                    type uint32;
-                }
-                
-                leaf name {
-                    description "The name of the permission.";
-                    type string;
-                }
-                
-                leaf quantity {
-                    description "The number of these permissions enabled.";
-                    type uint32;
-                }
-                
-                leaf typeOfPermission1 {
-                    description "The type of this permission.";
-                    type permission1Type;
-                }
-                                
-                leaf timeUntilExpiry {
-                    description "Number of minutes until the permission expires.";
-                    type uint32;
-                    units "minutes";
-                }
-                
-                leaf permissionActive {
-                    description "Indicates if this permission is currently active.";
-                    type boolean;
-                }               
-            }
-        }
-
-        container notificationListeners {
-            leaf-list statusListeners {
-                description "List of IP addresses to send status messages to.";
-                type uint32;
-            }
-            
-            leaf-list snmpTrapListeners {
-                description "List of IP addresses to send SNMP traps to.";
-                type uint32;
-            }
-            
-            container redundantPart1 {
-                description "Network details for the redundant part.";
-                leaf ipAddress {
-                    type uint32;
-                }
-                
-                leaf destinationProfile {
-                    description "The profile number to be used by the redundant 
-                                 part.";
-                    type uint32;
-                }
-                
-                leaf echoConfiguration {
-                    description "Indicates if configuration changes are to be
-                                 sent to the redundant part.";
-                    type boolean;
-                }
-            }
-        }
-        
-        uses resourceDescription;
-        
-        list socket1 {
-            key id;
-            leaf id {
-                type uint32;
-            }
-            
-            typedef itemType {
-                description "Identifies what type of item has a version number.";
-                type enumeration {
-                    enum type1 {
-                        description "An item of type 1.";
-                    }
-                    enum type2 {
-                        description "An item of type 2.";
-                    }
-                    enum type3 {
-                        description "An item of type 3.";
-                    }
-                }
-            }
-            
-            grouping versionInformation {
-                description "Version information for an item.";
-                leaf itemDescription {
-                    description "A description of the item.";
-                    type string;
-                }
-                
-                leaf versionNumber {
-                    description "The version number of the item.";
-                    type string;
-                }
-                
-                leaf itemType {
-                     description "The type of the item.";
-                     type itemType;
-                }
-                
-                leaf valid {
-                    description "Indicates that the item is valid.";
-                    type boolean;
-                }
-            }
-            
-            grouping part2VersionInformation {
-                description "Version information of a part.";
-                leaf name {
-                    description "Name of the part.";
-                    type string;
-                }
-                
-                leaf sNumber {
-                    description "The S number of the part.";
-                    type string;
-                }
-                
-                leaf packageVersion {
-                    description "Overall version of this part.";
-                    type string;
-                }
-                
-                leaf packageValid {
-                    description "Indicates if this collection is valid 
-                                 on this part.";
-                    type boolean;
-                }
-        
-                leaf pcbModificationState {
-                    description "The modification state of the part.";
-                    type string;
-                }
-                
-                leaf serialNumber {
-                    description "The serial number of the part.";
-                    type string;
-                }
-                
-                list version {
-                    description "Container for the version numbers for the items 
-                                 on the part.";
-                    key id;
-                    
-                    leaf id {
-                        description "The ID number for this item.";
-                        type uint32;
-                    }
-                    
-                    uses versionInformation;
-                }
-            }
-            
-            grouping assemblyVersions {
-                description "Version numbers for an assembly.";
-                list part2 {
-                    description "Container for the part version numbers.";
-                    key id;
-                    
-                    leaf id {
-                        description "The ID number for this item.";
-                        type uint32;
-                    }
-        
-                    uses part2VersionInformation;
-                    list daughterPart2 {
-                        description "Container for daughter part version 
-                                     numbers.";
-                        key id;
-                        
-                        leaf id {
-                            description "The ID number of the daughter part.";
-                            type uint32;
-                        }
-                        
-                        uses part2VersionInformation;
-                    }
-                }
-            }
-
-            container socket1Version {
-	            description "Version information of the part in this socket.";
-	            config false;
-	            uses assemblyVersions;
-	        }
-	        uses resourceDescription;
-        }
-
-	    container identification {
-	        leaf unitLocation {
-	           description "User definable location of this unit.
-	                        This maps to SNMP system.sysLocation.";
-	           type string; 
-	        }
-	
-	        leaf unitName {
-	           description "User definable name of this unit.
-	                        This maps to SNMP system.sysName.";
-	           type string; 
-	        }
-	   }
     }
     
     container xpo {
@@ -340,9 +93,20 @@ module device_test {
             }
         }
 
-        leaf activeProfile {
-            description "The number of the active profile.";
-            type uint32;
+        grouping streamItem {
+            description "Stream container.";
+            uses resourceDescription;
+
+            list resourceConnection {
+                description "Connection between two virtual resources.";
+                key id;
+
+                leaf id {
+                    description "Connection identifier.";
+                    type uint32;
+                }
+                uses connectionItem;
+            }
         }
         
         list profile {
@@ -373,56 +137,26 @@ module device_test {
                     description "Connection identifier.";
                     type uint32;
                 }
-                uses connectionItem;
-            }
-        }
-       
-        grouping streamItem {
-            description "Stream container.";
-            uses resourceDescription;
 
-            list connection {
-                description "Connection between two virtual resources.";
-                key id;
-
-                leaf id {
-                    description "Connection identifier.";
+                leaf sourceStreamId {
+                    description "The ID of the stream providing the input to the
+                                 connection.";
                     type uint32;
                 }
+
+                leaf destinationStreamId {
+                    description "The ID of the stream accepting the output of the
+                                 connection.";
+                    type uint32;
+                }
+
                 uses connectionItem;
             }
         }
-    }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Start of RPC block
-    ///////////////////////////////////////////////////////////////////////////
-    rpc get-resource-types {
-        description "Obtains a list of available resource types.";
-
-        output {
-            leaf-list resource-type {
-                description "The resource type present in system.";
-                type uint32;
-            }
-        }
-    }
-
-    rpc get-resource-capability {
-        description "Obtains the capabilities of a specific resource type.";
-
-        input {
-            leaf resource-type {
-                description "The resource type to query.";
-                type uint32;
-            }
-        }
-
-        output {
-            leaf resource-capability {
-                description "Capabilities of resource.";
-                type string;
-            }
+        leaf activeProfile {
+            description "The number of the active profile.";
+            type uint32;
         }
     }
 
@@ -467,62 +201,10 @@ module device_test {
                 description "The language specified is unknown.";
             }
             enum dictionaryReferenceNotFound {
-                description "The dicitionary reference requested was not found.";
+                description "The dictionary reference requested was not found.";
             }
         }
     }
-    
-    rpc get-dictionary {
-        description "Obtains the system dictionary.";
-        
-        input {
-            leaf language {
-                description "The language required.";
-                type string;
-            }
-        }
-        
-        output {
-            leaf getDictionaryResult {
-                description "The result of the get operation.";
-                type rpcResult;
-            }
-
-            leaf dictionary {
-                description "The requested dictionary.";
-                type string;
-            }
-        }    
-    }
-    
-    rpc get-dictionary-reference {
-        description "Get a specific dictionary reference.";
-        
-        input {
-            leaf language {
-                description "The language required.";
-                type string;
-            }
-            
-            leaf referenceId {
-                description "The reference id required.";
-                type uint32;
-            }
-        }    
-        
-        output {
-            leaf getDictionaryReferenceResult {
-                description "The result of the get operation.";
-                type rpcResult;
-            }
-
-            leaf definition {
-                description "The text matching the input request.";
-                type string;
-            }
-        }
-    }
-        
     rpc copy-profile {
         description "Allows a profile to be copied.";
         
@@ -547,237 +229,6 @@ module device_test {
         output {
             leaf copyResult {
                 description "The result of the copy operation.";
-                type rpcResult;
-            }
-        }
-    }
-    
-    rpc copy-stream {
-        description "Allows a stream to be copied.";
-        
-        input {
-            leaf sourceProfileId {
-                description "The ID of the profile that contains the 
-                             stream to copy.";
-                type uint32;
-            }
-            
-            leaf sourceStreamId {
-                description "The ID of the stream to copy.";
-                type uint32;
-            }
-            
-            leaf destinationProfileId {
-                description "The profile to copy the stream in to.";
-                type uint32;
-            }
-            
-            leaf-list destintionStreamIdList {
-                description "A list of stream IDs to copy to.";
-                type uint32;
-            }
-            
-            leaf replaceExisting {
-                description "Indicates if the copy operation is able to 
-                             replace an existing stream.  If any of the 
-                             destination streams already exist the entire
-                             copy operation is aborted, and no streams
-                             are copied if this value is set to false.";
-                type boolean;
-            }
-        }
-        
-        output {
-            leaf copyResult {
-                description "The result of the copy operation.";
-                type rpcResult;
-            }
-        }
-    }
-
-    rpc modify-stream-config {
-        description "Allows mass adjustment of the same parameters across many
-                     streams within a single profile.";
-        input {
-            leaf profileId {
-                description "The ID of the profile to be modified.";
-                type uint32;
-            }
-            
-            leaf-list streamIdList {
-                description "A list of stream IDs to be modified.";
-                type uint32;
-            }
-            
-            leaf resourceNodeId {
-                description "The ID of the resource node to be modified.";
-                type uint32;
-            }
-            
-            leaf configBitMask {
-                description "A bit mask indicating which configuration items 
-                             are to be modified.";
-                type binary;
-            }
-            
-            leaf configuration {
-                description "The base-64 encoded configuration blob containing
-                             only those items detailed by the configBitMask.";
-                type binary;
-            }
-        }
-        
-        output {
-            leaf editStreamConfigResult {
-                description "The result of the edit config operation.";
-                type rpcResult;
-            }
-        }       
-    }
-       
-    rpc modify-stream-alarm-config {
-        description "Allows mass adjustment of the same alarm configuration 
-                     parameters across many  streams within a single profile.";
-        input {
-            leaf profileId {
-                description "The ID of the profile to be modified.";
-                type uint32;
-            }
-            
-            leaf-list streamIdList {
-                description "A list of stream IDs to be modified.";
-                type uint32;
-            }
-            
-            leaf resourceNodeId {
-                description "The ID of the resource node to be modified.";
-                type uint32;
-            }
-            
-            leaf alarmConfigBitMask {
-                description "A bit mask indicating which alarm configuration 
-                             items are to be modified.";
-                type binary;
-            }
-            
-            leaf alarmConfig {
-                description "The base-64 encoded alarm configuration blob 
-                             containing only those items detailed by the 
-                             alarmConfigBitMask.";
-                type binary;
-            }
-        }
-        
-        output {
-            leaf editStreamAlarmConfigResult {
-                description "The result of the edit alarm config operation.";
-                type rpcResult;
-            }
-        }       
-    }
-
-    rpc modify-stream-status-config {
-        description "Allows mass adjustment of the same status configuration 
-                     parameters across many streams within a single profile.";
-        input {
-            leaf profileId {
-                description "The ID of the profile to be modified.";
-                type uint32;
-            }
-            
-            leaf-list streamIdList {
-                description "A list of stream IDs to be modified.";
-                type uint32;
-            }
-            
-            leaf resourceNodeId {
-                description "The ID of the resource node to be modified.";
-                type uint32;
-            }
-            
-            leaf statusConfigBitMask {
-                description "A bit mask indicating which status configuration 
-                             items are to be modified.";
-                type binary;
-            }
-            
-            leaf statusConfig {
-                description "The base-64 encoded status configuration blob 
-                             containing only those items detailed by the 
-                             statusConfigBitMask.";
-                type binary;
-            }
-        }
-        
-        output {
-            leaf editStreamStatusConfigResult {
-                description "The result of the edit status config operation.";
-                type rpcResult;
-            }
-        }       
-    }
-
-    rpc get-status {
-        description "Allows the status of given virtual resource to be 
-                     retrieved.";
-        
-        input {
-            leaf streamId {
-                description "The stream ID of the virtual resource whose status 
-                             is being requested.";
-                type uint32;
-            }
-            
-            leaf virtualResourceId {
-                description "The ID of the virtual resource whose status is 
-                             being requested.";
-                type uint32;
-            }
-            
-            leaf statusId {
-                description "The ID of the status item being requested.";
-                type uint32;
-            }
-        }
-        
-        output {
-            leaf getStatusResult {
-                description "Indicates if the get status operation was 
-                             successful or not.";
-                type rpcResult;
-            }
-
-            leaf statusValue {
-                description "Base64 encoded value of the requested status item.";
-                type string;
-            }
-        }
-    }
-    
-    rpc get-time {
-        description "Returns the current time.";
-        
-        output {
-            leaf time {
-                description "The current time as XML.";
-                type string;
-            }
-        }
-    }
-    
-    rpc set-time {
-        description "Sets the current time.";
-        
-        input {
-            leaf time {
-                description "XML of the required time to be set.";
-                type string;
-            }
-        }
-        
-        output {
-            leaf setTimeResult {
-                description "Result of the set time operation.";
                 type rpcResult;
             }
         }

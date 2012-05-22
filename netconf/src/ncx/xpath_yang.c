@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,53 +48,18 @@ date         init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath_yang
 #include "xpath_yang.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 
 /********************************************************************
@@ -110,302 +75,427 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-
 /********************************************************************
-* FUNCTION set_next_objnode
-* 
-* Get the object identifier associated with
-* QName in an leafref XPath expression
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*    pcb == parser control block in progress
-*    prefix == prefix value used if any
-*    nodename == node name to find (must be present)
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    set_next_objnode (xpath_pcb_t *pcb,
-                      const xmlChar *prefix,
-                      xmlns_id_t  nsid,
-                      const xmlChar *nodename)
+ * Utility function for selecting the object template to use.
+ *
+ * \param pcb the parser control block
+ * \param  res the status of the selection 
+ * \return useobj the selected  object template 
+ ********************************************************************/
+static obj_template_t** select_pcb_object( xpath_pcb_t* pcb, 
+                                           status_t* res )
 {
-    obj_template_t     **useobj, *foundobj;
-    const xmlChar       *modname;
-    ncx_module_t        *targmod;
-    dlq_hdr_t           *temp_modQ;
-    status_t             res;
-    boolean              laxnamespaces;
-    xmlns_id_t           ncid;
-
-    /* TBD: change this to an agt_profile 'namespaces' */
-    laxnamespaces = TRUE;
-    targmod = NULL;
-    foundobj = NULL;
-    res = NO_ERR;
-    useobj = NULL;
-    ncid = xmlns_nc_id();
-    temp_modQ = ncx_get_temp_modQ();
-
-    /* set the pcb target to get the result */
     switch (pcb->curmode) {
     case XP_CM_TARGET:
-        useobj = &pcb->targobj;
-        break;
+        *res = NO_ERR;
+        return &pcb->targobj;
+
     case XP_CM_ALT:
-        useobj = &pcb->altobj;
-        break;
+        *res = NO_ERR;
+        return &pcb->altobj;
+
+
     case XP_CM_KEYVAR:
-        useobj = &pcb->varobj;
-        break;
+        *res = NO_ERR;
+        return &pcb->varobj;
+
+
     default:
-        res = SET_ERROR(ERR_INTERNAL_VAL);
+        *res = ERR_INTERNAL_VAL;
+        return NULL;
+    }
+}
+
+/********************************************************************
+ * Utility function for conditionally calling ncx_print_errormsg 
+ * depending on pcb->logerrors.
+ *
+ * \param pcb the parser control block
+ * \param mod the module 
+ * \param res the status error
+ * \return the status error
+ ********************************************************************/
+static status_t  pcb_print_errormsg( xpath_pcb_t* pcb, 
+                                     ncx_module_t *mod, 
+                                     status_t res )
+{
+    if ( pcb->logerrors ) {
+        ncx_print_errormsg( pcb->tkc, mod, res );
+    }
+    return res;
+}
+
+/********************************************************************
+ * Utility function for conditionally calling log_error 
+ * depending on pcb->logerrors.
+ *
+ * \param pcb the parser control block
+ * \param fmtstr the error message format string
+ ********************************************************************/
+static void pcb_log_error( xpath_pcb_t* pcb, 
+                           const char* fmtstr, ... )
+{
+    if ( pcb->logerrors ) {
+        va_list args;
+        va_start(args, fmtstr);
+        vlog_error( fmtstr, args );
+        va_end( args );
+    }
+}
+
+/********************************************************************
+ * Utility function for conditionally calling log_error 
+ * depending on pcb->logerrors.
+ *
+ * \param pcb the parser control block
+ * \param mod the module 
+ * \param res the status error
+ * \param fmtstr the error message format string
+ * \return the status error
+ ********************************************************************/
+static status_t pcb_log_error_msg( xpath_pcb_t* pcb, 
+                               ncx_module_t *mod, 
+                               status_t res,
+                               const char* fmtstr, ... )
+{
+    if ( pcb->logerrors ) {
+        ncx_print_errormsg( pcb->tkc, mod, res );
+
+        va_list args;
+        va_start(args, fmtstr);
+        vlog_error( fmtstr, args );
+        va_end( args );
+    }
+    return res;
+}
+
+
+/********************************************************************
+ * Utility function for getting the target module for the nsid.
+ *
+ * \param nsid the nsid
+ * \return the corresponding module.
+ ********************************************************************/
+static ncx_module_t* get_target_module_for_nsid( xmlns_id_t nsid )
+{
+    const xmlChar* modname = xmlns_get_module(nsid);
+    if (modname) {
+        return ncx_find_module(modname, NULL);
+    }
+    return NULL;
+}
+
+/********************************************************************
+ * Utility function for testing if a target object is a leaf list
+ *
+ * \param pcb the parser control block in progress|
+ * \return true if the target object is a leaf list 
+ *********************************************************************/
+static bool targ_obj_is_leaflist( xpath_pcb_t* pcb )
+{
+    return (pcb->targobj && pcb->targobj->objtype == OBJ_TYP_LEAF_LIST);
+}
+
+/********************************************************************
+ * Utility function for getting the target module for selecting the
+ * target module.
+ *
+ * \param pcb the parser control block in progress
+ * \param prefix the prefix value used if any
+ * \param nsid the namespace id for the module
+ * \param laxnamespaces flag indicating if lax namespaces are being used.
+ * \return the corresponding module.
+ ********************************************************************/
+static ncx_module_t* select_target_module( xpath_pcb_t* pcb, 
+                                      const xmlChar* prefix,
+                                      xmlns_id_t nsid, 
+                                      boolean laxnamespaces,
+                                      status_t* res )
+{
+    *res = NO_ERR;
+    ncx_module_t* targmod = NULL;
+
+    if( pcb->source == XP_SRC_XML || !pcb->tkerr.mod ) {
+        if (nsid) {
+            dlq_hdr_t *temp_modQ = ncx_get_temp_modQ();
+            if (nsid == xmlns_nc_id() || !temp_modQ ) {
+                targmod = get_target_module_for_nsid( nsid );
+            } else if ( temp_modQ ) {
+                /* try the temp Q first */
+                targmod = ncx_find_module_que_nsid(temp_modQ, nsid);
+                if ( !targmod ) {
+                    targmod = get_target_module_for_nsid( nsid );
+                }
+            }
+
+            if ( !targmod ) {
+                *res = ERR_NCX_DEF_NOT_FOUND;
+                pcb_log_error( pcb, "\nError: module not found in expr '%s'",
+                               pcb->exprstr );
+            }
+        } else if (!laxnamespaces) {
+            *res = ERR_NCX_UNKNOWN_NAMESPACE;
+            pcb_log_error( pcb, "\nError: no namespace in expr '%s'", 
+                           pcb->exprstr);
+        }
+    } else {
+        *res = xpath_get_curmod_from_prefix( prefix, pcb->tkerr.mod, &targmod);
+        if (*res != NO_ERR) {
+            if ( !prefix && laxnamespaces) {
+                *res = NO_ERR;
+            } else {
+                pcb_log_error( pcb, "\nError: Module for prefix '%s' not found",
+                               (prefix) ? prefix : EMPTY_STRING );
+            }
+        }
+    }
+
+    return targmod;
+}
+
+/********************************************************************
+ * Utility function for finding any object based on the node name.
+ *
+ * \param nodename the name of the object to find.
+ * \return the corresponding object template.
+ ********************************************************************/
+static obj_template_t* find_any_object( const xmlChar* nodename )
+{
+    obj_template_t *foundobj = NULL;
+    dlq_hdr_t *temp_modQ = ncx_get_temp_modQ();
+
+    if ( temp_modQ ) {
+        foundobj = ncx_find_any_object_que( temp_modQ, nodename );
+     }
+
+     if ( !foundobj ) {
+         foundobj = ncx_find_any_object(nodename);
+     }
+
+     return foundobj;
+}
+
+/********************************************************************
+ * Utility function for finding any object from root, using  the node name
+ * and nsid
+ *
+ * \param nodename the name of the object to find.
+ * \param nsid the nsid
+ * \return the corresponding object template.
+ ********************************************************************/
+static obj_template_t* find_object_from_root( const xmlChar* nodename, 
+                                              xmlns_id_t nsid )
+{
+    obj_template_t *foundobj = find_any_object( nodename );
+
+     if ( foundobj && nsid && obj_get_nsid(foundobj) != nsid ) {
+         /* did not match the specified namespace ID */
+         foundobj = NULL;
+     }
+
+     return foundobj;
+}
+
+static obj_template_t* ensure_found_object_is_rpc( obj_template_t* foundobj )
+{
+    if (foundobj && foundobj->objtype == OBJ_TYP_RPC) {
+        return foundobj;
+     }
+    return NULL;
+}
+
+/********************************************************************
+ * Utility function for finding a top level object if the prefix or
+ * nsid is not specified.
+ *
+ * \param pcb the parser control block in progress
+ * \param prefix the prefix value used if any
+ * \param nsid the namespace id for the module
+ * \param nodename the name of the node to find
+ * \param targobj the target module
+ * \return the corresponding object template
+ ********************************************************************/
+static obj_template_t* find_top_level_object( xpath_pcb_t* pcb, 
+                                       const xmlChar* prefix,
+                                       xmlns_id_t nsid, 
+                                       const xmlChar* nodename )
+{
+    obj_template_t* foundobj = NULL;
+
+    if ( !pcb->targobj ) {
+        pcb->targobj = pcb->obj;
+    }
+
+    if ( !pcb->targobj ) {
+        return NULL;
+    }
+
+
+    if (obj_is_root(pcb->targobj)) {
+        foundobj = find_object_from_root( nodename, nsid );
+    } else if ( obj_get_nsid(pcb->targobj) == xmlns_nc_id() && 
+                ( !xml_strcmp(obj_get_name(pcb->targobj), NCX_EL_RPC)) ) { 
+        /* find an RPC method with the nodename */
+        if ( prefix && nsid == 0) {
+            nsid = xmlns_find_ns_by_prefix(prefix);
+        }
+
+        if ( !nsid ) {
+            foundobj = find_any_object( nodename );
+        } else {
+            ncx_module_t* targmod = NULL;
+            dlq_hdr_t *temp_modQ = ncx_get_temp_modQ();
+            if (temp_modQ) {
+                targmod = ncx_find_module_que_nsid(temp_modQ, nsid);
+            } else {
+                targmod = get_target_module_for_nsid( nsid );
+            }
+
+            if ( targmod ) {
+                foundobj = ncx_find_object( targmod, nodename);
+            }
+        }
+
+        foundobj = ensure_found_object_is_rpc( foundobj );
+    } else {
+        foundobj = obj_find_child( pcb->targobj, obj_get_mod_name(pcb->targobj),
+                                   nodename);
+        if ( !foundobj && !prefix ) {
+            foundobj = obj_find_child( pcb->targobj, NULL, nodename);
+        }
+    }
+    return foundobj;
+}
+
+/********************************************************************
+ * Get the object identifier based on the ueeobj
+ *
+ * \param useobj the object being used
+ * \param targnod the target module
+ * \param nodename the node name to find (must be present)
+ * \param laxnamespaces flag indicating if lax namespaces are being used.
+ * \return status
+ *********************************************************************/
+
+static obj_template_t* find_object_from_use_obj( obj_template_t* useobj, 
+                                                 ncx_module_t* targmod,
+                                                 const xmlChar* nodename,
+                                                 boolean laxnamespaces )
+{
+    obj_template_t* foundobj = NULL;
+
+    if (obj_is_root(useobj)) {
+        if ( targmod ) {
+            foundobj = obj_find_template_top( targmod, ncx_get_modname(targmod),
+                                              nodename);
+        }
+    } else if ( obj_get_nsid(useobj) == xmlns_nc_id() &&
+                !xml_strcmp(obj_get_name(useobj), NCX_EL_RPC)) {
+        /* get the rpc template ode for this object */
+        if ( targmod ) {
+            foundobj = obj_find_template_top(targmod, ncx_get_modname(targmod),
+                                          nodename);
+            foundobj = ensure_found_object_is_rpc( foundobj );
+        }
+    } else {
+        /* get child node of this object */
+        if ( targmod ) {
+            foundobj = obj_find_child( useobj, ncx_get_modname(targmod),
+                                       nodename);
+        }
+        else if ( !foundobj && laxnamespaces ) {
+            foundobj = obj_find_child(useobj, NULL, nodename);
+        }
+    }
+    return foundobj;
+}
+
+/********************************************************************
+ * Get the object identifier associated with
+ * QName in an leafref XPath expression
+ *
+ * \note Error messages are printed by this function!!
+ *       Do not duplicate error messages upon error return
+ *
+ * \param pcb the parser control block in progress
+ * \param prefix the prefix value used if any
+ * \param nsid the namespace id for the module
+ * \param nodename the node name to find (must be present)
+ * \return status
+ *********************************************************************/
+static status_t set_next_objnode( xpath_pcb_t *pcb,
+                                  const xmlChar *prefix,
+                                  xmlns_id_t  nsid,
+                                  const xmlChar *nodename )
+{
+    /* TBD: change this to an agt_profile 'namespaces' */
+    boolean              laxnamespaces = TRUE;
+
+    /* set the pcb target to get the result */
+    status_t res = NO_ERR;
+    obj_template_t** useobj = select_pcb_object( pcb, &res );
+    if ( res != NO_ERR ) {
+        return pcb_print_errormsg( pcb, pcb->tkerr.mod, res );
     }
 
     /* get the module from the NSID or the prefix */
-    if (res == NO_ERR) {
-        if (pcb->source == XP_SRC_XML || pcb->tkerr.mod==NULL) {
-            if (nsid) {
-                if (nsid == ncid || temp_modQ == NULL) {
-                    modname = xmlns_get_module(nsid);
-                    if (modname) {
-                        targmod = ncx_find_module(modname, NULL);
-                    }
-                } else if (temp_modQ != NULL) {
-                    /* try the temp Q first */
-                    targmod = ncx_find_module_que_nsid(temp_modQ, 
-                                                       nsid);
-                    if (targmod == NULL) {
-                        /* try to find a manager-loaded module */
-                        modname = xmlns_get_module(nsid);
-                        if (modname) {
-                            targmod = ncx_find_module(modname, NULL);
-                        }
-                    }
-                }
-                if (targmod == NULL) {
-                    res = ERR_NCX_DEF_NOT_FOUND;
-                    if (pcb->logerrors) {
-                        log_error("\nError: module not found in expr '%s'",
-                                  pcb->exprstr);
-                    }
-                }
-            } else if (!laxnamespaces) {
-                res = ERR_NCX_UNKNOWN_NAMESPACE;
-                if (pcb->logerrors) {
-                    log_error("\nError: no namespace in expr '%s'",
-                              pcb->exprstr);
-                }
-            }
-        } else {
-            res = xpath_get_curmod_from_prefix(prefix,
-                                               pcb->tkerr.mod,
-                                               &targmod);
-            if (res != NO_ERR) {
-                if (prefix == NULL && laxnamespaces) {
-                    res = NO_ERR;
-                } else if (pcb->logerrors) {
-                    log_error("\nError: Module for prefix '%s' not found",
-                              (prefix) ? prefix : EMPTY_STRING);
-                }
-            }
-        }
+    ncx_module_t* targmod = select_target_module( pcb, prefix, nsid, 
+                                                  laxnamespaces, &res );
+    if ( res != NO_ERR ) {
+        return pcb_print_errormsg( pcb, pcb->tkerr.mod, res );
     }
 
     /* check if no NSID or prefix used: instead of rejecting
      * the request, check any top-level object, if allowed
      * by the laxnamespaces parameter
      */
-    if (targmod == NULL &&
-        laxnamespaces && 
-        res == NO_ERR && 
-        (nsid == 0 || prefix == NULL)) {
-
-        if (pcb->targobj == NULL) {
-            pcb->targobj = pcb->obj;
+    obj_template_t *foundobj = NULL;
+    if ( !targmod && laxnamespaces && ( !nsid || !prefix )) {
+        foundobj = find_top_level_object( pcb, prefix, nsid, nodename );
+        if ( !foundobj ) {
+            return pcb_log_error_msg(pcb, pcb->tkerr.mod, ERR_NCX_DEF_NOT_FOUND,
+                      "\nError: No object match for node '%s' in expr '%s'", 
+                      nodename, pcb->exprstr);
         }
-
-        if (pcb->targobj != NULL) {
-            if (obj_is_root(pcb->targobj)) {
-                if (temp_modQ != NULL) {
-                    foundobj = 
-                        ncx_find_any_object_que(temp_modQ,
-                                                nodename);
-                    if (foundobj == NULL) {
-                        foundobj = ncx_find_any_object(nodename);
-                    }
-                } else {
-                    foundobj = ncx_find_any_object(nodename);
-                }
-                if (foundobj != NULL && 
-                    nsid != 0 && 
-                    obj_get_nsid(foundobj) != nsid) {
-                    /* did not match the specified namespace ID */
-                    foundobj = NULL;
-                }
-            } else if (obj_get_nsid(pcb->targobj) == xmlns_nc_id() &&
-                       (!xml_strcmp(obj_get_name(pcb->targobj),
-                                    NCX_EL_RPC))) {
-                foundobj = NULL;
-
-                /* find an RPC method with the nodename */
-                if (prefix != NULL && nsid == 0) {
-                    nsid = xmlns_find_ns_by_prefix(prefix);
-                }
-                if (nsid == 0) {
-                    if (temp_modQ != NULL) {
-                        foundobj = 
-                            ncx_find_any_object_que(temp_modQ,
-                                                    nodename);
-                    } else {
-                        foundobj = ncx_find_any_object(nodename);
-                    }
-                } else {
-                    targmod = NULL;
-                    if (temp_modQ) {
-                        targmod = 
-                            ncx_find_module_que_nsid(temp_modQ,
-                                                     nsid);
-                    } else {
-                        modname = xmlns_get_module(nsid);
-                        if (modname) {
-                            targmod = ncx_find_module(modname, NULL);
-                        }
-                    }
-                    if (targmod != NULL) {
-                            foundobj = ncx_find_object(targmod,
-                                                       nodename);
-                    }
-                }
-
-                if (foundobj != NULL && 
-                    foundobj->objtype != OBJ_TYP_RPC) {
-                    foundobj = NULL;
-                }
-            } else {
-                foundobj = obj_find_child(pcb->targobj,
-                                          obj_get_mod_name(pcb->targobj),
-                                          nodename);
-                if (foundobj == NULL && 
-                    laxnamespaces &&
-                    prefix == NULL) {
-                    foundobj = obj_find_child(pcb->targobj,
-                                              NULL,
-                                              nodename);
-                }
-            }
+    } else if ( *useobj ) {
+        foundobj = find_object_from_use_obj( *useobj, targmod, nodename, 
+                                              laxnamespaces ); 
+    } else if ( pcb->curmode == XP_CM_KEYVAR || pcb->curmode == XP_CM_ALT ) {
+        /* setting object for the first time, get child node of the current 
+         * context object */
+        if ( pcb->targobj && targmod ) {
+            foundobj = obj_find_child( pcb->targobj, ncx_get_modname(targmod), 
+                                       nodename );
         }
-
-        if (foundobj == NULL) {
-            res = ERR_NCX_DEF_NOT_FOUND;
-            if (pcb->logerrors) {
-                log_error("\nError: No object match for node '%s' "
-                          "in expr '%s'",
-                          nodename, pcb->exprstr);
-            }
+    } else if ( ( pcb->flags & XP_FL_ABSPATH ) ) {
+        /* setting object for the first time get top-level object from 
+         * object module */
+        if ( targmod ) {
+            foundobj = obj_find_template_top(targmod, ncx_get_modname(targmod),
+                                             nodename);
         }
+    } else {
+        /* setting object for the first time but the context node is a leaf, 
+         * so there is no possible child node of the start object */
+        log_debug2( "\n%s setting object for the first time but the context "
+                    "node is a leaf, so there is no possible child node "
+                    "of the start object", __func__ );
     }
 
-    /* finish off any error and exit */
-    if (res != NO_ERR) {
-        if (pcb->logerrors) {
-            ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
-        }
-        return res;
-    }
-
-    /* get the object from the module (if not already done) */
-    if (foundobj != NULL) {
-        /* already set in the wildcard search above */  ;
-    } else if (*useobj != NULL) {
-        if (obj_is_root(*useobj)) {
-            if (targmod != NULL) {
-                foundobj = 
-                    obj_find_template_top(targmod,
-                                          ncx_get_modname(targmod),
-                                          nodename);
-            }
-        } else if (obj_get_nsid(*useobj) == xmlns_nc_id() &&
-                   !xml_strcmp(obj_get_name(*useobj), NCX_EL_RPC)) {
-            if (targmod != NULL) {
-                foundobj = 
-                    obj_find_template_top(targmod,
-                                          ncx_get_modname(targmod),
-                                          nodename);
-                if (foundobj && foundobj->objtype != OBJ_TYP_RPC) {
-                    foundobj = NULL;
-                }
-            }
-        } else {
-            /* get child node of this object */
-            if (targmod != NULL) {
-                foundobj = 
-                    obj_find_child(*useobj,
-                                   ncx_get_modname(targmod),
-                                   nodename);
-            }
-            if (foundobj == NULL && 
-                laxnamespaces &&
-                targmod == NULL &&
-                prefix == NULL) {
-                foundobj = obj_find_child(*useobj, NULL, nodename);
-            }
-        }
-    } else if (pcb->curmode == XP_CM_KEYVAR ||
-               pcb->curmode == XP_CM_ALT) {
-
-        /* setting object for the first time
-         * get child node of the current context object
-         */
-        if (pcb->targobj != NULL && targmod != NULL) {
-            foundobj = 
-                obj_find_child(pcb->targobj,
-                               ncx_get_modname(targmod),
+    if ( !foundobj ) {
+        if (prefix) {
+            pcb_log_error( pcb, "\nError: object not found '%s:%s'", prefix, 
                                nodename);
+        } else {
+            pcb_log_error( pcb, "\nError: object not found '%s'", nodename);
         }
-    } else if (pcb->flags & XP_FL_ABSPATH) {
-        /* setting object for the first time
-         * get top-level object from object module 
-         */
-        if (targmod != NULL) {
-            foundobj = 
-                obj_find_template_top(targmod,
-                                      ncx_get_modname(targmod),
-                                      nodename);
-        }
-    } else {
-        /* setting object for the first time
-         * but the context node is a leaf, so there
-         * is no possible child node of the the start object 
-         */
-        ;
+        return pcb_print_errormsg( pcb, pcb->objmod, 
+                                   ERR_NCX_DEF_NOT_FOUND );
     }
 
-    if (foundobj == NULL) {
-        res = ERR_NCX_DEF_NOT_FOUND;
-        if (pcb->logerrors) {
-            if (prefix) {
-                log_error("\nError: object not found '%s:%s'",
-                          prefix, 
-                          nodename);
-            } else {
-                log_error("\nError: object not found '%s'",
-                          nodename);
-            }
-            ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
-        }
-    } else {
-        *useobj = foundobj;
-    }
-
-    return res;
-
+    *useobj = foundobj;
+    return NO_ERR;
 } /* set_next_objnode */
-
 
 /********************************************************************
 * FUNCTION move_up_obj
@@ -421,25 +511,14 @@ static status_t
 * RETURNS:
 *   status
 *********************************************************************/
-static status_t
-    move_up_obj (xpath_pcb_t *pcb)
+static status_t move_up_obj (xpath_pcb_t *pcb)
 {
-    obj_template_t  **useobj, *foundobj;
-    status_t                res;
+    obj_template_t  *foundobj = NULL;
 
-    foundobj = NULL;
-    res = NO_ERR;
-
-    switch (pcb->curmode) {
-    case XP_CM_TARGET:
-        useobj = &pcb->targobj;
-        break;
-    case XP_CM_ALT:
-        useobj = &pcb->altobj;
-        break;
-    default:
-        res = SET_ERROR(ERR_INTERNAL_VAL);
-        ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+    status_t res = NO_ERR;
+    obj_template_t** useobj = select_pcb_object( pcb, &res );
+    if ( NO_ERR != res ) {
+        pcb_print_errormsg(pcb, pcb->objmod, res);
         return res;
     }
 
@@ -475,134 +554,142 @@ static status_t
 
 } /* move_up_obj */
 
+/********************************************************************
+ * retrieve the associated node name for the current tk_tt_period
+ * pcb token.
+ *
+ * \param pcb the parser control block in progress|
+ * \param res the result status
+ * \return the associated node name
+ *********************************************************************/
+static const xmlChar* parse_node_identifier_tk_tt_period( xpath_pcb_t* pcb,
+                                                          status_t* res )
+{
+    if (pcb->flags & XP_FL_INSTANCEID) {
+        if ( !targ_obj_is_leaflist( pcb ) ) {
+            *res = ERR_NCX_INVALID_VALUE;
+        } else {
+            *res = NO_ERR;
+            return obj_get_name(pcb->targobj);
+        }
+    } else {
+       *res = pcb_log_error_msg( pcb, NULL, ERR_NCX_WRONG_TKTYPE,
+                                 "\nError: '.' not allowed here" );
+    }
+    return NULL;
+}
 
 /********************************************************************
-* FUNCTION parse_node_identifier
-* 
-* Parse the leafref node-identifier string
-* It has already been tokenized
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* node-identifier        = [prefix ":"] identifier
-*
-* INPUTS:
-*    pcb == parser control block in progress
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    parse_node_identifier (xpath_pcb_t *pcb)
+ * retrieve the associated node name for the current tk_tt_string
+ * pcb token.
+ *
+ * \param pcb the parser control block in progress|
+ * \param prefix the prefix
+ * \param nsid the nsid
+ * \param res the result status
+ * \return the associated node name
+ *********************************************************************/
+static const xmlChar* parse_node_identifier_tk_tt_string( xpath_pcb_t* pcb, 
+                                            const xmlChar** prefix,
+                                            xmlns_id_t* nsid,
+                                            status_t* res )
 {
-    const xmlChar  *prefix, *nodename;
-    ncx_import_t   *import;
-    ncx_module_t   *testmod;
-    status_t        res;
-    xmlns_id_t      nsid;
+    /* pfix:identifier */
+    *prefix = TK_CUR_MOD(pcb->tkc);
 
-    prefix = NULL;
-    nodename = NULL;
-    import = NULL;
-    res = NO_ERR;
-    nsid = 0;
+    if (pcb->source != XP_SRC_XML) {
+        if (pcb->tkerr.mod) {
+            if ( xml_strcmp(pcb->tkerr.mod->prefix, *prefix)) {
+                ncx_import_t* import = ncx_find_pre_import( pcb->tkerr.mod, 
+                                                            *prefix);
+                if (!import) {
+                    *res = pcb_log_error_msg( pcb, pcb->tkerr.mod, 
+                            ERR_NCX_PREFIX_NOT_FOUND, 
+                            "\nError: '.' not allowed here" );
+                    return NULL;
+                } else {
+                    ncx_module_t* testmod = ncx_find_module( import->module, 
+                                                             import->revision );
+                    if (testmod) {
+                        *nsid = testmod->nsid;
+                    }
+                }
+            }
+        } else {
+            *nsid = xmlns_find_ns_by_prefix(*prefix);
+            if ( *nsid == XMLNS_NULL_NS_ID ) {
+                *res = pcb_log_error_msg( pcb, pcb->tkerr.mod, 
+                       ERR_NCX_PREFIX_NOT_FOUND, 
+                       "\nError: module for prefix '%s' not found", *prefix );
+                return NULL;
+            }
+        }
+    } else {
+        *res = xml_get_namespace_id( pcb->reader, *prefix, 
+                                     TK_CUR_MODLEN(pcb->tkc), nsid);
+        if ( *res != NO_ERR ) {
+            *res = pcb_log_error_msg( pcb, pcb->tkerr.mod, *res,
+                    "\nError: unknown XML prefix '%s'", *prefix );
+            return NULL;
+        }
+    }
+
+    /* save the NSID in the token for printing later */
+    TK_CUR_NSID(pcb->tkc) = *nsid;
+    return TK_CUR_VAL(pcb->tkc);
+}
+
+/********************************************************************
+ * Parse the leafref node-identifier string
+ * It has already been tokenized
+ *
+ * \note Error messages are printed by this function!!
+ *       Do not duplicate error messages upon error return
+ *
+ * node-identifier        = [prefix ":"] identifier
+ *
+ * \param pcb the parser control block in progress|
+ * \return the status result
+ *********************************************************************/
+static status_t parse_node_identifier (xpath_pcb_t *pcb)
+{
+    const xmlChar *nodename = NULL;
+    const xmlChar *prefix = NULL;
+    xmlns_id_t nsid = 0;
 
     /* get the next token in the step, node-identifier */
-    res = TK_ADV(pcb->tkc);
+    status_t res = TK_ADV(pcb->tkc);
     if (res != NO_ERR) {
-        ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
+        pcb_print_errormsg(pcb, pcb->tkerr.mod, res);
         return res;
     }
 
     switch (TK_CUR_TYP(pcb->tkc)) {
     case TK_TT_PERIOD:
-        if (pcb->flags & XP_FL_INSTANCEID) {
-            if (!(pcb->targobj && 
-                  pcb->targobj->objtype == OBJ_TYP_LEAF_LIST)) {
-                res = ERR_NCX_INVALID_VALUE;
-            } else {
-                nodename = obj_get_name(pcb->targobj);
-            }
-        } else {
-            res = ERR_NCX_WRONG_TKTYPE;
-            if (pcb->logerrors) {
-                log_error("\nError: '.' not allowed here");
-                ncx_print_errormsg(pcb->tkc, NULL, res);
-            }
-        }
+        nodename = parse_node_identifier_tk_tt_period( pcb, &res );
         break;
+
     case TK_TT_MSTRING:
-        /* pfix:identifier */
-        prefix = TK_CUR_MOD(pcb->tkc);
+        nodename = parse_node_identifier_tk_tt_string( pcb, &prefix, &nsid, 
+                                                      &res );
+        break;
 
-        if (pcb->source != XP_SRC_XML) {
-            if (pcb->tkerr.mod) {
-                if (xml_strcmp(pcb->tkerr.mod->prefix, prefix)) {
-                    import = ncx_find_pre_import(pcb->tkerr.mod, prefix);
-                    if (!import) {
-                        res = ERR_NCX_PREFIX_NOT_FOUND;
-                        if (pcb->logerrors) {
-                            log_error("\nError: import for "
-                                      "prefix '%s' not found",
-                                      prefix);
-                            ncx_print_errormsg(pcb->tkc, 
-                                               pcb->tkerr.mod, 
-                                               res);
-                        }
-                        break;  /* out of switch */
-                    } else {
-                        testmod = ncx_find_module(import->module,
-                                                  import->revision);
-                        if (testmod) {
-                            nsid = testmod->nsid;
-                        }
-                    }
-                }
-            } else {
-                nsid = xmlns_find_ns_by_prefix(prefix);
-                if (nsid == XMLNS_NULL_NS_ID) {
-                    res = ERR_NCX_PREFIX_NOT_FOUND;
-                    if (pcb->logerrors) {
-                        log_error("\nError: module for prefix "
-                                  "'%s' not found",
-                                  prefix);
-                        ncx_print_errormsg(pcb->tkc, 
-                                           pcb->tkerr.mod, 
-                                           res);
-                    }
-                    break;  /* out of switch */
-                }
-            }
-        } else {
-            res = xml_get_namespace_id(pcb->reader,
-                                       prefix,
-                                       TK_CUR_MODLEN(pcb->tkc),
-                                       &nsid);
-            if (res != NO_ERR) {
-                if (pcb->logerrors) {
-                    log_error("\nError: unknown XML prefix '%s'",  prefix);
-                    ncx_print_errormsg(pcb->tkc, NULL, res);
-                }
-                break;
-            }
-        }
-
-        /* save the NSID in the token for printing later */
-        TK_CUR_NSID(pcb->tkc) = nsid;
         /* fall through to check QName */
     case TK_TT_TSTRING:
         nodename = TK_CUR_VAL(pcb->tkc);
-        if (pcb->obj) {
-            res = set_next_objnode(pcb, prefix, nsid, nodename);
-        } /* else identifier not checked here */
         break;
     default:
         res = ERR_NCX_WRONG_TKTYPE;
-        ncx_mod_exp_err(pcb->tkc, 
-                        pcb->tkerr.mod, 
-                        res,
-                        "node identifier");
+        if (pcb->logerrors) {
+            ncx_mod_exp_err(pcb->tkc, pcb->tkerr.mod, res, "node identifier");
+        }
+        break;
+    }
+
+    /* FIXME Should this function simply return NO_ERR at the top if
+     * pcb->obj is NULL */
+    if ( res == NO_ERR && pcb->obj ) {
+        res = set_next_objnode( pcb, prefix, nsid, nodename );
     }
 
     return res;
@@ -640,10 +727,12 @@ static status_t
     if (xml_strcmp(TK_CUR_VAL(pcb->tkc),
                    (const xmlChar *)"current")) {
         res = ERR_NCX_WRONG_VAL;
-        ncx_mod_exp_err(pcb->tkc, 
-                        pcb->tkerr.mod, 
-                        res,
-                        "current() function");
+        if (pcb->logerrors) {
+            ncx_mod_exp_err(pcb->tkc, 
+                            pcb->tkerr.mod, 
+                            res,
+                            "current() function");
+        }
         return res;
     }
 
@@ -901,8 +990,7 @@ static status_t
             return res;
         }
     } else if ((pcb->flags & XP_FL_INSTANCEID) && 
-               pcb->targobj && 
-               pcb->targobj->objtype == OBJ_TYP_LEAF_LIST) {
+               targ_obj_is_leaflist( pcb ) ) {
         keytotal = 1;
     }
     
@@ -1484,6 +1572,51 @@ status_t
                            xpath_source_t source,
                            xpath_pcb_t *pcb)
 {
+    return xpath_yang_parse_path_ex(tkc, mod, source, pcb, TRUE);
+
+}  /* xpath_yang_parse_path */
+
+
+/********************************************************************
+* FUNCTION xpath_yang_parse_path_ex
+* 
+* Parse the leafref path as a leafref path
+*
+* DOES NOT VALIDATE PATH NODES USED IN THIS PHASE
+* A 2-pass validation is used in case the path expression
+* is defined within a grouping.  This pass is
+* used on all objects, even in groupings
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+*
+* INPUTS:
+*    tkc == parent token chain (may be NULL)
+*    mod == module in progress
+*    obj == context node
+*    source == context for this expression
+*              XP_SRC_LEAFREF or XP_SRC_INSTANCEID
+*    pcb == initialized xpath parser control block
+*           for the leafref path; use xpath_new_pcb
+*           to initialize before calling this fn.
+*           The pcb->exprstr field must be set
+*    logerrors == TRUE to log errors; 
+*              == FALSE to suppress error messages
+* OUTPUTS:
+*   pcb->tkc is filled and then validated for well-formed
+*   leafref or instance-identifier syntax
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_yang_parse_path_ex (tk_chain_t *tkc,
+                              ncx_module_t *mod,
+                              xpath_source_t source,
+                              xpath_pcb_t *pcb,
+                              boolean logerrors)
+{
     status_t       res;
     uint32         linenum, linepos;
 
@@ -1502,7 +1635,7 @@ status_t
 #endif
 
     pcb->curmode = XP_CM_TARGET;
-    pcb->logerrors = TRUE;
+    pcb->logerrors = logerrors;
     if (tkc && tkc->cur) {
         linenum = TK_CUR_LNUM(tkc);
         linepos = TK_CUR_LPOS(tkc);
@@ -1552,7 +1685,7 @@ status_t
      */
     return pcb->parseres;
 
-}  /* xpath_yang_parse_path */
+}  /* xpath_yang_parse_path_ex */
 
 
 /********************************************************************

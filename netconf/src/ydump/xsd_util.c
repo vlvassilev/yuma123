@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -1299,6 +1299,7 @@ static val_value_t *
         newval = xml_val_new_cstring(NCX_EL_UNITS, ncx_id, units);
         if (!newval) {
             val_free_value(appval);
+            return NULL;
         } else {
             val_add_child(newval, appval);
         }
@@ -1321,6 +1322,7 @@ static val_value_t *
         newval = xml_val_new_cstring(NCX_EL_CONDITION, ncx_id, condition);
         if (!newval) {
             val_free_value(appval);
+            return NULL;
         } else {
             val_add_child(newval, appval);
         }
@@ -1331,6 +1333,7 @@ static val_value_t *
         newval = make_reference(ref);
         if (!newval) {
             val_free_value(appval);
+            return NULL;
         } else {
             val_add_child(newval, appval);
         }
@@ -1958,6 +1961,9 @@ xmlChar *
     case NCX_CVTTYP_UC:
     case NCX_CVTTYP_YC:
         ext = (const xmlChar *)".c";
+        break;
+    case NCX_CVTTYP_CPP_TEST:
+        ext = (const xmlChar *)".cpp";
         break;
     case NCX_CVTTYP_YANG:
     case NCX_CVTTYP_COPY:

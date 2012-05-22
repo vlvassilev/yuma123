@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -26,141 +26,49 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-#include  <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
+#include <assert.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
+#include "procdefs.h"
 #include "agt.h"
-#endif
-
-#ifndef _H_agt_cap
 #include "agt_cap.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_rpcerr
 #include "agt_rpcerr.h"
-#endif
-
-#ifndef _H_agt_tree
 #include "agt_tree.h"
-#endif
-
-#ifndef _H_agt_util
 #include "agt_util.h"
-#endif
-
-#ifndef _H_agt_xpath
 #include "agt_xpath.h"
-#endif
-
-#ifndef _H_agt_val
 #include "agt_val.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_getcb
 #include "getcb.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ncx_feature
-#include  "ncx_feature.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_obj
-#include  "obj.h"
-#endif
-
-#ifndef _H_op
-#include  "op.h"
-#endif
-
-#ifndef _H_rpc
+#include "log.h"
+#include "ncx.h"
+#include "ncxmod.h"
+#include "ncx_feature.h"
+#include "ncxconst.h"
+#include "obj.h"
+#include "op.h"
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
+#include "ses.h"
+#include "status.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_msg.h"
+#include "xml_util.h"
+#include "xml_wr.h"
+#include "xpath.h"
 
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_msg
-#include  "xml_msg.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_wr
-#include  "xml_wr.h"
-#endif
-
-#ifndef _H_xpath
-#include  "xpath.h"
-#endif
 
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-#ifdef DEBUG
-#define AGT_UTIL_DEBUG  1
-#endif
-
 
 /********************************************************************
 *								    *
@@ -182,7 +90,6 @@ typedef struct agt_keywalker_parms_t_ {
 *                                                                   *
 *********************************************************************/
 
-
 /********************************************************************
 * FUNCTION is_default
 *
@@ -196,9 +103,7 @@ typedef struct agt_keywalker_parms_t_ {
 *    TRUE if set to the default value (by user or agent)
 *    FALSE if no default applicable or not set to default
 *********************************************************************/
-static boolean
-    is_default (ncx_withdefaults_t withdef,
-                val_value_t *val)
+static boolean is_default (ncx_withdefaults_t withdef, val_value_t *val)
 {
     boolean retval;
 
@@ -223,7 +128,6 @@ static boolean
 
 } /* is_default */
 
-
 /********************************************************************
 * FUNCTION check_withdef
 *
@@ -237,9 +141,7 @@ static boolean
 *    TRUE if node should be output
 *    FALSE if node is filtered out
 *********************************************************************/
-static boolean
-    check_withdef (ncx_withdefaults_t withdef,
-                   val_value_t *node)
+static boolean check_withdef (ncx_withdefaults_t withdef, val_value_t *node)
 {
     const agt_profile_t     *profile;
     boolean                  ret;
@@ -272,85 +174,60 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION add_default_leaf
-*
-* Make a default leaf and add it to the running config
-*
-* INPUTS:
-*    parentval == parent complex type to add the default
-*               as the new last child (could be cfg->root)
-*    defobj == object template for the default leaf
-*    defstr == string containing the default value to use
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    add_default_leaf (val_value_t *parentval,
-                      obj_template_t *defobj,
-                      const xmlChar *defstr)
+ * Make a default leaf and add it to the running config
+ *
+ * \param parentval parent complex type to add the default as the new last 
+ *                  child (could be cfg->root)
+ * \param defobj object template for the default leaf
+ * \param defstr string containing the default value to use
+ * \return status
+ *********************************************************************/
+static status_t add_default_leaf( val_value_t *parentval, 
+        obj_template_t *defobj, const xmlChar *defstr )
 {
     val_value_t    *newval;
-    status_t        res;
+    status_t res = NO_ERR;
 
-    res = NO_ERR;
-
-    newval = val_find_child(parentval,
-                            obj_get_mod_name(defobj),
-                            obj_get_name(defobj));
-    if (newval != NULL) {
+    newval = val_find_child( parentval, obj_get_mod_name(defobj),
+                             obj_get_name(defobj) );
+    if ( newval ) {
         /* node already exists */
         return NO_ERR;
     }
 
     newval = val_make_simval_obj(defobj, defstr, &res);
+    if ( !newval )
+    {
+        return ( res == NO_ERR ? ERR_INTERNAL_PTR : res );
+    }
 
     if (res != NO_ERR) {
-        if (newval != NULL) {
-            val_free_value(newval);
-        }
-    } else {
-        newval->flags |= VAL_FL_DEFSET;
-        val_add_child(newval, parentval);
-    }
+        val_free_value(newval);
+        return res;
+    } 
+    
+    newval->flags |= VAL_FL_DEFSET;
+    val_add_child(newval, parentval);
 
     return res;
-
 }  /* add_default_leaf */
 
-
 /********************************************************************
-* FUNCTION get_key_value
-*
-* Get the next expected key value in the ancestor chain
-*
-* val_walker_fn prototype
-*
-* INPUTS:
-*   val == value node found in descendant search
-*   cookie1 == cookie1 value passed to start of walk
-*   cookie2 == cookie2 value passed to start of walk
-*
-* RETURNS:
-*   TRUE if walk should continue
-*   FALSE if walk should terminate 
-*/
-static boolean
-    get_key_value (val_value_t *val,
-                   void *cookie1,
-                   void *cookie2)
+ * Get the next expected key value in the ancestor chain
+ * val_walker_fn prototype
+ *
+ * \param val the value node found in descendant search.
+ * \param cookie1 a cookie value passed to start of walk.
+ * \param cookie2 a cookie value passed to start of walk.
+ * \return TRUE if walk should continue, FALSE if walk should terminate.
+ */
+static boolean get_key_value ( val_value_t *val, void *cookie1, void *cookie2 )
 {
-    agt_keywalker_parms_t *parms;
-
-#ifdef DEBUG
-    if (val == NULL || cookie1 == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    parms = (agt_keywalker_parms_t *)cookie1;
+    assert( val && "val is NULL" );
+    assert( cookie1 && "val is NULL" );
     (void)cookie2;
+
+    agt_keywalker_parms_t *parms = (agt_keywalker_parms_t *)cookie1;
 
     if (parms->done) {
         return FALSE;
@@ -363,13 +240,83 @@ static boolean
         parms->usenext = TRUE;
         return TRUE;
     }
-    return TRUE;
 
+    return TRUE;
 }  /* get_key_value */
 
+/********************************************************************
+ * Get the filter type
+ *
+ * \param filter the input filter
+ * \return the type of filter
+ *
+ *********************************************************************/
+static op_filtertyp_t get_filter_type( val_value_t* filter )
+{
+    /* setup the filter parameters */
+    val_value_t* filtertype = val_find_meta( filter, 0, NCX_EL_TYPE );
+    if ( !filtertype ) {
+        /* should not happen; the default is subtree */
+        return OP_FILTER_SUBTREE;
+    } 
+    
+    return op_filtertyp_id( VAL_STR(filtertype) );
+}
+
+/********************************************************************
+ * validate an xpath filter the filter type
+ *
+ * \param scb session control block
+ * \param msg rpc_msg_t in progress
+ * \param filter the filter element to use
+ * \return the type of filter
+ *
+ *********************************************************************/
+static status_t validate_xpath_filter( ses_cb_t* scb, rpc_msg_t* msg, 
+                                       val_value_t* filter )
+{
+    val_value_t *sel = val_find_meta(filter, 0, NCX_EL_SELECT);
+    status_t res = NO_ERR;
+
+    if (!sel || !sel->xpathpcb) {
+        res = ERR_NCX_MISSING_ATTRIBUTE;
+    } else if (sel->xpathpcb->parseres != NO_ERR) {
+        res = sel->xpathpcb->parseres;
+    }
+
+    if ( NO_ERR == res ) {
+        msg->rpc_filter.op_filtyp = OP_FILTER_XPATH;
+        msg->rpc_filter.op_filter = sel;
+    }
+    else {
+        xml_attr_t selattr;
+        memset(&selattr, 0x0, sizeof(xml_attr_t));
+        selattr.attr_ns = 0;
+        selattr.attr_name = NCX_EL_SELECT;
+
+        agt_record_attr_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res,
+                               &selattr, NULL, NULL, NCX_NT_VAL, filter );
+    }
+    return res;
+}
+
+/********************************************************************
+ * validate a subtree filter the filter type
+ *
+ * \param msg rpc_msg_t in progress
+ * \param filter the filter element to use
+ * \return the type of filter
+ *
+ *********************************************************************/
+static status_t validate_subtree_filter( rpc_msg_t* msg,
+                                         val_value_t* filter )
+{
+    msg->rpc_filter.op_filtyp = OP_FILTER_SUBTREE;
+    msg->rpc_filter.op_filter = filter;
+    return NO_ERR;
+}
 
 /************  E X T E R N A L    F U N C T I O N S    **************/
-
 
 /********************************************************************
 * FUNCTION agt_get_cfg_from_parm
@@ -617,11 +564,11 @@ status_t
 *    msg == incoming rpc_msg_t in progress
 *    methnode == XML node for RPC method (for errors)
 *    returl == address of return URL string pointer
-* 
+*    retval == address of value node from input used
 * OUTPUTS:
 *   *returl is set to the address of the URL string
 *   pointing to the memory inside the found parameter
-*
+*   *retval is set to parm node found, if return NO_ERR
 * RETURNS:
 *    status
 *********************************************************************/
@@ -629,7 +576,8 @@ status_t
     agt_get_url_from_parm (const xmlChar *parmname,
                            rpc_msg_t *msg,
                            xml_node_t *methnode,
-                           const xmlChar **returl)
+                           const xmlChar **returl,
+                           val_value_t **retval)
 {
     agt_profile_t     *profile;
     val_value_t       *val;
@@ -637,13 +585,14 @@ status_t
     status_t           res;
 
 #ifdef DEBUG
-    if (!parmname || !msg || !methnode || !returl) {
+    if (!parmname || !msg || !methnode || !returl || !retval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    val = val_find_child(msg->rpc_input, 
-                         val_get_mod_name(msg->rpc_input), 
+    *retval = NULL;
+
+    val = val_find_child(msg->rpc_input, val_get_mod_name(msg->rpc_input), 
                          parmname);
     if (!val || val->res != NO_ERR) {
         if (!val) {
@@ -724,6 +673,8 @@ status_t
                          NULL,
                          NCX_NT_VAL, 
                          errval);
+    } else {
+        *retval = errval;
     }
 
     return res;
@@ -865,16 +816,8 @@ void
                       ncx_node_t nodetyp,
                       void *error_path)
 {
-    agt_record_error_errinfo(scb, 
-                             msghdr, 
-                             layer, 
-                             res, 
-                             xmlnode,
-                             parmtyp, 
-                             error_info, 
-                             nodetyp,
-                             error_path, 
-                             NULL);
+    agt_record_error_errinfo(scb, msghdr, layer, res, xmlnode, parmtyp, 
+                             error_info, nodetyp, error_path, NULL);
 
 } /* agt_record_error */
 
@@ -921,17 +864,15 @@ void
                               void *error_path,
                               const ncx_errinfo_t *errinfo)
 {
-    rpc_err_rec_t      *err;
-    dlq_hdr_t          *errQ;
-    xmlChar            *pathbuff;
-
-    errQ = (msghdr) ? &msghdr->errQ : NULL;
-    pathbuff = NULL;
-    err = NULL;
+    rpc_err_rec_t      *err = NULL;
+    dlq_hdr_t          *errQ = (msghdr) ? &msghdr->errQ : NULL;
+    xmlChar            *pathbuff = NULL;
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
-        log_debug3("\nagt_record_error: ");
+        log_debug3("\nagt_record_error for session %u:",
+                   scb ? SES_MY_SID(scb) : 0);
+        
         if (xmlnode) {
             if (xmlnode->qname) {
                 log_debug3(" xml: %s", xmlnode->qname);
@@ -943,10 +884,14 @@ void
             }
         }
         if (nodetyp == NCX_NT_VAL && error_path) {
-            log_debug3(" error-path: \n");
-            val_dump_value((val_value_t *)error_path, 
-                           (scb) ? ses_indent_count(scb) : NCX_DEF_INDENT);
-            log_debug3("\n");
+            const val_value_t *logval = (const val_value_t *)error_path;
+            log_debug3(" error-path object:");
+            if (obj_is_root(logval->obj)) {
+                log_debug3(" <nc:config> root\n");
+            } else {
+                log_debug3(" <%s:%s>\n", val_get_mod_name(logval), 
+                           logval->name);
+            }
         }
     }
 
@@ -954,33 +899,35 @@ void
     if (errQ) {
         /* get the error-path */
         if (error_path) {
+            status_t res2;
             switch (nodetyp) {
             case NCX_NT_STRING:
                 pathbuff = xml_strdup((const xmlChar *)error_path);
                 break;
             case NCX_NT_VAL:
-                (void)val_gen_instance_id(msghdr, 
-                                          (val_value_t *)error_path, 
-                                          NCX_IFMT_XPATH1, 
-                                          &pathbuff);
+                res2 = val_gen_instance_id_ex(msghdr, 
+                                              (val_value_t *)error_path, 
+                                              NCX_IFMT_XPATH1, 
+                                              FALSE, &pathbuff);
+                if (res2 != NO_ERR) {
+                    log_error("\nError: Generate instance id failed (%s)",
+                              get_error_string(res2));
+                }
                 break;
             case NCX_NT_OBJ:
-                (void)obj_gen_object_id(error_path, &pathbuff);
+                res2 = obj_gen_object_id(error_path, &pathbuff);
+                if (res2 != NO_ERR) {
+                    log_error("\nError: Generate object id failed (%s)",
+                              get_error_string(res2));
+                }
                 break;
             default:
                 SET_ERROR(ERR_INTERNAL_VAL);
             }
         }
 
-        err = agt_rpcerr_gen_error_ex(layer, 
-                                      res, 
-                                      xmlnode, 
-                                      parmtyp, 
-                                      error_info, 
-                                      pathbuff, 
-                                      errinfo,
-                                      nodetyp,
-                                      error_path);
+        err = agt_rpcerr_gen_error_ex(layer, res, xmlnode, parmtyp, error_info, 
+                                      pathbuff, errinfo, nodetyp, error_path);
         if (err) {
             /* pass off pathbuff memory here */
             dlq_enque(err, errQ);
@@ -1046,20 +993,19 @@ void
                 buff = xml_strdup((const xmlChar *)errnode);
             } else if (nodetyp==NCX_NT_VAL) {
                 errnodeval = (const val_value_t *)errnode;
-                (void)val_gen_instance_id(msghdr, 
-                                          errnodeval,
-                                          NCX_IFMT_XPATH1, 
-                                          &buff);
-
+                status_t res2 = val_gen_instance_id_ex(msghdr, 
+                                                       errnodeval,
+                                                       NCX_IFMT_XPATH1, 
+                                                       FALSE,
+                                                       &buff);
+                if (res2 != NO_ERR) {
+                    log_error("\nError: Generate instance id failed (%s)",
+                              get_error_string(res2));
+                }
             }
         }
-        err = agt_rpcerr_gen_attr_error(layer, 
-                                        res, 
-                                        xmlattr, 
-                                        xmlnode, 
-                                        errnodeval,
-                                        badns, 
-                                        buff);
+        err = agt_rpcerr_gen_attr_error(layer, res, xmlattr, xmlnode, 
+                                        errnodeval, badns, buff);
         if (err) {
             dlq_enque(err, errQ);
         } else {
@@ -1126,15 +1072,10 @@ void
     if (errQ) {
         /* get the error-path */
         pathbuff = NULL;
-        (void)val_gen_instance_id(msghdr, 
-                                  errval, 
-                                  NCX_IFMT_XPATH1, 
-                                  &pathbuff);
-
-        err = agt_rpcerr_gen_insert_error(NCX_LAYER_CONTENT, 
-                                          res,
-                                          errval, 
-                                          pathbuff);
+        status_t res2 = val_gen_instance_id_ex(msghdr, errval, NCX_IFMT_XPATH1, 
+                                               FALSE, &pathbuff);
+        err = agt_rpcerr_gen_insert_error(NCX_LAYER_CONTENT, res, errval, 
+                                          (res2 == NO_ERR) ? pathbuff : NULL);
         if (err) {
             dlq_enque(err, errQ);
         } else {
@@ -1203,15 +1144,13 @@ void
     if (errQ) {
         /* get the error-path */
         pathbuff = NULL;
-        (void)val_gen_instance_id(msghdr, errval, 
-                                  NCX_IFMT_XPATH1, 
-                                  &pathbuff);
-
-        err = agt_rpcerr_gen_unique_error(msghdr,
-                                          NCX_LAYER_CONTENT, 
-                                          interr,
-                                          valuniqueQ, 
-                                          pathbuff);
+        /* this instance ID is never sourced from the <rpc>
+         * so the plain 'stop_at_root' variant is used here */
+        status_t res = val_gen_instance_id(msghdr, errval, NCX_IFMT_XPATH1, 
+                                           &pathbuff);
+        err = agt_rpcerr_gen_unique_error(msghdr, NCX_LAYER_CONTENT, 
+                                          interr, valuniqueQ,
+                                          (res == NO_ERR) ? pathbuff : NULL);
         if (err) {
             dlq_enque(err, errQ);
         } else {
@@ -1225,196 +1164,108 @@ void
 
 
 /********************************************************************
-* FUNCTION agt_validate_filter
-*
-* Validate the <filter> parameter if present
-*
-* INPUTS:
-*    scb == session control block
-*    msg == rpc_msg_t in progress
-*
-* OUTPUTS:
-*    msg->rpc_filter is filled in if NO_ERR; type could be NONE
-* RETURNS:
-*    status
-*********************************************************************/
-status_t 
-    agt_validate_filter (ses_cb_t *scb,
-                         rpc_msg_t *msg)
+ * Validate the <filter> parameter if present.
+ * If the filter is valid msg->rpc_filter is filled in;
+ *
+ * \param scb session control block
+ * \param msg rpc_msg_t in progress
+ * \return status
+ *********************************************************************/
+status_t agt_validate_filter ( ses_cb_t *scb,
+                               rpc_msg_t *msg )
 {
-    val_value_t    *filter;
-    status_t        res;
-
-#ifdef DEBUG
-    if (!scb || !msg) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
 
     /* filter parm is optional */
-    filter = val_find_child(msg->rpc_input, 
-                            NC_MODULE, 
-                            NCX_EL_FILTER);
+    val_value_t *filter = val_find_child( msg->rpc_input, NC_MODULE, 
+                                          NCX_EL_FILTER );
     if (!filter) {
         msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
         msg->rpc_filter.op_filter = NULL;
-        res = NO_ERR;   /* not an error */
-    } else {
-        res =agt_validate_filter_ex(scb, msg, filter);
-    }
-    return res;
+        return NO_ERR;   /* not an error */
+    } 
 
+    return agt_validate_filter_ex( scb, msg, filter );
 } /* agt_validate_filter */
 
 
 /********************************************************************
-* FUNCTION agt_validate_filter_ex
-*
-* Validate the <filter> parameter if present
-*
-* INPUTS:
-*    scb == session control block
-*    msg == rpc_msg_t in progress
-*    filter == filter element to use
-* OUTPUTS:
-*    msg->rpc_filter is filled in if NO_ERR; type could be NONE
-* RETURNS:
-*    status
-*********************************************************************/
-status_t 
-    agt_validate_filter_ex (ses_cb_t *scb,
-                            rpc_msg_t *msg,
-                            val_value_t *filter)
+ * Validate the <filter> parameter if present
+ * If the filter is valid msg->rpc_filter is filled in;
+ *
+ * \param scb session control block
+ * \param msg rpc_msg_t in progress
+ * \param filter the filter element to use
+ * \return status
+ *********************************************************************/
+status_t agt_validate_filter_ex( ses_cb_t *scb, rpc_msg_t *msg, 
+                                 val_value_t *filter )
 {
-    val_value_t    *filtertype, *sel;
-    const xmlChar  *errstr;
-    op_filtertyp_t  filtyp;
-    status_t        res;
-    xml_attr_t      selattr;
-
-#ifdef DEBUG
-    if (!scb || !msg || !filter) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    filtertype = NULL;
-    filtyp = OP_FILTER_NONE;
-    sel = NULL;
-    errstr = NULL;
-    res = NO_ERR;
+    assert( scb && "scb is NULL" );
+    assert( msg && "msg is NULL" );
 
     /* filter parm is optional */
-    if (filter->res != NO_ERR) {
-        return res;
+    if ( !filter || filter->res != NO_ERR ) {
+        return NO_ERR;
     }
 
-
-    /* setup the filter parameters */
-    filtertype = val_find_meta(filter, 0, NCX_EL_TYPE);
-    if (!filtertype) {
-        /* should not happen; the default is subtree */
-        filtyp = OP_FILTER_SUBTREE;
-    } else {
-        filtyp = op_filtertyp_id(VAL_STR(filtertype));
-    }
+    status_t res = NO_ERR;
+    op_filtertyp_t  filtyp = get_filter_type( filter );;
 
     /* check if the select attribute is needed */
     switch (filtyp) {
     case OP_FILTER_SUBTREE:
+        res = validate_subtree_filter( msg, filter );
         break;
+
     case OP_FILTER_XPATH:
-        sel = val_find_meta(filter, 0, NCX_EL_SELECT);
-        if (!sel || !sel->xpathpcb) {
-            res = ERR_NCX_MISSING_ATTRIBUTE;
-        } else if (sel->xpathpcb->parseres != NO_ERR) {
-            res = sel->xpathpcb->parseres;
-        }
-        if (res != NO_ERR) {
-            memset(&selattr, 0x0, sizeof(xml_attr_t));
-            selattr.attr_ns = 0;
-            selattr.attr_name = NCX_EL_SELECT;
-            agt_record_attr_error(scb, 
-                                  &msg->mhdr, 
-                                  NCX_LAYER_OPERATION, 
-                                  res,
-                                  &selattr, 
-                                  NULL, 
-                                  NULL,
-                                  NCX_NT_VAL, 
-                                  filter);
-            return res;
-        }
+        res = validate_xpath_filter( scb, msg, filter );
         break;
+
     default:
         res = ERR_NCX_INVALID_VALUE;
+        agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL,
+                          NCX_NT_NONE, NULL, NCX_NT_VAL, filter );
     }
 
-    if (res != NO_ERR) {
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res, 
-                         NULL,
-                         (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
-                         errstr, 
-                         NCX_NT_VAL, 
-                         filter);
-    } else {
-#ifdef AGT_UTIL_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nagt_util_validate_filter:");
-            val_dump_value(msg->rpc_input, 0);
-        }
-#endif
-
-        msg->rpc_filter.op_filtyp = filtyp;
-        msg->rpc_filter.op_filter = (sel) ? sel : filter;
+    if ( NO_ERR == res && LOGDEBUG3 ) {
+        log_debug3("\nagt_util_validate_filter:");
+        val_dump_value(msg->rpc_input, 0);
     }
 
     return res;
-
 } /* agt_validate_filter_ex */
 
 
 /********************************************************************
-* FUNCTION agt_check_config
-*
 * val_nodetest_fn_t callback
-*
 * Used by the <get-config> operation to return any type of 
 * configuration data
 *
-* INPUTS:
-*    see ncx/val_util.h   (val_nodetest_fn_t)
-*
-* RETURNS:
-*    TRUE if config; FALSE if non-config
+* \param withdef - see ncx/val_util.h   (val_nodetest_fn_t)
+* \param realtest - see ncx/val_util.h   (val_nodetest_fn_t)
+* \param node - see ncx/val_util.h   (val_nodetest_fn_t)
+* \return *    TRUE if config; FALSE if non-config
 *********************************************************************/
-boolean
-    agt_check_config (ncx_withdefaults_t withdef,
-                      boolean realtest,
-                      val_value_t *node)
+boolean agt_check_config ( ncx_withdefaults_t withdef,
+                           boolean realtest,
+                           val_value_t *node )
 {
-    boolean           ret;
-
     if (realtest) {
         if (node->dataclass == NCX_DC_CONFIG) {
-            ret = check_withdef(withdef, node);
-        } else {
-            /* not a node that should be saved with a copy-config 
-             * to NVRAM
-             */
-            ret = FALSE;
-        }
-    } else if (node->obj) {
-        ret = obj_is_config(node->obj);
-    } else {
-        ret = TRUE;
+            return check_withdef(withdef, node);
+        } 
+        
+        /* not a node that should be saved with a copy-config to NVRAM */
+        return FALSE;
+    } 
+    
+    if (node->obj) {
+        return obj_is_config(node->obj);
     }
 
-    return ret;
-
+    return TRUE;
 } /* agt_check_config */
 
 
@@ -1545,16 +1396,10 @@ status_t
             /* return everything */
             if (getop) {
                 /* all config and state data */
-                xml_wr_val(scb, 
-                           &msg->mhdr, 
-                           source->root, 
-                           indent);
+                xml_wr_val(scb, &msg->mhdr, source->root, indent);
             } else {
                 /* all config nodes */
-                xml_wr_check_val(scb, 
-                                 &msg->mhdr, 
-                                 source->root, 
-                                 indent, 
+                xml_wr_check_val(scb, &msg->mhdr, source->root, indent, 
                                  agt_check_config);
             }
             break;
@@ -1563,17 +1408,11 @@ status_t
             /* with-defaults=false: return only non-defaults */
             if (getop) {
                 /* all non-default config and state data */             
-                xml_wr_check_val(scb, 
-                                 &msg->mhdr, 
-                                 source->root, 
-                                 indent,
+                xml_wr_check_val(scb, &msg->mhdr, source->root, indent,
                                  agt_check_default);
             } else {
                 /* all non-default config data */
-                xml_wr_check_val(scb, 
-                                 &msg->mhdr, 
-                                 source->root, 
-                                 indent, 
+                xml_wr_check_val(scb, &msg->mhdr, source->root, indent, 
                                  agt_check_config);
             }
             break;
@@ -1584,16 +1423,9 @@ status_t
         break;
     case OP_FILTER_SUBTREE:
         if (source->root) {
-            top = agt_tree_prune_filter(scb, 
-                                        msg, 
-                                        source, 
-                                        getop);
+            top = agt_tree_prune_filter(scb, msg, source, getop);
             if (top) {
-                agt_tree_output_filter(scb, 
-                                       msg, 
-                                       top, 
-                                       indent, 
-                                       getop);
+                agt_tree_output_filter(scb, msg, top, indent, getop);
                 ncx_free_filptr(top);
                 break;
             }
@@ -1601,11 +1433,7 @@ status_t
         break;
     case OP_FILTER_XPATH:
         if (source->root) {
-            res = agt_xpath_output_filter(scb, 
-                                          msg, 
-                                          source,
-                                          getop,
-                                          indent);
+            res = agt_xpath_output_filter(scb, msg, source, getop, indent);
         }
         break;
     default:
@@ -1653,9 +1481,7 @@ status_t
         done = FALSE;
         while (!done) {
             if (fgets(buffer, NCX_MAX_LINELEN, fil)) {
-                ses_putcstr(scb, 
-                            (const xmlChar *)buffer, 
-                            indent);
+                ses_putcstr(scb, (const xmlChar *)buffer, indent);
             } else {
                 fclose(fil);
                 done = TRUE;
@@ -1703,17 +1529,27 @@ status_t
 * Check if the max-access for a parameter is exceeded
 *
 * INPUTS:
-*   op == requested op
-*   acc == max-access for the parameter
+*   newval == value node from PDU to check
 *   cur_exists == TRUE if the corresponding node in the target exists
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
-    agt_check_max_access (op_editop_t  op,
-                          ncx_access_t acc,
+    agt_check_max_access (val_value_t *newval,
                           boolean cur_exists)
 {
+    op_editop_t   op;
+    ncx_access_t  acc;
+    boolean       iskey;
+
+    if (newval == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    op = newval->editop;
+    acc = obj_get_max_access(newval->obj);
+    iskey = obj_is_key(newval->obj);
+
     switch (op) {
     case OP_EDITOP_NONE:
         return NO_ERR;
@@ -1745,6 +1581,19 @@ status_t
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
     case OP_EDITOP_CREATE:
+        switch (acc) {
+        case NCX_ACCESS_NONE:
+            return ERR_NCX_NO_ACCESS_MAX;
+        case NCX_ACCESS_RO:
+            return ERR_NCX_ACCESS_READ_ONLY;
+        case NCX_ACCESS_RW:
+            return ERR_NCX_NO_ACCESS_MAX;
+        case NCX_ACCESS_RC:
+            /* create/delete allowed */
+            return NO_ERR;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
     case OP_EDITOP_DELETE:
     case OP_EDITOP_REMOVE:
         switch (acc) {
@@ -1756,6 +1605,21 @@ status_t
             return ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RC:
             /* create/delete allowed */
+            if (iskey) {
+                if (newval->parent) {
+                    op_editop_t pop = newval->parent->editop;
+                    if (pop == OP_EDITOP_DELETE || pop == OP_EDITOP_REMOVE) {
+                        /* delete operation is derived from parent */
+                        return NO_ERR;
+                    } else {
+                        /* deleting the key leaf but not the parent */
+                        return ERR_NCX_NO_ACCESS_MAX;
+                    }
+                } else {
+                    /* key leaf with no parent?? */
+                    return SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
             return NO_ERR;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
@@ -1856,8 +1720,24 @@ status_t
     /* check the child editop against the parent editop */
     switch (*cop) {
     case OP_EDITOP_NONE:
-        /* no operation set in the child or the parent yet */
-        res = (curnode) ? NO_ERR : ERR_NCX_DATA_MISSING;
+        /* no operation set in the child or the parent yet
+         * need to check the entire subtree from this node
+         * to see if any operations set at all; if so then
+         * it matters if the corresponding node exists
+         * at this level of the data tree
+         */
+        if (curnode) {
+            res = NO_ERR;
+        } else if (newnode) {
+            if (agt_any_operations_set(newnode)) {
+                res = ERR_NCX_DATA_MISSING;
+            } else {
+                res = NO_ERR;
+            }
+        } else {
+            /* should not happen */
+            res = NO_ERR;
+        }
         break;
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:
@@ -1930,9 +1810,8 @@ status_t
          * instances are allowed; depends on the defaults style
          */
         if (curnode) {
-            switch (iqual) {
-            case NCX_IQUAL_ONE:
-            case NCX_IQUAL_OPT:
+            switch (curnode->obj->objtype) {
+            case OBJ_TYP_LEAF:
                 switch (profile->agt_defaultStyleEnum) {
                 case NCX_WITHDEF_REPORT_ALL:
                     res = ERR_NCX_DATA_EXISTS;
@@ -1952,7 +1831,7 @@ status_t
                 }
                 break;
             default:
-                ;
+                res = ERR_NCX_DATA_EXISTS;
             }
             if (res != NO_ERR) {
                 return res;
@@ -2160,224 +2039,138 @@ status_t
 
 
 /********************************************************************
-* FUNCTION agt_make_leaf
-*
 * make a val_value_t struct for a specified leaf or leaf-list
 *
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   leafstrval == string version of value to set for leaf
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
+* \param parentobj parent object to find child leaf object
+* \param leafname name of leaf to find (namespace hardwired)
+* \param leafstrval== string version of value to set for leaf
+* \param res address of return status
+* \return :malloced value struct or NULL if some error
 *********************************************************************/
-val_value_t *
-    agt_make_leaf (obj_template_t *parentobj,
-                   const xmlChar *leafname,
-                   const xmlChar *leafstrval,
-                   status_t *res)
+val_value_t* agt_make_leaf ( obj_template_t *parentobj,
+                             const xmlChar *leafname,
+                             const xmlChar *leafstrval,
+                             status_t *res )
 {
-    obj_template_t  *leafobj;
-    val_value_t     *leafval;
+    assert( parentobj && "parentobj is NULL" );
+    assert( leafname && "leafname is NULL" );
+    assert( res && "res is NULL" );
 
-#ifdef DEBUG
-    if (parentobj == NULL || leafname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
     
-    leafobj = obj_find_child(parentobj,
-                             obj_get_mod_name(parentobj),
-                             leafname);
-    if (!leafobj) {
+    obj_template_t *leafobj = obj_find_child( parentobj, 
+            obj_get_mod_name(parentobj), leafname );
+
+    if ( !leafobj ) {
         *res =ERR_NCX_DEF_NOT_FOUND;
         return NULL;
     }
+
     if (!(leafobj->objtype == OBJ_TYP_LEAF ||
           leafobj->objtype == OBJ_TYP_LEAF_LIST)) {
         *res = ERR_NCX_WRONG_TYPE;
         return NULL;
     }
 
-    leafval = val_make_simval_obj(leafobj,
-                                  leafstrval,
-                                  res);
+    val_value_t *leafval = val_make_simval_obj( leafobj, leafstrval, res );
     return leafval;
-
 }  /* agt_make_leaf */
 
-
 /********************************************************************
-* FUNCTION agt_make_uint_leaf
-*
-* make a val_value_t struct for a specified leaf or leaf-list
-*
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   leafval == number value for leaf
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-val_value_t *
-    agt_make_uint_leaf (obj_template_t *parentobj,
-                        const xmlChar *leafname,
-                        uint32 leafval,
-                        status_t *res)
+ * make a val_value_t struct for a specified leaf or leaf-list
+ *
+ * \param parentobj parent object to find child leaf object
+ * \param leafname name of leaf to find (namespace hardwired)
+ * \param leafval number value for leaf
+ * \param res address of return status
+* \return :malloced value struct or NULL if some error
+ *********************************************************************/
+val_value_t * agt_make_uint_leaf ( obj_template_t *parentobj,
+                                   const xmlChar *leafname,
+                                   uint32 leafval,
+                                   status_t *res )
 {
+    assert( parentobj && "parentobj is NULL" );
+    assert( leafname && "leafname is NULL" );
+    assert( res && "res is NULL" );
+
     xmlChar numbuff[NCX_MAX_NUMLEN];
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%u", leafval);
 
-#ifdef DEBUG
-    if (parentobj == NULL || leafname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    sprintf((char *)numbuff, "%u", leafval);
-
-    return agt_make_leaf(parentobj,
-                         leafname,
-                         numbuff,
-                         res);
-
+    return agt_make_leaf( parentobj, leafname, numbuff, res); 
 }  /* agt_make_uint_leaf */
 
-
 /********************************************************************
-* FUNCTION agt_make_int_leaf
-*
-* make a val_value_t struct for a specified leaf or leaf-list
-*
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   leafval == integer number value for leaf
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-val_value_t *
-    agt_make_int_leaf (obj_template_t *parentobj,
-                       const xmlChar *leafname,
-                       int32 leafval,
-                       status_t *res)
+ * make a val_value_t struct for a specified leaf or leaf-list
+ *
+ * \param parentobj parent object to find child leaf object
+ * \param leafname name of leaf to find (namespace hardwired)
+ * \param leafval number value for leaf
+ * \param res address of return status
+* \return :malloced value struct or NULL if some error
+ *********************************************************************/
+val_value_t *agt_make_int_leaf( obj_template_t *parentobj, 
+                                const xmlChar *leafname,
+                                int32 leafval,
+                                status_t *res )
 {
+    assert( parentobj && "parentobj is NULL" );
+    assert( leafname && "leafname is NULL" );
+    assert( res && "res is NULL" );
+
     xmlChar numbuff[NCX_MAX_NUMLEN];
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%d", leafval);
 
-#ifdef DEBUG
-    if (parentobj == NULL || leafname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    sprintf((char *)numbuff, "%d", leafval);
-
-    return agt_make_leaf(parentobj,
-                         leafname,
-                         numbuff,
-                         res);
-
+    return agt_make_leaf(parentobj, leafname, numbuff, res);
 }  /* agt_make_int_leaf */
 
-
 /********************************************************************
-* FUNCTION agt_make_uint64_leaf
-*
-* make a val_value_t struct for a specified leaf or leaf-list
-*
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   leafval == number value for leaf
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-val_value_t *
-    agt_make_uint64_leaf (obj_template_t *parentobj,
-                          const xmlChar *leafname,
-                          uint64 leafval,
-                          status_t *res)
+ * make a val_value_t struct for a specified leaf or leaf-list
+ *
+ * \param parentobj parent object to find child leaf object
+ * \param leafname name of leaf to find (namespace hardwired)
+ * \param leafval number value for leaf
+ * \param res address of return status
+* \return :malloced value struct or NULL if some error
+ *********************************************************************/
+val_value_t *agt_make_uint64_leaf ( obj_template_t *parentobj,
+                                    const xmlChar *leafname,
+                                    uint64 leafval,
+                                    status_t *res)
 {
+    assert( parentobj && "parentobj is NULL" );
+    assert( leafname && "leafname is NULL" );
+    assert( res && "res is NULL" );
+
     xmlChar numbuff[NCX_MAX_NUMLEN];
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%llu", 
+             (long long unsigned int) leafval);
 
-#ifdef DEBUG
-    if (parentobj == NULL || leafname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    sprintf((char *)numbuff, "%llu", (long long unsigned int)leafval);
-
-    return agt_make_leaf(parentobj,
-                         leafname,
-                         numbuff,
-                         res);
-
+    return agt_make_leaf( parentobj, leafname, numbuff, res); 
 }  /* agt_make_uint64_leaf */
 
 
 /********************************************************************
-* FUNCTION agt_make_int64_leaf
-*
-* make a val_value_t struct for a specified leaf or leaf-list
-*
-INPUTS:
-*   parentobj == parent object to find child leaf object
-*   leafname == name of leaf to find (namespace hardwired)
-*   leafval == integer number value for leaf
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-val_value_t *
-    agt_make_int64_leaf (obj_template_t *parentobj,
-                         const xmlChar *leafname,
-                         int64 leafval,
-                         status_t *res)
+ * make a val_value_t struct for a specified leaf or leaf-list
+ *
+ * \param parentobj parent object to find child leaf object
+ * \param leafname name of leaf to find (namespace hardwired)
+ * \param leafval number value for leaf
+ * \param res address of return status
+* \return :malloced value struct or NULL if some error
+ *********************************************************************/
+val_value_t *agt_make_int64_leaf( obj_template_t *parentobj,
+                                  const xmlChar *leafname,
+                                  int64 leafval,
+                                  status_t *res )
 {
+    assert( parentobj && "parentobj is NULL" );
+    assert( leafname && "leafname is NULL" );
+    assert( res && "res is NULL" );
+
     xmlChar numbuff[NCX_MAX_NUMLEN];
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%lld", (long long int)leafval);
 
-#ifdef DEBUG
-    if (parentobj == NULL || leafname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    sprintf((char *)numbuff, "%lld", (long long int)leafval);
-
-    return agt_make_leaf(parentobj,
-                         leafname,
-                         numbuff,
-                         res);
-
+    return agt_make_leaf( parentobj, leafname, numbuff, res); 
 }  /* agt_make_int64_leaf */
 
 
@@ -2475,39 +2268,56 @@ val_value_t *
                    const xmlChar *listname,
                    status_t *res)
 {
-    obj_template_t  *listobj;
-    val_value_t     *listval;
+    return agt_make_object(parentobj, listname, res);
 
-#ifdef DEBUG
-    if (parentobj == NULL || listname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-    
-    listobj = obj_find_child(parentobj,
-                             obj_get_mod_name(parentobj),
-                             listname);
-    if (!listobj) {
+}  /* agt_make_list */
+
+
+/********************************************************************
+* FUNCTION agt_make_object
+*
+* make a val_value_t struct for a specified node
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   objname == name of the object to find (namespace hardwired)
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct for the list or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_object (obj_template_t *parentobj,
+                     const xmlChar *objname,
+                     status_t *res)
+{
+    obj_template_t  *obj;
+    val_value_t     *val;
+
+    assert( parentobj && "parentobj == NULL!" );
+    assert( objname && "objname == NULL!" );
+    assert( res && "res == NULL!" );
+
+    obj = obj_find_child(parentobj, obj_get_mod_name(parentobj), objname);
+    if (!obj) {
         *res =ERR_NCX_DEF_NOT_FOUND;
         return NULL;
     }
-    if (listobj->objtype != OBJ_TYP_LIST) {
-        *res = ERR_NCX_WRONG_TYPE;
-        return NULL;
-    }
 
-    listval = val_new_value();
-    if (listval == NULL) {
+    val = val_new_value();
+    if (val == NULL) {
         *res = ERR_INTERNAL_MEM;
         return NULL;
     }
 
-    val_init_from_template(listval, listobj);
+    val_init_from_template(val, obj);
 
-    return listval;
+    return val;
 
-}  /* agt_make_list */
+}  /* agt_make_object */
 
 
 /********************************************************************
@@ -2578,7 +2388,7 @@ val_value_t *
 * make a val_value_t struct for a specified virtual 
 * top-level data node
 *
-INPUTS:
+* INPUTS:
 *   obj == object node of the virtual data node to create
 *   callbackfn == get callback function to install
 *
@@ -3199,7 +3009,10 @@ status_t
     if (scb == NULL || msg == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
+#else
+    (void)scb;
 #endif
+
     (void)methnode;
     res = NO_ERR;
 
@@ -3229,67 +3042,46 @@ status_t
 
 
 /********************************************************************
-* FUNCTION agt_get_key_value
-*
-* Get the next expected key value in the ancestor chain
-* Used in Yuma SIL code to invoke User SIL callbacks with key values
-*
-* INPUTS:
-*   startval == value node to start from
-*   lastkey == address of last key leaf found in ancestor chain
-*              caller maintains this state-var as the anscestor
-*              keys are traversed
-*             *lastkey == NULL to get the first key
-*
-* OUTPUTS:
-*   *lastkey updated with the return value if key found
-*
-* RETURNS:
-*   value node to use (do not free!!!)
-*   NULL if some bad error like no next key found
-*********************************************************************/
-val_value_t *
-    agt_get_key_value (val_value_t *startval,
-                       val_value_t **lastkey)
+ * Get the next expected key value in the ancestor chain
+ * Used in Yuma SIL code to invoke User SIL callbacks with key values.
+ * The caller should maintain the lastkey as a state-var as the anscestor,
+ * keys are traversed. If lastkey == NULL the first key is returned.
+ *
+ * \param startval value node to start from
+ * \param lastkey address of last key leaf found in ancestor chain.
+ * \return  value node to use (do not free!!!)
+ *********************************************************************/
+val_value_t* agt_get_key_value ( val_value_t *startval,
+                                 val_value_t **lastkey )
 {
+    assert( startval && "startval is NULL" );
+    assert( lastkey && "lastkey is NULL" );
+
     agt_keywalker_parms_t  parms;
-
-#ifdef DEBUG
-    if (startval == NULL || lastkey == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
     parms.lastkey = *lastkey;
     parms.retkey = NULL;
     parms.usenext = FALSE;
     parms.done = FALSE;
 
-#ifdef AGT_UTIL_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nStart key walk for %s", startval->name);
-        if (*lastkey) {
+    if ( LOGDEBUG3 ) {
+        log_debug3( "\nStart key walk for %s", startval->name );
+        if ( *lastkey ) {
             log_debug3("  lastkey=%s", (*lastkey)->name);
         }
     }
-#endif
 
     val_traverse_keys(startval, (void *)&parms, NULL, get_key_value);
 
-#ifdef AGT_UTIL_DEBUG
-    if (LOGDEBUG3) {
+    if ( LOGDEBUG3 ) {
         log_debug3("\nEnd key walk for %s:", startval->name);
         if (parms.retkey) {
             log_debug3("  retkey:\n");
             val_dump_value(parms.retkey, 2);
         }
     }
-#endif
 
     *lastkey = parms.retkey;
     return parms.retkey;
-
 }  /* agt_get_key_value */
 
 
@@ -3377,6 +3169,131 @@ val_value_t *
     return nodeval;
 
 }  /* agt_add_top_node_if_missing */
+
+
+/********************************************************************
+* FUNCTION agt_any_operations_set
+*
+* Check the new node and all descendants
+* for any operation attibutes prsent
+*
+* INPUTS:
+*   val == value node to check
+*
+* RETURNS:
+*   TRUE if any operation attributes found
+*   FALSE if no operation attributes found
+*/
+boolean
+    agt_any_operations_set (val_value_t *val)
+{
+    val_value_t  *childval;
+
+    if (val->editvars && val->editvars->operset) {
+        return TRUE;
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+        boolean anyset = agt_any_operations_set(childval);
+        if (anyset) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+
+}  /* agt_any_operations_set */
+
+
+/********************************************************************
+* FUNCTION agt_apply_this_node
+* 
+* Check if the write operation applies to the current node
+*
+* INPUTS:
+*    editop == edit operation value
+*    newnode == pointer to new node (if any)
+*    curnode == pointer to current value node (if any)
+*                (just used to check if non-NULL or compare leaf)
+*
+* RETURNS:
+*    TRUE if the current node needs the write operation applied
+*    FALSE if this is a NO=OP node (either explicit or special merge)
+*********************************************************************/
+boolean
+    agt_apply_this_node (op_editop_t editop,
+                         const val_value_t *newnode,
+                         const val_value_t *curnode)
+{
+    boolean retval = FALSE;
+    switch (editop) {
+    case OP_EDITOP_NONE:
+        /* never apply here when operation is none */
+        break;
+    case OP_EDITOP_MERGE:
+        /* if no current node then always merge here
+         * merge child nodes into an existing complex type
+         * except for the index nodes, which are kept
+         */
+        if (!curnode) {
+            retval = TRUE;
+        } else {
+            /* if this is a leaf and not an index leaf, then
+             * apply the merge here, if value changed
+             */
+            if (curnode && !curnode->index) {
+                if (typ_is_simple(obj_get_basetype(curnode->obj))) {
+                    if (newnode == NULL) {
+                        retval = TRUE;  // should not happen!
+                    } else if (newnode->editvars != NULL &&
+                               newnode->editvars->insertop != OP_INSOP_NONE) {
+                        retval = TRUE;
+                    } else if (val_compare(newnode, curnode) != 0) {
+                        retval = TRUE;
+                    } 
+                } /* else this is a complex node, keep checking
+                   * all the descendents in case an insert operation
+                   * is present in a nested list or leaf list
+                   * this will compare the same for a move op
+                   */
+            }
+        }
+        break;
+    case OP_EDITOP_REPLACE:
+        if (curnode == NULL) {
+            retval = TRUE;
+        } else if (!obj_is_root(curnode->obj)) {
+            /* apply here if value has changed */
+            if (newnode == NULL) {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            } else if (newnode->editvars != NULL &&
+                       newnode->editvars->insertop != OP_INSOP_NONE) {
+                retval = TRUE;
+            } else if (val_compare_max(newnode, curnode, TRUE, TRUE, TRUE)
+                       != 0) {
+                retval = TRUE;
+            } /* else if this is a complex node, keep checking
+               * all the descendents in case an insert operation
+               * is present in a nested list or leaf list
+               * this will compare the same for a move op
+               */
+        }
+        break;
+    case OP_EDITOP_COMMIT:
+    case OP_EDITOP_CREATE:
+    case OP_EDITOP_LOAD:
+    case OP_EDITOP_DELETE:
+    case OP_EDITOP_REMOVE:
+        retval = TRUE;
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return retval;
+
+} /* agt_apply_this_node */
 
 
 /* END file agt_util.c */

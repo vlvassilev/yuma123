@@ -59,4 +59,21 @@ AbstractGlobalTestFixture::getTargetDbConfig()
     return TestContext::CONFIG_WRITEABLE_RUNNNIG;
 }
 
+// ---------------------------------------------------------------------------|
+bool AbstractGlobalTestFixture::usingStartupCapability()
+{
+    const string startup( "--with-startup=true" );
+    const char** endPos = argv_ + numArgs_; 
+    const char** res = find_if( argv_, endPos, ph_args::arg1 == startup );
+
+    if ( res == endPos )
+    {
+        cout << "Startup capability is NOT in use!\n";
+        return false;
+    }
+    
+    cout << "Startup capability is in use!\n";
+    return true;
+}
+
 } // namespace YumaTest

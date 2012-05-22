@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -24,6 +24,7 @@
  * and use the defined base types provided below
  */
 #include    <limits.h>
+#include    <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -251,7 +252,7 @@ extern uint32  free_cnt;
 #endif		/* m__getMem */
 
 #ifndef m__free
-#define m__free(X)    free(X);free_cnt++
+#define m__free(X)    do { if ( X ) { free(X); free_cnt++; } } while(0)
 #endif		/* m__free */
 
 #ifndef m__getObj

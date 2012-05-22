@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -63,9 +63,6 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#ifdef DEBUG
-#define AGT_PROC_DEBUG 1
-#endif
 
 #define proc_MOD        (const xmlChar *)"yuma-proc"
 
@@ -573,9 +570,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-#ifdef AGT_PROC_DEBUG
     log_debug2("\nagt: Loading proc module");
-#endif
 
     agt_profile = agt_get_profile();
     procmod = NULL;

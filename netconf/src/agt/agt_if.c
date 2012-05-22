@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -37,81 +37,25 @@ date         init     comment
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_agt
-#include  "agt.h"
-#endif
-
-#ifndef _H_agt_cb
-#include  "agt_cb.h"
-#endif
-
-#ifndef _H_agt_if
-#include  "agt_if.h"
-#endif
-
-#ifndef _H_agt_rpc
-#include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_util
-#include  "agt_util.h"
-#endif
-
-#ifndef _H_cfg
-#include  "cfg.h"
-#endif
-
-#ifndef _H_getcb
-#include  "getcb.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
-#include  "ncxtypes.h"
-#endif
-
-#ifndef _H_rpc
-#include  "rpc.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_ses_msg
-#include  "ses_msg.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
-#include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
+#include "procdefs.h"
+#include "agt.h"
+#include "agt_cb.h"
+#include "agt_if.h"
+#include "agt_rpc.h"
+#include "agt_util.h"
+#include "cfg.h"
+#include "getcb.h"
+#include "log.h"
+#include "ncxmod.h"
+#include "ncxtypes.h"
+#include "rpc.h"
+#include "ses.h"
+#include "ses_msg.h"
+#include "status.h"
+#include "val.h"
+#include "val_util.h"
+#include "xmlns.h"
+#include "xml_util.h"
 
 
 /********************************************************************
@@ -119,15 +63,12 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#ifdef DEBUG
-#define AGT_IF_DEBUG 1
-#endif
 
 #define interfaces_MOD        (const xmlChar *)"yuma-interfaces"
 
 #define interfaces_MOD_REV    NULL
 
-#define interfaces_N_interfaces      (const xmlChar *)"yuma-interfaces"
+#define interfaces_N_interfaces      (const xmlChar *)"interfaces"
 
 #define interfaces_N_interface       (const xmlChar *)"interface"
 
@@ -724,9 +665,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-#ifdef AGT_IF_DEBUG
     log_debug2("\nagt: Loading interfaces module");
-#endif
 
     ifmod = NULL;
     agt_if_not_supported = FALSE;

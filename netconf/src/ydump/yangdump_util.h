@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -47,8 +47,7 @@ extern "C" {
 *********************************************************************/
 
 #define COPYRIGHT_HEADER (const xmlChar *)\
-"\n * Copyright (c) 2009 - 2011, Andy Bierman\
-\n * All Rights Reserved.\
+"\n * Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.\
 \n *\
 \n * Unless required by applicable law or agreed to in writing,\
 \n * software distributed under the License is distributed on an\

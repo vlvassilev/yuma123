@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -28,85 +28,33 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-#include  <string.h>
-#include  <ctype.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
+#include <ctype.h>
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_cfg
+#include "procdefs.h"
 #include "cfg.h"
-#endif
-
-#ifndef _H_cli
 #include "cli.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include "ncx_feature.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
 
 
 /********************************************************************
@@ -114,9 +62,7 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
-/* #define VAL_UTIL_DEBUG  1 */
-
+/* #define VAL_UTIL_DEBUG_CANONICAL 1 */
 
 /********************************************************************
 * FUNCTION new_index
@@ -564,6 +510,8 @@ static status_t
 *           the internal prefix mappings
 *   format == desired output format
 *   val == value node to generate instance string for
+*   stop_at_root == TRUE to stop if a 'root' node is encountered
+*                == FALSE to keep recursing all the way to 
 *   buff = buffer to hold result; NULL == get length only
 *   len == address of return length
 *
@@ -580,43 +528,44 @@ static status_t
     get_instance_string (xml_msg_hdr_t *mhdr,
                          ncx_instfmt_t format,
                          const val_value_t *val,
+                         boolean stop_at_root,
                          xmlChar *buff,
                          uint32  *len)
 {
-    const xmlChar      *name, *prefix, *ncprefix;
+    const xmlChar      *name = NULL, *prefix = NULL, *ncprefix = NULL;
     xmlChar             numbuff[NCX_MAX_NUMLEN+1];
-    uint32              cnt, childcnt, total;
-    status_t            res;
-    boolean             root;
-    xmlns_id_t          rpcid;
-
-    /* init local vars */
-    res = NO_ERR;
-    total = 0;
-    cnt = 0;
-    root = FALSE;
-    prefix = NULL;
-    name = NULL;
+    uint32              cnt = 0, childcnt = 0, total = 0;
+    status_t            res = NO_ERR;
+    boolean             root = FALSE, skiproot = FALSE;
+    xmlns_id_t          rpcid = 0;
 
     /* process the specific node type 
      * Recurively find the top node and start there
      */
-    if (val->parent &&
-        val->parent->obj &&
-        !obj_is_root(val->parent->obj)) {
-        res = get_instance_string(mhdr, 
-                                  format, 
-                                  val->parent, 
-                                  buff, 
-                                  &cnt);
+    if (stop_at_root && val->obj && obj_is_root(val->obj)) {
+        root = TRUE;
+        skiproot = TRUE;
+    } else if (val->parent && val->parent->obj) {
+        if (stop_at_root && obj_is_root(val->parent->obj)) {
+            root = TRUE;
+        }
     } else {
         root = TRUE;
+    }
+    if (!root) {
+        res = get_instance_string(mhdr, format, val->parent,
+                                   stop_at_root, buff, &cnt);
     }
 
     *len = 0;
 
     if (res != NO_ERR) {
         return res;
+    }
+
+    /* make sure not to generate an i-i that starts with /nc:config */
+    if (val->obj && obj_is_root(val->obj) && val->parent == NULL) {
+        return NO_ERR;
     }
 
     /* move the buffer pointer to the end to append */
@@ -656,16 +605,14 @@ static status_t
 #endif
 
     /* check if a path sep char is needed */
-    switch (format) {
-    case NCX_IFMT_C:
+    if (format == NCX_IFMT_C) {
         if (cnt) {
             if (buff) {
                 *buff++ = VAL_INST_SEPCH;
             }
             cnt++;
         }
-        break;
-    default:
+    } else {
         if (buff) {
             *buff++ = VAL_XPATH_SEPCH;   /*   starting '/' */
         }
@@ -709,18 +656,22 @@ static status_t
 
 
     /* add prefix string for this component */
-    if (buff) {
+    if (buff && !skiproot) {
         buff += xml_strcpy(buff, prefix);
         *buff++ = ':';
     }
-    cnt += xml_strlen(prefix);
-    cnt++;
+    if (!skiproot) {
+        cnt += xml_strlen(prefix);
+        cnt++;
+    }
 
     /* add name string for this component */
-    if (buff) {
+    if (buff && !skiproot) {
         buff += xml_strcpy(buff, name);
     }
-    cnt += xml_strlen(name);
+    if (!skiproot) {
+        cnt += xml_strlen(name);
+    }
 
     /* check if the 'input' or 'output node needs to be printed */
     if (root && val->obj->objtype == OBJ_TYP_RPCIO) {
@@ -773,7 +724,7 @@ static status_t
                 }
                 total++;
 
-                sprintf((char *)numbuff, "%u", cnt);
+                snprintf((char *)numbuff, sizeof(numbuff), "%u", cnt);
 
                 if (buff) {
                     buff += xml_strcpy(buff, numbuff);
@@ -818,6 +769,9 @@ static void
         nextval = val_get_next_child(chval);
 
         if (chval->res != NO_ERR) {
+            log_debug("\nDeleting error node '%s:%s' (%s)",
+                      val_get_mod_name(chval), chval->name,
+                      get_error_string(chval->res));
             val_remove_child(chval);
             val_free_value(chval);
         } else {
@@ -836,8 +790,8 @@ static void
 * INPUTS:
 *   val == parent value node of the object node to check
 *   valroot == database root for XPath purposes
-*   childobj == object template of child to check
-*   when-stmt == object to check
+*   context == value node to use for context node
+*   whenstmt == XPath PCB to use
 *   condresult == address of conditional test result
 *   
 * OUTPUTS:
@@ -850,67 +804,32 @@ static void
 static status_t
     check_when_stmt (val_value_t *val,
                      val_value_t *valroot,
-                     val_value_t *childval,
-                     obj_template_t *childobj,
+                     val_value_t *context,
                      xpath_pcb_t *whenstmt,
                      boolean *condresult)
 {
-    val_value_t             *dummychild, *usechild;
-    xpath_result_t          *result;
-    status_t                 res;
-    boolean                  whentest;
-
-    dummychild = NULL;
-    res = NO_ERR;
-
-    if (childval == NULL) {
-        dummychild = val_new_value();
-        if (!dummychild) {
-            return ERR_INTERNAL_MEM;
-        }
-        val_init_from_template(dummychild, childobj);
-        val_add_child(dummychild, val);
-        usechild = dummychild;
-    } else {
-        usechild = childval;
-    }
-
-    result = xpath1_eval_expr(whenstmt,
-                              usechild,
-                              valroot,
-                              FALSE,
-                              TRUE,
-                              &res);
-    if (result == NULL) {
+    status_t res = NO_ERR;
+    xpath_result_t *result = 
+        xpath1_eval_expr(whenstmt, context, valroot, FALSE /* logerrors */, 
+                         TRUE /* configonly */, &res);
+    if (result == NULL || res != NO_ERR) {
         *condresult = FALSE;
     } else {
-        whentest = xpath_cvt_boolean(result);
+        boolean whentest = xpath_cvt_boolean(result);
         *condresult = whentest;
-        if (!whentest) {
-            if (LOGDEBUG3) {
-                log_debug3("\nval: when test '%s' failed "
-                           "for object %s in parent %s",
-                           whenstmt->exprstr,
-                           obj_get_name(childobj),
-                           val->name);
+        if (LOGDEBUG3) {
+            if (whentest) {
+                log_debug3("\nval: when test '%s' OK for node '%s' with "
+                           "context '%s'", whenstmt->exprstr, 
+                           val->name, context->name);
             } else {
-                if (LOGDEBUG3) {
-                    log_debug3("\nval: when test '%s' OK "
-                               "for object %s in parent %s",
-                               whenstmt->exprstr,
-                               obj_get_name(childobj),
-                               val->name);
-                }
+                log_debug3("\nval: when test '%s' failed for node '%s' "
+                           "with context '%s'", whenstmt->exprstr, 
+                           val->name, context->name);
             }
-
         }
-        xpath_free_result(result);
     }
-
-    if (dummychild != NULL) {
-        val_remove_child(dummychild);
-        val_free_value(dummychild);
-    }
+    xpath_free_result(result);
 
     return res;
 
@@ -971,25 +890,54 @@ void
     val_value_t           *chval;
     dlq_hdr_t              tempQ;
 
-#ifdef DEBUG
-    if (val == NULL || val->obj == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
+    assert( val && "val is NULL!" );
+    assert( val->obj && "val->obj is NULL!" );
 
     if (val_is_virtual(val)) {
         return;
     }
 
-#ifdef VAL_UTIL_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nval_canonical start '%s'", val->name);
+    boolean skip = FALSE;
+    switch (val->obj->objtype) {
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+        skip = TRUE;
+        break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPC:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_RPCIO:
+    case OBJ_TYP_NOTIF:
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    if (skip) {
+#ifdef VAL_UTIL_DEBUG_CANONICAL
+        log_debug3("\nval_canonical skip '%s'", val->name);
+#endif
+        return;
+    }
+
+#ifdef VAL_UTIL_DEBUG_CANONICAL
+    log_debug3("\nval_canonical start '%s'", val->name);
+    if (LOGDEBUG4) {
         val_dump_value(val, 0);
     }
 #endif
 
+    /* transfer all the val->childQ nodes to the tempQ */
     dlq_createSQue(&tempQ);
+    dlq_block_enque(&val->v.childQ, &tempQ);
 
     switch (val->obj->objtype) {
     case OBJ_TYP_LEAF:
@@ -1010,25 +958,18 @@ void
              key != NULL;
              key = obj_next_ckey(key)) {
 
-            chval = val_find_child(val, 
-                                   obj_get_mod_name(key->keyobj),
-                                   obj_get_name(key->keyobj));
+            chval = val_find_child_que(&tempQ, obj_get_mod_name(key->keyobj),
+                                       obj_get_name(key->keyobj));
             if (chval) {
                 dlq_remove(chval);
-                dlq_enque(chval, &tempQ);
+                val_add_child(chval, val);
             }
         }
         /* fall through to do the rest of the child nodes */
     case OBJ_TYP_CONTAINER:
         if (obj_is_root(val->obj)) {
-            dlq_hdr_t  rootQ;
-
-            /* remove all the entries then add then back sorted */
-            dlq_createSQue(&rootQ);
-            dlq_block_enque(&val->v.childQ, &rootQ);
-
-            while (!dlq_empty(&rootQ)) {
-                chval = (val_value_t *)dlq_deque(&rootQ);
+            while (!dlq_empty(&tempQ)) {
+                chval = (val_value_t *)dlq_deque(&tempQ);
                 val_add_child_sorted(chval, val);
                 val_set_canonical_order(chval);
             }
@@ -1045,12 +986,11 @@ void
                 continue;
             }
 
-            chval = val_find_child(val, 
-                                   obj_get_mod_name(chobj),
-                                   obj_get_name(chobj));
+            chval = val_find_child_que(&tempQ, obj_get_mod_name(chobj),
+                                       obj_get_name(chobj));
             while (chval) {
                 dlq_remove(chval);
-                dlq_enque(chval, &tempQ);
+                val_add_child_sorted(chval, val);
 
                 switch (chval->obj->objtype) {
                 case OBJ_TYP_LEAF:
@@ -1066,31 +1006,31 @@ void
                 default:
                     ;
                 }
-                chval = val_find_child(val, 
-                                       obj_get_mod_name(chobj),
-                                       obj_get_name(chobj));
+                chval = val_find_child_que(&tempQ, obj_get_mod_name(chobj),
+                                           obj_get_name(chobj));
             }
         }
 
         /* check left over nodes */
-        if (dlq_count(&val->v.childQ)) {
+        if (dlq_count(&tempQ)) {
             /* could be some error nodes left over not
              * part of the schema definition
              */
-            dlq_block_enque(&val->v.childQ, &tempQ);
+            log_debug("\nset_canonical: %d leftover nodes added "
+                      " to end of childQ for val %s",
+                      dlq_count(&tempQ), val->name);
+            dlq_block_enque(&tempQ, &val->v.childQ);
         }
 
-        /* move the ordered tempQ back to the real Q */
-        dlq_block_enque(&tempQ, &val->v.childQ);
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-#ifdef VAL_UTIL_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nval_canonical end '%s'", val->name);
-        log_debug3("\n   tempQ count is %u", dlq_count(&tempQ));
+#ifdef VAL_UTIL_DEBUG_CANONICAL
+    log_debug3("\nval_canonical end '%s'", val->name);
+    //log_debug4("\n   tempQ count is %u", dlq_count(&tempQ));
+    if (LOGDEBUG4) {
         val_dump_value(val, 0);
     }
 #endif
@@ -1664,7 +1604,8 @@ void
  *   copyname == TRUE is dname strdup should be used
  *   parent == parent node
  *   editop == requested edit operation
- *   
+ *   obj == object template to use
+ *
  * RETURNS:
  *   status
  *********************************************************************/
@@ -1673,7 +1614,8 @@ val_value_t *
                        const xmlChar *name,
                        boolean copyname,
                        val_value_t *parent,
-                       op_editop_t editop)
+                       op_editop_t editop,
+                       obj_template_t *obj)
 {
     val_value_t *chval;
 
@@ -1696,8 +1638,9 @@ val_value_t *
     }
 
     chval->parent = parent;
-    chval->editvars->editop = editop;
+    chval->editop = editop;
     chval->nsid = nsid;
+    chval->obj = obj;
 
     return chval;
 
@@ -1730,25 +1673,60 @@ status_t
                          ncx_instfmt_t format,
                          xmlChar  **buff)
 {
-    uint32    len, len2;
+    return val_gen_instance_id_ex(mhdr, val, format, TRUE, buff);
+
+}  /* val_gen_instance_id */
+
+
+/********************************************************************
+* FUNCTION val_gen_instance_id_ex
+* 
+* Malloc and Generate the instance ID string for this value node, 
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   val == node to generate the instance ID for
+*   format == desired output format (NCX or Xpath)
+*   stop_at_root == TRUE to stop if a 'root' node is encountered
+*                == FALSE to keep recursing all the way to 
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_gen_instance_id_ex (xml_msg_hdr_t *mhdr,
+                            const val_value_t  *val, 
+                            ncx_instfmt_t format,
+                            boolean stop_at_root,
+                            xmlChar  **buff)
+{
+    assert( val && "val is NULL!" );
+    assert( buff && "buff is NULL!" );
+
+    uint32    len = 0, len2 = 0;
     status_t  res;
 
-#ifdef DEBUG 
-    if (!val || !buff) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
     /* figure out the length of the parmset instance ID */
-    res = get_instance_string(mhdr, format, val, NULL, &len);
+    res = get_instance_string(mhdr, format, val, stop_at_root, NULL, &len);
     if (res != NO_ERR) {
         return res;
     }
 
     /* check no instance ID */
     if (len==0) {
-        *buff = NULL;
-        return ERR_NCX_NO_INSTANCE;
+        if (obj_is_root(val->obj)) {
+            len = 1;
+        } else {
+            *buff = NULL;
+            return ERR_NCX_NO_INSTANCE;
+        }
     }
 
     /* get a buffer to fit the instance ID string */
@@ -1759,11 +1737,17 @@ status_t
         memset(*buff, 0x0, len+1);
     }
 
-    /* get the instance ID string for real this time */
-    res = get_instance_string(mhdr, format, val, *buff, &len2);
-    if (res != NO_ERR) {
-        m__free(*buff);
-        *buff = NULL;
+    if (obj_is_root(val->obj) && len == 1) {
+        xml_strcpy(*buff, (const xmlChar *)"/");
+        len2 = 1;
+    } else {
+        /* get the instance ID string for real this time */
+        res = get_instance_string(mhdr, format, val, stop_at_root, 
+                                  *buff, &len2);
+        if (res != NO_ERR) {
+            m__free(*buff);
+            *buff = NULL;
+        }
     }
 
     if (res == NO_ERR && len != len2) {
@@ -1772,7 +1756,7 @@ status_t
 
     return res;
 
-}  /* val_gen_instance_id */
+}  /* val_gen_instance_id_ex */
 
 
 /********************************************************************
@@ -1788,6 +1772,8 @@ status_t
 *   format == desired output format (NCX or Xpath)
 *   leaf_pfix == namespace prefix string of the leaf to add
 *   leaf_name ==  name string of the leaf to add
+*   stop_at_root == TRUE to stop if a 'root' node is encountered
+*                == FALSE to keep recursing all the way to 
 *   buff == pointer to address of buffer to use
 *
 * OUTPUTS
@@ -1804,12 +1790,13 @@ status_t
                                ncx_instfmt_t format,
                                xmlns_id_t leaf_nsid,
                                const xmlChar *leaf_name,
+                               boolean stop_at_root,
                                xmlChar  **buff)
 {
-    xmlChar  *p;
-    const xmlChar *leaf_pfix;
-    uint32    len, leaf_len;
-    status_t  res;
+
+    const xmlChar *leaf_pfix = NULL;
+    uint32    len = 0, leaf_len = 0;
+    status_t  res = NO_ERR;
 
 #ifdef DEBUG 
     if (!val || !leaf_name || !buff) {
@@ -1817,7 +1804,6 @@ status_t
     }
 #endif
 
-    leaf_pfix = NULL;
     if (leaf_nsid) {
         leaf_pfix = xmlns_get_ns_prefix(leaf_nsid);
     }
@@ -1825,16 +1811,18 @@ status_t
         leaf_pfix = (const xmlChar *)"inv";
     }
 
-    /* figure out the length of the parmset instance ID */
-    res = get_instance_string(mhdr, format, val, NULL, &len);
-    if (res != NO_ERR) {
-        return res;
-    }
+    if (!(stop_at_root && val->obj && obj_is_root(val->obj))) {
+        /* figure out the length of the parmset instance ID */
+        res = get_instance_string(mhdr, format, val, stop_at_root, NULL, &len);
+        if (res != NO_ERR) {
+            return res;
+        }
 
-    /* check no instance ID */
-    if (len==0) {
-        *buff = NULL;
-        return ERR_NCX_NO_INSTANCE;
+        /* check no instance ID */
+        if (len==0) {
+            *buff = NULL;
+            return ERR_NCX_NO_INSTANCE;
+        }
     }
 
     /* get the length of the extra leaf '/pfix:name' */
@@ -1850,17 +1838,19 @@ status_t
     }
 
     /* get the instance ID string for real this time */
-    res = get_instance_string(mhdr, format, val, *buff, &len);
+    if (!(stop_at_root && val->obj && obj_is_root(val->obj))) {
+        res = get_instance_string(mhdr, format, val, stop_at_root, *buff, &len);
+    }
     if (res != NO_ERR) {
         m__free(*buff);
         *buff = NULL;
     } else {
-        p = *buff;
+        xmlChar  *p = *buff;
         p += len;
         *p++ = '/';
         p += xml_strcpy(p, leaf_pfix);
         *p++ = ':';
-        p += xml_strcpy(p, leaf_name);
+        xml_strcpy(p, leaf_name);
     }
 
     return res;
@@ -2036,35 +2026,37 @@ status_t
                         boolean *condresult,
                         uint32  *whencount)
 {
-    obj_template_t          *whenobj;
-    status_t                 res;
-    boolean                  done;
-    uint32                   cnt;
+    assert( val && "val is NULL!" );
+    assert( valroot && "valroot is NULL!" );
+    assert( obj && "obj is NULL!" );
+    assert( condresult && "condresult is NULL!" );
 
-#ifdef DEBUG
-    if (!val || !valroot || !obj || !condresult) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
+    status_t res = NO_ERR;
+    uint32   cnt = 0;
 
-    cnt = 0;
-    res = NO_ERR;
-
-    /* there are no false if-feature statements
-     * so check for any whan statements attached
-     * to this object
-     *  1) direct
-     *  2) inherited from augment-when
-     *  3) inherited from uses-when chain
+    /* check for any when statements attached to this object
+     *  1) direct + parent choice/case
+     *  2) inherited from uses or augment-when + parent choice/case
      */
     if (obj->when) {
         cnt++;
-        res = check_when_stmt(val, 
-                              valroot, 
-                              objval,
-                              obj, 
-                              obj->when,
-                              condresult);
+
+        val_value_t *dummychild = NULL, *usechild = objval;
+        if (objval == NULL) {
+            dummychild = val_new_value();
+            if (!dummychild) {
+                return ERR_INTERNAL_MEM;
+            }
+            val_init_from_template(dummychild, obj);
+            val_add_child(dummychild, val);
+            usechild = dummychild;
+        }
+
+        res = check_when_stmt(val, valroot, usechild, obj->when, condresult);
+        if (dummychild) {
+            val_remove_child(dummychild);
+            val_free_value(dummychild);
+        }
         if (res != NO_ERR || !*condresult) {
             if (whencount) {
                 *whencount = cnt;
@@ -2073,14 +2065,21 @@ status_t
         }
     }
 
-    if (obj->augobj && obj->augobj->when) {
+    if (val == valroot || val->parent == NULL) {
+        if (whencount) {
+            *whencount = cnt;
+        }
+        *condresult = FALSE;
+        return NO_ERR;
+    }
+
+    /* all other when-stmts inherited from various sources use
+     * the parent data node of the target node as the XPath context  */
+    obj_xpath_ptr_t *xptr = obj_first_xpath_ptr(obj);
+    for (; xptr; xptr = obj_next_xpath_ptr(xptr)) {
         cnt++;
-        res = check_when_stmt(val, 
-                              valroot, 
-                              NULL,
-                              obj->augobj,
-                              obj->augobj->when,
-                              condresult);
+        res = check_when_stmt(val, valroot, val->parent, 
+                              xptr->xpath, condresult);
         if (res != NO_ERR || !*condresult) {
             if (whencount) {
                 *whencount = cnt;
@@ -2089,24 +2088,39 @@ status_t
         }
     }
 
-    done = FALSE;
-    whenobj = obj->usesobj;
+    obj_template_t *testobj = obj->parent;
+    boolean done = FALSE;
     while (!done) {
-        if (whenobj != NULL && whenobj->when) {
-            cnt++;
-            res = check_when_stmt(val,
-                                  valroot,
-                                  NULL,
-                                  whenobj,
-                                  whenobj->when,
-                                  condresult);
-            if (res != NO_ERR || !*condresult) {
-                if (whencount) {
-                    *whencount = cnt;
+        if (testobj && 
+            (testobj->objtype == OBJ_TYP_CHOICE ||
+             testobj->objtype == OBJ_TYP_CASE)) {
+
+            if (testobj->when) {
+                cnt++;
+                res = check_when_stmt(val, valroot, val->parent, 
+                                      testobj->when, condresult);
+                if (res != NO_ERR || !*condresult) {
+                    if (whencount) {
+                        *whencount = cnt;
+                    }
+                    return res;
                 }
-                return res;
             }
-            whenobj = whenobj->usesobj;
+            
+            for (xptr = obj_first_xpath_ptr(testobj);
+                 xptr; xptr = obj_next_xpath_ptr(xptr)) {
+                cnt++;
+                res = check_when_stmt(val, valroot, val->parent, 
+                                      xptr->xpath, condresult);
+                if (res != NO_ERR || !*condresult) {
+                    if (whencount) {
+                        *whencount = cnt;
+                    }
+                    return res;
+                }
+            }
+
+            testobj = testobj->parent;
         } else {
             done = TRUE;
         }
@@ -2120,189 +2134,6 @@ status_t
     return NO_ERR;
 
 } /* val_check_obj_when */
-
-
-/********************************************************************
-* FUNCTION val_check_child_conditional
-* 
-* checks if-feature and when-stmt
-* Check if the specified child object node is
-* conditionally TRUE or FALSE, based on any
-* if-feature of when statements attached to the child node
-*
-* INPUTS:
-*   val == parent value node of the object node to check
-*   valroot == database root for XPath purposes
-*   childobj == object template of child to check
-*   condresult == address of conditional test result
-*   
-* OUTPUTS:
-*   *condresult == TRUE if conditional is true or there are none
-*                  FALSE if conditional test failed
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    val_check_child_conditional (val_value_t *val,
-                                 val_value_t *valroot,
-                                 obj_template_t *childobj,
-                                 boolean *condresult)
-{
-#ifdef DEBUG
-    if (!val || !valroot || !childobj || !condresult) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    /* object is marked as mandatory, so need to
-     * check any if-feature statements that are false
-     */
-    if (!obj_is_enabled(childobj)) {
-        *condresult = FALSE;
-        return NO_ERR;
-    }
-
-    /* there are no false if-feature statements
-     * so check for any whan statements attached
-     * to this object
-     */
-    return val_check_obj_when(val, 
-                              valroot, 
-                              NULL,
-                              childobj, 
-                              condresult,
-                              NULL);
-
-} /* val_check_child_conditional */
-
-
-/********************************************************************
-* FUNCTION val_is_mandatory
-*
-* Figure out if the value node is YANG mandatory or not
-*
-* INPUTS:
-*   val == parent value node of the object node to check
-*   valroot == database root for XPath purposes
-*   childobj == object template of child to check
-*   
-* RETURNS:
-*   TRUE if value is mandatory
-*   FALSE if value is not mandatory
-*********************************************************************/
-boolean
-    val_is_mandatory (val_value_t *val,
-                      val_value_t *valroot,
-                      obj_template_t *childobj)
-{
-    obj_template_t       *chobj;
-    boolean               mand, condresult;
-    status_t              res;
-
-#ifdef DEBUG
-    if (!val) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    mand = obj_is_mandatory(childobj);
-    if (!mand) {
-        return FALSE;
-    }
-
-    if (obj_is_key(childobj)) {
-        return TRUE;
-    }
-
-    res = val_check_child_conditional(val,
-                                      valroot,
-                                      childobj,
-                                      &condresult);
-    if (res != NO_ERR) {
-        SET_ERROR(res);
-        return FALSE;
-    }
-
-    if (!condresult) {
-        return FALSE;
-    }
-
-    /* need to check if mandatory true is for real or not */
-    switch (childobj->objtype) {
-    case OBJ_TYP_CONTAINER:
-        if (childobj->def.container->presence) {
-            return FALSE;
-        }
-        /* else drop through and check children */
-    case OBJ_TYP_CASE:
-    case OBJ_TYP_RPCIO:
-        for (chobj = obj_first_child(childobj);
-             chobj != NULL;
-             chobj = obj_next_child(chobj)) {
-
-            mand = val_is_mandatory(val, valroot, chobj);
-            if (mand) {
-                return TRUE;
-            }
-        }
-        return FALSE;
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_ANYXML:
-    case OBJ_TYP_CHOICE:
-    case OBJ_TYP_LEAF_LIST:
-    case OBJ_TYP_LIST:
-        return TRUE;
-    case OBJ_TYP_USES:
-    case OBJ_TYP_AUGMENT:
-    case OBJ_TYP_REFINE:
-    case OBJ_TYP_RPC:
-    case OBJ_TYP_NOTIF:
-        return FALSE;
-    case OBJ_TYP_NONE:
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return FALSE;
-    }
-
-}   /* val_is_mandatory */
-
-
-/********************************************************************
-* FUNCTION val_get_cond_iqualval
-* 
-* Get the instance qualifier enum for this value node
-* Check all the conditional statements that can make
-* the object required or not
-*
-* INPUTS:
-*   val == parent value node of the object node to check
-*   valroot == database root for XPath purposes
-*   dobj == object template of child to check
-*   
-* RETURNS:
-*   instance qualifier value
-*********************************************************************/
-ncx_iqual_t 
-    val_get_cond_iqualval (val_value_t *val,
-                           val_value_t *valroot,
-                           obj_template_t *obj)
-{
-    boolean      required;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NCX_IQUAL_NONE;
-    }
-#endif
-
-    required = val_is_mandatory(val, valroot, obj);
-
-    return obj_get_iqualval_ex(obj, required);
-
-}  /* val_get_cond_iqualval */
 
 
 /********************************************************************
@@ -2470,22 +2301,22 @@ status_t
 * OUTPUTS:
 *  prints an error message if a warn-off record cannot be added
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_warning_parms (val_value_t *parentval)
 {
     val_value_t        *parmval;
-    status_t            res;
+    status_t            res = NO_ERR;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2523,6 +2354,8 @@ void
         }
     }
 
+    return res;
+
 }  /* val_set_warning_parms */
 
 
@@ -2543,24 +2376,24 @@ void
 * OUTPUTS:
 *  prints an error message if any errors occur
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_logging_parms (val_value_t *parentval)
 {
     val_value_t        *val;
     char               *logfilename;
-    status_t            res;
+    status_t            res = NO_ERR;
     boolean             logappend;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2577,11 +2410,11 @@ void
         if (log_get_debug_level() == LOG_DEBUG_NONE) {
             log_error("\nError: invalid log-level value (%s)",
                       (const char *)VAL_ENUM_NAME(val));
+            return ERR_NCX_INVALID_VALUE;
         }
     }
 
-    val = val_find_child(parentval, 
-                         val_get_mod_name(parentval),
+    val = val_find_child(parentval, val_get_mod_name(parentval),
                          NCX_EL_LOGAPPEND);
     if (val && val->res == NO_ERR) {
         logappend = TRUE;
@@ -2607,6 +2440,8 @@ void
         }
     }
 
+    return res;
+
 }  /* val_set_logging_parms */
 
 
@@ -2625,22 +2460,21 @@ void
 * INPUTS:
 *   parentval == CLI container to check for the runpath,
 *                 modpath, and datapath variables
-*
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_path_parms (val_value_t *parentval)
 {
     val_value_t        *val;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2667,7 +2501,9 @@ void
     if (val && val->res == NO_ERR) {
         ncxmod_set_runpath(VAL_STR(val));
     }
-    
+
+    return NO_ERR;
+
 }  /* val_set_path_parms */
 
 
@@ -2680,21 +2516,21 @@ void
 * INPUTS:
 *   parentval == CLI container to check for the subdirs parm
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_subdirs_parm (val_value_t *parentval)
 {
     val_value_t        *val;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2705,7 +2541,9 @@ void
     if (val && val->res == NO_ERR) {
         ncxmod_set_subdirs(VAL_BOOL(val));
     }
-    
+
+    return NO_ERR;
+
 }  /* val_set_subdirs_parm */
 
 
@@ -2726,22 +2564,22 @@ void
 * INPUTS:
 *   parentval == CLI container to check for the feature parms
 *
+* RETURNS:
+*  status
 *********************************************************************/
-void
+status_t
     val_set_feature_parms (val_value_t *parentval)
 {
     val_value_t        *val;
-    status_t            res;
+    status_t   res = NO_ERR;
 
 #ifdef DEBUG
     if (!parentval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(parentval->btyp == NCX_BT_CONTAINER || 
           parentval->btyp == NCX_BT_LIST)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -2757,7 +2595,7 @@ void
                                NCX_EL_STATIC)) {
             ncx_set_feature_code_default(NCX_FEATURE_CODE_STATIC);
         } else {
-            SET_ERROR(ERR_INTERNAL_VAL);
+            return ERR_NCX_INVALID_VALUE;
         }
     }
 
@@ -2777,7 +2615,7 @@ void
         res = ncx_set_feature_code_entry(VAL_STR(val),
                                          NCX_FEATURE_CODE_STATIC);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2794,7 +2632,7 @@ void
         res = ncx_set_feature_code_entry(VAL_STR(val),
                                          NCX_FEATURE_CODE_DYNAMIC);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2811,7 +2649,7 @@ void
     while (val && val->res == NO_ERR) {
         res = ncx_set_feature_enable_entry(VAL_STR(val), TRUE);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2827,7 +2665,7 @@ void
     while (val && val->res == NO_ERR) {
         res = ncx_set_feature_enable_entry(VAL_STR(val), FALSE);
         if (res != NO_ERR) {
-            return;
+            return res;
         }
 
         val = val_find_next_child(parentval, 
@@ -2836,7 +2674,8 @@ void
                                   val);
     }
 
-    
+    return res;
+
 }  /* val_set_feature_parms */
 
 
@@ -3199,11 +3038,15 @@ status_t
     }
 #endif
 
-    if (!val_is_config_data(val)) {
+    if (editop == OP_EDITOP_NONE) {
         return NO_ERR;
     }
 
-    /* quick exist check */
+    if (!val_is_config_data(val)) {
+        return ERR_NCX_NO_ACCESS_MAX;
+    }
+
+    /* quick exit check */
     running = cfg_get_config_id(NCX_CFGID_RUNNING);
     if (cfg_first_partial_lock(running) == NULL) {
         return NO_ERR;
@@ -3227,7 +3070,7 @@ status_t
     }
 
     /* see if the path to root needs to be checked
-     * because the AGT_CB_COMMIT_CHECK waited until
+     * because the agt_val_check_commit_edits waited until
      * applyhere to check the partial lock
      */
     if (checkup) {
@@ -3247,7 +3090,7 @@ status_t
         }
     }
 
-    /* only replace a delete need to dive into the subtree
+    /* only replace and delete need to dive into the subtree
      * because the config in the PDU does not need to
      * align with the target data tree; and the request
      * is all-or-nothing.  The merge operation will
@@ -3265,11 +3108,7 @@ status_t
              childval = val_get_next_child(childval)) {
 
             if (val_is_config_data(childval)) {
-                res = val_write_ok(childval,
-                                   editop,
-                                   sesid,
-                                   FALSE,
-                                   lockid);
+                res = val_write_ok(childval, editop, sesid, FALSE, lockid);
                 if (res != NO_ERR) {
                     return res;
                 }
@@ -3298,23 +3137,16 @@ void
     val_check_swap_resnode (val_value_t *curval,
                             val_value_t *newval)
 {
-    xpath_result_t *result;
-    uint32          i;
-
-#ifdef DEBUG
     if (curval == NULL || newval == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
-    for (i=0; i < VAL_MAX_PLOCKS; i++) {
+    uint32 i = 0;
+    for (; i < VAL_MAX_PLOCKS; i++) {
         newval->plock[i] = curval->plock[i];
         if (curval->plock[i] != NULL) {
-            result = plock_get_final_result(curval->plock[i]);
-            xpath_nodeset_swap_valptr(result, 
-                                      curval, 
-                                      newval);
+            xpath_result_t *result = plock_get_final_result(curval->plock[i]);
+            xpath_nodeset_swap_valptr(result, curval, newval);
         }
     }
 
@@ -3334,19 +3166,14 @@ void
 void
     val_check_delete_resnode (val_value_t *curval)
 {
-    xpath_result_t *result;
-    uint32          i;
-
-#ifdef DEBUG
     if (curval == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-#endif
 
-    for (i=0; i < VAL_MAX_PLOCKS; i++) {
+    uint32 i = 0;
+    for (; i < VAL_MAX_PLOCKS; i++) {
         if (curval->plock[i] != NULL) {
-            result = plock_get_final_result((curval->plock[i]));
+            xpath_result_t *result = plock_get_final_result((curval->plock[i]));
             xpath_nodeset_delete_valptr(result, curval);
         }
     }
@@ -3638,6 +3465,64 @@ void
     }
     
 }  /* val_traverse_keys */
+
+
+/********************************************************************
+* FUNCTION val_build_index_chains
+* 
+* Check descendant-or-self nodes for lists
+* Check if they have index chains built already
+* If not, then try to add one
+* for each of the key objects in order
+*
+* INPUTS:
+*   val == value node to start check from
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_build_index_chains (val_value_t *val)
+{
+    val_value_t *childval = NULL;
+    status_t     res = NO_ERR;
+
+#ifdef DEBUG
+    if (!val || !val->obj) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (obj_is_leafy(val->obj)) {
+        return NO_ERR;
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+        if (!obj_is_leafy(childval->obj)) {
+            res = val_build_index_chains(childval);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+    }
+
+    if (val->btyp != NCX_BT_LIST) {
+        /* container or maybe anyxml */
+        return NO_ERR;
+    }
+
+    if (!dlq_empty(&val->indexQ)) {
+        /* assume index chain already built */
+        return NO_ERR;
+    }
+
+    /* 0 or more index components expected */
+    res = val_gen_index_chain(val->obj, val);
+    return res;
+    
+}  /* val_build_index_chains */
 
 
 /* END file val_util.c */

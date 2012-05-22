@@ -18,16 +18,8 @@ They should be added to the bug tracker.
       -- JQuery menu not supported
    -- SIL code generation not done:
      -- RPC output
-     -- list key retrieval
      -- support for NCX_ERR_SKIPPED to PASS callback to parent
         partially handled (or skipped)
-     -- choice code generation is broken; a Q header
-        is not passed by the stack.  Only individual case member
-        callbacks would be invoked instead.
-     -- list and leaf-list code generation is also wrong because
-        a Q header would not be passed by the stack.  Instead,
-        a NCX_BT_LIST or normal base type for a leaf-list would
-        be passed. 
      -- conditional code generation for features and the CLI
         parms for this functionality is not done
      -- when-stmt auto-gen code is not done
@@ -36,10 +28,6 @@ They should be added to the bug tracker.
      -- command completion for more data types
      -- command completion based on mirror of database
   -- server bugs:
-    -- deleted node markers not supported so sibling order
-       can be lost during a rollback for a move operation
-    -- rollback-on-error not fully tested; only applies
-       to commit phase because only allowed on <running> config.
     -- ietf-netconf.yang not used internally.  hacks are used
        to advertise ietf-netconf but use yuma-netconf.
        An 'annotation' feature like deviation-stmt is needed
@@ -60,11 +48,7 @@ They should be added to the bug tracker.
     -- SIL user callback functions do not yet support a 'PASS' mode,
        so that multiple callback handlers within the same YANG
        data structure can be utilized.  
-    -- searching for SILL callback handlers is done self-or-ancestor,
-       it should be done self-or-descendant, then ancestor
   -- server optimizations not done:
-    -- mechanisms to optimize must-stmt and when-stmt evaluation
-       during validation
     -- save to NVstore:
       -- user hook to override output to XML file
       -- write /config/foo in sub-directories instead of

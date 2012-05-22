@@ -15,13 +15,19 @@ if [ $# != 3 ]; then
 fi
 
 if [ $1 = 1 ]; then
-  echo "Making yuma source tarball for $1.$2-$3"
+  echo "Making yuma source tarball for $1.$2-$3 from v1 branch"
   mkdir -p ~/srctarballprep
   cd ~/srctarballprep
   rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
   svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$1.$2-$3
 elif [ $1 = 2 ]; then
-  echo "Making yuma source tarball for $1.$2-$3"
+  echo "Making yuma source tarball for $1.$2-$3 from v2 branch"
+  mkdir -p ~/srctarballprep
+  cd ~/srctarballprep
+  rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
+  svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v2 yuma-$1.$2-$3
+elif [ $1 = 3 ]; then
+  echo "Making yuma source tarball for $1.$2-$3 from trunk"
   mkdir -p ~/srctarballprep
   cd ~/srctarballprep
   rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -30,64 +30,24 @@ date         init     comment
 #include  <stdio.h>
 #include  <stdlib.h>
 #include  <memory.h>
+#include  <assert.h>
 
 #include <xmlstring.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_def_reg
 #include "def_reg.h"
-#endif
-
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_grp
 #include "grp.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include "ncx_feature.h"
-#endif
-
-#ifndef _H_ncx_num
 #include "ncx_num.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_tk
 #include "tk.h"
-#endif
-
-#ifndef _H_typ
 #include "typ.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
-
-#ifndef _H_xpath1
 #include "xpath1.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
 
 
 /********************************************************************
@@ -106,164 +66,70 @@ date         init     comment
 *           F O R W A R D   D E C L A R A T I O N S                 *
 *                                                                   *
 *********************************************************************/
-static xpath_result_t *
-    parse_expr (xpath_pcb_t *pcb,
-                status_t  *res);
-
-
-static xpath_result_t *
-    boolean_fn (xpath_pcb_t *pcb,
-                dlq_hdr_t *parmQ,
-                status_t  *res);
-
-static xpath_result_t *
-    ceiling_fn (xpath_pcb_t *pcb,
-                dlq_hdr_t *parmQ,
-                status_t  *res);
-
-static xpath_result_t *
-    concat_fn (xpath_pcb_t *pcb,
-               dlq_hdr_t *parmQ,
-               status_t  *res);
-
-static xpath_result_t *
-    contains_fn (xpath_pcb_t *pcb,
-                 dlq_hdr_t *parmQ,
-                 status_t  *res);
-
-static xpath_result_t *
-    count_fn (xpath_pcb_t *pcb,
-              dlq_hdr_t *parmQ,
-              status_t  *res);
-
-static xpath_result_t *
-    current_fn (xpath_pcb_t *pcb,
-                dlq_hdr_t *parmQ,
-                status_t  *res);
-
-static xpath_result_t *
-    false_fn (xpath_pcb_t *pcb,
-              dlq_hdr_t *parmQ,
-              status_t  *res);
-
-static xpath_result_t *
-    floor_fn (xpath_pcb_t *pcb,
-              dlq_hdr_t *parmQ,
-              status_t  *res);
-
-static xpath_result_t *
-    id_fn (xpath_pcb_t *pcb,
-           dlq_hdr_t *parmQ,
-           status_t  *res);
-
-static xpath_result_t *
-    lang_fn (xpath_pcb_t *pcb,
-             dlq_hdr_t *parmQ,
-             status_t  *res);
-
-static xpath_result_t *
-    last_fn (xpath_pcb_t *pcb,
-             dlq_hdr_t *parmQ,
-             status_t  *res);
-
-static xpath_result_t *
-    local_name_fn (xpath_pcb_t *pcb,
-                   dlq_hdr_t *parmQ,
-                   status_t  *res);
-
-static xpath_result_t *
-    namespace_uri_fn (xpath_pcb_t *pcb,
-                      dlq_hdr_t *parmQ,
-                      status_t  *res);
-
-static xpath_result_t *
-    name_fn (xpath_pcb_t *pcb,
-             dlq_hdr_t *parmQ,
-             status_t  *res);
-
-static xpath_result_t *
-    normalize_space_fn (xpath_pcb_t *pcb,
-                        dlq_hdr_t *parmQ,
-                        status_t  *res);
-
-static xpath_result_t *
-    not_fn (xpath_pcb_t *pcb,
-            dlq_hdr_t *parmQ,
-            status_t  *res);
-
-static xpath_result_t *
-    number_fn (xpath_pcb_t *pcb,
-               dlq_hdr_t *parmQ,
-               status_t  *res);
-
-static xpath_result_t *
-    position_fn (xpath_pcb_t *pcb,
-                 dlq_hdr_t *parmQ,
-                 status_t  *res);
-
-static xpath_result_t *
-    round_fn (xpath_pcb_t *pcb,
-              dlq_hdr_t *parmQ,
-              status_t  *res);
-
-static xpath_result_t *
-    starts_with_fn (xpath_pcb_t *pcb,
-                 dlq_hdr_t *parmQ,
-                    status_t  *res);
-
-static xpath_result_t *
-    string_fn (xpath_pcb_t *pcb,
-               dlq_hdr_t *parmQ,
-               status_t  *res);
-
-static xpath_result_t *
-    string_length_fn (xpath_pcb_t *pcb,
-                      dlq_hdr_t *parmQ,
-                      status_t  *res);
-
-static xpath_result_t *
-    substring_fn (xpath_pcb_t *pcb,
-                  dlq_hdr_t *parmQ,
-                  status_t  *res);
-
-static xpath_result_t *
-    substring_after_fn (xpath_pcb_t *pcb,
-                        dlq_hdr_t *parmQ,
-                        status_t  *res);
-
-static xpath_result_t *
-    substring_before_fn (xpath_pcb_t *pcb,
-                         dlq_hdr_t *parmQ,
-                         status_t  *res);
-
-static xpath_result_t *
-    sum_fn (xpath_pcb_t *pcb,
-            dlq_hdr_t *parmQ,
-            status_t  *res);
-
-static xpath_result_t *
-    translate_fn (xpath_pcb_t *pcb,
-                  dlq_hdr_t *parmQ,
-                  status_t  *res);
-
-static xpath_result_t *
-    true_fn (xpath_pcb_t *pcb,
-             dlq_hdr_t *parmQ,
-             status_t  *res);
-
-static xpath_result_t *
-    module_loaded_fn (xpath_pcb_t *pcb,
-                      dlq_hdr_t *parmQ,
-                      status_t  *res);
-
-static xpath_result_t *
-    feature_enabled_fn (xpath_pcb_t *pcb,
-                        dlq_hdr_t *parmQ,
-                        status_t  *res);
-
+static xpath_result_t* parse_expr( xpath_pcb_t *pcb, status_t  *res); 
+static xpath_result_t* boolean_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                   status_t *res );
+static xpath_result_t* ceiling_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
+                                   status_t *res);
+static xpath_result_t* concat_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                  status_t *res); 
+static xpath_result_t* contains_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                    status_t *res); 
+static xpath_result_t* count_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                 status_t *res); 
+static xpath_result_t* current_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                   status_t *res); 
+static xpath_result_t* false_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                 status_t *res); 
+static xpath_result_t* floor_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                 status_t *res); 
+static xpath_result_t* id_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                              status_t *res); 
+static xpath_result_t* lang_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                status_t *res); 
+static xpath_result_t* last_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                status_t *res); 
+static xpath_result_t* local_name_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                      status_t *res); 
+static xpath_result_t* namespace_uri_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                         status_t *res); 
+static xpath_result_t* name_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                status_t *res); 
+static xpath_result_t* normalize_space_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                           status_t *res); 
+static xpath_result_t* not_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                               status_t *res); 
+static xpath_result_t* number_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                  status_t *res); 
+static xpath_result_t* position_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                    status_t *res); 
+static xpath_result_t* round_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                 status_t *res); 
+static xpath_result_t* starts_with_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                       status_t *res); 
+static xpath_result_t* string_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                  status_t *res); 
+static xpath_result_t* string_length_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                         status_t *res); 
+static xpath_result_t* substring_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                     status_t *res); 
+static xpath_result_t* substring_after_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                           status_t *res); 
+static xpath_result_t* substring_before_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                            status_t *res); 
+static xpath_result_t* sum_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                               status_t *res); 
+static xpath_result_t* translate_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                     status_t *res); 
+static xpath_result_t* true_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                status_t *res); 
+static xpath_result_t* module_loaded_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                         status_t *res); 
+static xpath_result_t* feature_enabled_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
+                                           status_t *res); 
 
 /********************************************************************
-*                                                                   *
+*                                  *
 *                         V A R I A B L E S                         *
 *                                                                   *
 *********************************************************************/
@@ -709,9 +575,7 @@ static xpath_result_t *
 *    result == result struct to free
 *
 *********************************************************************/
-static void
-    free_result (xpath_pcb_t *pcb,
-                xpath_result_t *result)
+static void free_result (xpath_pcb_t *pcb, xpath_result_t *result)
 {
     xpath_resnode_t *resnode;
 
@@ -3782,7 +3646,7 @@ static xpath_result_t *
 /********************************************************************
 * FUNCTION substring_fn
 * 
-* string substring-after(string, number, number?) function [4.2]
+* string substring(string, number, number?) function [4.2]
 *
 * INPUTS:
 *    pcb == parser control block to use
@@ -5889,7 +5753,17 @@ static status_t
         dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     } else if (!pcb->val && pcb->obj) {
         if (pcb->logerrors) {
-            if (axis != XP_AX_CHILD) {
+            /* hack: the val_gen_instance_id code will generate
+             * instance IDs that start with /nc:rpc QName.
+             * The <rpc> node is currently unsupported in
+             * node searches since all YANG content starts
+             * from the RPC operation node;
+             * check for the <nc:rpc> node and suppress the warning
+             * if this is the node that is not found  */
+            if ((childnsid == 0 || childnsid == xmlns_nc_id()) && 
+                !xml_strcmp(childname, NCX_EL_RPC)) {
+                ;  // assume this is an error-path XPath string
+            } else if (axis != XP_AX_CHILD) {
                 res = ERR_NCX_NO_XPATH_DESCENDANT;
                 if (ncx_warning_enabled(res)) {
                     log_warn("\nWarning: no descendant nodes found "
@@ -9099,7 +8973,7 @@ status_t
 * INPUTS:
 *    pcb == XPath parser control block to use
 *    val == start context node for value of current()
-*    docroot == ptr to cfg->root or top of rpc/rpc-replay/notif tree
+*    docroot == ptr to cfg->root or top of rpc/rpc-reply/notif tree
 *    logerrors == TRUE if log_error and ncx_print_errormsg
 *                  should be used to log XPath errors and warnings
 *                 FALSE if internal error info should be recorded
@@ -9132,25 +9006,18 @@ xpath_result_t *
 {
     xpath_result_t *result;
 
-#ifdef DEBUG
-    if (!pcb || !val || !docroot || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert( pcb && "pcb is NULL" );
+    assert( val && "val is NULL" );
+    assert( docroot && "docroot is NULL" );
+    assert( res && "res is NULL" );
 
     if (pcb->tkc) {
         tk_reset_chain(pcb->tkc);
     } else {
-        pcb->tkc = tk_tokenize_xpath_string(NULL, 
-                                            pcb->exprstr, 
-                                            1, 
-                                            1, 
-                                            res);
+        pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 1, 1, res);
         if (!pcb->tkc || *res != NO_ERR) {
             if (logerrors) {
-                log_error("\nError: Invalid XPath string '%s'",
-                          pcb->exprstr);
+                log_error("\nError: Invalid XPath string '%s'", pcb->exprstr);
             }
             return NULL;
         }
@@ -9169,27 +9036,13 @@ xpath_result_t *
     pcb->val = val;
     pcb->val_docroot = docroot;
     pcb->logerrors = logerrors;
-    if (val) {
-        pcb->context.node.valptr = val;
-        pcb->orig_context.node.valptr = val;
+    pcb->context.node.valptr = val;
+    pcb->orig_context.node.valptr = val;
 
 #ifdef EXTRA_DEBUG
-        if (LOGDEBUG3 && pcb->val) {
-            log_debug3("\nXPath setting context node to val: %s",
-                       pcb->context.node.valptr->name);
-        }
+    log_debug3("\nXPath setting context node to val: %s",
+        pcb->context.node.valptr->name);
 #endif
-    } else {
-        pcb->context.node.valptr = docroot;
-        pcb->orig_context.node.valptr = docroot;
-
-#ifdef EXTRA_DEBUG
-        if (LOGDEBUG3 && pcb->val) {
-            log_debug3("\nXPath setting context node to docroot: %s",
-                       pcb->context.node.valptr->name);
-        }
-#endif
-    }
 
     if (configonly ||
         (pcb->source == XP_SRC_YANG && obj_is_config(val->obj))) {
@@ -9885,6 +9738,45 @@ boolean
     return retval;
 
 }  /* xpath1_compare_result_to_number */
+
+
+/********************************************************************
+* FUNCTION xpath1_compare_nodeset_results
+* 
+* Compare an XPath result to another result
+*
+*    result1 = node-set
+*    result2 = node-set
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result1 == result struct to compare
+*    result2 == result struct to compare
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*     equality relation result (TRUE or FALSE)
+*********************************************************************/
+boolean
+    xpath1_compare_nodeset_results (xpath_pcb_t *pcb,
+                                    xpath_result_t *result1,
+                                    xpath_result_t *result2,
+                                    status_t *res)
+{
+    /* only compare real results, not objects */
+    if (!pcb->val) {
+        return TRUE;
+    }
+
+    *res = NO_ERR;
+    boolean retval = compare_results(pcb, result1, result2,
+                                     XP_EXOP_EQUAL, res);
+    return retval;
+
+}  /* xpath1_compare_nodeset_results */
 
 
 /* END xpath1.c */

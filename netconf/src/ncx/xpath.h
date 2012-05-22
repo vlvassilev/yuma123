@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -634,6 +634,7 @@ extern status_t
 			   const xmlChar *target,
 			   val_value_t **targval);
 
+
 /********************************************************************
 * FUNCTION xpath_find_val_unique
 * 
@@ -644,38 +645,35 @@ extern status_t
 * internally to identify a config DB node
 * and return the val_value_t that it indicates
 *
-* Expression must be the node-path from root for
-* the desired node.
-*
 * Error messages are logged by this function
 * only if logerrors is TRUE
 *
 * INPUTS:
-*    cfg == configuration to search
+*    startval == starting context node (contains unique-stmt)
 *    mod == module to use for the default context
 *           and prefixes will be relative to this module's
 *           import statements.
 *        == NULL and the default registered prefixes
 *           will be used
 *    target == Xpath expression string to evaluate
+*    root = XPath docroot to use
 *    logerrors == TRUE to use log_error, FALSE to skip it
-*    targval == address of return value  (may be NULL)
+*    retpcb == address of return value
 *
 * OUTPUTS:
-*   if non-NULL inputs and value node found:
-*      *targval == target value node
-*   If non-NULL targval and error exit:
-*      *targval == last good node visited in expression (if any)
+*   if value node found:
+*      *retpcb == malloced XPath PCB with result
 *
 * RETURNS:
 *   status
 *********************************************************************/
 extern status_t
     xpath_find_val_unique (val_value_t *startval,
-			   ncx_module_t *mod,
-			   const xmlChar *target,
-			   boolean logerrors,
-			   val_value_t **targval);
+                           ncx_module_t *mod,
+                           const xmlChar *target,
+                           val_value_t *root,
+                           boolean logerrors,
+                           xpath_pcb_t **retpcb);
 
 
 /********************************************************************
@@ -869,6 +867,18 @@ extern void
 *********************************************************************/
 extern void
     xpath_free_resnode (xpath_resnode_t *resnode);
+
+
+/********************************************************************
+* FUNCTION xpath_delete_resnode
+* 
+* Delete and free a malloced XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to free
+*********************************************************************/
+extern void
+    xpath_delete_resnode (xpath_resnode_t *resnode);
 
 
 /********************************************************************

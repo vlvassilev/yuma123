@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -32,62 +32,23 @@ date         init     comment
 #include  <stdlib.h>
 #include  <string.h>
 #include  <memory.h>
+#include  <assert.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_agt_rpc
 #include  "agt_rpc.h"
-#endif
-
-#ifndef _H_agt_rpcerr
 #include  "agt_rpcerr.h"
-#endif
-
-#ifndef _H_cfg
 #include  "cfg.h"
-#endif
-
-#ifndef _H_def_reg
 #include  "def_reg.h"
-#endif
-
-#ifndef _H_ncx
 #include  "ncx.h"
-#endif
-
-#ifndef _H_ncxconst
 #include  "ncxconst.h"
-#endif
-
-#ifndef _H_rpc
 #include  "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include  "rpc_err.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_val
 #include  "val.h"
-#endif
-
-#ifndef _H_val_util
 #include  "val_util.h"
-#endif
-
-#ifndef _H_xmlns
 #include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
+#include  "xpath.h"
 
 /********************************************************************
 *                                                                   *
@@ -95,7 +56,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#define AGT_RPCERR_DEBUG 1
 
 /********************************************************************
 *                                                                   *
@@ -610,6 +570,7 @@ static rpc_err_t
         return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_AUGTARGET:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_DUP_REFINE_STMT:
         *apptag = RPC_ERR_APPTAG_DUPLICATE_ERROR;
         return RPC_ERR_OPERATION_FAILED;
@@ -699,6 +660,12 @@ static rpc_err_t
     case ERR_NCX_NO_DEFAULT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
         return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_MISSING_KEY:
+        *apptag = RPC_ERR_APPTAG_DATA_INVALID;
+        return RPC_ERR_MISSING_ELEMENT;
+    case ERR_NCX_TOP_LEVEL_MANDATORY_FAILED:
+        *apptag = RPC_ERR_APPTAG_GEN_ERROR;
+        return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -707,6 +674,64 @@ static rpc_err_t
     /*NOTREACHED*/
 
 } /* get_rpcerr */
+
+
+/**
+ * Create a new error information structure and add it to an error
+ *
+ * /param err pointer to the error to which the error info should be added
+ * /param name_nsid the namespace id
+ * /param name the error name
+ * /param isqname val_nsid + strval == QName
+ * /param val_btype the type of error information content 
+ * /param val_nsid the namespace id value
+ * /param badns an invalid namespace string (NULL if not required)
+ * /param strval the string error content (NULL if not required)
+ * /param interr pointer to the number error content (NULL if not required)
+ *
+ * /return the status of the operation
+ ********************************************************************/
+static status_t enque_error_info (rpc_err_rec_t* err,
+                                  xmlns_id_t name_nsid,
+                                  const xmlChar* name,
+                                  boolean isqname,
+                                  ncx_btype_t val_btype,
+                                  xmlns_id_t val_nsid,
+                                  const xmlChar* badns,
+                                  const xmlChar* strval,
+                                  status_t* interr)
+{
+    /* no value for union */
+    if (!strval && !interr) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    rpc_err_info_t* errinfo = rpc_err_new_info();
+    if (!errinfo) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* generate bad-attribute value */
+    errinfo->name_nsid = name_nsid;
+    errinfo->name = name;
+    errinfo->isqname = isqname;
+    errinfo->val_btype = val_btype;
+    errinfo->val_nsid = val_nsid;
+    if (badns) {
+        errinfo->badns = xml_strdup(badns);
+    }
+    if (interr) {
+        errinfo->v.numval.u = (uint32)(*interr);
+    }
+    if (strval) {
+        errinfo->dval = xml_strdup(strval);
+        errinfo->v.strval = errinfo->dval;
+    }
+    dlq_enque(errinfo, &err->error_info);
+    return NO_ERR;
+
+}  /* enque_error_info */
+
 
 
 /********************************************************************
@@ -735,29 +760,23 @@ static rpc_err_t
 * RETURNS:
 *   status
 *********************************************************************/
-static status_t
-    add_base_vars (rpc_err_rec_t  *err,
-                   rpc_err_t  rpcerr,
-                   const xml_node_t *errnode,
-                   const xmlChar *badval,
-                   const xmlChar *badns,
-                   xmlns_id_t  badnsid1,
-                   xmlns_id_t  badnsid2,
-                   const void *errparm1,
-                   const void *errparm2,
-                   const void *errparm4)
+static status_t add_base_vars (rpc_err_rec_t  *err,
+                               rpc_err_t  rpcerr,
+                               const xml_node_t *errnode,
+                               const xmlChar *badval,
+                               const xmlChar *badns,
+                               xmlns_id_t  badnsid1,
+                               xmlns_id_t  badnsid2,
+                               const void *errparm1,
+                               const void *errparm2,
+                               const void *errparm4)
 {
-    rpc_err_info_t       *errinfo;
+    status_t              res = NO_ERR;
     const xmlChar        *badel;
     const uint32         *numptr;
     ses_id_t              sesid;
-    boolean               attrerr;
-    xmlns_id_t            ncid, ncxid, badid;
-
-    /* setup local vars */
-    ncid = xmlns_nc_id();
-    ncxid = xmlns_ncx_id();
-    attrerr = FALSE;
+    boolean               attrerr = FALSE;
+    xmlns_id_t            badid;
 
     /* figure out the required error-info */
     switch (rpcerr) {
@@ -768,30 +787,14 @@ static status_t
          * errparm2 == error attribute name
          */
         if (errparm2) {
-            badid = badnsid1;
-            badel = (const xmlChar *)errparm2;
-
-            errinfo = rpc_err_new_info();
-            if (!errinfo) {
-                return ERR_INTERNAL_MEM;
+            res = enque_error_info(err, xmlns_nc_id(), NCX_EL_BAD_ATTRIBUTE, 
+                                   TRUE, NCX_BT_STRING, badnsid1,
+                                   (badnsid1 == xmlns_inv_id()) ? badns : NULL, 
+                                   (const xmlChar *)errparm2, NULL); 
+            if (res != NO_ERR) {
+                return res;
             }
-        
-            /* generate bad-attribute value */
-            errinfo->name_nsid = ncid;
-            errinfo->name = NCX_EL_BAD_ATTRIBUTE;
-            errinfo->val_btype = NCX_BT_STRING;
-            errinfo->val_nsid = badid;
-            if (badns && badid == xmlns_inv_id()) {
-                errinfo->badns = xml_strdup(badns);
-            }
-            errinfo->dval = xml_strdup(badel);
-            if (!errinfo->dval) {
-                rpc_err_free_info(errinfo);
-                return ERR_INTERNAL_MEM;
-            }
-            errinfo->v.strval = errinfo->dval;
-            errinfo->isqname = TRUE;
-            dlq_enque(errinfo, &err->error_info);
+       
         } /* else internal error already recorded */
         attrerr = TRUE;
         /* fall through */
@@ -813,49 +816,25 @@ static status_t
 
         /* generate bad-element value */
         if (badel) {
-            errinfo = rpc_err_new_info();
-            if (!errinfo) {
-                return ERR_INTERNAL_MEM;
+            res = enque_error_info(err, xmlns_nc_id(), NCX_EL_BAD_ELEMENT, 
+                                   TRUE, NCX_BT_STRING, badid,
+                                   (badid == xmlns_inv_id()) ? badns : NULL, 
+                                   badel, NULL); 
+            if (res != NO_ERR) {
+                return res;
             }
-            errinfo->name_nsid = ncid;
-            errinfo->name = NCX_EL_BAD_ELEMENT;
-            errinfo->val_btype = NCX_BT_STRING;
-
-            errinfo->val_nsid = badid;
-            if (badns && badid == xmlns_inv_id()) {
-                errinfo->badns = xml_strdup(badns);
-            }
-
-            errinfo->dval = xml_strdup(badel);
-            if (!errinfo->dval) {
-                rpc_err_free_info(errinfo);
-                return ERR_INTERNAL_MEM;
-            }
-            errinfo->v.strval = errinfo->dval;
-            errinfo->isqname = TRUE;
-            dlq_enque(errinfo, &err->error_info);
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
         }
 
         if (rpcerr == RPC_ERR_UNKNOWN_NAMESPACE) {
             if (badns) {
-                /* generate bad-namespace element */
-                errinfo = rpc_err_new_info();
-                if (!errinfo) {
-                    return ERR_INTERNAL_MEM;
+                res = enque_error_info(err, xmlns_nc_id(), NCX_EL_BAD_NAMESPACE,
+                                       FALSE, NCX_BT_STRING, 0, NULL, badns, 
+                                       NULL); 
+                if (res != NO_ERR) {
+                    return res;
                 }
-                errinfo->dval = xml_strdup(badns);
-                if (!errinfo->dval) {
-                    rpc_err_free_info(errinfo);
-                    return ERR_INTERNAL_MEM;
-                }
-                errinfo->name_nsid = ncid;
-                errinfo->name = NCX_EL_BAD_NAMESPACE;
-                errinfo->val_btype = NCX_BT_STRING;
-                errinfo->val_nsid = 0;
-                errinfo->v.strval = errinfo->dval;
-                dlq_enque(errinfo, &err->error_info);
             } else {
                 SET_ERROR(ERR_INTERNAL_VAL);
             }
@@ -871,39 +850,22 @@ static status_t
             sesid = 0;
         }
 
-        errinfo = rpc_err_new_info();
-        if (!errinfo) {
-            return ERR_INTERNAL_MEM;
+        res = enque_error_info(err, xmlns_nc_id(), NCX_EL_SESSION_ID, 
+                               FALSE, NCX_BT_UINT32, 0, NULL, NULL, &sesid); 
+        if (res != NO_ERR) {
+            return res;
         }
-        errinfo->name_nsid = ncid;
-        errinfo->name = NCX_EL_SESSION_ID;
-        errinfo->val_btype = NCX_BT_UINT32;
-        errinfo->val_nsid = 0;
-        errinfo->v.numval.u = (uint32)sesid;
-        dlq_enque(errinfo, &err->error_info);
         break;
     case RPC_ERR_DATA_MISSING:
-        if (errparm2) {
+        if (errparm2 && !badval) {
             /* expecting the obj_template_t of the missing choice */
-            badel = (const xmlChar *)errparm2;
-            
-            errinfo = rpc_err_new_info();
-            if (!errinfo) {
-                return ERR_INTERNAL_MEM;
+            res = enque_error_info(err, xmlns_yang_id(), 
+                                   (const xmlChar *)"missing-choice", FALSE, 
+                                   NCX_BT_STRING, 0, NULL, 
+                                   (const xmlChar *)errparm2, NULL); 
+            if (res != NO_ERR) {
+                return res;
             }
-            errinfo->dval = xml_strdup(badel);
-            if (!errinfo->dval) {
-                rpc_err_free_info(errinfo);
-                return ERR_INTERNAL_MEM;
-            }
-            errinfo->name_nsid = xmlns_yang_id();
-            errinfo->name = (const xmlChar *)"missing-choice";
-            errinfo->val_btype = NCX_BT_STRING;
-            errinfo->val_nsid = 0;
-            errinfo->v.strval = errinfo->dval;
-            dlq_enque(errinfo, &err->error_info);
-        } else {
-            SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
     default:
@@ -912,22 +874,12 @@ static status_t
 
     /* generate NCX extension bad-value */
     if (badval) {
-        errinfo = rpc_err_new_info();
-        if (!errinfo) {
-            return ERR_INTERNAL_MEM;
+        res = enque_error_info(err, xmlns_ncx_id(), NCX_EL_BAD_VALUE,
+                               FALSE, NCX_BT_STRING, 0, NULL, badval, 
+                               NULL); 
+        if (res != NO_ERR) {
+            return res;
         }
-        errinfo->dval = xml_strdup(badval);
-        if (!errinfo->dval) {
-            rpc_err_free_info(errinfo);
-            return ERR_INTERNAL_MEM;
-        }
-
-        errinfo->name_nsid = ncxid;
-        errinfo->name = NCX_EL_BAD_VALUE;
-        errinfo->val_btype = NCX_BT_STRING;
-        errinfo->val_nsid = 0;
-        errinfo->v.strval = errinfo->dval;
-        dlq_enque(errinfo, &err->error_info);
     }
 
     return NO_ERR;
@@ -956,27 +908,10 @@ static status_t
     add_error_number (rpc_err_rec_t  *err,
                       status_t  interr)
 {
-    rpc_err_info_t       *errinfo;
-
-    errinfo = rpc_err_new_info();
-    if (!errinfo) {
-        return ERR_INTERNAL_MEM;
-    }
-
-    /* generate bad-attribute value */
-    errinfo->name_nsid = xmlns_ncx_id();
-    errinfo->name = NCX_EL_ERROR_NUMBER;
-    errinfo->val_btype = NCX_BT_UINT32;
-    errinfo->val_nsid = 0;
-    errinfo->v.numval.u = (uint32)interr;
-    dlq_enque(errinfo, &err->error_info);
-    return NO_ERR;
-
+    status_t res = enque_error_info(err, xmlns_ncx_id(), NCX_EL_ERROR_NUMBER,
+                         FALSE, NCX_BT_UINT32, 0, NULL, NULL, &interr); 
+    return res;
 }  /* add_error_number */
-
-
-/**************** E X T E R N A L   F U N C T I O N S  ***************/
-
 
 
 /********************************************************************
@@ -1085,6 +1020,42 @@ rpc_err_rec_t *
 } /* agt_rpcerr_gen_error_errinfo */
 
 
+/**
+ * Set the values of an error record structure
+ *
+ * /param err pointer to the error to set
+ * /param error_res the error result
+ * /param error_id the error id
+ * /param error_type the error type
+ * /param error_severity the error severity
+ * /param error_tag the error tag
+ * /param error_app_tag the error application tag
+ * /param error_path the error path
+ * /param error_message the error message (may be NULL)
+ ********************************************************************/
+static void set_error_record (rpc_err_rec_t* err,
+                       status_t error_res,
+                       rpc_err_t error_id,
+                       ncx_layer_t error_type, 
+                       rpc_err_sev_t error_severity, 
+                       const xmlChar* error_tag,
+                       const xmlChar* error_app_tag,
+                       xmlChar* error_path,
+                       const xmlChar* error_message)
+
+{
+    err->error_res = error_res;
+    err->error_id = error_id;
+    err->error_type = error_type;
+    err->error_severity = error_severity;
+    err->error_tag = error_tag;
+    err->error_app_tag = error_app_tag;
+    err->error_path = error_path;
+    err->error_message = (error_message) ? xml_strdup(error_message) : NULL;
+    err->error_message_lang = NCX_DEF_LANG;
+}  /* set_error_record */
+
+
 /********************************************************************
 * FUNCTION agt_rpc_gen_error_ex
 *
@@ -1134,12 +1105,10 @@ rpc_err_rec_t *
     const obj_template_t     *parm, *in, *obj;
     const xmlns_qname_t      *qname;
     const val_value_t        *valparm;
-    xmlChar                  *error_msg;
     const xmlChar            *badval, *badns, *msg, *apptag;
     const void               *err1, *err2, *err4;
     const cfg_template_t     *badcfg;
     rpc_err_t                 rpcerr;
-    status_t                  res;
     rpc_err_sev_t             errsev;
     xmlns_id_t                badnsid1, badnsid2;
     boolean                   just_errnum;
@@ -1155,7 +1124,6 @@ rpc_err_rec_t *
     obj = NULL;
     qname = NULL;
     valparm = NULL;
-    error_msg = NULL;
     badval = NULL;
     badns = NULL;
     msg = NULL;
@@ -1163,10 +1131,6 @@ rpc_err_rec_t *
     err1 = NULL;
     err2 = NULL;
     err4 = NULL;
-    badval = NULL;
-    badns = NULL;
-    rpcerr = RPC_ERR_NONE;
-    res = NO_ERR;
     errsev = RPC_ERR_SEV_NONE;
     badnsid1 = 0;
     badnsid2 = 0;
@@ -1176,6 +1140,7 @@ rpc_err_rec_t *
     case ERR_NCX_MISSING_PARM:
     case ERR_NCX_EXTRA_CHOICE:
     case ERR_NCX_MISSING_CHOICE:
+    case ERR_NCX_MISSING_KEY:
         if (!error_parm) {
             SET_ERROR(ERR_INTERNAL_PTR);
         } else {
@@ -1195,6 +1160,13 @@ rpc_err_rec_t *
                 }
                 break;
             case NCX_NT_STRING:
+                /* FIXME: setting this to 0 may cause a
+                 * SET_ERROR when the XML element is printed
+                 * because the error-info 'bad-element'
+                 * is supposed to be a QName and nsid must != 0
+                 * TBD: redo this whole error API!!!
+                 * but first just pass in the NSID of the bad-element
+                 */
                 badnsid1 = 0;
                 err2 = (const void *)error_parm;
                 break;
@@ -1231,6 +1203,7 @@ rpc_err_rec_t *
                 err2 = (const void *)obj_get_name(in);
             }
         }
+        break;
     case ERR_NCX_DEF_NOT_FOUND:
         if (parmtyp == NCX_NT_STRING && error_parm) {
             err1 = error_parm;
@@ -1274,7 +1247,9 @@ rpc_err_rec_t *
          * for the bad-element name 
          */
         if (errnode) {
-            badnsid2 = qname->nsid;
+            if (qname) {
+                badnsid2 = qname->nsid;
+            }
             err4 = (const void *)errnode;
             /* make sure add_base_vars doesn't use as an xml_node_t */
             errnode = NULL;  
@@ -1302,26 +1277,13 @@ rpc_err_rec_t *
         msg = (const xmlChar *)get_error_string(interr);
     }
 
-    /* ignoring possible malloc failure; 
-     * will try to sent the error without an error-message
-     * if the xml_strdup call fails
-     */
-    error_msg = (msg) ? xml_strdup(msg) : NULL;
-
     if (errinfo && errinfo->error_app_tag) {
         apptag = errinfo->error_app_tag;
     }
 
     /* setup the return record */
-    err->error_res = interr;
-    err->error_id = rpcerr;
-    err->error_type = layer;
-    err->error_severity = errsev;
-    err->error_tag = rpc_err_get_errtag(rpcerr);
-    err->error_app_tag = apptag;
-    err->error_path = error_path;
-    err->error_message = error_msg;
-    err->error_message_lang = NCX_DEF_LANG;
+    set_error_record(err, interr, rpcerr, layer, errsev, 
+                     rpc_err_get_errtag(rpcerr), apptag, error_path, msg);
 
     /* figure out the required error-info 
      * It is possible for an attribute error to be recorded
@@ -1330,26 +1292,30 @@ rpc_err_rec_t *
      */
     switch (rpcerr) {
     case RPC_ERR_MISSING_ELEMENT:
+    case RPC_ERR_UNKNOWN_ELEMENT:
+    case RPC_ERR_LOCK_DENIED:
+    case RPC_ERR_MISSING_ATTRIBUTE:
+    case RPC_ERR_BAD_ATTRIBUTE:
+    case RPC_ERR_UNKNOWN_ATTRIBUTE:
         break;
     case RPC_ERR_BAD_ELEMENT:
         if (parmtyp==NCX_NT_STRING) {
             badval = (const xmlChar *)error_parm;
         }
         break;
-    case RPC_ERR_UNKNOWN_ELEMENT:
-        break;
     case RPC_ERR_UNKNOWN_NAMESPACE:
         if (parmtyp==NCX_NT_STRING) {
             badns = (const xmlChar *)error_parm;
         }
         break;
-    case RPC_ERR_LOCK_DENIED:
-    case RPC_ERR_MISSING_ATTRIBUTE:
-    case RPC_ERR_BAD_ATTRIBUTE:
-    case RPC_ERR_UNKNOWN_ATTRIBUTE:
-        break;
     case RPC_ERR_DATA_MISSING:
-        if (interr != ERR_NCX_MISSING_CHOICE) {
+        if (interr == ERR_NCX_MISSING_CHOICE) {
+            badval = NULL;
+        } else if (interr == ERR_NCX_MISSING_VAL_INST) {
+            if (obj) {
+                badval = obj_get_name(obj);
+            }
+        } else {
             just_errnum = TRUE;
         }
         break;
@@ -1363,27 +1329,13 @@ rpc_err_rec_t *
 
     if (!just_errnum) {
         /* add the required error-info, call even if err2 is NULL */
-        res = add_base_vars(err, 
-                            rpcerr, 
-                            errnode, 
-                            badval, 
-                            badns, 
-                            badnsid1,
-                            badnsid2,
-                            err1, 
-                            err2, 
-                            err4);
-        if (res != NO_ERR) {
-            /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-            ;    /* add error statistics (TBD) */
-        }
+        /* ignore result and use err anyway */
+        add_base_vars(err, rpcerr, errnode, badval, badns, badnsid1, badnsid2,
+                      err1, err2, err4);
     }
 
-    res = add_error_number(err, interr);
-    if (res != NO_ERR) {
-        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-        ;    /* add error statistics (TBD) */
-    }
+    /* ignore result and use err anyway */
+    add_error_number(err, interr);
 
     return err;
 
@@ -1419,20 +1371,10 @@ rpc_err_rec_t *
                                  xmlChar *error_path)
 {
     rpc_err_rec_t            *err;
-    xmlChar                  *error_msg;
-    const xmlChar            *badval, *msg, *apptag;
-    const void               *err2, *err4;
-    xmlns_id_t                badnsid1, badnsid2;
-    rpc_err_t                 rpcerr;
-    status_t                  res;
-    rpc_err_sev_t             errsev;
+    const xmlChar            *badval = NULL, *msg;
+    const void               *err2 = NULL;
 
-#ifdef DEBUG
-    if (!errval) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    assert(errval && "param errval is NULL");
 
     /* get a new error record */
     err = rpc_err_new_record();
@@ -1440,64 +1382,31 @@ rpc_err_rec_t *
         return NULL;
     }
 
-    badval = NULL;
-    err2 = NULL;
-    err4 = NULL;
-    badnsid1 = 0;
-    badnsid2 = 0;
-
-    rpcerr = RPC_ERR_BAD_ATTRIBUTE;
-    errsev = RPC_ERR_SEV_ERROR;
-
     msg = (const xmlChar *)get_error_string(interr);
-    error_msg = (msg) ? xml_strdup(msg) : NULL;
 
-    apptag = RPC_ERR_APPTAG_INSERT;
-
-    err->error_res = interr;
-    err->error_id = rpcerr;
-    err->error_type = layer;
-    err->error_severity = errsev;
-    err->error_tag = rpc_err_get_errtag(rpcerr);
-    err->error_app_tag = apptag;
-    err->error_path = error_path;
-    err->error_message = error_msg;
-    err->error_message_lang = NCX_DEF_LANG;
+    set_error_record(err, interr, RPC_ERR_BAD_ATTRIBUTE, layer, 
+                     RPC_ERR_SEV_ERROR, 
+                     rpc_err_get_errtag(RPC_ERR_BAD_ATTRIBUTE), 
+                     RPC_ERR_APPTAG_INSERT, error_path, msg);
 
     if (errval->editvars) {
         badval = errval->editvars->insertstr;
     }
 
-    badnsid1 = xmlns_yang_id();
     if (errval->obj->objtype == OBJ_TYP_LIST) {
         err2 = (const void *)NCX_EL_KEY;
     } else {
         err2 = (const void *)NCX_EL_VALUE;
     }
-    badnsid2 = val_get_nsid(errval);
-    err4 = (const void *)errval->name;
 
     /* add the required error-info, call even if err2 is NULL */
-    res = add_base_vars(err, 
-                        rpcerr, 
-                        NULL, 
-                        badval, 
-                        NULL, 
-                        badnsid1,
-                        badnsid2,
-                        NULL, 
-                        err2, 
-                        err4);
-    if (res != NO_ERR) {
-        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-        ;    /* add error statistics (TBD) */
-    }
+    /* ignore result and use err anyway */
+    add_base_vars(err, RPC_ERR_BAD_ATTRIBUTE, NULL, badval, NULL, 
+                  xmlns_yang_id(), val_get_nsid(errval), NULL, err2, 
+                  (const void *)errval->name);
 
-    res = add_error_number(err, interr);
-    if (res != NO_ERR) {
-        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-        ;    /* add error statistics (TBD) */
-    }
+    /* ignore result and use err anyway */
+    add_error_number(err, interr);
 
     return err;
 
@@ -1537,14 +1446,10 @@ rpc_err_rec_t *
                                  xmlChar *error_path)
 {
     rpc_err_rec_t            *err;
-    rpc_err_info_t           *errinfo;
-    xmlChar                  *error_msg, *pathbuff;
-    const xmlChar            *msg, *apptag;
+    xmlChar                  *pathbuff;
+    const xmlChar            *msg;
     val_unique_t             *unival;
-    rpc_err_t                 rpcerr;
     status_t                  res;
-    rpc_err_sev_t             errsev;
-    xmlns_id_t                yangid;
 
     /* get a new error record */
     err = rpc_err_new_record();
@@ -1552,60 +1457,46 @@ rpc_err_rec_t *
         return NULL;
     }
 
-    rpcerr = RPC_ERR_OPERATION_FAILED;
-    errsev = RPC_ERR_SEV_ERROR;
     msg = (const xmlChar *)get_error_string(interr);
-    error_msg = (msg) ? xml_strdup(msg) : NULL;
-    apptag = RPC_ERR_APPTAG_UNIQUE_FAILED;
 
     /* setup the return record */
-    err->error_res = interr;
-    err->error_id = rpcerr;
-    err->error_type = layer;
-    err->error_severity = errsev;
-    err->error_tag = rpc_err_get_errtag(rpcerr);
-    err->error_app_tag = apptag;
-    err->error_path = error_path;
-    err->error_message = error_msg;
-    err->error_message_lang = NCX_DEF_LANG;
-
-    yangid = xmlns_yang_id();
+    set_error_record(err, interr, RPC_ERR_OPERATION_FAILED, layer, 
+                     RPC_ERR_SEV_ERROR, 
+                     rpc_err_get_errtag(RPC_ERR_OPERATION_FAILED),
+                     RPC_ERR_APPTAG_UNIQUE_FAILED, error_path, msg);
 
     for (unival = (val_unique_t *)dlq_firstEntry(valuniqueQ);
          unival != NULL;
          unival = (val_unique_t *)dlq_nextEntry(unival)) {
 
         pathbuff = NULL;
-        res = val_gen_instance_id(msghdr, 
-                                  unival->valptr, 
-                                  NCX_IFMT_XPATH1, 
+        xpath_resnode_t *resnode = xpath_get_first_resnode(unival->pcb->result);
+        if (resnode == NULL) {
+            // should not happen!
+            continue;
+        }
+        val_value_t *valptr = xpath_get_resnode_valptr(resnode);
+        if (valptr == NULL) {
+            // should not happen!
+            continue;
+        }
+        res = val_gen_instance_id(msghdr, valptr, NCX_IFMT_XPATH1, 
                                   &pathbuff);
-        if (res != NO_ERR) {
-            return err;
+        if (res == NO_ERR) {
+            res = enque_error_info(err, xmlns_yang_id(), NCX_EL_NON_UNIQUE, 
+                                   FALSE, NCX_BT_INSTANCE_ID, 0, NULL, 
+                                   pathbuff, NULL);
         }
-
-        errinfo = rpc_err_new_info();
-        if (!errinfo) {
-            /* try to send the error as-is */
+        if (pathbuff) {
             m__free(pathbuff);
-            return err;
         }
-        
-        /* generate non-unique value */
-        errinfo->name_nsid = yangid;
-        errinfo->name = NCX_EL_NON_UNIQUE;
-        errinfo->val_btype = NCX_BT_INSTANCE_ID;
-        errinfo->val_nsid = 0;
-        errinfo->dval = pathbuff;
-        errinfo->v.strval = errinfo->dval;
-        dlq_enque(errinfo, &err->error_info);
+        if (res != NO_ERR) {
+            log_error("\nError: could not add unique-error info");
+        }
     }
 
-    res = add_error_number(err, interr);
-    if (res != NO_ERR) {
-        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-        ;    /* add error statistics (TBD) */
-    }
+    /* ignore result and use err anyway */
+    add_error_number(err, interr);
 
     return err;
 
@@ -1646,25 +1537,16 @@ rpc_err_rec_t *
     rpc_err_rec_t  *err;
     rpc_err_sev_t   errsev;
     rpc_err_t       rpcerr;
-    xmlChar        *badval, *error_msg;
-    const void     *err1, *err2, *err4;
-    const xmlChar  *msg, *apptag;
-    status_t        res;
-    xmlns_id_t      badnsid1, badnsid2;
+    xmlChar        *badval = NULL;
+    const void     *err2 = NULL, *err4 = NULL;
+    const xmlChar  *msg, *apptag = NULL;
+    xmlns_id_t      badnsid1 = 0, badnsid2 = 0;
 
     /* get a new error record */
     err = rpc_err_new_record();
     if (!err) {
         return NULL;
     }
-
-    badval = NULL;
-    badnsid1 = 0;
-    badnsid2 = 0;
-    err1 = NULL;
-    err2 = NULL;
-    err4 = NULL;
-    apptag = NULL;
 
     if (attr) {
         badnsid1 = attr->attr_ns;
@@ -1682,6 +1564,7 @@ rpc_err_rec_t *
     switch (rpcerr) {
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
     case RPC_ERR_MISSING_ATTRIBUTE:
+    case RPC_ERR_UNKNOWN_NAMESPACE:
         break;
     case RPC_ERR_INVALID_VALUE:
         rpcerr = RPC_ERR_BAD_ATTRIBUTE;
@@ -1691,47 +1574,23 @@ rpc_err_rec_t *
             badval = attr->attr_val;
         }
         break;
-    case RPC_ERR_UNKNOWN_NAMESPACE:
-        break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
     } 
 
     /* generate a default error message */
     msg = (const xmlChar *)get_error_string(interr);
-    error_msg = (msg) ? xml_strdup(msg) : NULL;
 
-    err->error_res = interr;
-    err->error_id = rpcerr;
-    err->error_type = layer;
-    err->error_severity = errsev;
-    err->error_tag = rpc_err_get_errtag(rpcerr);
-    err->error_app_tag = apptag;
-    err->error_path = error_path;
-    err->error_message = error_msg;
-    err->error_message_lang = NCX_DEF_LANG;
+    set_error_record(err, interr, rpcerr, layer, errsev, 
+                     rpc_err_get_errtag(rpcerr), apptag, error_path, msg);
 
     /* add the required error-info */
-    res = add_base_vars(err, 
-                        rpcerr, 
-                        errnode, 
-                        badval, 
-                        badns,
-                        badnsid1,
-                        badnsid2,
-                        err1, 
-                        err2, 
-                        err4);
-    if (res != NO_ERR) {
-        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-        ;    /* add error statistics (TBD) */
-    }
+    /* ignore result and use err anyway */
+    add_base_vars(err, rpcerr, errnode, badval, badns, badnsid1, badnsid2, NULL,
+                  err2, err4);
 
-    res = add_error_number(err, interr);
-    if (res != NO_ERR) {
-        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-        ;    /* add error statistics (TBD) */
-    }
+    /* ignore result and use err anyway */
+    add_error_number(err, interr);
 
     return err;
 

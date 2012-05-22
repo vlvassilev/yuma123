@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -462,7 +462,7 @@ status_t
     memset(fdmap, 0x0, sizeof(def_fdmap_t));
 
     /* get a string key */
-    ret = sprintf((char *)fdmap->num, "%d", fd);
+    ret = snprintf((char *)fdmap->num, sizeof(fdmap->num), "%d", fd);
     if (ret <= 0) {
         m__free(fdmap);
         return ERR_NCX_INVALID_NUM;
@@ -500,7 +500,7 @@ ses_cb_t *
     int            ret;
     xmlChar        buff[NCX_MAX_NUMLEN];
 
-    ret = sprintf((char *)buff, "%d", fd);
+    ret = snprintf((char *)buff, sizeof(buff), "%d", fd);
     if (ret <= 0) {
         return NULL;
     }
@@ -532,7 +532,7 @@ void
     int            ret;
     xmlChar        buff[NCX_MAX_NUMLEN];
 
-    ret = sprintf((char *)buff, "%d", fd);
+    ret = snprintf((char *)buff, sizeof(buff), "%d", fd);
     if (ret <= 0) {
         return;
     }

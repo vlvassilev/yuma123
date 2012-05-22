@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -66,6 +66,7 @@ extern "C" {
 #define AGT_CLI_NOSTARTUP (const xmlChar *)"no-startup"
 #define AGT_CLI_STARTUP   (const xmlChar *)"startup"
 #define AGT_CLI_FACTORY_STARTUP   (const xmlChar *)"factory-startup"
+#define AGT_CLI_RUNNING_ERROR (const xmlChar *)"running-error"
 #define AGT_CLI_STARTUP_ERROR (const xmlChar *)"startup-error"
 #define AGT_CLI_STARTUP_STOP  (const xmlChar *)"stop"
 #define AGT_CLI_DELETE_EMPTY_NPCONTAINERS \

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -40,97 +40,29 @@ date         init     comment
 
 #define _C_main 1
 
-#ifndef _H_procdefs
-#include  "procdefs.h"
-#endif
-
-#ifndef _H_cli
-#include  "cli.h"
-#endif
-
-#ifndef _H_conf
-#include  "conf.h"
-#endif
-
-#ifndef _H_ext
-#include  "ext.h"
-#endif
-
-#ifndef _H_help
-#include  "help.h"
-#endif
-
-#ifndef _H_log
-#include  "log.h"
-#endif
-
-#ifndef _H_ncx
-#include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_feature
-#include  "ncx_feature.h"
-#endif
-
-#ifndef _H_ncxconst
-#include  "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
-#include  "ncxmod.h"
-#endif
-
-#ifndef _H_ses
-#include  "ses.h"
-#endif
-
-#ifndef _H_status
-#include  "status.h"
-#endif
-
-#ifndef _H_tstamp
-#include  "tstamp.h"
-#endif
-
-#ifndef _H_val
-#include  "val.h"
-#endif
-
-#ifndef _H_val_util
-#include  "val_util.h"
-#endif
-
-#ifndef _H_xml_util
-#include  "xml_util.h"
-#endif
-
-#ifndef _H_yang
-#include  "yang.h"
-#endif
-
-#ifndef _H_yangconst
-#include  "yangconst.h"
-#endif
-
-#ifndef _H_yangdiff
-#include  "yangdiff.h"
-#endif
-
-#ifndef _H_yangdiff_grp
-#include  "yangdiff_grp.h"
-#endif
-
-#ifndef _H_yangdiff_obj
-#include  "yangdiff_obj.h"
-#endif
-
-#ifndef _H_yangdiff_typ
-#include  "yangdiff_typ.h"
-#endif
-
-#ifndef _H_yangdiff_util
-#include  "yangdiff_util.h"
-#endif
+#include "procdefs.h"
+#include "cli.h"
+#include "conf.h"
+#include "ext.h"
+#include "help.h"
+#include "log.h"
+#include "ncx.h"
+#include "ncx_feature.h"
+#include "ncxconst.h"
+#include "ncxmod.h"
+#include "ses.h"
+#include "status.h"
+#include "tstamp.h"
+#include "val.h"
+#include "val_util.h"
+#include "xml_util.h"
+#include "yang.h"
+#include "yangconst.h"
+#include "yangdiff.h"
+#include "yangdiff_grp.h"
+#include "yangdiff_obj.h"
+#include "yangdiff_typ.h"
+#include "yangdiff_util.h"
 
 
 /********************************************************************
@@ -139,7 +71,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 #define YANGDIFF_DEBUG   1
-
 
 
 /********************************************************************
@@ -228,22 +159,15 @@ static void
                 output_mstart_line(cp, YANG_K_IMPORT, oldimp->module, TRUE);
                 if (cp->edifftype != YANGDIFF_DT_TERSE) {
                     indent_in(cp);
-                    output_diff(cp, 
-                                YANG_K_PREFIX,
-                                oldimp->prefix, 
-                                newimp->prefix, 
-                                TRUE);
+                    output_diff(cp, YANG_K_PREFIX, oldimp->prefix, 
+                                newimp->prefix, TRUE);
                     indent_out(cp);
                 }
             }
             newimp->used = TRUE;
         } else {
             /* import was removed from the new module */
-            output_diff(cp, 
-                        YANG_K_IMPORT, 
-                        oldimp->module, 
-                        NULL, 
-                        TRUE);
+            output_diff(cp, YANG_K_IMPORT, oldimp->module, NULL, TRUE);
         }
     }
 
@@ -253,11 +177,7 @@ static void
 
         if (!newimp->used) {
             /* this import was added in the new revision */
-            output_diff(cp, 
-                        YANG_K_IMPORT, 
-                        NULL, 
-                        newimp->module, 
-                        TRUE);
+            output_diff(cp, YANG_K_IMPORT, NULL, newimp->module, TRUE);
         }
     }
 
@@ -301,11 +221,7 @@ static void
             newinc->usexsd = TRUE;
         } else {
             /* include was removed from the new module */
-            output_diff(cp, 
-                        YANG_K_INCLUDE, 
-                        oldinc->submodule, 
-                        NULL, 
-                        TRUE);
+            output_diff(cp, YANG_K_INCLUDE, oldinc->submodule, NULL, TRUE);
         }
     }
 
@@ -315,11 +231,7 @@ static void
 
         if (!newinc->usexsd) {
             /* this include was added in the new revision */
-            output_diff(cp, 
-                        YANG_K_INCLUDE, 
-                        NULL, 
-                        newinc->submodule, 
-                        TRUE);
+            output_diff(cp, YANG_K_INCLUDE, NULL, newinc->submodule, TRUE);
         }
     }
 
@@ -403,11 +315,7 @@ static void
             newrev->res = NO_ERR;
         } else {
             /* revision was removed from the new module */
-            output_diff(cp, 
-                        YANG_K_REVISION, 
-                        oldrev->version, 
-                        NULL, 
-                        FALSE);
+            output_diff(cp, YANG_K_REVISION, oldrev->version, NULL, FALSE);
         }
     }
 
@@ -417,11 +325,7 @@ static void
 
         if (newrev->res != NO_ERR) {
             /* this revision-stmt was added in the new version */
-            output_diff(cp, 
-                        YANG_K_REVISION, 
-                        NULL, 
-                        newrev->version, 
-                        FALSE);
+            output_diff(cp, YANG_K_REVISION, NULL, newrev->version, FALSE);
         }
     }
 
@@ -543,11 +447,7 @@ static void
             newext->used = TRUE;
         } else {
             /* extension was removed from the new module */
-            output_diff(cp, 
-                        YANG_K_EXTENSION, 
-                        oldext->name, 
-                        NULL, 
-                        TRUE);
+            output_diff(cp, YANG_K_EXTENSION, oldext->name, NULL, TRUE);
         }
     }
 
@@ -557,11 +457,7 @@ static void
          newext = (ext_template_t *)dlq_nextEntry(newext)) {
         if (!newext->used) {
             /* this extension-stmt was added in the new version */
-            output_diff(cp, 
-                        YANG_K_EXTENSION,
-                        NULL,
-                        newext->name,
-                        TRUE);
+            output_diff(cp, YANG_K_EXTENSION, NULL, newext->name, TRUE);
         }
     }
 
@@ -689,11 +585,7 @@ static void
             newfeat->seen = TRUE;
         } else {
             /* feature was removed from the new module */
-            output_diff(cp, 
-                        YANG_K_FEATURE, 
-                        oldfeat->name, 
-                        NULL, 
-                        TRUE);
+            output_diff(cp, YANG_K_FEATURE, oldfeat->name, NULL, TRUE);
         }
     }
 
@@ -703,11 +595,7 @@ static void
          newfeat = (ncx_feature_t *)dlq_nextEntry(newfeat)) {
         if (!newfeat->seen) {
             /* this feature-stmt was added in the new version */
-            output_diff(cp, 
-                        YANG_K_FEATURE,
-                        NULL,
-                        newfeat->name,
-                        TRUE);
+            output_diff(cp, YANG_K_FEATURE, NULL, newfeat->name, TRUE);
         }
     }
 
@@ -838,11 +726,7 @@ static void
             newident->seen = TRUE;
         } else {
             /* identure was removed from the new module */
-            output_diff(cp, 
-                        YANG_K_IDENTITY, 
-                        oldident->name, 
-                        NULL, 
-                        TRUE);
+            output_diff(cp, YANG_K_IDENTITY, oldident->name, NULL, TRUE);
         }
     }
 
@@ -852,11 +736,7 @@ static void
          newident = (ncx_identity_t *)dlq_nextEntry(newident)) {
         if (!newident->seen) {
             /* this identure-stmt was added in the new version */
-            output_diff(cp, 
-                        YANG_K_IDENTITY,
-                        NULL,
-                        newident->name,
-                        TRUE);
+            output_diff(cp, YANG_K_IDENTITY, NULL, newident->name, TRUE);
         }
     }
 
@@ -907,17 +787,10 @@ static void
     }
 
     /* namespace */
-    output_diff(cp, 
-                YANG_K_NAMESPACE,
-                oldpcb->top->ns, 
-                newpcb->top->ns, 
-                FALSE);
+    output_diff(cp, YANG_K_NAMESPACE, oldpcb->top->ns, newpcb->top->ns, FALSE);
 
     /* prefix */
-    output_diff(cp, 
-                YANG_K_PREFIX,
-                oldpcb->top->prefix, 
-                newpcb->top->prefix, 
+    output_diff(cp, YANG_K_PREFIX, oldpcb->top->prefix, newpcb->top->prefix, 
                 FALSE);
 
     /* imports */
@@ -927,32 +800,20 @@ static void
     output_include_diff(cp, oldpcb, newpcb);
 
     /* organization */
-    output_diff(cp,
-                YANG_K_ORGANIZATION,
-                oldpcb->top->organization,
-                newpcb->top->organization, 
-                FALSE);
+    output_diff(cp, YANG_K_ORGANIZATION, oldpcb->top->organization,
+                newpcb->top->organization, FALSE);
 
     /* contact */
-    output_diff(cp,
-                YANG_K_CONTACT,
-                oldpcb->top->contact_info,
-                newpcb->top->contact_info,
-                FALSE);
+    output_diff(cp, YANG_K_CONTACT, oldpcb->top->contact_info,
+                newpcb->top->contact_info, FALSE);
 
     /* description */
-    output_diff(cp,
-                YANG_K_DESCRIPTION,
-                oldpcb->top->descr,
-                newpcb->top->descr,
-                FALSE);
+    output_diff(cp, YANG_K_DESCRIPTION, oldpcb->top->descr,
+                newpcb->top->descr, FALSE);
 
     /* reference */
-    output_diff(cp,
-                YANG_K_REFERENCE,
-                oldpcb->top->ref,
-                newpcb->top->ref,
-                FALSE);
+    output_diff(cp, YANG_K_REFERENCE, oldpcb->top->ref,
+                newpcb->top->ref, FALSE);
 
     /* revisions */
     output_revision_diff(cp, oldpcb, newpcb);
@@ -1079,18 +940,14 @@ static status_t
     output_identities_diff(cp, oldpcb, newpcb);
 
     /* global typedefs */
-    output_typedefQ_diff(cp, 
-                         &oldpcb->top->typeQ, 
-                         &newpcb->top->typeQ);
+    output_typedefQ_diff(cp, &oldpcb->top->typeQ, &newpcb->top->typeQ);
 
     /* global groupings */
-    output_groupingQ_diff(cp, 
-                          &oldpcb->top->groupingQ, 
+    output_groupingQ_diff(cp, &oldpcb->top->groupingQ, 
                           &newpcb->top->groupingQ);
 
     /* global data definitions */
-    output_datadefQ_diff(cp, 
-                         &oldpcb->top->datadefQ, 
+    output_datadefQ_diff(cp, &oldpcb->top->datadefQ, 
                          &newpcb->top->datadefQ);
 
     /* finish off revision statement if that is the diff mode */
@@ -1584,6 +1441,7 @@ static ses_cb_t *
         fp = fopen((const char *)namebuff, "w");
         if (!fp) {
             *res = ERR_FIL_OPEN;
+            m__free(namebuff);
             return NULL;
         }
     }
@@ -1985,19 +1843,11 @@ static status_t
      * parm(TRUE) indicates all description clauses should be saved
      * Set debug cutoff filter to user errors
      */
-    res = ncx_init(TRUE,
-                   LOG_DEBUG_INFO,
-                   FALSE,
-                   NULL,
-                   argc, 
-                   argv);
+    res = ncx_init(TRUE, LOG_DEBUG_INFO, FALSE, NULL, argc, argv);
 
     if (res == NO_ERR) {
         /* load in the YANG converter CLI definition file */
-        res = ncxmod_load_module(YANGDIFF_MOD, 
-                                 NULL, 
-                                 NULL,
-                                 NULL);
+        res = ncxmod_load_module(YANGDIFF_MOD, NULL, NULL, NULL);
     }
 
     if (res == NO_ERR) {

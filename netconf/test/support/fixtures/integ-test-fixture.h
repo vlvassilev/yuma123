@@ -2,6 +2,7 @@
 #define __INTEG_TEST_FIXTURE__H
 
 #include "test/support/fixtures/abstract-global-fixture.h"
+#include "test/support/fixtures/abstract-fixture-helper.h"
 #include "test/support/nc-query-util/yuma-op-policies.h"
 #include "test/support/fixtures/test-context.h"
 
@@ -49,46 +50,10 @@ private:
      */
     void configureTestContext();
 
-    /** 
-     * Initialise the NCX engine. 
-     * This function this simply calls ncx_init() and checks that it 
-     * returned NO_ERR.  
-     */
-    void initialiseNCXEngine();
-
     /**
-     * Load the base schemas.
-     * This function loads the following base schemas:
-     * <ul>
-     *   <li>NCXMOD_YUMA_NETCONF - NETCONF data types and RPC methods.</li>
-     *   <li>NCXMOD_NETCONFD - The netconf server boot parameter definition 
-     *                        file.</li>
-     * </ul>
+     * Fixture helper
      */
-    void loadBaseSchemas();
-
-    /**
-     * Load the core schemas.
-     * This function loads the following base schemas:
-     * <ul>
-     *   <li>NCXMOD_YUMA_NETCONF - NETCONF data types and RPC methods.</li>
-     *   <li>NCXMOD_NETCONFD - The netconf server boot parameter definition 
-     *                        file.</li>
-     * </ul>
-     */
-    void loadCoreSchema();
-    
-    /**
-     * Perform stage 1 Agt initialisation.
-     * This function calls agt_init1 to perform stage 1 Agt initialisation.
-     */
-    void stage1AgtInitialisation();
-
-    /**
-     * Perform stage 2 Agt initialisation.
-     * This function calls agt_init2 to perform stage 2 Agt initialisation.
-     */
-    void stage2AgtInitialisation();
+    std::shared_ptr<AbstractFixtureHelper> fixtureHelper_;
 };
 
 } // namespace YumaTest

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -133,7 +133,7 @@ typedef enum agt_not_stream_t_ {
 typedef struct agt_not_msg_t_ {
     dlq_hdr_t                qhdr;
     obj_template_t          *notobj;
-    dlq_hdr_t                payloadQ;
+    dlq_hdr_t                payloadQ;  /* Q of val_value_t */
     uint32                   msgid;
     xmlChar                  eventTime[TSTAMP_MIN_SIZE];
     val_value_t             *msg;     /* /notification element */

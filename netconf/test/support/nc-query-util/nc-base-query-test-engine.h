@@ -38,8 +38,10 @@ public:
      * The target DB name must be either 'running' or 'candidate'. Running
      * is only valid if Yuma is configured to allow modifications to the
      * running config.
+     *
+     * \param builder the message builder to use.
      */
-    NCBaseQueryTestEngine();
+    explicit NCBaseQueryTestEngine( std::shared_ptr<NCMessageBuilder> builder );
 
     /** Destructor */
     virtual ~NCBaseQueryTestEngine();
@@ -63,14 +65,6 @@ public:
      */
     void setLogLevel( std::shared_ptr<AbstractNCSession> session,
                       const std::string& logLevel );
-
-    /**
-     * Get the NCMessageBuidler.
-     *
-     * \return a reference to the message builder.
-     */
-    NCMessageBuilder& getMessageBuilder()
-    { return messageBuilder_; }
 
 protected:
     /**
@@ -102,11 +96,10 @@ protected:
         checker( queryResult );
     }
 
-private:
+protected:
     /** Utility XML message builder */
-    NCMessageBuilder messageBuilder_;
+    std::shared_ptr<NCMessageBuilder> messageBuilder_;
 };    
-
 
 } // namespace YumaTest
 

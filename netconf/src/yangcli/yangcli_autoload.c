@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -529,11 +529,7 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    temp_filcb = get_new_temp_filcb(mscb,
-                                    module,
-                                    revision,
-                                    isyang,
-                                    &res);
+    temp_filcb = get_new_temp_filcb(mscb, module, revision, isyang, &res);
     if (temp_filcb == NULL) {
         return res;
     }
@@ -558,6 +554,7 @@ static status_t
     if (destfile == NULL) {
         res = errno_to_status();
         ncxmod_free_session_tempfile(temp_filcb);
+        m__free(linebuffer);
         return res;
     }
 
@@ -567,6 +564,7 @@ static status_t
         res = errno_to_status();
         fclose(destfile);
         ncxmod_free_session_tempfile(temp_filcb);
+        m__free(linebuffer);
         return res;
     }
 
@@ -748,18 +746,12 @@ static status_t
      */
     if (res == NO_ERR) {
         if (LOGDEBUG) {
-            res = ncxmod_parse_module(modname, 
-                                      revision, 
-                                      &savedevQ,
-                                      retmod);
+            res = ncxmod_parse_module(modname, revision, &savedevQ, retmod);
         } else {
             /* ignore parse warnings during autoload unless debug mode */
             loglevel = log_get_debug_level();
             log_set_debug_level(LOG_DEBUG_ERROR);
-            res = ncxmod_parse_module(modname, 
-                                      revision, 
-                                      &savedevQ,
-                                      retmod);
+            res = ncxmod_parse_module(modname, revision, &savedevQ, retmod);
             log_set_debug_level(loglevel);
         }
         if (res != NO_ERR) {

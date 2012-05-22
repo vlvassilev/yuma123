@@ -53,6 +53,7 @@ date         init     comment
 #include "def_reg.h"
 #include "log.h"
 #include "ncx.h"
+#include "ncxmod.h"
 #include "ncxconst.h"
 #include "ses.h"
 #include "ses_msg.h"

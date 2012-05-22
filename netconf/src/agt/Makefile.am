@@ -29,8 +29,9 @@ $(top_srcdir)/netconf/src/agt/agt_val.c \
 $(top_srcdir)/netconf/src/agt/agt_val_parse.c \
 $(top_srcdir)/netconf/src/agt/agt_xml.c \
 $(top_srcdir)/netconf/src/agt/agt_xpath.c \
-$(top_srcdir)/netconf/src/agt/agt_yuma_arp.c
-
+$(top_srcdir)/netconf/src/agt/agt_yuma_arp.c \
+$(top_srcdir)/netconf/src/agt/agt_cfg.c \
+$(top_srcdir)/netconf/src/agt/agt_commit_complete.c
 libagt_la_CPPFLAGS = -DDISABLE_YUMA_INTERFACES -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
 libagt_la_LDFLAGS = -lxml2 -lz  -ldl
 

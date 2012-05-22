@@ -19,7 +19,8 @@ $(top_srcdir)/netconf/modules/netconfcentral/yuma-time-filter.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-proc.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-system.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-app-common.yang \
-$(top_srcdir)/netconf/modules/netconfcentral/netconfd.yang
+$(top_srcdir)/netconf/modules/netconfcentral/netconfd.yang \
+$(top_srcdir)/netconf/modules/netconfcentral/yuma-mysession.yang
 
 yang_yang_DATA = \
 $(top_srcdir)/netconf/modules/yang/ietf-yang-types.yang \

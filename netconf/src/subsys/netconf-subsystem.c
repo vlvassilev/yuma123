@@ -172,16 +172,6 @@ static void configure_logging( int argc, char** argv )
 * RETURNS:
 *   status
 *********************************************************************/
-
-/********************************************************************
-* FUNCTION init_subsys
-*
-* Initialize the subsystem, and get it ready to send and receive
-* the first message of any kind
-* 
-* RETURNS:
-*   status
-*********************************************************************/
 static status_t
     init_subsys (int argc, char** argv)
 {
@@ -536,7 +526,7 @@ int main (int argc, char **argv)
 
     configure_logging( argc, argv );
 
-    res = init_subsys();
+    res = init_subsys(argc, argv);
     if (res != NO_ERR) {
         msg = "init failed";
     }

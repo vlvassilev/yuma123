@@ -312,7 +312,6 @@ extern "C" {
  * if the XML string starts with a double quote
  * then it will be interpreted as whitespace-allowed
  */
-
 #define NCX_STR_START   (xmlChar)'"'
 #define NCX_STR_END     (xmlChar)'"'
 

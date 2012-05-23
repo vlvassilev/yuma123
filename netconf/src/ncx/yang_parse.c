@@ -1021,19 +1021,15 @@ static status_t
                       ncx_module_t  *mod,
                       ncx_identity_t *identity)
 {
-    ncx_identity_t   *testidentity;
-    status_t          res;
-    boolean           errdone;
-
     if (identity->isroot) {
         return NO_ERR;
     }
 
-    res = NO_ERR;
-    testidentity = NULL;
-    errdone = FALSE;
+    ncx_identity_t *testidentity = NULL;
+    status_t res = NO_ERR;
+    boolean errdone = FALSE;
 
-    if (identity->baseprefix &&
+    if (identity->baseprefix && mod->prefix &&
         xml_strcmp(identity->baseprefix, mod->prefix)) {
 
         /* find the identity in another module */
@@ -1047,7 +1043,8 @@ static status_t
         if (res != NO_ERR) {
             errdone = TRUE;
         }
-    } else if (!xml_strcmp(identity->name, identity->basename)) {
+    } else if (identity->name && identity->basename && 
+               !xml_strcmp(identity->name, identity->basename)) {
         /* error: 'base foo' inside 'identity foo' */
         res = ERR_NCX_DEF_LOOP;
         log_error("\nError: 'base %s' inside identity '%s'",
@@ -1055,22 +1052,25 @@ static status_t
         tkc->curerr = &identity->tkerr;
         ncx_print_errormsg(tkc, mod, res);
         errdone = TRUE;
-    } else {
-        testidentity = 
-            ncx_find_identity(mod, 
-                              identity->basename,
-                              FALSE);
+    } else if (identity->basename) {
+        testidentity = ncx_find_identity(mod, identity->basename, FALSE);
     }
-
     if (!testidentity && !errdone) {
-        log_error("\nError: Base '%s%s%s' not found "
-                  "for identity statement '%s'",
-                  (identity->baseprefix) ? 
-                  identity->baseprefix : EMPTY_STRING,
+        if (identity->baseprefix || identity->basename) {
+            log_error("\nError: Base '%s%s%s' not found "
+                      "for identity statement '%s'",
+                      (identity->baseprefix) ? 
+                      identity->baseprefix : EMPTY_STRING,
                   (identity->baseprefix) ? "?" : "",
                   identity->basename,
                   identity->name);
-        res = ERR_NCX_DEF_NOT_FOUND;
+            res = ERR_NCX_DEF_NOT_FOUND;
+        } else {
+            log_error("\nError: Invalid base name for identity statement '%s'",
+                      (identity->name) ? identity->name : NCX_EL_NONE);
+            res = ERR_NCX_INVALID_NAME;
+        }
+
         tkc->curerr = &identity->tkerr;
         ncx_print_errormsg(tkc, mod, res);
     }

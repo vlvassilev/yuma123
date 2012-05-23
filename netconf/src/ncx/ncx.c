@@ -4361,7 +4361,7 @@ void
 
     if (tktyp == TK_TT_NONE) {
         gotval = NULL;
-    } else if (TK_CUR_TYP(tkc)==TK_TT_TSTRING || TK_CUR_NUM(tkc)) {
+    } else if (TK_TYP_STR(tktyp)) {
         gotval = (const char *)TK_CUR_VAL(tkc);
     } else if (TK_CUR_TYP(tkc) == TK_TT_LBRACE) {
         gotval = "left brace, skipping to closing right brace";
@@ -4376,11 +4376,7 @@ void
         } else if (expstr) {
             log_error("\nError:  Expected: %s", expstr);
         }
-        ncx_print_errormsg_ex(tkc, 
-                              mod, 
-                              result, 
-                              NULL, 
-                              0,
+        ncx_print_errormsg_ex(tkc, mod, result, NULL, 0,
                               (expstr) ? FALSE : TRUE);
         log_error("\n");
     }

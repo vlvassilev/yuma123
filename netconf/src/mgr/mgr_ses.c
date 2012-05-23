@@ -521,7 +521,6 @@ static void
     ses_putstr(scb, (const xmlChar *)"10000");
 
     ses_putstr(scb, (const xmlChar *)";tcp;");
-
     snprintf(buffer, sizeof(buffer), "%u;", (uint32)getuid());
     ses_putstr(scb, (const xmlChar *)buffer);
     snprintf(buffer, sizeof(buffer), "%u;", (uint32)getgid());

@@ -284,8 +284,6 @@ static status_t
     ret = connect(ncxsock,
                   ncxname,
                   name_size);
-                  (const struct sockaddr *)&ncxname,
-                  SUN_LEN(&ncxname));
     if (ret != 0) {
         SUBSYS_TRACE1( "ERROR: init_subsys(): NCX Socket Connect failed\n" );
         return ERR_NCX_OPERATION_FAILED;

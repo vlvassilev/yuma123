@@ -45,6 +45,33 @@
 
 static void show_demo_introduction(GetLine *gl);
 
+static char* my_tab_context_string_array[] = {"one", "two", "three", NULL};
+
+static int my_tab_callback (WordCompletion *cpl,
+                          void *data,
+                          const char *line,
+                          int word_end)
+{
+    int word_start;
+    int i;
+    int retval;
+    for(word_start=word_end;word_start>0;word_start--) {
+        if(line[word_start-1]==' ') break;
+    }
+    i=0;
+    while(my_tab_context_string_array[i]!=NULL) {
+        if(strlen(my_tab_context_string_array[i])>=(word_end-word_start)) {
+            if(((word_end-word_start)==0) || (0==memcmp(line+word_start,my_tab_context_string_array[i],word_end-word_start))) {
+                retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                            (const char *)my_tab_context_string_array[i]+word_end-word_start,
+                                            (const char *)":num:", (const char *)" + ");
+            }
+        }
+        i++;
+    }
+    return 0;
+}
+
 /*.......................................................................
  * This program demonstrates how to use gl_get_line() as a line editor to
  * to enable users to enter input. It takes no arguments.
@@ -54,6 +81,7 @@ int main(int argc, char *argv[])
   char *line;             /* A line of input */
   GetLine *gl;            /* The line editor */
   int major,minor,micro;  /* The version number of the library */
+  int retval;
 /*
  * Create the line editor, specifying a max line length of 500 bytes,
  * and 10000 bytes to allocate to storage of historical input lines.
@@ -61,6 +89,15 @@ int main(int argc, char *argv[])
   gl = new_GetLine(500, 5000);
   if(!gl)
     return 1;
+
+  /* setup CLI tab line completion */
+  retval = gl_customize_completion(gl,
+                                   my_tab_context_string_array,
+                                   my_tab_callback);
+  if (retval != 0) {
+    printf("\nError: cannot set GL tab completion");
+    return 1;
+  }
 /*
  * If the user has the LC_CTYPE or LC_ALL environment variables set,
  * enable display of characters corresponding to the specified locale.

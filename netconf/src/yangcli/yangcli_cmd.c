@@ -249,7 +249,20 @@ static val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
 
         myargv[0] = (char*)xml_strdup( obj_get_name(rpc) );
         if ( myargv[0] ) {
+            char* secondary_args = args;
+            int secondary_args_flag = 0;
+            while(strlen(secondary_args)>=strlen("--")) {
+                if(memcmp(secondary_args, "--", strlen("--"))==0) {
+                    secondary_args[0]=0;
+                    secondary_args_flag = 1;
+                    break;
+                }
+                secondary_args++;
+            }
+
             myargv[1] = (char*)xml_strdup( args );
+            if(secondary_args_flag) secondary_args[0] = '-';
+
             if ( myargv[1] ) {
                 retval = cli_parse( server_cb->runstack_context, 2, myargv, obj,
                                     VALONLY, SCRIPTMODE, get_autocomp(), 
@@ -259,6 +272,10 @@ static val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
                 *res = ERR_INTERNAL_MEM;
             }
             m__free( myargv[0] );
+            if(*res==NO_ERR && secondary_args_flag) {
+                secondary_args[0] = '-';
+                myargv[0] = (char*)xml_strdup( secondary_args + strlen("--") );
+            }
         } else {
             *res = ERR_INTERNAL_MEM;
         }
@@ -521,7 +538,6 @@ static xmlChar *
                   server_cb->returncode,
                   server_cb->errnocode);
     }
-
     return line;
 
 } /* get_line */
@@ -4411,7 +4427,8 @@ static val_value_t *
                              boolean dofill,
                              boolean iswrite,
                              status_t *retres,
-                             val_value_t **valroot)
+                             val_value_t **valroot,
+                             char* secondary_args)
 {
     val_value_t           *parm, *curparm = NULL, *newparm = NULL;
     const val_value_t     *userval = NULL;
@@ -4746,6 +4763,14 @@ static val_value_t *
                         res = val_replace(curparm, mytarg);
                     } /* else should not happen */
                 } else if (!get_batchmode()){
+                    /* secondary_args = "mtu=1500"; */
+                    if(secondary_args) {
+                        status_t status;
+                        char* argv[2];
+                        argv[0] = obj_get_name(mytarg->obj);
+                        argv[1] = secondary_args;
+                        curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &status);
+                    }
                     res = fill_valset(server_cb, rpc, mytarg, curparm, 
                                       iswrite, isdelete);
                 }
@@ -5158,6 +5183,8 @@ static status_t
     boolean                getoptional, dofill;
     boolean                isdelete, topcontainer, doattr;
     op_defop_t             def_editop;
+    char                   *secondary_args;
+    int                    secondary_args_flag;
 
     /* init locals */
     res = NO_ERR;
@@ -5173,7 +5200,7 @@ static status_t
     } else {
         isdelete = FALSE;
     }
-
+ 
     /* get the command line parameters for this command */
     valset = get_valset(server_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {
@@ -5205,11 +5232,21 @@ static status_t
         dofill = FALSE;
     }
 
+    secondary_args = line;
+    secondary_args_flag = 0;
+    while(strlen(secondary_args)>=strlen("--")) {
+        if(memcmp(secondary_args, "--", strlen("--"))==0) {
+            secondary_args+=strlen("--");
+            secondary_args_flag = 1;
+            break;
+        }
+        secondary_args++;
+    }
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(server_cb, rpc, valset, getoptional,
                                       isdelete, dofill,
                                       TRUE, /* iswrite */
-                                      &res, &valroot);
+                                      &res, &valroot, secondary_args_flag?secondary_args:NULL);
     if (content == NULL) {
         if (res != NO_ERR) {
             if (LOGDEBUG2) {
@@ -5342,7 +5379,7 @@ static status_t
                                       FALSE,  /* isdelete */
                                       dofill,
                                       TRUE,  /* iswrite */
-                                      &res, &valroot);
+                                      &res, &valroot, NULL);
     if (!content) {
         val_free_value(valset);
         return (res == NO_ERR) ? ERR_NCX_MISSING_PARM : res;
@@ -5523,7 +5560,7 @@ static status_t
                                       FALSE,  /* isdelete */
                                       dofill,
                                       FALSE,  /* iswrite */
-                                      &res, &valroot);
+                                      &res, &valroot, NULL);
     if (res != NO_ERR) {
         val_free_value(valset);
         return (res==NO_ERR) ? ERR_NCX_MISSING_PARM : res;
@@ -5632,7 +5669,7 @@ static status_t
                                       FALSE,  /* isdelete */
                                       dofill,
                                       FALSE, /* iswrite */
-                                      &res, &valroot);
+                                      &res, &valroot, NULL);
     if (res != NO_ERR) {
         val_free_value(valset);
         return res;
@@ -5780,7 +5817,7 @@ static status_t
                                       FALSE,  /* isdelete */
                                       FALSE,  /* dofill */
                                       FALSE,  /* iswrite */
-                                      &res, &valroot);
+                                      &res, &valroot, NULL);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
             str = VAL_STR(content);
@@ -5952,7 +5989,7 @@ static status_t
                                       FALSE,  /* isdelete */
                                       FALSE,  /* dofill */
                                       FALSE,  /* iswrite */
-                                      &res, &valroot);
+                                      &res, &valroot, NULL);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
             str = VAL_STR(content);

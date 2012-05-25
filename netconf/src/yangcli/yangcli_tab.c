@@ -310,7 +310,7 @@ static status_t
 
 
 static status_t
-    fill_xpath_children_completion (obj_template_t *parentObj,
+    fill_xpath_children_completion (obj_template_t *rpc, obj_template_t *parentObj,
         WordCompletion *cpl,
         const char *line,
         int word_start,
@@ -343,7 +343,7 @@ static status_t
 
           // put the children path with topObj into the recursive 
           // lookup function
-          return fill_xpath_children_completion (childObj, cpl,line, word_iter,
+          return fill_xpath_children_completion (rpc, childObj, cpl,line, word_iter,
                                                  word_end, cmdlen);
         }
       word_iter ++;
@@ -364,6 +364,14 @@ static status_t
       if( !obj_is_data_db(childObj)) {
           /* object is either rpc or notification*/
           continue;
+      }
+
+      if(!obj_get_config_flag(childObj)) {
+          const xmlChar* rpc_name;
+          rpc_name = obj_get_name(rpc);
+          if(0==strcmp((const char*)rpc_name, "create")) continue;
+          if(0==strcmp((const char*)rpc_name, "replace")) continue;
+          if(0==strcmp((const char*)rpc_name, "delete")) continue;
       }
 
       retval = cpl_add_completion(cpl, line, word_start, word_end,
@@ -406,6 +414,7 @@ static obj_template_t * find_xpath_top_obj(
 
 static status_t
     fill_xpath_root_completion (
+        obj_template_t *rpc,
         WordCompletion *cpl,
         const char *line,
         int word_start,
@@ -433,6 +442,14 @@ static status_t
           if( !obj_is_data_db(modObj)) {
               /* object is either rpc or notification*/
               continue;
+          }
+
+          if(!obj_get_config_flag(modObj)) {
+              const xmlChar* rpc_name;
+              rpc_name = obj_get_name(rpc);
+              if(0==strcmp((const char*)rpc_name, "create")) continue;
+              if(0==strcmp((const char*)rpc_name, "replace")) continue;
+              if(0==strcmp((const char*)rpc_name, "delete")) continue;
           }
 
           retval = cpl_add_completion(cpl, line, word_start, word_end,
@@ -502,14 +519,14 @@ static status_t
 
             // put the children path with topObj into the recursive 
             // lookup function
-            return fill_xpath_children_completion (topObj, cpl, line,
+            return fill_xpath_children_completion (rpc, topObj, cpl, line,
                                                    word_iter, word_end, cmdlen);
           }
         word_iter ++;
       }
 
     // The second '/' is not found
-    return fill_xpath_root_completion(cpl, line, word_start, word_end, cmdlen);
+    return fill_xpath_root_completion(rpc, cpl, line, word_start, word_end, cmdlen);
 
     //return NO_ERR;
 

@@ -27,7 +27,7 @@ clean: treeclean
 
 superclean: treesuperclean
 
-distclean: distclean
+distclean: treedistclean
 
 install: treeinstall
 

@@ -36,6 +36,8 @@ clean: yumaclean
 
 superclean: yumasuperclean
 
+distclean: yumadistclean
+
 install: yumainstall
 
 ifdef DOC
@@ -84,6 +86,11 @@ yumasuperclean: libtecla/Makefile
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
+yumadistclean: libtecla/Makefile
+	for dir in $(DIRS); do\
+	  cd $$dir && $(MAKE) distclean && cd ..;\
+        done
+
 yuma-all-install:
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
@@ -94,8 +101,8 @@ yuma-doc-install:
           cd $$dir && $(MAKE) install && cd ..;\
         done
 
-.PHONY: all clean superclean install yuma-dev \
-	yumaall yumaclean yumasuperclean yumainstall \
+.PHONY: all clean superclean distclean install yuma-dev \
+	yumaall yumaclean yumasuperclean yumadistclean yumainstall \
 	yuma-all yuma-all-install yuma-doc-install
 
 

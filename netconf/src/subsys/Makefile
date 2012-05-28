@@ -61,7 +61,7 @@ endif
 uninstall:
 	rm -f  $(REAL_INST)/$(PROG)
 
-distclean: superclean uninstall
+distclean: superclean
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files

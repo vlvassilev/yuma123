@@ -84,7 +84,7 @@ uninstall:
 	rm -f  $(REAL_INST)/$(PROG)
 	rm -rf $(LIB_INST)
 
-distclean: superclean uninstall
+distclean: superclean
 
 
 # this real rule keeps make from deleting the $(OBJS) as

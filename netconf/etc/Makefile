@@ -32,7 +32,7 @@ install:
 endif  # DEVELOPER
 
 
-distclean: superclean uninstall
+distclean: superclean
 
 .PHONY: all clean depend superclean install uninstall distclean
 

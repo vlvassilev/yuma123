@@ -1625,7 +1625,7 @@ val_value_t *
                                   errbuff);
                     }
                 } else {
-                    log_error("\nError: %s");
+                    log_error("\nError: %s", msg);
                 }
             }
             m__free(buff);

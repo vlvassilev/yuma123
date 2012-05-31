@@ -11,6 +11,11 @@ module yuma-types {
 
     description "Yuma Common Data Types";
 
+    revision 2012-05-31 {
+       description 
+         "Added yang-identifier data type.";
+    }
+
     revision 2011-12-18 {
        description 
          "Added TransactionId data type.";
@@ -88,6 +93,14 @@ module yuma-types {
             type NcxName;
             type NcxQName;
         }
+    }
+
+    typedef yang-identifier {
+      description "YANG identifier string.";
+      type string {
+        length "1..max";
+        pattern '[a-z,A-Z,_][a-z,A-Z,0-9,\-,_,\.]*';
+      }
     }
 
     typedef NcxSessionId {

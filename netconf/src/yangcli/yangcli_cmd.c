@@ -4770,9 +4770,10 @@ static val_value_t *
                         argv[0] = obj_get_name(mytarg->obj);
                         argv[1] = secondary_args;
                         curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &status);
+                        res = val_replace(curparm, mytarg);
                     }
                     res = fill_valset(server_cb, rpc, mytarg, curparm, 
-                                      iswrite, isdelete);
+                                          iswrite, isdelete);
                 }
             }
         }

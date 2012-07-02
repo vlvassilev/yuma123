@@ -1,3 +1,7 @@
+yuma-transpacket (2.2-1) stable; urgency=high
+  * yangcli
+    * Added non-interactive filling of created nodes
+
 yuma (2.2-1) stable; urgency=high
   * netconfd
     * Added server regression testing and Coverity static code cleanup

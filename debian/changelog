@@ -1,7 +1,7 @@
 yuma-transpacket (2.2-1) stable; urgency=high
   * yangcli
     * Added non-interactive filling of created nodes
-
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 2 Jul 2012 21:16:00 -0800
 yuma (2.2-1) stable; urgency=high
   * netconfd
     * Added server regression testing and Coverity static code cleanup

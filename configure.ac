@@ -3,6 +3,7 @@ AC_INIT([yuma], [2.0.0], [vladimir@ellipticlabs.com])
 AC_CANONICAL_SYSTEM
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+LT_INIT([disable-static])
 
 AC_PROG_CC
 AC_PROG_CXX

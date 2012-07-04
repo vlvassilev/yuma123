@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libtecla.la
+noinst_LTLIBRARIES = libtecla.la
 
 libtecla_la_SOURCES = \
 $(top_srcdir)/libtecla/chrqueue.c \

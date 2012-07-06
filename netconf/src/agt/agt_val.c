@@ -1810,7 +1810,7 @@ static status_t
                  restore_newnode2(newval, newval_marker);
                  return ERR_INTERNAL_MEM;
              }
-
+             val_set_dirty_flag(curval->parent);
              /* check if this is a leaf with a default */
              if (obj_get_default(curval->obj)) {
                  /* convert this leaf to its default value */
@@ -2600,7 +2600,7 @@ static void
         if (undo->free_curnode) {
             if (VAL_IS_DELETED(undo->curnode)) {
                 val_remove_child(undo->curnode);
-            }
+             }
             if (undo->curnode_clone) {
                 /* do not need curnode as a backup for redo-restore */
                 val_free_value(undo->curnode);
@@ -2948,7 +2948,7 @@ static status_t
                       " %s on %s config", (unsigned long long)txcb->txid,
                       editcnt, cntstr, target->name);
         } else {
-            log_debug("\nStart full commit of transaction %llu: %d"
+            log_debug("\nStart full commit of transaction %llu"
                       " LOAD operation on %s config",
                       (unsigned long long)txcb->txid, target->name);
         }
@@ -5725,6 +5725,7 @@ status_t
         /* complete the operation */
         res = handle_callback(AGT_CB_COMMIT, editop, scb, msg, target, 
                               pducfg, target->root, target->root);
+        /*commit_complete?*/
     } else {
         /* rollback the operation */
         status_t res2 = handle_callback(AGT_CB_ROLLBACK, editop, scb, msg, 

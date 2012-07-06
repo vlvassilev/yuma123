@@ -99,4 +99,5 @@ $(top_srcdir)/netconf/src/agt/agt_util.h \
 $(top_srcdir)/netconf/src/agt/agt_ses.h \
 $(top_srcdir)/netconf/src/agt/agt.h \
 $(top_srcdir)/netconf/src/agt/agt_top.h \
-$(top_srcdir)/netconf/src/agt/agt_cli.h
+$(top_srcdir)/netconf/src/agt/agt_cli.h \
+$(top_srcdir)/netconf/src/agt/agt_commit_complete.h

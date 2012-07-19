@@ -42,6 +42,7 @@ date         init     comment
 #include "agt_cb.h"
 #include "agt_cfg.h"
 #include "agt_commit_complete.h"
+#include "agt_commit_validate.h"
 #include "agt_cli.h"
 #include "agt_connect.h"
 #include "agt_hello.h"
@@ -562,6 +563,7 @@ status_t
     /* init user callback support */
     agt_cb_init();
     agt_commit_complete_init();
+    agt_commit_validate_init();
 
     /* initial signal handler first to allow clean exit */
     agt_signal_init();

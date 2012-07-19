@@ -74,7 +74,7 @@ extern "C" {
 * T Y P E D E F S
 *********************************************************************/
 /** Typedef of the commit_validate callback */
-typedef status_t (*agt_commit_validate_cb_t)(agt_profile_t *profile, ses_cb_t *scb, xml_msg_hdr_t *msghdr, val_value_t *root);
+typedef status_t (*agt_commit_validate_cb_t)(ses_cb_t *scb, xml_msg_hdr_t *msghdr, val_value_t *root);
 
 /********************************************************************
 * F U N C T I O N S
@@ -122,7 +122,7 @@ extern void agt_commit_validate_unregister( const xmlChar *modname );
  *
  * \return the ERR_OK or the status of the first failing callback.
  */
-extern status_t agt_commit_validate( agt_profile_t *profile, ses_cb_t *scb, xml_msg_hdr_t *msghdr, val_value_t *root );
+extern status_t agt_commit_validate( ses_cb_t *scb, xml_msg_hdr_t *msghdr, val_value_t *root );
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

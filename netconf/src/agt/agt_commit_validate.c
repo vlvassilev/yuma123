@@ -171,7 +171,7 @@ void agt_commit_validate_unregister( const xmlChar *modname )
 }
 
 /********************************************************************/
-status_t agt_commit_validate( agt_profile_t *profile, ses_cb_t *scb, xml_msg_hdr_t *msghdr, val_value_t *root )
+status_t agt_commit_validate( ses_cb_t *scb, xml_msg_hdr_t *msghdr, val_value_t *root )
 {
     agt_cb_commit_validate_set_t* cbSet;
 
@@ -181,7 +181,7 @@ status_t agt_commit_validate( agt_profile_t *profile, ses_cb_t *scb, xml_msg_hdr
     {
         if ( cbSet->callback )
         {
-            status_t res = cbSet->callback(profile, scb, msghdr, root);
+            status_t res = cbSet->callback(scb, msghdr, root);
 
             if ( NO_ERR != res )
             {

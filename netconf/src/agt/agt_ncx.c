@@ -2088,7 +2088,10 @@ static status_t
             }
         }
         if(res==NO_ERR) {
-            res = agt_commit_validate( profile, scb, &msg->mhdr, candidate->root );
+            res = agt_commit_validate(scb, &msg->mhdr, candidate->root );
+            if (res != NO_ERR) {
+                errdone = TRUE;
+            }
         }
     }
 

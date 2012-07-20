@@ -1,3 +1,11 @@
+yuma123 (2.2-3.1) stable; urgency=high
+  * Fixed bug deleting list nodes from the configuration
+  * Added non-interactive filling of created nodes
+  * Added cross module dependencies validation mechanism with commit_validate
+  * Added rpc-aware xpath tab completion. Ignores status nodes for RPCs dealin$
+  * Added autoconf/automake build scripts
+  * Fixed printout bug in ncx.c
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Fri, 20 Jul 2012 18:48:00 +0100
 yuma (2.2-1) stable; urgency=high
   * netconfd
     * Added server regression testing and Coverity static code cleanup

@@ -1,14 +1,14 @@
-Source: yuma
+Source: yuma123
 Section: devel
 Priority: extra
-Maintainer: Andy Bierman <andy@netconfcentral.org>
+Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
-Homepage: http://www.netconfcentral.org/
 
-Package: yuma
+Package: yuma123
 Architecture: any
 Depends: libncurses5, libssh2-1, libxml2, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: yuma
 Description: YANG-based Unified Modular Automation tools
  Yuma Tools is a YANG-based NETCONF-over-SSH client and server
  development toolkit.  The netconfd server includes an automated
@@ -16,22 +16,22 @@ Description: YANG-based Unified Modular Automation tools
  The yangdump and yangdiff development tools are also
  included, to compile and process YANG modules.
 
-Package: yuma-dev
-Architecture: all
-Depends: yuma, ${misc:Depends}
-Description: YANG-based Unified Modular Automation tools (dev)
- Yuma Tools is a YANG-based NETCONF-over-SSH client and server
- development toolkit.  This package contains H files, scripts,
- and other files needed to create SIL code for use with
- the netconfd server.
+#Package: yuma-dev
+#Architecture: all
+#Depends: yuma, ${misc:Depends}
+#Description: YANG-based Unified Modular Automation tools (dev)
+# Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+# development toolkit.  This package contains H files, scripts,
+# and other files needed to create SIL code for use with
+# the netconfd server.
 
-Package: yuma-doc
-Architecture: all
-Section: doc
-Depends: ${misc:Depends}
-Description: YANG-based Unified Modular Automation tools (doc)
- Yuma Tools is a YANG-based NETCONF-over-SSH client and server
- development toolkit.  This package contains the user and developer
- manuals.
+#Package: yuma-doc
+#Architecture: all
+#Section: doc
+#Depends: ${misc:Depends}
+#Description: YANG-based Unified Modular Automation tools (doc)
+# Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+# development toolkit.  This package contains the user and developer
+# manuals.
 
 

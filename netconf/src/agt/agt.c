@@ -42,6 +42,7 @@ date         init     comment
 #include "agt_cb.h"
 #include "agt_cfg.h"
 #include "agt_commit_complete.h"
+#include "agt_commit_validate.h"
 #include "agt_cli.h"
 #include "agt_connect.h"
 #include "agt_hello.h"
@@ -562,6 +563,7 @@ status_t
     /* init user callback support */
     agt_cb_init();
     agt_commit_complete_init();
+    agt_commit_validate_init();
 
     /* initial signal handler first to allow clean exit */
     agt_signal_init();
@@ -668,13 +670,13 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
-
+#if 0
     /* load the NETCONF interface monitoring data model module */
     res = agt_if_init();
     if (res != NO_ERR) {
         return res;
     }
-
+#endif
     /* initialize the NCX server core callback functions.
      * the schema (yuma-netconf.yang) for these callbacks was 
      * already loaded in the common ncx_init
@@ -886,13 +888,13 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
-
+#if 0
     /* load the interface monitoring callback functions and data */
     res = agt_if_init2();
     if (res != NO_ERR) {
         return res;
     }
-
+#endif
     /* TBD: load the time filter callbacks
      * this currently does not do anything
      */

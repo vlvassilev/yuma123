@@ -46,6 +46,7 @@ date         init     comment
 #include "agt_time_filter.h"
 #include "agt_util.h"
 #include "agt_val.h"
+#include "agt_commit_validate.h"
 #include "cap.h"
 #include "cfg.h"
 #include "ncxmod.h"
@@ -2086,7 +2087,14 @@ static status_t
                 msg->rpc_txcb->commitcheck = FALSE;
             }
         }
+        if(res==NO_ERR) {
+            res = agt_commit_validate(scb, &msg->mhdr, candidate->root );
+            if (res != NO_ERR) {
+                errdone = TRUE;
+            }
+        }
     }
+
 
     if (res != NO_ERR && !errdone) {
         agt_record_error(scb, 

@@ -74,6 +74,7 @@ date         init     comment
  * will mess up STDOUT diplsay with debug messages!!!
  */
 /* #define YANGCLI_TAB_DEBUG 1 */
+/* #define DEBUG_TRACE 1 */
 
 
 /********************************************************************
@@ -309,158 +310,345 @@ static status_t
 }  /* fill_parm_completion */
 
 
+/********************************************************************
+ * FUNCTION fill_xpath_children_completion
+ * 
+ * fill the command struct for one XPath child node
+ *
+ * INPUTS:
+ *    parentObj == object template of parent to check
+ *    cpl == word completion struct to fill in
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 static status_t
     fill_xpath_children_completion (obj_template_t *rpc, obj_template_t *parentObj,
+                                    WordCompletion *cpl,
+                                    const char *line,
+                                    int word_start,
+                                    int word_end,
+                                    int cmdlen)
+{
+    const xmlChar         *pathname;
+    int                    retval;
+    int word_iter = word_start + 1;
+    // line[word_start] == '/'
+    word_start ++;
+    cmdlen --;
+    while(word_iter <= word_end) {
+        if (line[word_iter] == '/') {
+            // The second '/' is found
+            // find the top level obj and fill its child completion
+            char childName[128];
+            int child_name_len = word_iter - word_start;
+            strncpy (childName, &line[word_start], child_name_len);
+            childName[child_name_len] = '\0';
+            if (parentObj == NULL)
+                return NO_ERR;
+            obj_template_t *childObj = 
+                obj_find_child(parentObj,
+                               obj_get_mod_name(parentObj),
+                               (const xmlChar *)childName);
+            cmdlen = word_end - word_iter;
+
+            // put the children path with topObj into the recursive 
+            // lookup function
+            return fill_xpath_children_completion(rpc, childObj, 
+                                                  cpl,line, word_iter,
+                                                  word_end, cmdlen);
+        }
+        word_iter ++;
+    }
+    obj_template_t * childObj = obj_first_child_deep(parentObj);
+    for(;childObj!=NULL; childObj = obj_next_child_deep(childObj)) {
+        pathname = obj_get_name(childObj);
+        /* check if there is a partial command name */
+        if (cmdlen > 0 &&
+            strncmp((const char *)pathname,
+                    &line[word_start],
+                    cmdlen)) {
+            /* command start is not the same so skip it */
+            continue;
+        }
+
+        if( !obj_is_data_db(childObj)) {
+            /* object is either rpc or notification*/
+            continue;
+        }
+
+        if(!obj_get_config_flag(childObj)) {
+            const xmlChar* rpc_name;
+            rpc_name = obj_get_name(rpc);
+            if(0==strcmp((const char*)rpc_name, "create")) continue;
+            if(0==strcmp((const char*)rpc_name, "replace")) continue;
+            if(0==strcmp((const char*)rpc_name, "delete")) continue;
+        }
+
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                    (const char *)&pathname[cmdlen], "", "");
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
+        }
+    }
+    return NO_ERR;
+}  /* fill_xpath_children_completion */
+
+
+/********************************************************************
+ * FUNCTION check_find_xpath_top_obj
+ * 
+ * Check a module for a specified object (full or partial name)
+ *
+ * INPUTS:
+ *    mod == module to check
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * RETURNS:
+ *   pointer to object if found, NULL if not found
+ *********************************************************************/
+static obj_template_t * 
+    check_find_xpath_top_obj (ncx_module_t *mod,
+                              const char *line,
+                              int word_start,
+                              int cmdlen)
+{
+    obj_template_t *modObj = ncx_get_first_object(mod);
+    for(; modObj!=NULL; 
+        modObj = ncx_get_next_object(mod, modObj)) {
+        const xmlChar *pathname = obj_get_name(modObj);
+        /* check if there is a partial command name */
+        if (cmdlen > 0 && !strncmp((const char *)pathname,
+                                   &line[word_start],
+                                   cmdlen)) {
+            // The object is the one looking for
+            return modObj;
+        }
+    }
+    return NULL;
+
+}  /* check_find_xpath_top_obj */
+
+
+
+/********************************************************************
+ * FUNCTION find_xpath_top_obj
+ * 
+ * Check all modules for top-level data nodes to save
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    comstate == completion state in progress
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static obj_template_t *
+    find_xpath_top_obj (completion_state_t *comstate,
+                        const char *line,
+                        int word_start,
+                        int word_end)
+{
+    // line[word_end] == '/'
+    int cmdlen = (word_end - 1) - word_start;
+    obj_template_t *modObj;
+
+    if (use_servercb(comstate->server_cb)) {
+        modptr_t *modptr;
+        for (modptr = (modptr_t *)
+                 dlq_firstEntry(&comstate->server_cb->modptrQ);
+             modptr != NULL;
+             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+            modObj = check_find_xpath_top_obj(modptr->mod, line,
+                                              word_start, cmdlen);
+            if (modObj != NULL) {
+                return modObj;
+            }
+        }
+
+        /* check manager loaded commands next */
+        for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
+             modptr != NULL;
+             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+            modObj = check_find_xpath_top_obj(modptr->mod, line,
+                                              word_start, cmdlen);
+            if (modObj != NULL) {
+                return modObj;
+            }
+        }
+    } else {
+        ncx_module_t * mod = ncx_get_first_session_module();
+        for(;mod!=NULL; mod = ncx_get_next_session_module(mod)) {
+
+            modObj = check_find_xpath_top_obj(mod, line,
+                                              word_start, cmdlen);
+            if (modObj != NULL) {
+                return modObj;
+            }
+        }
+    }
+    return NULL;
+} /* find_xpath_top_obj */
+
+
+/********************************************************************
+ * FUNCTION check_save_xpath_completion
+ * 
+ * Check a module for saving top-level data objects
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    mod == module to check
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    check_save_xpath_completion (
         WordCompletion *cpl,
+        ncx_module_t *mod,
         const char *line,
         int word_start,
         int word_end,
         int cmdlen)
 {
-  const xmlChar         *pathname;
-  int                    retval;
-  int word_iter = word_start + 1;
-  // line[word_start] == '/'
-  word_start ++;
-  cmdlen --;
-  while(word_iter <= word_end)
-    {
-      if (line[word_iter] == '/')
-        {
-          // The second '/' is found
-          // find the top level obj and fill its child completion
-          char childName[128];
-          int child_name_len = word_iter - word_start;
-          strncpy (childName, &line[word_start], child_name_len);
-          childName[child_name_len] = '\0';
-          if (parentObj == NULL)
-            return NO_ERR;
-          obj_template_t * childObj = obj_find_child(parentObj,
-              obj_get_mod_name(parentObj),
-              (const xmlChar *)childName);
+    obj_template_t * modObj = ncx_get_first_object(mod);
+    for (; modObj != NULL; 
+         modObj = ncx_get_next_object(mod, modObj)) {
 
-          cmdlen = word_end - word_iter;
-
-          // put the children path with topObj into the recursive 
-          // lookup function
-          return fill_xpath_children_completion (rpc, childObj, cpl,line, word_iter,
-                                                 word_end, cmdlen);
+        if (!obj_is_data_db(modObj)) {
+            /* object is either rpc or notification*/
+            continue;
         }
-      word_iter ++;
-    }
-  obj_template_t * childObj = obj_first_child_deep(parentObj);
-  for(;childObj!=NULL; childObj = obj_next_child_deep(childObj))
-    {
-      pathname = obj_get_name(childObj);
-      /* check if there is a partial command name */
-      if (cmdlen > 0 &&
-          strncmp((const char *)pathname,
-                  &line[word_start],
-                  cmdlen)) {
-          /* command start is not the same so skip it */
-          continue;
-      }
 
-      if( !obj_is_data_db(childObj)) {
-          /* object is either rpc or notification*/
-          continue;
-      }
+        const xmlChar *pathname = obj_get_name(modObj);
+        /* check if there is a partial command name */
+        if (cmdlen > 0 && strncmp((const char *)pathname, 
+                                  &line[word_start], cmdlen)) {
+            continue;
+        }
 
-      if(!obj_get_config_flag(childObj)) {
-          const xmlChar* rpc_name;
-          rpc_name = obj_get_name(rpc);
-          if(0==strcmp((const char*)rpc_name, "create")) continue;
-          if(0==strcmp((const char*)rpc_name, "replace")) continue;
-          if(0==strcmp((const char*)rpc_name, "delete")) continue;
-      }
+        if(!obj_get_config_flag(modObj)) {
+            const xmlChar* rpc_name;
+            rpc_name = obj_get_name(rpc);
+            if(0==strcmp((const char*)rpc_name, "create")) continue;
+            if(0==strcmp((const char*)rpc_name, "replace")) continue;
+            if(0==strcmp((const char*)rpc_name, "delete")) continue;
+        }
 
-      retval = cpl_add_completion(cpl, line, word_start, word_end,
-                             (const char *)&pathname[cmdlen], "", "");
-      if (retval != 0) {
-          return ERR_NCX_OPERATION_FAILED;
-      }
-    }
-  return NO_ERR;
-}
+#ifdef DEBUG_TRACE
+        log_debug2("\nFilling from module %s, object %s", 
+                   mod->name, pathname);
+#endif
 
-static obj_template_t * find_xpath_top_obj(
-        const char *line,
-        int word_start,
-        int word_end
-        )
-{
-  // line[word_end] == '/'
-  int cmdlen = (word_end - 1) - word_start;
-  const xmlChar         *pathname;
-  ncx_module_t * mod = ncx_get_first_session_module();
-  for(;mod!=NULL; mod = ncx_get_next_session_module(mod))
-    {
-      obj_template_t * modObj = ncx_get_first_object(mod);
-      for(; modObj!=NULL; modObj = ncx_get_next_object(mod, modObj))
-        {
-          pathname = obj_get_name(modObj);
-          /* check if there is a partial command name */
-          if (cmdlen > 0 &&
-              !strncmp((const char *)pathname,
-                      &line[word_start],
-                      cmdlen)) {
-              // The object is the one looking for
-              return modObj;
-          }
+        int retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                        (const char *)&pathname[cmdlen],
+                                        "", "");
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
         }
     }
-  return NULL;
-}
+    return NO_ERR;
 
+}  /* check_save_xpath_completion */
+
+
+/********************************************************************
+ * FUNCTION fill_xpath_root_completion
+ * 
+ * Check all modules for top-level data nodes to save
+ *
+ * INPUTS:
+ *    cpl == word completion struct to fill in
+ *    comstate == completion state in progress
+ *    line == line passed to callback
+ *    word_start == start position within line of the 
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 static status_t
     fill_xpath_root_completion (
         obj_template_t *rpc,
         WordCompletion *cpl,
+        completion_state_t *comstate,
         const char *line,
         int word_start,
         int word_end,
         int cmdlen)
 {
-  const xmlChar         *pathname;
-  int                    retval;
-  ncx_module_t * mod = ncx_get_first_session_module();
-  for(;mod!=NULL; mod = ncx_get_next_session_module(mod))
-    {
-      obj_template_t * modObj = ncx_get_first_object(mod);
-      for(; modObj!=NULL; modObj = ncx_get_next_object(mod, modObj))
-        {
-          pathname = obj_get_name(modObj);
-          /* check if there is a partial command name */
-          if (cmdlen > 0 &&
-              strncmp((const char *)pathname,
-                      &line[word_start],
-                      cmdlen)) {
-              /* command start is not the same so skip it */
-              continue;
-          }
+    status_t res;
 
-          if( !obj_is_data_db(modObj)) {
-              /* object is either rpc or notification*/
-              continue;
-          }
+    if (use_servercb(comstate->server_cb)) {
+        modptr_t *modptr = (modptr_t *)
+            dlq_firstEntry(&comstate->server_cb->modptrQ);
+        for (; modptr != NULL; modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+            res = check_save_xpath_completion(cpl, modptr->mod, line,
+                                              word_start, word_end, cmdlen);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
 
-          if(!obj_get_config_flag(modObj)) {
-              const xmlChar* rpc_name;
-              rpc_name = obj_get_name(rpc);
-              if(0==strcmp((const char*)rpc_name, "create")) continue;
-              if(0==strcmp((const char*)rpc_name, "replace")) continue;
-              if(0==strcmp((const char*)rpc_name, "delete")) continue;
-          }
-
-          retval = cpl_add_completion(cpl, line, word_start, word_end,
-                                      (const char *)&pathname[cmdlen], "", "");
-          if (retval != 0) {
-              return ERR_NCX_OPERATION_FAILED;
-          }
+        /* check manager loaded commands next */
+        for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
+             modptr != NULL;
+             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+            res = check_save_xpath_completion(cpl, modptr->mod, line,
+                                              word_start, word_end, cmdlen);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+    } else {
+        ncx_module_t * mod = ncx_get_first_session_module();
+        for (;mod!=NULL; mod = ncx_get_next_session_module(mod)) {
+            res = check_save_xpath_completion(cpl, mod, line,
+                                              word_start, word_end, cmdlen);
+            if (res != NO_ERR) {
+                return res;
+            }
         }
     }
-  return NO_ERR;
-}
+    return NO_ERR;
+
+} /* fill_xpath_root_completion */
 
 
 /********************************************************************
@@ -475,6 +663,7 @@ static status_t
  * INPUTS:
  *    rpc == rpc operation to use
  *    cpl == word completion struct to fill in
+ *    comstate == completion state in progress
  *    line == line passed to callback
  *    word_start == start position within line of the
  *                  word being completed
@@ -492,43 +681,42 @@ static status_t
  *********************************************************************/
 static status_t
     fill_one_xpath_completion (obj_template_t *rpc,
-                                   WordCompletion *cpl,
-                                   const char *line,
-                                   int word_start,
-                                   int word_end,
-                                   int cmdlen)
+                               WordCompletion *cpl,
+                               completion_state_t *comstate,
+                               const char *line,
+                               int word_start,
+                               int word_end,
+                               int cmdlen)
 {
     (void)rpc;
     int word_iter = word_start + 1;
     // line[word_start] == '/'
     word_start ++;
     cmdlen --;
-    while(word_iter <= word_end)
-      {
+    while(word_iter <= word_end) {
 //        log_write("%c", line[word_iter]);
-        if (line[word_iter] == '/')
-          {
-            // The second '/' is found
-            // TODO: find the top level obj and fill its child completion
+        if (line[word_iter] == '/') {
+              // The second '/' is found
+              // TODO: find the top level obj and fill its child completion
 //            log_write("more than 1\n");
-            obj_template_t * topObj = find_xpath_top_obj(line,
-                word_start,
-                word_iter);
+              obj_template_t * topObj = find_xpath_top_obj(comstate, line,
+                                                           word_start,
+                                                           word_iter);
 
-            cmdlen = word_end - word_iter;
+              cmdlen = word_end - word_iter;
 
-            // put the children path with topObj into the recursive 
-            // lookup function
-            return fill_xpath_children_completion (rpc, topObj, cpl, line,
-                                                   word_iter, word_end, cmdlen);
-          }
+              // put the children path with topObj into the recursive 
+              // lookup function
+              return fill_xpath_children_completion (rpc, topObj, cpl, line,
+                                                     word_iter, word_end, 
+                                                     cmdlen);
+        }
         word_iter ++;
-      }
+    }
 
     // The second '/' is not found
-    return fill_xpath_root_completion(rpc, cpl, line, word_start, word_end, cmdlen);
-
-    //return NO_ERR;
+    return fill_xpath_root_completion(rpc, cpl, comstate, line, 
+                                      word_start, word_end, cmdlen);
 
 }  /* fill_one_xpath_completion */
 
@@ -562,6 +750,7 @@ static status_t
 static status_t
     fill_one_rpc_completion_parms (obj_template_t *rpc,
                                    WordCompletion *cpl,
+                                   completion_state_t *comstate,
                                    const char *line,
                                    int word_start,
                                    int word_end,
@@ -574,7 +763,7 @@ static status_t
     boolean                hasval;
 
     if(line[word_start] == '/') {
-        return fill_one_xpath_completion(rpc, cpl, line, word_start,
+        return fill_one_xpath_completion(rpc, cpl, comstate, line, word_start,
                                          word_end, cmdlen);
     }
 
@@ -753,6 +942,11 @@ static status_t
                  modptr != NULL && res == NO_ERR;
                  modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
+#ifdef DEBUG_TRACE
+                log_debug("\nFilling from server_cb module %s", 
+                          modptr->mod->name);
+#endif
+
                 res = fill_one_module_completion_commands
                     (modptr->mod, cpl, comstate, line, word_start,
                      word_end, cmdlen);
@@ -764,13 +958,22 @@ static status_t
                  modptr != NULL && res == NO_ERR;
                  modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
+#ifdef DEBUG_TRACE
+                log_debug("\nFilling from mgrloadQ module %s", 
+                          modptr->mod->name);
+#endif
+
                 res = fill_one_module_completion_commands
                     (modptr->mod, cpl, comstate, line, word_start,
                      word_end, cmdlen);
             }
         }
 
+#ifdef DEBUG_TRACE
         /* use the yangcli top commands every time */
+        log_debug("\nFilling from yangcli module");
+#endif
+
         res = fill_one_module_completion_commands
             (get_yangcli_mod(), cpl, comstate, line, word_start,
              word_end, cmdlen);
@@ -1236,8 +1439,9 @@ static status_t
         log_debug2("\n*** fill one RPC %s parms ***\n", obj_get_name(rpc));
 #endif
 
-        res = fill_one_rpc_completion_parms(rpc, cpl, line, tokenstart,
-                                            word_end, word_end - tokenstart);
+        res = fill_one_rpc_completion_parms(rpc, cpl, comstate, line,
+                                            tokenstart, word_end, 
+                                            word_end - tokenstart);
     } else if (parmobj) {
         /* have a parameter in progress and the
          * token start is supposed to be the value
@@ -1512,7 +1716,8 @@ static status_t
     /* check where E-O-WSP search stopped */
     if (str == &line[word_end]) {
         /* stopped before entering any parameters */
-        res = fill_one_rpc_completion_parms(comstate->cmdobj, cpl, line,
+        res = fill_one_rpc_completion_parms(comstate->cmdobj, cpl, 
+                                            comstate, line,
                                             word_start, word_end, 0);
         return res;
     }

@@ -38,7 +38,7 @@ installfiles:
 	mkdir -p $(BIN_INSTALL)
 	install $(OWNER) $(GRP) make_sil_dir $(BIN_INSTALL)
 
-distclean: superclean uninstall
+distclean: superclean
 
 .PHONY: all clean depend superclean install uninstall distclean \
 	installfiles

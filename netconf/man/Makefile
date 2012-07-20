@@ -48,7 +48,7 @@ webinstall:
 	  groff -mandoc -mwww -Thtml $$fil > $(WEB_INSTALL)/$$fil.html;\
 	done
 
-distclean: superclean uninstall
+distclean: superclean
 
 
 .PHONY: all clean depend superclean install distclean uninstall webinstall

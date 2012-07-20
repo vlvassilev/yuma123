@@ -1061,9 +1061,9 @@ static status_t
                       "for identity statement '%s'",
                       (identity->baseprefix) ? 
                       identity->baseprefix : EMPTY_STRING,
-                  (identity->baseprefix) ? "?" : "",
-                  identity->basename,
-                  identity->name);
+                      (identity->baseprefix) ? ":" : "",
+                      (identity->basename) ? identity->basename : EMPTY_STRING,
+                      (identity->name) ? identity->name : NCX_EL_NONE);
             res = ERR_NCX_DEF_NOT_FOUND;
         } else {
             log_error("\nError: Invalid base name for identity statement '%s'",

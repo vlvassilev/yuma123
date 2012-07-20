@@ -65,7 +65,7 @@ manuals:
 
 
 
-distclean: superclean uninstall
+distclean: superclean
 
 
 .PHONY: all clean depend superclean install distclean uninstall pdfs \

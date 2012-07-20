@@ -68,7 +68,7 @@ clean:
 superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) $(BIN_INST)/$(SUBDIR_NM)
 
-distclean: superclean uninstall
+distclean: superclean
 
 .PHONY: yangdump
 

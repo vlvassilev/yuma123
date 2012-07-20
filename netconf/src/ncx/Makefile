@@ -126,7 +126,7 @@ superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LBASE)/lib$(SUBDIR_NM).*
 
-distclean: superclean uninstall
+distclean: superclean
 
 curversion.h:
 

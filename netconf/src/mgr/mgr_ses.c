@@ -547,6 +547,7 @@ static void
 
 }  /* tcp_setup */
 
+<<<<<<< HEAD
 /********************************************************************
 * FUNCTION tcp_setup_direct
 *
@@ -576,6 +577,8 @@ static void
 
 }  /* tcp_setup_direct */
 
+=======
+>>>>>>> yuma123/master
 
 /********************************************************************
 * FUNCTION log_ssh2_error
@@ -768,12 +771,15 @@ status_t
     status_t   res;
     struct hostent *hent;
     uint       i, slot;
+<<<<<<< HEAD
     int        tcp_direct_enable = 0;
 
     if(transport == SES_TRANSPORT_TCP_DIRECT) {
     	tcp_direct_enable = 1;
     	transport = SES_TRANSPORT_TCP;
     }
+=======
+>>>>>>> yuma123/master
 
 #ifdef DEBUG
     if (user == NULL || target == NULL || retsid == NULL) {
@@ -907,11 +913,15 @@ status_t
     }
 
     if (res == NO_ERR && transport == SES_TRANSPORT_TCP) {
+<<<<<<< HEAD
     	if(tcp_direct_enable) {
             tcp_setup_direct(scb, user, port);
     	} else {
             tcp_setup(scb, user);
         }
+=======
+        tcp_setup(scb, user);
+>>>>>>> yuma123/master
     }
 
     /* send the manager hello to the server */

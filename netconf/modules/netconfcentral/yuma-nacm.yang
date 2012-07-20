@@ -5,6 +5,7 @@ module yuma-nacm {
     prefix "nacm";
 
     import yuma-ncx { prefix ncx; }
+    import yuma-types { prefix yt; }
     import ietf-yang-types { prefix yang; }
 
     organization  "Netconf Central";
@@ -13,6 +14,13 @@ module yuma-nacm {
 
     description 
       "NETCONF Server Access Control Model";
+
+    revision 2012-05-31 {
+        description  
+          "Change unrestricted strings to yang-identifier
+           type because illegal chars were accepted for YANG
+           identifier strings.";
+    }
 
     revision 2012-01-13 {
         description  
@@ -307,9 +315,7 @@ module yuma-nacm {
                     description
                       "Name of the module associated with 
                        this rule.";
-                    type string {
-			length "1..max";
-                    }
+                    type yt:yang-identifier;
                 }
 
                 uses common-rule-parms;
@@ -338,17 +344,13 @@ module yuma-nacm {
                     description
                       "Name of the module defining this 
                        RPC operation.";
-                    type string {
-			length "1..max";
-                    }
+                    type yt:yang-identifier;
                 }
 
                 leaf rpc-name {
                     description
                       "Name of the RPC operation.";
-                    type string {
-			length "1..max";
-                    }
+                    type yt:yang-identifier;
                 }
 
                 uses common-rule-parms;
@@ -411,17 +413,13 @@ module yuma-nacm {
                     description
                       "Name of the module defining this 
                        notification event type.";
-                    type string {
-			length "1..max";
-                    }
+                    type yt:yang-identifier;
                 }
 
                 leaf notification-name {
                     description
                       "Name of the notification event.";
-                    type string {
-			length "1..max";
-                    }
+                    type yt:yang-identifier;
                 }
 
                 uses common-rule-parms;

@@ -538,6 +538,7 @@ static xmlChar *
                   server_cb->returncode,
                   server_cb->errnocode);
     }
+
     return line;
 
 } /* get_line */
@@ -4773,7 +4774,7 @@ static val_value_t *
                         res = val_replace(curparm, mytarg);
                     }
                     res = fill_valset(server_cb, rpc, mytarg, curparm, 
-                                          iswrite, isdelete);
+                                      iswrite, isdelete);
                 }
             }
         }
@@ -5201,7 +5202,7 @@ static status_t
     } else {
         isdelete = FALSE;
     }
- 
+
     /* get the command line parameters for this command */
     valset = get_valset(server_cb, rpc, &line[len], &res);
     if (!valset || res != NO_ERR) {

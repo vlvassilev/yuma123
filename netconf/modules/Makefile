@@ -65,7 +65,7 @@ clean:
 
 superclean:
 
-distclean: uninstall
+distclean: superclean
 
 MODFORMATS=yin yang xsd sqldb html h c
 test:

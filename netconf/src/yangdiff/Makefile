@@ -72,7 +72,7 @@ clean:
 superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) $(BIN_INST)/$(PROG)
 
-distclean: superclean uninstall
+distclean: superclean
 
 .PHONY: yangdiff
 

@@ -535,6 +535,7 @@ static obj_template_t *
  *********************************************************************/
 static status_t
     check_save_xpath_completion (
+        obj_template_t *rpc,
         WordCompletion *cpl,
         ncx_module_t *mod,
         const char *line,
@@ -619,7 +620,7 @@ static status_t
         modptr_t *modptr = (modptr_t *)
             dlq_firstEntry(&comstate->server_cb->modptrQ);
         for (; modptr != NULL; modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-            res = check_save_xpath_completion(cpl, modptr->mod, line,
+            res = check_save_xpath_completion(rpc, cpl, modptr->mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
                 return res;
@@ -630,7 +631,7 @@ static status_t
         for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
              modptr != NULL;
              modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-            res = check_save_xpath_completion(cpl, modptr->mod, line,
+            res = check_save_xpath_completion(rpc, cpl, modptr->mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
                 return res;
@@ -639,7 +640,7 @@ static status_t
     } else {
         ncx_module_t * mod = ncx_get_first_session_module();
         for (;mod!=NULL; mod = ncx_get_next_session_module(mod)) {
-            res = check_save_xpath_completion(cpl, mod, line,
+            res = check_save_xpath_completion(rpc, cpl, mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
                 return res;

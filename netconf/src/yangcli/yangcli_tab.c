@@ -331,7 +331,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    fill_xpath_children_completion (obj_template_t *parentObj,
+    fill_xpath_children_completion (obj_template_t *rpc, obj_template_t *parentObj,
                                     WordCompletion *cpl,
                                     const char *line,
                                     int word_start,
@@ -362,7 +362,7 @@ static status_t
 
             // put the children path with topObj into the recursive 
             // lookup function
-            return fill_xpath_children_completion(childObj, 
+            return fill_xpath_children_completion(rpc, childObj, 
                                                   cpl,line, word_iter,
                                                   word_end, cmdlen);
         }
@@ -383,6 +383,14 @@ static status_t
         if( !obj_is_data_db(childObj)) {
             /* object is either rpc or notification*/
             continue;
+        }
+
+        if(!obj_get_config_flag(childObj)) {
+            const xmlChar* rpc_name;
+            rpc_name = obj_get_name(rpc);
+            if(0==strcmp((const char*)rpc_name, "create")) continue;
+            if(0==strcmp((const char*)rpc_name, "replace")) continue;
+            if(0==strcmp((const char*)rpc_name, "delete")) continue;
         }
 
         retval = cpl_add_completion(cpl, line, word_start, word_end,
@@ -527,6 +535,7 @@ static obj_template_t *
  *********************************************************************/
 static status_t
     check_save_xpath_completion (
+        obj_template_t *rpc,
         WordCompletion *cpl,
         ncx_module_t *mod,
         const char *line,
@@ -548,6 +557,14 @@ static status_t
         if (cmdlen > 0 && strncmp((const char *)pathname, 
                                   &line[word_start], cmdlen)) {
             continue;
+        }
+
+        if(!obj_get_config_flag(modObj)) {
+            const xmlChar* rpc_name;
+            rpc_name = obj_get_name(rpc);
+            if(0==strcmp((const char*)rpc_name, "create")) continue;
+            if(0==strcmp((const char*)rpc_name, "replace")) continue;
+            if(0==strcmp((const char*)rpc_name, "delete")) continue;
         }
 
 #ifdef DEBUG_TRACE
@@ -589,6 +606,7 @@ static status_t
  *********************************************************************/
 static status_t
     fill_xpath_root_completion (
+        obj_template_t *rpc,
         WordCompletion *cpl,
         completion_state_t *comstate,
         const char *line,
@@ -602,7 +620,7 @@ static status_t
         modptr_t *modptr = (modptr_t *)
             dlq_firstEntry(&comstate->server_cb->modptrQ);
         for (; modptr != NULL; modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-            res = check_save_xpath_completion(cpl, modptr->mod, line,
+            res = check_save_xpath_completion(rpc, cpl, modptr->mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
                 return res;
@@ -613,7 +631,7 @@ static status_t
         for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
              modptr != NULL;
              modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-            res = check_save_xpath_completion(cpl, modptr->mod, line,
+            res = check_save_xpath_completion(rpc, cpl, modptr->mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
                 return res;
@@ -622,7 +640,7 @@ static status_t
     } else {
         ncx_module_t * mod = ncx_get_first_session_module();
         for (;mod!=NULL; mod = ncx_get_next_session_module(mod)) {
-            res = check_save_xpath_completion(cpl, mod, line,
+            res = check_save_xpath_completion(rpc, cpl, mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
                 return res;
@@ -690,7 +708,7 @@ static status_t
 
               // put the children path with topObj into the recursive 
               // lookup function
-              return fill_xpath_children_completion (topObj, cpl, line,
+              return fill_xpath_children_completion (rpc, topObj, cpl, line,
                                                      word_iter, word_end, 
                                                      cmdlen);
         }
@@ -698,7 +716,7 @@ static status_t
     }
 
     // The second '/' is not found
-    return fill_xpath_root_completion(cpl, comstate, line, 
+    return fill_xpath_root_completion(rpc, cpl, comstate, line, 
                                       word_start, word_end, cmdlen);
 
 }  /* fill_one_xpath_completion */

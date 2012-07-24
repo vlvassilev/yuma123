@@ -1,7 +1,9 @@
-yuma-transpacket (2.2-1) stable; urgency=high
-  * yangcli
-    * Added non-interactive filling of created nodes
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 2 Jul 2012 21:16:00 -0800
+yuma-transpacket (2.2-3.1-2012-07-24-884f4ca73a4effda2d2a1ab0f83ec0a94d6b02ee) stable; urgency=low
+
+  * Added non-interactive filling of created containers
+
+ -- Vladimir Vassilev <vladimir@bmf.yourdomainname.com>  Tue, 24 Jul 2012 22:14:00 +0000
+
 yuma (2.2-1) stable; urgency=high
   * netconfd
     * Added server regression testing and Coverity static code cleanup

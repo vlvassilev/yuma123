@@ -1,8 +1,8 @@
-yuma-transpacket (2.2-3.1-2012-07-24-884f4ca73a4effda2d2a1ab0f83ec0a94d6b02ee) stable; urgency=low
+yuma-transpacket (2.2-3.1-2012-07-24-27096e8e1b4ef9540489a435d058169958b641a41) stable; urgency=low
 
   * Added non-interactive filling of created containers
 
- -- Vladimir Vassilev <vladimir@bmf.yourdomainname.com>  Tue, 24 Jul 2012 22:14:00 +0000
+ -- Vladimir Vassilev <vladimir@bmf.yourdomainname.com>  Tue, 24 Jul 2012 23:20:31 +0000
 
 yuma (2.2-1) stable; urgency=high
   * netconfd

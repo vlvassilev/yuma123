@@ -1,4 +1,4 @@
-sbin_PROGRAMS = netconf_subsystem
+sbin_PROGRAMS = netconf-subsystem
 netconf_subsystem_SOURCES = \
 $(top_srcdir)/netconf/src/subsys/netconf-subsystem.c
 

@@ -989,7 +989,8 @@ void
          */
         if (agt_profile->agt_idle_timeout > 0 &&
             scb->active && 
-            !scb->notif_active) {
+            !scb->notif_active &&
+            (strcmp(scb->peeraddr,"127.0.0.1")!=0)) {
 
             timediff = difftime(timenow, scb->last_rpc_time);
             if (timediff >= (double)agt_profile->agt_idle_timeout) {

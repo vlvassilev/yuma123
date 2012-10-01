@@ -564,6 +564,7 @@ status_t
     agt_cb_init();
     agt_commit_complete_init();
     agt_commit_validate_init();
+    agt_not_queue_notification_cb_init();
 
     /* initial signal handler first to allow clean exit */
     agt_signal_init();

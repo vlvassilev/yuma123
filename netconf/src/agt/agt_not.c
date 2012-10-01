@@ -58,6 +58,7 @@ date         init     comment
 #include "agt_tree.h"
 #include "agt_util.h"
 #include "agt_xpath.h"
+#include "agt_not_queue_notification_cb.h"
 #include "cfg.h"
 #include "getcb.h"
 #include "log.h"
@@ -1959,6 +1960,8 @@ void
             }
         }
     }
+
+    agt_not_queue_notification_cb(notif);
 
     agt_profile = agt_get_profile();
 

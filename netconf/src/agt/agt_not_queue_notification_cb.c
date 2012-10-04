@@ -79,7 +79,7 @@ static agt_cb_queue_notification_set_t* find_callback_set( const xmlChar *modnam
           cbSet != NULL;
           cbSet = ( agt_cb_queue_notification_set_t* )dlq_nextEntry( cbSet ) )
     {
-        if ( xml_strcmp( modname, cbSet->modname ) )
+        if ( 0==xml_strcmp( modname, cbSet->modname ) )
         {
             return cbSet;
         }

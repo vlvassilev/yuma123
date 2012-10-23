@@ -31,7 +31,9 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef MEMORY_DEBUG
 #include <mcheck.h>
+#endif
 
 #include <pthread.h>
 

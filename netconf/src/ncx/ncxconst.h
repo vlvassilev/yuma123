@@ -261,9 +261,9 @@ extern "C" {
 
 /* default virtual value cache timeout value in seconds
  * use 0 to disable the cache and refresh a virtual value
- * every time is is retrieved (2 second default)
+ * every time is is retrieved (1 second default)
  */
-#define NCX_DEF_VTIMEOUT  2
+#define NCX_DEF_VTIMEOUT  1
 
 /* Default startup config transaction ID file name */
 #define NCX_DEF_STARTUP_TXID_FILE  (const xmlChar *)"startup-cfg-txid.txt"

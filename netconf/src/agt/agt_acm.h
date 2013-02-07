@@ -59,7 +59,7 @@ date	     init     comment
 #endif
 
 #ifndef _H_xml_msg
-#include "xmlmsg.h"
+#include "xml_msg.h"
 #endif
 
 #ifndef _H_xmlns
@@ -109,7 +109,7 @@ typedef struct agt_acm_group_t_ {
 typedef struct agt_acm_usergroups_t_ {
     dlq_hdr_t         qhdr;
     xmlChar          *username;
-    dlq_hdr_t         groupQ;   /* Q of group_ptr_t */
+    dlq_hdr_t         groupQ;   /* Q of agt_acm_group_t */
 } agt_acm_usergroups_t;
 
 /* cache for 1 NACM moduleRule entry */

@@ -14,6 +14,10 @@ module ietf-system {
     prefix nacm;
   }
 
+  import iana-timezones {
+    prefix ianatz;
+  }
+
   organization
     "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
 
@@ -28,7 +32,7 @@ module ietf-system {
                <mailto:j.schoenwaelder@jacobs-university.de>
 
      Editor:   Andy Bierman
-               <mailto:andy@netconfcentral.org>
+               <mailto:andy@yumaworks.com>
 
      Editor:   Martin Bjorklund
                <mailto:mbj@tail-f.com>";
@@ -38,7 +42,7 @@ module ietf-system {
      configuration and identification of the management system of a
      device.
 
-     Copyright (c) 2011 IETF Trust and the persons identified as
+     Copyright (c) 2012 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -55,11 +59,11 @@ module ietf-system {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netmod-system-mgmt-00.txt
+  // Note: extracted from draft-ietf-netmod-system-mgmt-03.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2012-01-31 {
+  revision "2012-09-07" {
     description
       "Initial revision.";
     reference
@@ -70,582 +74,14 @@ module ietf-system {
    * Typedefs
    */
 
-  typedef timezone-name {
-    description
-      "List of available timezone enumerations.
-       Based on the referenced list, but non-unique names
-       have been changed so they are unique enumeration
-       identifiers.";
-    reference
-      "Wikipedia: http://en.wikipedia.org/wiki/"
-       + "List_of_time_zone_abbreviations";
-    type enumeration {
-      enum ACDT {
-        description
-          "Australian Central Daylight Time UTC+10:30";
-      }
-      enum ACST {
-        description
-          "Australian Central Standard Time UTC+09:30";
-      }
-      enum ACT {
-        description
-          "ASEAN Common Time UTC+08";
-      }
-      enum ADT {
-        description
-          "Atlantic Daylight Time UTC-03";
-      }
-      enum AEDT {
-        description
-          "Australian Eastern Daylight Time UTC+11";
-      }
-      enum AEST {
-        description
-          "Australian Eastern Standard Time UTC+10";
-      }
-      enum AFT {
-        description
-          "Afghanistan Time UTC+04:30";
-      }
-      enum AKDT {
-        description
-          "Alaska Daylight Time UTC-08";
-      }
-      enum AKST {
-        description
-          "Alaska Standard Time UTC-09";
-      }
-      enum AMST {
-        description
-          "Armenia Summer Time UTC+05";
-      }
-      enum AMT {
-        description
-          "Armenia Time UTC+04";
-      }
-      enum ART {
-        description
-          "Argentina Time UTC-03";
-      }
-      enum AST {
-        description
-          "Arab Standard Time (Kuwait, Riyadh) UTC+03";
-      }
-      enum AST-2 {
-        description
-          "Arabian Standard Time (Abu Dhabi, Muscat) UTC+04";
-      }
-      enum AST-3 {
-        description
-          "Arabic Standard Time (Baghdad) UTC+03";
-      }
-      enum AST-4 {
-        description
-          "Atlantic Standard Time UTC-04";
-      }
-      enum AWDT {
-        description
-          "Australian Western Daylight Time UTC+09";
-      }
-      enum AWST {
-        description
-          "Australian Western Standard Time UTC+08";
-      }
-      enum AZOST {
-        description
-          "Azores Standard Time UTC-01";
-      }
-      enum AZT {
-        description
-          "Azerbaijan Time UTC+04";
-      }
-      enum BDT {
-        description
-          "Brunei Time UTC+08";
-      }
-      enum BIOT {
-        description
-          "British Indian Ocean Time UTC+06";
-      }
-      enum BIT {
-        description
-          "Baker Island Time UTC-12";
-      }
-      enum BOT {
-        description
-          "Bolivia Time UTC-04";
-      }
-      enum BRT {
-        description
-          "Brasilia Time UTC-03";
-      }
-      enum BST {
-        description
-          "Bangladesh Standard Time UTC+06";
-      }
-      enum BST-2 {
-        description
-          "British Summer Time (British Standard Time
-           from Feb 1968 to Oct 1971) UTC+01";
-      }
-      enum BTT {
-        description
-          "Bhutan Time UTC+06";
-      }
-      enum CAT {
-        description
-          "Central Africa Time UTC+02";
-      }
-      enum CCT {
-        description
-          "Cocos Islands Time UTC+06:30";
-      }
-      enum CDT {
-        description
-          "Central Daylight Time (North America) UTC-05";
-      }
-      enum CEDT {
-        description
-          "Central European Daylight Time UTC+02";
-      }
-      enum CEST {
-        description
-          "Central European Summer Time (Cf. HAEC) UTC+02";
-      }
-      enum CET {
-        description
-          "Central European Time UTC+01";
-      }
-      enum CHADT {
-        description
-          "Chatham Daylight Time UTC+13:45";
-      }
-      enum CHAST {
-        description
-          "Chatham Standard Time UTC+12:45";
-      }
-      enum CIST {
-        description
-          "Clipperton Island Standard Time UTC-08";
-      }
-      enum CKT {
-        description
-          "Cook Island Time UTC-10";
-      }
-      enum CLST {
-        description
-          "Chile Summer Time UTC-03";
-      }
-      enum CLT {
-        description
-          "Chile Standard Time UTC-04";
-      }
-      enum COST {
-        description
-          "Colombia Summer Time UTC-04";
-      }
-      enum COT {
-        description
-          "Colombia Time UTC-05";
-      }
-      enum CST {
-        description
-          "Central Standard Time (North America) UTC-06";
-      }
-      enum CST-2 {
-        description
-          "China Standard Time UTC+08";
-      }
-      enum CST-3 {
-        description
-          "Central Standard Time (Australia) UTC+09:30";
-      }
-      enum CT {
-        description
-          "China Time UTC+08";
-      }
-      enum CVT {
-        description
-          "Cape Verde Time UTC-01";
-      }
-      enum CXT {
-        description
-          "Christmas Island Time UTC+07";
-      }
-      enum CHST {
-        description
-          "Chamorro Standard Time UTC+10";
-      }
-      enum DFT {
-        description
-          "AIX specific equivalent of Central European Time UTC+01";
-      }
-      enum EAST {
-        description
-          "Easter Island Standard Time UTC-06";
-      }
-      enum EAT {
-        description
-          "East Africa Time UTC+03";
-      }
-      enum ECT {
-        description
-          "Eastern Caribbean Time (does not recognise DST) UTC-04";
-      }
-      enum ECT-2 {
-        description
-          "Ecuador Time UTC-05";
-      }
-      enum EDT {
-        description
-          "Eastern Daylight Time (North America) UTC-04";
-      }
-      enum EEDT {
-        description
-          "Eastern European Daylight Time UTC+03";
-      }
-      enum EEST {
-        description
-          "Eastern European Summer Time UTC+03";
-      }
-      enum EET {
-        description
-          "Eastern European Time UTC+02";
-      }
-      enum EST {
-        description
-          "Eastern Standard Time (North America) UTC-05";
-      }
-      enum FJT {
-        description
-          "Fiji Time UTC+12";
-      }
-      enum FKST {
-        description
-          "Falkland Islands Summer Time UTC-03";
-      }
-      enum FKT {
-        description
-          "Falkland Islands Time UTC-04";
-      }
-      enum GALT {
-        description
-          "Galapagos Time UTC-06";
-      }
-      enum GET {
-        description
-          "Georgia Standard Time UTC+04";
-      }
-      enum GFT {
-        description
-          "French Guiana Time UTC-03";
-      }
-      enum GILT {
-        description
-          "Gilbert Island Time UTC+12";
-      }
-      enum GIT {
-        description
-          "Gambier Island Time UTC-09";
-      }
-      enum GMT {
-        description
-          "Greenwich Mean Time UTC";
-      }
-      enum GST {
-        description
-          "South Georgia and the South Sandwich Islands UTC-02";
-      }
-      enum GST-2 {
-        description
-          "Gulf Standard Time UTC+04";
-      }
-      enum GYT {
-        description
-          "Guyana Time UTC-04";
-      }
-      enum HADT {
-        description
-          "Hawaii-Aleutian Daylight Time UTC-09";
-      }
-      enum HAEC {
-        description
-          "Heure Avancee d'Europe Centrale francised name for
-           CEST UTC+02";
-      }
-      enum HAST {
-        description
-          "Hawaii-Aleutian Standard Time UTC-10";
-      }
-      enum HKT {
-        description
-          "Hong Kong Time UTC+08";
-      }
-      enum HMT {
-        description
-          "Heard and McDonald Islands Time UTC+05";
-      }
-      enum HST {
-        description
-          "Hawaii Standard Time UTC-10";
-      }
-      enum ICT {
-        description
-          "Indochina Time UTC+07";
-      }
-      enum IDT {
-        description
-          "Israeli Daylight Time UTC+03";
-      }
-      enum IRKT {
-        description
-          "Irkutsk Time UTC+08";
-      }
-      enum IRST {
-        description
-          "Iran Standard Time UTC+03:30";
-      }
-      enum IST {
-        description
-          "Indian Standard Time UTC+05:30";
-      }
-      enum IST-2 {
-        description
-          "Irish Summer Time UTC+01";
-      }
-      enum IST-3 {
-        description
-          "Israel Standard Time UTC+02";
-      }
-      enum JST {
-        description
-          "Japan Standard Time UTC+09";
-      }
-      enum KRAT {
-        description
-          "Krasnoyarsk Time UTC+07";
-      }
-      enum KST {
-        description
-          "Korea Standard Time UTC+09";
-      }
-      enum LHST {
-        description
-          "Lord Howe Standard Time UTC+10:30";
-      }
-      enum LINT {
-        description
-          "Line Islands Time UTC+14";
-      }
-      enum MAGT {
-        description
-          "Magadan Time UTC+11";
-      }
-      enum MDT {
-        description
-          "Mountain Daylight Time (North America) UTC-06";
-      }
-      enum MET {
-        description
-          "Middle European Time Same zone as CET UTC+02";
-      }
-      enum MEST {
-        description
-          "Middle European Saving Time Same zone as CEST UTC+02";
-      }
-      enum MIT {
-        description
-          "Marquesas Islands Time UTC-09:30";
-      }
-      enum MSD {
-        description
-          "Moscow Summer Time UTC+04";
-      }
-      enum MSK {
-        description
-          "Moscow Standard Time UTC+03";
-      }
-      enum MST {
-        description
-          "Malaysian Standard Time UTC+08";
-      }
-      enum MST-2 {
-        description
-          "Mountain Standard Time (North America) UTC-07";
-      }
-      enum MST-3 {
-        description
-          "Myanmar Standard Time UTC+06:30";
-      }
-      enum MUT {
-        description
-          "Mauritius Time UTC+04";
-      }
-      enum MYT {
-        description
-          "Malaysia Time UTC+08";
-      }
-      enum NDT {
-        description
-          "Newfoundland Daylight Time UTC-02:30";
-      }
-      enum NFT {
-        description
-          "Norfolk Time[1] UTC+11:30";
-      }
-      enum NPT {
-        description
-          "Nepal Time UTC+05:45";
-      }
-      enum NST {
-        description
-          "Newfoundland Standard Time UTC-03:30";
-      }
-      enum NT {
-        description
-          "Newfoundland Time UTC-03:30";
-      }
-      enum NZDT {
-        description
-          "New Zealand Daylight Time UTC+13";
-      }
-      enum NZST {
-        description
-          "New Zealand Standard Time UTC+12";
-      }
-      enum OMST {
-        description
-          "Omsk Time UTC+06";
-      }
-      enum PDT {
-        description
-          "Pacific Daylight Time (North America) UTC-07";
-      }
-      enum PETT {
-        description
-          "Kamchatka Time UTC+12";
-      }
-      enum PHOT {
-        description
-          "Phoenix Island Time UTC+13";
-      }
-      enum PKT {
-        description
-          "Pakistan Standard Time UTC+05";
-      }
-      enum PST {
-        description
-          "Pacific Standard Time (North America) UTC-08";
-      }
-      enum PST-2 {
-        description
-          "Philippine Standard Time UTC+08";
-      }
-      enum RET {
-        description
-          "Reunion Time UTC+04";
-      }
-      enum SAMT {
-        description
-          "Samara Time UTC+04";
-      }
-      enum SAST {
-        description
-          "South African Standard Time UTC+02";
-      }
-      enum SBT {
-        description
-          "Solomon Islands Time UTC+11";
-      }
-      enum SCT {
-        description
-          "Seychelles Time UTC+04";
-      }
-      enum SGT {
-        description
-          "Singapore Time UTC+08";
-      }
-      enum SLT {
-        description
-          "Sri Lanka Time UTC+05:30";
-      }
-      enum SST {
-        description
-          "Samoa Standard Time UTC-11";
-      }
-      enum SST-2 {
-        description
-          "Singapore Standard Time UTC+08";
-      }
-      enum TAHT {
-        description
-          "Tahiti Time UTC-10";
-      }
-      enum THA {
-        description
-          "Thailand Standard Time UTC+07";
-      }
-      enum UTC {
-        description
-          "Coordinated Universal Time UTC";
-      }
-      enum UYST {
-        description
-          "Uruguay Summer Time UTC-02";
-      }
-      enum UYT {
-        description
-          "Uruguay Standard Time UTC-03";
-      }
-      enum VET {
-        description
-          "Venezuelan Standard Time UTC-04:30";
-      }
-      enum VLAT {
-        description
-          "Vladivostok Time UTC+10";
-      }
-      enum WAT {
-        description
-          "West Africa Time UTC+01";
-      }
-      enum WEDT {
-        description
-          "Western European Daylight Time UTC+01";
-      }
-      enum WEST {
-        description
-          "Western European Summer Time UTC+01";
-      }
-      enum WET {
-        description
-          "Western European Time UTC";
-      }
-      enum WST {
-        description
-          "Western Standard Time UTC+08";
-      }
-      enum YAKT {
-        description
-          "Yakutsk Time UTC+09";
-      }
-      enum YEKT {
-        description
-          "Yekaterinburg Time UTC+05";
-      }
-    }
-  }
-
   typedef crypt-hash {
     type string {
-      pattern "$0$.* | $1|5|6$[a-zA-Z0-9./]{2,16}$.*";
+      pattern "$0$.*|$(1|5|6)$[a-zA-Z0-9./]{2,16}$.*";
     }
     description
       "The crypt-hash type is used to store passwords using
        a hash function.  This type is implemented in various UNIX
        systems as the function crypt(3).
-
        When a clear text value is set to a leaf of this type, the
        server calculates a password hash, and stores the result
        in the datastore.  Thus, the password is never stored in
@@ -658,6 +94,7 @@ module ietf-system {
 
          $0$<clear text password>
          $<id>$<salt>$<password hash>
+
       The '$0$' prefix signals that the value is clear text.  When
       such a value is received by the server, a hash value is
       calculated, and the string '$<id>$<salt>$' is prepended to the
@@ -768,17 +205,7 @@ module ietf-system {
     reference
       "TZ Database  http://www.twinsun.com/tz/tz-link.htm
        Maintaining the Timezone Database
-         draft-lear-iana-timezone-database-04.txt";
-  }
-
-  feature timezone-name {
-    description
-      "Indicates that the local timezone on the device
-       can be configured using the timezone enumeration
-       strings as an alias for an UTC offset.";
-    reference
-      "Wikipedia: http://en.wikipedia.org/wiki/"
-    + "List_of_time_zone_abbreviations";
+         RFC 6557 (BCP 175)";
   }
 
   /*
@@ -820,7 +247,6 @@ module ietf-system {
       type string {
         length "0..255";
       }
-      default "";
       description
         "The administrator contact information for the system.";
       reference
@@ -833,7 +259,6 @@ module ietf-system {
       type string {
         length "0..255";
       }
-      default "";
       description
         "The administratively assigned system name.";
       reference
@@ -846,7 +271,6 @@ module ietf-system {
       type string {
         length "0..255";
       }
-      default "";
       description
         "The system location";
       reference
@@ -933,33 +357,28 @@ module ietf-system {
 
       choice timezone {
         description
-          "Configure the system timezone information.";
+          "The system timezone information.";
 
         leaf timezone-location {
           if-feature timezone-location;
-          type string;
+          type ianatz:iana-timezone;
           description
             "The TZ database location identifier string
              to use for the system, such as 'Europe/Stockholm'.";
         }
 
-        leaf timezone-name {
-          if-feature timezone-name;
-          type timezone-name;
-          description
-            "The timezone enumeration string to use
-             for the system, such as 'CET'.";
-        }
-
         leaf timezone-utc-offset {
           type int16 {
-            range "-1439 .. 1439";
+            range "-1500 .. 1500";
           }
+          units "minutes";
           description
             "The number of minutes to add to UTC time to
              identify the timezone for this system.
              For example, 'UTC - 8:00 hours' would be
-             represented as '-480'.";
+             represented as '-480'.  Note that automatic
+             daylight savings time adjustment is not provided,
+             if this object is used.";
         }
       }
     }
@@ -981,14 +400,37 @@ module ietf-system {
 
       list ntp-server {
         key address;
-        ordered-by user;
         description
           "List of NTP servers to use for
            system clock synchronization.  If 'use-ntp'
            is 'true', then the system will attempt to
-           contact and utilize the specified NTP servers.
-           The user specified order indicates the server priority.";
+           contact and utilize the specified NTP servers.";
 
+        leaf association-type {
+          type enumeration {
+            enum server {
+              description
+                "Use server association mode.  This device
+                is not expected to synchronize with the
+                configured NTP server.";
+            }
+            enum peer {
+              description
+                "Use peer association mode.  This device
+                 may be expected to synchronize with the
+                 configured NTP server.";
+            }
+            enum pool {
+              description
+                "Use pool association mode.  This device
+                 is not expected to synchronize with the
+                 configured NTP server.";
+            }
+          }
+          default server;
+          description
+            "The desired association type for this NTP server.";
+        }
         leaf address {
           type inet:host;
           description
@@ -1000,6 +442,20 @@ module ietf-system {
           description
             "Indicates whether this server is enabled for use or
              not.";
+        }
+        leaf iburst {
+          type boolean;
+          default false;
+          description
+            "Indicates whether this server should enable burst
+             synchronization or not.";
+        }
+        leaf prefer {
+          type boolean;
+          default false;
+          description
+            "Indicates whether this server should be preferred
+             or not.";
         }
       }
     }
@@ -1058,7 +514,6 @@ module ietf-system {
         }
       }
     }
-
     container radius {
       if-feature radius;
 
@@ -1155,7 +610,6 @@ module ietf-system {
          key name;
          description
            "The list of local users configured on this device.";
-
          leaf name {
            type string;
            description
@@ -1166,15 +620,36 @@ module ietf-system {
            description
              "The password for this entry.";
          }
-         leaf ssh-dsa {
-           type binary;
+         list ssh-key {
+           key name;
            description
-             "The public DSA key for this entry.";
-         }
-         leaf ssh-rsa {
-           type binary;
-           description
-             "The public RSA key for this entry.";
+             "A list of public SSH keys for this user.";
+           reference
+             "RFC 4253: The Secure Shell (SSH) Transport Layer
+                        Protocol";
+
+           leaf name {
+             type string;
+             description
+               "An arbitrary name for the ssh key.";
+           }
+           leaf algorithm {
+             type string;
+             description
+               "The public key algorithm name for this ssh key.
+
+                Valid values are the values in the IANA Secure Shell
+                (SSH) Protocol Parameters registry, Public Key
+                Algorithm Names";
+             reference
+               "IANA Secure Shell (SSH) Protocol Parameters registry,
+                Public Key Algorithm Names";
+           }
+           leaf key-data {
+             type binary;
+             description
+               "The binary key data for this ssh key.";
+           }
          }
        }
      }
@@ -1183,11 +658,11 @@ module ietf-system {
   rpc set-current-datetime {
     nacm:default-deny-all;
     description
-      "Manually set the /system/clock/current-datetime leaf
+      "Set the /system/clock/current-datetime leaf
        to the specified value.
 
-       If the /system/ntp/ntp-in-use leaf exists and
-       is set to 'true', then this operation will
+       If the system is using NTP (e.g., /system/ntp/use-ntp
+       is set to 'true'), then this operation will
        fail with error-tag 'operation-failed',
        and error-app-tag value of 'ntp-active'";
     input {

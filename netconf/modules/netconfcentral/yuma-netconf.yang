@@ -13,9 +13,6 @@ module yuma-netconf {
    // for NCX 'metadata' language extension
    import yuma-ncx { prefix "ncx"; }
 
-   // for NCX 'secure' language extension
-   import yuma-nacm { prefix "nacm"; }
-
    description 
       "NETCONF Protocol 
         * Data Types
@@ -26,6 +23,14 @@ module yuma-netconf {
    contact
      "Translated by Andy Bierman.
       Send comments to <andy@netconfcentral.org>.";
+
+   revision 2012-10-05 {
+       description  
+         "Updated typedefs to RFC versions where they overlapped.
+          Remove nacm extension usage; not needed due to
+          server code which not not allow any client session
+          to invoke this operation, even superuser.";
+   }
 
    revision "2011-05-30" {
      description 
@@ -228,7 +233,7 @@ module yuma-netconf {
 
    // NETCONF Simple Types
 
-   typedef ErrorTag {
+   typedef error-tag-type {
      type enumeration {
         enum in-use {
           description
@@ -338,12 +343,17 @@ module yuma-netconf {
       reference "RFC 6241, Appendix A.";
    }
 
-   typedef ErrorSeverity {
-     description "NETCONF Error Severity";
-     type enumeration { 
-       enum error;
-       enum warning;
+   typedef error-severity-type {
+     type enumeration {
+       enum error {
+         description "Error severity";
+       }
+       enum warning {
+         description "Warning severity";
+       }
      }
+     description "NETCONF Error Severity";
+     reference "RFC XXXX, section 4.3.";
    }
 
    typedef TestOptionType {
@@ -382,16 +392,63 @@ module yuma-netconf {
      }
    }
 
-   typedef EditOperationType {
-     description "NETCONF 'operation' Attribute Content";
-     type enumeration { 
-       enum merge;
-       enum replace;
-       enum create;
-       enum delete;
-       enum remove;    // only allowed if base:1.1 active
+
+   typedef edit-operation-type {
+     type enumeration {
+       enum merge {
+         description
+           "The configuration data identified by the
+            element containing this attribute is merged
+            with the configuration at the corresponding
+            level in the configuration datastore identified
+            by the target parameter.";
+       }
+       enum replace {
+         description
+           "The configuration data identified by the element
+            containing this attribute replaces any related
+            configuration in the configuration datastore
+            identified by the target parameter.  If no such
+            configuration data exists in the configuration
+            datastore, it is created. Unlike a
+            <copy-config> operation, which replaces the
+            entire target configuration, only the configuration
+            actually present in the config parameter is affected.";
+       }
+       enum create {
+         description
+           "The configuration data identified by the element
+            containing this attribute is added to the
+            configuration if and only if the configuration
+            data does not already exist in the configuration
+            datastore.  If the configuration data exists, an
+            <rpc-error> element is returned with an
+            <error-tag> value of 'data-exists'.";
+       }
+       enum delete {
+         description
+           "The configuration data identified by the element
+            containing this attribute is deleted from the
+            configuration if and only if the configuration
+            data currently exists in the configuration
+            datastore.  If the configuration data does not
+            exist, an <rpc-error> element is returned with
+            an <error-tag> value of 'data-missing'.";
+       }
+       enum remove {
+         description
+           "The configuration data identified by the element
+            containing this attribute is deleted from the
+            configuration if the configuration
+            data currently exists in the configuration
+            datastore.  If the configuration data does not
+            exist, the 'remove' operation is silently ignored
+            by the server.";
+       }
      }
      default "merge";
+     description "NETCONF 'operation' attribute values";
+     reference "RFC XXXX, section 7.2.";
    }
 
    typedef DefaultOperationType {
@@ -538,7 +595,7 @@ module yuma-netconf {
       leaf error-tag {
         description
           "Contains a string identifying the error condition.";
-        type ErrorTag;
+        type error-tag-type;
         mandatory true;
       }
 
@@ -546,7 +603,7 @@ module yuma-netconf {
         description
           "Contains a string identifying the error severity, as
            determined by the device.";
-        type ErrorSeverity;
+        type error-severity-type;
         mandatory true;
       }
 
@@ -657,7 +714,7 @@ module yuma-netconf {
    leaf operation {
      description 
        "Internal object for the nc:operation attribute.";
-     type EditOperationType;
+     type edit-operation-type;
      ncx:abstract;
      ncx:hidden;
    }
@@ -1247,7 +1304,6 @@ module yuma-netconf {
    rpc load-config {
       ncx:hidden;
       ncx:abstract;
-      nacm:very-secure;
 
       description 
         "NCX internal load-config operation.

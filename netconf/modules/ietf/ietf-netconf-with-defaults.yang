@@ -1,165 +1,140 @@
- module ietf-netconf-with-defaults {
+module ietf-netconf-with-defaults {
 
-    namespace "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults";
+   namespace "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults";
 
-    prefix ncwd;
+   prefix ncwd;
 
-    import ietf-netconf { prefix nc; }
+   import ietf-netconf { prefix nc; }
 
-    organization
-     "IETF NETCONF (Network Configuration Protocol) Working Group";
+   organization
+    "IETF NETCONF (Network Configuration Protocol) Working Group";
 
-    contact
-     "WG Web:   <http://tools.ietf.org/wg/netconf/>
-      WG List:  <mailto:netconf@ietf.org>
+   contact
+    "WG Web:   <http://tools.ietf.org/wg/netconf/>
 
-      WG Chair: Bert Wijnen
-                <mailto:bertietf@bwijnen.net>
+     WG List:  <netconf@ietf.org>
 
-      WG Chair: Mehmet Ersue
-                <mailto:mehmet.ersue@nsn.com>
+     WG Chair: Bert Wijnen
+               <bertietf@bwijnen.net>
 
-      Editor: Andy Bierman
-              <mailto:andy.bierman@brocade.com>
+     WG Chair: Mehmet Ersue
+               <mehmet.ersue@nsn.com>
 
-      Editor: Balazs Lengyel
-              <mailto:balazs.lengyel@ericsson.com>";
+     Editor: Andy Bierman
+             <andy.bierman@brocade.com>
 
-    description
-     "This module defines an extension to the NETCONF protocol
-      that allows the NETCONF client to control how default
-      values are handled by the server in particular NETCONF operations.
+     Editor: Balazs Lengyel
+             <balazs.lengyel@ericsson.com>";
 
-      Copyright (c) 2010 IETF Trust and the persons identified as
-      the document authors.  All rights reserved.
+   description
+    "This module defines an extension to the NETCONF protocol
+     that allows the NETCONF client to control how default
+     values are handled by the server in particular NETCONF
+     operations.
 
-      Redistribution and use in source and binary forms, with or
-      without modification, is permitted pursuant to, and subject
-      to the license terms contained in, the Simplified BSD License
-      set forth in Section 4.c of the IETF Trust's Legal Provisions
-      Relating to IETF Documents
-      (http://trustee.ietf.org/license-info).
+     Copyright (c) 2011 IETF Trust and the persons identified as
+     the document authors.  All rights reserved.
 
-      This version of this YANG module is part of RFC XXXX; see
-      the RFC itself for full legal notices.";
-    // RFC Ed.: replace XXXX with actual RFC number and remove this note
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
 
-    // RFC Ed.: remove this note
-    // Note: extracted from draft-ietf-netmod-with-defaults-10.txt
+     This version of this YANG module is part of RFC 6243; see
+     the RFC itself for full legal notices.";
 
-    revision 2010-06-09 {
+   revision 2011-06-01 {
+     description
+       "Initial version.";
+     reference
+      "RFC 6243: With-defaults Capability for NETCONF";
+   }
+
+   typedef with-defaults-mode {
       description
-        "Initial version.";
+        "Possible modes to report default data.";
       reference
-       "RFC XXXX: With-defaults capability for NETCONF";
-    }
-    // RFC Ed.: replace XXXX with actual
-    // RFC number and remove this note
+         "RFC 6243; Section 3.";
+      type enumeration {
+         enum report-all {
+             description
+               "All default data is reported.";
+             reference
+               "RFC 6243; Section 3.1";
+         }
+         enum report-all-tagged {
+             description
+               "All default data is reported.
+                Any nodes considered to be default data
+                will contain a 'default' XML attribute,
+                set to 'true' or '1'.";
+             reference
+               "RFC 6243; Section 3.4";
+         }
+         enum trim {
+             description
+               "Values are not reported if they contain the default.";
+             reference
+               "RFC 6243; Section 3.2";
+         }
+         enum explicit {
+             description
+               "Report values that contain the definition of
+                explicitly set data.";
+             reference
+               "RFC 6243; Section 3.3";
+         }
+     }
+   }
 
-    typedef with-defaults-mode {
+   grouping with-defaults-parameters {
+     description
+       "Contains the <with-defaults> parameter for control
+        of defaults in NETCONF retrieval operations.";
+
+     leaf with-defaults {
        description
-         "Possible modes to report default data.";
+         "The explicit defaults processing mode requested.";
        reference
-          "RFC XXXX; section 3.";
-          // RFC Ed.: replace XXXX with actual
-          // RFC number and remove this note
+         "RFC 6243; Section 4.5.1";
 
-       type enumeration {
-          enum report-all {
-              description
-                "All default data is reported.";
-              reference
-                "RFC XXXX; section 3.1";
-                // RFC Ed.: replace XXXX with actual
-                // RFC number and remove this note
+       type with-defaults-mode;
+     }
+   }
 
-          }
-          enum report-all-tagged {
-              description
-                "All default data is reported.
-                 Any nodes considered to be default data
-                 will contain a 'wd:default' XML attribute,
-                 set to 'true'.";
-              reference
-                "RFC XXXX; section 3.4";
-                // RFC Ed.: replace XXXX with actual
-                // RFC number and remove this note
-          }
-          enum trim {
-              description
-                "Values are not reported if they contain the default.";
-              reference
-                "RFC XXXX; section 3.2";
-                // RFC Ed.: replace XXXX with actual
-                // RFC number and remove this note
+   // extending the get-config operation
+   augment /nc:get-config/nc:input {
+       description
+         "Adds the <with-defaults> parameter to the
+          input of the NETCONF <get-config> operation.";
+       reference
+         "RFC 6243; Section 4.5.1";
 
-          }
-          enum explicit {
-              description
-                "Report values that contain the definition of
-                 explicitly set data.";
-              reference
-                "RFC XXXX; section 3.3";
-                // RFC Ed.: replace XXXX with actual
-                // RFC number and remove this note
-          }
-      }
-    }
+       uses with-defaults-parameters;
+   }
 
-    grouping with-defaults-parameters {
-      description
-        "Contains the <with-defaults> parameter for control
-         of defaults in NETCONF retrieval operations.";
+   // extending the get operation
+   augment /nc:get/nc:input {
+       description
+         "Adds the <with-defaults> parameter to
+          the input of the NETCONF <get> operation.";
+       reference
+         "RFC 6243; Section 4.5.1";
 
-      leaf with-defaults {
-        description
-          "The explicit defaults processing mode requested.";
-        reference
-          "RFC XXXX; section 4.6.1";
-          // RFC Ed.: replace XXXX with actual
-          // RFC number and remove this note
+       uses with-defaults-parameters;
+   }
 
-        type with-defaults-mode;
-      }
-    }
+   // extending the copy-config operation
+   augment /nc:copy-config/nc:input {
+       description
+         "Adds the <with-defaults> parameter to
+          the input of the NETCONF <copy-config> operation.";
+       reference
+         "RFC 6243; Section 4.5.1";
 
-    // extending the get-config operation
-    augment /nc:get-config/nc:input {
-        description
-          "Adds the <with-defaults> parameter to the
-           input of the NETCONF <get-config> operation.";
-        reference
-          "RFC XXXX; section 4.6.1";
-          // RFC Ed.: replace XXXX with actual
-          // RFC number and remove this note
+       uses with-defaults-parameters;
+   }
 
-        uses with-defaults-parameters;
-    }
-
-    // extending the get operation
-    augment /nc:get/nc:input {
-        description
-          "Adds the <with-defaults> parameter to
-           the input of the NETCONF <get> operation.";
-        reference
-          "RFC XXXX; section 4.6.1";
-          // RFC Ed.: replace XXXX with actual
-          // RFC number and remove this note
-
-        uses with-defaults-parameters;
-    }
-
-    // extending the copy-config operation
-    augment /nc:copy-config/nc:input {
-        description
-          "Adds the <with-defaults> parameter to
-           the input of the NETCONF <copy-config> operation.";
-        reference
-          "RFC XXXX; section 4.6.1";
-          // RFC Ed.: replace XXXX with actual
-          // RFC number and remove this note
-
-        uses with-defaults-parameters;
-    }
-
- }
+}

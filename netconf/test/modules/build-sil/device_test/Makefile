@@ -17,6 +17,7 @@ TARGET_LIB := lib$(BASE_NAME).so
 
 $(TARGET_LIB): output/$(BASE_NAME).o 
 	$(CXX) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,$@ -o $@ $^
+	mkdir -p ../../sil
 	cp $(TARGET_LIB) ../../sil
 
 TARGETS := $(TARGET_LIB)

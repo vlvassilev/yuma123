@@ -1,51 +1,32 @@
 #!/bin/sh
 #
-# prep-deb.sh [major version number]
+# prep-deb.sh
 #
 # make the yuma build code and tar it up for debian
-#
-# the $1 parameter must be '1' or '2'
+# Only supports packaging of v2 branch!!!
 
-if [ $# != 1 ]; then
-  echo "Usage: prep-deb.sh <major-version>"
-  echo "Example:   prep-deb.sh 1"
-  exit 1
-fi
-
-if [ $1 = 1 ]; then
-VER="1.15"
-URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1
-elif [ $1 = 2 ]; then
 VER="2.2"
-URL=https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v2
-elif [ $1 = 3 ]; then
-VER="3.0"
-URL=https://yuma.svn.sourceforge.net/svnroot/yuma/trunk
-else
-  echo "Error: major version must be 1 to 3"
-  echo "Usage: prep-deb.sh <major-version>"
-  echo "Example:   prep-deb.sh 2"
+
+if [ ! -d $HOME/swdev/yuma-$VER ]; then
+  echo "Error: $HOME/swdev/yuma-$VER not found"
+  echo "  1: git clone https://github.com/YumaWorks/yuma yuma-2.2"
+  echo "  2: cd yuma-2.2; git checkout v2; git pull"
   exit 1
 fi
 
-mkdir -p ~/build
-mkdir -p ~/rpmprep
-rm -rf ~/rpmprep/*
+mkdir -p $HOME/build
 
-cd ~/rpmprep
-
-svn export $URL yuma-$VER
-
-tar cvf yuma_$VER.tar yuma-$VER/
+cd $HOME/swdev
+tar --exclude=.git* --exclude=.svn* -cvf yuma_$VER.tar  yuma-$VER/
 gzip yuma_$VER.tar
-cp yuma_$VER.tar.gz ~/build
+mv yuma_$VER.tar.gz $HOME/build
 
-cd ~/build
+cd $HOME/build
 if [ ! -f yuma_$VER.orig.tar.gz ]; then
   cp yuma_$VER.tar.gz yuma_$VER.orig.tar.gz
 fi
 
-rm -rf yuma_$VER
+rm -rf yuma-$VER
 tar xvf yuma_$VER.tar.gz
 
 

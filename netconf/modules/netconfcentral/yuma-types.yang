@@ -11,9 +11,10 @@ module yuma-types {
 
     description "Yuma Common Data Types";
 
-    revision 2012-05-31 {
+    revision 2012-06-01 {
        description 
-         "Added yang-identifier data type.";
+         "Added new NcDebugType enum (sysLogLevel).
+          Added yang-identifier data type.";
     }
 
     revision 2011-12-18 {
@@ -174,18 +175,26 @@ module yuma-types {
            plus the messages for the specified value.
 
            off == no logging is done
+           write == log write  messages (NOT SUPPORTED IN YUMA)
+           dev0 == log developer level 0 messages (NOT SUPPORTED
+                     IN YUMA)
            error == log error messages
            warn == log warning messages
            info == log info messages 
-           debug == log debug level 1 messages
+           dev1    == log developer level 1 messages (NOT SUPPORTED
+                      IN YUMA)
+           debug  == log debug level 1 messages
            debug2 == log debug level 2 messages
            debug3 == log debug level 3 messages
            debug4 == log debug level 4 messages";
         type enumeration { 
              enum off;
+             enum write;   // yumapro only
+             enum dev0;    // yumapro only
              enum error; 
              enum warn;
              enum info;
+             enum dev1;    // yumapro only
              enum debug;
              enum debug2;
              enum debug3;

@@ -1594,7 +1594,9 @@ static status_t
             ;
         } else if (!typ_is_simple(newval->btyp) && !add_defs_done && 
                    editop != OP_EDITOP_DELETE && editop != OP_EDITOP_REMOVE) {
-            res = val_add_defaults(newval, FALSE);
+
+            res = val_add_defaults(newval, (target) ? target->root : NULL,
+                                   curval, FALSE);
             if (res != NO_ERR) {
                 log_error("\nError: add defaults failed");
                 applyhere = FALSE;
@@ -1810,7 +1812,10 @@ static status_t
                  restore_newnode2(newval, newval_marker);
                  return ERR_INTERNAL_MEM;
              }
-             val_set_dirty_flag(curval->parent);
+             if (curval->parent) {
+                 val_set_dirty_flag(curval->parent);
+             }
+
              /* check if this is a leaf with a default */
              if (obj_get_default(curval->obj)) {
                  /* convert this leaf to its default value */
@@ -2285,6 +2290,15 @@ static status_t
             }
         }
 
+        /* any of the errors so far indicate this node is bad
+         * setting the val->res to the error will force it to be removed
+         * if --startup-error=continue; only apply to the new tree, if any
+         */
+        if (res != NO_ERR && newval != NULL) {
+            VAL_MARK_DELETED(newval);
+            newval->res = res;
+        }
+
         /* make sure the node is not partial locked
          * by another session; there is a corner case where
          * all the PDU nodes are OP_EDITOP_NONE, and
@@ -2386,9 +2400,9 @@ static status_t
             }
             res = invoke_btype_cb(cbtyp, cur_editop, scb, msg, target, 
                                   chval, curch, curval);
-            if (chval->res == NO_ERR) {
-                chval->res = res;
-            }
+            //if (chval->res == NO_ERR) {
+            //    chval->res = res;
+            //}
             CHK_EXIT(res, retres);
         }
     }
@@ -2524,6 +2538,10 @@ static status_t invoke_btype_cb( agt_cbtyp_t cbtyp,
     } else {
         res = invoke_simval_cb(cbtyp, editop, scb, msg, target, newval, 
                                (v_val) ? v_val : curval, curparent );
+        if (newval != NULL && res != NO_ERR) {
+            VAL_MARK_DELETED(newval);
+            newval->res = res;
+        }
     }
 
     return res;
@@ -2597,6 +2615,11 @@ static void
     }
 
     if (undo->curnode) {
+        if (msg->rpc_txcb->cfg_id == NCX_CFGID_RUNNING) {
+            val_clear_dirty_flag(undo->curnode);
+        } else {
+            val_set_dirty_flag(undo->curnode);
+        }
         if (undo->free_curnode) {
             if (VAL_IS_DELETED(undo->curnode)) {
                 val_remove_child(undo->curnode);
@@ -2606,10 +2629,6 @@ static void
                 val_free_value(undo->curnode);
                 undo->curnode = NULL;
             }
-        } else if (msg->rpc_txcb->cfg_id == NCX_CFGID_RUNNING) {
-            val_clear_dirty_flag(undo->curnode);
-        } else {
-            val_set_dirty_flag(undo->curnode);
         }
     }
 
@@ -2945,12 +2964,13 @@ static status_t
         }
         if (editcnt) {
             log_debug("\nStart full commit of transaction %llu: %d"
-                      " %s on %s config", (unsigned long long)txcb->txid,
+                      " %s on %s config", txcb->txid,
                       editcnt, cntstr, target->name);
         } else {
-            log_debug("\nStart full commit of transaction %llu"
+
+            log_debug("\nStart full commit of transaction %llu:"
                       " LOAD operation on %s config",
-                      (unsigned long long)txcb->txid, target->name);
+                      txcb->txid, target->name);
         }
     }
 
@@ -3066,12 +3086,12 @@ static status_t
         }
         if (editcnt) {
             log_debug("\nStart full rollback of transaction %llu: %d"
-                      " %s on %s config", (unsigned long long)txcb->txid,
+                      " %s on %s config", txcb->txid,
                       editcnt, cntstr, target->name);
         } else {
             log_debug("\nStart full rollback of transaction %llu:"
                       " LOAD operation on %s config",
-                      (unsigned long long)txcb->txid, target->name);
+                      txcb->txid, target->name);
         }
     }
 
@@ -4291,7 +4311,7 @@ static status_t
     boolean                condresult = FALSE;
     uint32                 whencount = 0;
 
-    res = val_check_obj_when(curval, root, curval, obj, &condresult,
+    res = val_check_obj_when(curval->parent, root, curval, obj, &condresult,
                              &whencount);
     if (res != NO_ERR) {
         log_error("\nError: when_check: failed for %s:%s (%s)",
@@ -4391,7 +4411,7 @@ static status_t
     boolean          condresult = FALSE;
     uint32           whencount = 0;
 
-    retres = val_check_obj_when(curval, root, curval, obj, &condresult,
+    retres = val_check_obj_when(curval->parent, root, curval, obj, &condresult,
                                 &whencount);
     if (retres != NO_ERR) {
         log_error("\nError: when_check: failed for %s:%s (%s)",
@@ -4400,11 +4420,11 @@ static status_t
         agt_record_error(scb, msg, NCX_LAYER_OPERATION, retres, NULL, 
                          NCX_NT_NONE, NULL, NCX_NT_VAL, curval);
         return retres;
-    } else if (!condresult) {
+    } else if (whencount && !condresult) {
         retres = ERR_NCX_RPC_WHEN_FAILED;
         agt_record_error(scb, msg, NCX_LAYER_OPERATION,
-                         retres, NULL, NCX_NT_NONE,
-                         NULL, NCX_NT_VAL, curval);
+                         retres, NULL, NCX_NT_VAL,
+                         curval, NCX_NT_VAL, curval);
         return retres;
     } else {
         if (LOGDEBUG3 && whencount) {
@@ -5091,7 +5111,8 @@ static uint32
 *   valset == val_value_t list, leaf-list, or container to check
 *   valroot == root node of the database
 *   layer == NCX layer calling this function (for error purposes only)
-*
+*   all_levels == TRUE to recurse for all levels
+*              == FALSE to just check the curent level
 * OUTPUTS:
 *   if msg not NULL:
 *      msg->msg_errQ may have rpc_err_rec_t structs added to it 
@@ -5106,7 +5127,8 @@ static status_t
                         xml_msg_hdr_t *msg,
                         val_value_t *valset,
                         val_value_t *valroot,
-                        ncx_layer_t layer)
+                        ncx_layer_t layer,
+                        boolean all_levels)
 {
     assert( valset && "valset is NULL!" );
 
@@ -5123,13 +5145,14 @@ static status_t
         return NO_ERR;
     }
 
-    if (val_child_cnt(valset)) {
+    if (all_levels && val_child_cnt(valset)) {
         val_value_t *chval = val_get_first_child(valset);
         for (; chval != NULL; chval = val_get_next_child(chval)) {
 
             if (!(obj_is_root(chval->obj) || obj_is_leafy(chval->obj))) {
                 /* recurse for all object types except root, leaf, leaf-list */
-                res = run_instance_check(scb, msg, chval, valroot, layer);
+                res = run_instance_check(scb, msg, chval, valroot, 
+                                         layer, all_levels);
                 CHK_EXIT(res, retres);
             }
         }
@@ -5217,7 +5240,8 @@ static status_t
 
         /* need to run the instance tests on the 'val' node */
         if (ct) {
-            res = run_instance_check(scb, msghdr, val, root, NCX_LAYER_CONTENT);
+            res = run_instance_check(scb, msghdr, val, root,
+                                     NCX_LAYER_CONTENT, FALSE);
             CHK_EXIT(res, retres);
         } else {
             /* TBD: figure out how to use the gen_root object
@@ -5442,7 +5466,7 @@ status_t
                             val_value_t *valroot,
                             ncx_layer_t layer)
 {
-    return run_instance_check(scb, msg, valset, valroot, layer);
+    return run_instance_check(scb, msg, valset, valroot, layer, TRUE);
     
 }  /* agt_val_instance_check */
 
@@ -5515,6 +5539,7 @@ status_t
     res = run_obj_commit_tests(profile, scb, msghdr, NULL, root, root,
                                AGT_TEST_ALL_COMMIT_MASK);
     if (res != NO_ERR) {
+        profile->agt_load_top_rootcheck_errors = TRUE;
         CHK_EXIT(res, retres);
     }
 
@@ -5560,6 +5585,8 @@ status_t
             res = run_obj_commit_tests(profile, scb, msghdr, ct, valnode, 
                                        root, tests);
             if (res != NO_ERR) {
+                valnode->res = res;
+                profile->agt_load_rootcheck_errors = TRUE;
                 CHK_EXIT(res, retres);
             }
         }
@@ -5568,6 +5595,7 @@ status_t
          * instead of one instance at a time  */
         res = run_obj_unique_tests(scb, msghdr, ct, root);
         if (res != NO_ERR) {
+            profile->agt_load_rootcheck_errors = TRUE;
             CHK_EXIT(res, retres);
         }
     }

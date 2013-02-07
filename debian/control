@@ -4,7 +4,6 @@ Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
-
 Package: yuma123
 Architecture: any
 Depends: libncurses5, libssh2-1, libxml2, ${shlibs:Depends}, ${misc:Depends}

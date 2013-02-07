@@ -42,20 +42,15 @@ all: sil_dummy sil_lib
 #################### PLATFORM DEFINITIONS ############
 
 ifdef RELEASE
+# libtoaster is in the source tree
 CINC = -I. -I../../netconf/src/platform -I../../netconf/src/ncx \
      -I../../netconf/src/agt
 else
-ifdef YUMA_HOME
-CINC = -I. -I$(YUMA_HOME)/src/platform -I$(YUMA_HOME)/src/ncx \
-     -I$(YUMA_HOME)/src/agt
-else
-# try yuma source tree first then installed location
+# assume libtoaster in the source tree first, then install location
 CINC = -I. -I../../netconf/src/platform \
 	-I../../netconf/src/ncx -I../../netconf/src/agt \
 	-I$(REALINC)/yuma/platform -I$(REALINC)/yuma/ncx \
 	-I$(REALINC)/yuma/agt 
-
-endif  # YUMA_HOME
 endif  # RELEASE
 
 CINC += -I$(PREFIX)/include -I$(PREFIX)/include/libxml2 \

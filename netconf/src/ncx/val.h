@@ -3612,6 +3612,19 @@ extern val_index_t *
 extern val_index_t *
     val_get_next_key (val_index_t *curkey);
 
+/********************************************************************
+* FUNCTION val_remove_key
+* 
+* Remove a key pointer because the key is invalid
+* Free the key pointer
+*
+* INPUTS:
+*   keyval == value node to find, remove and free
+*
+*********************************************************************/
+extern void
+    val_remove_key (val_value_t *keyval);
+
 
 /********************************************************************
 * FUNCTION val_new_deleted_value

@@ -1147,7 +1147,14 @@ static status_t
                     if (!retval->v.idref.name) {
                         res = ERR_INTERNAL_MEM;
                     }
-                }
+                } else {
+                    /* save name given anyway or NULL string will 
+                     * get printed */
+                    retval->v.idref.name = xml_strdup(valnode.simval);
+                    if (!retval->v.idref.name) {
+                        res = ERR_INTERNAL_MEM;
+                    }
+                }                    
             }
             break;
         case XML_NT_END:
@@ -2111,6 +2118,7 @@ static status_t
                             retval);
         break;
     default:
+        log_error("\nError: got invalid btype '%d'", btyp);
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 

@@ -745,7 +745,7 @@ static status_t
         parm = cli_find_rawparm(NCX_EL_YUMA_HOME, &parmQ);
         if (parm && parm->count) {
             if (parm->count > 1) {
-                log_error("\nError: Only one 'yang-home' parameter allowed");
+                log_error("\nError: Only one 'yuma-home' parameter allowed");
                 res = ERR_NCX_DUP_ENTRY;
             } else {
                 /*** VALIDATE YUMA_HOME ***/
@@ -3475,11 +3475,6 @@ void
         ncx_free_filptr(fp);
     }
 
-    /* check if any malloced memory inside */
-    if (filptr->virtualnode) {
-        val_free_value(filptr->virtualnode);
-    }
-
     /* check if this entry should be put in the cache */
     if (ncx_cur_filptrs < ncx_max_filptrs) {
         memset(filptr, 0x0, sizeof(ncx_filptr_t));
@@ -5262,7 +5257,11 @@ xmlChar *
 
     assert ( fspec && " param fspec is NULL" );
     assert ( res && " param res is NULL" );
-    assert ( *fspec && " data referenced by param fspec is NULL" );
+
+    if (*fspec == 0) {
+        *res = ERR_NCX_INVALID_VALUE;
+        return NULL;
+    }
 
     const xmlChar  *start;
     xmlChar        *bp;
@@ -5991,7 +5990,7 @@ void
 /********************************************************************
 * FUNCTION ncx_turn_off_warning
 * 
-* Add ar warning suppression entry
+* Add a warning suppression entry
 *
 * INPUTS:
 *   res == internal status code to suppress
@@ -6031,6 +6030,46 @@ status_t
     return NO_ERR;
 
 } /* ncx_turn_off_warning */
+
+
+/********************************************************************
+* FUNCTION ncx_turn_on_warning
+* 
+* Remove a warning suppression entry if it exists
+*
+* INPUTS:
+*   res == internal status code to enable
+*
+* RETURNS:
+*   status (duplicates are silently dropped)
+*********************************************************************/
+status_t
+    ncx_turn_on_warning (status_t res)
+{
+    warnoff_t         *warnoff;
+
+    if (res == NO_ERR) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res < ERR_WARN_BASE) {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* check if 'res' exists and remove it if found */
+    for (warnoff = (warnoff_t *)dlq_firstEntry(&warnoffQ);
+         warnoff != NULL;
+         warnoff = (warnoff_t *)dlq_nextEntry(warnoff)) {
+        if (warnoff->res == res) {
+            dlq_remove(warnoff);
+            m__free(warnoff);
+            return NO_ERR;
+        }
+    }
+
+    return NO_ERR;
+
+} /* ncx_turn_on_warning */
 
 
 /********************************************************************

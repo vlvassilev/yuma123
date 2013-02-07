@@ -47,6 +47,7 @@ install: toasterinstall libinstall
 endif  # DEBIAN
 
 toasterall:
+	mkdir -p lib bin
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) && cd ..;\
         done

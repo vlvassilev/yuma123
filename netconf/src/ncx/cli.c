@@ -606,11 +606,6 @@ static char *
         *bufflen += (strlen(argv[parmnum]) + padamount);
     }
 
-    /* adjust extra spaces */
-    if (*bufflen) {
-        *bufflen -= padamount;
-    }
-
     buff = m__getMem(*bufflen + 1);
     if (!buff) {
         /* non-recoverable error */
@@ -1211,7 +1206,7 @@ val_value_t *
     if (argc < 2) {
         /* 2) add any defaults for optional parms that are not set */
         if (!valonly) {
-            res = val_add_defaults(val, script);
+            res = val_add_defaults(val, NULL, NULL, script);
         }
 
         /* 3) CLI Instance Check
@@ -1640,7 +1635,7 @@ val_value_t *
 
     /* 2) add any defaults for optional parms that are not set */
     if (res == NO_ERR && !valonly) {
-        res = val_add_defaults(val, script);
+        res = val_add_defaults(val, NULL, NULL, script);
     }
 
     /* 3) CLI Instance Check

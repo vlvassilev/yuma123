@@ -4575,6 +4575,7 @@ static val_value_t *
         curparm = NULL;
         parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_VALUE);
         if (parm && parm->res == NO_ERR) {
+            const xmlChar *parmval = NULL;
             if (parm->btyp == NCX_BT_EXTERN) {
                 isextern = TRUE;
                 curparm = mgr_load_extern_file(VAL_EXTERN(parm), NULL,  &res);
@@ -4583,17 +4584,19 @@ static val_value_t *
                     return NULL;
                 }
             } else {
-                curparm = 
-                    var_get_script_val(server_cb->runstack_context,
-                                       targobj, 
-                                       NULL, 
-                                       VAL_STR(parm),
-                                       ISPARM, 
-                                       &res);
+                if (typ_is_string(parm->btyp)) {
+                    parmval = VAL_STR(parm);
+                } else if (typ_is_enum(parm->btyp)) {
+                    parmval = VAL_ENUM_NAME(parm);
+                }
+                curparm = var_get_script_val_ex(server_cb->runstack_context,
+                                                NULL, targobj, NULL, parmval, ISPARM, 
+                                                (parmval) ? NULL : parm, &res);
             }
             if (curparm == NULL || res != NO_ERR) {
                 log_error("\nError: Script value '%s' invalid (%s)", 
-                          VAL_STR(parm), 
+                          (parmval) ? parmval : 
+                          (const xmlChar *)"<complex-val>",
                           get_error_string(res)); 
                 server_cb->get_optional = saveopt;
                 val_free_value(*valroot);
@@ -8065,7 +8068,7 @@ val_value_t *
             *res = ERR_INTERNAL_MEM;
         } else {
             val_init_from_template(valset, obj);
-            *res = val_add_defaults(valset, SCRIPTMODE);
+            *res = val_add_defaults(valset, NULL, NULL, SCRIPTMODE);
         }
     }
 

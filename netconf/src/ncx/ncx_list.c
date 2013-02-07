@@ -149,6 +149,7 @@ void
     ncx_init_list (ncx_list_t *list,
                    ncx_btype_t btyp)
 {
+    
 #ifdef DEBUG
     if (!list) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -175,14 +176,10 @@ void
 {
     ncx_lmem_t  *lmem;
 
-#ifdef DEBUG
-    if (!list) {
-        SET_ERROR(ERR_INTERNAL_PTR);
+    if (!list || list->btyp == NCX_BT_NONE) {
         return;
     }
-#endif
 
-    /* clean the string Q */
     while (!dlq_empty(&list->memQ)) {
         lmem = (ncx_lmem_t *)dlq_deque(&list->memQ);
         ncx_clean_lmem(lmem, list->btyp);

@@ -2444,6 +2444,21 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION ncx_turn_on_warning
+* 
+* Remove a warning suppression entry if it exists
+*
+* INPUTS:
+*   res == internal status code to enable
+*
+* RETURNS:
+*   status (duplicates are silently dropped)
+*********************************************************************/
+extern status_t
+    ncx_turn_on_warning (status_t res);
+
+
+/********************************************************************
 * FUNCTION ncx_warning_enabled
 * 
 * Check if a specific status_t code is enabled

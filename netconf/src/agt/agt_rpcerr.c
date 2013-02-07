@@ -1141,6 +1141,7 @@ rpc_err_rec_t *
     case ERR_NCX_EXTRA_CHOICE:
     case ERR_NCX_MISSING_CHOICE:
     case ERR_NCX_MISSING_KEY:
+    case ERR_NCX_RPC_WHEN_FAILED:
         if (!error_parm) {
             SET_ERROR(ERR_INTERNAL_PTR);
         } else {

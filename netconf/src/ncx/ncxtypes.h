@@ -577,7 +577,7 @@ typedef struct ncx_feature_t_ {
 typedef struct ncx_filptr_t_ {
     dlq_hdr_t             qhdr;
     struct val_value_t_  *node;        /* read-only backptr */
-    struct val_value_t_  *virtualnode;  /* malloced virtual val */
+    struct val_value_t_  *virtualnode;  /* virtual val backptr */
     dlq_hdr_t             childQ;  /* Q of ncx_filptr_t */
 } ncx_filptr_t;
 

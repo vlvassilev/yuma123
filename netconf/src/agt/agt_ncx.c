@@ -2748,6 +2748,11 @@ static status_t
         return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
+    /* check if any error values need to be purged from the load config */
+    if (msg->rpc_parse_errors) {
+        val_purge_errors_from_root(val);
+    }
+
     /* create a transaction CB */
     msg->rpc_txcb = 
         agt_cfg_new_transaction(NCX_CFGID_RUNNING, AGT_CFG_EDIT_TYPE_FULL,
@@ -2769,7 +2774,9 @@ static status_t
                 /* any startup errors mean server shutdown */
                 return res;
             }
-            val_purge_errors_from_root(val);
+            // delay this until end of load_running_config
+            // error nodes are marked as deleted
+            //val_purge_errors_from_root(val);
         }
 
         res = agt_val_delete_dead_nodes(scb, msg, val);
@@ -2777,11 +2784,16 @@ static status_t
             res = agt_val_root_check(scb, &msg->mhdr, msg->rpc_txcb, val);
         }
         if (res != NO_ERR) {
-            profile->agt_load_rootcheck_errors = TRUE;
-            if (profile->agt_running_error) {
-                return res;
+            if (profile->agt_load_rootcheck_errors && 
+                profile->agt_startup_error) {
+                ;
+            } else if (profile->agt_load_top_rootcheck_errors &&
+                       profile->agt_running_error) {
+                ;
             } else {
-                val_purge_errors_from_root(val);
+                // delay this until end of load_running_config
+                // error nodes are marked as deleted
+                //val_purge_errors_from_root(val);
                 res = NO_ERR;
             }
         }

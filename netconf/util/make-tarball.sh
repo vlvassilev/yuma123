@@ -1,6 +1,9 @@
 #!/bin/sh
 #
-# make-tarball.sh [svnversion]
+#
+# This is obsolete!!! Do not use!!!
+#
+# make-tarball.sh [revision]
 #
 # make the yuma binary tar ball 
 #
@@ -48,7 +51,9 @@ cd ..
 
 echo "Making yuma tarball for yuma-$VER-$REL"
 
-svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1
+git clone https://github.com/YumaWorks/yuma
+cd yuma
+git checkout v2
 
 TAGSTR=$VER-"$REL"."$OS"."$ARCH"
 
@@ -58,8 +63,14 @@ elif [ "$OS" = "fc13" ]; then
   EXTRA=""
 elif [ "$OS" = "fc14" ]; then
   EXTRA=""
+elif [ "$OS" = "fc15" ]; then
+  EXTRA=""
+elif [ "$OS" = "fc16" ]; then
+  EXTRA=""
+elif [ "$OS" = "fc17" ]; then
+  EXTRA=""
 else
-  EXTRA="FULL_STATIC=1 DEBIAN=1"
+  EXTRA="DEBIAN=1"
 fi
 
 echo "extra=$EXTRA"

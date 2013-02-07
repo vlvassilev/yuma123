@@ -1031,6 +1031,7 @@ static status_t
                         !xml_strcmp((const xmlChar *)
                                     &ep->d_name[modnamelen+12], 
                                     YIN_SUFFIX)) {
+                        dirdone = TRUE;
                         *done = TRUE;
                         if ((pathlen + dentlen) >= bufflen) {
                             res = ERR_BUFF_OVFL;

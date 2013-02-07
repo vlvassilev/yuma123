@@ -194,6 +194,10 @@ static status_t
  *
  * INPUTS:
  *   val == the value struct to modify
+ *   rootval == the root value for XPath purposes
+ *           == NULL to skip when-stmt check
+ *   cxtval == the context value for XPath purposes
+ *           == NULL to use val instead
  *   scriptmode == TRUE if the value is a script object access
  *              == FALSE for normal val_get_simval access instead
  *   addcas == obj_template for OBJ_TYP_CASE when adding defaults
@@ -207,14 +211,11 @@ static status_t
  *********************************************************************/
 static status_t 
     add_defaults (val_value_t *val,
+                  val_value_t *rootval,
+                  val_value_t *cxtval,
                   boolean scriptmode,
                   obj_template_t *addcas)
 {
-    obj_template_t       *obj, *chobj, *casobj;
-    const xmlChar        *defval;
-    val_value_t          *chval, *testval;
-    status_t              res;
-
 #ifdef DEBUG
     /* test in static fn because it is so recursive */
     if (!val || !val->obj) {
@@ -222,13 +223,15 @@ static status_t
     }
 #endif
 
+    obj_template_t *obj, *chobj;
+
     if (addcas) {
         obj = addcas;
     } else {
         obj = val->obj;
     }
 
-    res = NO_ERR;
+    status_t res = NO_ERR;
 
     /* skip any uses or augment nodes */
     if (!obj_has_name(obj)) {
@@ -248,38 +251,66 @@ static status_t
          chobj != NULL && res == NO_ERR;
          chobj = obj_next_child(chobj)) {
 
+        const xmlChar *defval = NULL;
+        val_value_t *chval = NULL, *testval = NULL, *chcxtval = NULL;
+        obj_template_t *casobj = NULL;
+        uint32 whencount = 0;
+        boolean condresult = FALSE;
+
         switch (chobj->objtype) {
         case OBJ_TYP_ANYXML:
             break;
         case OBJ_TYP_LEAF:
-            /* If the child leaf is required then it is marked
-             * as mandatory and no default exists
-             * If mandatory, then default is ignored
-             * !!! ignore read-only objects !!!
+            /* first check if this leaf even has a default */
+            defval = obj_get_default(chobj);
+            if (!defval) {
+                continue;
+            }
+
+            /* check if the child leaf is a config node */
+            if (!obj_is_config(chobj)) {
+                continue;
+            }
+
+            /* check if this leaf has a false when-stmt associated
+             * with it; skip this leaf if when FALSE
              */
-            if (!obj_is_mandatory(chobj) && obj_is_config(chobj)) {
-                    
-                chval = val_find_child(val, 
-                                       obj_get_mod_name(chobj),
-                                       obj_get_name(chobj));
-                if (!chval) {
-                    defval = obj_get_default(chobj);
-                    if (defval) {
-                        res = cli_parse_parm(NULL,
-                                             val, 
-                                             chobj,
-                                             defval, 
-                                             scriptmode);
-                        if (res==NO_ERR) {
-                            chval = val_find_child(val, 
-                                                   obj_get_mod_name(chobj),
-                                                   obj_get_name(chobj));
-                            if (!chval) {
-                                SET_ERROR(ERR_INTERNAL_VAL);
-                            } else {
-                                chval->flags |= VAL_FL_DEFSET;
-                            }
+            if (rootval) {
+                res = val_check_obj_when((cxtval) ? cxtval : val, 
+                                         rootval, NULL, chobj,
+                                         &condresult, &whencount);
+                if (res != NO_ERR) {
+                    return res;
+                }
+                if (whencount && !condresult) {
+                    if (LOGDEBUG3) {
+                        log_debug3("\nadd_default: skipping false when '%s:%s'",
+                                   obj_get_mod_name(chobj),
+                                   obj_get_name(chobj));
+                    }
+                    continue;
+                }
+            }
+
+            /* node is not conditional or when=TRUE
+             * check if the node exists alread
+             */
+            chval = val_find_child(val, obj_get_mod_name(chobj),
+                                   obj_get_name(chobj));
+            if (!chval) {
+                res = cli_parse_parm(NULL, val, chobj, defval, scriptmode);
+                if (res==NO_ERR) {
+                    chval = val_find_child(val, obj_get_mod_name(chobj),
+                                           obj_get_name(chobj));
+                    if (!chval) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    } else {
+                        if (LOGDEBUG4) {
+                            log_debug4("\nadd default leaf '%s:%s'",
+                                       val_get_mod_name(chval),
+                                       chval->name);
                         }
+                        chval->flags |= VAL_FL_DEFSET;
                     }
                 }
             }
@@ -310,7 +341,7 @@ static status_t
                 /* add all the default nodes in the default case
                  * or selected case 
                  */
-                res = add_defaults(val, scriptmode, casobj);
+                res = add_defaults(val, rootval, cxtval, scriptmode, casobj);
             }
             break;
         case OBJ_TYP_LEAF_LIST:
@@ -331,7 +362,10 @@ static status_t
                                    obj_get_mod_name(chobj),
                                    obj_get_name(chobj));
             if (chval) {
-                res = add_defaults(chval, scriptmode, NULL);            
+                if (cxtval) {
+                    chcxtval = val_first_child_match(cxtval, chval);
+                }
+                res = add_defaults(chval, rootval, chcxtval, scriptmode, NULL);
             }
 
             if (chobj->objtype == OBJ_TYP_LIST) {
@@ -341,7 +375,12 @@ static status_t
                                                 obj_get_name(chobj),
                                                 chval);
                     if (chval) {
-                        res = add_defaults(chval, scriptmode, NULL);
+                        if (chcxtval) {
+                            chcxtval = val_next_child_match(cxtval, chval,
+                                                            chcxtval);
+                        }
+                        res = add_defaults(chval, rootval, chcxtval, 
+                                           scriptmode, NULL);
                     }
                 }
             }
@@ -673,29 +712,6 @@ static status_t
         cnt += xml_strlen(name);
     }
 
-    /* check if the 'input' or 'output node needs to be printed */
-    if (root && val->obj->objtype == OBJ_TYP_RPCIO) {
-        if (buff) {
-            *buff++ = (xmlChar)((format==NCX_IFMT_C) ? 
-                                VAL_INST_SEPCH : VAL_XPATH_SEPCH);
-        }
-        cnt++;
-        if (buff) {
-            buff += xml_strcpy(buff, prefix);
-        }
-        cnt += xml_strlen(prefix);
-
-        if (buff) {
-            *buff++ = ':';
-        }
-        cnt++;
-
-        if (buff) {
-            buff += xml_strcpy(buff, val->name);
-        }
-        cnt += xml_strlen(val->name);
-    }
-
     total = cnt;
 
     /* check if this is a value node with an index clause */
@@ -752,7 +768,7 @@ static status_t
 * FUNCTION purge_errors
 * 
 * Remove any error nodes recursively
-*
+* Need to use raw Q access to find nodes marked deleted
 * INPUTS:
 *   val == node to purge
 *
@@ -760,21 +776,27 @@ static status_t
 static void
     purge_errors (val_value_t *val)
 {
-    val_value_t           *chval, *nextval;
 
-    for (chval = val_get_first_child(val);
-         chval != NULL; 
-         chval = nextval) {
+    if (!typ_has_children(val->btyp)) {
+        return;
+    }
 
-        nextval = val_get_next_child(chval);
+    val_value_t *nextval;
+    val_value_t *chval = (val_value_t *)dlq_firstEntry(&val->v.childQ);
+    for (; chval != NULL; chval = nextval) {
+
+        nextval = (val_value_t *)dlq_nextEntry(chval);
 
         if (chval->res != NO_ERR) {
             log_debug("\nDeleting error node '%s:%s' (%s)",
                       val_get_mod_name(chval), chval->name,
                       get_error_string(chval->res));
+            if (obj_is_key(chval->obj)) {
+                val_remove_key(chval);
+            }
             val_remove_child(chval);
             val_free_value(chval);
-        } else {
+        } else if (typ_has_children(chval->btyp)) {
             purge_errors(chval);
         }
     }
@@ -1212,6 +1234,10 @@ status_t
  *
  * INPUTS:
  *   val == the value struct to modify
+ *   rootval == the root value for XPath purposes
+ *           == NULL to skip when-stmt check
+ *   cxtval == the context value for XPath purposes
+ *           == NULL to use val instead
  *   scriptmode == TRUE if the value is a script object access
  *              == FALSE for normal val_get_simval access instead
  *
@@ -1223,9 +1249,11 @@ status_t
  *********************************************************************/
 status_t 
     val_add_defaults (val_value_t *val,
+                      val_value_t *rootval,
+                      val_value_t *cxtval,
                       boolean scriptmode)
 {
-    return add_defaults(val, scriptmode, NULL);
+    return add_defaults(val, rootval, cxtval, scriptmode, NULL);
 
 } /* val_add_defaults */
 
@@ -1578,16 +1606,7 @@ void
     val_purge_errors_from_root (val_value_t *val)
 {
 
-#ifdef DEBUG
-    if (!val) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-    if (!obj_is_root(val->obj)) {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-#endif
+    assert( val && "val is NULL!" );
 
     purge_errors(val);
     val->res = NO_ERR;
@@ -2043,6 +2062,15 @@ status_t
 
         val_value_t *dummychild = NULL, *usechild = objval;
         if (objval == NULL) {
+            /* this code demopnstrates a bug in YANG
+             * the dummy node alters tha value tree that the
+             * test is being performed on. It adds a node
+             * with no value, even if the type is not 'empty'
+             *
+             * The when-stmt MUST NOT use descendant-or-self
+             * nodes in the test!  This should seem obvious
+             * but it is still allowed in YANG
+             */
             dummychild = val_new_value();
             if (!dummychild) {
                 return ERR_INTERNAL_MEM;
@@ -2073,12 +2101,13 @@ status_t
         return NO_ERR;
     }
 
-    /* all other when-stmts inherited from various sources use
-     * the parent data node of the target node as the XPath context  */
+    /* !! the parent node is passed in so it is the context node
+     * !! when xptrs are saved in the object
+     */
     obj_xpath_ptr_t *xptr = obj_first_xpath_ptr(obj);
     for (; xptr; xptr = obj_next_xpath_ptr(xptr)) {
         cnt++;
-        res = check_when_stmt(val, valroot, val->parent, 
+        res = check_when_stmt(val, valroot, val, 
                               xptr->xpath, condresult);
         if (res != NO_ERR || !*condresult) {
             if (whencount) {

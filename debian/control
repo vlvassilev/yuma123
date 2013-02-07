@@ -1,10 +1,10 @@
 Source: yuma
 Section: devel
 Priority: extra
-Maintainer: Andy Bierman <andy@netconfcentral.org>
+Maintainer: Andy Bierman <andy@yumaworks.com>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
-Homepage: http://www.netconfcentral.org/
+Homepage: http://www.yumaworks.com/
 
 Package: yuma
 Architecture: any

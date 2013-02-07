@@ -18,6 +18,8 @@ module yuma-system {
 
     import yuma-ncx { prefix ncx; }
 
+    // choose ietf-netconf-acm or yuma-nacm
+    //import ietf-netconf-acm { prefix nacm; }
     import yuma-nacm { prefix nacm; }
 
     organization  "Netconf Central";
@@ -26,6 +28,12 @@ module yuma-system {
 
     description 
       "NETCONF Basic System Group.";
+
+    revision 2012-10-05 {
+        description  
+          "Updated EditOperationType to edit-operation-type.
+           Converged nacm extension usage.";
+    }
 
     revision 2012-01-15 {
         description  
@@ -104,7 +112,7 @@ module yuma-system {
         }
 
         anyxml sysNetconfServerCLI {
-            nacm:very-secure;
+            nacm:default-deny-all;
             description
               "The boot-time CLI and configuration parameters that
                were used by the server running on this system.
@@ -156,7 +164,7 @@ module yuma-system {
     }
 
     rpc set-log-level {
-        nacm:secure;
+        nacm:default-deny-all;
 
         description
             "Sets the server log verbosity level";
@@ -256,7 +264,7 @@ module yuma-system {
           leaf operation {
              description
                "Type of edit operation performed.";
-               type nc:EditOperationType;
+               type nc:edit-operation-type;
           }
        }
     }
@@ -414,7 +422,7 @@ module yuma-system {
     }
 
     rpc load {
-      nacm:secure;
+      nacm:default-deny-all;
       description 
         "Load a module into the server, if it is not already loaded.
          Returns the module revision date (or today's date if none),
@@ -452,13 +460,13 @@ module yuma-system {
     rpc restart {
       description 
         "Restart the server. Does not reload the software image..";
-      nacm:secure;
+        nacm:default-deny-all;
     }
 
     rpc shutdown {
       description 
         "Shutdown the server.";
-      nacm:secure;
+      nacm:default-deny-all;
     }
 
     rpc no-op {

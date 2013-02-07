@@ -11,6 +11,11 @@ module yuma-proc {
     description 
       "NETCONF /proc file system monitoring.";
 
+    revision 2012-10-10 {
+        description  
+	  "Add more counters for ubuntu 12.04 support.";
+    }
+
     revision 2010-06-01 {
         description  
 	  "Add more counters for ubuntu 10.04 support.";
@@ -74,6 +79,11 @@ module yuma-proc {
              leaf stepping {
                description "Stepping number";
                type uint32;
+             }
+
+             leaf microcode {
+               description "Microcode hex string";
+               type string;
              }
 
              leaf cpu_MHz {
@@ -168,6 +178,11 @@ module yuma-proc {
                type decimal64 {
                  fraction-digits 2;
                }
+             }
+
+             leaf TLB_size {
+               description "TLB size: number of pages";
+               type string;
              }
 
              leaf clflush_size {

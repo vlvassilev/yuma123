@@ -4,8 +4,8 @@ module ietf-routing {
 
   prefix "rt";
 
-  import ietf-yang-types {
-    prefix "yang";
+  import ietf-inet-types {
+    prefix "inet";
   }
 
   import ietf-interfaces {
@@ -34,8 +34,8 @@ module ietf-routing {
     ";
 
   description
-    "This module contains YANG definitions of essential components
-     that may be used for configuring a routing subsystem.
+    "This YANG module defines essential components that may be used
+     for configuring a routing subsystem.
 
      Copyright (c) 2012 IETF Trust and the persons identified as
      authors of the code. All rights reserved.
@@ -51,7 +51,7 @@ module ietf-routing {
      RFC itself for full legal notices.
     ";
 
-  revision 2012-02-20 {
+  revision 2012-07-09 {
     description
       "Initial revision.";
     reference
@@ -90,6 +90,13 @@ module ietf-routing {
       "Route filter that blocks all routes.";
   }
 
+  identity allow-all-route-filter {
+    base route-filter;
+    description
+      "Route filter that permits all routes.
+      ";
+  }
+
   /* Type Definitions */
 
   typedef router-ref {
@@ -106,7 +113,7 @@ module ietf-routing {
   grouping afn-safi {
     leaf address-family {
       type ianaaf:address-family;
-      default "ipV4";
+      default "ipv4";
       description
         "Address family of routes in the routing table.";
     }
@@ -138,27 +145,37 @@ module ietf-routing {
 
   /* RPC Methods */
 
-  rpc get-route {
+  rpc active-route {
     description
-      "Query the forwarding information base of a router instance
-       whose name is given as the first parameter 'router-name'. The
-       second parameter 'destination-address' should be augmented in
-       order to support destination addresses of all supported
-       address families. The server returns the route which is
-       currently used for forwarding datagrams to that destination
-       address, or an error message, if no such route exists.";
+      "Return the active route (or multiple routes, in the case of
+       multi-path routing) to a destination address.
+
+       Parameters
+
+       1. 'router-name',
+
+       2. 'destination-address'.
+
+       If the logical router with 'router-name' doesn't exist, then
+       this operation will fail with error-tag 'missing-element' and
+       error-app-tag 'router-not-found'.
+
+       If there is no active route for 'destination-address', then
+       this operation will fail with error-tag 'data-missing' and
+       error-app-tag 'no-route'.
+      ";
     input {
       leaf router-name {
         type router-ref;
         mandatory "true";
         description
-          "First parameter: name of the router instance whose
-           forwarding information base is queried.";
+          "Name of the router instance whose forwarding information
+           base is being queried.";
       }
       container destination-address {
         uses afn-safi;
         description
-          "Second parameter: destination address.
+          "Network layer destination address.
 
            AFN/SAFI-specific modules must augment this container with
            a leaf named 'address'.
@@ -166,11 +183,58 @@ module ietf-routing {
       }
     }
     output {
-      container route {
+      list route {
+        min-elements "1";
         uses afn-safi;
+        uses route-content;
         description
-          "Contents of the reply specific for each address family
-           should be defined through augmenting.";
+          "Route contents specific for each address family should be
+           defined through augmenting.";
+      }
+    }
+  }
+
+  rpc route-count {
+    description
+      "Return the current number of routes in a routing table.
+
+       Parameters:
+
+       1. 'router-name',
+
+       2. 'routing-table-name'.
+
+       If the logical router with 'router-name' doesn't exist, then
+       this operation will fail with error-tag 'missing-element' and
+       error-app-tag 'router-not-found'.
+
+       If the routing table with 'routing-table-name' doesn't exist,
+       then this operation will fail with error-tag 'missing-element'
+       and error-app-tag 'routing-table-not-found'.
+      ";
+    input {
+      leaf router-name {
+        type router-ref;
+        mandatory "true";
+        description
+          "Name of the router instance containing the routing
+           table.";
+      }
+      leaf routing-table {
+        type leafref {
+          path "/routing/router/routing-tables/routing-table/name";
+        }
+        mandatory "true";
+        description
+          "Name of the routing table.";
+      }
+    }
+    output {
+      leaf number-of-routes {
+        type uint32;
+        mandatory "true";
+        description
+          "Number of routes in the routing table.";
       }
     }
   }
@@ -182,14 +246,30 @@ module ietf-routing {
       "Routing parameters.";
     list router {
       key "name";
-      unique "interfaces/interface/name";
+      unique "router-id";
       description
-        "Each list entry is a container for configuration and
-         operational state data of a single (logical) router.";
+        'Each list entry is a container for configuration and
+         operational state data of a single (logical) router.
+
+         Network layer interfaces assigned to the router must have
+         their entries in the "interfaces" list.
+        ';
       leaf name {
         type string;
         description
           "The unique router name.";
+      }
+      leaf router-id {
+        type inet:ipv4-address;
+        description
+          "Global router ID in the form of an IPv4 address.
+
+           An implementation may select a value if this parameter is
+           not configured.
+
+           Routing protocols may override this global parameter
+           inside their configuration.
+          ";
       }
       leaf description {
         type string;
@@ -200,8 +280,12 @@ module ietf-routing {
         type boolean;
         default "true";
         description
-          "Enable or disable the router. The default value is 'true',
-           which means that the router is enabled.";
+          "Enable the router. The default value is 'true'.
+
+           If this parameter is false, the parent router instance is
+           disabled, despite any other configuration that might be
+           present.
+          ";
       }
       container interfaces {
         description
@@ -209,13 +293,12 @@ module ietf-routing {
         list interface {
           key "name";
           description
-            "List of logical interfaces assigned to the router
-             instance. Any logical interface can only be assigned to
-             one router instance.";
+            "List of network layer interfaces assigned to the router
+             instance.";
           leaf name {
             type if:interface-ref;
             description
-              "A reference to the name of a configured logical
+              "A reference to the name of a configured network layer
                interface.";
           }
         }
@@ -253,18 +336,18 @@ module ietf-routing {
               "Container for connected routing tables.";
             list routing-table {
               must "not(../../../../routing-tables/"
-                 + "routing-table[current()/"
+                 + "routing-table[rt:name=current()/"
                  + "preceding-sibling::routing-table/name]/"
                  + "address-family=../../../../routing-tables/"
-                 + "routing-table[current()/name]/"
+                 + "routing-table[rt:name=current()/name]/"
                  + "address-family and ../../../../routing-tables/"
-                 + "routing-table[current()/"
+                 + "routing-table[rt:name=current()/"
                  + "preceding-sibling::routing-table/name]/safi=../"
-                 + "../../../routing-tables/routing-table[current()/"
-                 + "name]/safi)" {
-                error-message
-                  "Each routing protocol may have no more than one
-                   connected routing table for each AFN and SAFI.";
+                 + "../../../routing-tables/"
+                 + "routing-table[rt:name=current()/name]/safi)" {
+                error-message "Each routing protocol may have no "
+                            + "more than one connected routing "
+                            + "table for each AFN and SAFI.";
                 description
                   "For each AFN/SAFI pair there may be at most one
                    connected routing table.";
@@ -274,9 +357,10 @@ module ietf-routing {
                 "List of routing tables to which the routing protocol
                  instance is connected.
 
-                 Implementation may provide default routing tables
-                 for some AFN/SAFI pairs, which are used if the
-                 corresponding entry is not configured.
+                 If no connected routing table is defined for an
+                 address family, the routing protocol should be
+                 connected by default to the main routing table for
+                 that address family.
                 ";
               leaf name {
                 type leafref {
@@ -288,8 +372,7 @@ module ietf-routing {
               }
               leaf import-filter {
                 type leafref {
-                  path "../../../../../route-filters/route-filter/"
-                     + "name";
+                  path "/routing/route-filters/route-filter/name";
                 }
                 description
                   "Reference to a route filter that is used for
@@ -301,8 +384,7 @@ module ietf-routing {
               }
               leaf export-filter {
                 type leafref {
-                  path "../../../../../route-filters/route-filter/"
-                     + "name";
+                  path "/routing/route-filters/route-filter/name";
                 }
                 description
                   "Reference to a route filter that is used for
@@ -318,50 +400,15 @@ module ietf-routing {
             }
           }
           container static-routes {
-            must "../type='static'" {
-              error-message
-                "Static routes may be configured only for 'static'
-                 routing protocol.";
+            must "../type='rt:static'" {
+              error-message "Static routes may be configured only "
+                          + "for 'static' routing protocol.";
               description
                 "This container is only valid for the 'static'
                  routing protocol.";
             }
             description
               "Configuration of 'static' pseudo-protocol.";
-          }
-        }
-      }
-      container route-filters {
-        description
-          "Container for configured route filters.";
-        list route-filter {
-          key "name";
-          description
-            "Route filters are used for filtering and/or manipulating
-             routes that are passed between a routing protocol and a
-             routing table or vice versa, or between two routing
-             tables. It is expected that other modules augment this
-             list with contents specific for a particular route
-             filter type.";
-          leaf name {
-            type string;
-            description
-              "The name of the route filter.";
-          }
-          leaf description {
-            type string;
-            description
-              "Textual description of the route filter.";
-          }
-          leaf type {
-            type identityref {
-              base route-filter;
-            }
-            default "deny-all-route-filter";
-            description
-              "Type of the route-filter - an identity derived from
-               the 'route-filter' base identity. The default value
-               represents an all-blocking filter.";
           }
         }
       }
@@ -395,48 +442,89 @@ module ietf-routing {
                 "A routing table entry. This data node must augmented
                  with information specific for routes of each address
                  family.";
+              uses route-content;
               leaf source-protocol {
                 type leafref {
-                  path "../../../../../routing-protocols/"
+                  path "/routing/router/routing-protocols/"
                      + "routing-protocol/name";
                 }
+                mandatory "true";
                 description
                   "The name of the routing protocol instance from
                    which the route comes. This routing protocol must
                    be configured (automatically or manually) in the
                    device.";
               }
-              leaf last-modified {
-                type yang:date-and-time;
+              leaf age {
+                type uint32;
+                units "seconds";
+                mandatory "true";
                 description
-                  "Time stamp of the last modification of the route.
-                   If the route was never modified, it is the time
-                   when the route was inserted to the routing
-                   table.";
+                  "The number of seconds since the parent route was
+                   created or last updated.";
               }
             }
           }
-          list recipient-routing-tables {
-            key "recipient-name";
+          container recipient-routing-tables {
             description
-              "A list of routing tables that receive routes from this
-               routing table.";
-            leaf recipient-name {
-              type leafref {
-                path "../../../routing-table/name";
-              }
+              "Container for recipient routing tables.";
+            list recipient-routing-table {
+              key "name";
               description
-                "The name of the recipient routing table.";
-            }
-            leaf filter {
-              type leafref {
-                path "../../../../route-filters/route-filter/name";
+                "A list of routing tables that receive routes from
+                 this routing table.";
+              leaf name {
+                type leafref {
+                  path "/routing/router/routing-tables/"
+                     + "routing-table/name";
+                }
+                description
+                  "The name of the recipient routing table.";
               }
-              description
-                "A route filter which is applied to the routes passed
-                 on to the recipient routing table.";
+              leaf filter {
+                type leafref {
+                  path "/routing/route-filters/route-filter/name";
+                }
+                description
+                  "A route filter which is applied to the routes
+                   passed on to the recipient routing table.";
+              }
             }
           }
+        }
+      }
+    }
+    container route-filters {
+      description
+        "Container for configured route filters.";
+      list route-filter {
+        key "name";
+        description
+          "Route filters are used for filtering and/or manipulating
+           routes that are passed between a routing protocol and a
+           routing table or vice versa, or between two routing
+           tables. It is expected that other modules augment this
+           list with contents specific for a particular route filter
+           type.";
+        leaf name {
+          type string;
+          description
+            "The name of the route filter.";
+        }
+        leaf description {
+          type string;
+          description
+            "Textual description of the route filter.";
+        }
+        leaf type {
+          type identityref {
+            base route-filter;
+          }
+          default "rt:deny-all-route-filter";
+          description
+            "Type of the route-filter - an identity derived from the
+             'route-filter' base identity. The default value
+             represents an all-blocking filter.";
         }
       }
     }

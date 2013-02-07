@@ -245,6 +245,7 @@ typedef struct agt_profile_t_ {
     boolean             agt_deleteall_ok;   /* TBD: not implemented */
     boolean             agt_stream_output;   /* d:true; no CLI support yet */
     boolean             agt_delete_empty_npcontainers;     /* d: false */
+    boolean             agt_notif_sequence_id;    /* d: false */
     const xmlChar      *agt_accesscontrol;
     const xmlChar      *agt_conffile;
     const xmlChar      *agt_logfile;
@@ -275,6 +276,7 @@ typedef struct agt_profile_t_ {
     /* server load-config errors */
     boolean             agt_load_validate_errors;
     boolean             agt_load_rootcheck_errors;
+    boolean             agt_load_top_rootcheck_errors;
     boolean             agt_load_apply_errors;
 
     /* Q of malloced ncx_save_deviations_t */

@@ -100,6 +100,8 @@ extern "C" {
 
 #define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-netconf-with-defaults"
 
+#define NCXMOD_YANGCLI (const xmlChar *)"yangcli"
+
 /* name of the NETCONF module containing NETCONF protocol definitions,
  * that is loaded by default during startup 
  */

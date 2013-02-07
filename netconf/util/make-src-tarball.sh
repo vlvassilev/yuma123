@@ -19,19 +19,24 @@ if [ $1 = 1 ]; then
   mkdir -p ~/srctarballprep
   cd ~/srctarballprep
   rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
-  svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v1 yuma-$1.$2-$3
+  git clone https://github.com/YumaWorks/yuma yuma-$1.$2-$3  
+  cd yuma-$1.$2-$3
+  git checkout v1
 elif [ $1 = 2 ]; then
   echo "Making yuma source tarball for $1.$2-$3 from v2 branch"
   mkdir -p ~/srctarballprep
   cd ~/srctarballprep
   rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
-  svn export https://yuma.svn.sourceforge.net/svnroot/yuma/branches/v2 yuma-$1.$2-$3
+  git clone https://github.com/YumaWorks/yuma yuma-$1.$2-$3  
+  cd yuma-$1.$2-$3
+  git checkout v2
 elif [ $1 = 3 ]; then
   echo "Making yuma source tarball for $1.$2-$3 from trunk"
   mkdir -p ~/srctarballprep
   cd ~/srctarballprep
   rm -rf yuma-$1.$2-$3 yuma-$1.$2-$3.tar.gz
-  svn export https://yuma.svn.sourceforge.net/svnroot/yuma/trunk yuma-$1.$2-$3
+  git clone https://github.com/YumaWorks/yuma yuma-$1.$2-$3  
+  cd yuma-$1.$2-$3
 else
   echo "Error: major version must be 1 or 2"
   echo "Usage: make-src-tarball <major-version> <minor-version> <release-number>"
@@ -40,9 +45,16 @@ else
 fi
 
 echo "echo \"#define RELEASE $3\" > platform/curversion.h" > \
-    yuma-$1.$2-$3/netconf/src/platform/setversion.sh
-tar cvf yuma-$1.$2-$3.tar yuma-$1.$2-$3
+    netconf/src/platform/setversion.sh
+cd ..
+rm -f yuma-$1.$2-$3.tar yuma-$1.$2-$3.zip
+tar --exclude=.git* --exclude=.svn* -cvf yuma-$1.$2-$3.tar yuma-$1.$2-$3
 gzip yuma-$1.$2-$3.tar
+zip -r yuma-$1.$2-$3.zip yuma-$1.$2-$3 -x "yuma-$1.$2-$3/.*"
+
+
+
+
 
 
 

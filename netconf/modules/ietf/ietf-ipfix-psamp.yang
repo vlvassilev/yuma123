@@ -33,9 +33,9 @@ module ietf-ipfix-psamp {
     Relating to IETF Documents
     (http://trustee.ietf.org/license-info).";
 
-  revision 2011-07-07 {
+  revision 2012-06-12 {
     description "Version of
-      draft-ietf-ipfix-configuration-model-10.";
+      draft-ietf-ipfix-configuration-model-11";
     reference "RFCxxxx: IPFIX/PSAMP Configuration Data Model";
   }
 
@@ -331,7 +331,7 @@ module ietf-ipfix-psamp {
       }
     }
     description "Status of a Transport Session.";
-    reference "RFC5815, Section 8 (ipfixTransportSessionStatus).";
+    reference "RFC6615, Section 8 (ipfixTransportSessionStatus).";
   }
 
   /*****************************************************************
@@ -358,7 +358,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixObservationPointObservationDomainId in the IPFIX MIB
         module.";
-      reference "RFC5101; RFC5815, Section 8
+      reference "RFC5101; RFC6615, Section 8
         (ipfixObservationPointObservationDomainId).";
     }
     leaf-list ifName {
@@ -378,7 +378,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixObservationPointPhysicalInterface in the IPFIX MIB
         module.";
-      reference "RFC 1229; RFC5815, Section 8
+      reference "RFC 1229; RFC6615, Section 8
         (ipfixObservationPointPhysicalInterface).";
     }
     leaf-list entPhysicalName {
@@ -398,7 +398,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixObservationPointPhysicalEntity in the IPFIX MIB
         module.";
-      reference "RFC 4133; RFC5815, Section 8
+      reference "RFC 4133; RFC6615, Section 8
         (ipfixObservationPointPhysicalInterface).";
     }
     leaf direction {
@@ -745,7 +745,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixSelectorStatsPacketsObserved in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixSelectorStatsPacketsObserved).";
     }
     leaf packetsDropped {
@@ -760,7 +760,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixSelectorStatsPacketsDropped in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixSelectorStatsPacketsDropped).";
     }
     leaf selectorDiscontinuityTime {
@@ -774,7 +774,7 @@ module ietf-ipfix-psamp {
         MIB module. In contrast to
         ipfixSelectionProcessStatsDiscontinuityTime, the time is
         absolute and not relative to sysUpTime.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixSelectionProcessStatsDiscontinuityTime).";
     }
   }
@@ -843,7 +843,8 @@ module ietf-ipfix-psamp {
             (../ieEnterpriseNumber != 29305))" {
             description "This parameter is not available for
               Reverse Information Elements (which have enterprise
-              number 29305) or if the Cache Mode is 'immediate'.";
+              number 29305). It is also not available for
+              immediateCache.";
           }
           type empty;
           description "If present, this is a flow key.";
@@ -887,10 +888,10 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixMeteringProcessCacheActiveTimeout in the IPFIX
         MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixMeteringProcessCacheActiveTimeout).";
     }
-    leaf inactiveTimeout {
+    leaf idleTimeout {
       when "(name(..) = 'timeoutCache') or
         (name(..) = 'naturalCache')" {
         description "This parameter is only available for
@@ -902,14 +903,14 @@ module ietf-ipfix-psamp {
         seconds after which a Flow is expired if no more packets
         matching this Flow are received by the Cache.
         The parameter value zero indicates infinity, meaning that
-        there is no inactive timeout.
+        there is no idle timeout.
         If not configured by the user, the Monitoring Device sets
         this parameter.
         Note that this parameter corresponds to
-        ipfixMeteringProcessCacheInactiveTimeout in the IPFIX
+        ipfixMeteringProcessCacheIdleTimeout in the IPFIX
         MIB module.";
-      reference "RFC5815, Section 8
-        (ipfixMeteringProcessCacheInactiveTimeout).";
+      reference "RFC6615, Section 8
+        (ipfixMeteringProcessCacheIdleTimeout).";
     }
     leaf exportInterval {
       when "name(..) = 'permanentCache'" {
@@ -932,7 +933,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixMeteringProcessCacheActiveFlows in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixMeteringProcessCacheActiveFlows).";
     }
     leaf unusedCacheEntries {
@@ -944,13 +945,25 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixMeteringProcessCacheUnusedCacheEntries in the IPFIX
         MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixMeteringProcessCacheUnusedCacheEntries).";
     }
   }
 
   grouping exportingProcessParameters {
     description "Parameters of an Exporting Process.";
+    leaf exportingProcessId {
+      type uint32;
+      config false;
+      description "The identifier of the Exporting Process.
+        This parameter corresponds to the Information Element
+        exporintProcessId. Its occurrence helps to associate
+        Exporting Process parameters with Exporing Process
+        statistics exported by the Monitoring Device using the
+        Exporting Process Reliability Statistics Template as
+        defined by the IPFIX Protocol Specification.";
+      reference "RFC5101, Section 4.3; RFC5102, Section 5.1.6.";
+    }
     leaf exportMode {
       type identityref {
         base "exportMode";
@@ -1116,6 +1129,7 @@ module ietf-ipfix-psamp {
       reference "RFC 3758; RFC 4960.";
     }
   }
+
   grouping udpExporterParameters {
     description "Parameters of a UDP export destination.";
     uses commonExporterParameters;
@@ -1153,7 +1167,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionTemplateRefreshTimeout in the IPFIX
         MIB module.";
-      reference "RFC5101, Section 10.3.6; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.6; RFC6615, Section 8
         (ipfixTransportSessionTemplateRefreshTimeout).";
     }
     leaf optionsTemplateRefreshTimeout {
@@ -1168,7 +1182,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionOptionsTemplateRefreshTimeout in the
         IPFIX MIB module.";
-      reference "RFC5101, Section 10.3.6; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.6; RFC6615, Section 8
         (ipfixTransportSessionOptionsTemplateRefreshTimeout).";
     }
     leaf templateRefreshPacket {
@@ -1180,7 +1194,7 @@ module ietf-ipfix-psamp {
         ipfixTransportSessionTemplateRefreshPacket in the IPFIX
         MIB module.
         If omitted, Templates are only resent after timeout.";
-      reference "RFC5101, Section 10.3.6; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.6; RFC6615, Section 8
         (ipfixTransportSessionTemplateRefreshPacket).";
     }
     leaf optionsTemplateRefreshPacket {
@@ -1193,7 +1207,7 @@ module ietf-ipfix-psamp {
         ipfixTransportSessionOptionsTemplateRefreshPacket in the
         IPFIX MIB module.
         If omitted, Templates are only resent after timeout.";
-      reference "RFC5101, Section 10.3.6; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.6; RFC6615, Section 8
         (ipfixTransportSessionOptionsTemplateRefreshPacket).";
     }
   }
@@ -1444,7 +1458,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionTemplateRefreshTimeout in the IPFIX
         MIB module.";
-      reference "RFC5101, Section 10.3.7; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.7; RFC6615, Section 8
         (ipfixTransportSessionTemplateRefreshTimeout).";
     }
     leaf optionsTemplateLifeTime {
@@ -1463,7 +1477,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionOptionsTemplateRefreshTimeout in the
         IPFIX MIB module.";
-      reference "RFC5101, Section 10.3.7; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.7; RFC6615, Section 8
         (ipfixTransportSessionOptionsTemplateRefreshTimeout).";
     }
     leaf templateLifePacket {
@@ -1477,7 +1491,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionTemplateRefreshPacket in the IPFIX
         MIB module.";
-      reference "RFC5101, Section 10.3.7; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.7; RFC6615, Section 8
         (ipfixTransportSessionTemplateRefreshPacket).";
     }
     leaf optionsTemplateLifePacket {
@@ -1492,7 +1506,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionOptionsTemplateRefreshPacket in the
         IPFIX MIB module.";
-      reference "RFC5101, Section 10.3.7; RFC5815, Section 8
+      reference "RFC5101, Section 10.3.7; RFC6615, Section 8
         (ipfixTransportSessionOptionsTemplateRefreshPacket).";
     }
   }
@@ -1634,7 +1648,7 @@ module ietf-ipfix-psamp {
       Process or received by a Collecting Process in a specific
       Transport Session. Parameter names and semantics correspond to
       the managed objects in IPFIX-MIB";
-    reference "RFC5101; RFC5815, Section 8 (ipfixTemplateEntry,
+    reference "RFC5101; RFC6615, Section 8 (ipfixTemplateEntry,
       ipfixTemplateDefinitionEntry, ipfixTemplateStatsEntry)";
     leaf observationDomainId {
       type uint32;
@@ -1642,7 +1656,7 @@ module ietf-ipfix-psamp {
         Template is defined.
         Note that this parameter corresponds to
         ipfixTemplateObservationDomainId in the IPFIX MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTemplateObservationDomainId).";
     }
     leaf templateId {
@@ -1656,7 +1670,7 @@ module ietf-ipfix-psamp {
         message.
         Note that this parameter corresponds to ipfixTemplateId in
         the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTemplateId).";
+      reference "RFC6615, Section 8 (ipfixTemplateId).";
     }
     leaf setId {
       type uint16;
@@ -1666,7 +1680,7 @@ module ietf-ipfix-psamp {
         used for Sets containing Options Template definitions.
         Note that this parameter corresponds to ipfixTemplateSetId
         in the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTemplateSetId).";
+      reference "RFC6615, Section 8 (ipfixTemplateSetId).";
     }
     leaf accessTime {
       type yang:date-and-time;
@@ -1678,7 +1692,7 @@ module ietf-ipfix-psamp {
         Exporter or read from the file.
         Note that this parameter corresponds to
         ipfixTemplateAccessTime in the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTemplateAccessTime).";
+      reference "RFC6615, Section 8 (ipfixTemplateAccessTime).";
     }
     leaf templateDataRecords {
       type yang:counter64;
@@ -1690,7 +1704,7 @@ module ietf-ipfix-psamp {
         templateDiscontinuityTime.
         Note that this parameter corresponds to
         ipfixTemplateDataRecords in the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTemplateDataRecords).";
+      reference "RFC6615, Section 8 (ipfixTemplateDataRecords).";
     }
     leaf templateDiscontinuityTime {
       type yang:date-and-time;
@@ -1700,7 +1714,7 @@ module ietf-ipfix-psamp {
         ipfixTemplateDiscontinuityTime in the IPFIX MIB module.
         In contrast to ipfixTemplateDiscontinuityTime, the time
         is absolute and not relative to sysUpTime.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTemplateDiscontinuityTime).";
     }
     list field {
@@ -1714,7 +1728,7 @@ module ietf-ipfix-psamp {
           Element Id of the field.
           Note that this parameter corresponds to
           ipfixTemplateDefinitionIeId in the IPFIX MIB module.";
-        reference "RFC5815, Section 8 (ipfixTemplateDefinitionIeId);
+        reference "RFC6615, Section 8 (ipfixTemplateDefinitionIeId);
           RFC5102.";
       }
       leaf ieLength {
@@ -1725,7 +1739,7 @@ module ietf-ipfix-psamp {
           Note that this parameter corresponds to
           ipfixTemplateDefinitionIeLength in the IPFIX MIB
           module.";
-        reference "RFC5815, Section 8
+        reference "RFC6615, Section 8
           (ipfixTemplateDefinitionIeLength); RFC5102.";
       }
       leaf ieEnterpriseNumber {
@@ -1738,7 +1752,7 @@ module ietf-ipfix-psamp {
           Note that this parameter corresponds to
           ipfixTemplateDefinitionIeEnterpriseNumber in the IPFIX
           MIB module.";
-        reference "RFC5815, Section 8
+        reference "RFC6615, Section 8
           (ipfixTemplateDefinitionIeEnterpriseNumber).";
       }
       leaf isFlowKey {
@@ -1750,7 +1764,7 @@ module ietf-ipfix-psamp {
         description "If present, this is a Flow Key field.
           Note that this corresponds to flowKey(1) being set in
           ipfixTemplateDefinitionFlags.";
-        reference "RFC5815, Section 8
+        reference "RFC6615, Section 8
           (ipfixTemplateDefinitionFlags).";
       }
       leaf isScope {
@@ -1762,7 +1776,7 @@ module ietf-ipfix-psamp {
         description "If present, this is a scope field.
           Note that this corresponds to scope(0) being set in
           ipfixTemplateDefinitionFlags.";
-        reference "RFC5815, Section 8
+        reference "RFC6615, Section 8
           (ipfixTemplateDefinitionFlags).";
       }
     }
@@ -1773,7 +1787,7 @@ module ietf-ipfix-psamp {
       from an Exporting or terminating at a Collecting Process.
       Parameter names and semantics correspond to the managed
       objects in IPFIX-MIB.";
-    reference "RFC5101; RFC5815, Section 8
+    reference "RFC5101; RFC6615, Section 8
       (ipfixTransportSessionEntry,
        ipfixTransportSessionStatsEntry).";
     leaf ipfixVersion {
@@ -1792,7 +1806,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionIpfixVersion in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionIpfixVersion).";
     }
     leaf sourceAddress {
@@ -1808,7 +1822,7 @@ module ietf-ipfix-psamp {
         ipfixTransportSessionSourceAddressType and
         ipfixTransportSessionSourceAddress in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionSourceAddressType,
         ipfixTransportSessionSourceAddress);
         RFC4960, Section 6.4.";
@@ -1826,7 +1840,7 @@ module ietf-ipfix-psamp {
         ipfixTransportSessionDestinationAddressType and
         ipfixTransportSessionDestinationAddress in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionDestinationAddressType,
         ipfixTransportSessionDestinationAddress);
         RFC4960, Section 6.4.";
@@ -1837,7 +1851,7 @@ module ietf-ipfix-psamp {
         Exporter of the IPFIX Transport Session.
         Note that this parameter corresponds to
         ipfixTransportSessionSourcePort in the IPFIX MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionSourcePort).";
     }
     leaf destinationPort {
@@ -1847,7 +1861,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionDestinationPort in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionDestinationPort).";
     }
     leaf sctpAssocId {
@@ -1863,7 +1877,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionSctpAssocId in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionSctpAssocId);
         RFC3871";
     }
@@ -1872,7 +1886,7 @@ module ietf-ipfix-psamp {
       description "Status of the Transport Session.
         Note that this parameter corresponds to
         ipfixTransportSessionStatus in the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTransportSessionStatus).";
+      reference "RFC6615, Section 8 (ipfixTransportSessionStatus).";
     }
     leaf rate {
       type yang:gauge32;
@@ -1882,7 +1896,7 @@ module ietf-ipfix-psamp {
         This parameter is updated every second.
         Note that this parameter corresponds to
         ipfixTransportSessionRate in the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTransportSessionRate).";
+      reference "RFC6615, Section 8 (ipfixTransportSessionRate).";
     }
     leaf bytes {
       type yang:counter64;
@@ -1895,7 +1909,7 @@ module ietf-ipfix-psamp {
         transportSessionDiscontinuityTime.
         Note that this parameter corresponds to
         ipfixTransportSessionBytes in the IPFIX MIB module.";
-      reference "RFC5815, Section 8 (ipfixTransportSessionBytes).";
+      reference "RFC6615, Section 8 (ipfixTransportSessionBytes).";
     }
     leaf messages {
       type yang:counter64;
@@ -1908,7 +1922,7 @@ module ietf-ipfix-psamp {
         transportSessionDiscontinuityTime.
         Note that this parameter corresponds to
         ipfixTransportSessionMessages in the IPFIX MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionMessages).";
     }
     leaf discardedMessages {
@@ -1928,7 +1942,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionDiscardedMessages in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionDiscardedMessages).";
     }
     leaf records {
@@ -1942,7 +1956,7 @@ module ietf-ipfix-psamp {
         transportSessionDiscontinuityTime.
         Note that this parameter corresponds to
         ipfixTransportSessionRecords in the IPFIX MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionRecords).";
     }
     leaf templates {
@@ -1956,7 +1970,7 @@ module ietf-ipfix-psamp {
         transportSessionDiscontinuityTime.
         Note that this parameter corresponds to
         ipfixTransportSessionTemplates in the IPFIX MIB module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionTemplates).";
     }
     leaf optionsTemplates {
@@ -1971,7 +1985,7 @@ module ietf-ipfix-psamp {
         Note that this parameter corresponds to
         ipfixTransportSessionOptionsTemplates in the IPFIX MIB
         module.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionOptionsTemplates).";
     }
     leaf transportSessionStartTime {
@@ -1991,7 +2005,7 @@ module ietf-ipfix-psamp {
         module. In contrast to
         ipfixTransportSessionDiscontinuityTime, the time is
         absolute and not relative to sysUpTime.";
-      reference "RFC5815, Section 8
+      reference "RFC6615, Section 8
         (ipfixTransportSessionDiscontinuityTime).";
     }
     list template {
@@ -2028,6 +2042,7 @@ module ietf-ipfix-psamp {
           Processes in the list.";
       }
     }
+
     list observationPoint {
       if-feature meter;
       key name;
@@ -2106,6 +2121,20 @@ module ietf-ipfix-psamp {
         type nameType;
         description "Key of this list.";
       }
+      leaf meteringProcessId {
+        type uint32;
+        config false;
+        description "The identifier of the Metering Process this
+          Cache belongs to.
+          This parameter corresponds to the Information Element
+          meteringProcessId. Its occurrence helps to associate
+          Cache parameters with Metering Process statistics
+          exported by the Monitoring Device using the Metering
+          Process (Reliability) Statistics Template as
+          defined by the IPFIX Protocol specification.";
+        reference "RFC5101, Sections 4.1 and 4.2;
+          RFC5102, Section 5.1.5.";
+      }
       leaf dataRecords {
         type yang:counter64;
         units "Data Records";
@@ -2119,7 +2148,7 @@ module ietf-ipfix-psamp {
           Note that this parameter corresponds to
           ipfixMeteringProcessDataRecords in the IPFIX MIB
           module.";
-        reference "RFC5815, Section 8
+        reference "RFC6615, Section 8
           (ipfixMeteringProcessDataRecords).";
       }
       leaf cacheDiscontinuityTime {
@@ -2132,7 +2161,7 @@ module ietf-ipfix-psamp {
           module. In contrast to
           ipfixMeteringProcessDiscontinuityTime, the time is
           absolute and not relative to sysUpTime.";
-        reference "RFC5815, Section 8
+        reference "RFC6615, Section 8
           (ipfixMeteringProcessDiscontinuityTime).";
       }
       choice CacheType {
@@ -2146,14 +2175,14 @@ module ietf-ipfix-psamp {
         }
         container timeoutCache {
           if-feature timeoutCache;
-          description "Flow expiration after active and inactive
+          description "Flow expiration after active and idle
             timeout; generation of Flow Records.";
           uses flowCacheParameters;
           uses cacheLayoutParameters;
         }
         container naturalCache {
           if-feature naturalCache;
-          description "Flow expiration after active and inactive
+          description "Flow expiration after active and idle
             timeout, or on natural termination (e.g. TCP FIN, or
             TCP RST) of the Flow; generation of Flow Records.";
           uses flowCacheParameters;

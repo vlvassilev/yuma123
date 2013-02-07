@@ -3667,7 +3667,7 @@ static obj_template_t* get_child_node_for_notif( obj_template_t* obj,
             foundobj =  ncx_find_object( foundmod, curnode->elname);
 
              // check the foundobj is a notification type
-            if ( foundobj && obj_is_notif(foundobj) ) {
+            if ( foundobj && !obj_is_notif(foundobj) ) {
                 /* object is the wrong type */
                 foundobj = NULL;
             }
@@ -5194,6 +5194,11 @@ boolean
     }
 #endif
 
+    if (exprmod && exprmod->parent) {
+        /* look in the parent module, not a submodule */
+        exprmod = exprmod->parent;
+    }
+
     if (obj_is_root(startnode) && !useroot) {
 
         for (obj = ncx_get_first_data_object(exprmod);
@@ -5368,6 +5373,11 @@ boolean
         obj = startnode->parent;
     }
 
+    if (exprmod && exprmod->parent) {
+        /* look in the parent module, not a submodule */
+        exprmod = exprmod->parent;
+    }
+
     if (obj && obj_is_root(obj) && !useroot) {
 
         for (obj = ncx_get_first_data_object(exprmod);
@@ -5538,6 +5548,11 @@ boolean
 
     *fncalled = FALSE;
 
+    if (exprmod && exprmod->parent) {
+        /* look in the parent module, not a submodule */
+        exprmod = exprmod->parent;
+    }
+
     if (obj_is_root(startnode) && !useroot) {
 
         for (obj = ncx_get_first_data_object(exprmod);
@@ -5704,6 +5719,11 @@ boolean
 #endif
 
     *fncalled = FALSE;
+
+    if (exprmod && exprmod->parent) {
+        /* look in the parent module, not a submodule */
+        exprmod = exprmod->parent;
+    }
 
     /* check the Q containing the startnode
      * for preceding or following nodes;
@@ -10591,7 +10611,7 @@ boolean obj_is_hidden (const obj_template_t *obj)
  *********************************************************************/
 boolean obj_is_root (const obj_template_t *obj)
 {
-    assert(obj && "obj is NULL" );
+    //assert(obj && "obj is NULL" );
     return (obj->flags & OBJ_FL_ROOT) ? TRUE : FALSE;
 }   /* obj_is_root */
 
@@ -11389,20 +11409,26 @@ void
 
     const dlq_hdr_t *appinfoQ = obj_get_appinfoQ(obj);
 
-    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
-        obj->flags |= OBJ_FL_PASSWD;
+    if (obj_is_leafy(obj)) {
+        if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_PASSWORD)) {
+            obj->flags |= OBJ_FL_PASSWD;
+        }
     }
 
     if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_HIDDEN)) {
         obj->flags |= OBJ_FL_HIDDEN;
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_XSDLIST)) {
-        obj->flags |= OBJ_FL_XSDLIST;
+    if (obj_is_leafy(obj)) {
+        if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_XSDLIST)) {
+            obj->flags |= OBJ_FL_XSDLIST;
+        }
     }
 
-    if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ROOT)) {
-        obj->flags |= OBJ_FL_ROOT;
+    if (obj->objtype == OBJ_TYP_CONTAINER) {
+        if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_ROOT)) {
+            obj->flags |= OBJ_FL_ROOT;
+        }
     }
 
     if (ncx_find_const_appinfo(appinfoQ, NCX_PREFIX, NCX_EL_CLI)) {

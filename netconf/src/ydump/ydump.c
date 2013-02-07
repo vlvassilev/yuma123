@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2012, YumaWorks, Inc., All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -317,7 +318,7 @@ static status_t
     }
 
     if (!defs_done) {
-        res = val_add_defaults(valset, FALSE);
+        res = val_add_defaults(valset, NULL, NULL, FALSE);
         if (res != NO_ERR) {
             return res;
         }
@@ -984,12 +985,8 @@ static status_t
                         uint32 indent,
                         help_mode_t helpmode)
 {
-    obj_template_t    *obj;
-    dlq_hdr_t         *childQ;
-    uint32             reallen, i;
-    status_t           res;
-    boolean            anyout = FALSE;
-
+    status_t res = NO_ERR;
+    obj_template_t *obj;
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -999,6 +996,7 @@ static status_t
         }
 
         if (!treeformat) {
+            uint32 reallen = 0;
             if (helpmode == HELP_MODE_FULL) {
                 res = obj_copy_object_id_mod(obj, buff, bufflen, &reallen);
             } else {
@@ -1013,6 +1011,7 @@ static status_t
 
         ses_putchar(scb, '\n');
         if (treeformat) {
+            uint32 i;
             for (i=0; i < startindent; i++) {
                 ses_putchar(scb, ' ');
             }
@@ -1025,25 +1024,18 @@ static status_t
             ses_putstr(scb, buff);
         }
 
-        anyout = TRUE;
-
-        childQ = obj_get_datadefQ(obj);
+        dlq_hdr_t *childQ = obj_get_datadefQ(obj);
         if (childQ) {
-            res = output_identifiers(childQ, 
-                                     scb, 
-                                     buff, 
-                                     bufflen,
-                                     treeformat,
-                                     startindent+indent,
-                                     indent,
-                                     helpmode);
+            res = output_identifiers(childQ, scb, buff, bufflen,
+                                     treeformat, startindent+indent,
+                                     indent, helpmode);
             if (res != NO_ERR) {
                 return res;
             }
         }
     }
 
-    return (anyout) ? NO_ERR : ERR_NCX_SKIPPED;
+    return NO_ERR;
 
 }   /* output_identifiers */
 

@@ -253,7 +253,7 @@ static boolean
                 return TRUE;
             }
         } else {
-            if (!obj_is_secure(obj)) {
+            if (!(obj_is_secure(obj) || obj_is_very_secure(obj))) {
                 return TRUE;
             }
         }
@@ -404,8 +404,7 @@ static agt_acm_group_t *
 * free a group pointer
 *
 * INPUTS:
-*   groupnsid == group identity namspace ID
-*   groupname == group identity name to use
+*   grptr == group to free
 *
 * RETURNS:
 *   filled in, malloced struct or NULL if malloc error
@@ -1114,7 +1113,7 @@ static boolean
     val_value_t           *noRule;
     boolean                retval;
 
-    /* check if the RPC method is tagged as 
+    /* check if the data node is tagged as 
      * ncx:secure or ncx:very-secure and
      * deny access if so
      */
@@ -1367,7 +1366,7 @@ static status_t
 * OUTPUTS:
 *    *done == TRUE if a rule was found, so return value is
 *             the final answer
-*          == FALSE if no rpcRule was found to match
+*          == FALSE if no dataRule was found to match
 *
 * RETURNS:
 *    only valid if *done == TRUE:
@@ -1445,7 +1444,7 @@ static boolean
 * requested access and the user's configured max-access
 * 
 * INPUTS:
-*   msg == incoming message in progress
+*   cache == cache for this session/message
 *   user == user name string
 *   val  == val_value_t in progress to check
 *   newval  == newval val_value_t in progress to check (write only)
@@ -2128,7 +2127,7 @@ status_t
            has disabled NACM.  TBD: what to do about operator thinking
            NACM is enabled but it is really turned off!!    */
 
-        res = val_add_defaults(nacmval, FALSE);
+        res = val_add_defaults(nacmval, NULL, NULL, FALSE);
         if (res != NO_ERR) {
             return res;
         }
@@ -2176,6 +2175,8 @@ void
     }
 
     agt_cb_unregister_callbacks(AGT_ACM_MODULE, nacm_OID_nacm);
+    agt_cb_unregister_callbacks(AGT_ACM_MODULE, 
+                                nacm_OID_nacm_enable_nacm);
     nacmmod = NULL;
     if (notif_cache != NULL) {
         free_acm_cache(notif_cache);
@@ -2480,7 +2481,6 @@ boolean
 *                (may be NULL, if curval set)
 *   curval  == val_value_t in progress to check
 *                (may be NULL, if newval set)
-*   val  == val_value_t in progress to check
 *   editop == requested CRUD operation
 *
 * RETURNS:

@@ -1360,7 +1360,10 @@ static status_t
         break;
     case OBJ_TYP_CASE:
         /* case objects not handled here */
-        res = SET_ERROR(ERR_INTERNAL_VAL);
+        log_warn("\nSkipping case node "
+                      "'%s', not supported in XSD", 
+                      obj_get_name(obj));
+        res = NO_ERR;
         break;
     case OBJ_TYP_USES:
         /* skip all uses because it may be expanded with

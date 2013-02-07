@@ -395,8 +395,8 @@ module test {
  }
 
  container xpath.1 {
-    must "name != 'fred' or data2";
-    must "name != name2 or data2";
+    // must "name != 'fred' or data2";
+    // must "name != name2 or data2";
 
    leaf name {
       when "../data1 >= 4";

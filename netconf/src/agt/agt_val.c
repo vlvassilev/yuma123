@@ -2968,12 +2968,7 @@ static status_t
                       " %s on %s config", txcb->txid,
                       editcnt, cntstr, target->name);
         } else {
-<<<<<<< HEAD
-            log_debug("\nStart full commit of transaction %llu"
-=======
-
             log_debug("\nStart full commit of transaction %llu:"
->>>>>>> yuma123-write/master
                       " LOAD operation on %s config",
                       txcb->txid, target->name);
         }

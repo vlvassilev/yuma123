@@ -1300,6 +1300,11 @@ static val_value_t *
         }
     }
 
+    if (val->res != NO_ERR) {
+        *res = val->res;
+        return NULL;
+    }
+
     copy = val_new_value();
     if (!copy) {
         *res = ERR_INTERNAL_MEM;
@@ -1462,14 +1467,19 @@ static val_value_t *
         for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
              ch != NULL && *res==NO_ERR;
              ch = (const val_value_t *)dlq_nextEntry(ch)) {
-            copych = clone_test(ch, testfn, with_editvars, res);
-            if (!copych) {
-                if (*res == ERR_NCX_SKIPPED) {
-                    *res = NO_ERR;
+            if (ch->res == NO_ERR) {
+                copych = clone_test(ch, testfn, with_editvars, res);
+                if (!copych) {
+                    if (*res == ERR_NCX_SKIPPED) {
+                        *res = NO_ERR;
+                    }
+                } else {
+                    copych->parent = copy;
+                    dlq_enque(copych, &copy->v.childQ);
                 }
             } else {
-                copych->parent = copy;
-                dlq_enque(copych, &copy->v.childQ);
+                log_warn("\nWarning: Skipping invalid value node '%s' (%s)",
+                         ch->name, get_error_string(ch->res));
             }
         }
         break;
@@ -2973,6 +2983,7 @@ status_t
             unval->btyp = NCX_BT_UNION;
             unval->typdef = typdef;
             res = val_union_ok_ex(typdef, simval, unval, errinfo, mod);
+            unval->btyp = NCX_BT_NONE;            
             val_free_value(unval);
         }
         break;
@@ -3962,9 +3973,13 @@ void
         break;
     case NCX_BT_IDREF:
         idref = VAL_IDREF(val);
-        (*dumpfn)("%s:%s",
-                  xmlns_get_ns_prefix(idref->nsid),
-                  idref->name);
+        if (idref->nsid && idref->name) {
+            (*dumpfn)("%s:%s",
+                      xmlns_get_ns_prefix(idref->nsid),
+                      idref->name);
+        } else if (idref->name) {
+            (*dumpfn)("%s", idref->name);
+        }
         break;
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
@@ -7111,9 +7126,10 @@ uint32
          val != NULL;
          val = (const val_value_t *)dlq_nextEntry(val)) {
 
-        if (VAL_IS_DELETED(val)) {
-            continue;
-        }
+        /* do not skip over deleted nodes in case the reason
+         * this function is called is to print the instance ID
+         * of the node being deleted
+         */
 
         if (xml_strcmp(val_get_mod_name(child),
                        val_get_mod_name(val))) {
@@ -7365,9 +7381,18 @@ int32
         ret = ncx_compare_lists(&val1->v.list, &val2->v.list);
         break;
     case NCX_BT_IDREF:
+        /* note that this sort order based on NSID number may not
+         * be stable across reboots, so the order of system-ordered
+         * identityref leaf-lists can change
+         */
         if (val1->v.idref.nsid == val2->v.idref.nsid) {
-            ret = xml_strcmp(val1->v.idref.name,
-                             val2->v.idref.name);
+            if (val1->v.idref.name == NULL) {
+                ret = 1;
+            } else if (val2->v.idref.name == NULL) {
+                ret = -1;
+            } else {
+                ret = xml_strcmp(val1->v.idref.name, val2->v.idref.name);
+            }
         } else if (val1->v.idref.nsid < val2->v.idref.nsid) {
             ret = -1;
         } else {
@@ -10445,6 +10470,36 @@ val_index_t *
     return (val_index_t *)dlq_nextEntry(curkey);
 
 } /* val_get_next_key */
+
+
+/********************************************************************
+* FUNCTION val_remove_key
+* 
+* Remove a key pointer because the key is invalid
+* Free the key pointer
+*
+* INPUTS:
+*   keyval == value node to find, remove and free
+*
+*********************************************************************/
+void
+    val_remove_key (val_value_t *keyval)
+{
+    assert(keyval && "keyval is NULL!" );
+
+    val_value_t *parent = keyval->parent;
+    val_index_t *valin = (val_index_t *)dlq_firstEntry(&parent->indexQ);
+    val_index_t *nextvalin = NULL;
+    for (; valin != NULL; valin = nextvalin) {
+        nextvalin = (val_index_t *)dlq_nextEntry(valin);
+
+        if (valin->val == keyval) {
+            dlq_remove(valin);
+            m__free(valin);
+            return;
+        }
+    }
+} /* val_remove_key */
 
 
 /********************************************************************

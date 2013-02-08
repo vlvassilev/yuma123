@@ -1780,6 +1780,22 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION typ_is_enum
+* 
+* Check if the base type is an enumeration
+*
+* INPUTS:
+*    btyp == base type enum to check
+*
+* RETURNS:
+*    TRUE if base type is an enumeration
+*    FALSE if some other type
+*********************************************************************/
+extern boolean
+    typ_is_enum (ncx_btype_t btyp);
+
+
+/********************************************************************
 * FUNCTION typ_new_pattern
 * 
 *   Malloc and init a pattern struct

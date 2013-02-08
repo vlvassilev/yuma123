@@ -79,8 +79,6 @@ extern "C" {
 /* NETCONF edit-config operation attribute name */
 #define NC_OPERATION_ATTR_NAME (const xmlChar *)"operation"
 
-#define NC_OPERATION_ATTR_TYPE (const xmlChar *)"EditOperationType"
-
 #define NC_RPC_REPLY_TYPE (const xmlChar *)"rpc-reply"
 
 #define NCX_SSH_PORT    22

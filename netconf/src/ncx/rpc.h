@@ -146,6 +146,11 @@ typedef struct rpc_msg_t_ {
      */
     struct agt_cfg_transaction_t_ *rpc_txcb;
 
+    /* load-config parse-error and --startup-error=continue
+     * flag if the val_purge_errors_from_root function is needed
+     */
+    boolean         rpc_parse_errors;
+
 } rpc_msg_t;
 
 

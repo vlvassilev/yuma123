@@ -9,6 +9,9 @@ module ietf-ip {
   import ietf-inet-types {
     prefix inet;
   }
+  import ietf-yang-types {
+    prefix yang;
+  }
 
   organization
     "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
@@ -28,11 +31,10 @@ module ietf-ip {
 
   description
     "This module contains a collection of YANG definitions for
-     configuring IP addresses on network interfaces.
+     configuring IP implementations.
 
-     Copyright (c) 2011 IETF Trust and the persons identified as
+     Copyright (c) 2012 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
-
      Redistribution and use in source and binary forms, with or
      without modification, is permitted pursuant to, and subject
      to the license terms contained in, the Simplified BSD License
@@ -48,7 +50,7 @@ module ietf-ip {
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision 2012-02-08 {
+  revision 2012-09-05 {
     description
       "Initial revision.";
     reference
@@ -57,24 +59,35 @@ module ietf-ip {
 
   /* Features */
 
-  feature non-contiguous-netmasks {
+  feature ipv4-non-contiguous-netmasks {
     description
       "Indicates support for configuring non-contiguous
        subnet masks.";
+  }
+
+  feature ipv6-privacy-autoconf {
+    description
+      "Indicates support for Privacy Extensions for Stateless Address
+       Autoconfiguration in IPv6.";
+    reference
+      "RFC 4941: Privacy Extensions for Stateless Address
+                 Autoconfiguration in IPv6";
   }
 
   /* Data nodes */
 
   augment "/if:interfaces/if:interface" {
     description
-      "Parameters for configuring IP addresses on interfaces.
+      "Parameters for configuring IP on interfaces.
 
        If an interface is not capable of running IP, the server
        must not allow the client to configure these parameters.";
 
     container ipv4 {
+      presence "Configure IPv4 on this interface.";
       description
         "Parameters for the IPv4 address family.";
+
       leaf enabled {
         type boolean;
         default true;
@@ -82,11 +95,17 @@ module ietf-ip {
           "Controls if IPv4 is enabled or disabled on this
            interface.";
       }
+      leaf ip-forwarding {
+        type boolean;
+        default false;
+        description
+          "Controls if IPv4 packet forwarding is enabled or disabled
+           on this interface.";
+      }
       list address {
         key "ip";
         description
-          "The list of manually configured IPv4 addresses
-           on the interface.";
+          "The list of IPv4 addresses on the interface.";
 
         leaf ip {
           type inet:ipv4-address;
@@ -110,15 +129,39 @@ module ietf-ip {
               "The length of the subnet prefix.";
           }
           leaf netmask {
-            if-feature non-contiguous-netmasks;
+            if-feature ipv4-non-contiguous-netmasks;
             type inet:ipv4-address;
             description
               "The subnet specified as a netmask.";
           }
         }
       }
+      list neighbor {
+        key "ip";
+        description
+          "A list of mappings from IPv4
+           addresses to physical addresses.
+
+           Entries in this list are used as static entries in the
+           ARP cache.";
+        reference
+          "RFC 826: An Ethernet Address Resolution Protocol";
+
+        leaf ip {
+          type inet:ipv4-address;
+          description
+            "The IPv4 address of a neighbor node.";
+        }
+        leaf phys-address {
+          type yang:phys-address;
+          description
+            "The physical level address of the neihgbor node.";
+        }
+      }
+
     }
     container ipv6 {
+      presence "Configure IPv6 on this interface.";
       description
         "Parameters for the IPv6 address family.";
 
@@ -129,11 +172,20 @@ module ietf-ip {
           "Controls if IPv6 is enabled or disabled on this
            interface.";
       }
+      leaf ip-forwarding {
+        type boolean;
+        default false;
+        description
+          "Controls if IPv6 packet forwarding is enabled or disabled
+           on this interface.";
+        reference
+          "RFC 4861: Neighbor Discovery for IP version 6 (IPv6)
+                     Section 6.2.1, IsRouter";
+      }
       list address {
         key "ip";
         description
-          "The list of manually configured IPv6 addresses
-           on the interface.";
+          "The list of IPv6 addresses on the interface.";
 
         leaf ip {
           type inet:ipv6-address;
@@ -149,6 +201,41 @@ module ietf-ip {
             "The length of the subnet prefix.";
         }
       }
+      list neighbor {
+        key "ip";
+        description
+          "A list of mappings from IPv6
+           addresses to physical addresses.
+
+           Entries in this list are used as static entries in the
+           Neighbor Cache.";
+        reference
+          "RFC 4861: Neighbor Discovery for IP version 6 (IPv6)";
+
+        leaf ip {
+          type inet:ipv6-address;
+          description
+            "The IPv6 address of a neighbor node.";
+        }
+        leaf phys-address {
+          type yang:phys-address;
+          description
+            "The physical level address of the neighbor node.";
+        }
+      }
+      leaf dup-addr-detect-transmits {
+        type uint32;
+        default 1;
+        description
+          "The number of consecutive Neighbor Solicitation messages
+           sent while performing Duplicate Address Detection on a
+           tentative address.  A value of zero indicates that
+           Duplicate Address Detection is not performed on
+           tentative addresses.  A value of one indicates a single
+           transmission with no follow-up retransmissions.";
+        reference
+          "RFC 4862: IPv6 Stateless Address Autoconfiguration";
+      }
       container autoconf {
         description
           "Parameters to control the autoconfiguration of IPv6
@@ -156,13 +243,7 @@ module ietf-ip {
         reference
           "RFC 4862: IPv6 Stateless Address Autoconfiguration";
 
-        // Open Issue #ip-02: should we have a leaf to control
-        //   the creation of a link-local address?
-        //leaf create-link-local-address { ... default true; ... }
-
         leaf create-global-addresses {
-          // Open Issue #ip-06: should we have a feature here?
-          //if-feature ipv6-host;
           type boolean;
           default true;
           description
@@ -171,18 +252,42 @@ module ietf-ip {
           reference
             "RFC 4862: IPv6 Stateless Address Autoconfiguration";
         }
-        leaf dup-addr-detect-transmits {
-          type uint32;
-          default 1;
+        leaf create-temporary-addresses {
+          if-feature ipv6-privacy-autoconf;
+          type boolean;
+          default false;
           description
-            "The number of consecutive Neighbor Solicitation messages
-             sent while performing Duplicate Address Detection on a
-             tentative address.  A value of zero indicates that
-             Duplicate Address Detection is not performed on
-             tentative addresses.  A value of one indicates a single
-             transmission with no follow-up retransmissions.";
+            "If enabled, the host creates temporary addresses as
+             described in RFC 4941.";
           reference
-            "RFC 4862: IPv6 Stateless Address Autoconfiguration";
+            "RFC 4941: Privacy Extensions for Stateless Address
+                       Autoconfiguration in IPv6";
+        }
+        leaf temporary-valid-lifetime {
+          if-feature ipv6-privacy-autoconf;
+          type uint32;
+          units "seconds";
+          default 604800;
+          description
+            "The time period during which the temporary address
+             is valid.";
+          reference
+            "RFC 4941: Privacy Extensions for Stateless Address
+                       Autoconfiguration in IPv6
+                       - TEMP_VALID_LIFETIME";
+        }
+        leaf temporary-preferred-lifetime {
+          if-feature ipv6-privacy-autoconf;
+          type uint32;
+          units "seconds";
+          default 86400;
+          description
+            "The time period during which the temporary address is
+             preferred.";
+          reference
+            "RFC 4941: Privacy Extensions for Stateless Address
+                       Autoconfiguration in IPv6
+                       - TEMP_PREFERED_LIFETIME";
         }
       }
     }

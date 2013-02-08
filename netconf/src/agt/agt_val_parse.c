@@ -1610,6 +1610,14 @@ static status_t
                     if (!retval->v.idref.name) {
                         res = ERR_INTERNAL_MEM;
                     }
+                } else {
+                    /* save the name for error purposes or else
+                     * a NULL string will get printed 
+                     */
+                    retval->v.idref.name = xml_strdup(valnode.simval);
+                    if (!retval->v.idref.name) {
+                        res = ERR_INTERNAL_MEM;
+                    }
                 }
             }
             if (res == NO_ERR) {
@@ -1899,6 +1907,11 @@ static status_t
  *
  * INPUTS:
  *   see parse_btype_nc parameter list
+ *   errfromchild == address of return flag for origin of error
+ *
+ * OUTPUTS:
+ *   *errfromchild == TRUE if the return code is from a child node
+ *
  * RETURNS:
  *   status
  *********************************************************************/
@@ -1908,7 +1921,8 @@ static status_t
                       obj_template_t *obj,
                       const xml_node_t *startnode,
                       ncx_data_class_t parentdc,
-                      val_value_t  *retval)
+                      val_value_t  *retval,
+                      boolean *errfromchild)
 {
     const xml_node_t     *errnode;
     obj_template_t *chobj, *topchild, *curchild;
@@ -1919,6 +1933,7 @@ static status_t
     ncx_btype_t           chbtyp;
 
     /* setup local vars */
+    *errfromchild = FALSE;
     errnode = startnode;
     chobj = NULL;
     topchild = NULL;
@@ -2107,9 +2122,10 @@ static status_t
         val_add_child(chval, retval);
         res = parse_btype_nc(scb, msg, curchild, &chnode, 
                              retval->dataclass, chval);
-        chval->res = res;
+        // chval->res = res; already done
         if (res != NO_ERR) {
             retres = res;
+            *errfromchild = TRUE;
             if (NEED_EXIT(res) || res==ERR_XML_READER_EOF) {
                 done = TRUE;
                 continue;
@@ -2575,7 +2591,7 @@ static status_t
 {
     ncx_btype_t  btyp;
     status_t     res, res2, res3;
-    boolean      nserr;
+    boolean      nserr, errfromchild = FALSE;
 
     btyp = obj_get_basetype(obj);
 
@@ -2642,7 +2658,8 @@ static status_t
     case NCX_BT_LIST:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
-        res = parse_complex_nc(scb, msg, obj, startnode, parentdc, retval);
+        res = parse_complex_nc(scb, msg, obj, startnode, parentdc, 
+                               retval, &errfromchild);
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -2657,14 +2674,21 @@ static status_t
     }
 
     if (res != NO_ERR) {
-        retval->res = res;
+        if (!errfromchild) {
+            retval->res = res;
+        }
         return res;
     } else if (res2 != NO_ERR) {
+        if (!errfromchild) {
+            retval->res = res;
+        }
         retval->res = res2;
         return res2;
     }
 
-    retval->res = res3;
+    if (!errfromchild) {
+        retval->res = res3;
+    }
     return res3;
 
 } /* parse_btype_nc */

@@ -38,8 +38,13 @@ module ietf-ipv6-unicast-routing {
     ";
 
   description
-    "This module augments the 'ietf-routing' module with YANG
-     definitions for basic configuration of IPv6 unicast routing.
+    "This YANG module augments the 'ietf-routing' module with basic
+     configuration and operational state data for IPv6 unicast
+     routing.
+
+     Every implementation must preconfigure a routing table with the
+     name 'main-ipv6-unicast', which is the main routing table for
+     IPv6 unicast.
 
      Copyright (c) 2012 IETF Trust and the persons identified as
      authors of the code. All rights reserved.
@@ -55,7 +60,7 @@ module ietf-ipv6-unicast-routing {
      RFC itself for full legal notices.
     ";
 
-  revision 2012-02-20 {
+  revision 2012-07-09 {
     description
       "Initial revision.";
     reference
@@ -67,7 +72,6 @@ module ietf-ipv6-unicast-routing {
   grouping route-content {
     description
       "Specific parameters of IPv6 unicast routes.";
-    uses rt:route-content;
     leaf dest-prefix {
       type inet:ipv6-prefix;
       description
@@ -82,14 +86,14 @@ module ietf-ipv6-unicast-routing {
 
   /* RPC Methods */
 
-  augment "/rt:get-route/rt:input/rt:destination-address" {
-    when "address-family='ipV6' and safi='nlri-unicast'" {
+  augment "/rt:active-route/rt:input/rt:destination-address" {
+    when "address-family='ipv6' and safi='nlri-unicast'" {
       description
         "This augment is valid only for IPv6 unicast.";
     }
     description
       "The 'address' leaf augments the 'rt:destination-address'
-       parameter of the 'rt:get-route' operation.";
+       parameter of the 'rt:active-route' operation.";
     leaf address {
       type inet:ipv6-address;
       description
@@ -97,21 +101,21 @@ module ietf-ipv6-unicast-routing {
     }
   }
 
-  augment "/rt:get-route/rt:output/rt:route" {
-    when "address-family='ipV6' and safi='nlri-unicast'" {
+  augment "/rt:active-route/rt:output/rt:route" {
+    when "address-family='ipv6' and safi='nlri-unicast'" {
       description
         "This augment is valid only for IPv6 unicast.";
     }
     description
-      "Contents of the reply to 'rt:get-route' operation.";
+      "Contents of the reply to 'rt:active-route' operation.";
     uses route-content;
   }
 
   /* Data nodes */
 
   augment "/rt:routing/rt:router/rt:interfaces/rt:interface" {
-    when "/if:interfaces/if:interface[name=current()/name] "
-       + "/ip:ipv6/ip:enabled='true'" {
+    when "/if:interfaces/if:interface[name=current()/name]/ip:ipv6/"
+       + "ip:enabled='true'" {
       description
         "This augment is only valid for router interfaces with
          enabled IPv6.
@@ -164,7 +168,7 @@ module ietf-ipv6-unicast-routing {
            - if max-rtr-adv-interval >= 9 seconds, the default value
              is 0.33 * max-rtr-adv-interval;
 
-           - otherwise it is max-rtr-adv-interval.
+           - otherwise it is 0.75 * max-rtr-adv-interval.
           ";
       }
       leaf managed-flag {
@@ -234,9 +238,9 @@ module ietf-ipv6-unicast-routing {
         description
           "The value to be placed in the Router Lifetime field of
            Router Advertisements sent from the interface, in seconds.
-           MUST be either zero or between MaxRtrAdvInterval and 9000
-           seconds. A value of zero indicates that the router is not
-           to be used as a default router. These limits may be
+           MUST be either zero or between max-rtr-adv-interval and
+           9000 seconds. A value of zero indicates that the router is
+           not to be used as a default router. These limits may be
            overridden by specific documents that describe how IPv6
            operates over different link layers.
 
@@ -250,79 +254,78 @@ module ietf-ipv6-unicast-routing {
            options in Router Advertisement messages sent from the
            interface.
 
-           Default: all prefixes that the router advertises via
+           By default, all prefixes that the router advertises via
            routing protocols as being on-link for the interface from
            which the advertisement is sent. The link-local prefix
            should not be included in the list of advertised prefixes.
           ";
         list prefix {
-          key "seqno";
-          unique "prefix-spec";
+          key "prefix-spec";
           description
             "Advertised prefix entry.";
-          leaf seqno {
-            type uint8;
-            description
-              "Sequential number of the entry.";
-          }
           leaf prefix-spec {
             type inet:ipv6-prefix;
             description
               "IPv6 address prefix.";
           }
-          leaf valid-lifetime {
-            type uint32;
-            units "seconds";
-            default "2592000";
+          choice control-adv-prefixes {
+            default "advertise";
             description
-              "The value to be placed in the Valid Lifetime in the
-               Prefix Information option, in seconds. The designated
-               value of all 1's (0xffffffff) represents infinity.
-               Implementations may allow valid-lifetime to be
-               specified in two ways:
-
-               1. a time that decrements in real time, that is, one
-                  that will result in a Lifetime of zero at the
-                  specified time in the future,
-
-               2. a fixed time that stays the same in consecutive
-                  advertisements.
-              ";
-          }
-          leaf on-link-flag {
-            type boolean;
-            default "true";
-            description
-              "The value to be placed in the on-link flag ('L-bit')
-               field in the Prefix Information option.";
-          }
-          leaf preferred-lifetime {
-            type uint32;
-            units "seconds";
-            default "604800";
-            description
-              "The value to be placed in the Preferred Lifetime in
-               the Prefix Information option, in seconds. The
-               designated value of all 1's (0xffffffff) represents
-               infinity.
-
-               Implementations MAY allow AdvPreferredLifetime to be
-               specified in two ways:
-
-               1. a time that decrements in real time, that is, one
-                  that will result in a Lifetime of zero at a
-                  specified time in the future,
-
-               2. a fixed time that stays the same in consecutive
-                  advertisements.
-              ";
-          }
-          leaf autonomous-flag {
-            type boolean;
-            default "true";
-            description
-              "The value to be placed in the Autonomous Flag field in
-               the Prefix Information option.";
+              "The prefix either may be explicitly removed from the
+               set of advertised prefixes, or parameters with which
+               it is advertised may be specified (default case).";
+            leaf no-advertise {
+              type empty;
+              description
+                "The prefix will not be advertised.
+                 This may be used for removing the prefix from the
+                 default set of advertised prefixes.
+                ";
+            }
+            case advertise {
+              leaf valid-lifetime {
+                type uint32;
+                units "seconds";
+                default "2592000";
+                description
+                  "The value to be placed in the Valid Lifetime in
+                   the Prefix Information option, in seconds. The
+                   designated value of all 1's (0xffffffff)
+                   represents infinity.
+                  ";
+              }
+              leaf on-link-flag {
+                type boolean;
+                default "true";
+                description
+                  "The value to be placed in the on-link flag
+                   ('L-bit') field in the Prefix Information
+                   option.";
+              }
+              leaf preferred-lifetime {
+                type uint32;
+                units "seconds";
+                must ". <= ../valid-lifetime" {
+                  description
+                    "This value must not be larger than
+                     valid-lifetime.";
+                }
+                default "604800";
+                description
+                  "The value to be placed in the Preferred Lifetime
+                   in the Prefix Information option, in seconds. The
+                   designated value of all 1's (0xffffffff)
+                   represents infinity.
+                  ";
+              }
+              leaf autonomous-flag {
+                type boolean;
+                default "true";
+                description
+                  "The value to be placed in the Autonomous Flag
+                   field in the Prefix Information option.";
+              }
+            }
           }
         }
       }
@@ -339,28 +342,39 @@ module ietf-ipv6-unicast-routing {
         "Configuration of a 'static' pseudo-protocol instance
          consists of a list of routes.";
       list route {
-        key "seqno";
+        key "id";
         ordered-by "user";
         description
           "A user-ordered list of static routes.";
-        leaf seqno {
-          type uint16;
+        leaf id {
+          type uint32 {
+            range "1..max";
+          }
           description
-            "Sequential number of the route.";
+            'Numeric identifier of the route.
+
+             It is not required that the routes be sorted according
+             to their "id".
+            ';
         }
         leaf description {
           type string;
           description
             "Textual description of the route.";
         }
-        uses route-content;
+        uses rt:route-content;
+        uses route-content {
+          refine "dest-prefix" {
+            mandatory "true";
+          }
+        }
       }
     }
   }
 
   augment "/rt:routing/rt:router/rt:routing-tables/rt:routing-table/"
         + "rt:routes/rt:route" {
-    when "../../rt:address-family='ipV6' and "
+    when "../../rt:address-family='ipv6' and "
        + "../../rt:safi='nlri-unicast'" {
       description
         "This augment is valid only for IPv6 unicast.";

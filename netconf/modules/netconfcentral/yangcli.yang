@@ -50,6 +50,11 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2012-10-05 {
+        description
+          "Add uses for YumaHomeParm";
+    }
+
     revision 2011-10-10 {
        description 
          "Add CLI parameters:
@@ -649,6 +654,10 @@ module yangcli {
         "CLI Parameter Set for the NETCONF Client Application.";
 
       uses ncxapp:NcxAppCommon;
+
+      uses ncxapp:ConfigParm;
+
+      uses ncxapp:YumaHomeParm;
 
       uses ncxapp:CommonFeatureParms;
 

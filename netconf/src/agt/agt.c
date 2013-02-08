@@ -133,6 +133,20 @@ static void
     agt_profile.agt_xmlorder = FALSE;
     agt_profile.agt_deleteall_ok = FALSE;
     agt_profile.agt_stream_output = TRUE;
+
+    /* this flag is no longer supported -- it must be
+     * set to false for XPath to work correctly
+     */
+    agt_profile.agt_delete_empty_npcontainers = FALSE;
+
+    /* this flag adds the <sequence-id> leaf to notifications
+     * It was default true for yuma through 2.2-3 release
+     * Starting 2.2-4 it is removed by default since the XSD
+     * in RFC 5277 does not allow extensions
+     */
+    agt_profile.agt_notif_sequence_id = FALSE;
+
+    agt_profile.agt_accesscontrol = NULL;
     agt_profile.agt_conffile = NULL;
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
@@ -249,56 +263,97 @@ static status_t
     
     /* try to load the config file that was found or given */
     res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE, fname);
-    if (res != NO_ERR) {
-        profile->agt_config_state = AGT_CFG_STATE_BAD;
+    if (res == ERR_XML_READER_START_FAILED) {
+        log_error("\nagt: Error: Could not open startup config file"
+                  "\n     (%s)\n", fname);
+    } else if (res != NO_ERR) {
+        /* if an error is returned then it was a hard error
+         * since the startup_error and running_error profile
+         * variables have already been accounted for.
+         * An error in the setup or in the AGT_RPC_PH_INVOKE phase
+         * of the <load-config> operation occurred
+         */
+        log_error("\nError: load startup config failed (%s)",
+                  get_error_string(res));
         if (!dlq_empty(&cfg->load_errQ)) {
             *loaded = TRUE;
-            boolean errdone = FALSE;
-            if (profile->agt_load_validate_errors) {
-                if (profile->agt_startup_error) {
-                    /* quit if any startup validation errors */
-                    log_error("\nError: validation errors occurred loading the "
-                              "<running> database\n   from NV-storage"
-                              " (%s)\n", fname);
-                    errdone = TRUE;
-                } else {
-                    /* continue if any startup errors */
-                    log_warn("\nWarning: validation errors occurred loading "
-                             "the <running> database\n   from NV-storage"
-                             " (%s)\n", fname);
-                    res = NO_ERR;
-                }
-            }
-            if (!errdone && profile->agt_load_rootcheck_errors) {
-                if (profile->agt_running_error) {
-                    /* quit if any running validation errors */
-                    log_error("\nError: root-check validation errors "
-                              "occurred loading the <running> database\n"
-                              "   from NV-storage (%s)\n", fname);
-                    errdone = TRUE;
-                } else {
-                    /* continue if any startup errors */
-                    log_warn("\nWarning: root-check validation errors "
-                             "occurred loading the <running> database\n"
-                             "   from NV-storage (%s)\n", fname);
-                    res = NO_ERR;
-                }
-            }
-            if (!errdone && profile->agt_load_apply_errors) {
-                /* quit if any apply-to-running SIL errors */
-                log_error("\nError: fatal errors "
-                          "occurred loading the <running> database "
-                          "from NV-storage\n     (%s)\n", fname);
-            }
-        } else if (res == ERR_XML_READER_START_FAILED) {
-            log_error("\nagt: Error: Could not open startup config file"
-                      "\n     (%s)\n", fname);
         }
     } else {
+        /* assume OK or startup and running continue; if 1 or both is not
+         * set then the server will exit anyway and the config state
+         * will not matter
+         */
         profile->agt_config_state = AGT_CFG_STATE_OK;
+
         *loaded = TRUE;
-        log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
-                 fname);
+
+        boolean errdone = FALSE;
+        boolean errcontinue = FALSE;
+
+        if (profile->agt_load_validate_errors) {
+            if (profile->agt_startup_error) {
+                /* quit if any startup validation errors */
+                log_error("\nError: validation errors occurred loading the "
+                          "<running> database\n   from NV-storage"
+                          " (%s)\n", fname);
+                errdone = TRUE;
+            } else {
+                /* continue if any startup errors */
+                log_warn("\nWarning: validation errors occurred loading "
+                         "the <running> database\n   from NV-storage"
+                         " (%s)\n", fname);
+                errcontinue = TRUE;
+            }
+        }
+        if (!errdone && profile->agt_load_rootcheck_errors) {
+            if (profile->agt_startup_error) {
+                /* quit if any startup root-check validation errors */
+                log_error("\nError: root-check validation errors "
+                          "occurred loading the <running> database\n"
+                          "   from NV-storage (%s)\n", fname);
+                errdone = TRUE;
+            } else {
+                /* continue if any root-check validation errors */
+                log_warn("\nWarning: root-check validation errors "
+                         "occurred loading the <running> database\n"
+                         "   from NV-storage (%s)\n", fname);
+                errcontinue = TRUE;
+            }
+        }
+        if (!errdone && profile->agt_load_top_rootcheck_errors) {
+            if (profile->agt_running_error) {
+                /* quit if any top-level root-check validation errors */
+                log_error("\nError: top-node root-check validation errors "
+                          "occurred loading the <running> database\n"
+                          "   from NV-storage (%s)\n", fname);
+                errdone = TRUE;
+            } else {
+                /* continue if any startup errors */
+                log_warn("\nWarning: top-node root-check validation errors "
+                         "occurred loading the <running> database\n"
+                         "   from NV-storage (%s)\n", fname);
+                profile->agt_config_state = AGT_CFG_STATE_BAD;
+                errcontinue = TRUE;
+            }
+        }
+        if (!errdone && profile->agt_load_apply_errors) {
+            /* quit if any apply-to-running SIL errors */
+            errdone = TRUE;
+            log_error("\nError: fatal errors "
+                      "occurred loading the <running> database "
+                      "from NV-storage\n     (%s)\n", fname);
+        }
+
+        if (errdone) {
+            res = ERR_NCX_OPERATION_FAILED;
+        } else if (errcontinue) {
+            val_purge_errors_from_root(cfg->root);
+            log_info("\nagt: Startup config loaded after pruning error nodes\n"
+                     "Source: %s\n", fname);
+        } else {
+            log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
+                     fname);
+        }
     }
 
     if (LOGDEBUG) {

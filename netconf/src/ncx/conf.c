@@ -883,6 +883,11 @@ status_t
     } 
 #endif
 
+    if (*filespec == 0) {
+        log_error("\nError: no config file name specified");
+        return ERR_NCX_INVALID_VALUE;
+    }
+        
     res = NO_ERR;
     sourcespec = ncx_get_source(filespec, &res);
     if (!sourcespec) {

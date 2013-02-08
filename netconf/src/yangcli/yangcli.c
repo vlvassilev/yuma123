@@ -2088,7 +2088,7 @@ static status_t
     }
 
     if (res == NO_ERR && defs_done == FALSE) {
-        res = val_add_defaults(mgr_cli_valset, FALSE);
+        res = val_add_defaults(mgr_cli_valset, NULL, NULL, FALSE);
     }
 
     if (res != NO_ERR) {

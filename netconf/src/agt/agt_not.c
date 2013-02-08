@@ -833,10 +833,7 @@ static status_t
         }
         val_init_from_template(topval, notificationobj);
 
-        eventTime = 
-            val_make_simval_obj(eventTimeobj,
-                                notif->eventTime,
-                                &res);
+        eventTime = val_make_simval_obj(eventTimeobj, notif->eventTime, &res);
         if (!eventTime) {
             log_error("\nError: make simval failed (%s): cannot "
                       "send notification", 
@@ -858,18 +855,17 @@ static status_t
 
         /* move the payloadQ: transfer the memory here */
         while (!dlq_empty(&notif->payloadQ)) {
-            payloadval = (val_value_t *)
-                dlq_deque(&notif->payloadQ);
+            payloadval = (val_value_t *)dlq_deque(&notif->payloadQ);
             val_add_child(payloadval, eventType);
         }
 
-        /* only use a msgid on a real event, not replay */
-        if (checkfilter) { 
+        /* only use a msgid on a real event, not replay
+         * also only use if enabled in the agt_profile
+         */
+        agt_profile_t *profile = agt_get_profile();
+        if (checkfilter && profile->agt_notif_sequence_id) { 
             snprintf((char *)numbuff, sizeof(numbuff), "%u", notif->msgid);
-            sequenceid = 
-                val_make_simval_obj(sequenceidobj,
-                                    numbuff,
-                                    &res);
+            sequenceid = val_make_simval_obj(sequenceidobj, numbuff, &res);
             if (!sequenceid) {
                 log_error("\nError: malloc failed: cannot "
                           "add sequence-id");

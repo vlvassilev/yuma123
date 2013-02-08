@@ -655,8 +655,21 @@ static status_t
             if (!cloneval) {
                 res = ERR_INTERNAL_MEM;
             } else {
-                val_move_children(cloneval, new_parm);
-                val_free_value(cloneval);
+                /* hack: just move the entire node as a child of new_parm
+                 * but only for the yangcli:value parameter
+                 */
+                if (!xml_strcmp(obj_get_mod_name(obj), NCXMOD_YANGCLI) &&
+                    !xml_strcmp(obj_get_name(obj), NCX_EL_VALUE)) {
+                    /* adding a container to a complex parm like 'value' */
+                    val_add_child(cloneval, new_parm);
+                } else {
+                    /* the old code moved the children to the anyxml container */
+                    val_move_children(cloneval, new_parm);
+                    val_free_value(cloneval);
+
+                    /* change the new_parm->btyp from ANYXML to CONTAINER */
+                    new_parm->btyp = NCX_BT_CONTAINER;
+                }
             }
         } else {
             /* convert the new_parm to a string because

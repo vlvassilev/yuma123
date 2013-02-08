@@ -15,6 +15,13 @@ module yuma-nacm {
     description 
       "NETCONF Server Access Control Model";
 
+    revision 2012-10-05 {
+        description  
+          "Copy default-deny-all and default-deny-write
+           extensions here to integrate with other modules
+           more easily.";
+    }
+
     revision 2012-05-31 {
         description  
           "Change unrestricted strings to yang-identifier
@@ -110,6 +117,18 @@ module yuma-nacm {
          predicate is missing, then the schema-instance-identifier
          represents all possible server instances for that key.";
       type string;
+    }
+
+    extension default-deny-write {
+      description
+        "Copy of IETF version of 'secure' extension.";
+      reference "RFC 6536";
+    }
+
+    extension default-deny-all {
+      description
+        "Copy of IETF version of 'very-secure' extension.";
+      reference "RFC 6536";
     }
 
     extension secure {

@@ -49,6 +49,7 @@ fi
 
 cp -f ./yuma_$1_$ARCH.deb ~/YUMA_PACKAGES/yuma-$1."$UV".$ARCH.deb
 cp -f ./yuma-dev_$1_$ARCH.deb ~/YUMA_PACKAGES/yuma-dev-$1."$UV".$ARCH.deb
+cp -f ./yuma-doc_$1_$ARCH.deb ~/YUMA_PACKAGES/yuma-dev-$1."$UV".$ARCH.deb
 
 
 

@@ -649,6 +649,9 @@ static status_t
                                          mod, 
                                          &obj->iffeatureQ,
                                          &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = yang_consume_must(tkc, mod, &obj->def.leaf->mustQ,
+                                    &obj->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
             res = yang_consume_boolean(tkc, 
                                        mod,

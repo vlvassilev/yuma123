@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2012, YumaWorks, Inc., All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -277,8 +278,7 @@ static status_t
      * list of supported auth methods will be returned
      */
     userauthlist = libssh2_userauth_list(mscb->session,
-                                         user, 
-                                         strlen(user));
+                                         user, strlen(user));
     if (!userauthlist) {
         /* check if the server accepted NONE as an auth method */
         if (libssh2_userauth_authenticated(mscb->session)) {
@@ -305,11 +305,32 @@ static status_t
             privkeyfile != NULL) {
             boolean keyauthdone = FALSE;
             while (!keyauthdone) {
-                ret = libssh2_userauth_publickey_fromfile(mscb->session, 
-                                                          user, 
-                                                          pubkeyfile, 
-                                                          privkeyfile, 
-                                                          password);
+                status_t res = NO_ERR;
+                xmlChar *expand_pubkey = 
+                    ncx_get_source((const xmlChar *)pubkeyfile, &res);
+                if (res != NO_ERR) {
+                    log_error("\nError: expand public key '%s' failed (%s)",
+                              pubkeyfile, get_error_string(res));
+                    return res;
+                }
+
+                xmlChar *expand_privkey = 
+                    ncx_get_source((const xmlChar *)privkeyfile, &res);
+                if (res != NO_ERR) {
+                    log_error("\nError: expand private key '%s' failed (%s)",
+                              privkeyfile, get_error_string(res));
+                    m__free(expand_pubkey);
+                    return res;
+                }
+
+                ret = libssh2_userauth_publickey_fromfile
+                    (mscb->session, user, 
+                     (const char *)expand_pubkey, 
+                     (const char *)expand_privkey, 
+                     password);
+                m__free(expand_pubkey);
+                m__free(expand_privkey);
+
                 if (ret) {
                     if (ret == LIBSSH2_ERROR_EAGAIN) {
                         if (LOGDEBUG2) {
@@ -381,8 +402,7 @@ static status_t
             boolean passauthdone = FALSE;
             while (!passauthdone) {
                 ret = libssh2_userauth_password(mscb->session, 
-                                                user, 
-                                                password);
+                                                user, password);
                 if (ret) {
                     if (ret == LIBSSH2_ERROR_EAGAIN) {
                         if (LOGDEBUG2) {

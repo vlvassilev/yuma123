@@ -14,6 +14,11 @@ module yuma-app-common {
     description 
        "Common CLI parameters used in all yuma applications.";
 
+    revision 2012-08-16 {
+       description 
+         "Split yuma-home into its own grouping YumaHomeParm";
+    }
+
     revision 2011-10-06 {
        description 
          "Add HomeParm grouping.
@@ -108,15 +113,6 @@ module yuma-app-common {
 
     grouping NcxAppCommon {
 
-        leaf config {
-          description
-            "The name of the configuration file to use.
-             Any parameter except this one can be set in the config file.
-             The default config file will be not be checked if this
-             parameter is present.";
-           type string;
-        }
-
         leaf help {
           description "Print program help file and exit.";
           type empty;
@@ -197,6 +193,9 @@ module yuma-app-common {
           }
         }
 
+    }
+
+    grouping YumaHomeParm {
         leaf yuma-home {
           description
              "Directory for the yuma project root to use.
@@ -206,6 +205,35 @@ module yuma-app-common {
               entered, then the YUMA_HOME environment variable
               will be ignored.";
           type string;
+        }
+    }
+
+    grouping ConfigParm {
+        leaf config {
+          description
+            "The name of the configuration file to use.
+             Any parameter except this one can be set in the config file.
+             The default config file will be not be checked if this
+             parameter is present.";
+           type string;
+        }
+    }
+
+    grouping NewConfigParm {
+        choice config-choice {
+          leaf config {
+            description
+              "The name of the configuration file to use.
+               Any parameter except this one can be set in the config file.
+               The default config file will be not be checked if this
+               parameter is present.";
+             type string;
+          }
+          leaf no-config {
+            description
+              "Do not the default .conf file even if it exists.";
+            type empty;
+          }
         }
     }
 

@@ -248,6 +248,10 @@ extern status_t
  *
  * INPUTS:
  *   val == the value struct to modify
+ *   rootval == the root value for XPath purposes
+ *           == NULL to skip when-stmt check
+ *   cxtval == the context value for XPath purposes
+ *           == NULL to use val instead
  *   scriptmode == TRUE if the value is a script object access
  *              == FALSE for normal val_get_simval access instead
  *
@@ -259,6 +263,8 @@ extern status_t
  *********************************************************************/
 extern status_t 
     val_add_defaults (val_value_t *val,
+                      val_value_t *valroot,
+                      val_value_t *cxtval,
 		      boolean scriptmode);
 
 

@@ -786,7 +786,7 @@ static status_t
          *** added to the value tree, so val_add_defaults
          *** will add a default where there was an error before
          ***/
-        res = val_add_defaults(msg->rpc_input, FALSE);
+        res = val_add_defaults(msg->rpc_input, NULL, NULL, FALSE);
     }
 
     if (res == NO_ERR) {
@@ -968,6 +968,7 @@ static status_t
         } else {
             log_warn("\nWarning: Parse <load-config> failed and "
                      "--startup-error=continue");
+            msg->rpc_parse_errors = TRUE;
             retres = NO_ERR;
         }
     }
@@ -1297,7 +1298,7 @@ void
     res2 = NO_ERR;
     cbset = NULL;
     rpcobj = NULL;
-
+    buff = NULL;
 
     agttotals = ses_get_total_stats();
 
@@ -1481,14 +1482,17 @@ void
 
     /* check any errors in the RPC method node */
     if (res != NO_ERR && !errdone) {
-        /* construct an error-path string */
-        buff = m__getMem(xml_strlen(method.qname) 
-                         + xml_strlen(RPC_ROOT) + 2);
-        if (buff) {
-            xml_strcpy(buff, RPC_ROOT);
-            xml_strcat(buff, (const xmlChar *)"/");
-            xml_strcat(buff, method.qname);
+        if (res != ERR_NCX_ACCESS_DENIED) {
+            /* construct an error-path string */
+            buff = m__getMem(xml_strlen(method.qname) 
+                             + xml_strlen(RPC_ROOT) + 2);
+            if (buff) {
+                xml_strcpy(buff, RPC_ROOT);
+                xml_strcat(buff, (const xmlChar *)"/");
+                xml_strcat(buff, method.qname);
+            }
         }
+
         /* passing a NULL buff is okay; it will get checked 
           * The NCX_NT_STRING node type enum is ignored if 
          * the buff pointer is NULL
@@ -1866,14 +1870,26 @@ status_t
 
     /* generate the <error-path> field */
     if (err->error_path) {
-        leafval = agt_make_leaf(rpcerror->obj,
-                                NCX_EL_ERROR_PATH,
-                                err->error_path, 
-                                &res);
+        /* since the error nodes may already be deleted,
+         * suppress the warning in xpath1.c about no child node
+         * found   */
+        boolean savewarn = ncx_warning_enabled(ERR_NCX_NO_XPATH_CHILD);
+
+        if (savewarn) {
+            (void)ncx_turn_off_warning(ERR_NCX_NO_XPATH_CHILD);
+        }
+
+        leafval = agt_make_leaf(rpcerror->obj, NCX_EL_ERROR_PATH,
+                                err->error_path, &res);
+
         if (leafval) {
             val_add_child(leafval, rpcerror);
         } else {
             retres = res;
+        }
+
+        if (savewarn) {
+            (void)ncx_turn_on_warning(ERR_NCX_NO_XPATH_CHILD);
         }
     }
 

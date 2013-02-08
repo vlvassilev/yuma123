@@ -43,7 +43,7 @@ install: yumainstall
 ifdef DOC
 # yuma-doc package
 # nothing to make at this time, just install
-yumaall:
+yumaall: yuma-doc
 
 yumainstall: yuma-doc-install
 
@@ -96,6 +96,11 @@ yuma-all-install:
           cd $$dir && $(MAKE) install && cd ..;\
         done
 
+yuma-doc:
+	for dir in $(DOCDIRS); do\
+          cd $$dir && $(MAKE) && cd ..;\
+        done
+
 yuma-doc-install:
 	for dir in $(DOCDIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
@@ -103,7 +108,7 @@ yuma-doc-install:
 
 .PHONY: all clean superclean distclean install yuma-dev \
 	yumaall yumaclean yumasuperclean yumadistclean yumainstall \
-	yuma-all yuma-all-install yuma-doc-install
+	yuma-all yuma-all-install yuma-doc yuma-doc-install
 
 
 # prevent the make program from choking on all the symbols

@@ -1,13 +1,3 @@
-/*
- * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
- * 
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.    
- */
 #ifndef _H_agt_commit_validate_cb
 #define _H_agt_commit_validate_cb
 
@@ -19,13 +9,6 @@
     This file contains functions to support registering, 
     unregistering and execution of commit validate callbacks. 
 
-*********************************************************************
-* C H A N G E	 H I S T O R Y
-*********************************************************************
-
-date	     init     comment
-----------------------------------------------------------------------
-24-oct-11    mp       First draft.
 */
 
 #include <xmlstring.h>

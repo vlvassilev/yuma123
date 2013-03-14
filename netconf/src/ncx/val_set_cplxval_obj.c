@@ -31,6 +31,24 @@
 #include "xpath_yang.h"
 #include "yangconst.h"
 
+static status_t val_set_cplxval_obj_recursive_anyxml(val_value_t *val, obj_template_t *obj, xmlDocPtr doc, xmlNode *top)
+{
+    xmlNode *cur;
+    status_t res;
+#if 0
+    cur = top->xmlChildrenNode;
+    while (cur != NULL) {
+        if(cur->xmlChildrenNode != NULL) {
+            /* container */
+        } else {
+            /* leaf */
+        }
+        cur = cur->next;
+    }
+#endif
+    return NO_ERR;
+}
+
 static status_t val_set_cplxval_obj_recursive(val_value_t *val, obj_template_t *obj, xmlDocPtr doc, xmlNode *top)
 {
     xmlNode *cur;
@@ -58,7 +76,8 @@ static status_t val_set_cplxval_obj_recursive(val_value_t *val, obj_template_t *
             assert(res==NO_ERR);
 
         } else if(cur_obj->objtype == OBJ_TYP_ANYXML) {
-            printf("leaving anyxml container empty\n");
+            res = val_set_cplxval_obj_recursive_anyxml(cur_val, cur_obj, doc, cur);
+            assert(res==NO_ERR);
         } else {
 
             res = val_set_cplxval_obj_recursive(cur_val, cur_obj, doc, cur);

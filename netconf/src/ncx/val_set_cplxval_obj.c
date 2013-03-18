@@ -35,17 +35,34 @@ static status_t val_set_cplxval_obj_recursive_anyxml(val_value_t *val, obj_templ
 {
     xmlNode *cur;
     status_t res;
-#if 0
+
     cur = top->xmlChildrenNode;
     while (cur != NULL) {
-        if(cur->xmlChildrenNode != NULL) {
+        if(cur->children->type == XML_ELEMENT_NODE) {
             /* container */
+            val_value_t* container_val;
+            container_val = val_new_value();
+            assert(container_val!=NULL);
+            val_init_from_template(container_val, ncx_get_gen_container());
+            strcpy(container_val->name,cur->name);
+            val_add_child(container_val, val);
+            res = val_set_cplxval_obj_recursive_anyxml(container_val, obj, doc, cur);
+            if(res != NO_ERR) {
+                return res;
+            }
         } else {
-            /* leaf */
+            /* leaf */ 
+            val_value_t* leaf_val;
+            leaf_val = val_new_value();
+            assert(leaf_val!=NULL);
+            val_set_string (leaf_val,
+                            cur->name,
+                            xmlNodeListGetString(doc, cur->xmlChildrenNode, 1));
+            val_add_child(leaf_val, val);
         }
         cur = cur->next;
     }
-#endif
+
     return NO_ERR;
 }
 

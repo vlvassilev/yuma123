@@ -13,6 +13,9 @@ AC_PROG_LIBTOOL
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 
+yangdir="$prefix/share/yuma/modules"
+AC_SUBST(yangdir)
+
 ietf_yangdir="$prefix/share/yuma/modules/ietf"
 AC_SUBST(ietf_yangdir)
 
@@ -47,6 +50,7 @@ AC_CONFIG_FILES([
         netconf/src/yangcli/Makefile
         netconf/src/subsys/Makefile
         libtoaster/src/Makefile
+        example-modules/helloworld/Makefile
 ])
 
 AC_OUTPUT

@@ -1,3 +1,5 @@
+
+
 module ietf-system {
   namespace "urn:ietf:params:xml:ns:yang:ietf-system";
   prefix "sys";
@@ -59,11 +61,11 @@ module ietf-system {
   // note.
 
   // RFC Ed.: remove this note
-  // Note: extracted from draft-ietf-netmod-system-mgmt-03.txt
+  // Note: extracted from draft-ietf-netmod-system-mgmt-05.txt
 
   // RFC Ed.: update the date below with the date of RFC publication
   // and remove this note.
-  revision "2012-09-07" {
+  revision "2013-02-25" {
     description
       "Initial revision.";
     reference
@@ -82,6 +84,7 @@ module ietf-system {
       "The crypt-hash type is used to store passwords using
        a hash function.  This type is implemented in various UNIX
        systems as the function crypt(3).
+
        When a clear text value is set to a leaf of this type, the
        server calculates a password hash, and stores the result
        in the datastore.  Thus, the password is never stored in
@@ -178,6 +181,7 @@ module ietf-system {
 
   feature crypt-hash-sha-256 {
     description
+
       "Indicates that the device supports the SHA-256
        hash function in 'crypt-hash' values";
     reference "FIPS.180-3.2008: Secure Hash Standard";
@@ -226,6 +230,7 @@ module ietf-system {
        RFC 5607: Remote Authentication Dial-In User Service (RADIUS)
                  Authorization for Network Access Server (NAS)
                  Management";
+
   }
 
   identity local-users {
@@ -233,6 +238,29 @@ module ietf-system {
     description
       "Indicates password-based authentication of locally
        configured users.";
+  }
+
+  identity radius-authentication-type {
+    description
+      "Base identity for RADIUS authentication types.";
+  }
+
+  identity radius-pap {
+    base radius-authentication-type;
+    description
+      "The device requests PAP authentication from the RADIUS
+       server.";
+    reference
+      "RFC 2865: Remote Authentication Dial In User Service";
+  }
+
+  identity radius-chap {
+    base radius-authentication-type;
+    description
+      "The device requests CHAP authentication from the RADIUS
+       server.";
+    reference
+      "RFC 2865: Remote Authentication Dial In User Service";
   }
 
   /*
@@ -251,6 +279,7 @@ module ietf-system {
         "The administrator contact information for the system.";
       reference
         "RFC 3418 - Management Information Base (MIB) for the
+
                     Simple Network Management Protocol (SNMP)
                     SNMPv2-MIB.sysContact";
     }
@@ -299,6 +328,7 @@ module ietf-system {
       leaf os-release {
         type string;
         description
+
           "The current release level of the operating
            system in use.  This string MAY indicate
            the OS source code revision.";
@@ -395,6 +425,7 @@ module ietf-system {
         description
           "Indicates that the system should attempt
            to synchronize the system clock with an
+
            NTP server from the 'ntp-server' list.";
       }
 
@@ -443,6 +474,7 @@ module ietf-system {
             "Indicates whether this server is enabled for use or
              not.";
         }
+
         leaf iburst {
           type boolean;
           default false;
@@ -487,16 +519,11 @@ module ietf-system {
            limited to those that are generally available across
            different resolver implementations, and generally
            useful.";
-        leaf ndots {
-          type uint8;
-          default "1";
-          description
-            "This parameter sets a threshold for the number of dots
-             which must appear in a query request before an initial
-             absolute query will be made.";
-        }
         leaf timeout {
-          type uint8;
+          type uint8 {
+            range "1..max";
+          }
+
           units "seconds";
           default "5";
           description
@@ -505,7 +532,9 @@ module ietf-system {
              retrying the query via a different name server.";
         }
         leaf attempts {
-          type uint8;
+          type uint8 {
+            range "1..max";
+          }
           default "2";
           description
             "The number of times the resolver will send a query to
@@ -514,6 +543,7 @@ module ietf-system {
         }
       }
     }
+
     container radius {
       if-feature radius;
 
@@ -542,9 +572,19 @@ module ietf-system {
           nacm:default-deny-all;
           description
             "The shared secret which is known to both the RADIUS
+
              client and server.";
           reference
             "RFC 2865: Remote Authentication Dial In User Service";
+        }
+        leaf authentication-type {
+          type identityref {
+            base radius-authentication-type;
+          }
+          default radius-pap;
+          description
+            "The authentication type requested from the RADIUS
+             server.";
         }
       }
       container options {
@@ -552,7 +592,9 @@ module ietf-system {
           "RADIUS client options.";
 
         leaf timeout {
-          type uint8;
+          type uint8 {
+            range "1..max";
+          }
           units "seconds";
           default "5";
           description
@@ -561,7 +603,9 @@ module ietf-system {
              different server.";
         }
         leaf attempts {
-          type uint8;
+          type uint8 {
+            range "1..max";
+          }
           default "2";
           description
             "The number of times the device will send a query to
@@ -610,6 +654,7 @@ module ietf-system {
          key name;
          description
            "The list of local users configured on this device.";
+
          leaf name {
            type string;
            description
@@ -624,6 +669,7 @@ module ietf-system {
            key name;
            description
              "A list of public SSH keys for this user.";
+
            reference
              "RFC 4253: The Secure Shell (SSH) Transport Layer
                         Protocol";
@@ -691,5 +737,5 @@ module ietf-system {
        shutting down the system.";
   }
 
+   }
 
-}

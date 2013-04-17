@@ -4535,9 +4535,16 @@ status_t
              * entered at the CLI; use @foo.jpg for
              * raw input of binary files in var_get_script_val
              */
+#if 0
             memcpy(val->v.binary.ustr, valstr, ulen);
             val->v.binary.ubufflen = ulen+1;
             val->v.binary.ustrlen = ulen;
+#else
+          val->v.binary.ubufflen = ulen+1;
+          res = b64_decode(valstr, ulen,
+                          val->v.binary.ustr, val->v.binary.ubufflen,
+                          &val->v.binary.ustrlen);
+#endif
         }
         break;
     case NCX_BT_ANY:
@@ -7879,6 +7886,7 @@ status_t
                  * !!! to send; assume call to this fn
                  * !!! to retrieve the length was done OK
                  */
+
                 res = b64_encode(s, val->v.binary.ustrlen, buff, NCX_MAX_UINT,
                                  NCX_DEF_LINELEN, len);
             } else {

@@ -254,7 +254,7 @@ status_t b64_encode ( const uint8_t* inbuff, uint32_t inbufflen,
 {
     assert( inbuff && "b64_decode() inbuff is NULL!" );
     assert( outbuff && "b64_decode() outbuff is NULL!" );
-
+    assert(linesize>4);
     if ( b64_get_encoded_str_len( inbufflen, linesize ) > outbufflen )
     {
         return ERR_BUFF_OVFL;
@@ -265,15 +265,24 @@ status_t b64_encode ( const uint8_t* inbuff, uint32_t inbufflen,
     const uint8_t* iter = inbuff;
     uint8_t* outIter = outbuff;
     uint32_t numBlocks=0;
+    int line_index=0;
 
     while( !endReached )
     {
         endReached = encode_3bytes( &iter, endPos, &outIter );
         ++numBlocks;
-        if ( numBlocks*4 >= linesize )
+        if ( (numBlocks*4) >= ((line_index+1)*linesize) )
         {
-            *outIter++ ='\r';
-            *outIter++ ='\n';
+            int new_lined_bytes;
+            new_lined_bytes = (numBlocks*4)% linesize;
+            
+            if(new_lined_bytes) {
+            	memmove(*outIter-new_lined_bytes+2, *outIter-new_lined_bytes, new_lined_bytes);
+            }
+            *(outIter-new_lined_bytes+0)='\r';
+            *(outIter-new_lined_bytes+1)='\n';
+            *outIter+=2;
+            line_index++;
         }
     }
 

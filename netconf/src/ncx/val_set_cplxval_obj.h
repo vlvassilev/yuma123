@@ -16,3 +16,4 @@
 #include "rpc.h"
 
 status_t val_set_cplxval_obj(val_value_t *val, obj_template_t *obj, char* xmlstr);
+status_t val_set_cplxval_obj_recursive(val_value_t *val, obj_template_t *obj, xmlDocPtr doc, xmlNode *top);

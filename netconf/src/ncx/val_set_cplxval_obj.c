@@ -66,20 +66,21 @@ static status_t val_set_cplxval_obj_recursive_anyxml(val_value_t *val, obj_templ
     return NO_ERR;
 }
 
-static status_t val_set_cplxval_obj_recursive(val_value_t *val, obj_template_t *obj, xmlDocPtr doc, xmlNode *top)
+status_t val_set_cplxval_obj_recursive(val_value_t *val, obj_template_t *obj, xmlDocPtr doc, xmlNode *top)
 {
     xmlNode *cur;
     status_t res;
 
-    cur = top->xmlChildrenNode;
-    while (cur != NULL) {
+    for(cur=top->xmlChildrenNode; cur!=NULL; cur=cur->next) {
         obj_template_t *cur_obj;
         val_value_t* cur_val;
 
         cur_obj = obj_find_child(val->obj,
                                  obj_get_mod_name(val->obj),
                                  cur->name);
-        assert(cur_obj!=NULL);
+        if(cur_obj==NULL) {
+            continue;
+        }
         cur_val = val_new_value();
         assert(cur_val!=NULL);
 
@@ -104,8 +105,6 @@ static status_t val_set_cplxval_obj_recursive(val_value_t *val, obj_template_t *
             assert(res==NO_ERR);
         }
         val_add_child(cur_val, val);
-        
-        cur = cur->next;
     }
     return NO_ERR;
 }

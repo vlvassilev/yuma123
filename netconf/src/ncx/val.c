@@ -7888,13 +7888,13 @@ status_t
                  */
 
                 res = b64_encode(s, val->v.binary.ustrlen, buff, NCX_MAX_UINT,
-                                 NCX_DEF_LINELEN, len);
+                                 0 /*no newline split*/, len);
             } else {
                 *len = 0;
             }
         } else if (s) {
             *len = b64_get_encoded_str_len( val->v.binary.ustrlen, 
-                                            NCX_DEF_LINELEN );
+                                            0/*no newline split*/ );
         } else {
             *len = 0;
         }

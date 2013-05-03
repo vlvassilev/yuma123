@@ -35,6 +35,7 @@ $(top_srcdir)/netconf/src/ncx/ses.h \
 $(top_srcdir)/netconf/src/ncx/yin.h \
 $(top_srcdir)/netconf/src/ncx/runstack.h \
 $(top_srcdir)/netconf/src/ncx/val.h \
+$(top_srcdir)/netconf/src/ncx/val_set_cplxval_obj.h \
 $(top_srcdir)/netconf/src/ncx/version.h \
 $(top_srcdir)/netconf/src/ncx/ext.h \
 $(top_srcdir)/netconf/src/ncx/yangconst.h \

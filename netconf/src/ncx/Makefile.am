@@ -39,6 +39,7 @@ $(top_srcdir)/netconf/src/ncx/top.c \
 $(top_srcdir)/netconf/src/ncx/tstamp.c \
 $(top_srcdir)/netconf/src/ncx/typ.c \
 $(top_srcdir)/netconf/src/ncx/val.c \
+$(top_srcdir)/netconf/src/ncx/val_set_cplxval_obj.c \
 $(top_srcdir)/netconf/src/ncx/val_util.c \
 $(top_srcdir)/netconf/src/ncx/var.c \
 $(top_srcdir)/netconf/src/ncx/xml_msg.c \

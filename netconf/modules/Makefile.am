@@ -3,6 +3,8 @@ $(top_srcdir)/netconf/modules/ietf/ietf-netconf-monitoring.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-partial-lock.yang \
 $(top_srcdir)/netconf/modules/ietf/nc-notifications.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-with-defaults.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-netconf-acm.yang \
+$(top_srcdir)/netconf/modules/ietf/iana-timezones.yang \
 $(top_srcdir)/netconf/modules/ietf/notifications.yang \
 $(top_srcdir)/netconf/modules/ietf/SNMPv2-TC.yang
 

@@ -1957,8 +1957,6 @@ void
         }
     }
 
-    agt_not_queue_notification_cb(notif);
-
     agt_profile = agt_get_profile();
 
     if (agt_profile->agt_eventlog_size) {
@@ -1975,6 +1973,7 @@ void
          */
         dlq_enque(notif, &notificationQ);
     }
+    agt_not_queue_notification_cb(notif);
 
 }  /* agt_not_queue_notification */
 

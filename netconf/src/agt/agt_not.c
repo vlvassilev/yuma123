@@ -1961,10 +1961,9 @@ void
 
     if (agt_profile->agt_eventlog_size) {
         if (notification_count < agt_profile->agt_eventlog_size) {
-            notification_count++;
-        } else {
             delete_oldest_notification();
         }
+        notification_count++;
         dlq_enque(notif, &notificationQ);
     } else {
         /* not tracking the event log size 

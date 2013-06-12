@@ -1960,7 +1960,8 @@ void
     agt_profile = agt_get_profile();
 
     if (agt_profile->agt_eventlog_size) {
-        if (notification_count < agt_profile->agt_eventlog_size) {
+    	assert(notification_count<=agt_profile->agt_eventlog_size);
+        if (notification_count == agt_profile->agt_eventlog_size) {
             delete_oldest_notification();
         }
         notification_count++;

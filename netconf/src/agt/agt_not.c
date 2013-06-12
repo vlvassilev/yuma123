@@ -46,6 +46,7 @@ date         init     comment
 #include  <memory.h>
 #include  <unistd.h>
 #include  <errno.h>
+#include  <assert.h>
 
 #include "procdefs.h"
 #include "agt.h"

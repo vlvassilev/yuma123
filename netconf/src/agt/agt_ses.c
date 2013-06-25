@@ -665,6 +665,9 @@ void
     /* clear any NACM cache that this session was using */
     agt_acm_clear_session_cache(scb);
 
+    ses_msg_unmake_inready(scb);
+    ses_msg_unmake_outready(scb);
+
     /* this will close the socket if it is still open */
     ses_free_scb(scb);
 
@@ -738,6 +741,7 @@ void
                              termreason);
         break;
     case SES_ST_IN_MSG:
+    case SES_ST_HELLO_WAIT:
         scb->state = SES_ST_SHUTDOWN_REQ;
         break;
     default:

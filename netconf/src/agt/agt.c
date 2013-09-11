@@ -1505,6 +1505,9 @@ status_t
 boolean
     agt_advertise_module_needed (const xmlChar *modname)
 {
+    val_value_t* val;
+    val_value_t* clivalset;
+
     if (!xml_strcmp(modname, NCXMOD_NETCONF)) {
         return FALSE;
     }
@@ -1519,6 +1522,19 @@ boolean
 
     if (!xml_strcmp(modname, NCXMOD_NETCONFD)) {
         return FALSE;
+    }
+
+    clivalset = agt_cli_get_valset();
+    val = val_find_child(clivalset, NCXMOD_NETCONFD, NCX_EL_NON_ADVERTISED_MODULE);
+
+    while (val) {
+        if (!xml_strcmp(modname, VAL_STRING(val))) {
+            return FALSE;
+        }
+        val = val_find_next_child(clivalset,
+                                  NCXMOD_NETCONFD,
+                                  NCX_EL_NON_ADVERTISED_MODULE,
+                                  val);
     }
 
     return TRUE;

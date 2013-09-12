@@ -21,6 +21,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2013-09-11 {
+        description
+          "Add non-advertised-module";
+    }
+
     revision 2012-10-05 {
         description
           "Add uses for YumaHomeParm";
@@ -333,6 +338,15 @@ module netconfd {
            socket. tcp-direct-address controls the server bind address.";
 
          type inet:port-number;
+      }
+
+      leaf non-advertised-module {
+        description 
+          "Specifying a module as non advertised excludes it from the capabilities
+           list in the <hello> message. For example taking out the RPCs defined
+           in a given module from the list of available commands in a cli.";
+
+         type nt:NcModuleSpec;
       }
 
       uses ncxapp:ModuleParm;

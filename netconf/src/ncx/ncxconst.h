@@ -573,6 +573,7 @@ extern "C" {
 #define NCX_EL_NODUPLICATES    (const xmlChar *)"no-duplicates"
 #define NCX_EL_NONE            (const xmlChar *)"none"
 #define NCX_EL_NON_UNIQUE      (const xmlChar *)"non-unique"
+#define NCX_EL_NON_ADVERTISED_MODULE (const xmlChar *)"non-advertised-module"
 #define NCX_EL_NO_OP           (const xmlChar *)"no-op"
 #define NCX_EL_NOOP_ELEMENT    (const xmlChar *)"noop-element"
 #define NCX_EL_NOTIFICATION    (const xmlChar *)"notification"

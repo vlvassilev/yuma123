@@ -154,7 +154,7 @@ date         init     comment
  *    comstate == completion state to use
  *    line == line passed to callback
  *    parmval == parm value string to check
- *    word_start == start position within line of the 
+ *    word_start == start position within line of the
  *                  word being completed
  *    word_end == word_end passed to callback
  *    parmlen == length of parameter value already entered
@@ -220,7 +220,7 @@ static status_t
  *    cpl == word completion struct to fill in
  *    comstate == completion state record to use
  *    line == line passed to callback
- *    word_start == start position within line of the 
+ *    word_start == start position within line of the
  *                  word being completed
  *    word_end == word_end passed to callback
  *    parmlen == length of parameter name already entered
@@ -309,6 +309,13 @@ static status_t
 
 }  /* fill_parm_completion */
 
+static status_t
+    fill_xpath_predicate_completion (obj_template_t *rpc, obj_template_t *parentObj,
+                                    WordCompletion *cpl,
+                                    const char *line,
+                                    int word_start,
+                                    int word_end,
+                                    int cmdlen);
 
 /********************************************************************
  * FUNCTION fill_xpath_children_completion
@@ -319,7 +326,7 @@ static status_t
  *    parentObj == object template of parent to check
  *    cpl == word completion struct to fill in
  *    line == line passed to callback
- *    word_start == start position within line of the 
+ *    word_start == start position within line of the
  *                  word being completed
  *    word_end == word_end passed to callback
  *    cmdlen == command length
@@ -345,8 +352,8 @@ static status_t
     word_start ++;
     cmdlen --;
     while(word_iter <= word_end) {
-        if (line[word_iter] == '/') {
-            // The second '/' is found
+        if ((line[word_iter] == '/') || (line[word_iter] == '[')) {
+            // The second '/' or predicate condition starting with '[' is found
             // find the top level obj and fill its child completion
             char childName[128];
             int child_name_len = word_iter - word_start;
@@ -362,9 +369,15 @@ static status_t
 
             // put the children path with topObj into the recursive 
             // lookup function
-            return fill_xpath_children_completion(rpc, childObj, 
-                                                  cpl,line, word_iter,
-                                                  word_end, cmdlen);
+            if(line[word_iter] == '/') {
+                return fill_xpath_children_completion(rpc, childObj,
+                                                      cpl,line, word_iter,
+                                                      word_end, cmdlen);
+            } else if(line[word_iter] == '[') {
+                return fill_xpath_predicate_completion(rpc, childObj,
+                                                      cpl,line, word_iter,
+                                                      word_end, cmdlen);
+            }
         }
         word_iter ++;
     }
@@ -402,6 +415,100 @@ static status_t
     return NO_ERR;
 }  /* fill_xpath_children_completion */
 
+/********************************************************************
+ * FUNCTION fill_xpath_predicate_completion
+ *
+ * fill the command struct for one XPath predicate
+ *
+ * INPUTS:
+ *    parentObj == object template of parent to check
+ *    cpl == word completion struct to fill in
+ *    line == line passed to callback
+ *    word_start == start position within line of the
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_xpath_predicate_completion (obj_template_t *rpc, obj_template_t *parentObj,
+                                    WordCompletion *cpl,
+                                    const char *line,
+                                    int word_start,
+                                    int word_end,
+                                    int cmdlen)
+{
+    const xmlChar         *pathname;
+    int                    retval;
+    int word_iter = word_start + 1;
+    // line[word_start] == '/'
+    word_start ++;
+    cmdlen --;
+    while(word_iter <= word_end) {
+        if (line[word_iter] == ']') {
+            // The second ']'
+            // fill parentObj child completion
+            int predicate_len = word_iter - word_start;
+            if (parentObj == NULL)
+                return NO_ERR;
+
+            if(((word_iter+1)>word_end) || (line[word_iter+1] != '/')) {
+                return NO_ERR;
+            }
+            word_iter ++;
+
+            cmdlen = word_end - word_iter;
+
+            return fill_xpath_children_completion(rpc, parentObj,
+                                                  cpl,line, word_iter,
+                                                      word_end, cmdlen);
+        }
+        word_iter ++;
+    }
+    obj_template_t * childObj = obj_first_child_deep(parentObj);
+    for(;childObj!=NULL; childObj = obj_next_child_deep(childObj)) {
+        pathname = obj_get_name(childObj);
+        /* check if there is a partial command name */
+        if (cmdlen > 0 &&
+            strncmp((const char *)pathname,
+                    &line[word_start],
+                    cmdlen)) {
+            /* command start is not the same so skip it */
+            continue;
+        }
+
+        if( !obj_is_data_db(childObj)) {
+            /* object is either rpc or notification*/
+            continue;
+        }
+
+        if(!obj_get_config_flag(childObj)) {
+            const xmlChar* rpc_name;
+            rpc_name = obj_get_name(rpc);
+            if(0==strcmp((const char*)rpc_name, "create")) continue;
+            if(0==strcmp((const char*)rpc_name, "replace")) continue;
+            if(0==strcmp((const char*)rpc_name, "delete")) continue;
+        }
+
+        if(!obj_is_leaf(childObj)) {
+            const xmlChar* rpc_name;
+            continue;
+        }
+
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                    (const char *)&pathname[cmdlen], "", "");
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
+        }
+    }
+    return NO_ERR;
+
+} /* fill_xpath_predicate_completion */
 
 /********************************************************************
  * FUNCTION check_find_xpath_top_obj
@@ -1021,7 +1128,7 @@ static boolean
             if (line[word_cur - 2] == '-') {
                 if ((word_cur - 3) >= word_start) {
                     /* check for previous char before '--' */
-		  if (isspace((int)line[word_cur - 3])) {
+          if (isspace((int)line[word_cur - 3])) {
                         /* this a real '--' command start */
                         return TRUE;
                     } else {
@@ -1514,6 +1621,68 @@ static status_t
 
 } /* fill_parm_values */
 
+/********************************************************************
+ * FUNCTION strip_predicate
+ *
+ * INPUTS:
+ *    line == original line containing predicates
+ *
+ * OUTPUTS:
+ *    line_striped == at least equal in size buffer to the original line to contain the result
+ *
+ * EXAMPLE:
+ *    /interfaces/interface[name='ge0']/mtu -> /interfaces/interface/mtu
+ *********************************************************************/
+static void strip_predicate(char* line, char* line_striped)
+{
+    unsigned int i,j;
+    unsigned int len;
+    int predicate_open=0;
+    int double_quote_open=0;
+    int single_quote_open=0;
+    unsigned int predicate_open_j;
+
+    len = strlen(line);
+
+    for(i=0,j=0;i<len;i++) {
+        if(predicate_open) {
+            if(single_quote_open) {
+                if(line[i]=='\'') {
+                    single_quote_open=0;
+                }
+            } else if(double_quote_open) {
+                if(line[i]=='"') {
+                    double_quote_open=0;
+                }
+            } else {
+                if(line[i]==']') {
+                    predicate_open = 0;
+                    j = predicate_open_j;
+                    continue;
+                }
+            }
+        } else {
+            if(single_quote_open) {
+                if(line[i]=='\'') {
+                    single_quote_open=0;
+                }
+            } else if(double_quote_open) {
+                if(line[i]=='"') {
+                    double_quote_open=0;
+                }
+            } else {
+                if(line[i]=='[') {
+                    predicate_open=1;
+                    predicate_open_j = j;
+                }
+            }
+        }
+        line_striped[j++]=line[i];
+    }
+    line_striped[j]=0;
+
+} /* strip_predicate */
+
 
 /********************************************************************
  * FUNCTION fill_completion_commands
@@ -1551,6 +1720,7 @@ static status_t
     int                    word_start, cmdlen;
     uint32                 retlen;
     boolean                done, equaldone;
+    char                   *line_striped;
 
     res = NO_ERR;
     str = line;
@@ -1600,7 +1770,7 @@ static status_t
             /* stopped past the first word
              * so need to skip further
              */
-	  if (isspace((int)*str)) {
+      if (isspace((int)*str)) {
                 /* find equals sign or word_end */
                 while ((str < &line[word_end]) && 
                        isspace((int)*str)) {
@@ -1736,17 +1906,33 @@ static status_t
         comstate->cmdinput = inputobj;
     }
 
+    /* strip all predicate blocks ...[name='ge0']... */
+    {
+        char *line_copy;
+        int word_end_striped;
+
+        line_copy = (char*)malloc(strlen(line)+1);
+        strcpy(line_copy, line);
+        line_striped = (char*)malloc(strlen(line)+1);
+        line_copy[word_end]=0;
+        strip_predicate(line_copy, line_striped);
+        free(line_copy);
+        word_end_striped = strlen(line_striped);
+        strcat(line_striped,&line_striped[word_end]);
+        word_end = word_end_striped;
+    }
+
     /* check if any strings entered on the line
      * stopping forward parse at line[word_start]
      */
-    cmdend = str;
-    while (cmdend < &line[word_end] &&
+    cmdend = &line_striped[str-line];
+    while (cmdend < &line_striped[word_end] &&
            *cmdend != '"' && 
            *cmdend != '\'') {
         cmdend++;
     }
 
-    if (cmdend < &line[word_end]) {
+    if (cmdend < &line_striped[word_end]) {
         /* found the start of a quoted string
          * look for the end of the last quoted
          * string
@@ -1755,30 +1941,31 @@ static status_t
         while (!done) {
             /* match == start of quoted string */
             match = cmdend++;
-            while (cmdend < &line[word_end] &&
+            while (cmdend < &line_striped[word_end] &&
                    *cmdend != *match) {
                 cmdend++;
             }
-            if (cmdend == &line[word_end]) {
+            if (cmdend == &line_striped[word_end]) {
                 /* entering a value inside a string
                  * so just return, instead of
                  * guessing the string value
                  */
+                free(line_striped);
                 return res;
             } else {
                 cmdend++;
-                while (cmdend < &line[word_end] &&
+                while (cmdend < &line_striped[word_end] &&
                        *cmdend != '"' && 
                        *cmdend != '\'') {
                     cmdend++;
                 }
-                if (cmdend == &line[word_end]) {
+                if (cmdend == &line_striped[word_end]) {
                     /* did not find the start of
                      * another string so set the
                      * new word_start and call
                      * the parse_backwards_parm fn
                      */
-                    word_start = (int)(cmdend - line);
+                    word_start = (int)(cmdend - line_striped);
                     done = TRUE;
                 } 
 
@@ -1793,8 +1980,8 @@ static status_t
      * quoted string so figure out the
      * parm in progress and check for completions
      */
-    res = parse_backwards_parm(cpl, comstate, line, word_start, word_end);
-
+    res = parse_backwards_parm(cpl, comstate, line_striped, word_start, word_end);
+    free(line_striped);
     return res;
 
 } /* fill_completion_commands */

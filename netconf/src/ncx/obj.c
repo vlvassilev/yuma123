@@ -10401,6 +10401,7 @@ boolean obj_is_data_db (const obj_template_t *obj)
 {
     assert(obj && "obj is NULL" );
 
+//    if (/*obj_is_abstract(obj) ||*/ obj_is_cli(obj)) {
     if (obj_is_abstract(obj) || obj_is_cli(obj)) {
         return FALSE;
     }

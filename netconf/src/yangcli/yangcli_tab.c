@@ -1918,7 +1918,7 @@ static status_t
         strip_predicate(line_copy, line_striped);
         free(line_copy);
         word_end_striped = strlen(line_striped);
-        strcat(line_striped,&line_striped[word_end]);
+        strcat(line_striped,&line[word_end]);
         word_end = word_end_striped;
     }
 

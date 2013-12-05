@@ -2355,19 +2355,13 @@ static status_t
     const xmlChar *name = obj_get_name(obj);
     uint32 namelen = xml_strlen(name), seplen = 1;
 
-    if (addmodname) {
-        if (bufflen &&
-            ((*retlen + namelen + modnamelen + 2) >= bufflen)) {
-            return ERR_BUFF_OVFL;
-        }
-    } else {
-        if (bufflen && ((*retlen + namelen + 1) >= bufflen)) {
-            return ERR_BUFF_OVFL;
-        }
-    }
-
     if (topnode && stopobj) {
         seplen = 0;
+    }
+
+    if (bufflen &&
+        ((*retlen + namelen + addmodname?modnamelen:0 + seplen + 1) >= bufflen)) {
+        return ERR_BUFF_OVFL;
     }
 
     /* copy the name string recusively, letting the stack

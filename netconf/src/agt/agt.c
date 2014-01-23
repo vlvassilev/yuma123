@@ -163,6 +163,7 @@ static void
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_EXPLICIT;
     agt_profile.agt_accesscontrol_enum = AGT_ACMOD_ENFORCING;
     agt_profile.agt_system_sorted = AGT_DEF_SYSTEM_SORTED;
+    agt_profile.agt_max_sessions = 1024;
 
 } /* init_server_profile */
 

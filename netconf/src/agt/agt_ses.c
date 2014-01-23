@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 /*  FILE: agt_ses.c
 
@@ -62,24 +62,17 @@ date         init     comment
 #include "xmlns.h"
 #include "xml_util.h"
 
-
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
 
-/* maximum number of concurrent inbound sessions 
- * Must be >= 2 since session 0 is used for the dummy scb
- */
-#define AGT_SES_MAX_SESSIONS     1024
-
 #define AGT_SES_MODULE      (const xmlChar *)"yuma-mysession"
 
 #define AGT_SES_GET_MY_SESSION   (const xmlChar *)"get-my-session"
 
 #define AGT_SES_SET_MY_SESSION   (const xmlChar *)"set-my-session"
-
 
 /* number of seconds to wait between session timeout checks */
 #define AGT_SES_TIMEOUT_INTERVAL  1
@@ -89,7 +82,6 @@ date         init     comment
 *                           T Y P E S                               *
 *                                                                   *
 *********************************************************************/
-
 
 /********************************************************************
 *                                                                   *
@@ -101,7 +93,7 @@ static boolean    agt_ses_init_done = FALSE;
 
 static uint32     next_sesid;
 
-static ses_cb_t  *agtses[AGT_SES_MAX_SESSIONS];
+static ses_cb_t  **agtses;
 
 static ses_total_stats_t *agttotals;
 
@@ -125,7 +117,7 @@ static time_t     last_timeout_check;
 * RETURNS:
 *    status
 *********************************************************************/
-static status_t 
+static status_t
     get_session_key (const val_value_t *virval,
                      ses_id_t *retsid)
 {
@@ -141,14 +133,13 @@ static status_t
                             (const xmlChar *)"session-id");
 
     if (sidval == NULL) {
-        return ERR_NCX_DEF_NOT_FOUND;        
+        return ERR_NCX_DEF_NOT_FOUND;
     }
 
     *retsid = VAL_UINT(sidval);
     return NO_ERR;
 
 } /* get_session_key */
-
 
 /********************************************************************
 * FUNCTION get_my_session_invoke
@@ -160,7 +151,7 @@ static status_t
 * RETURNS:
 *    status
 *********************************************************************/
-static status_t 
+static status_t
     get_my_session_invoke (ses_cb_t *scb,
                            rpc_msg_t *msg,
                            xml_node_t *methnode)
@@ -187,7 +178,7 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
 
-    withdefval = 
+    withdefval =
         val_make_string(mysesmod->nsid,
                         NCX_EL_WITH_DEFAULTS,
                         ncx_get_withdefaults_string(scb->withdef));
@@ -205,7 +196,6 @@ static status_t
 
 } /* get_my_session_invoke */
 
-
 /********************************************************************
 * FUNCTION set_my_session_invoke
 *
@@ -216,7 +206,7 @@ static status_t
 * RETURNS:
 *    status
 *********************************************************************/
-static status_t 
+static status_t
     set_my_session_invoke (ses_cb_t *scb,
                            rpc_msg_t *msg,
                            xml_node_t *methnode)
@@ -226,7 +216,7 @@ static status_t
     (void)methnode;
 
     /* get the indent amount parameter */
-    indentval = val_find_child(msg->rpc_input, 
+    indentval = val_find_child(msg->rpc_input,
                                AGT_SES_MODULE,
                                NCX_EL_INDENT);
     if (indentval && indentval->res == NO_ERR) {
@@ -234,7 +224,7 @@ static status_t
     }
 
     /* get the line sizer parameter */
-    linesizeval = val_find_child(msg->rpc_input, 
+    linesizeval = val_find_child(msg->rpc_input,
                                  AGT_SES_MODULE,
                                  NCX_EL_LINESIZE);
     if (linesizeval && linesizeval->res == NO_ERR) {
@@ -242,11 +232,11 @@ static status_t
     }
 
     /* get the with-defaults parameter */
-    withdefval = val_find_child(msg->rpc_input, 
+    withdefval = val_find_child(msg->rpc_input,
                                 AGT_SES_MODULE,
                                 NCX_EL_WITH_DEFAULTS);
     if (withdefval && withdefval->res == NO_ERR) {
-        scb->withdef = 
+        scb->withdef =
             ncx_get_withdefaults_enum(VAL_ENUM_NAME(withdefval));
     }
 
@@ -254,9 +244,7 @@ static status_t
 
 } /* set_my_session_invoke */
 
-
 /************* E X T E R N A L    F U N C T I O N S ***************/
-
 
 /********************************************************************
 * FUNCTION agt_ses_init
@@ -287,7 +275,15 @@ status_t
 
     agt_profile = agt_get_profile();
 
-    for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
+    /* maximum number of concurrent inbound sessions
+     * Must be >= 2 since session 0 is used for the dummy scb
+     */
+    assert(agt_profile->agt_max_sessions>=2);
+
+    agtses = (ses_cb_t  **) malloc((agt_profile->agt_max_sessions)*sizeof(ses_cb_t  *));
+    assert(agtses!=NULL);
+
+    for (i=0; i<agt_profile->agt_max_sessions; i++) {
         agtses[i] = NULL;
     }
     next_sesid = 1;
@@ -300,8 +296,8 @@ status_t
     agt_ses_init_done = TRUE;
 
     /* load the netconf-state module */
-    res = ncxmod_load_module(AGT_SES_MODULE, 
-                             NULL, 
+    res = ncxmod_load_module(AGT_SES_MODULE,
+                             NULL,
                              &agt_profile->agt_savedevQ,
                              &mysesmod);
     if (res != NO_ERR) {
@@ -330,7 +326,6 @@ status_t
 
 }  /* agt_ses_init */
 
-
 /********************************************************************
 * FUNCTION agt_ses_cleanup
 *
@@ -341,17 +336,22 @@ status_t
 * RETURNS:
 *   none
 *********************************************************************/
-void 
+void
     agt_ses_cleanup (void)
 {
     uint32 i;
+    agt_profile_t   *agt_profile;
+
+    agt_profile = agt_get_profile();
 
     if (agt_ses_init_done) {
-        for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
+        for (i=0; i<agt_profile->agt_max_sessions; i++) {
             if (agtses[i]) {
                 agt_ses_free_session(agtses[i]);
             }
         }
+
+        free(agtses);
 
         next_sesid = 0;
 
@@ -365,7 +365,6 @@ void
     }
 
 }  /* agt_ses_cleanup */
-
 
 /********************************************************************
 * FUNCTION agt_ses_new_dummy_session
@@ -399,11 +398,10 @@ ses_cb_t *
     }
 
     agtses[0] = scb;
-    
+
     return scb;
 
 }  /* agt_ses_new_dummy_session */
-
 
 /********************************************************************
 * FUNCTION agt_ses_set_dummy_session_acm
@@ -468,11 +466,10 @@ status_t
             return ERR_INTERNAL_MEM;
         }
     }
-    
+
     return NO_ERR;
 
 }  /* agt_ses_set_dummy_session_acm */
-
 
 /********************************************************************
 * FUNCTION agt_ses_free_dummy_session
@@ -496,7 +493,6 @@ void
 
 }  /* agt_ses_free_dummy_session */
 
-
 /********************************************************************
 * FUNCTION agt_ses_new_session
 *
@@ -504,7 +500,7 @@ void
 *
 * INPUTS:
 *   transport == the transport type
-*   fd == file descriptor number to use for IO 
+*   fd == file descriptor number to use for IO
 * RETURNS:
 *   pointer to initialized SCB, or NULL if some error
 *   This pointer is stored in the session table, so it does
@@ -518,6 +514,9 @@ ses_cb_t *
     agt_profile_t  *profile;
     uint32          i, slot;
     status_t        res;
+    agt_profile_t   *agt_profile;
+
+    agt_profile = agt_get_profile();
 
     if (!agt_ses_init_done) {
         agt_ses_init();
@@ -533,7 +532,7 @@ ses_cb_t *
          * session reclaim mode
          */
         slot = 0;
-        for (i=1; i<AGT_SES_MAX_SESSIONS && !slot; i++) {
+        for (i=1; i<agt_profile->agt_max_sessions && !slot; i++) {
             if (!agtses[i]) {
                 slot = i;
             }
@@ -547,7 +546,6 @@ ses_cb_t *
         scb = ses_new_scb();
         if (scb) {
             /* initialize the profile vars */
-            profile = agt_get_profile();
             scb->linesize = profile->agt_linesize;
             scb->withdef = profile->agt_defaultStyleEnum;
             scb->indent = profile->agt_indent;
@@ -590,7 +588,7 @@ ses_cb_t *
 
         /* update the next slot now */
         if (next_sesid) {
-            if (++next_sesid==AGT_SES_MAX_SESSIONS) {
+            if (++next_sesid==agt_profile->agt_max_sessions) {
                 /* reached the end */
                 next_sesid = 0;
             }
@@ -614,7 +612,6 @@ ses_cb_t *
     return scb;
 
 }  /* agt_ses_new_session */
-
 
 /********************************************************************
 * FUNCTION agt_ses_free_session
@@ -679,7 +676,6 @@ void
 
 }  /* agt_ses_free_session */
 
-
 /********************************************************************
 * FUNCTION agt_ses_session_id_valid
 *
@@ -693,13 +689,16 @@ void
 boolean
     agt_ses_session_id_valid (ses_id_t  sid)
 {
-    if (sid < AGT_SES_MAX_SESSIONS && agtses[sid]) {
+    agt_profile_t *agt_profile;
+
+    agt_profile = agt_get_profile();
+
+    if (sid < agt_profile->agt_max_sessions && agtses[sid]) {
         return TRUE;
     } else {
         return FALSE;
     }
 } /* agt_ses_session_id_valid */
-
 
 /********************************************************************
 * FUNCTION agt_ses_request_close
@@ -736,7 +735,7 @@ void
     case SES_ST_IDLE:
     case SES_ST_SHUTDOWN:
     case SES_ST_SHUTDOWN_REQ:
-        agt_ses_kill_session(scb, 
+        agt_ses_kill_session(scb,
                              killedby,
                              termreason);
         break;
@@ -746,7 +745,7 @@ void
         break;
     default:
         if (dlq_empty(&scb->outQ)) {
-            agt_ses_kill_session(scb, 
+            agt_ses_kill_session(scb,
                                  killedby,
                                  termreason);
         } else {
@@ -755,7 +754,6 @@ void
     }
 
 }  /* agt_ses_request_close */
-
 
 /********************************************************************
 * FUNCTION agt_ses_kill_session
@@ -799,7 +797,6 @@ void
 
 } /* agt_ses_kill_session */
 
-
 /********************************************************************
 * FUNCTION agt_ses_process_first_ready
 *
@@ -839,7 +836,7 @@ boolean
         /* don't process the message or even it mark it
          * It will be cleaned up when the session is freed
          */
-        log_debug("\nagt_ses drop input, session %d shutting down", 
+        log_debug("\nagt_ses drop input, session %d shutting down",
                   scb->sid);
         return TRUE;
     }
@@ -851,15 +848,15 @@ boolean
         log_error("\nagt_ses ready Q message not correct");
         if (msg && scb->state != SES_ST_INIT) {
             /* do not echo the ncx-connect message */
-            cnt = xml_strcpy(buff, 
+            cnt = xml_strcpy(buff,
                              (const xmlChar *)"Incoming msg for session ");
             snprintf((char *)(&buff[cnt]), sizeof(buff) - cnt, "%u", scb->sid);
             ses_msg_dump(msg, buff);
         }
-            
+
         return FALSE;
     } else if (LOGDEBUG2 && scb->state != SES_ST_INIT) {
-        cnt = xml_strcpy(buff, 
+        cnt = xml_strcpy(buff,
                          (const xmlChar *)"Incoming msg for session ");
         snprintf((char *)(&buff[cnt]), sizeof(buff) - cnt, "%u", scb->sid);
         ses_msg_dump(msg, buff);
@@ -869,26 +866,26 @@ boolean
     if (scb->reader) {
             /* reset the xmlreader */
         res = xml_reset_reader_for_session(ses_read_cb,
-                                           NULL, 
-                                           scb, 
+                                           NULL,
+                                           scb,
                                            scb->reader);
     } else {
         res = xml_get_reader_for_session(ses_read_cb,
-                                         NULL, 
-                                         scb, 
+                                         NULL,
+                                         scb,
                                          &scb->reader);
     }
 
     /* process the message */
     if (res == NO_ERR) {
-        /* process the message 
+        /* process the message
          * the scb pointer may get deleted !!!
          */
         agt_top_dispatch_msg(&scb);
     } else {
         if (LOGINFO) {
             log_info("\nReset xmlreader failed for session %d (%s)",
-                     scb->sid, 
+                     scb->sid,
                      get_error_string(res));
         }
         agt_ses_kill_session(scb, 0, SES_TR_OTHER);
@@ -900,7 +897,6 @@ boolean
         dlq_remove(msg);
         ses_msg_free_msg(scb, msg);
 
-
         /* check if any messages left for this session */
         msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
         if (msg && msg->ready) {
@@ -909,9 +905,8 @@ boolean
     }
 
     return TRUE;
-    
-}  /* agt_ses_process_first_ready */
 
+}  /* agt_ses_process_first_ready */
 
 /********************************************************************
 * FUNCTION agt_ses_check_timeouts
@@ -932,7 +927,7 @@ void
     agt_profile = agt_get_profile();
 
     /* check if both timeouts are disabled and the
-     * confirmed-commit is not active -- quick exit 
+     * confirmed-commit is not active -- quick exit
      */
     if (agt_profile->agt_idle_timeout == 0 &&
         agt_profile->agt_hello_timeout == 0 &&
@@ -961,7 +956,7 @@ void
         agt_profile->agt_hello_timeout == 0) {
         last = 0;
     } else if (next_sesid == 0) {
-        last = AGT_SES_MAX_SESSIONS;
+        last = agt_profile->agt_max_sessions;
     } else {
         last = next_sesid;
     }
@@ -987,12 +982,12 @@ void
             }
         }
 
-        /* check if the the idle timer needs to be tested 
+        /* check if the the idle timer needs to be tested
          * check only active sessions
-         * skip if notifications are active 
+         * skip if notifications are active
          */
         if (agt_profile->agt_idle_timeout > 0 &&
-            scb->active && 
+            scb->active &&
             !scb->notif_active &&
             (strcmp(scb->peeraddr,"127.0.0.1")!=0)) {
 
@@ -1011,7 +1006,6 @@ void
     agt_ncx_check_cc_timeout();
 
 }  /* agt_ses_check_timeouts */
-
 
 /********************************************************************
 * FUNCTION agt_ses_ssh_port_allowed
@@ -1058,7 +1052,6 @@ boolean
 
 }  /* agt_ses_ssh_port_allowed */
 
-
 /********************************************************************
 * FUNCTION agt_ses_fill_writeset
 *
@@ -1100,7 +1093,6 @@ void
 
 }  /* agt_ses_fill_writeset */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_inSessions
 *
@@ -1112,7 +1104,7 @@ void
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_inSessions (ses_cb_t *scb,
                             getcb_mode_t cbmode,
                             const val_value_t *virval,
@@ -1130,7 +1122,6 @@ status_t
 
 } /* agt_ses_get_inSessions */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_inBadHellos
 *
@@ -1142,7 +1133,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_inBadHellos (ses_cb_t *scb,
                              getcb_mode_t cbmode,
                              const val_value_t *virval,
@@ -1160,7 +1151,6 @@ status_t
 
 } /* agt_ses_get_inBadHellos */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_inRpcs
 *
@@ -1172,7 +1162,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_inRpcs (ses_cb_t *scb,
                         getcb_mode_t cbmode,
                         const val_value_t *virval,
@@ -1190,7 +1180,6 @@ status_t
 
 } /* agt_ses_get_inRpcs */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_inBadRpcs
 *
@@ -1202,7 +1191,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_inBadRpcs (ses_cb_t *scb,
                            getcb_mode_t cbmode,
                            const val_value_t *virval,
@@ -1220,7 +1209,6 @@ status_t
 
 } /* agt_ses_get_inBadRpcs */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_outRpcErrors
 *
@@ -1232,7 +1220,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_outRpcErrors (ses_cb_t *scb,
                               getcb_mode_t cbmode,
                               const val_value_t *virval,
@@ -1250,7 +1238,6 @@ status_t
 
 } /* agt_ses_get_outRpcErrors */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_outNotifications
 *
@@ -1262,7 +1249,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_outNotifications (ses_cb_t *scb,
                                   getcb_mode_t cbmode,
                                   const val_value_t *virval,
@@ -1280,7 +1267,6 @@ status_t
 
 } /* agt_ses_get_outNotifications */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_droppedSessions
 *
@@ -1292,7 +1278,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_droppedSessions (ses_cb_t *scb,
                                  getcb_mode_t cbmode,
                                  const val_value_t *virval,
@@ -1310,7 +1296,6 @@ status_t
 
 } /* agt_ses_get_droppedSessions */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_session_inRpcs
 *
@@ -1322,7 +1307,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_session_inRpcs (ses_cb_t *scb,
                                 getcb_mode_t cbmode,
                                 const val_value_t *virval,
@@ -1350,7 +1335,6 @@ status_t
 
 } /* agt_ses_get_session_inRpcs */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_session_inBadRpcs
 *
@@ -1362,7 +1346,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_session_inBadRpcs (ses_cb_t *scb,
                                    getcb_mode_t cbmode,
                                    const val_value_t *virval,
@@ -1390,7 +1374,6 @@ status_t
 
 } /* agt_ses_get_session_inBadRpcs */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_session_outRpcErrors
 *
@@ -1402,7 +1385,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_session_outRpcErrors (ses_cb_t *scb,
                                       getcb_mode_t cbmode,
                                       const val_value_t *virval,
@@ -1430,7 +1413,6 @@ status_t
 
 } /* agt_ses_get_session_outRpcErrors */
 
-
 /********************************************************************
 * FUNCTION agt_ses_get_session_outNotifications
 *
@@ -1442,7 +1424,7 @@ status_t
 * RETURNS:
 *    status
 *********************************************************************/
-status_t 
+status_t
     agt_ses_get_session_outNotifications (ses_cb_t *scb,
                                           getcb_mode_t cbmode,
                                           const val_value_t *virval,
@@ -1470,7 +1452,6 @@ status_t
 
 } /* agt_ses_get_session_outNotifications */
 
-
 /********************************************************************
 * FUNCTION agt_ses_invalidate_session_acm_caches
 *
@@ -1482,8 +1463,11 @@ void
     agt_ses_invalidate_session_acm_caches (void)
 {
     uint32          i;
+    agt_profile_t   *agt_profile;
 
-    for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
+    agt_profile = agt_get_profile();
+
+    for (i=0; i<agt_profile->agt_max_sessions; i++) {
         if (agtses[i] != NULL) {
             agt_acm_invalidate_session_cache(agtses[i]);
         }
@@ -1500,20 +1484,21 @@ void
 *
 * RETURNS:
 *    ses_cb_t*
-*    
+*
 *********************************************************************/
-ses_cb_t* 
+ses_cb_t*
     agt_ses_get_session_for_id(ses_id_t sid)
 {
     ses_cb_t *scb = NULL;
+    agt_profile_t *agt_profile;
 
-    if ( sid >0 && sid < AGT_SES_MAX_SESSIONS )
+    agt_profile = agt_get_profile();
+
+    if ( sid >0 && sid < agt_profile->agt_max_sessions )
     {
         scb = agtses[ sid ];
     }
     return scb;
 }
-
-
 
 /* END file agt_ses.c */

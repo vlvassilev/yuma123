@@ -726,6 +726,7 @@ extern "C" {
 #define NCX_EL_YH              (const xmlChar *)"yh"
 #define NCX_EL_YIN             (const xmlChar *)"yin"
 #define NCX_EL_YUMA_HOME       (const xmlChar *)"yuma-home"
+#define NCX_EL_MAX_SESSIONS    (const xmlChar *)"max-sessions"
 
 /* bit definitions for ncx_lstr_t flags field */
 #define NCX_FL_RANGE_ERR   bit0

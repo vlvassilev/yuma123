@@ -495,5 +495,12 @@ module netconfd {
         type boolean;
         default true;
       }
+      leaf max-sessions {
+        description
+          "Specifies the maximum number of sessions
+           that can be accepted.";
+        type uint32;
+        default 1024;
+      }
     }
 }

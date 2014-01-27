@@ -511,7 +511,6 @@ ses_cb_t *
                          int fd)
 {
     ses_cb_t       *scb;
-    agt_profile_t  *profile;
     uint32          i, slot;
     status_t        res;
     agt_profile_t   *agt_profile;
@@ -546,9 +545,9 @@ ses_cb_t *
         scb = ses_new_scb();
         if (scb) {
             /* initialize the profile vars */
-            scb->linesize = profile->agt_linesize;
-            scb->withdef = profile->agt_defaultStyleEnum;
-            scb->indent = profile->agt_indent;
+            scb->linesize = agt_profile->agt_linesize;
+            scb->withdef = agt_profile->agt_defaultStyleEnum;
+            scb->indent = agt_profile->agt_indent;
 
             if (ncx_protocol_enabled(NCX_PROTO_NETCONF10)) {
                 scb->protocols_requested |= NCX_FL_PROTO_NETCONF10;

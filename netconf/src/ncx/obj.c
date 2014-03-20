@@ -2360,7 +2360,7 @@ static status_t
     }
 
     if (bufflen &&
-        ((*retlen + namelen + addmodname?modnamelen:0 + seplen + 1) >= bufflen)) {
+        (((*retlen) + namelen + (addmodname?modnamelen:0) + seplen + 1) > bufflen)) {
         return ERR_BUFF_OVFL;
     }
 

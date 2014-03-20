@@ -19,8 +19,8 @@ module yuma-system {
     import yuma-ncx { prefix ncx; }
 
     // choose ietf-netconf-acm or yuma-nacm
-    //import ietf-netconf-acm { prefix nacm; }
-    import yuma-nacm { prefix nacm; }
+    import ietf-netconf-acm { prefix nacm; }
+    //import yuma-nacm { prefix nacm; }
 
     organization  "Netconf Central";
 

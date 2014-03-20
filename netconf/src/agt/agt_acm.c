@@ -17,7 +17,7 @@ leaf /nacm/enable-nacm
 leaf /nacm/read-default
 leaf /nacm/write-default
 leaf /nacm/exec-default
-leaf /nacm/denied-rpcs
+leaf /nacm/denied-operations
 leaf /nacm/denied-data-writes
 container /nacm/groups
 list /nacm/groups/group
@@ -105,7 +105,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#define AGT_ACM_MODULE      (const xmlChar *)"yuma-nacm"
+#define AGT_ACM_MODULE     (const xmlChar *)"ietf-netconf-acm"
 
 #define nacm_I_nacmGroups (const xmlChar *)"nacmGroups"
 #define nacm_I_superuser (const xmlChar *)"superuser"
@@ -140,7 +140,7 @@ date         init     comment
 #define nacm_N_rules (const xmlChar *)"rules"
 #define nacm_N_userName (const xmlChar *)"user-name"
 
-#define nacm_N_deniedRpcs (const xmlChar *)"denied-rpcs"
+#define nacm_N_denied_operations (const xmlChar *)"denied-operations"
 #define nacm_N_deniedDataWrites (const xmlChar *)"denied-data-writes"
 
 #define nacm_OID_nacm (const xmlChar *)"/nacm"
@@ -175,7 +175,7 @@ static const xmlChar *superuser;
 
 static agt_acmode_t   acmode;
 
-static uint32         deniedRpcCount;
+static uint32         denied_operations_count;
 
 static uint32         deniedDataWriteCount;
 
@@ -1789,9 +1789,9 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION get_deniedRpcs
+* FUNCTION get_denied_perations
 *
-* <get> operation handler for the nacm/deniedRpcs counter
+* <get> operation handler for the nacm/denied_operations counter
 *
 * INPUTS:
 *    see ncx/getcb.h getcb_fn_t for details
@@ -1800,7 +1800,7 @@ static boolean
 *    status
 *********************************************************************/
 static status_t 
-    get_deniedRpcs (ses_cb_t *scb,
+    get_denied_operations (ses_cb_t *scb,
                     getcb_mode_t cbmode,
                     const val_value_t *virval,
                     val_value_t  *dstval)
@@ -1812,10 +1812,10 @@ static status_t
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
-    VAL_UINT(dstval) = deniedRpcCount;
+    VAL_UINT(dstval) = denied_operations_count;
     return NO_ERR;
 
-} /* get_deniedRpcs */
+} /* get_denied_operations */
 
 
 /********************************************************************
@@ -2053,7 +2053,7 @@ status_t
 
     superuser = NULL;
     acmode = AGT_ACMOD_ENFORCING;
-    deniedRpcCount = 0;
+    denied_operations_count = 0;
     deniedDataWriteCount = 0;
     agt_acm_init_done = TRUE;
     log_reads = FALSE;
@@ -2134,10 +2134,10 @@ status_t
     }
 
     /* add read-only virtual leafs to the nacm value node
-     * create /nacm/deniedRpcs
+     * create /nacm/denied-operations
      */
-    childval = agt_make_virtual_leaf(nacmval->obj, nacm_N_deniedRpcs,
-                                     get_deniedRpcs, &res);
+    childval = agt_make_virtual_leaf(nacmval->obj, nacm_N_denied_operations,
+                                     get_denied_operations, &res);
     if (childval != NULL) {
         val_add_child_sorted(childval, nacmval);
     }
@@ -2311,7 +2311,7 @@ boolean
     }
 
     if (!retval) {
-        deniedRpcCount++;
+        denied_operations_count++;
     }
 
     log_debug2("\nagt_acm: %s (%s)", retval ? "PERMIT" : "DENY",

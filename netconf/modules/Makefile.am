@@ -15,7 +15,6 @@ $(top_srcdir)/netconf/modules/netconfcentral/yuma-interfaces.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-arp.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yangcli.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-netconf.yang \
-$(top_srcdir)/netconf/modules/netconfcentral/yuma-nacm.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-ncx.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-time-filter.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-proc.yang \

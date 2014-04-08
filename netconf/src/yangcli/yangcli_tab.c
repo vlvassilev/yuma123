@@ -799,6 +799,12 @@ static status_t
     (void)rpc;
     int word_iter = word_start + 1;
     // line[word_start] == '/'
+
+    if(word_start==word_end) {
+        // this is the case where the cursor is under the / (not after) ignore completion
+        return NO_ERR;
+    }
+
     word_start ++;
     cmdlen --;
     while(word_iter <= word_end) {

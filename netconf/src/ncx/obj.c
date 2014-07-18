@@ -246,11 +246,11 @@ static status_t
                                         obj_get_mod_name(newobj),
                                         obj_get_name(newobj));
             if (testobj) {
-                log_error("\nError: Object %s on line %s "
+                log_error("\nError: Object %s on line %u "
                           "already defined at line %u",
                           obj_get_name(newobj),
-                          srcobj->tkerr.linenum,
-                          testobj->tkerr.linenum);
+                          (unsigned int)srcobj->tkerr.linenum,
+                          (unsigned int)testobj->tkerr.linenum);
                 obj_free_template(newobj);
             } else {
                 newobj->parent = parent;

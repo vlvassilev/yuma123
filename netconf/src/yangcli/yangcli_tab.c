@@ -363,7 +363,7 @@ static status_t
                 return NO_ERR;
             obj_template_t *childObj = 
                 obj_find_child(parentObj,
-                               obj_get_mod_name(parentObj),
+                               NULL/*obj_get_mod_name(parentObj)*/,
                                (const xmlChar *)childName);
             cmdlen = word_end - word_iter;
 

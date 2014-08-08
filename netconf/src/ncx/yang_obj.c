@@ -9134,12 +9134,12 @@ static status_t
             res = resolve_when(mod, testobj->when, testobj);
             CHK_EXIT(res, retres);
         }
-
+#if 0
         if (!obj_has_name(testobj)) {
             /* skip augment and uses for the rest of the tests */
             continue;
         }
-
+#endif
         /* validate correct Xpath in must clauses */
         if (is_targetmod) {
             res = resolve_mustQ(tkc, mod, testobj);
@@ -9153,6 +9153,21 @@ static status_t
                                 mod, 
                                 testobj->def.container->datadefQ);
             break;
+
+        case OBJ_TYP_AUGMENT:
+            /* check augment children */
+            res = resolve_xpath(tkc,
+                                mod,
+                                &testobj->def.augment->datadefQ);
+            break;
+
+        case OBJ_TYP_USES:
+            /* check USES children */
+            res = resolve_xpath(tkc,
+                                mod,
+                                &testobj->def.augment->datadefQ);
+            break;
+
         case OBJ_TYP_ANYXML:
             break;
         case OBJ_TYP_LEAF:

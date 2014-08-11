@@ -9165,7 +9165,7 @@ static status_t
             /* check USES children */
             res = resolve_xpath(tkc,
                                 mod,
-                                &testobj->def.augment->datadefQ);
+                                &testobj->def.uses->datadefQ);
             break;
 
         case OBJ_TYP_ANYXML:

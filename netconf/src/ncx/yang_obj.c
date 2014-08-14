@@ -9165,7 +9165,7 @@ static status_t
             /* check USES children */
             res = resolve_xpath(tkc,
                                 mod,
-                                &testobj->def.uses->datadefQ);
+                                testobj->def.uses->datadefQ);
             break;
 
         case OBJ_TYP_ANYXML:
@@ -9282,6 +9282,8 @@ static status_t
             break;
         case OBJ_TYP_NOTIF:
             res = resolve_xpath(tkc, mod, &testobj->def.notif->datadefQ);
+            break;
+        case OBJ_TYP_REFINE:
             break;
         case OBJ_TYP_NONE:
         default:

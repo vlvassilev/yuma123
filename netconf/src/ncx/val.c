@@ -5186,6 +5186,32 @@ status_t
 }  /* val_replace_str */
 
 
+
+/********************************************************************
+* FUNCTION val_add_meta
+*
+*   Add a meta value node to a parent value node
+*   Simply makes a new last meta!!!
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
+void
+    val_add_meta (val_value_t *meta,
+                   val_value_t *parent)
+{
+#ifdef DEBUG
+    if (meta == NULL || parent == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+    dlq_enque(meta, &parent->metaQ);
+
+}   /* val_add_meta */
+
 /********************************************************************
 * FUNCTION val_add_child
 * 

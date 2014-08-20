@@ -224,32 +224,6 @@ static const xmlChar *force_target;
 static boolean use_xmlheader;
 
 
-
-/********************************************************************
-* FUNCTION free_modptr
-* 
-*  Clean and free a module pointer block
-* 
-* INPUTS:
-*    modptr == mod pointer block to free
-*              MUST BE REMOVED FROM ANY Q FIRST
-*
-*********************************************************************/
-void
-    free_modptr (modptr_t *modptr)
-{
-#ifdef DEBUG
-    if (!modptr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    m__free(modptr);
-
-}  /* free_modptr */
-
-
 /********************************************************************
  * FUNCTION create_system_var
  * 
@@ -1094,6 +1068,20 @@ boolean
 }  /* get_autocomp */
 
 /********************************************************************
+* FUNCTION get_batchmode
+*
+*  Get the batchmode parameter value
+*
+* RETURNS:
+*    batchmode boolean value
+*********************************************************************/
+boolean
+    get_batchmode (void)
+{
+    return batchmode;
+}  /* get_batchmode */
+
+/********************************************************************
 * FUNCTION replace_connect_valset
 * 
 *  Replace the current connect value set with a clone
@@ -1149,58 +1137,6 @@ status_t
     return NO_ERR;
 
 }  /* replace_connect_valset */
-
-
-/********************************************************************
-* FUNCTION xpath_getvar_fn
- *
- * see ncx/xpath.h -- matches xpath_getvar_fn_t template
- *
- * Callback function for retrieval of a variable binding
- * 
- * INPUTS:
- *   pcb   == XPath parser control block in use
- *   varname == variable name requested
- *   res == address of return status
- *
- * OUTPUTS:
- *  *res == return status
- *
- * RETURNS:
- *    pointer to the ncx_var_t data structure
- *    for the specified varbind
-*********************************************************************/
-ncx_var_t *
-    xpath_getvar_fn (struct xpath_pcb_t_ *pcb,
-                     const xmlChar *varname,
-                     status_t *res)
-{
-    ncx_var_t           *retvar;
-    runstack_context_t  *rcxt;
-
-#ifdef DEBUG
-    if (varname == NULL || res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* if the runstack context is not set then the default
-     * context will be used
-     */
-    rcxt = (runstack_context_t *)pcb->cookie;
-    retvar = var_find(rcxt, varname, 0);
-    if (retvar == NULL) {
-        *res = ERR_NCX_DEF_NOT_FOUND;
-    } else {
-        *res = NO_ERR;
-    }
-
-    return retvar;
-
-}  /* xpath_getvar_fn */
-
-
 
 /********************************************************************
 * FUNCTION create_session
@@ -1596,125 +1532,6 @@ status_t
     return res;
 
 }  /* do_connect */
-
-/********************************************************************
-* FUNCTION findparm
-* 
-* Get the specified string parm from the parmset and then
-* make a strdup of the value
-*
-* INPUTS:
-*   valset == value set to search
-*   modname == optional module name defining the parameter to find
-*   parmname  == name of parm to get, or partial name to get
-*
-* RETURNS:
-*   pointer to val_value_t if found
-*********************************************************************/
-val_value_t *
-    findparm (val_value_t *valset,
-              const xmlChar *modname,
-              const xmlChar *parmname)
-{
-    val_value_t *parm;
-
-#ifdef DEBUG
-    if (!parmname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    if (!valset) {
-        return NULL;
-    }
-
-    parm = val_find_child(valset, modname, parmname);
-    if (!parm && get_autocomp()) {
-        parm = val_match_child(valset, modname, parmname);
-    }
-    return parm;
-
-}  /* findparm */
-
-
-/********************************************************************
-* FUNCTION get_strparm
-* 
-* Get the specified string parm from the parmset and then
-* make a strdup of the value
-*
-* INPUTS:
-*   valset == value set to check if not NULL
-*   modname == module defining parmname
-*   parmname  == name of parm to get
-*
-* RETURNS:
-*   pointer to string !!! THIS IS A MALLOCED COPY !!!
-*********************************************************************/
-xmlChar *
-    get_strparm (val_value_t *valset,
-                 const xmlChar *modname,
-                 const xmlChar *parmname)
-{
-    val_value_t    *parm;
-    xmlChar        *str;
-
-#ifdef DEBUG
-    if (!valset || !parmname) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-    
-    str = NULL;
-    parm = findparm(valset, modname, parmname);
-    if (parm) {
-        str = xml_strdup(VAL_STR(parm));
-        if (!str) {
-            log_error("\nyangcli: Out of Memory error");
-        }
-    }
-    return str;
-
-}  /* get_strparm */
-
-
-/********************************************************************
-* FUNCTION add_clone_parm
-* 
-*  Create a parm 
-* 
-* INPUTS:
-*   val == value to clone and add
-*   valset == value set to add parm into
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    add_clone_parm (const val_value_t *val,
-                    val_value_t *valset)
-{
-    val_value_t    *parm;
-
-#ifdef DEBUG
-    if (!val || !valset) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    parm = val_clone(val);
-    if (!parm) {
-        log_error("\nyangcli: val_clone failed");
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(parm, valset);
-    }
-    return NO_ERR;
-
-}  /* add_clone_parm */
-
 
 /********************************************************************
 * FUNCTION process_cli_input
@@ -2278,10 +2095,579 @@ int yangrpc_init(int argc, char* argv[])
     return res;
 }
 
+/********************************************************************
+* FUNCTION report_capabilities
+*
+* Generate a start session report, listing the capabilities
+* of the NETCONF server
+*
+* INPUTS:
+*  server_cb == server control block to use
+*  scb == session control block
+*  isfirst == TRUE if first call when session established
+*             FALSE if this is from show session command
+*  mode == help mode; ignored unless first == FALSE
+*********************************************************************/
+void
+    report_capabilities (server_cb_t *server_cb,
+                         const ses_cb_t *scb,
+                         boolean isfirst,
+                         help_mode_t mode)
+{
+    const mgr_scb_t    *mscb;
+    const xmlChar      *server;
+    const val_value_t  *parm;
+
+    if (!LOGINFO) {
+        /* skip unless log level is INFO or higher */
+        return;
+    }
+
+    mscb = (const mgr_scb_t *)scb->mgrcb;
+
+    parm = val_find_child(server_cb->connect_valset,
+                          YANGCLI_MOD,
+                          YANGCLI_SERVER);
+    if (parm && parm->res == NO_ERR) {
+        server = VAL_STR(parm);
+    } else {
+        server = (const xmlChar *)"--";
+    }
+
+    log_write("\n\nNETCONF session established for %s on %s",
+              scb->username,
+              mscb->target ? mscb->target : server);
+
+
+    log_write("\n\nClient Session Id: %u", scb->sid);
+    log_write("\nServer Session Id: %u", mscb->agtsid);
+
+    if (isfirst || mode > HELP_MODE_BRIEF) {
+        log_write("\n\nServer Protocol Capabilities");
+        cap_dump_stdcaps(&mscb->caplist);
+
+        log_write("\n\nServer Module Capabilities");
+        cap_dump_modcaps(&mscb->caplist);
+
+        log_write("\n\nServer Enterprise Capabilities");
+        cap_dump_entcaps(&mscb->caplist);
+        log_write("\n");
+    }
+
+    log_write("\nProtocol version set to: ");
+    switch (ses_get_protocol(scb)) {
+    case NCX_PROTO_NETCONF10:
+        log_write("RFC 4741 (base:1.0)");
+        break;
+    case NCX_PROTO_NETCONF11:
+        log_write("RFC 6241 (base:1.1)");
+        break;
+    default:
+        log_write("unknown");
+    }
+
+    if (!isfirst && (mode <= HELP_MODE_BRIEF)) {
+        return;
+    }
+
+    log_write("\nDefault target set to: ");
+
+    switch (mscb->targtyp) {
+    case NCX_AGT_TARG_NONE:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        log_write("none");
+        break;
+    case NCX_AGT_TARG_CANDIDATE:
+        if (isfirst) {
+            server_cb->default_target = NCX_EL_CANDIDATE;
+        }
+        log_write("<candidate>");
+        break;
+    case NCX_AGT_TARG_RUNNING:
+        if (isfirst) {
+            server_cb->default_target = NCX_EL_RUNNING;
+        }
+        log_write("<running>");
+        break;
+    case NCX_AGT_TARG_CAND_RUNNING:
+        if (force_target != NULL &&
+            !xml_strcmp(force_target, NCX_EL_RUNNING)) {
+            /* set to running */
+            if (isfirst) {
+                server_cb->default_target = NCX_EL_RUNNING;
+            }
+            log_write("<running> (<candidate> also supported)");
+        } else {
+            /* set to candidate */
+            if (isfirst) {
+                server_cb->default_target = NCX_EL_CANDIDATE;
+            }
+            log_write("<candidate> (<running> also supported)");
+        }
+        break;
+    case NCX_AGT_TARG_LOCAL:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        log_write("none -- local file");
+        break;
+    case NCX_AGT_TARG_REMOTE:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        log_write("none -- remote file");
+        break;
+    default:
+        if (isfirst) {
+            server_cb->default_target = NULL;
+        }
+        SET_ERROR(ERR_INTERNAL_VAL);
+        log_write("none -- unknown (%d)", mscb->targtyp);
+        break;
+    }
+
+    log_write("\nSave operation mapped to: ");
+    switch (mscb->targtyp) {
+    case NCX_AGT_TARG_NONE:
+        log_write("none");
+        break;
+    case NCX_AGT_TARG_CANDIDATE:
+    case NCX_AGT_TARG_CAND_RUNNING:
+        if (!xml_strcmp(server_cb->default_target,
+                        NCX_EL_CANDIDATE)) {
+            log_write("commit");
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_write(" + copy-config <running> <startup>");
+            }
+        } else {
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_write("copy-config <running> <startup>");
+            } else {
+                log_write("none");
+            }
+        }
+        break;
+    case NCX_AGT_TARG_RUNNING:
+        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+            log_write("copy-config <running> <startup>");
+        } else {
+            log_write("none");
+        }
+        break;
+    case NCX_AGT_TARG_LOCAL:
+    case NCX_AGT_TARG_REMOTE:
+        /* no way to assign these enums from the capabilities alone! */
+        if (cap_std_set(&mscb->caplist, CAP_STDID_URL)) {
+            log_write("copy-config <running> <url>");
+        } else {
+            log_write("none");
+        }
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        log_write("none");
+        break;
+    }
+
+    log_write("\nDefault with-defaults behavior: ");
+    if (mscb->caplist.cap_defstyle) {
+        log_write("%s", mscb->caplist.cap_defstyle);
+    } else {
+        log_write("unknown");
+    }
+
+    log_write("\nAdditional with-defaults behavior: ");
+    if (mscb->caplist.cap_supported) {
+        log_write("%s", mscb->caplist.cap_supported);
+    } else {
+        log_write("unknown");
+    }
+
+    log_write("\n");
+
+} /* report_capabilities */
+
+
+/********************************************************************
+* FUNCTION namespace_mismatch_warning
+*
+* Issue a namespace mismatch warning
+*
+* INPUTS:
+*  module == module name
+*  revision == revision date (may be NULL)
+*  namespacestr == server expected URI
+*  clientns == client provided URI
+*********************************************************************/
+static void
+    namespace_mismatch_warning (const xmlChar *module,
+                                const xmlChar *revision,
+                                const xmlChar *namespacestr,
+                                const xmlChar *clientns)
+{
+    /* !!! FIXME: need a warning number for suppression */
+    log_warn("\nWarning: module namespace URI mismatch:"
+             "\n   module:    '%s'"
+             "\n   revision:  '%s'"
+             "\n   server ns: '%s'"
+             "\n   client ns: '%s'",
+             module,
+             (revision) ? revision : EMPTY_STRING,
+             namespacestr,
+             clientns);
+
+}  /* namespace_mismatch_warning */
+
+
+/********************************************************************
+* FUNCTION check_module_capabilities
+*
+* Check the modules reported by the server
+* If autoload is TRUE then load any missing modules
+* otherwise just warn which modules are missing
+* Also check for wrong module module and version errors
+*
+* The server_cb->searchresultQ is filled with
+* records for each module or deviation specified in
+* the module capability URIs.
+*
+* After determining all the files that the server has,
+* the <get-schema> operation is used (if :schema-retrieval
+* advertised by the device and --autoload=true)
+*
+* All the files are copied into the session work directory
+* to make sure the correct versions are used when compiling
+* these files and applying features and deviations
+*
+* All files are compiled against the versions of the imports
+* advertised in the capabilities, to make sure that imports
+* without revision-date statements will still select the
+* same revision as the server (INSTEAD OF ALWAYS SELECTING
+* THE LATEST VERSION).
+*
+* If the device advertises an incomplete set of modules,
+* then searches for any missing imports will be done
+* using the normal search path, including YUMA_MODPATH.
+*
+* INPUTS:
+*  server_cb == server control block to use
+*  scb == session control block
+*
+*********************************************************************/
+static void
+    check_module_capabilities (server_cb_t *server_cb,
+                               ses_cb_t *scb)
+{
+    mgr_scb_t              *mscb;
+    ncx_module_t           *mod;
+    cap_rec_t              *cap;
+    const xmlChar          *module, *revision, *namespacestr;
+    ncxmod_search_result_t *searchresult, *libresult;
+    status_t                res;
+    boolean                 retrieval_supported;
+
+    mscb = (mgr_scb_t *)scb->mgrcb;
+
+    log_info("\n\nChecking Server Modules...\n");
+
+    if (!cap_std_set(&mscb->caplist, CAP_STDID_V1)) {
+        log_warn("\nWarning: NETCONF v1 capability not found");
+    }
+
+    retrieval_supported = cap_set(&mscb->caplist,
+                                  CAP_SCHEMA_RETRIEVAL);
+
+    /* check all the YANG modules;
+     * build a list of modules that
+     * the server needs to get somehow
+     * or proceed without them
+     * save the results in the server_cb->searchresultQ
+     */
+    cap = cap_first_modcap(&mscb->caplist);
+    while (cap) {
+        mod = NULL;
+        module = NULL;
+        revision = NULL;
+        namespacestr = NULL;
+        libresult = NULL;
+
+        cap_split_modcap(cap,
+                         &module,
+                         &revision,
+                         &namespacestr);
+
+        if (namespacestr == NULL) {
+            /* try the entire base part of the URI if there was
+             * no module capability parsed
+             */
+            namespacestr = cap->cap_uri;
+        }
+
+        if (namespacestr == NULL) {
+            if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
+                log_warn("\nWarning: skipping enterprise capability "
+                         "for URI '%s'",
+                         cap->cap_uri);
+            }
+            cap = cap_next_modcap(cap);
+            continue;
+        }
+
+        if (module == NULL) {
+            /* check if there is a module in the modlibQ that
+             * has the same namespace URI as 'namespacestr' base
+             */
+            libresult = ncxmod_find_search_result(&modlibQ,
+                                                  NULL,
+                                                  NULL,
+                                                  namespacestr);
+            if (libresult != NULL) {
+                module = libresult->module;
+                revision = libresult->revision;
+            } else {
+                /* nothing found and modname is NULL, so continue */
+                if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
+                    log_warn("\nWarning: skipping enterprise capability "
+                             "for URI '%s'",
+                             cap->cap_uri);
+                }
+                cap = cap_next_modcap(cap);
+                continue;
+            }
+        }
+
+        mod = ncx_find_module(module, revision);
+        if (mod != NULL) {
+            /* make sure that the namespace URIs match */
+            if (ncx_compare_base_uris(mod->ns, namespacestr)) {
+                namespace_mismatch_warning(module,
+                                           revision,
+                                           namespacestr,
+                                           mod->ns);
+                /* force a new search or auto-load */
+                mod = NULL;
+            }
+        }
+
+        if (mod == NULL && module != NULL) {
+            /* check if there is a module in the modlibQ that
+             * has the same namespace URI as 'namespacestr' base
+             */
+            libresult = ncxmod_find_search_result(&modlibQ,
+                                                  NULL,
+                                                  NULL,
+                                                  namespacestr);
+            if (libresult != NULL) {
+                module = libresult->module;
+                revision = libresult->revision;
+            }
+        }
+
+        if (mod == NULL) {
+            /* module was not found in the module search path
+             * of this instance of yangcli
+             * try to auto-load the module if enabled
+             */
+            if (server_cb->autoload) {
+                if (libresult) {
+                    searchresult = ncxmod_clone_search_result(libresult);
+                    if (searchresult == NULL) {
+                        log_error("\nError: cannot load file, "
+                                  "malloc failed");
+                        return;
+                    }
+                } else {
+                    searchresult = ncxmod_find_module(module, revision);
+                }
+                if (searchresult) {
+                    searchresult->cap = cap;
+                    if (searchresult->res != NO_ERR) {
+                        if (LOGDEBUG2) {
+                            log_debug2("\nLocal module search failed (%s)",
+                                       get_error_string(searchresult->res));
+                        }
+                    } else if (searchresult->source) {
+                        /* module with matching name, revision
+                         * was found on the local system;
+                         * check if the namespace also matches
+                         */
+                        if (searchresult->namespacestr) {
+                            if (ncx_compare_base_uris
+                                (searchresult->namespacestr, namespacestr)) {
+                                /* cannot use this local file because
+                                 * it has a different namespace
+                                 */
+                                namespace_mismatch_warning
+                                    (module,
+                                     revision,
+                                     namespacestr,
+                                     searchresult->namespacestr);
+                            } else {
+                                /* can use the local system file found */
+                                searchresult->capmatch = TRUE;
+                            }
+                        } else {
+                            /* this module found is invalid;
+                             * has no namespace statement
+                             */
+                            log_error("\nError: found module '%s' "
+                                      "revision '%s' "
+                                      "has no namespace-stmt",
+                                      module,
+                                      (revision) ? revision : EMPTY_STRING);
+                        }
+                    } else {
+                        /* the search result is valid, but no source;
+                         * specified module is not available
+                         * on the manager platform; see if the
+                         * get-schema operation is available
+                         */
+                        if (!retrieval_supported) {
+                            /* no <get-schema> so SOL, do without this module
+                             * !!! FIXME: need warning number
+                             */
+                            if (revision != NULL) {
+                                log_warn("\nWarning: module '%s' "
+                                         "revision '%s' not available",
+                                         module,
+                                         revision);
+                            } else {
+                                log_warn("\nWarning: module '%s' "
+                                         "(no revision) not available",
+                                         module);
+                            }
+                        } else if (LOGDEBUG) {
+                            log_debug("\nautoload: Module '%s' not available,"
+                                      " will try <get-schema>",
+                                      module);
+                        }
+                    }
+
+                    /* save the search result no matter what */
+                    dlq_enque(searchresult, &server_cb->searchresultQ);
+                } else {
+                    /* libresult was NULL, so there was no searchresult
+                     * ncxmod did not find any YANG module with this namespace
+                     * the module is not available
+                     */
+                    if (!retrieval_supported) {
+                        /* no <get-schema> so SOL, do without this module 
+                         * !!! need warning number 
+                         */
+                        if (revision != NULL) {
+                            log_warn("\nWarning: module '%s' "
+                                     "revision '%s' not available",
+                                     module,
+                                     revision);
+                        } else {
+                            log_warn("\nWarning: module '%s' "
+                                     "(no revision) not available",
+                                     module);
+                        }
+                    } else {
+                        /* setup a blank searchresult so auto-load
+                         * will attempt to retrieve it
+                         */
+                        searchresult =
+                            ncxmod_new_search_result_str(module,
+                                                         revision);
+                        if (searchresult) {
+                            searchresult->cap = cap;
+                            dlq_enque(searchresult, &server_cb->searchresultQ);
+                            if (LOGDEBUG) {
+                                log_debug("\nyangcli_autoload: Module '%s' "
+                                          "not available, will try "
+                                          "<get-schema>",
+                                          module);
+                            }
+                        } else {
+                            log_error("\nError: cannot load file, "
+                                      "malloc failed");
+                            return;
+                        }
+                    }
+                }
+            } else {
+                /* --autoload=false */
+                if (LOGINFO) {
+                    log_info("\nModule '%s' "
+                             "revision '%s' not "
+                             "loaded, autoload disabled",
+                             module,
+                             (revision) ? revision : EMPTY_STRING);
+                }
+            }
+        } else {
+            /* since the module was already loaded, it is
+             * OK to use, even if --autoload=false
+             * just copy the info into a search result record
+             * so it will be copied and recompiled with the
+             * correct features and deviations applied
+             */
+            searchresult = ncxmod_new_search_result_ex(mod);
+            if (searchresult == NULL) {
+                log_error("\nError: cannot load file, malloc failed");
+                return;
+            } else {
+                searchresult->cap = cap;
+                searchresult->capmatch = TRUE;
+                dlq_enque(searchresult, &server_cb->searchresultQ);
+            }
+        }
+
+        /* move on to the next module */
+        cap = cap_next_modcap(cap);
+    }
+
+    /* get all the advertised YANG data model modules into the
+     * session temp work directory that are local to the system
+     */
+    res = autoload_setup_tempdir(server_cb, scb);
+    if (res != NO_ERR) {
+        log_error("\nError: autoload setup temp files failed (%s)",
+                  get_error_string(res));
+    }
+
+    /* go through all the search results (if any)
+     * and see if <get-schema> is needed to pre-load
+     * the session work directory YANG files
+     */
+    if (res == NO_ERR &&
+        retrieval_supported &&
+        server_cb->autoload) {
+
+        /* compile phase will be delayed until autoload
+         * get-schema operations are done
+         */
+        res = autoload_start_get_modules(server_cb, scb);
+        if (res != NO_ERR) {
+            log_error("\nError: autoload get modules failed (%s)",
+                      get_error_string(res));
+        }
+    }
+
+    /* check autoload state did not start or was not requested */
+    if (res == NO_ERR && server_cb->command_mode != CMD_MODE_AUTOLOAD) {
+        /* parse and hold the modules with the correct deviations,
+         * features and revisions.  The returned modules
+         * from yang_parse.c will not be stored in the local module
+         * directory -- just used for this one session then deleted
+         */
+        res = autoload_compile_modules(server_cb, scb);
+        if (res != NO_ERR) {
+            log_error("\nError: autoload compile modules failed (%s)",
+                      get_error_string(res));
+        }
+    }
+
+} /* check_module_capabilities */
+
 server_cb_t* yangrpc_connect(char* host, char* user, char* pass)
 {
     int argc=4;
-    char* argv[]={"exec-name-dummy", "--server=127.0.0.1", "--user=root", "--password=blah"};
+    char* argv[]={"exec-name-dummy", "--server=localhost", "--user=vladimir", "--password="};
     server_cb_t          *server_cb;
     ses_cb_t             *ses_cb;
     status_t res;
@@ -2471,6 +2857,8 @@ server_cb_t* yangrpc_connect(char* host, char* user, char* pass)
 
     {
         ses_cb_t* scb;
+        mgr_scb_t* mscb;
+
         scb = mgr_ses_get_scb(server_cb->mysid);
         assert(scb!=NULL);
 
@@ -2483,6 +2871,13 @@ server_cb_t* yangrpc_connect(char* host, char* user, char* pass)
                 break;
             }
         }
+        /* incoming hello OK and outgoing hello is sent */
+        server_cb->state = MGR_IO_ST_CONN_IDLE;
+        report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
+        check_module_capabilities(server_cb, scb);
+        mscb = (mgr_scb_t *)scb->mgrcb;
+        ncx_set_temp_modQ(&mscb->temp_modQ);
+
     }
 
 
@@ -2557,6 +2952,7 @@ void
             }
         }
 #else
+        val_dump_value(rpy->reply,0);
         global_reply_val = val_clone(rpy->reply);
 #endif
     }
@@ -2637,9 +3033,6 @@ int main(int argc, char* argv[])
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
     assert(res==NO_ERR);
 
-    res = ncxmod_load_module ("ietf-interfaces", NULL, NULL, &interfaces_mod);
-    assert(res==NO_ERR);
-
     rpc_obj = ncx_find_object(ietf_netconf_mod, "get");
     assert(obj_is_rpc(rpc_obj));
     input_obj = obj_find_child(rpc_obj, NULL, YANG_K_INPUT);
@@ -2653,7 +3046,7 @@ int main(int argc, char* argv[])
     val_init_from_template(filter_val, filter_obj);
     
     type_meta_val = val_make_string(0, "type","xpath");
-    select_meta_val = val_make_string(0, "select", "/interfaces-state");
+    select_meta_val = val_make_string(0, "select", "/");
 
     val_add_meta(select_meta_val, filter_val);
     val_add_meta(type_meta_val, filter_val);
@@ -2667,7 +3060,7 @@ int main(int argc, char* argv[])
     	val_value_t* data_val;
     	val_value_t* interfaces_state_val;
         data_val = val_find_child(reply_val,NULL,"data");
-        interfaces_state_val = val_find_child(interfaces_state_val,"ietf-interfaces","interfaces-state");
+        interfaces_state_val = val_find_child(data_val,"ietf-interfaces","interfaces-state");
         val_dump_value(interfaces_state_val,0);
     }
     yangrpc_close(server_cb);

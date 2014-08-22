@@ -2707,7 +2707,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, char* user, char* password, char* pu
 
     public_key_arg = malloc(strlen("--public-key=")+strlen(public_key)+1);
     assert(public_key_arg!=NULL);
-    sprintf(public_key_arg,"--public_key=%s",public_key);
+    sprintf(public_key_arg,"--public-key=%s",public_key);
     argv[4]=public_key_arg;
 
     private_key_arg = malloc(strlen("--private-key=")+strlen(private_key)+1);

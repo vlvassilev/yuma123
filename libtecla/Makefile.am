@@ -4,9 +4,6 @@ libtecla_la_SOURCES = \
 $(top_srcdir)/libtecla/chrqueue.c \
 $(top_srcdir)/libtecla/cplfile.c \
 $(top_srcdir)/libtecla/cplmatch.c \
-$(top_srcdir)/libtecla/demo2.c \
-$(top_srcdir)/libtecla/demo3.c \
-$(top_srcdir)/libtecla/demo.c \
 $(top_srcdir)/libtecla/direader.c \
 $(top_srcdir)/libtecla/enhance.c \
 $(top_srcdir)/libtecla/errmsg.c \

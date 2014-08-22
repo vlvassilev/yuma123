@@ -1,4 +1,4 @@
-SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld
+SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc
 
 
 platform_netconf_include_HEADERS= \
@@ -104,3 +104,7 @@ $(top_srcdir)/netconf/src/agt/agt_cli.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_complete.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_validate.h \
 $(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.h
+
+yangrpc_netconf_include_HEADERS= \
+$(top_srcdir)/netconf/src/yangrpc/yangrpc.h
+

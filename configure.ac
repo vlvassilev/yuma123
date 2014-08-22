@@ -31,6 +31,9 @@ AC_SUBST(ncx_netconf_includedir)
 agt_netconf_includedir="$includedir/yuma/agt"
 AC_SUBST(agt_netconf_includedir)
 
+yangrpc_netconf_includedir="$includedir/yuma/yangrpc"
+AC_SUBST(yangrpc_netconf_includedir)
+
 platform_netconf_includedir="$includedir/yuma/platform"
 AC_SUBST(platform_netconf_includedir)
 
@@ -51,6 +54,7 @@ AC_CONFIG_FILES([
         netconf/src/subsys/Makefile
         libtoaster/src/Makefile
         example-modules/helloworld/Makefile
+        netconf/src/yangrpc/Makefile
 ])
 
 AC_OUTPUT

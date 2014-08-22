@@ -22,9 +22,8 @@ int main(int argc, char* argv[])
 
     res = yangrpc_init(argc, argv);
     assert(res==NO_ERR);
-    yangrpc_cb = yangrpc_connect("127.0.0.1"/*host*/,"root"/*user*/,"blah"/*pass*/);
+    yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/,"vladimir"/*user*/,""/*password*/,"/home/vladimir/.ssh/id_rsa.pub"/*public_key*/, "/home/vladimir/.ssh/id_rsa"/*private_key*/);
 
-    while(1) {
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
     assert(res==NO_ERR);
 
@@ -41,7 +40,7 @@ int main(int argc, char* argv[])
     val_init_from_template(filter_val, filter_obj);
     
     type_meta_val = val_make_string(0, "type","xpath");
-    select_meta_val = val_make_string(0, "select", "/interfaces-state/interface[name=\"ge0\"]");
+    select_meta_val = val_make_string(0, "select", "/");
 
     val_add_meta(select_meta_val, filter_val);
     val_add_meta(type_meta_val, filter_val);
@@ -49,7 +48,7 @@ int main(int argc, char* argv[])
 
     res = yangrpc_exec(yangrpc_cb, request_val, &reply_val);
     assert(res==0);
-#if 0
+
     val_dump_value(reply_val,0);
     {
     	val_value_t* data_val;
@@ -58,9 +57,9 @@ int main(int argc, char* argv[])
         interfaces_state_val = val_find_child(data_val,"ietf-interfaces","interfaces-state");
         val_dump_value(interfaces_state_val,0);
     }
-#endif
+
     val_free_value(reply_val);
-    }
+
     yangrpc_close(yangrpc_cb);
     return 0;
 }

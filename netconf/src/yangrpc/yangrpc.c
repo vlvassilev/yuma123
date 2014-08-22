@@ -2663,10 +2663,15 @@ static void
 
 } /* check_module_capabilities */
 
-yangrpc_cb_t* yangrpc_connect(char* host, char* user, char* pass)
+yangrpc_cb_t* yangrpc_connect(char* server, char* user, char* password, char* public_key, char* private_key)
 {
-    int argc=4;
-    char* argv[]={"exec-name-dummy", "--server=localhost", "--user=root", "--password="};
+    char* server_arg;
+    char* user_arg;
+    char* password_arg;
+    char* public_key_arg;
+    char* private_key_arg;
+    char* argv[]={"exec-name-dummy", "--server=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
+    int argc=sizeof(argv)/sizeof(char*);
     server_cb_t          *server_cb;
     ses_cb_t             *ses_cb;
     status_t res;
@@ -2684,6 +2689,32 @@ yangrpc_cb_t* yangrpc_connect(char* host, char* user, char* pass)
     if (server_cb==NULL) {
         return NULL;
     }
+
+    server_arg = malloc(strlen("--server=")+strlen(server)+1);
+    assert(server_arg!=NULL);
+    sprintf(server_arg,"--server=%s",server);
+    argv[1]=server_arg;
+
+    user_arg = malloc(strlen("--user=")+strlen(user)+1);
+    assert(user_arg!=NULL);
+    sprintf(user_arg,"--user=%s",user);
+    argv[2]=user_arg;
+
+    password_arg = malloc(strlen("--password=")+strlen(password)+1);
+    assert(password_arg!=NULL);
+    sprintf(password_arg,"--password=%s",password);
+    argv[3]=password_arg;
+
+    public_key_arg = malloc(strlen("--public-key=")+strlen(public_key)+1);
+    assert(public_key_arg!=NULL);
+    sprintf(public_key_arg,"--public_key=%s",public_key);
+    argv[4]=public_key_arg;
+
+    private_key_arg = malloc(strlen("--private-key=")+strlen(private_key)+1);
+    assert(private_key_arg!=NULL);
+    sprintf(private_key_arg,"--private-key=%s",private_key);
+    argv[5]=private_key_arg;
+
 
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);

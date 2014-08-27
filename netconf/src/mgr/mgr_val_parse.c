@@ -1058,7 +1058,6 @@ static status_t
 
 } /* parse_string */
 
-
 /********************************************************************
  * FUNCTION parse_idref
  * 
@@ -1089,6 +1088,7 @@ static status_t
                  const xml_node_t *startnode,
                  val_value_t  *retval)
 {
+    ncx_module_t          *mod;
     const xmlChar         *str;
     xml_node_t             valnode, endnode;
     status_t               res, res2;
@@ -1131,17 +1131,29 @@ static status_t
             if (val_all_whitespace(valnode.simval)) {
                 res = ERR_NCX_INVALID_VALUE;
             } else {
-                retval->v.idref.nsid = valnode.contentnsid;
+                mgr_scb_t* mscb;
+                mscb = (mgr_scb_t *)scb->mgrcb;
+
 
                 /* get the name field and verify identity is valid
                  * for the identity base in the typdef
                  */
                 str = NULL;
-                res = val_idref_ok(obj_get_typdef(obj), 
+                for (mod = (ncx_module_t *)dlq_firstEntry(&mscb->temp_modQ);
+                     mod != NULL;
+                     mod = (ncx_module_t *)dlq_nextEntry(mod)) {
+                    res = val_idref_ok(obj_get_typdef(obj),
                                    valnode.simval,
-                                   retval->v.idref.nsid,
-                                   &str, 
+                                   mod->nsid,
+                                   &str,
                                    &retval->v.idref.identity);
+
+                    if (res == NO_ERR) {
+                        retval->v.idref.nsid = mod->nsid;
+                        break;
+                    }
+                }
+
                 if (str) {
                     retval->v.idref.name = xml_strdup(str);
                     if (!retval->v.idref.name) {
@@ -1154,7 +1166,7 @@ static status_t
                     if (!retval->v.idref.name) {
                         res = ERR_INTERNAL_MEM;
                     }
-                }                    
+                }
             }
             break;
         case XML_NT_END:

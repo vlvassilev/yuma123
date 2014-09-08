@@ -3015,7 +3015,7 @@ status_t yangrpc_exec(yangrpc_cb_t *yangrpc_cb, val_value_t* request_val, val_va
         log_error("\nError allocating a new RPC request");
         return res;
     }
-    req->data = request_val/*reqdata*/;
+    req->data = val_clone(request_val);/*reqdata*/
     req->rpc = request_val->obj;
     req->timeout = 1000/*timeoutval*/;
 

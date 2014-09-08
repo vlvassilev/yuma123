@@ -47,6 +47,7 @@ $(top_srcdir)/netconf/src/ncx/xmlns.c \
 $(top_srcdir)/netconf/src/ncx/xml_util.c \
 $(top_srcdir)/netconf/src/ncx/xml_val.c \
 $(top_srcdir)/netconf/src/ncx/xml_wr.c \
+$(top_srcdir)/netconf/src/ncx/xml_rd.c \
 $(top_srcdir)/netconf/src/ncx/xpath1.c \
 $(top_srcdir)/netconf/src/ncx/xpath.c \
 $(top_srcdir)/netconf/src/ncx/xpath_wr.c \
@@ -58,7 +59,8 @@ $(top_srcdir)/netconf/src/ncx/yang_obj.c \
 $(top_srcdir)/netconf/src/ncx/yang_parse.c \
 $(top_srcdir)/netconf/src/ncx/yang_typ.c \
 $(top_srcdir)/netconf/src/ncx/yin.c \
-$(top_srcdir)/netconf/src/ncx/yinyang.c
+$(top_srcdir)/netconf/src/ncx/yinyang.c \
+$(top_srcdir)/netconf/src/ncx/val_parse.c
 
 libncx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
 libncx_la_LDFLAGS = -version-info 2:0 -lxml2 -lz  -ldl

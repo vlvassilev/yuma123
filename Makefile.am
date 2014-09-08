@@ -1,4 +1,5 @@
 SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc netconf/src/yangrpc/example
+# netconf/src/yangrpc/yanghttpd
 
 
 platform_netconf_include_HEADERS= \
@@ -27,6 +28,7 @@ $(top_srcdir)/netconf/src/ncx/top.h \
 $(top_srcdir)/netconf/src/ncx/obj.h \
 $(top_srcdir)/netconf/src/ncx/json_wr.h \
 $(top_srcdir)/netconf/src/ncx/xml_wr.h \
+$(top_srcdir)/netconf/src/ncx/xml_rd.h \
 $(top_srcdir)/netconf/src/ncx/def_reg.h \
 $(top_srcdir)/netconf/src/ncx/ncx_num.h \
 $(top_srcdir)/netconf/src/ncx/op.h \

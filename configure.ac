@@ -1,4 +1,4 @@
-AC_INIT([yuma], [2.0.0], [vladimir@ellipticlabs.com])
+AC_INIT([yuma], [2.0.0], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 
@@ -37,6 +37,8 @@ AC_SUBST(yangrpc_netconf_includedir)
 platform_netconf_includedir="$includedir/yuma/platform"
 AC_SUBST(platform_netconf_includedir)
 
+apachemoduledir="$libdir/apache2/modules"
+AC_SUBST(apachemoduledir)
 
 CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2"
 AC_SUBST(CFLAGS)
@@ -56,6 +58,7 @@ AC_CONFIG_FILES([
         example-modules/helloworld/Makefile
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
+        netconf/src/yangrpc/yanghttpd/Makefile
 ])
 
 AC_OUTPUT

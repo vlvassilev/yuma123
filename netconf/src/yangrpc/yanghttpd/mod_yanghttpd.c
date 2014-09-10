@@ -8,10 +8,16 @@
 
 
 #include <time.h>
-#include <unistd.h>
 #include <assert.h>
 #include <string.h>
 #include <pthread.h>
+#include <errno.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pwd.h>
 
 /* YANG database access headers */
 #include "ncx.h"
@@ -39,16 +45,44 @@ module AP_MODULE_DECLARE_DATA   yanghttpd_module =
     register_hooks   // Our hook registering function
 };
 
+static char* get_username(int uid)
+{
+    struct passwd pwd;
+    struct passwd *result;
+    char* username;
+    char *buf;
+    size_t bufsize;
+    int s;
+
+    bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if (bufsize == -1)          /* Value was indeterminate */
+        bufsize = 16384;        /* Should be more than enough */
+
+    buf = malloc(bufsize);
+    if (buf == NULL) {
+        return NULL;
+    }
+    s = getpwuid_r(uid, &pwd, buf, bufsize, &result);
+    if (result == NULL) {
+        free(buf);
+        return NULL;
+    }
+    username = malloc(strlen(pwd.pw_gecos)+1);
+    strcpy(username, pwd.pw_name);
+    free(buf);
+    return username;
+}
 
 /* register_hooks: Adds a hook to the httpd process */
 static void register_hooks(apr_pool_t *pool) 
 {
     int ret;
-    char username[512];
-    char private_key[512];
-    char public_key[512];
-    ret = getlogin_r(username, sizeof(username));
-    assert(ret==0);
+    username = get_username();
+    private_key = malloc(strlen(getenv("HOME"))+strlen("/.ssh/id_rsa")+1);
+    public_key = malloc(strlen(getenv("HOME"))+strlen("/.ssh/id_rsa.pub")+1);
+    sprintf(private_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa");
+    sprintf(public_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa.pub");
+
     /* Hook the request handler */
     ap_hook_handler(example_handler, NULL, NULL, APR_HOOK_LAST);
     {
@@ -57,10 +91,11 @@ static void register_hooks(apr_pool_t *pool)
     	int argc = 1;
         res = yangrpc_init(argc, argv);
         assert(res==NO_ERR);
-        sprintf(private_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa");
-        sprintf(public_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa.pub");
         yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/,username/*user*/,""/*password*/, public_key, private_key);
     }
+    free(username);
+    free(private_key);
+    free(public_key);
 }
 
 static ssize_t writer_fn(void *cookie, const void *buffer, size_t size)

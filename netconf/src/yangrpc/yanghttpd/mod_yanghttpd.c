@@ -77,7 +77,11 @@ static char* get_username(int uid)
 static void register_hooks(apr_pool_t *pool) 
 {
     int ret;
-    username = get_username();
+    char* username;
+    char* private_key;
+    char* public_key;
+
+    username = get_username(getuid());
     private_key = malloc(strlen(getenv("HOME"))+strlen("/.ssh/id_rsa")+1);
     public_key = malloc(strlen(getenv("HOME"))+strlen("/.ssh/id_rsa.pub")+1);
     sprintf(private_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa");
@@ -87,12 +91,20 @@ static void register_hooks(apr_pool_t *pool)
     ap_hook_handler(example_handler, NULL, NULL, APR_HOOK_LAST);
     {
     	status_t res;
+        int i;
     	char* argv[] = {"blah"};
     	int argc = 1;
         res = yangrpc_init(argc, argv);
         assert(res==NO_ERR);
-        yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/,username/*user*/,""/*password*/, public_key, private_key);
+        i=0;
+        for(i=0;(i<10);i++) {
+            yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/,username/*user*/,""/*password*/, public_key, private_key);
+            if(yangrpc_cb)
+                break;
+            fprintf(stderr,"[%d] yangrpc_connect attempt failed.\n", i);
+        }
     }
+    assert(yangrpc_cb);
     free(username);
     free(private_key);
     free(public_key);

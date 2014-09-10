@@ -2896,7 +2896,9 @@ yangrpc_cb_t* yangrpc_connect(char* server, char* user, char* password, char* pu
         assert(res==NO_ERR);
         while(1) {
             res = ses_accept_input(scb);
-            assert(res==NO_ERR);
+            if(res!=NO_ERR) {
+                return NULL;
+            }
             if(mgr_ses_process_first_ready()) {
                 break;
             }

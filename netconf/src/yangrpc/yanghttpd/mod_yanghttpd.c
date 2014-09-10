@@ -292,7 +292,7 @@ static int edit_config(request_rec *r)
     assert(input_obj!=NULL);
 
 
-    rpc_format_str = "<input><target><candidate/></target>%s</input>";
+    rpc_format_str = "<input><target><candidate/></target><default-operation>replace</default-operation>%s</input>";
     rpc_str = malloc(strlen(rpc_format_str)+strlen(config_xml_str)+1);
     sprintf(rpc_str, rpc_format_str, config_xml_str);
 

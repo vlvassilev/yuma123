@@ -74,6 +74,7 @@ status_t
 
     res = val_parse(scb, obj, &top, *val);
 
+    scb->fp = NULL; /* skip fclose inside ses_free_scb */
     ses_free_scb(scb);
 
     return res;

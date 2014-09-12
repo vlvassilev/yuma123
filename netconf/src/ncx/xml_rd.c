@@ -74,7 +74,6 @@ status_t
 
     res = val_parse(scb, obj, &top, *val);
 
-    xml_free_reader(scb->reader);
     ses_free_scb(scb);
 
     return res;

@@ -4194,7 +4194,6 @@ status_t
 * 
 * set a string with any typdef
 * Set an initialized val_value_t as a simple type
-* namespace set to 0 !!!
 *
 * Will check if the string is OK for the typdef!
 *
@@ -4234,7 +4233,7 @@ status_t
         val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
         val->btyp = NCX_BT_STRING;
     }
-    val->nsid = 0;
+    //val->nsid = 0;
 
     switch (val->btyp) {
     case NCX_BT_STRING:
@@ -4271,7 +4270,7 @@ status_t
             temp = xml_strdup(EMPTY_STRING);
         }
         if (temp) {
-            res = val_set_simval(val, typdef, 0, NULL, temp);
+            res = val_set_simval(val, typdef, val->nsid, NULL, temp);
             m__free(temp);
         } else {
             res = ERR_INTERNAL_MEM;

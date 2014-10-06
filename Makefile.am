@@ -1,5 +1,4 @@
-SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc netconf/src/yangrpc/example
-# netconf/src/yangrpc/yanghttpd
+SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc netconf/src/yangrpc/example netconf/src/yangrpc/yanghttpd
 
 
 platform_netconf_include_HEADERS= \
@@ -38,6 +37,7 @@ $(top_srcdir)/netconf/src/ncx/yin.h \
 $(top_srcdir)/netconf/src/ncx/runstack.h \
 $(top_srcdir)/netconf/src/ncx/val.h \
 $(top_srcdir)/netconf/src/ncx/val_set_cplxval_obj.h \
+$(top_srcdir)/netconf/src/ncx/val_get_leafref_targval.h \
 $(top_srcdir)/netconf/src/ncx/version.h \
 $(top_srcdir)/netconf/src/ncx/ext.h \
 $(top_srcdir)/netconf/src/ncx/yangconst.h \

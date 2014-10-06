@@ -96,6 +96,7 @@ static char *client_addr;
 static struct sockaddr *ncxname;
 static struct sockaddr_un ncxname_unix;
 static struct sockaddr_in ncxname_inet;
+static char*    ncxserver_sockname;
 static int    ncxport_inet;
 static int    ncxsock;
 static char *user;
@@ -186,10 +187,13 @@ static status_t
     ncxsock = -1;
     ncxconnect = FALSE;
     ncxport_inet = -1;
+    ncxserver_sockname = NULL;
 
     for(i=1;i<argc;i++) {
     	if(strlen(argv[i])>strlen("--tcp-direct-port=") && 0==memcmp(argv[i],"--tcp-direct-port=",strlen("--tcp-direct-port="))) {
-    		ncxport_inet = atoi(argv[i]+strlen("--tcp-direct-port=")); 
+            ncxport_inet = atoi(argv[i]+strlen("--tcp-direct-port=")); 
+        } else if(strlen(argv[i])>strlen("--ncxserver-sockname=") && 0==memcmp(argv[i],"--ncxserver-sockname=",strlen("--ncxserver-sockname="))) {
+            ncxserver_sockname = argv[i]+strlen("--ncxserver-sockname=");
     	}
     }    
 
@@ -274,7 +278,7 @@ static status_t
         } 
         ncxname_unix.sun_family = AF_LOCAL;
         strncpy(ncxname_unix.sun_path, 
-       	        NCXSERVER_SOCKNAME, 
+                (ncxserver_sockname==NULL)?NCXSERVER_SOCKNAME:ncxserver_sockname, 
                 sizeof(ncxname_unix.sun_path));
         name_size = SUN_LEN(&ncxname_unix);
         ncxname = (struct sockaddr *)&ncxname_unix;

@@ -541,6 +541,7 @@ extern "C" {
 #define NCX_EL_LIST            (const xmlChar *)"list"
 #define NCX_EL_TCP_DIRECT_ADDRESS (const xmlChar *)"tcp-direct-address"
 #define NCX_EL_TCP_DIRECT_PORT (const xmlChar *)"tcp-direct-port"
+#define NCX_EL_NCXSERVER_SOCKNAME (const xmlChar *)"ncxserver-sockname"
 #define NCX_EL_LOAD            (const xmlChar *)"load"
 #define NCX_EL_LOAD_CONFIG     (const xmlChar *)"load-config"
 #define NCX_EL_LOCK            (const xmlChar *)"lock"

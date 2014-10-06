@@ -268,6 +268,7 @@ status_t
     boolean                done, done2, stream_output;
     char*                  tcp_direct_address = NULL;
     int                    tcp_direct_port = -1;
+    char*                  ncxserver_sockname;
     val_value_t            *clivalset;
     val_value_t            *val;
 
@@ -289,6 +290,16 @@ status_t
             tcp_direct_address = VAL_STR(val);
             if(tcp_direct_port==-1) tcp_direct_port = 2023;
         }
+
+        val = val_find_child(clivalset,
+                             NCXMOD_NETCONFD,
+                             NCX_EL_NCXSERVER_SOCKNAME);
+        if(val != NULL) {
+            ncxserver_sockname = VAL_STR(val);
+        } else {
+            ncxserver_sockname = NCXSERVER_SOCKNAME;
+        }
+
     } else {
             log_error("\n*** agt_ncxserver_run:agt_cli_get_valset failed.\n");
             return SET_ERROR(ERR_INTERNAL_VAL);
@@ -300,11 +311,11 @@ status_t
             return res;
         }
     } else {
-        res = make_named_socket(NCXSERVER_SOCKNAME, &ncxsock);
+        res = make_named_socket(ncxserver_sockname, &ncxsock);
         if (res != NO_ERR) {
             log_error("\n*** Cannot connect to ncxserver socket"
                       "\n*** If no other instances of netconfd are running,"
-                      "\n*** try deleting /tmp/ncxserver.sock\n");
+                      "\n*** try deleting %s\n",ncxserver_sockname);
             return res;
         }
     }

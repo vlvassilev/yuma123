@@ -21,6 +21,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2014-10-06 {
+        description
+          "Add ncxserver-sockname allowing multiple netconfd instances per host.";
+    }
+
     revision 2013-09-11 {
         description
           "Add non-advertised-module";
@@ -319,6 +324,17 @@ module netconfd {
            connections on the netconf-ssh port (tcp/830).";
 
          type inet:port-number;
+      }
+      leaf ncxserver-sockname {
+        description
+          "Overrides the default /tmp/ncxserver.sock UNIX
+           socket name netconfd listens on for incomming connections.
+           You have to add corresponding entry to /etc/ssh/sshd_config e.g.:
+           ...
+           Port 1830
+           Subsystem netconf \"/usr/sbin/netconf-subsystem --ncxserver-sockname=/tmp/ncxserver1.sock\"
+           ...";
+        type string;
       }
 
       leaf tcp-direct-address {

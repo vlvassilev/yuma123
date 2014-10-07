@@ -39,58 +39,26 @@ val_value_t* val_get_leafref_targval_parent(val_value_t* root_val, obj_template_
 val_value_t* val_get_leafref_targval(val_value_t *leafref_val, val_value_t *root_val)
 {
     status_t res;
-    val_value_t* target_val;
-#if 0
-    val_value_t* root_val;
-    val_value_t* parent_val;
-    val_value_t* val;
-    obj_template_t* targobj;
+    val_value_t* target_val =NULL;
 
-    assert(leafref_val!=NULL);
-    targobj = obj_get_leafref_targobj(leafref_val->obj);
-
-    root_val = leafref_val->parent;
-    assert(root_val);
-    while(root_val->parent) {
-        root_val = root_val->parent;
-    }
-
-    parent_val = val_get_leafref_targval_parent(root_val, targobj);
-    for (val = val_get_first_child(parent_val);
-         val != NULL;
-         val = val_get_next_child(val)) {
-        if(0==strcmp(VAL_STRING(val), VAL_STRING(leafref_val))) {
-            return val;
-        }
-    }
-    return NULL;
-#else
-    /*
-      Workaround using the available function xpath_find_val_target.
-      TODO: To resolve more complicated cases of leafrefs depending on
-      leafs relevant to the leafref value needs both the
-      root_val and the leafref_val
-     */
-#if 0
-    root_val = leafref_val->parent;
-    assert(root_val);
-    while(root_val->parent) {
-        root_val = root_val->parent; 
-    }
-#endif
-
-    res = xpath_find_val_target((leafref_val->xpathpcb->exprstr[0] == '/')?root_val:leafref_val, NULL/*mod*/,leafref_val->xpathpcb->exprstr, &target_val);
-    assert(res==NO_ERR);
-    while(target_val) {
+    xpath_resnode_t *resnode;
+    xpath_result_t *result =
+            xpath1_eval_expr(leafref_val->xpathpcb, leafref_val, root_val, FALSE /* logerrors */, FALSE /* non-configonly */, &res);
+    assert(result);
+    for (resnode = (xpath_resnode_t *)dlq_firstEntry(&result->r.nodeQ);
+         resnode != NULL;
+         resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
         char* target_str;
-        target_str = val_make_sprintf_string(target_val);
+        val_value_t* val;
+        val = resnode->node.valptr;
+        target_str = val_make_sprintf_string(val);
         if(0==strcmp(target_str,VAL_STRING(leafref_val))) {
             free(target_str);
+            target_val = val;
             break;
         }
         free(target_str);
-        target_val = val_get_next_child(target_val);
     }
+    free(result);
     return target_val;
-#endif
 }

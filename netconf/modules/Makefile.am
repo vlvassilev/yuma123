@@ -1,4 +1,6 @@
 ietf_yang_DATA = \
+$(top_srcdir)/netconf/modules/ietf/iana-if-type.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-interfaces@2014-05-08.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-monitoring.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-partial-lock.yang \
 $(top_srcdir)/netconf/modules/ietf/nc-notifications.yang \
@@ -11,7 +13,6 @@ $(top_srcdir)/netconf/modules/ietf/SNMPv2-TC.yang
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-xsd.yang \
-$(top_srcdir)/netconf/modules/netconfcentral/yuma-interfaces.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-arp.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yangcli.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-netconf.yang \

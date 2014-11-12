@@ -23,19 +23,6 @@
 #include "xpath_yang.h"
 #include "yangconst.h"
 
-val_value_t* val_get_leafref_targval_parent(val_value_t* root_val, obj_template_t* targobj)
-{
-    val_value_t* val;
-    val_value_t* parent_val;
-    if(targobj->parent!=NULL) {
-        parent_val = val_get_leafref_targval_parent(root_val, targobj->parent);
-        val = val_find_child(parent_val,obj_get_mod_name(targobj), obj_get_name(targobj));
-    } else {
-        val = val_find_child(root_val,obj_get_mod_name(targobj), obj_get_name(targobj));
-    }
-    return val;
-}
-
 val_value_t* val_get_leafref_targval(val_value_t *leafref_val, val_value_t *root_val)
 {
     status_t res;

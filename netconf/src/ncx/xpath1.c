@@ -9152,6 +9152,7 @@ xpath_result_t *
     pcb->val_docroot = docroot;
     pcb->logerrors = logerrors;
     pcb->reader = reader;
+    pcb->valueres = NO_ERR;
 
     if (val) {
         pcb->context.node.valptr = val;

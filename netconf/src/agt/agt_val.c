@@ -5581,7 +5581,7 @@ status_t
         for (; resnode != NULL; resnode = xpath_get_next_resnode(resnode)) {
 
             val_value_t *valnode = xpath_get_resnode_valptr(resnode);
-
+            valnode->res = NO_ERR;
             res = run_obj_commit_tests(profile, scb, msghdr, ct, valnode, 
                                        root, tests);
             if (res != NO_ERR) {

@@ -4859,8 +4859,8 @@ static status_t
         ct->testflags = testflags;
         dlq_enque(ct, commit_testQ);
         if (LOGDEBUG4) {
-            log_debug4("\nAdded commit_test record for %s", 
-                       ct->objpcb->exprstr);
+            log_debug4("\nAdded commit_test record for %s testflags=0x%08X",
+                       ct->objpcb->exprstr, testflags);
         }
     }
 
@@ -4947,7 +4947,10 @@ static uint32
      * the root node (on the top-level YANG data nodes, so
      * any instance or mandatory tests on the top-node will
      * always be done     */
-    return 0;
+    //return 0;
+
+    /* xpath tests can depend on any top level container */
+    return (curflags & AGT_TEST_FL_XPATH_TYPE);
 
 } /* check_prune_obj */
 

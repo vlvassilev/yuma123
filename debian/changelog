@@ -1,6 +1,58 @@
+yuma123 (2.3-1) stable; urgency=medium
+
+  * Added autotools files to build yuma in standard and portable way.
+
+  * netconfd
+    - functionality allowing direct connection form yangcli to netconfd over unencrypted tcp socket (--tcp-direct-address="0.0.0.0" --tcp-direct-port=12024 netconfd parameters).
+    - introduced agt_not_queue_notification_cb API adding functionality to allow registering global notification callback
+    - bug in commit_complete code causing problem when more then two different modules register calbacks
+    - changed AGT_TIMER_SKIP_COUNT from 10 to 1 for better resolution
+    - decreased NCX_DEF_VTIMEOUT from 2 to 1 second
+    - introduced val_set_cplxval_obj which initializes a container and populates it with subcontainers and leafs according to xml string
+    - fixed memory leaks caused by un xmlFree -ed buffers
+    - added example-modules directory and a very simple helloworld module to be used as template
+    - fix for the b64_encode which generated \r\n for every fourth byte after > linesize bytes are generated
+    - fixed bug causing memory leak when notification_count of queued notifications exceeded the limit set by agt_profile->agt_eventlog_size
+    - bug causing segmentation fault when session scb is agt_ses_kill_session-ed twice incase of bad <hello>
+    - added agt_check_feature function for getting the state of given feature
+    - added command line parameter --non-advertised-module=<module-name> allowing to "hide" certain modules by taking them out of the hello capabilities list
+    - fixed bug in get_object_string. The function was returning wrong retlen value when called with buf==NULL
+    - added max-sessions netconfd argument to replace the constant (1024) used
+    - fixed bug in log_error format string causing segmentation fault when the error happened
+    - fixed bug caused by unresolved/uninitialized tdef->def.simple.xrefdef members of leafref objects defined within augment sections
+    - added support for 'refine' objects in resolve_xpath
+    - added val_add_meta API function
+    - added autoloading of the server modules based on the received capabilities list from the <hello>
+    - fixed memory leak - session and reader in xml_rd_open_file were not freed
+    - added new API function val_get_leafref_targval
+    - added ncxserver-sockname parameter to netconfd and netconf-subsystem. Now multiple instances of netconfd can be started on the same system
+    - replaced the makeshif timplementation of val_find_node with call to xpath1_eval_expr
+    - fixed bug relevant to presistent commit validation check result variables not reinitialized before a new commit validation attempt was made. For example unresolved leafref causes a commit to fail then the missing leaf is added but the commit keeps failing
+    - fixed ancient bug in check_prune_obj causing pruning/skiping of the leafref validation. The bug can be reproduced when the leaf referenced by the leafref is deleted without making changes in the toplevel container containing the leafref.
+    - moved /yuma-system:system to /ieft-system:system-state/yuma-system:yuma
+
+  * yangcli
+    - patch allowing leaf objects which are not keys to be initialized in the predicate of create target Xpath
+    - taken the config=false objects out of the Xpath tab completion choices for create,replace and delete RPCs
+    - introduced new method for entry of container leafs: create /interfaces/interface -- name='ge0' mtu=1500
+    - added basic predicate tab completion and seamless tab completion of xpaths after predicate blocks
+    - fixed bug in yangcli tab completion in the cases when the cursor was stending under (not after) the initial '/'
+    - fixed tab completion for paths defined in augment modules
+    - fixed bug in parsing top augment leafs in var_get_script_val. val->nsid was overwritten by 0 and no xmlns meta was added to the generated xml causing netconfd to not accept the data
+
+  * YANG modules:
+    - replaced yuma-interfaces.yang with ietf-interfaces.yang (rfc7223)
+    - replaced yuma-system.yang with ietf-system.yang (rfc7317)
+    - replaced yuma-nacm.yang with ietf-netconf-acm.yang (rfc6536)
+
+  * yangrpc:
+    - added experimental blocking (non-callback) API for clients called yangrpc_* (yangrpc_connect, yangrpc_exec, yangrpc_close). An alternative to the mgr_* API suited better for certain applications
+    - added simple apache2 module as yangrpc usage example. Reading state and configuration root as xml and submit form for configurations
+ --  <vladimir@transpacket.com>  Wed, 10 Dec 2014 17:08:11 +0100
+
 yuma123 (2.2-5.1) stable; urgency=high
   * Integrated last official yuma release 2.2-5
- -- Vladimir Vassilev <vladimir@transpacket.com>  Fhu, 7 Feb 2013 18:22:00 +0100
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 7 Feb 2013 18:22:00 +0100
 yuma (2.2-5) stable; urgency=high
   * netconfd:
     - fix error-path bugs

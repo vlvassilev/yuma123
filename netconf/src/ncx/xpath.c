@@ -642,6 +642,26 @@ static status_t
             return res;
         }
 
+        if(nextobj->parent != curobj) {
+            res = ERR_NCX_DEFSEG_NOT_FOUND;
+            log_error("\nError: in '%s' the schema node parent of '%s' is '%s' while '%s' is its document node parent. Schema nodes like (case, choice, input or output) are mandatory in schema node identifier expressions: "
+                      "%s on line %u",
+                      target,
+                      obj_get_name(nextobj),
+                      obj_get_name(nextobj->parent),
+                      obj_get_name(curobj),
+                      tkerr->mod->name,
+                      tkerr->linenum);
+            do_errmsg(tkc, mod, tkerr, res);
+            if (prefix) {
+                m__free(prefix);
+            }
+            if (name) {
+                m__free(name);
+            }
+            return res;
+        }
+
         if (nextobj) {
             curobj = nextobj;
         } else {

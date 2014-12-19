@@ -77,6 +77,8 @@ status_t
     scb->fp = NULL; /* skip fclose inside ses_free_scb */
     ses_free_scb(scb);
 
+    xml_clean_node(&top);
+
     return res;
 
 } /* xml_rd_open_file */

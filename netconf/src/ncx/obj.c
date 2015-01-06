@@ -6362,6 +6362,13 @@ status_t
             typdef->def.named.typ = testtyp;
             typdef->linenum = testtyp->tkerr.linenum;
             testtyp->used = TRUE;
+            if (testtyp->typdef.tclass == NCX_CL_NAMED &&
+                     testtyp->typdef.def.named.typ==NULL) {
+                obj_set_named_type (tkc, mod, typname,
+                            &testtyp->typdef,
+                            parent,
+                            grp);
+            }
         }
     }
     return NO_ERR;

@@ -2,7 +2,7 @@ ietf_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf/ietf-system.yang \
 $(top_srcdir)/netconf/modules/ietf/iana-crypt-hash.yang \
 $(top_srcdir)/netconf/modules/ietf/iana-if-type.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-interfaces@2014-05-08.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-interfaces.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-monitoring.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-partial-lock.yang \
 $(top_srcdir)/netconf/modules/ietf/nc-notifications.yang \

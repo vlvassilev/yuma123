@@ -709,7 +709,7 @@ static boolean
                                     AGT_ACM_MODULE,
                                     nacm_N_accessOperations);
             assert(rights);
-            if (0==strcmp(rights,"*")) {
+            if (0==strcmp(VAL_STRING(rights),"*")) {
                 granted=TRUE;
             } else {
 #if 0
@@ -969,6 +969,9 @@ static boolean
     *done = FALSE;
     granted = FALSE;
     res = NO_ERR;
+
+    return FALSE;
+    /*TODO: Not ready. */
 
     if (!(cache->flags & FL_ACM_MODRULES_SET)) {
         cache->flags |= FL_ACM_MODRULES_SET;
@@ -1256,7 +1259,7 @@ for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE,
          */
         pcb->source = XP_SRC_YANG;
         result = xpath1_eval_expr( pcb, valroot, valroot, FALSE,
-                                   TRUE, &res );
+                                   TRUE /*configonly*/, &res );
         if ( !result ) 
         {
             res = ERR_INTERNAL_MEM;
@@ -1372,8 +1375,10 @@ static boolean
                 break;
             }
 
-            if ( xpath1_check_node_exists_slow( datarule_cache->pcb,
-                                                resnodeQ, val ) )
+            if ( xpath1_check_node_child_exists_slow( datarule_cache->pcb,
+                                                resnodeQ, val ) ||
+                 xpath1_check_node_exists_slow( datarule_cache->pcb,
+                                                resnodeQ, val ))
             {
                 /* this data rule is for the specified data-node
                  * check if requested access is allowed
@@ -1428,7 +1433,7 @@ static boolean
     logfn_t      logfn;
 
     /* check if this is a read or a write */
-    if ((newval==NULL) && (curval==NULL)) {
+    if ((newval!=NULL) || (curval!=NULL)) {
         iswrite = TRUE;
         logfn = (log_writes) ? log_debug2 : log_noop;
     } else {

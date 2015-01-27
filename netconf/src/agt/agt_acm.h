@@ -101,7 +101,6 @@ extern "C" {
 /* 1 group that the user is a member */
 typedef struct agt_acm_group_t_ {
     dlq_hdr_t         qhdr;
-    xmlns_id_t        groupnsid;
     const xmlChar    *groupname;
 } agt_acm_group_t;
 
@@ -209,7 +208,7 @@ extern boolean
 *
 * Check if the specified user is allowed to receive
 * a notification event
-* 
+* d
 * INPUTS:
 *   user == user name string
 *   notifobj == obj_template_t for the notification event to check

@@ -138,7 +138,7 @@ static agt_acmode_t   acmode;
 
 static uint32         denied_operations_count;
 
-static uint32         deniedDataWriteCount;
+static uint32         denied_data_writes_count;
 
 static agt_acm_cache_t  *notif_cache;
 
@@ -864,7 +864,7 @@ for (rule_list = val_find_child(nacmroot,
      rule_list != NULL && res == NO_ERR && !*done;
      rule_list = val_find_next_child(nacmroot,
                                    AGT_ACM_MODULE,
-                                   nacm_N_rule,
+                                   nacm_N_ruleList,
                                    rule_list)) {
     for (rule = val_find_child(rule_list, 
                                   AGT_ACM_MODULE, 
@@ -890,9 +890,10 @@ for (rule_list = val_find_child(nacmroot,
 
 
         /* check if this is the right module */
-        if (xml_strcmp("*",
-                       VAL_STR(modname)) && xml_strcmp(obj_get_mod_name(rpcobj),
-                       VAL_STR(modname))) {
+        if (xml_strcmp("*", VAL_STR(modname)) &&
+            xml_strcmp(obj_get_mod_name(rpcobj), VAL_STR(modname)) &&
+            (xml_strcmp(obj_get_mod_name(rpcobj), "yuma-netconf") && xml_strcmp("ietf-netconf", VAL_STR(modname)))
+           ) {
             continue;
         }
 
@@ -1190,7 +1191,7 @@ static boolean
 *
 * INPUTS:
 *    cache == agt_acm cache to use
-*    rulesval == /nacm/rules node, pre-fetched
+*    nacmroot == /nacm node
 *
 * OUTPUTS:
 *    *cache is modified with the cached datarules items.
@@ -1201,7 +1202,7 @@ static boolean
 *********************************************************************/
 static status_t
     cache_data_rules( agt_acm_cache_t *cache,
-                      val_value_t *nacmroot )
+                      val_value_t *nacmroot)
 {
     status_t             res = NO_ERR;
     val_value_t         *rule, *rule_list;
@@ -1211,7 +1212,19 @@ static status_t
     if ( ( cache->flags & FL_ACM_DATARULES_SET ) ) 
     {
         // datarules have already been already cached, return no error
-        return NO_ERR;
+        //return NO_ERR;
+
+
+        /* regenerate all cached datarules since no mechanism for updating config=false rules is in place yet */
+        agt_acm_datarule_t  *freerule;        
+        while (!dlq_empty(&cache->dataruleQ)) {
+            freerule = (agt_acm_datarule_t *)dlq_deque(&cache->dataruleQ);
+            if (freerule) {
+                free_datarule(freerule);
+            } else {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
     }
 
     /* the /nacm node is supposed to be a child of <config> */
@@ -1240,6 +1253,7 @@ for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE,
         xpath_pcb_t         *pcb;
         xpath_result_t      *result;
 
+
         /* get the XPath expression leaf */
         path = val_find_child( rule, AGT_ACM_MODULE, nacm_N_path );
         if ( !path || !path->xpathpcb ) 
@@ -1259,7 +1273,7 @@ for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE,
          */
         pcb->source = XP_SRC_YANG;
         result = xpath1_eval_expr( pcb, valroot, valroot, FALSE,
-                                   TRUE /*configonly*/, &res );
+                                   FALSE /*configonly*/, &res );
         if ( !result ) 
         {
             res = ERR_INTERNAL_MEM;
@@ -1354,9 +1368,13 @@ static boolean
     *done = FALSE;
 
     /* fill the dataruleQ in the cache if needed */
+#if 0
     if (!(cache->flags & FL_ACM_DATARULES_SET)) 
+#else
+    if (1)
+#endif
     {
-        res = cache_data_rules( cache, nacmroot );
+        res = cache_data_rules( cache, nacmroot);
     }
 
     if ( res == NO_ERR )
@@ -1374,9 +1392,12 @@ static boolean
                 res = SET_ERROR(ERR_INTERNAL_VAL);
                 break;
             }
-
-            if ( xpath1_check_node_child_exists_slow( datarule_cache->pcb,
-                                                resnodeQ, val ) ||
+            if(0==strcmp(access, "update")) {
+            	*done=TRUE;
+            	return TRUE;
+            }
+            if ( ((0==strcmp(access, "read")) && xpath1_check_node_child_exists_slow( datarule_cache->pcb,
+                                                resnodeQ, val )) ||
                  xpath1_check_node_exists_slow( datarule_cache->pcb,
                                                 resnodeQ, val ))
             {
@@ -1797,7 +1818,7 @@ static status_t
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
-    VAL_UINT(dstval) = deniedDataWriteCount;
+    VAL_UINT(dstval) = denied_data_writes_count;
     return NO_ERR;
 
 } /* get_deniedDataWrites */
@@ -2009,7 +2030,7 @@ status_t
     superuser = NULL;
     acmode = AGT_ACMOD_ENFORCING;
     denied_operations_count = 0;
-    deniedDataWriteCount = 0;
+    denied_data_writes_count = 0;
     agt_acm_init_done = TRUE;
     log_reads = FALSE;
     log_writes = TRUE;
@@ -2467,7 +2488,7 @@ boolean
     retval = valnode_access_allowed(msg->acm_cache, user, val, newval, curval, editop);
 
     if (!retval) {
-        deniedDataWriteCount++;
+        denied_data_writes_count++;
     }
 
     return retval;

@@ -9044,8 +9044,10 @@ xpath_result_t *
         pcb->context.node.valptr->name);
 #endif
 
-    if (configonly ||
-        (pcb->source == XP_SRC_YANG && obj_is_config(val->obj))) {
+    if (configonly) {
+#if 0
+    	|| (pcb->source == XP_SRC_YANG && obj_is_config(val->obj)  && !obj_is_root(val->obj))) {
+#endif
         pcb->flags |= XP_FL_CONFIGONLY;
     }
 

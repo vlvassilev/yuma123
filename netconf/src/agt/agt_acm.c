@@ -76,7 +76,6 @@ date         init     comment
 
 #define nacm_N_accessOperations (const xmlChar *)"access-operations"
 #define nacm_N_comment (const xmlChar *)"comment"
-#define nacm_N_dataRule (const xmlChar *)"data-rule"
 #define nacm_N_enableNacm (const xmlChar *)"enable-nacm"
 #define nacm_N_group (const xmlChar *)"group"
 #define nacm_N_name (const xmlChar *)"name"
@@ -85,12 +84,8 @@ date         init     comment
 #define nacm_N_moduleRule (const xmlChar *)"module-rule"
 #define nacm_N_nacm (const xmlChar *)"nacm"
 #define nacm_N_rule_name (const xmlChar *)"rule-name"
-#define nacm_N_notificationModuleName \
-    (const xmlChar *)"notification-module-name"
 #define nacm_N_notificationName \
     (const xmlChar *)"notification-name"
-#define nacm_N_notificationRule \
-    (const xmlChar *)"notification-rule"
 #define nacm_N_readDefault (const xmlChar *)"read-default"
 #define nacm_N_writeDefault (const xmlChar *)"write-default"
 #define nacm_N_execDefault (const xmlChar *)"exec-default"
@@ -606,16 +601,18 @@ static agt_acm_cache_t  *
     new_acm_cache (void)
 {
     agt_acm_cache_t  *acm_cache;
-
+    int i;
     acm_cache = m__getObj(agt_acm_cache_t);
     if (!acm_cache) {
         return NULL;
     }
     memset(acm_cache, 0x0, sizeof(agt_acm_cache_t));
     dlq_createSQue(&acm_cache->modruleQ);
-    dlq_createSQue(&acm_cache->dataruleQ);
+    for(i=0;i<DATA_RULE_QUEUE_NUM;i++) {
+        dlq_createSQue(&acm_cache->dataruleQ[i]);
+    }
     acm_cache->mode = acmode;
-    acm_cache->flags |= FL_ACM_CACHE_VALID;
+    acm_cache->flags = FL_ACM_CACHE_VALID;
     return acm_cache;
 
 } /* new_acm_cache */
@@ -634,6 +631,7 @@ static void
 {
     agt_acm_modrule_t    *modrule;
     agt_acm_datarule_t   *datarule;
+    int i;
 
     while (!dlq_empty(&acm_cache->modruleQ)) {
         modrule = (agt_acm_modrule_t *)
@@ -641,10 +639,12 @@ static void
         free_modrule(modrule);
     }
 
-    while (!dlq_empty(&acm_cache->dataruleQ)) {
-        datarule = (agt_acm_datarule_t *)
-            dlq_deque(&acm_cache->dataruleQ);
-        free_datarule(datarule);
+    for(i=0;i<DATA_RULE_QUEUE_NUM;i++) {
+        while (!dlq_empty(&acm_cache->dataruleQ[i])) {
+            datarule = (agt_acm_datarule_t *)
+            dlq_deque(&acm_cache->dataruleQ[i]);
+            free_datarule(datarule);
+        }
     }
 
     if (acm_cache->usergroups) {
@@ -689,8 +689,8 @@ static boolean
     *done = FALSE;
     granted = FALSE;
 
-    for (group = val_find_child(ruleval->parent, 
-                                AGT_ACM_MODULE, 
+    for (group = val_find_child(ruleval->parent,
+                                AGT_ACM_MODULE,
                                 nacm_N_group);
          group != NULL && !*done;
          group = val_find_next_child(ruleval->parent,
@@ -728,6 +728,43 @@ static boolean
     return granted;
 
 } /* check_access_bit */
+
+/********************************************************************
+* FUNCTION check_rule_group
+*
+*
+* INPUTS:
+*    ruleval == /nacm/rule-list/rule node, pre-fetched
+*    usergroups == user-to-group mapping for access processing
+*    done == address of return done processing flag
+*
+* RETURNS:
+*      TRUE if group was found
+*      FALSE if group was not found
+*********************************************************************/
+static boolean
+    check_rule_group (val_value_t *ruleval,
+                      agt_acm_usergroups_t *usergroups)
+{
+    val_value_t      *group, *nameval, *rights;
+
+    for (group = val_find_child(ruleval->parent,
+                                AGT_ACM_MODULE,
+                                nacm_N_group);
+         group != NULL;
+         group = val_find_next_child(ruleval->parent,
+                                      AGT_ACM_MODULE,
+                                      nacm_N_name,
+                                      group)) {
+        if ((0==strcmp(VAL_STRING(group),"*")) || find_group_ptr(usergroups,
+                           VAL_STRING(group))) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+
+} /* check_rule_group */
 
 
 /********************************************************************
@@ -859,7 +896,7 @@ static boolean
 
     /* check all the entries */
 for (rule_list = val_find_child(nacmroot,
-                                    AGT_ACM_MODULE, 
+                                    AGT_ACM_MODULE,
                                     nacm_N_ruleList);
      rule_list != NULL && res == NO_ERR && !*done;
      rule_list = val_find_next_child(nacmroot,
@@ -890,7 +927,8 @@ for (rule_list = val_find_child(nacmroot,
 
 
         /* check if this is the right module */
-        if (xml_strcmp("*", VAL_STR(modname)) &&
+        if ((modname != NULL) &&
+            xml_strcmp("*", VAL_STR(modname)) &&
             xml_strcmp(obj_get_mod_name(rpcobj), VAL_STR(modname)) &&
             (xml_strcmp(obj_get_mod_name(rpcobj), "yuma-netconf") && xml_strcmp("ietf-netconf", VAL_STR(modname)))
            ) {
@@ -955,13 +993,13 @@ for (rule_list = val_find_child(nacmroot,
 *********************************************************************/
 static boolean
     check_module_rules (agt_acm_cache_t *cache,
-                        val_value_t *rulesval,
+                        val_value_t *nacmroot,
                         const obj_template_t *obj,
                         const xmlChar *access,
                         agt_acm_usergroups_t *usergroups,
                         boolean *done)
 {
-    val_value_t        *modrule, *modname;
+    val_value_t        *rule_list, *modrule, *modname;
     agt_acm_modrule_t  *modrule_cache;
     boolean             granted;
     xmlns_id_t          nsid;
@@ -973,16 +1011,19 @@ static boolean
 
     return FALSE;
     /*TODO: Not ready. */
+    rule_list = val_find_child(nacmroot,
+                             AGT_ACM_MODULE,
+                             nacm_N_ruleList);
 
     if (!(cache->flags & FL_ACM_MODRULES_SET)) {
         cache->flags |= FL_ACM_MODRULES_SET;
 
         /* check all the moduleRule entries */
-        for (modrule = val_find_child(rulesval, 
-                                      AGT_ACM_MODULE, 
+        for (modrule = val_find_child(rule_list,
+                                      AGT_ACM_MODULE,
                                       nacm_N_moduleRule);
              modrule != NULL && res == NO_ERR;
-             modrule = val_find_next_child(rulesval,
+             modrule = val_find_next_child(rule_list,
                                            AGT_ACM_MODULE,
                                            nacm_N_moduleRule,
                                            modrule)) {
@@ -1180,6 +1221,36 @@ static boolean
 
 }  /* get_default_data_response */
 
+static const char* get_rule_queue_access_str(unsigned int access_id)
+{
+    if(access_id==DATA_RULE_QUEUE_READ) {
+        return "read";
+    } else if(access_id==DATA_RULE_QUEUE_UPDATE) {
+        return "update";
+    } else if(access_id==DATA_RULE_QUEUE_CREATE) {
+        return "create";
+    } else if(access_id==DATA_RULE_QUEUE_DELETE) {
+        return "delete";
+    } else {
+        assert(0);
+    }
+}
+
+static unsigned int get_rule_queue_access_id(char* access_str)
+{
+    if(0==strcmp("read", access_str)) {
+        return DATA_RULE_QUEUE_READ;
+    } else if(0==strcmp("update", access_str)) {
+        return DATA_RULE_QUEUE_UPDATE;
+    } else if(0==strcmp("create", access_str)) {
+        return DATA_RULE_QUEUE_CREATE;
+    } else if(0==strcmp("delete", access_str)) {
+        return DATA_RULE_QUEUE_DELETE;
+    } else {
+        assert(0);
+    }
+}
+
 /********************************************************************
 * FUNCTION cache_data_rules
 *
@@ -1204,25 +1275,26 @@ static status_t
     cache_data_rules( agt_acm_cache_t *cache,
                       val_value_t *nacmroot)
 {
-    status_t             res = NO_ERR;
+    status_t            res = NO_ERR;
     val_value_t         *rule, *rule_list;
     val_value_t         *valroot;
-    dlq_hdr_t            holdQ;
+    int                 i;
 
-    if ( ( cache->flags & FL_ACM_DATARULES_SET ) ) 
-    {
+    if (cache->flags & FL_ACM_DATARULES_SET) {
         // datarules have already been already cached, return no error
         //return NO_ERR;
 
 
         /* regenerate all cached datarules since no mechanism for updating config=false rules is in place yet */
-        agt_acm_datarule_t  *freerule;        
-        while (!dlq_empty(&cache->dataruleQ)) {
-            freerule = (agt_acm_datarule_t *)dlq_deque(&cache->dataruleQ);
-            if (freerule) {
-                free_datarule(freerule);
-            } else {
-                return SET_ERROR(ERR_INTERNAL_VAL);
+        agt_acm_datarule_t  *freerule;
+        for(i=0;i<DATA_RULE_QUEUE_NUM;i++) {
+            while (!dlq_empty(&cache->dataruleQ[i])) {
+                freerule = (agt_acm_datarule_t *)dlq_deque(&cache->dataruleQ[i]);
+                if (freerule) {
+                    free_datarule(freerule);
+                } else {
+                    return SET_ERROR(ERR_INTERNAL_VAL);
+                }
             }
         }
     }
@@ -1233,9 +1305,6 @@ static status_t
     {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
-
-    /* save data rules in this hold queue until all OK */
-    dlq_createSQue(&holdQ);
 
 for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE, 
                                      nacm_N_ruleList );
@@ -1250,75 +1319,83 @@ for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE,
                                           nacm_N_rule, rule ) ) 
     {
         val_value_t         *path;
+        val_value_t         *access_operations;
         xpath_pcb_t         *pcb;
         xpath_result_t      *result;
 
 
         /* get the XPath expression leaf */
         path = val_find_child( rule, AGT_ACM_MODULE, nacm_N_path );
-        if ( !path || !path->xpathpcb ) 
-        {
+        if ( !path || !path->xpathpcb ) {
             continue;
         }
 
-        pcb = xpath_clone_pcb( path->xpathpcb );
-        if(!pcb) {
-            res = ERR_INTERNAL_MEM;
-            break;
+        access_operations = val_find_child( rule, AGT_ACM_MODULE, nacm_N_accessOperations );
+        if ( !access_operations ) {
+            continue;
         }
 
-        /* make sure the source is not XML so the defunct reader
-         * does not get accessed; the clone should save the
-         * NSID bindings in all the tokens
-         */
-        pcb->source = XP_SRC_YANG;
-        result = xpath1_eval_expr( pcb, valroot, valroot, FALSE,
-                                   FALSE /*configonly*/, &res );
-        if ( !result ) 
-        {
-            res = ERR_INTERNAL_MEM;
-            xpath_free_pcb(pcb);
-            break;
-        }
+        for(i=0;i<DATA_RULE_QUEUE_NUM;i++) {
 
-        if ( res == NO_ERR) 
-        {
-            agt_acm_datarule_t  *datarule_cache;
-            datarule_cache = new_datarule(pcb, result, rule);
-            if ( datarule_cache ) 
-            {
-                /* pass off 'pcb' and 'result' memory here */
-                dlq_enque( datarule_cache, &holdQ );
+            /* make sure the source is not XML so the defunct reader
+             * does not get accessed; the clone should save the
+             * NSID bindings in all the tokens
+             */
+            if((0!=strcmp("*",VAL_STRING(access_operations))) && (NULL==strstr(get_rule_queue_access_str(i),VAL_STRING(access_operations)))) {
+                continue;
             }
-            else 
-            {
+
+            pcb = xpath_clone_pcb( path->xpathpcb );
+            if(!pcb) {
                 res = ERR_INTERNAL_MEM;
+                break;
             }
-        }
 
-        if ( res != NO_ERR )
-        {
-            xpath_free_pcb( pcb );
-            xpath_free_result( result );
-            break;
+            pcb->source = XP_SRC_YANG;
+            result = xpath1_eval_expr( pcb, valroot, valroot, FALSE,
+                                       (i==DATA_RULE_QUEUE_READ)?FALSE:TRUE /*configonly*/, &res );
+            if ( !result ) {
+                res = ERR_INTERNAL_MEM;
+                xpath_free_pcb(pcb);
+                break;
+            }
+
+            if ( res == NO_ERR) {
+                agt_acm_datarule_t  *datarule_cache;
+                datarule_cache = new_datarule(pcb, result, rule);
+                if ( datarule_cache ) {
+                    /* pass off 'pcb' and 'result' memory here */
+                    dlq_enque( datarule_cache, &cache->dataruleQ[i] );
+                } else {
+                    res = ERR_INTERNAL_MEM;
+                }
+            }
+
+            if ( res != NO_ERR ) {
+                xpath_free_pcb( pcb );
+                xpath_free_result( result );
+                break;
+            }
         }
     }
 }
     if (res == NO_ERR) {
         cache->flags |= FL_ACM_DATARULES_SET;
-        dlq_block_enque(&holdQ, &cache->dataruleQ);
     } else {
-        agt_acm_datarule_t  *freerule;        
-        while (!dlq_empty(&holdQ)) {
-            freerule = (agt_acm_datarule_t *)dlq_deque(&holdQ);
-            if (freerule) {
-                free_datarule(freerule);
-            } else {
-                SET_ERROR(ERR_INTERNAL_VAL);
+        for(i=0;i<DATA_RULE_QUEUE_NUM;i++) {
+
+            agt_acm_datarule_t  *freerule;
+            while (!dlq_empty(&cache->dataruleQ[i])) {
+                freerule = (agt_acm_datarule_t *)dlq_deque(&cache->dataruleQ[i]);
+                if (freerule) {
+                    free_datarule(freerule);
+                } else {
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
             }
+            log_error("\nError: cache NACM data rules failed! (%s)",
+                      get_error_string(res));
         }
-        log_error("\nError: cache NACM data rules failed! (%s)",
-                  get_error_string(res));
     }
 
     return res;
@@ -1334,7 +1411,6 @@ for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE,
 * INPUTS:
 *    cache == agt_acm cache to use
 *    nacmroot == /nacm node prefetched
-*    rulesval == /nacm/rules node, pre-fetched
 *    val == value node requested
 *    access == string (enum name) for the requested access
 *              (read, write)
@@ -1354,7 +1430,6 @@ for ( rule_list = val_find_child( nacmroot, AGT_ACM_MODULE,
 static boolean
     check_data_rules (agt_acm_cache_t *cache,
                       val_value_t *nacmroot,
-                      val_value_t *rulesval,
                       const val_value_t *val,
                       const xmlChar *access,
                       agt_acm_usergroups_t *usergroups,
@@ -1364,7 +1439,7 @@ static boolean
     agt_acm_datarule_t  *datarule_cache;
     boolean              granted = FALSE;
     status_t             res = NO_ERR;
-
+    int                  access_id;
     *done = FALSE;
 
     /* fill the dataruleQ in the cache if needed */
@@ -1377,38 +1452,36 @@ static boolean
         res = cache_data_rules( cache, nacmroot);
     }
 
-    if ( res == NO_ERR )
+    if ( res != NO_ERR )
     {
+        *done = FALSE;
+        return FALSE;
+    }
+
+    access_id = get_rule_queue_access_id(access);
+    {
+
         /* go through the cache and exit if any matches are found */
         for ( datarule_cache = (agt_acm_datarule_t *) 
-                  dlq_firstEntry(&cache->dataruleQ);
+                  dlq_firstEntry(&cache->dataruleQ[access_id]);
               datarule_cache != NULL && !*done;
               datarule_cache = (agt_acm_datarule_t *) 
                   dlq_nextEntry(datarule_cache)) 
         {
+            if(!check_rule_group (datarule_cache->datarule, usergroups)) {
+                continue;
+            }
+
             resnodeQ = xpath_get_resnodeQ(datarule_cache->result);
-            if (!resnodeQ) 
-            {
-                res = SET_ERROR(ERR_INTERNAL_VAL);
-                break;
-            }
-            if(0==strcmp(access, "update")) {
-            	*done=TRUE;
-            	return TRUE;
-            }
-            if ( ((0==strcmp(access, "read")) && xpath1_check_node_child_exists_slow( datarule_cache->pcb,
-                                                resnodeQ, val )) ||
+            assert(resnodeQ);
+
+            if ( ((access_id==DATA_RULE_QUEUE_READ) && xpath1_check_node_child_exists_slow( datarule_cache->pcb,resnodeQ, val )) ||
+                 ((access_id==DATA_RULE_QUEUE_UPDATE) && !obj_is_leaf(val->obj)) ||
                  xpath1_check_node_exists_slow( datarule_cache->pcb,
                                                 resnodeQ, val ))
             {
-                /* this data rule is for the specified data-node
-                 * check if requested access is allowed
-                 */
-
-                granted = check_access_bit( datarule_cache->datarule,
-                                            access,
-                                            usergroups,
-                                            done );
+                *done = TRUE;
+                granted = TRUE;
             }
         }
     }
@@ -1449,7 +1522,7 @@ static boolean
                             op_editop_t editop)
 {
     char* access;
-    val_value_t *nacmroot = NULL, *rulesval = NULL;
+    val_value_t *nacmroot = NULL;
     boolean      iswrite;
     logfn_t      logfn;
 
@@ -1566,13 +1639,13 @@ static boolean
 
         /* there is a rules node so check the dataRule list */
         if (!done) {
-            retval = check_data_rules(cache, nacmroot, rulesval, val, access,
+            retval = check_data_rules(cache, nacmroot, val, access,
                                       usergroups, &done);
             if (done) {
                 substr = (const xmlChar *)"data-rule";
             } else {
                 /* no data rule found; try a module namespace rule */
-                retval = check_module_rules(cache, rulesval, val->obj, access,
+                retval = check_module_rules(cache, nacmroot, val->obj, access,
                                             usergroups, &done);
                 if (done) {
                     substr = (const xmlChar *)"module-rule";
@@ -1669,8 +1742,12 @@ for (rule_list = val_find_child(nacmrootval,
         }
 
         /* check if this is the right module */
-        if ((modname!=NULL) && xml_strcmp(obj_get_mod_name(notifobj),
-                       VAL_STR(modname))) {
+
+        if ((modname!=NULL) &&
+            xml_strcmp("*", VAL_STR(modname)) &&
+            xml_strcmp(obj_get_mod_name(notifobj), VAL_STR(modname)) &&
+            (xml_strcmp(obj_get_mod_name(notifobj), "yuma-netconf") && xml_strcmp("ietf-netconf", VAL_STR(modname)))
+           ) {
             continue;
         }
 
@@ -1687,7 +1764,7 @@ for (rule_list = val_find_child(nacmrootval,
          */
         done2 = FALSE;
         granted = check_access_bit(rule,
-                                   nacm_E_allowedRights_exec,
+                                   nacm_E_allowedRights_read,
                                    usergroups,
                                    &done2);
         if (done2) {

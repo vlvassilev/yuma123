@@ -1,3 +1,12 @@
+yuma123 (2.4-1) stable; urgency=low
+
+  * netconfd
+    - NACM implemented
+    - Debian build system cleanup
+    - Memory leak fixed in xml_rd_open_file
+
+ --  <vladimir@transpacket.com>  Mon, 02 Feb 2015 13:37:12 +0100
+
 yuma123 (2.3-1) stable; urgency=medium
 
   * Added autotools files to build yuma in standard and portable way.

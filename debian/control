@@ -1,20 +1,12 @@
-<<<<<<< HEAD
-Source: yuma-transpacket
-=======
 Source: yuma123
->>>>>>> yuma123-write/master
 Section: devel
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
-<<<<<<< HEAD
 Homepage: http://transpacket.com/
 
-Package: yuma-transpacket
-=======
 Package: yuma123
->>>>>>> yuma123-write/master
 Architecture: any
 Depends: libncurses5, libssh2-1, libxml2, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: yuma

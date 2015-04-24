@@ -805,33 +805,29 @@ status_t
                 revision = savestr + 1;
             }
 
-            retmod = ncx_find_module(VAL_STR(val), revision);
-            if (retmod == NULL) {
 #ifdef STATIC_SERVER
-                /* load just the module
-                 * SIL initialization is assumed to be
-                 * handled elsewhere
-                 */
+            /* load just the module
+             * SIL initialization is assumed to be
+             * handled elsewhere
+             */
+             res = ncxmod_load_module(VAL_STR(val),
+                                     revision,
+                                     &agt_profile.agt_savedevQ,
+                                     &retmod);
+            }
+            
+#else
+            /* load the SIL and it will load its own module */
+            res = agt_load_sil_code(VAL_STR(val), revision, FALSE);
+            if (res == ERR_NCX_SKIPPED) {
+                log_warn("\nWarning: SIL code for module '%s' not found",
+                         VAL_STR(val));
                 res = ncxmod_load_module(VAL_STR(val),
                                          revision,
                                          &agt_profile.agt_savedevQ,
                                          &retmod);
-#else
-                /* load the SIL and it will load its own module */
-                res = agt_load_sil_code(VAL_STR(val), revision, FALSE);
-                if (res == ERR_NCX_SKIPPED) {
-                    log_warn("\nWarning: SIL code for module '%s' not found",
-                             VAL_STR(val));
-                    res = ncxmod_load_module(VAL_STR(val),
-                                             revision,
-                                             &agt_profile.agt_savedevQ,
-                                             &retmod);
-                }
-#endif
-            } else {
-                log_info("\nCLI: Skipping 'module' parm '%s', already loaded",
-                         VAL_STR(val));
             }
+#endif
 
             if (savestr != NULL) {
                 *savestr = savechar;

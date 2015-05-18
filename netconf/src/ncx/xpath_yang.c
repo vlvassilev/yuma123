@@ -399,12 +399,18 @@ static obj_template_t* find_object_from_use_obj( obj_template_t* useobj,
         }
     } else {
         /* get child node of this object */
+        obj_template_t* parentobj;
+        if(useobj->objtype == OBJ_TYP_AUGMENT) {
+            parentobj = useobj->def.augment->targobj;
+        } else {
+            parentobj = useobj;
+        }
         if ( targmod ) {
-            foundobj = obj_find_child( useobj, ncx_get_modname(targmod),
+            foundobj = obj_find_child( parentobj, ncx_get_modname(targmod),
                                        nodename);
         }
         else if ( !foundobj && laxnamespaces ) {
-            foundobj = obj_find_child(useobj, NULL, nodename);
+            foundobj = obj_find_child(parentobj, NULL, nodename);
         }
     }
     return foundobj;

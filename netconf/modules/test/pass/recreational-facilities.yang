@@ -1,0 +1,50 @@
+module recreational-facilities {
+
+    namespace "http://example.com/ns/recreational-facilities";
+
+    prefix "recreational-facilities";
+
+    import people { prefix people; }
+
+    organization  "Example LTD.";
+
+    description
+      "Example of the benefits of direct augmentation with must substatements.";
+
+    revision 2015-05-26 {
+        description
+            "Initial revision";
+    }
+
+    identity recreational-facility-type {
+        description
+            "Base identity from which specific recreational facility types are
+            derived.";
+    }
+
+    container recreational-facilities {
+        description
+            "Container for all recreational-facilities information.";
+
+        list recreational-facility {
+            key name;
+
+            leaf name {
+                type string;
+            }
+
+            leaf type {
+                type identityref {
+                    base recreational-facility-type;
+                }
+                mandatory true;
+            }
+
+            leaf-list visitor {
+                type leafref {
+                    path "/people:people/people:person/people:name";
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,50 @@
+module recreational-facilities-zoo {
+
+    namespace "http://example.com/ns/recreational-facilities-zoo";
+
+    prefix "recreational-facilities-zoo";
+
+    import recreational-facilities { prefix recreational-facilities; }
+
+    organization  "Example LTD.";
+
+    description
+      "Recreational facilities of type zoo augments.";
+
+    identity zoo {
+        base recreational-facilities:recreational-facility-type;
+    }
+    augment "/recreational-facilities:recreational-facilities/recreational-facilities:recreational-facility" {
+        when "recreational-facilities:type='recreational-facilities-zoo:zoo'";
+        list child-supervision {
+            key child;
+            leaf child {
+                type leafref {
+                    path "../../recreational-facilities:visitor";
+                }
+                must "/people/person[name=current()]/age<=14" {
+                    error-message
+                        "People older then 14 are not children.";
+                }
+            }
+            leaf adult {
+                mandatory true;
+                type leafref {
+                    path "../../recreational-facilities:visitor";
+                }
+                must "/people/person[name=current()]/age>=18" {
+                    error-message
+                        "People younger then 18 are not adults.";
+                }
+            }
+        }
+    }
+
+    augment "/recreational-facilities:recreational-facilities/recreational-facilities:recreational-facility/recreational-facilities:visitor" {
+        when "../recreational-facilities:type='recreational-facilities-zoo:zoo'";
+        must "((../child-supervision[child=current()]) or (/people/person[name=current()]/age>=14))" {
+            error-message
+                "Children without adult supervision are not allowed in a zoo.";
+        }
+    }
+}

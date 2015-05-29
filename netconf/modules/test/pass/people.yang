@@ -1,0 +1,30 @@
+module people {
+
+    namespace "http://example.com/ns/people";
+
+    prefix "people";
+
+    organization  "Example LTD.";
+
+    description
+      "All people.";
+
+    container people {
+        description
+            "Contains all people.";
+
+        list person {
+            key name;
+
+            leaf name {
+                type string;
+            }
+
+            leaf age {
+                type uint32;
+                mandatory true;
+            }
+        }
+    }
+}
+

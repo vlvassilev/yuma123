@@ -1658,6 +1658,9 @@ static obj_augment_t *
     (void)memset(aug, 0x0, sizeof(obj_augment_t));
 
     dlq_createSQue(&aug->datadefQ);
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENTS
+    dlq_createSQue(&aug->mustQ);
+#endif
 
     if (isreal) {
         aug->status = NCX_STATUS_CURRENT;

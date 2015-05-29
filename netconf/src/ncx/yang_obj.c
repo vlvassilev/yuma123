@@ -901,6 +901,24 @@ static status_t
 
 }  /* consume_container */
 
+#ifdef ENABLE_NONCOUNTAINED_MUST_AUGMENTS
+static status_t
+    consume_must (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
+                  ncx_module_t *mod,
+                  dlq_hdr_t  *que,
+                  obj_template_t *parent,
+                  grp_template_t *grp)
+{
+    status_t res;
+
+    res = yang_consume_must(tkc,
+                            mod,
+                            que,
+                            &parent->appinfoQ);
+    return res;
+}
+#endif
 
 /********************************************************************
 * FUNCTION consume_leaf
@@ -2783,7 +2801,18 @@ static status_t
                                que, 
                                parent, 
                                NULL);
-        } else {
+        }
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+          else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = consume_must(pcb,
+                               tkc,
+                               mod,
+                               &parent->def.augment->mustQ,
+                               parent /*parent->def.augment->targobj -- uninitialized here*/,
+                               NULL);
+        }
+#endif
+          else {
             errdone = FALSE;
             res = ERR_NCX_WRONG_TKVAL;
         }
@@ -7380,6 +7409,9 @@ static status_t
 
     obj_template_t *targobj = NULL, *testobj = NULL;
     dlq_hdr_t *augQ = &aug->datadefQ;
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+    dlq_hdr_t *aug_mustQ = &aug->mustQ;
+#endif
     status_t retres = NO_ERR;
 
     /* find schema-nodeid target
@@ -7507,7 +7539,13 @@ static status_t
 
     /* get the augment target datadefQ */
     dlq_hdr_t *targQ = obj_get_datadefQ(targobj);
-    if (!targQ) {
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+    dlq_hdr_t *targ_mustQ = obj_get_mustQ(targobj);
+    if (!targQ && !targ_mustQ)
+#else
+    if (!targQ)
+#endif
+    {
         log_error("\nError: %s '%s' cannot be augmented",
                   obj_get_typestr(targobj),
                   obj_get_name(targobj));
@@ -7515,6 +7553,23 @@ static status_t
                                 ERR_NCX_INVALID_AUGTARGET );
         return retres;
     }
+
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+    if(targ_mustQ && aug_mustQ) {
+        /* Move the must statements */
+        xpath_pcb_t   *must;
+        xpath_pcb_t   *must_clone;
+        must = (obj_template_t *)dlq_firstEntry(aug_mustQ);
+        for (; must != NULL; must = (xpath_pcb_t*)dlq_nextEntry(must)) {
+            must_clone = xpath_clone_pcb(must);
+            dlq_enque(must_clone, targ_mustQ);
+        }
+    }
+
+    if(!targQ) {
+        return retres;
+    }
+#endif
 
     /* go through each node in the augment
      * make sure it is not already in the same datadefQ
@@ -7759,7 +7814,11 @@ static status_t
     /* get the augment target datadefQ */
     targQ = obj_get_datadefQ(aug->targobj);
     if (targQ == NULL) {
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+        return NO_ERR;
+#else
         return ERR_NCX_OPERATION_FAILED;
+#endif
     }
 
     /* go through each node in the augment

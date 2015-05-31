@@ -406,7 +406,7 @@ typedef struct obj_augment_t_ {
     obj_augtype_t     augtype;
     ncx_status_t      status;
     dlq_hdr_t         datadefQ;         /* Q of obj_template_t */
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENTS
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
     dlq_hdr_t         mustQ;              /* Q of xpath_pcb_t */
 #endif
 

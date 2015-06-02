@@ -1658,7 +1658,7 @@ static obj_augment_t *
     (void)memset(aug, 0x0, sizeof(obj_augment_t));
 
     dlq_createSQue(&aug->datadefQ);
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENTS
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
     dlq_createSQue(&aug->mustQ);
 #endif
 

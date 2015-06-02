@@ -901,7 +901,7 @@ static status_t
 
 }  /* consume_container */
 
-#ifdef ENABLE_NONCOUNTAINED_MUST_AUGMENTS
+#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
 static status_t
     consume_must (yang_pcb_t *pcb,
                   tk_chain_t *tkc,

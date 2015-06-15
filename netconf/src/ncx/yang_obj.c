@@ -901,7 +901,7 @@ static status_t
 
 }  /* consume_container */
 
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
 static status_t
     consume_must (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
@@ -2802,8 +2802,8 @@ static status_t
                                parent, 
                                NULL);
         }
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
-          else if (!xml_strcmp(val, YANG_K_MUST)) {
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
+          else if (!xml_strcmp(val, YANG_K_MUST) && parent->def.augment->direct_must_augment_ex) {
             res = consume_must(pcb,
                                tkc,
                                mod,
@@ -2890,7 +2890,14 @@ static status_t
     }
 
     aug = obj->def.augment;
-
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
+    const xmlChar *objprefix = TK_CUR_MOD(tkc);
+    if(!xml_strcmp(objprefix, "direct-must-augment-ex")) {
+        aug->direct_must_augment_ex = TRUE;
+    } else {
+        aug->direct_must_augment_ex = FALSE;
+    }
+#endif
     /* Get the mandatory augment target */
     res = yang_consume_string(tkc, mod, &aug->target);
     CHK_OBJ_EXIT(obj, res, retres);
@@ -7409,7 +7416,7 @@ static status_t
 
     obj_template_t *targobj = NULL, *testobj = NULL;
     dlq_hdr_t *augQ = &aug->datadefQ;
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
     dlq_hdr_t *aug_mustQ = &aug->mustQ;
 #endif
     status_t retres = NO_ERR;
@@ -7539,7 +7546,7 @@ static status_t
 
     /* get the augment target datadefQ */
     dlq_hdr_t *targQ = obj_get_datadefQ(targobj);
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
     dlq_hdr_t *targ_mustQ = obj_get_mustQ(targobj);
     if (!targQ && !targ_mustQ)
 #else
@@ -7554,7 +7561,7 @@ static status_t
         return retres;
     }
 
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
     if(targ_mustQ && aug_mustQ) {
         /* Move the must statements */
         xpath_pcb_t   *must;
@@ -7813,13 +7820,19 @@ static status_t
 
     /* get the augment target datadefQ */
     targQ = obj_get_datadefQ(aug->targobj);
-    if (targQ == NULL) {
-#ifdef ENABLE_NONCONTAINED_MUST_AUGMENT
-        return NO_ERR;
-#else
+
+#ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
+    if (!aug->direct_must_augment_ex && targQ == NULL)  {
         return ERR_NCX_OPERATION_FAILED;
-#endif
+    } else {
+        /* direct_must_augment_ex can only have must statements */
+        return NO_ERR;
     }
+#else
+    if (targQ == NULL) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+#endif
 
     /* go through each node in the augment
      * make sure it is not already in the same datadefQ

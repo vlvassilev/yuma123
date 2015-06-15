@@ -43,7 +43,7 @@ AC_SUBST(platform_netconf_includedir)
 apachemoduledir="$libdir/apache2/modules"
 AC_SUBST(apachemoduledir)
 
-CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2"
+CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2 -DENABLE_DIRECT_MUST_AUGMENT_EX=1"
 AC_SUBST(CFLAGS)
 
 

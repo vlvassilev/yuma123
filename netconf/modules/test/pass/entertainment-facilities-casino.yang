@@ -1,0 +1,33 @@
+module entertainment-facilities-casino {
+  namespace "http://example.com/ns/entertainment-facilities-casino";
+  prefix ef-casino;
+  import ietf-direct-must-augment-extension
+    { prefix direct-must-augment-ex; }
+  import entertainment-facilities { prefix ef; }
+  organization "Example, Inc.";
+  contact "support@example.com";
+
+  description
+    "Module used in DIRECT-MUST-AUGMENT-EX example. " +
+    "Defines entertainment facility of type casino where" +
+    "only adults are allowed.";
+
+  revision 2015-06-12 {
+    description "Initial version";
+  }
+
+  identity casino {
+    base ef:entertainment-facility-generic;
+  }
+
+  direct-must-augment-ex:augment
+    "/ef:entertainment-facilities/ef:entertainment-facility/" +
+    "ef:visitor" {
+    when "../ef:type='ef-casino:casino'";
+    must "(/people/person[name=current()]/age>=18)" {
+      error-message
+        "Only adults are allowed in a casino.";
+    }
+  }
+}
+

@@ -1,0 +1,64 @@
+module entertainment-facilities {
+  namespace "http://example.com/ns/entertainment-facilities";
+  prefix entertainment-facilities;
+  organization "Example, Inc.";
+  contact "support@example.com";
+
+  description
+    "Module used in DIRECT-MUST-AUGMENT-EX example.";
+
+  revision 2015-06-12 {
+    description "Initial version";
+  }
+
+  container people {
+    description
+      "Contains all people.";
+
+    list person {
+      key name;
+
+      leaf name {
+        type string;
+      }
+
+      leaf age {
+        type uint32;
+        mandatory true;
+      }
+    }
+  }
+
+  identity entertainment-facility-generic {
+    description
+      "Base identity from which specific" +
+      "entertainment facility types are derived.";
+  }
+
+  container entertainment-facilities {
+    description
+      "Container for all entertainment-facilities information.";
+
+    list entertainment-facility {
+      key name;
+
+      leaf name {
+        type string;
+      }
+
+      leaf type {
+        type identityref {
+          base entertainment-facility-generic;
+        }
+        mandatory true;
+      }
+
+      leaf-list visitor {
+        type leafref {
+          path "/people/person/name";
+        }
+      }
+    }
+  }
+}
+

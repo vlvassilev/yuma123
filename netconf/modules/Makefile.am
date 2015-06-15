@@ -13,6 +13,9 @@ $(top_srcdir)/netconf/modules/ietf/iana-timezones.yang \
 $(top_srcdir)/netconf/modules/ietf/notifications.yang \
 $(top_srcdir)/netconf/modules/ietf/SNMPv2-TC.yang
 
+ietf_draft_yang_DATA = \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang
+
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-xsd.yang \

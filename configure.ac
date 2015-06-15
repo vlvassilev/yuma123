@@ -19,6 +19,9 @@ AC_SUBST(yangdir)
 ietf_yangdir="$prefix/share/yuma/modules/ietf"
 AC_SUBST(ietf_yangdir)
 
+ietf_draft_yangdir="$prefix/share/yuma/modules/ietf-draft"
+AC_SUBST(ietf_draft_yangdir)
+
 netconfcentral_yangdir="$prefix/share/yuma/modules/netconfcentral"
 AC_SUBST(netconfcentral_yangdir)
 

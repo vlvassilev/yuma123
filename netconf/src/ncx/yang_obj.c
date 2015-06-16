@@ -2892,7 +2892,7 @@ static status_t
     aug = obj->def.augment;
 #ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
     const xmlChar *objprefix = TK_CUR_MOD(tkc);
-    if(!xml_strcmp(objprefix, "direct-must-augment-ex")) {
+    if(objprefix!=NULL && !xml_strcmp(objprefix, "direct-must-augment-ex")) {
         aug->direct_must_augment_ex = TRUE;
     } else {
         aug->direct_must_augment_ex = FALSE;

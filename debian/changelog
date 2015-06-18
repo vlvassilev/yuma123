@@ -1,3 +1,9 @@
+yuma123 (2.5-1) stable; urgency=low
+
+  * Implemented direct-must-augment-ex:augment extension
+
+ --  <vladimir@transpacket.com>  Thu, 18 Jun 2015 14:48:12 +0200
+
 yuma123 (2.4-1) stable; urgency=low
 
   * netconfd

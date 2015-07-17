@@ -7822,11 +7822,13 @@ static status_t
     targQ = obj_get_datadefQ(aug->targobj);
 
 #ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
-    if (!aug->direct_must_augment_ex && targQ == NULL)  {
-        return ERR_NCX_OPERATION_FAILED;
-    } else {
-        /* direct_must_augment_ex can only have must statements */
-        return NO_ERR;
+    if(targQ == NULL) {
+        if (!aug->direct_must_augment_ex)  {
+            return ERR_NCX_OPERATION_FAILED;
+        } else {
+            /* direct_must_augment_ex can only have must statements */
+            return NO_ERR;
+        }
     }
 #else
     if (targQ == NULL) {

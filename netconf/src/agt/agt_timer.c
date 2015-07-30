@@ -34,6 +34,8 @@ date         init     comment
 #include <unistd.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <time.h>
+#include <assert.h>
 
 #include "procdefs.h"
 #include "agt.h"
@@ -64,6 +66,16 @@ static dlq_hdr_t   timer_cbQ;
 static uint32      next_id;
 
 static uint32      skip_count;
+
+static time_t uptime(time_t *t)
+{
+    int ret;
+    struct timespec tp;
+    ret = clock_gettime(CLOCK_MONOTONIC, &tp);
+    assert(ret==0);
+    *t = tp.tv_sec;
+    return *t;
+}
 
 /********************************************************************
 * FUNCTION get_timer_id
@@ -242,7 +254,7 @@ void
         skip_count = 0;
     }
 
-    (void)time(&timenow);
+    (void)uptime(&timenow);
 
     for (timer_cb = (agt_timer_cb_t *)dlq_firstEntry(&timer_cbQ);
          timer_cb != NULL;
@@ -265,7 +277,7 @@ void
                 free_timer_cb(timer_cb);
             } else {
                 /* reset this periodic timer */
-                (void)time(&timer_cb->timer_start_time);
+                (void)uptime(&timer_cb->timer_start_time);
             }
         }
     }
@@ -328,7 +340,7 @@ status_t
     timer_cb->timer_id = timer_id;
     timer_cb->timer_periodic = is_periodic;
     timer_cb->timer_cbfn = timer_fn;
-    (void)time(&timer_cb->timer_start_time);
+    (void)uptime(&timer_cb->timer_start_time);
     timer_cb->timer_duration = seconds;
     timer_cb->timer_cookie = cookie;
 
@@ -370,7 +382,7 @@ status_t
         return ERR_NCX_NOT_FOUND;
     }
 
-    (void)time(&timer_cb->timer_start_time);
+    (void)uptime(&timer_cb->timer_start_time);
     timer_cb->timer_duration = seconds;
     return NO_ERR;
 

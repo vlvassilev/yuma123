@@ -66,6 +66,7 @@ date         init     comment
 #include "xpath1.h"
 #include "xpath_yang.h"
 #include "yangconst.h"
+#include "uptime.h"
 
 
 /********************************************************************
@@ -1202,7 +1203,7 @@ static val_value_t *
 
     if (val->virtualval != NULL) {
         /* already have a value; check if it is fresh enough */
-        (void)time(&timenow);
+        (void)uptime(&timenow);
         timediff = difftime(timenow, val->cachetime);
 
         disable_cache = FALSE;
@@ -1239,7 +1240,7 @@ static val_value_t *
         return NULL;
     }
     setup_virtual_retval(val, retval);
-    (void)time(&val->cachetime);
+    (void)uptime(&val->cachetime);
 
     *res = (*getcb)(NULL, GETCB_GET_VALUE, val, retval);
     if (*res != NO_ERR) {

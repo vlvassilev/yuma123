@@ -43,7 +43,7 @@ date         init     comment
 #include "log.h"
 #include "ncx.h"
 #include "status.h"
-
+#include "uptime.h"
 
 /********************************************************************
 *                                                                   *
@@ -66,16 +66,6 @@ static dlq_hdr_t   timer_cbQ;
 static uint32      next_id;
 
 static uint32      skip_count;
-
-static time_t uptime(time_t *t)
-{
-    int ret;
-    struct timespec tp;
-    ret = clock_gettime(CLOCK_MONOTONIC, &tp);
-    assert(ret==0);
-    *t = tp.tv_sec;
-    return *t;
-}
 
 /********************************************************************
 * FUNCTION get_timer_id

@@ -61,6 +61,7 @@ date         init     comment
 #include "val.h"
 #include "xmlns.h"
 #include "xml_util.h"
+#include "uptime.h"
 
 /********************************************************************
 *                                                                   *
@@ -292,7 +293,7 @@ status_t
     agttotals = ses_get_total_stats();
     memset(agttotals, 0x0, sizeof(ses_total_stats_t));
     tstamp_datetime(agttotals->startTime);
-    (void)time(&last_timeout_check);
+    (void)uptime(&last_timeout_check);
     agt_ses_init_done = TRUE;
 
     /* load the netconf-state module */
@@ -939,7 +940,7 @@ void
      * the process loop; the AGT_SES_TIMEOUT_INTERVAL
      * is used for this purpose
      */
-    (void)time(&timenow);
+    (void)uptime(&timenow);
     timediff = difftime(timenow, last_timeout_check);
     if (timediff < (double)AGT_SES_TIMEOUT_INTERVAL) {
         return;

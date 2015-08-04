@@ -61,8 +61,9 @@ $(top_srcdir)/netconf/src/ncx/yang_parse.c \
 $(top_srcdir)/netconf/src/ncx/yang_typ.c \
 $(top_srcdir)/netconf/src/ncx/yin.c \
 $(top_srcdir)/netconf/src/ncx/yinyang.c \
-$(top_srcdir)/netconf/src/ncx/val_parse.c
+$(top_srcdir)/netconf/src/ncx/val_parse.c \
+$(top_srcdir)/netconf/src/ncx/uptime.c
 
 libncx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
-libncx_la_LDFLAGS = -version-info 2:0 -lxml2 -lz  -ldl
+libncx_la_LDFLAGS = -version-info 2:0 -lxml2 -lz  -ldl -lrt
 

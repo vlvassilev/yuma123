@@ -254,7 +254,17 @@ static status_t
                      * save the buffer and make the message ready to parse 
                      * don't let the xmlreader see the EOM string
                      */
-                    buff->bufflen = buff->buffpos - NC_SSH_END_LEN;
+                    if(buff->buffpos > NC_SSH_END_LEN) {
+                        buff->bufflen = buff->buffpos - NC_SSH_END_LEN;
+                    } else {
+                        /* the SSH EOM string is split accross 2 buffers */
+                        unsigned int rem_len;
+                        rem_len = NC_SSH_END_LEN - buff->buffpos;
+                        dlq_remove(buff);
+                        ses_msg_free_buff(scb, buff);
+                        buff = (ses_msg_buff_t *)dlq_lastEntry(&msg->buffQ);
+                        buff->bufflen = buff->bufflen - rem_len;
+                    }
                     buff->buffpos = 0;
                     buff->islast = TRUE;
                     msg->curbuff = NULL;

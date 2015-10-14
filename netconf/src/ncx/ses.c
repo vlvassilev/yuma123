@@ -693,8 +693,14 @@ static status_t
                     /* reset reader state */
                     scb->instate = SES_INST_IDLE;
                     scb->inendpos = 0;
-                    buff->bufflen = buff->buffpos;
-                    buff->buffpos = 0;
+                    if(buff->buffpos == 0) {
+                        /* remove an empty trailing buffer */
+                        dlq_remove(buff);
+                        ses_msg_free_buff (scb,buff);
+                    } else {
+                        buff->bufflen = buff->buffpos;
+                        buff->buffpos = 0;
+                    }
 
                     if (count < len) {
                         /* need a new message */
@@ -1726,13 +1732,6 @@ int
     done = FALSE;
     while (!done) {
 
-        buffer[retlen++] = (char)buff->buff[buff->buffpos++];
-
-        /* check xmlreader buffer full */
-        if (retlen == len) {
-            done = TRUE;
-            continue;
-        }
 
         /* check current buffer end has been reached */
         if (buff->buffpos == buff->bufflen) {
@@ -1746,6 +1745,18 @@ int
                 handle_prolog_state(msg, buffer, len, buff, 
                                     buff->bufflen, &retlen);
             }
+        }
+
+        if (buff->buffpos == buff->bufflen) {
+            continue; /* an empty buffer! */
+        }
+
+        buffer[retlen++] = (char)buff->buff[buff->buffpos++];
+
+        /* check xmlreader buffer full */
+        if (retlen == len) {
+            done = TRUE;
+            continue;
         }
     }
 

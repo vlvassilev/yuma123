@@ -1,0 +1,493 @@
+<center>'''Yuma Installation Guide'''</center>
+
+
+<center>YANG-Based Unified Modular Automation Tools</center>
+
+
+<center>YUMA Package Installation</center>
+
+
+<center>Version 2.2</center>
+
+
+<center>Last Updated: 2012-07-24</center>== <center>'''Table of Contents'''</center> ==
+1 Preface3
+
+1.1 Legal Statements3
+
+1.2 Additional Resources3
+
+1.2.1 WEB Sites3
+
+1.2.2 Mailing Lists4
+
+1.3 Conventions Used in this Document4
+
+2 Introduction5
+
+2.1 Intended Audience5
+
+3 Installation Requirements5
+
+3.1 Supported Platforms5
+
+3.2 External Packages6
+
+3.2.1 libxml26
+
+3.2.2 libssh26
+
+3.2.3 ncurses6
+
+3.2.4 zlib6
+
+3.3 Yuma Packages6
+
+3.3.1 yuma6
+
+3.3.2 yuma-doc6
+
+3.3.3 yuma-dev7
+
+4 Quick Installation7
+
+4.1 Ubuntu7
+
+4.1.1 External Libraries7
+
+4.1.2 Install the Yuma Package(s)7
+
+4.2 Fedora8
+
+4.2.1 External Libraries8
+
+4.2.2 Install the Yuma Package(s)8
+
+5 Installed Files8
+
+5.1 yuma Package8
+
+5.2 yuma-doc Package9
+
+5.3 yuma-dev Package 10
+
+6 Next Steps11
+
+6.1 More Documentation11
+
+6.2 Running the Yuma Programs12
+
+6.2.1 yangcli, yangdump, yangdiff12
+
+6.2.2 netconfd and netconf-subsystem12= Preface =
+== Legal Statements ==
+Copyright 2009 – 2012, Andy Bierman, All Rights Reserved.
+
+== Additional Resources ==
+Other documentation includes:
+
+Yuma<sup> </sup>Quickstart Guide
+
+Yuma User Manual
+
+Yuma netconfd Manual
+
+Yuma yangcli Manual
+
+Yuma<sup> </sup>yangdiff Manual
+
+Yuma<sup> </sup>yangdump Manual
+
+Yuma Developer Manual
+
+
+To obtain additional support you may join the yuma-users group on sourceforge.net and send email to this e-mail address
+
+yuma-users@lists.sourceforge.net
+
+
+The SourceForge.net Support Page for Yuma can be found at this WEB page:
+
+[http://sourceforge.net/projects/yuma/support http://sourceforge.net/projects/yuma/support]
+
+
+There are several sources of free information and tools for use with YANG and/or NETCONF.
+
+The following section lists the resources available at this time.
+
+=== WEB Sites ===
+* '''Netconf Central'''
+** [http://www.netconfcentral.org/ http://www.netconfcentral.org/]
+** Yuma Home Page
+*** Free information on NETCONF and YANG, tutorials, on-line YANG module validation and documentation database 
+* '''Yuma SourceFource OpenSource Project'''
+** [http://sourceforge.net/projects/yuma/ http://sourceforge.net/projects/yuma/]
+*** Download Yuma source and binaries; project forums and help
+* '''Yang Central'''
+** [http://www.yang-central.org/ http://www.yang-central.org]
+** Free information and tutorials on YANG, free YANG tools for download
+* '''NETCONF Working Group Wiki Page'''
+** [http://trac.tools.ietf.org/wg/netconf/trac/wiki http://trac.tools.ietf.org/wg/netconf/trac/wiki]
+** Free information on NETCONF standardization activities and NETCONF implementations
+* '''NETCONF WG Status Page'''
+** http://tools.ietf.org/wg/netconf/
+** IETF Internet draft status for NETCONF documents
+* '''libsmi Home Page'''
+** [http://www.ibr.cs.tu-bs.de/projects/libsmi/ http://www.ibr.cs.tu-bs.de/projects/libsmi/]
+** Free tools such as smidump, to convert SMIv2 to YANG
+* '''YumaWorks'''
+** [http://www.yumaworks.com/ http://www.yumaworks.com]
+** Offers support, training, and consulting for Yuma.
+** Offers YumaPro, a professional version of Yuma that includes concurrency, external database support, sub-agent support, multiple northbound interfaces, and more. API compatible with Yuma. Availability: September, 2012. Licensed.
+
+=== Mailing Lists ===
+* '''NETCONF Working Group'''
+** http://www.ietf.org/html.charters/netconf-charter.html
+** Technical issues related to the NETCONF protocol are discussed on the NETCONF WG mailing list. Refer to the instructions on the WEB page for joining the mailing list.
+* '''NETMOD Working Group'''
+** [http://www.ietf.org/html.charters/netmod-charter.html http://www.ietf.org/html.charters/netmod-charter.html]
+** Technical issues related to the YANG language and YANG data types are discussed on the NETMOD WG mailing list. Refer to the instructions on the WEB page for joining the mailing list.
+
+== Conventions Used in this Document ==
+The following formatting conventions are used throughout this document:
+
+<center>'''Documentation Conventions'''</center>
+
+
+
+{| style="border-spacing:0;"
+! <center>Convention</center>
+! <center>Description</center>
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''--foo'''
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| CLI parameter foo
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''<nowiki><foo></nowiki>'''
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| XML parameter foo
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''foo'''
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| '''yangcli''' command or parameter
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''$FOO'''
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Environment variable FOO
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''$$foo'''
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| '''yangcli''' global variable foo
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"|  some text
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Example command or PDU
+
+|-
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| some text
+| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Plain text
+
+|}
+= Introduction =
+[[Image:]]
+
+
+Refer to section 3 of the Yuma User Manual for a complete introduction to Yuma.
+
+This section focuses on the client and server tools within the Yuma programs.
+
+== Intended Audience ==
+This document is intended for users of the Yuma NETCONF client and server programs. It covers the installation of the Yuma packages.
+
+= Installation Requirements =
+The following requirements must be met for Yuma to be installed.
+
+== Supported Platforms ==
+The following platforms are supported at this time for the Yuma binary package:
+
+* Ubuntu version 9.10 (32 bit x86 and 64-bit AMD)
+* Ubuntu version 12.04 (32 bit x86 and 64-bit AMD)
+* Fedora version 12 (32 bit x86)
+
+== External Packages ==
+The following programs and libraries need to be available for Yuma to work.
+
+=== libxml2 ===
+The '''libxml2''' package is needed by the yuma package for some of the XML parsing functions. This package is installed by the default Linux installation process.
+
+To build yuma sources, also install the developer version of this package. It is called '''libxml2-dev '''on Ubuntu systems.
+
+=== libssh2 ===
+The '''libssh2''' package is needed by the yuma package for the '''yangcli''' program to connect to NETCONF servers using the SSH protocol. This package is called '''libssh2-1''' on Ubuntu platforms. This package is '''not''' installed by the default Linux installation process.
+
+To build yuma sources, also install the developer version of this package. It is called '''libssh2-1-dev '''on Ubuntu systems.
+
+=== ncurses ===
+The '''ncurses''' library is needed by the yuma package for some terminal support. This package is installed by the default Linux installation process.
+
+It is called '''libncurses5''' on Ubuntu systems. 
+
+To build yuma sources, also install the developer version of this package. It is called '''libncurses5-dev '''on Ubuntu systems.
+
+=== zlib ===
+The '''zlib''' library is needed by the yuma package for some compression support, used by other libraries that yuma imports. This package is installed by the default Linux installation process.
+
+To build yuma sources, also install the developer version of this package. It is called '''libz-dev '''on Ubuntu systems.
+
+== Yuma Packages ==
+The yuma files are split into 3 packages, described below.
+
+=== yuma ===
+The '''yuma''' package contains all the shared libraries, binary programs, man files, YANG files, sample .conf files, needed to run all the programs. It must be installed.
+
+=== yuma-doc ===
+The '''yuma-doc''' package contains all the documentation files, including this file. It is only needed if you want the PDF and HTML versions of the documentation installed. Since these files take up a lot of disk space, an optional package is used to install them.
+
+=== yuma-dev ===
+The '''yuma-dev''' package contains all the server instrumentation library (SIL) developer files. It is only needed if you want to add YANG modules to the server, and develop your own server instrumentation library code to load into the '''netconfd''' server at run-time.
+
+
+= Quick Installation =
+This section describes how to use the platform package manager program to install the Yuma programs.
+
+== Ubuntu ==
+=== External Libraries ===
+First, make sure the external libraries are installed.
+
+
+ mydir> '''dpkg --list libxml2 libssh2-1'''
+
+If the library is installed, the status will show 'ii libxml2', as in the example below:
+
+
+ Desired=Unknown/Install/Remove/Purge/Hold 
+ | Status=Not/Inst/Cfg-files/Unpacked/Failed-cfg/Half-inst/trig-aWait/Trig-pend 
+ |/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad) 
+ ||/ Name           Version        Description 
+ +++-==============-==============-============================================ 
+ '''ii  libssh2-1      1.2.2-1        SSH2 client-side library '''
+ '''ii  libxml2        2.7.6.dfsg-1ub GNOME XML library '''
+ mydir> 
+
+If the libxml2 library is not installed, then install it with following command:
+
+
+ mydir>''' sudo apt-get install libxml2 libssh2-1'''
+
+=== Install the Yuma Package(s) ===
+Next, install the Yuma package. Here is an example showing all 3 packages being installed.
+
+The actual hardware platform identifier may be different:
+
+
+ mydir> '''sudo dpkg -i yuma-2.1-1.u1004.i386.deb'''
+ mydir>''' sudo dpkg -i yuma-doc-2.1-1.u1004.i386.deb'''
+ mydir> '''sudo dpkg -i yuma-dev-12.1-1.u1004.i386.deb'''
+
+== Fedora ==
+=== External Libraries ===
+First, make sure the external libraries are installed.
+
+
+ mydir> '''rpm -q libxml2 ncurses libssh2'''
+
+If the packages are installed then a line will be printed for each package showing the version, such as in the following example (your versions may be different)
+
+
+ '''libxml2-2.7.6-2.fc14.i686'''
+ '''ncurses-5.7-3.20090207.fc14.i686
+ libssh2-2.3.8.fc14.i686'''
+
+If a package is not already installed, then install it. This example shows how to install both external libraries:
+
+
+ mydir> '''sudo yum install libxml2 ncurses libssh2'''
+
+=== Install the Yuma Package(s) ===
+Next, install the Yuma package. Here is an example.
+
+The actual yuma revision and hardware platform may be different:
+
+
+ mydir> '''sudo yum localinstall yuma-2.1-1.fc14.i686.rpm'''
+
+= Installed Files =
+== yuma Package ==
+This section describes all the files and/or directories installed by the '''yuma''' package:
+
+* '''/usr/bin''' directory contains the following programs:
+** yangcli
+** yangdiff
+** yangdump
+* '''/usr/sbin''' directory contains the following server programs:
+** netconfd
+** netconf-subsystem
+* '''/usr/lib '''directory contains the following files:
+** libncx.so.2.1 (file extension may vary based on platform)
+** libagt.so.2.1 (file extension may vary based on platform)
+* '''/usr/lib/yuma''' directory contains the following file:
+** libtoaster.so
+* '''/usr/share/doc/yuma '''directory containing the following files:
+** AUTHORS
+** README
+** yuma-legal-notices.pdf
+* '''/usr/share/doc/yuma''' directory (Ubuntu only) containing the following files:
+** copyright
+** changelog.Debian
+* '''/usr/share/yuma/modules''' directory contains all the YANG modules:
+** ietf/
+** netconfcentral/
+** yang/
+** test/
+
+* '''/usr/share/man/man1''' directory contains the following files:
+** yangcli.1.gz
+** yangdiff.1.gz
+** yangdump.1.gz
+** netconfd.1.gz
+** netconf-subsystem.1.gz
+** make_sil_dir.1.gz
+
+* '''/etc/yuma '''directory contains the following sample configuration files:
+
+* 
+** yangcli-sample.conf
+** yangdiff-sample.conf
+** yangdump-sample.conf
+
+* 
+** netconfd-sample.conf
+
+== yuma-doc Package ==
+This section describes all the files and/or directories installed by the '''yuma-doc''' package:
+
+* '''/usr/share/doc/yuma '''directory containing the following files:
+** AUTHORS
+** README
+* '''/usr/share/doc/yuma/pdf '''directory containing the following files:
+** yuma-legal-notices.pdf
+** yuma-installation-guide.pdf
+** yuma-quickstart-guide.pdf
+** yuma-user-cmn-manual.pdf
+** yuma-yangcli-manual.pdf
+** yuma-yangdiff-manual.pdf
+** yuma-yangdump-manual.pdf
+
+* 
+** yuma-netconfd-manual.pdf
+** yuma-dev-manual.pdf
+* '''/usr/share/doc/yuma/html '''directory containing the HTML files for all the manuals:
+** index.html
+** (directories for each HTML manual)
+
+* '''/usr/share/doc/yuma-doc''' directory (Ubuntu only) containing the following files:
+** copyright
+** changelog.Debian
+* 
+
+== yuma-dev Package  ==
+* '''/usr/bin''' directory contains the following programs:
+** make_sil_dir
+* '''/usr/include/yuma '''directory contains H files needed to compile SIL code so it can be loaded into the server at runtime:
+** ncx/*.h
+** agt/*.h
+** platform/procdefs.h
+* '''/usr/share/yuma/src/libtoaster''' directory contains the following contents:
+** Makefile
+** src directory
+*** Makefile
+*** toaster.c
+*** toaster.c.start
+*** toaster.h
+*** toaster.h.start
+** bin directory
+** lib directory
+* '''/usr/share/yuma/util '''directory contains the following files:
+** makefile.sil
+** makefile-top.sil
+* '''/usr/share/doc/yuma-dev''' directory (Ubuntu only) containing the following files:
+** copyright
+** changelog.Debian
+
+* '''/usr/share/man/man1''' directory contains the following files:
+** make_sil_dir.1.gz
+
+= Next Steps =
+== More Documentation ==
+* Yuma Quickstart Guide:
+** '''/usr/share/doc/yuma/pdf/yuma-quickstart-quide.pdf'''
+* Yuma Common User Manual:
+** '''/usr/share/doc/yuma/pdf/yuma-user-cmn-manual.pdf'''
+* Yuma Program Specific User Manual
+** '''/usr/share/doc/yuma/pdf/yuma-netconfd-manual.pdf'''
+** '''/usr/share/doc/yuma/pdf/yuma-yangcli-manual.pdf'''
+** '''/usr/share/doc/yuma/pdf/yuma-yangdiff-manual.pdf'''
+** '''/usr/share/doc/yuma/pdf/yuma-yangdump-manual.pdf'''
+* Yuma Developer Manual:
+** '''/usr/share/doc/yuma/pdf/yuma-dev-manual.pdf'''
+
+The unix 'man' program can be used to get documentation about each program. For example:
+
+* '''man yangcli'''
+* '''man yangdump'''
+* '''man yangdiff'''
+* '''man netconfd'''
+* '''man netconf-subsystem'''
+* '''man make_sil_dir'''
+
+Each program also has extensive help information available with the''' --help''' CLI parameter. For example:
+
+* '''yangcli --help'''
+* '''yangdump --help'''
+* '''yangdiff --help'''
+* '''netconfd --help'''
+
+== Running the Yuma Programs ==
+=== yangcli, yangdump, yangdiff ===
+If you are just using the Yuma client applications, then there is no further mandatory setup required.
+
+* If a work directory is used, then the '''$YUMA_HOME '''environment variable needs to be defined. Refer to the user manual for details.
+* If Yuma is installed in a location other than the default location described above, then the '''$YUMA_INSTALL''' environment variable needs to be defined. Refer to the user manual for details.
+* The following binary applications are available:
+** '''/usr/bin/yangcli''': NETCONF-over-SSH client application
+** '''/usr/bin/yangdump''': YANG compiler
+** '''/usr/bin/yangdiff''': YANG compare program
+** '''/usr/bin/make_sil_dir''': Bash script to create a new SIL work directory. Refer to the Yuma Developer Manual for details.
+
+=== netconfd and netconf-subsystem ===
+The Yuma server does not automatically start running when installed. This will be supported in a future release.
+
+The following steps must be taken to start the '''netconfd''' server:
+
+* You must modify the '''/etc/ssh/sshd_config''' file, and add the 'netconf' subsystem, as described in the user manual.If the yuma package was installed in a non-default location, then the path to the netconf-subsystem will be different than the example below. The following commands must be present:
+* 
+
+     
+     '''Port 22'''
+     '''Port 830'''
+     '''Subsystem netconf /usr/sbin/netconf-subsystem'''
+
+* Start the '''netconfd''' server, as described in the user manual or quickstart guide. This can be in the foreground or the background. If it is in the background, then the ''''--log'''' CLI parameter should be provided, as shown below:
+
+ 
+     mydir> /'''usr/sbin/netconfd --log=$HOME/mylog &'''
+     
+
+
+* Restart the SSH server. This is a platform-specific task. Refer to the '''sshd''' manual page for your system for more details. This step may need to be run as root or with the 'sudo' program.
+
+     
+     '''Fedora 12 version'''
+ 
+     mydir> '''sudo'''  '''/etc/rc.d/init.d/sshd restart'''
+     
+
+
+ 
+     '''Ubuntu 9.10 version:'''
+     
+     mydir>''' sudo  /etc/init.d/ssh restart'''
+     
+
+
+

@@ -28,7 +28,9 @@ $(top_srcdir)/netconf/modules/netconfcentral/yuma-proc.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-system.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-app-common.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/netconfd.yang \
-$(top_srcdir)/netconf/modules/netconfcentral/yuma-mysession.yang
+$(top_srcdir)/netconf/modules/netconfcentral/yuma-mysession.yang \
+$(top_srcdir)/netconf/modules/netconfcentral/toaster.yang
+
 
 yang_yang_DATA = \
 $(top_srcdir)/netconf/modules/yang/ietf-yang-types.yang \

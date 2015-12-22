@@ -1,4 +1,4 @@
-AC_INIT([yuma123], [2.4.0], [vladimir@transpacket.com])
+AC_INIT([yuma123], [2.5-2], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 
@@ -62,6 +62,7 @@ AC_CONFIG_FILES([
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangrpc/yanghttpd/Makefile
+        netconf/src/yangdump/Makefile
 ])
 
 AC_OUTPUT

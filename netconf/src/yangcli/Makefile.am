@@ -1,4 +1,5 @@
 bin_PROGRAMS = yangcli
+
 yangcli_SOURCES = \
 $(top_srcdir)/netconf/src/yangcli/yangcli_autoload.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_autolock.c \
@@ -15,6 +16,16 @@ $(top_srcdir)/netconf/src/yangcli/yangcli_util.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_alias.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_uservars.c
 
-yangcli_CPPFLAGS = -I $(top_srcdir)/libtecla -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
-yangcli_LDFLAGS = $(top_builddir)/libtecla/libtecla.la $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
+yangcli_CPPFLAGS = -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
+yangcli_LDFLAGS = $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
+
+
+if WITH_READLINE
+    yangcli_SOURCES += $(top_srcdir)/netconf/src/yangcli/tecla2readline/tecla2readline.c
+    yangcli_CPPFLAGS += -I $(top_srcdir)/libtecla
+    yangcli_LDFLAGS += -lreadline
+else
+    yangcli_CPPFLAGS += -I $(top_srcdir)/libtecla
+    yangcli_LDFLAGS += $(top_builddir)/libtecla/libtecla.la
+endif
 

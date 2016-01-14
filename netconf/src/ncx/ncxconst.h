@@ -759,10 +759,11 @@ extern "C" {
 #define E_BAD_DATA_CHECK  (const xmlChar *)"check"
 #define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
-#define COPYRIGHT_STRING \
-    "Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.\n" \
-    "Copyright (c) 2013-2015, Vladimir Vassilev, All Rights Reserved.\n"
 
+#define COPYRIGHT_STRING_LINE0 "Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.\n"
+#define COPYRIGHT_STRING_LINE1 "Copyright (c) 2013-2015, Vladimir Vassilev, All Rights Reserved.\n"
+
+#define COPYRIGHT_STRING COPYRIGHT_STRING_LINE0 COPYRIGHT_STRING_LINE1
 
 #define Y_PREFIX         (const xmlChar *)"y_"
 #define U_PREFIX         (const xmlChar *)"u_"

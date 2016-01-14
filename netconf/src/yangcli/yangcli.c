@@ -401,7 +401,9 @@ static void
     }
 
     (*logfn)("\n\n  ");
-    (*logfn)(COPYRIGHT_STRING);
+    (*logfn)(COPYRIGHT_STRING_LINE0);
+    (*logfn)("  ");
+    (*logfn)(COPYRIGHT_STRING_LINE1);
 
     if (!imode) {
         return;

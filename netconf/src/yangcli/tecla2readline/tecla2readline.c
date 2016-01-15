@@ -41,7 +41,7 @@ void process_line(char *line)
     /* done here in order to prevent readline printing newline and prompt */
     rl_callback_handler_remove();
 }
-
+static GetLine my_gl;
 static tcflag_t my_old_lflag;
 static cc_t     my_old_vtime;
 struct termios my_term;
@@ -70,7 +70,8 @@ GetLine *new_GetLine(size_t linelen, size_t histlen)
 #endif
     //rl_add_defun("change-prompt", change_prompt, CTRL('t'));
 
-    return (GetLine *)malloc(sizeof(struct GetLine));
+    //return (GetLine *)malloc(sizeof(struct GetLine));
+    return &my_gl;
 }
 
 GetLine *del_GetLine(GetLine *gl)
@@ -83,7 +84,7 @@ GetLine *del_GetLine(GetLine *gl)
         perror("tcsetattr");
         exit(1);
     }
-    free(gl);
+    //free(gl);
     return gl;
 }
 
@@ -128,14 +129,31 @@ struct WordCompletion {
     int dummy;
 };
 
+static WordCompletion my_word_completion;
+
 CplMatchFn * tecla_match_fn=NULL;
 
 void* tecla_match_fn_data=NULL;
 
-char **
+static char** my_completions;
+static unsigned int my_completion_counter=0;
+static unsigned int my_completions_max_len=0;
+
 my_completion (const char *text, int start, int end)
 {
-    return NULL;
+    my_completions = malloc(1024*sizeof(char*));
+    rl_attempted_completion_over = 1;
+    rl_completion_query_items=64;
+    tecla_match_fn(&my_word_completion, tecla_match_fn_data, text, end);
+    if(my_completion_counter==0) {
+        return NULL;
+    } else {
+        //rl_display_match_list (my_completions, my_completion_counter, my_completions_max_len);
+        my_completions[my_completion_counter]=NULL;
+        my_completion_counter=0;
+        my_completions_max_len=0;
+        return my_completions;
+    }
 }
 
 int gl_customize_completion(GetLine *gl, void *data, CplMatchFn *match_fn)
@@ -269,9 +287,24 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
 		       int word_start, int word_end, const char *suffix,
 		       const char *type_suffix, const char *cont_suffix)
 {
+    char* str;
+    unsigned int len;
+    int suffix_len;
+    suffix_len = strlen(suffix);
+    len = word_end-word_start + suffix_len;
+    if(len>my_completions_max_len) {
+        my_completions_max_len = len;
+    }
+    str=(char*)malloc(len+1);
+    memcpy(str+word_end-word_start,suffix,suffix_len);
+    memcpy(str,line+word_start,word_end-word_start);
+    str[suffix_len + word_end-word_start] = 0;
+    my_completions[my_completion_counter] = str;
+    my_completion_counter++;
     return 0;
 }
 
 void cpl_record_error(WordCompletion *cpl, const char *errmsg)
 {
+    fprintf(stderr,"cpl_record_error:%s\n",errmsg);
 }

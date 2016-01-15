@@ -38,9 +38,10 @@ void process_line(char *line)
         fprintf(stderr, "ENOTY LINE!\n", line);
     }
     my_line = line;
+    /* done here in order to prevent readline printing newline and prompt */
+    rl_callback_handler_remove();
 }
 
-static char* my_prompt;
 static tcflag_t my_old_lflag;
 static cc_t     my_old_vtime;
 struct termios my_term;
@@ -68,8 +69,6 @@ GetLine *new_GetLine(size_t linelen, size_t histlen)
     }
 #endif
     //rl_add_defun("change-prompt", change_prompt, CTRL('t'));
-    my_prompt=strdup("");
-    rl_callback_handler_install(my_prompt, process_line);
 
     return (GetLine *)malloc(sizeof(struct GetLine));
 }
@@ -207,11 +206,7 @@ char *gl_get_line(GetLine *gl, const char *prompt, const char *start_line,
         tv.tv_sec=inactivity_sec;
         tv.tv_usec=inactivity_nsec/1000;
 
-        if(strcmp(prompt,my_prompt)!=0) {
-            free(my_prompt);
-            my_prompt=strdup(prompt);
-            rl_callback_handler_install(my_prompt, process_line);
-        }
+        rl_callback_handler_install(prompt, process_line);
         while(1) {
             FD_ZERO(&fds);
             FD_SET(fileno(stdin), &fds);
@@ -235,7 +230,7 @@ char *gl_get_line(GetLine *gl, const char *prompt, const char *start_line,
                     tv.tv_usec=inactivity_nsec/1000;
                     continue;
                 } else if (after_timeout == GLTO_REFRESH) {
-                    rl_callback_handler_install(my_prompt, process_line);
+                    rl_callback_handler_install(prompt, process_line);
                     continue;
                 } else {
                     assert(0);

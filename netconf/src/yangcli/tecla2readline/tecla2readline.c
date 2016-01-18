@@ -277,6 +277,7 @@ GlReturnStatus gl_return_status(GetLine *gl)
 
 void gl_clear_history(GetLine *gl, int all_groups)
 {
+    rl_clear_history();
 }
 
 void gl_range_of_history(GetLine *gl, GlHistoryRange *range)

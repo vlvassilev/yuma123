@@ -144,7 +144,7 @@ my_completion (const char *text, int start, int end)
     my_completions = malloc(1024*sizeof(char*));
     rl_attempted_completion_over = 1;
     rl_completion_query_items=64;
-    tecla_match_fn(&my_word_completion, tecla_match_fn_data, text, end);
+    tecla_match_fn(&my_word_completion, tecla_match_fn_data, rl_line_buffer, end);
     if(my_completion_counter==0) {
         return NULL;
     } else {
@@ -177,6 +177,19 @@ int gl_lookup_history(GetLine *gl, unsigned long id, GlHistoryLine *line)
 int gl_show_history(GetLine *gl, FILE *fp, const char *fmt, int all_groups,
 		    int max_lines)
 {
+    int i;
+    HIST_ENTRY *h;
+    if(max_lines=-1) {
+        max_lines=history_length;
+    }
+    for(i=0;i<max_lines;i++) {
+        h = history_get(history_base+history_length-max_lines+i);
+        if(h!=NULL) {
+            printf("[%d] %s\n",history_base+history_length-max_lines+i,h->line);
+        } else {
+            break;
+        }
+    }
     return 0;
 }
 
@@ -277,11 +290,14 @@ GlReturnStatus gl_return_status(GetLine *gl)
 
 void gl_clear_history(GetLine *gl, int all_groups)
 {
-    rl_clear_history();
+    clear_history();
 }
 
 void gl_range_of_history(GetLine *gl, GlHistoryRange *range)
 {
+    range->oldest = history_base;
+    range->newest = history_base + history_length;
+    range->nlines = history_length;
 }
 
 int cpl_add_completion(WordCompletion *cpl, const char *line,
@@ -316,6 +332,9 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
     my_completions[my_completion_counter] = str;
 
     my_completion_counter++;
+    assert(strlen(cont_suffix)<=1);
+    rl_completion_append_character=cont_suffix[0]; /*e.g. "=","/"," "*/
+
     return 0;
 }
 

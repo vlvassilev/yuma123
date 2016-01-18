@@ -299,7 +299,21 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
     memcpy(str+word_end-word_start,suffix,suffix_len);
     memcpy(str,line+word_start,word_end-word_start);
     str[suffix_len + word_end-word_start] = 0;
+
+    if(my_completion_counter==0) {
+        my_completions[0]=strdup(str);
+        my_completion_counter++;
+    } else {
+        int i;
+        /* find the max common completion */
+        for(i=0;i<strlen(my_completions[0]);i++) {
+            if(my_completions[0][i]!=str[i]) {
+                my_completions[0][i]=0;
+            }
+        }
+    }
     my_completions[my_completion_counter] = str;
+
     my_completion_counter++;
     return 0;
 }

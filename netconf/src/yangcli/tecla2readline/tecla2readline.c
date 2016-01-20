@@ -139,6 +139,22 @@ static char** my_completions;
 static unsigned int my_completion_counter=0;
 static unsigned int my_completions_max_len=0;
 
+static int my_cpl_word_start; /* value determined by the completion callback strips the prefix base e.g. path /interfaces/.../ or optional arg prefix "--" */
+
+static void add_cpl_prefix(char* text, int start)
+{
+    char* str;
+    int prefix_len;
+    if(my_completions==NULL || my_completions[0]==NULL) {
+        return;
+    }
+    prefix_len = my_cpl_word_start-start;
+    str = malloc(prefix_len + strlen(my_completions[0])+1);
+    memcpy(str,text,prefix_len);
+    strcpy(str+prefix_len, my_completions[0]);
+    free(my_completions[0]);
+    my_completions[0]=str;
+}
 my_completion (const char *text, int start, int end)
 {
     my_completions = malloc(1024*sizeof(char*));
@@ -146,9 +162,11 @@ my_completion (const char *text, int start, int end)
     rl_completion_query_items=64;
     tecla_match_fn(&my_word_completion, tecla_match_fn_data, rl_line_buffer, end);
     if(my_completion_counter==0) {
+        free(my_completions);
         return NULL;
     } else {
         //rl_display_match_list (my_completions, my_completion_counter, my_completions_max_len);
+        add_cpl_prefix(text, start);
         my_completions[my_completion_counter]=NULL;
         my_completion_counter=0;
         my_completions_max_len=0;
@@ -312,6 +330,9 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
     if(len>my_completions_max_len) {
         my_completions_max_len = len;
     }
+    /* we need that in order to add the prefix e.g. -- or /interfaces/.../<completion_word> */
+    my_cpl_word_start = word_start;
+
     str=(char*)malloc(len+1);
     memcpy(str+word_end-word_start,suffix,suffix_len);
     memcpy(str,line+word_start,word_end-word_start);

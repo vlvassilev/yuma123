@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -43,8 +44,10 @@ date         init     comment
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "libtecla.h"
+#include "yangcli_wordexp.h"
 
 #include "procdefs.h"
 #include "log.h"
@@ -1162,6 +1165,66 @@ static boolean
 
 } /* is_parm_start */
 
+static obj_template_t* get_unique_param_w_value_compl_match(obj_template_t* inputobj, char* str)
+{
+    obj_template_t* childobj;
+    unsigned int matchcount;
+    /* try to find this parameter name */
+    childobj = obj_find_child_str(inputobj, NULL,
+                                 (const xmlChar *)str,
+                                 strlen(str));
+    if (childobj == NULL) {
+        matchcount = 0;
+
+        /* try to match this parameter name */
+        childobj = obj_match_child_str(inputobj, NULL,
+                                       (const xmlChar *)str,
+                                       strlen(str),
+                                       &matchcount);
+
+        if (childobj && matchcount > 1) {
+            /* ambiguous command error
+             * but just return no completions
+             */
+            childobj=NULL;
+        }
+    }
+
+    /* check if the parameter is an empty, which
+     * means another parameter is expected, not a value
+     */
+    if (childobj!=NULL && obj_get_basetype(childobj) == NCX_BT_EMPTY) {
+        childobj=NULL;
+    }
+    return childobj;
+}
+
+void parse_cmdline_completion_variable(char* str, int* param_index, int* value_index)
+{
+    int i;
+    *param_index = -1;
+    *value_index=-1;
+
+    /* abc=def - *param_index=0   *eq_sign_index=3 */
+    /* -abc=def - *param_index=1  *eq_sign_index=4 */
+    /* --abc=def - *param_index=2 *eq_sign_index=5 */
+    if(str[0]=='-' && str[1]=='-' && str[2]!='-') {
+        *param_index=2;
+    } else if(str[0]=='-' && str[1]!='-') {
+        *param_index=1;
+    } else {
+        *param_index=0;
+    }
+    i=*param_index;
+    assert(i>=0);
+    while(str[i]!=0 && str[i]!='=') {
+        i++;
+    }
+    if(str[i]=='=') {
+        *value_index=i+1;
+    }
+}
+
 
 /********************************************************************
  * FUNCTION find_parm_start
@@ -1216,274 +1279,63 @@ static status_t
                      int *tokenstart)
 
 {
-    obj_template_t       *childobj;
-    const char           *str, *seqstart, *equals;
-    uint32                withequals, matchcount;
-    boolean               inbetween, gotdashes;
+    yangcli_wordexp_t p;
+    int i;
 
-    withequals = 0;
-    inbetween = FALSE;
-    gotdashes = FALSE;
-    equals = NULL;
-
-    *expectparm = FALSE;
-    *emptyexit = FALSE;
     *parmobj = NULL;
-    *tokenstart = 0;
+    *emptyexit= FALSE;
+    *expectparm=TRUE;
 
-    /* get the last char entered */
-    str = &line[word_end - 1];
+    yangcli_wordexp(line, &p, 0);
 
-    /* check starting in between 2 token sequences */
-    if (isspace((int)*str)) {
-        inbetween = TRUE;
-
-        /* the tab was in between tokens, not inside a token
-         * skip all the whitespace backwards
-         */
-        while (str >= &line[word_start] && isspace((int)*str)) {
-            str--;
+    for (i = 0; i < p.we_wordc; i++) {
+        if(p.we_word_line_offset[i]+strlen(p.we_wordv[i])==word_end) {
+            /*cursor at the end of a parameter[=value] - completion possible*/
+            break;
+        } else if((p.we_word_line_offset[i]<=word_end) && (p.we_word_line_offset[i]+strlen(p.we_wordv[i])>word_end)) {
+            /*cursor in the middle of parameter[=value] - completion not possible*/
+            *emptyexit=TRUE;
+            return;
         }
-
-        if (isspace((int)*str)) {
-            /* only found spaces, so this is the line start */
-            *expectparm = TRUE;
-            *tokenstart = word_end;
-            return NO_ERR;
-        } /* else found the end of some text */
-    } else if (is_parm_start(line, 
-                             word_start, 
-                             (int)(str - line))) {
-        /* got valid -<tab> or --<tab> */
-        *expectparm = TRUE;
+    }
+    if(i==p.we_wordc) {
+        /*next parameter starts from scratch*/
+        *emptyexit=FALSE;
         *tokenstart = word_end;
-        return NO_ERR;
-    } else if (*str =='"' || *str == '\'') {
-        /* last char was the start or end of a string
-         * no completions possible at this point
-         */
-        *emptyexit = TRUE;
-        return NO_ERR;
-    }
-
-    /* str is pointing at the last char in the token sequence
-     * that needs to be checked; e.g.:
-     *    somecommand parm1=3 --parm2=fred<tab>
-     *    somecommand parm1<tab>
-     *
-     * count the equals signs; hack to guess if
-     * this is a complete assignment statement
-     */
-    while (str >= &line[word_start] && !isspace((int)*str)) {
-        if (*str == '=') {
-            if (equals == NULL) {
-                equals = str;
-            }
-            withequals++;
-        }
-        str--;
-    }
-
-    /* figure out where the backwards search stopped */
-    if (isspace((int)*str)) {
-        /* found a space entered so see if
-         * the string following it looks like
-         * the start of a parameter or a value
-         */
-        seqstart = ++str;
+    } else if(p.we_wordv[i][0]=='/') {
+        /* ignore tokens that are probably default argument Xpath */
+        *tokenstart = p.we_word_line_offset[i];
+        *emptyexit=FALSE;
     } else {
-        /* str backed up all the way to word_start
-         * start the forward analysis from this char
-         */
-        seqstart = str;
-    }
+        int param_index;
+        int value_index;
+        char* param;
+        obj_template_t* childobj;
 
-    /* str is now pointing at the preceding token sequence
-     * check if the parameter start sequence is next
-     */
-    if (*str == '-') {
-        /* try to find any matching parameters
-         * within the rpc/input section
-         */
-        seqstart++;
-        gotdashes = TRUE;
-        if (str+1 < &line[word_end]) {
-            /* -<some-text ... <tab>  */
-            str++;
-            if (*str == '-') {
-                if (str+1 < &line[word_end]) {
-                    /* --<some-text ... <tab>  */
-                    seqstart++;
-                    str++;
-                } else {
-                    /* entire line is --<tab> 
-                     * return parameter list
-                     */
-                    *expectparm = TRUE;
-                    *tokenstart = word_end;
-                    return NO_ERR;
-
-                }
-            } /*else  -<some-text ... <tab>  */
-        } else {
-            /* entire line is -<tab> 
-             * return parameter list
-             */
-            *expectparm = TRUE;
-            *tokenstart = word_end;
-            return NO_ERR;
-        }
-    } /* else token does not start with any dashes */
-
-    /* got a sequence start so figure out what to with it */
-    if (inbetween) {
-        if (withequals == 1) {
-            /* this profile fits 
-             *   '[-]-<parmname>=<parmval><spaces><tab>'
-             * assume that a new parameter is expected
-             * and cause all of them to be listed
-             */
-            *expectparm = TRUE;
-            *tokenstart = word_end;
-            return NO_ERR;
-        } else {
-            /* this profile fits 
-             *    '[-]-<parmname><spaces><tab>'
-             * this entire token needs to be matched to a
-             * parameter in the RPC input section
-             *
-             * first find the end of the parameter name
-             */
-            str = seqstart;
-
-            while (str < &line[word_end] && 
-                   !isspace((int)*str) &&
-                   *str != '=') {
-                str++;
-            }
-
-            /* try to find this parameter name */
-            childobj = obj_find_child_str(inputobj, NULL,
-                                          (const xmlChar *)seqstart,
-                                          (uint32)(str - seqstart));
-            if (childobj == NULL) {
-                matchcount = 0;
-
-                /* try to match this parameter name */
-                childobj = obj_match_child_str(inputobj, NULL,
-                                               (const xmlChar *)seqstart,
-                                               (uint32)(str - seqstart),
-                                               &matchcount);
-
-                if (childobj && matchcount > 1) {
-                    /* ambiguous command error
-                     * but just return no completions
-                     */
-                    *emptyexit = TRUE;
-                    return NO_ERR;
-                }
-            }
-
-            /* check find/match child result */
-            if (childobj == NULL) {
-                /* do not recognize this parameter,
-                 * so just return no matches
-                 */
+        *tokenstart = p.we_word_line_offset[i];
+        parse_cmdline_completion_variable(p.we_wordv[i], &param_index, &value_index);
+        if(value_index!=-1) {
+            unsigned int param_len = value_index-1;
+            param = malloc(param_len+1);
+            memcpy(param,p.we_wordv[i],param_len);
+            param[param_len]=0; 
+            *tokenstart=param_len+*tokenstart;
+            childobj=get_unique_param_w_value_compl_match(inputobj,param);
+            free(param);
+            if(childobj==NULL) {
                 *emptyexit = TRUE;
-                return NO_ERR;
-            }
-
-            /* else found one matching child object */
-            *tokenstart = word_end;
-
-            /* check if the parameter is an empty, which
-             * means another parameter is expected, not a value
-             */
-            if (obj_get_basetype(childobj) == NCX_BT_EMPTY) {
-                *expectparm = TRUE;
             } else {
-                /* normal leaf parameter; needs a value */
                 *parmobj = childobj;
+                *expectparm=FALSE;
             }
-            return NO_ERR;
+        } else if(param_index!=-1) {
+            *tokenstart=param_index+*tokenstart;
+            *emptyexit = FALSE;
         }
     }
-
-    /* not in between 2 tokens so tab is 'stuck' to
-     * this preceding token; determine if a parameter
-     * or a value is expected
-     */
-    if (withequals == 1) {
-        /* this profile fits 
-         *   '[--]<parmname>=<parmval><tab>'
-         * assume that a parameter value is expected
-         * and cause all of them to be listed that
-         * match the partial value string
-         */
-        *tokenstart = (int)((equals+1) - line);
-
-        /* try to find the parameter name */
-        childobj = obj_find_child_str(inputobj, NULL,
-                                      (const xmlChar *)seqstart,
-                                      (uint32)(equals - seqstart));
-        if (childobj == NULL) {
-            matchcount = 0;
-            
-            /* try to match this parameter name */
-            childobj = obj_match_child_str(inputobj, NULL,
-                                           (const xmlChar *)seqstart,
-                                           (uint32)(equals - seqstart),
-                                           &matchcount);
-
-            if (childobj && matchcount > 1) {
-                /* ambiguous command error
-                 * but just return no completions
-                 */
-                *emptyexit = TRUE;
-                return NO_ERR;
-            }
-        }
-
-        /* check find/match child result */
-        if (childobj == NULL) {
-            /* do not recognize this parameter,
-             * so just return no matches
-             */
-            *emptyexit = TRUE;
-        } else {
-            /* match the found parameter with a
-             * partial value string
-             */
-            *parmobj = childobj;
-        }
-        return NO_ERR;
-    } else if (gotdashes) {
-        /* this profile fits 
-         *   '--<parmname><tab>'
-         * assume that a parameter name is expected
-         * and cause all of them to be listed that
-         * match the partial name string
-         */
-        *tokenstart = (int)(seqstart - line);
-        *expectparm = TRUE;
-    } else {
-        /* this profile fits 
-         *   '[don't know]<parmwhat><tab>'
-         * assume that a parameter name is expected
-         * and cause all of them to be listed that
-         * match the partial name string
-         *
-         * TBD: should check back another token
-         * so see if a value or a name is expected
-         */
-        *tokenstart = (int)(seqstart - line);
-        *expectparm = TRUE;  /****/
-    }
-       
+    yangcli_wordfree(&p);
     return NO_ERR;
-
-} /* find_parm_start */
-
+}
 
 /********************************************************************
  * FUNCTION parse_backwards_parm
@@ -1912,82 +1764,11 @@ static status_t
         comstate->cmdinput = inputobj;
     }
 
-    /* strip all predicate blocks ...[name='ge0']... */
-    {
-        char *line_copy;
-        int word_end_striped;
-
-        line_copy = (char*)malloc(strlen(line)+1);
-        strcpy(line_copy, line);
-        line_striped = (char*)malloc(strlen(line)+1);
-        line_copy[word_end]=0;
-        strip_predicate(line_copy, line_striped);
-        free(line_copy);
-        word_end_striped = strlen(line_striped);
-        strcat(line_striped,&line[word_end]);
-        word_end = word_end_striped;
-    }
-
-    /* check if any strings entered on the line
-     * stopping forward parse at line[word_start]
-     */
-    cmdend = &line_striped[str-line];
-    while (cmdend < &line_striped[word_end] &&
-           *cmdend != '"' && 
-           *cmdend != '\'') {
-        cmdend++;
-    }
-
-    if (cmdend < &line_striped[word_end]) {
-        /* found the start of a quoted string
-         * look for the end of the last quoted
-         * string
-         */
-        done = FALSE;
-        while (!done) {
-            /* match == start of quoted string */
-            match = cmdend++;
-            while (cmdend < &line_striped[word_end] &&
-                   *cmdend != *match) {
-                cmdend++;
-            }
-            if (cmdend == &line_striped[word_end]) {
-                /* entering a value inside a string
-                 * so just return, instead of
-                 * guessing the string value
-                 */
-                free(line_striped);
-                return res;
-            } else {
-                cmdend++;
-                while (cmdend < &line_striped[word_end] &&
-                       *cmdend != '"' && 
-                       *cmdend != '\'') {
-                    cmdend++;
-                }
-                if (cmdend == &line_striped[word_end]) {
-                    /* did not find the start of
-                     * another string so set the
-                     * new word_start and call
-                     * the parse_backwards_parm fn
-                     */
-                    word_start = (int)(cmdend - line_striped);
-                    done = TRUE;
-                } 
-
-                /* else stopped on another start of 
-                 * quoted string so loop again
-                 */
-            }
-        }
-    }
-
     /* got some edited text past the last 
      * quoted string so figure out the
      * parm in progress and check for completions
      */
-    res = parse_backwards_parm(cpl, comstate, line_striped, word_start, word_end);
-    free(line_striped);
+    res = parse_backwards_parm(cpl, comstate, line, word_start, word_end);
     return res;
 
 } /* fill_completion_commands */

@@ -9,6 +9,7 @@
  * under the License.    
  */
 
+#include <stdlib.h>
 #include "yangcli_wordexp.h"
 
 int yangcli_wordexp (const char* words, yangcli_wordexp_t* pwordexp, int flags)

@@ -16,13 +16,21 @@ int yangcli_wordexp (const char* words, yangcli_wordexp_t* pwordexp, int flags)
 {
     unsigned int i;
     unsigned int len;
+    unsigned char quoted;
     pwordexp->we_wordv=(char**)malloc(1024*sizeof(char*));
     pwordexp->we_word_line_offset=(int*)malloc(1024*sizeof(int));
 
     pwordexp->we_wordc=0;
     
+    quoted=0;
     for(i=0,len=0;i<strlen(words);i++){
-        if(words[i]==' ') {
+        if(quoted==0 && (words[i]=='\'' || words[i]=='\"')) {
+            quoted=words[i];
+        } else if(quoted==words[i]) {
+            quoted=0;
+        }
+
+        if(quoted==0 && words[i]==' ') {
             if(len>0) {
                 pwordexp->we_word_line_offset[pwordexp->we_wordc]=i-len;
                 pwordexp->we_wordv[pwordexp->we_wordc]=malloc(len+1);
@@ -43,6 +51,7 @@ int yangcli_wordexp (const char* words, yangcli_wordexp_t* pwordexp, int flags)
         pwordexp->we_wordv[pwordexp->we_wordc][len]=0;
         pwordexp->we_wordc++;
     }
+    return 0;
 }
 void yangcli_wordfree (yangcli_wordexp_t * pwordexp)
 {

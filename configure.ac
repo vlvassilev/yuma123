@@ -71,8 +71,7 @@ AC_CONFIG_FILES([
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangrpc/yanghttpd/Makefile
         netconf/src/yangdump/Makefile
-        netconf/test/test-suites/integ/Makefile
-        netconf/test/modules/Makefile
+        netconf/test/Makefile
 ])
 
 AC_OUTPUT

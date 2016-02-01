@@ -1,14 +1,4 @@
 #Tests
-TESTS=test_yangcli_wordex
-check_PROGRAMS=test_yangcli_wordex
-
-test_yangcli_wordex_SOURCES = \
-$(top_srcdir)/netconf/test/test-suites/integ/test_yangcli_wordex.c \
-$(top_srcdir)/netconf/src/yangcli/yangcli_wordexp.c
-
-test_yangcli_wordex_CPPFLAGS = -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
-test_yangcli_wordex_LDFLAGS = $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
-
 lib_LTLIBRARIES = libyumatest.la
 
 libyumatest_la_SOURCES = \
@@ -30,6 +20,7 @@ $(top_srcdir)/netconf/test/support/fixtures/integ-fixture-helper.cpp \
 $(top_srcdir)/netconf/test/support/fixtures/query-suite-fixture.cpp \
 $(top_srcdir)/netconf/test/support/fixtures/device-module-common-fixture.cpp \
 $(top_srcdir)/netconf/test/support/fixtures/device-get-module-fixture.cpp \
+$(top_srcdir)/netconf/test/support/fixtures/simple-container-module-fixture.cpp \
 $(top_srcdir)/netconf/test/support/checkers/string-presence-checkers.cpp \
 $(top_srcdir)/netconf/test/support/msg-util/NCMessageBuilder.cpp \
 $(top_srcdir)/netconf/test/support/nc-query-util/nc-query-test-engine.cpp \
@@ -39,32 +30,18 @@ $(top_srcdir)/netconf/test/support/misc-util/ptree-utils.cpp \
 $(top_srcdir)/netconf/test/support/nc-query-util/nc-base-query-test-engine.cpp \
 $(top_srcdir)/netconf/test/support/misc-util/base64.cpp \
 $(top_srcdir)/netconf/test/support/misc-util/log-utils.cpp \
-$(top_srcdir)/netconf/test/support/fixtures/base-suite-fixture.cpp
+$(top_srcdir)/netconf/test/support/fixtures/base-suite-fixture.cpp \
+$(top_srcdir)/netconf/test/support/nc-query-util/nc-strings.cpp \
+$(top_srcdir)/netconf/test/support/callbacks/system-cb-checker.cpp \
+$(top_srcdir)/netconf/test/support/fixtures/system-fixture-helper.cpp \
+$(top_srcdir)/netconf/test/support/fixtures/system-fixture-helper-factory.cpp \
+$(top_srcdir)/netconf/test/support/callbacks/system-cb-checker-factory.cpp \
+$(top_srcdir)/netconf/test/support/nc-session/sys-test-nc-session-base.cpp \
+$(top_srcdir)/netconf/test/support/nc-session/remote-nc-session.cpp \
+$(top_srcdir)/netconf/test/support/nc-session/remote-nc-session-factory.cpp
 
 libyumatest_la_CPPFLAGS = -DBOOST_TEST_DYN_LINK -std=c++0x -I $(top_srcdir)/netconf -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
 libyumatest_la_LDFLAGS=-static
-
-TESTS+=base-64-tests
-check_PROGRAMS+=base-64-tests
-
-base_64_tests_SOURCES = \
-$(top_srcdir)/netconf/test/integ-tests/simple-yang.cpp \
-$(top_srcdir)/netconf/test/test-suites/integ/base-64-tests.cpp
-
-base_64_tests_CPPFLAGS = -DBOOST_TEST_DYN_LINK -std=c++0x -I $(top_srcdir)/netconf -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
-base_64_tests_LDFLAGS = -lboost_unit_test_framework $(top_builddir)/netconf/test/test-suites/integ/libyumatest.la $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
-
-TESTS+=device-tests-get
-check_PROGRAMS+=device-tests-get
-
-#$(top_srcdir)/netconf/test/integ-tests/simple-yang.cpp
-
-device_tests_get_SOURCES = \
-$(top_srcdir)/netconf/test/integ-tests/device-edit-candidate.cpp \
-$(top_srcdir)/netconf/test/test-suites/common/device-tests-get.cpp
-
-device_tests_get_CPPFLAGS = -DBOOST_TEST_DYN_LINK -std=c++0x -I $(top_srcdir)/netconf -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
-device_tests_get_LDFLAGS = -lboost_unit_test_framework $(top_builddir)/netconf/test/test-suites/integ/libyumatest.la $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
 
 #Test modules - YANGs
 yang_DATA = \

@@ -15,7 +15,6 @@ The Yuma Test Harness
     libssh2-1-dev	1.2.2-1 SSH2 ssh2 client-side libary
 
 2: The Integration Test Harness
-netconf/test/integ-tests
 
 The Integration test harness is built as a stand alone executable that 
 includes most of the Yuma agt and ncx sources (which make up the system 
@@ -23,23 +22,22 @@ under test). This test harness runs on the local host machine and can be
  used to quickly verify the behaviour of netconfd.
 
 To build and run this test harness:
-    1: cd to netconf/test/modules/build-sil
+    1: cd to netconf/test
     2: make
-    1: cd to netconf/test/integ-tests
-    2: make
-    3: Either run each executable individually or use the alltests.py
-       script to run all of the tests.
+    3: sudo make install
+    4: cd integ-tests
+    5: `mkdir yuma-op` directory used to store output
+    6: make check
 
 Note: tests can be run individually, by specifying the name of the
 test suite and test on the command line as follows:
     ./test-simple-edit-running \
-        --run_test=simple_get_test_suite_running/edit_slt_entries_test1
+        --run_test=simple_get_test_suite_running/edit_slt_entries_test_delete
 
 For more information on test harness command line options see:
     http://www.boost.org/doc/libs/1_47_0/libs/test/doc/html/utf/user-guide/runtime-config.html
 
 3: The System Test Harness
-netconf/test/sys-test
 
 The System test harness is a stand alone program that is capable of 
 running full NETCONF sessions against a full Yuma/Netconf Server
@@ -56,11 +54,9 @@ variable, or put the YANG files a directory called 'modules' in
 your HOME directory.
 
 To build and run this test harness:
-    1: cp netconf/test/modules/yang/* $HOME/modules/
-    2: cd to netconf/test/sys-test
-    3: make
-    4: this will build a number of executables for verify either with
-       or without the candidate database. 
+    1: cd netconf/test
+    2: make
+    3: sudo make install
     5: start the server and make sure at least these flags are set:
        --module=device_test
        --module=simple_list_test
@@ -68,12 +64,13 @@ To build and run this test harness:
        --access-control=off OR --superuser=<user>
        --target=candidate OR --target=running
        --no-startup
-    6: run ./configure-env.py to configure the test client
-       - make sure to give IP addresses as numbers, such as
-         127.0.0.1 instead of localhost.
-       - enter the same user name as the <name> in step 5.
-    7: source ./config.sh
-    8: run either all-candidate.py or all-running.py, depending on
-       which target was selected in step 5.
+    6: cd sys-test
+    7: `mkdir yuma-op` directory used to store output
+    8: Configure the session variables:
+       export YUMA_AGENT_IPADDR=127.0.0.1
+       export YUMA_AGENT_PORT=830
+       export YUMA_AGENT_USER=root
+       export YUMA_AGENT_PASSWORD=****
+    9: run either all tests with `make check` or individual tests e.g. ./test-shutdown
 
 

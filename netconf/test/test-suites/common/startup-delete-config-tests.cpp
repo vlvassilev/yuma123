@@ -15,13 +15,6 @@
 
 #include "test/include/boost_includes.hpp"
 
-#include <boost/range/algorithm.hpp>
-#include <boost/fusion/include/std_pair.hpp>
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/fusion/at.hpp> 
-#include <boost/phoenix/bind.hpp>
-#include <boost/phoenix/operator.hpp> 
-
 // ---------------------------------------------------------------------------|
 // Yuma Test Harness includes
 // ---------------------------------------------------------------------------|

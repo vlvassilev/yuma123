@@ -13,9 +13,8 @@
 #include <iostream>
 #include <sstream>
 
-// ---------------------------------------------------------------------------|
-// Boost Includes
-// ---------------------------------------------------------------------------|
+#include "test/include/boost_includes.hpp"
+
 #include <boost/range/algorithm.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/phoenix/core.hpp>

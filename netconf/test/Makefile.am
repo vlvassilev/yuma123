@@ -4,6 +4,8 @@ lib_LTLIBRARIES = libyumatest.la
 libyumatest_la_SOURCES = \
 $(top_srcdir)/netconf/test/support/fixtures/test-context.cpp \
 $(top_srcdir)/netconf/test/support/fixtures/abstract-global-fixture.cpp \
+$(top_srcdir)/netconf/test/support/fixtures/device-module-fixture.cpp \
+$(top_srcdir)/netconf/test/support/nc-query-util/nc-default-operation-config.cpp \
 $(top_srcdir)/netconf/test/support/nc-query-util/yuma-op-policies.cpp \
 $(top_srcdir)/netconf/test/support/callbacks/integ-cb-checker-factory.cpp \
 $(top_srcdir)/netconf/test/support/fixtures/integ-fixture-helper-factory.cpp \

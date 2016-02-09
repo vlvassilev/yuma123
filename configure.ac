@@ -74,6 +74,7 @@ AC_CONFIG_FILES([
         netconf/test/Makefile
         netconf/test/sys-test/Makefile
         netconf/test/integ-tests/Makefile
+        netconf/test/sys-test-python/Makefile
 ])
 
 AC_OUTPUT

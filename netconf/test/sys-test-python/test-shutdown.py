@@ -53,4 +53,4 @@ Demonstrate shutdown operation (WARNING: netconf server must be manualy restarte
 
 	return 0
 
-main()
+sys.exit(main())

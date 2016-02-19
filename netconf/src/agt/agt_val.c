@@ -4267,7 +4267,9 @@ static status_t must_stmt_check ( ses_cb_t *scb,
         }
         xpath_free_result(result);
     }
-
+    if(res == NO_ERR && curval->res != NO_ERR) {
+        return curval->res;
+    }
     return res;
 }  /* must_stmt_check */
 

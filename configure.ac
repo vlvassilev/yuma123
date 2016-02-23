@@ -2,7 +2,7 @@ AC_INIT([yuma123], [2.5-2], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall foreign])
 LT_INIT([disable-static])
 
 AC_PROG_CC

@@ -2,7 +2,20 @@
     module ietf-system
     namespace urn:ietf:params:xml:ns:yang:ietf-system
  */
- 
+
+#define __USE_XOPEN 1
+//#define _XOPEN_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <string.h>
+#include <assert.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/wait.h>
+
+
 #include <xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
@@ -17,15 +30,6 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "rpc.h"
-
-#define __USE_XOPEN 1
-#define _XOPEN_SOURCE
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <string.h>
-#include <assert.h>
 
 /* module static variables */
 static ncx_module_t *ietf_system_mod;
@@ -86,6 +90,35 @@ static status_t
 }
 
 
+static status_t
+     y_ietf_system_system_restart (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        xml_node_t *methnode)
+{
+    agt_request_shutdown(NCX_SHUT_EXIT);
+
+    /* wait for process termination before rebooting */
+    {
+        int status;
+        pid_t child_pid;
+
+        log_debug("Waiting for netconfd to complete shutdown.\n");
+        if((child_pid = fork()) != 0) {
+            while (child_pid != wait(&status)) {
+                if(child_pid==-1) {
+                    exit(-1);
+                }
+            }
+            fprintf(stderr, "system-restart: Rebooting system ...");
+            system("reboot");
+            return status;
+        }
+    }
+    return NO_ERR;
+}
+
+
 /* The 3 mandatory callback functions: y_ietf_system_init, y_ietf_system_init2, y_ietf_system_cleanup */
 
 status_t
@@ -119,6 +152,15 @@ status_t
         "set-current-datetime",
         AGT_RPC_PH_INVOKE,
         y_ietf_system_set_current_datetime);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    res = agt_rpc_register_method(
+        "ietf-system",
+        "system-restart",
+        AGT_RPC_PH_INVOKE,
+        y_ietf_system_system_restart);
     if (res != NO_ERR) {
         return res;
     }

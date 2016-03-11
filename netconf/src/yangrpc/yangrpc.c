@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 #include <stdlib.h>
 #include <locale.h>
 #include <string.h>
@@ -2683,38 +2694,44 @@ yangrpc_cb_t* yangrpc_connect(char* server, char* user, char* password, char* pu
 
     dlq_createSQue(&savedevQ);
 
-
     /* create a default server control block */
     server_cb = new_server_cb(YANGCLI_DEF_SERVER);
     if (server_cb==NULL) {
         return NULL;
     }
 
+    argc=1;
     server_arg = malloc(strlen("--server=")+strlen(server)+1);
     assert(server_arg!=NULL);
     sprintf(server_arg,"--server=%s",server);
-    argv[1]=server_arg;
+    argv[argc++]=server_arg;
 
     user_arg = malloc(strlen("--user=")+strlen(user)+1);
     assert(user_arg!=NULL);
     sprintf(user_arg,"--user=%s",user);
-    argv[2]=user_arg;
+    argv[argc++]=user_arg;
 
-    password_arg = malloc(strlen("--password=")+strlen(password)+1);
-    assert(password_arg!=NULL);
-    sprintf(password_arg,"--password=%s",password);
-    argv[3]=password_arg;
+    /* at least password or public_key and private_key pair has to be specified */
+    assert(password!=NULL || (public_key!=NULL && private_key!=NULL));
 
-    public_key_arg = malloc(strlen("--public-key=")+strlen(public_key)+1);
-    assert(public_key_arg!=NULL);
-    sprintf(public_key_arg,"--public-key=%s",public_key);
-    argv[4]=public_key_arg;
+    if(password!=NULL) {
+        password_arg = malloc(strlen("--password=")+strlen(password)+1);
+        assert(password_arg!=NULL);
+        sprintf(password_arg,"--password=%s",password);
+        argv[argc++]=password_arg;
+    }
 
-    private_key_arg = malloc(strlen("--private-key=")+strlen(private_key)+1);
-    assert(private_key_arg!=NULL);
-    sprintf(private_key_arg,"--private-key=%s",private_key);
-    argv[5]=private_key_arg;
+    if(public_key!=NULL && private_key!=NULL) {
+        public_key_arg = malloc(strlen("--public-key=")+strlen(public_key)+1);
+        assert(public_key_arg!=NULL);
+        sprintf(public_key_arg,"--public-key=%s",public_key);
+        argv[argc++]=public_key_arg;
 
+        private_key_arg = malloc(strlen("--private-key=")+strlen(private_key)+1);
+        assert(private_key_arg!=NULL);
+        sprintf(private_key_arg,"--private-key=%s",private_key);
+        argv[argc++]=private_key_arg;
+    }
 
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);
@@ -3047,5 +3064,3 @@ status_t yangrpc_exec(yangrpc_cb_t *yangrpc_cb, val_value_t* request_val, val_va
 void yangrpc_close(yangrpc_cb_t *yangrpc_cb)
 {
 }
-
-

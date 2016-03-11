@@ -46,14 +46,20 @@ AC_SUBST(apachemoduledir)
 CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2 -DENABLE_DIRECT_MUST_AUGMENT_EX=1"
 AC_SUBST(CFLAGS)
 
-#libreadline or libtecla<default>
+#libreadline<default> or libtecla
 AC_ARG_WITH(readline,
 	[AS_HELP_STRING([--with-readline],
         [Use readline instead of tecla for interctive commandline yangcli input])],
 	[READLINE="1"],[])
 #	[AC_MSG_ERROR([--with-readline option is mandatory])])
-
 AM_CONDITIONAL([WITH_READLINE], [test "x$READLINE" = x1])
+
+AC_ARG_WITH(tecla,
+	[AS_HELP_STRING([--with-tecla],
+        [Use tecla instead of readline for interctive commandline yangcli input])],
+	[TECLA="1"],[])
+AM_CONDITIONAL([WITH_TECLA], [test "x$TECLA" = x1])
+
 
 AC_CONFIG_FILES([
         Makefile \
@@ -69,7 +75,6 @@ AC_CONFIG_FILES([
         example-modules/helloworld/Makefile
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
-        netconf/src/yangrpc/yanghttpd/Makefile
         netconf/src/yangdump/Makefile
         netconf/test/Makefile
         netconf/test/sys-test/Makefile

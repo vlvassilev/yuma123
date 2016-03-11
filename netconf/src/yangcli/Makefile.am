@@ -21,12 +21,12 @@ yangcli_CPPFLAGS = -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf
 yangcli_LDFLAGS = $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
 
 
-if WITH_READLINE
+if WITH_TECLA
+    yangcli_CPPFLAGS += -I $(top_srcdir)/libtecla
+    yangcli_LDFLAGS += $(top_builddir)/libtecla/libtecla.la
+else
     yangcli_SOURCES += $(top_srcdir)/netconf/src/yangcli/tecla2readline/tecla2readline.c
     yangcli_CPPFLAGS += -I $(top_srcdir)/libtecla
     yangcli_LDFLAGS += -lreadline
-else
-    yangcli_CPPFLAGS += -I $(top_srcdir)/libtecla
-    yangcli_LDFLAGS += $(top_builddir)/libtecla/libtecla.la
 endif
 

@@ -23,7 +23,7 @@
 #include "ncx.h"
 #include "val.h"
 #include "val_util.h"
-#include "val_parse.h"
+//#include "val_parse.h"
 #include "yangrpc.h"
 
 yangrpc_cb_t* yangrpc_cb;
@@ -34,7 +34,7 @@ static int example_handler(request_rec *r);
 
 /* Define our module as an entity and assign a function for registering hooks  */
 
-module AP_MODULE_DECLARE_DATA   yanghttpd_module =
+module AP_MODULE_DECLARE_DATA   yangrpc_example_module =
 {
     STANDARD20_MODULE_STUFF,
     NULL,            // Per-directory configuration handler

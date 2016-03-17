@@ -5,6 +5,7 @@
 #include "http_protocol.h"
 #include "http_request.h"
 #include "http_config.h"
+#include "http_log.h"
 
 
 #include <time.h>
@@ -26,11 +27,77 @@
 //#include "val_parse.h"
 #include "yangrpc.h"
 
-yangrpc_cb_t* yangrpc_cb;
+static char* server_address;
+static int server_port;
+static char* username;
+static char* password;
+static char* private_key_path;
+static char* public_key_path;
+
 
 /* Define prototypes of our functions in this module */
 static void register_hooks(apr_pool_t *pool);
 static int example_handler(request_rec *r);
+
+typedef struct {
+    yangrpc_cb_t* yangrpc_cb;
+} my_svr_cfg ;
+
+static void* my_create_svr_conf(apr_pool_t* pool, server_rec* svr)
+{
+    my_svr_cfg* svr_cfg = (my_svr_cfg*)apr_pcalloc(pool, sizeof(my_svr_cfg));
+    /* Set up the default values for fields of svr */
+
+    svr_cfg->yangrpc_cb=NULL;
+    return svr_cfg;
+}
+
+const char* server_address_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    server_address=strdup(arg);
+    return NULL;
+}
+
+const char* server_port_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    server_port=atoi(arg);
+    return NULL;
+}
+
+const char* username_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    username=strdup(arg);
+    return NULL;
+}
+
+const char* password_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    password=strdup(arg);
+    return NULL;
+}
+
+const char* private_key_path_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    private_key_path=strdup(arg);
+    return NULL;
+}
+
+const char* public_key_path_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    public_key_path=strdup(arg);
+    return NULL;
+}
+
+static const command_rec my_cmds[] = {
+    AP_INIT_TAKE1("ServerAddress", server_address_cmd_func, NULL/*my_ptr*/, OR_ALL, "Server address e.g. 127.0.0.1 or myserver.org"),
+    AP_INIT_TAKE1("ServerPort", server_port_cmd_func, NULL/*my_ptr*/, OR_ALL, "Server port e.g. 830"),
+    AP_INIT_TAKE1("Username", username_cmd_func, NULL/*my_ptr*/, OR_ALL, "Username e.g. root"),
+    AP_INIT_TAKE1("Password", password_cmd_func, NULL/*my_ptr*/, OR_ALL, "Password e.g. mypass"),
+    AP_INIT_TAKE1("PrivateKeyPath", private_key_path_cmd_func, NULL/*my_ptr*/, OR_ALL, "Private key path e.g. /root/.ssh/id_rsa"),
+    AP_INIT_TAKE1("PublicKeyPath", public_key_path_cmd_func, NULL/*my_ptr*/, OR_ALL, "Public key path e.g. /root/.ssh/id_rsa.pub"),
+    /* more directives as applicable */
+    { NULL }
+};
 
 /* Define our module as an entity and assign a function for registering hooks  */
 
@@ -39,9 +106,9 @@ module AP_MODULE_DECLARE_DATA   yangrpc_example_module =
     STANDARD20_MODULE_STUFF,
     NULL,            // Per-directory configuration handler
     NULL,            // Merge handler for per-directory configurations
-    NULL,            // Per-server configuration handler
+    my_create_svr_conf, // Per-server configuration handler
     NULL,            // Merge handler for per-server configurations
-    NULL,            // Any directives we may have for httpd
+    my_cmds,            // Any directives we may have for httpd
     register_hooks   // Our hook registering function
 };
 
@@ -73,41 +140,22 @@ static char* get_username(int uid)
     return username;
 }
 
+static int example_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp)
+{
+
+    server_address = strdup("127.0.0.1");
+    server_port = 830;
+    username = strdup("root");
+    password = strdup("mysecretpass");
+    private_key_path = strdup("/var/www/.ssh/id_rsa");
+    public_key_path = strdup("/var/www/.ssh/id_rsa.pub");
+    return OK;
+}
 /* register_hooks: Adds a hook to the httpd process */
 static void register_hooks(apr_pool_t *pool) 
 {
-    int ret;
-    char* username;
-    char* private_key;
-    char* public_key;
-
-    username = get_username(getuid());
-    private_key = malloc(strlen(getenv("HOME"))+strlen("/.ssh/id_rsa")+1);
-    public_key = malloc(strlen(getenv("HOME"))+strlen("/.ssh/id_rsa.pub")+1);
-    sprintf(private_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa");
-    sprintf(public_key, "%s%s", getenv("HOME"), "/.ssh/id_rsa.pub");
-
-    /* Hook the request handler */
+    ap_hook_pre_config(example_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_handler(example_handler, NULL, NULL, APR_HOOK_LAST);
-    {
-    	status_t res;
-        int i;
-    	char* argv[] = {"blah"};
-    	int argc = 1;
-        res = yangrpc_init(argc, argv);
-        assert(res==NO_ERR);
-        i=0;
-        for(i=0;(i<10);i++) {
-            yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/,username/*user*/,""/*password*/, public_key, private_key);
-            if(yangrpc_cb)
-                break;
-            fprintf(stderr,"[%d] yangrpc_connect attempt failed.\n", i);
-        }
-    }
-    assert(yangrpc_cb);
-    free(username);
-    free(private_key);
-    free(public_key);
 }
 
 static ssize_t writer_fn(void *cookie, const void *buffer, size_t size)
@@ -262,6 +310,7 @@ static int edit_config(request_rec *r)
     val_value_t* commit_rpc_reply_val;
     char* rpc_format_str;
     char* rpc_str;
+    my_svr_cfg* svr_cfg;
 
     FILE *fp = NULL;
     rc = read_post(r, &tab);
@@ -272,6 +321,8 @@ static int edit_config(request_rec *r)
         return DECLINED;
     }
     //ap_rprintf(r,"%s",config_xml_str);
+
+    svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
 
 #if 0
     rc = val_set_cplxval_obj(dst_val,dst_val->obj,config_xml_str);
@@ -305,7 +356,7 @@ static int edit_config(request_rec *r)
         edit_config_rpc_val = NULL;
         edit_config_rpc_reply_val=NULL;
     } else {
-        res = yangrpc_exec(yangrpc_cb, edit_config_rpc_val, &edit_config_rpc_reply_val);
+        res = yangrpc_exec(svr_cfg->yangrpc_cb, edit_config_rpc_val, &edit_config_rpc_reply_val);
         assert(res==NO_ERR);
     }
 
@@ -314,7 +365,7 @@ static int edit_config(request_rec *r)
         assert(obj_is_rpc(commit_rpc_obj));
         commit_rpc_val = val_new_value();
         val_init_from_template(commit_rpc_val, commit_rpc_obj);
-        res = yangrpc_exec(yangrpc_cb, commit_rpc_val, &commit_rpc_reply_val);
+        res = yangrpc_exec(svr_cfg->yangrpc_cb, commit_rpc_val, &commit_rpc_reply_val);
         assert(res==NO_ERR);
     } else {
         commit_rpc_val=NULL;
@@ -361,6 +412,7 @@ static int example_handler(request_rec *r)
     val_value_t* filter_val;
     val_value_t* type_meta_val;
     val_value_t* select_meta_val;
+    my_svr_cfg* svr_cfg;
 
     /* First off, we need to check if this is a call for the "example" handler.
      * If it is, we accept it and do our things, it not, we simply return DECLINED,
@@ -372,7 +424,22 @@ static int example_handler(request_rec *r)
                         0!=strcmp(r->uri, "/edit-config.xml")
        )) return (DECLINED);
 
-    
+    svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
+
+    if(svr_cfg->yangrpc_cb == NULL) {
+        int res;
+        char* argv[] = {"blah"};
+        int argc = 1;
+        res = yangrpc_init(argc, argv);
+        assert(res==NO_ERR);
+
+        svr_cfg->yangrpc_cb = yangrpc_connect(server_address, server_port, username, password, public_key_path, private_key_path);
+        if(svr_cfg->yangrpc_cb==NULL) {
+            assert(0);
+            return OK;
+        }
+    }
+
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
     assert(res==NO_ERR);
     if(0==strcmp(r->uri, "/edit-config.html")) {
@@ -400,7 +467,8 @@ static int example_handler(request_rec *r)
     val_add_meta(type_meta_val, filter_val);
     val_add_child(filter_val, request_val);
 
-    res = yangrpc_exec(yangrpc_cb, request_val, &reply_val);
+
+    res = yangrpc_exec(svr_cfg->yangrpc_cb, request_val, &reply_val);
     assert(res==NO_ERR);
 
     {

@@ -1382,7 +1382,7 @@ status_t
     val_value_t           *connect_valset;
     val_value_t           *valset, *testval;
     status_t               res;
-    boolean                s1, s2, s3, tcp;
+    boolean                s1, s2, s3, s4, s5, tcp;
 
 #ifdef DEBUG
     if (server_cb == NULL) {
@@ -1462,6 +1462,10 @@ status_t
                         YANGCLI_USER) ? TRUE : FALSE;
     s3 = val_find_child(valset, YANGCLI_MOD,
                         YANGCLI_PASSWORD) ? TRUE : FALSE;
+    s4 = val_find_child(valset, YANGCLI_MOD,
+                        YANGCLI_PUBLIC_KEY) ? TRUE : FALSE;
+    s5 = val_find_child(valset, YANGCLI_MOD,
+                        YANGCLI_PRIVATE_KEY) ? TRUE : FALSE;
 
     /* check the transport parameter */
     testval = val_find_child(valset, 
@@ -1480,7 +1484,7 @@ status_t
      * try to get any missing params in valset 
      */
     if (interactive_mode()) {
-        if (startupmode && s1 && s2 && (s3 || tcp)) {
+        if (startupmode && s1 && s2 && ((s3 || (s4 && s5)) || tcp)) {
             if (LOGDEBUG3) {
                 log_debug3("\nyangcli: CLI direct connect mode");
             }
@@ -1505,7 +1509,7 @@ status_t
     }
 
     /* passing off valset memory here */
-    s1 = s2 = s3 = FALSE;
+    s1 = s2 = s3 = s4 = s5 = FALSE;
     if (valset != NULL) {
         /* save the malloced valset */
         if (server_cb->connect_valset != NULL) {
@@ -1523,10 +1527,16 @@ status_t
         s3 = val_find_child(server_cb->connect_valset, 
                             YANGCLI_MOD,
                             YANGCLI_PASSWORD) ? TRUE : FALSE;
+        s4 = val_find_child(server_cb->connect_valset,
+                            YANGCLI_MOD,
+                            YANGCLI_PUBLIC_KEY) ? TRUE : FALSE;
+        s5 = val_find_child(server_cb->connect_valset,
+                            YANGCLI_MOD,
+                            YANGCLI_PRIVATE_KEY) ? TRUE : FALSE;
     }
 
     /* check if all params present yet */
-    if (s1 && s2 && (s3 || tcp)) {
+    if (s1 && s2 && ((s3 || (s4 && s5)) || tcp)) {
         res = replace_connect_valset(server_cb->connect_valset);
         if (res != NO_ERR) {
             log_warn("\nWarning: connection parameters could not be saved");
@@ -2674,14 +2684,15 @@ static void
 
 } /* check_module_capabilities */
 
-yangrpc_cb_t* yangrpc_connect(char* server, char* user, char* password, char* public_key, char* private_key)
+yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key)
 {
     char* server_arg;
+    char* port_arg;
     char* user_arg;
     char* password_arg;
     char* public_key_arg;
     char* private_key_arg;
-    char* argv[]={"exec-name-dummy", "--server=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
+    char* argv[]={"exec-name-dummy", "--server=?", "--port=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
     int argc=sizeof(argv)/sizeof(char*);
     server_cb_t          *server_cb;
     ses_cb_t             *ses_cb;
@@ -2705,6 +2716,11 @@ yangrpc_cb_t* yangrpc_connect(char* server, char* user, char* password, char* pu
     assert(server_arg!=NULL);
     sprintf(server_arg,"--server=%s",server);
     argv[argc++]=server_arg;
+
+    port_arg = malloc(strlen("--ncport=")+strlen("65535")+1);
+    assert(port_arg!=NULL);
+    sprintf(port_arg,"--ncport=%u", (unsigned int)port);
+    argv[argc++]=port_arg;
 
     user_arg = malloc(strlen("--user=")+strlen(user)+1);
     assert(user_arg!=NULL);

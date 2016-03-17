@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
     res = yangrpc_init(argc, argv);
     assert(res==NO_ERR);
-    yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/,"vladimir"/*user*/,""/*password*/,"/home/vladimir/.ssh/id_rsa.pub"/*public_key*/, "/home/vladimir/.ssh/id_rsa"/*private_key*/);
+    yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/, 830/*port*/, "vladimir"/*user*/,""/*password*/,"/home/vladimir/.ssh/id_rsa.pub"/*public_key*/, "/home/vladimir/.ssh/id_rsa"/*private_key*/);
 
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
     assert(res==NO_ERR);

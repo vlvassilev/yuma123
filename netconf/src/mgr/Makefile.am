@@ -15,6 +15,6 @@ $(top_srcdir)/netconf/src/mgr/mgr_val_parse.c \
 $(top_srcdir)/netconf/src/mgr/mgr_xml.c
 
 
-libmgr_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
+libmgr_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
 libmgr_la_LDFLAGS = -lxml2 -lz  -ldl -lrt
 

@@ -28,16 +28,16 @@ AC_SUBST(netconfcentral_yangdir)
 yang_yangdir="$prefix/share/yuma/modules/yang"
 AC_SUBST(yang_yangdir)
 
-ncx_netconf_includedir="$includedir/yuma/ncx"
+ncx_netconf_includedir="$prefix/include/yuma/ncx"
 AC_SUBST(ncx_netconf_includedir)
 
-agt_netconf_includedir="$includedir/yuma/agt"
+agt_netconf_includedir="$prefix/include/yuma/agt"
 AC_SUBST(agt_netconf_includedir)
 
-yangrpc_netconf_includedir="$includedir/yuma/yangrpc"
+yangrpc_netconf_includedir="$prefix/include/yuma/yangrpc"
 AC_SUBST(yangrpc_netconf_includedir)
 
-platform_netconf_includedir="$includedir/yuma/platform"
+platform_netconf_includedir="$prefix/include/yuma/platform"
 AC_SUBST(platform_netconf_includedir)
 
 apachemoduledir="$libdir/apache2/modules"

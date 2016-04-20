@@ -1,0 +1,24 @@
+module python-yuma-example {
+
+    namespace "http://yuma123.org/ns/python-yuma-example";
+
+    prefix "python-yuma-example";
+
+    organization  "yuma123.org";
+
+    description 
+      "python-yuma-example module";
+
+    revision 2016-04-19 {
+        description
+            "Initial revision";
+    }
+
+    container python-yuma-example {
+        description
+           "Top level leaf python-yuma-example container";
+        leaf message {
+            type string;
+       }
+    }
+}

@@ -2,7 +2,7 @@ AC_INIT([yuma123-netconfd-module-ietf-interfaces], [1.0], [vladimir@transpacket.
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Werror foreign])
 LT_INIT([disable-static])
 
 AC_PROG_CC

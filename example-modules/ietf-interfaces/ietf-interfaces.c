@@ -135,6 +135,9 @@ static status_t
 
     val_add_child(name_val, interface_val);
 
+    res = val_gen_index_chain(interface_obj, interface_val);
+    assert(res == NO_ERR);
+
     /* /interfaces-state/interface/statistics */
     statistics_obj = obj_find_child(interface_obj,
                                    "ietf-interfaces",

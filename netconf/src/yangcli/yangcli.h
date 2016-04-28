@@ -99,6 +99,8 @@ extern "C" {
 
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
+#define YANGCLI_EX_MOD  (const xmlChar *)"yangcli-ex"
+
 #define YANGCLI_NUM_TIMERS    16
 
 /* look in yangcli.c:yangcli_init for defaults not listed here */
@@ -204,6 +206,7 @@ extern "C" {
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
 #define YANGCLI_ID          (const xmlChar *)"id"
 #define YANGCLI_INDEX       (const xmlChar *)"index"
+#define YANGCLI_KEEP_SESSION_MODEL_COPIES_AFTER_COMPILATION    (const xmlChar *)"keep-session-model-copies-after-compilation"
 #define YANGCLI_LOAD        (const xmlChar *)"load"
 #define YANGCLI_LOCK_TIMEOUT (const xmlChar *)"lock-timeout"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
@@ -453,6 +456,7 @@ typedef struct server_cb_t_ {
     ncx_bad_data_t       baddata;
     log_debug_t          log_level;
     boolean              autoload;
+    boolean              keep_session_model_copies_after_compilation;
     boolean              fixorder;
     op_testop_t          testoption;
     op_errop_t           erroption;

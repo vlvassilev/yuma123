@@ -1,0 +1,38 @@
+module yangcli-ex {
+
+  namespace
+    "http://yuma123.org/ns/yangcli-ex";
+  prefix "yangcli-ex";
+
+  import yangcli { prefix yc; }
+
+  organization
+    "Yuma123";
+
+  contact
+    "Vladimir Vassilev <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module contains extra parameters for yangcli";
+
+  revision 2016-04-28 {
+    description
+      "Initial revision.";
+  }
+
+  augment "/yc:yangcli" {
+    description
+      "Adds extra parameters to yangcli.";
+
+      leaf keep-session-model-copies-after-compilation {
+        description
+          "Controls if temporary session model copies are kept
+           after compilation in ~/.yuma/tmp/<>/<sid> until yangcli
+           is terminated.";
+        type boolean;
+        default true;
+      }
+  }
+}
+
+

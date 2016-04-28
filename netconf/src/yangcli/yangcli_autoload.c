@@ -1324,6 +1324,14 @@ status_t
      */
     ncx_set_session_modQ(&mscb->temp_modQ);
 
+    if (!server_cb->keep_session_model_copies_after_compilation && mscb->temp_progcb && mscb->temp_sescb) {
+        /* we won't be keeping the compiled yang sources */
+        ncxmod_free_session_tempdir(mscb->temp_progcb,
+                                    mscb->temp_sescb->sidnum);
+        mscb->temp_sescb = NULL;
+    }
+
+
     /* need to wait until all the modules are loaded to
      * go through the modptr list and enable/disable the features
      * to match what the server has reported

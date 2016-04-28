@@ -139,6 +139,9 @@ static server_cb_t    *cur_server_cb;
 /* yangcli.yang file used for quicker lookups */
 static ncx_module_t  *yangcli_mod;
 
+/* yangcli-ex.yang file used for quicker lookups */
+static ncx_module_t  *yangcli_ex_mod;
+
 /* netconf.yang file used for quicker lookups */
 static ncx_module_t  *netconf_mod;
 
@@ -247,6 +250,11 @@ static xmlChar        *default_module;
 
 /* 0 for no timeout; N for N seconds message timeout */
 static uint32          default_timeout;
+
+/* TRUE if OK to keep model copies stored in $USER/.yuma/tmp/<>/<sid> until yangcli is terminated.
+ * FALSE if --keep-session-model-copies-after-compilation=false
+ */
+static boolean         keep_session_model_copies_after_compilation;
 
 /* default value for val_dump_value display mode */
 static ncx_display_mode_t   display_mode;
@@ -654,6 +662,7 @@ static server_cb_t *
     server_cb->baddata = baddata;
     server_cb->log_level = log_get_debug_level();
     server_cb->autoload = autoload;
+    server_cb->keep_session_model_copies_after_compilation = keep_session_model_copies_after_compilation;
     server_cb->fixorder = fixorder;
     server_cb->get_optional = optional;
     server_cb->testoption = testoption;
@@ -698,6 +707,7 @@ static void
     server_cb->baddata = baddata;
     server_cb->log_level = log_get_debug_level();
     server_cb->autoload = autoload;
+    server_cb->keep_session_model_copies_after_compilation = keep_session_model_copies_after_compilation;
     server_cb->fixorder = fixorder;
     server_cb->get_optional = optional;
     server_cb->testoption = testoption;
@@ -834,6 +844,17 @@ static status_t
         } else if (ncx_is_false(usestr)) {
             server_cb->autoload = FALSE;
             autoload = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_KEEP_SESSION_MODEL_COPIES_AFTER_COMPILATION)) {
+        if (ncx_is_true(usestr)) {
+            server_cb->keep_session_model_copies_after_compilation = TRUE;
+            keep_session_model_copies_after_compilation = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            server_cb->keep_session_model_copies_after_compilation = FALSE;
+            keep_session_model_copies_after_compilation = FALSE;
         } else {
             log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
@@ -1849,6 +1870,13 @@ static status_t
         return res;
     }
 
+    /* $$ keep_session_model_copies_after_compilation = boolean */
+    res = create_config_var(server_cb, YANGCLI_KEEP_SESSION_MODEL_COPIES_AFTER_COMPILATION,
+                            (keep_session_model_copies_after_compilation) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* $$ autouservars = boolean */
     res = create_config_var(server_cb, YANGCLI_AUTOUSERVARS, 
                             (autouservars) ? NCX_EL_TRUE : NCX_EL_FALSE);
@@ -2173,6 +2201,14 @@ static status_t
         autoload = TRUE;
     }
 
+    /* get the keep-session-model-copies-after-compilation parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_EX_MOD, YANGCLI_KEEP_SESSION_MODEL_COPIES_AFTER_COMPILATION);
+    if (parm && parm->res == NO_ERR) {
+        keep_session_model_copies_after_compilation = VAL_BOOL(parm);
+    } else {
+        keep_session_model_copies_after_compilation = TRUE;
+    }
+
     /* get the autouservars parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOUSERVARS);
     if (parm && parm->res == NO_ERR) {
@@ -2435,6 +2471,14 @@ static status_t
                              NULL, 
                              NULL,
                              &yangcli_mod);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    res = ncxmod_load_module(YANGCLI_EX_MOD,
+                             NULL,
+                             NULL,
+                             &yangcli_ex_mod);
     if (res != NO_ERR) {
         return res;
     }

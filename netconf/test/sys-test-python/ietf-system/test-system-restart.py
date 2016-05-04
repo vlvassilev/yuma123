@@ -25,9 +25,8 @@ Demonstrate ietf-system:system-restart RPC operation
 #2 - Confirm there is no error.
 #3 - Immediately attempt new connection.
 #4 - Confirm the attempt fails.
-#5 - Wait 1 min.
-#6 - Attempt new connection.
-#7 - Confirm the attempt succeeds.
+#5 - Keep attempting to connect for up to 120 sec.
+#6 - Confirm the attempt succeeds.
 """)
 	server=os.environ.get('YUMA_AGENT_IPADDR') #e.g. "192.168.209.31"
 	port=os.environ.get('YUMA_AGENT_PORT') #e.g. "830"
@@ -75,6 +74,7 @@ Demonstrate ietf-system:system-restart RPC operation
 		return (-1)
 
         time.sleep(10)
+
 	my_netconf = netconf.netconf()
 
 	sys.stderr.write("Connect to (server=%(server)s):\n" % {'server':server})
@@ -83,6 +83,17 @@ Demonstrate ietf-system:system-restart RPC operation
 		sys.stderr.write("Connect should have not succeeded: FAILED\n")
 		return (-1)
 
-	return 0
+	start = time.time()
+	while((time.time()-start)<120):
+		my_netconf = netconf.netconf()
+
+		sys.stderr.write("Connect to (server=%(server)s):\n" % {'server':server})
+		ret=my_netconf.connect("server=%(server)s port=%(port)s user=%(user)s password=%(password)s" % {'server':server,'port':port,'user':user,'password':password})
+		if ret == 0:
+			sys.stdout.write("Restart completed in %(seconds)d sec.\n" % {'seconds':time.time()-start})
+			return 0
+
+	sys.stderr.write("Timeout!\n")
+	return(-1)
 
 sys.exit(main())

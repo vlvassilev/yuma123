@@ -220,7 +220,7 @@ static val_value_t*
 *    pointer to malloced value set or NULL if none created,
 *    may have errors, check *res
 *********************************************************************/
-static val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
+val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
                                     obj_template_t *rpc,
                                     const xmlChar *args,
                                     status_t  *res )
@@ -4092,11 +4092,10 @@ static status_t
 
 } /* add_filter_attrs */
 
-
 /********************************************************************
-* FUNCTION send_get_to_server
+* FUNCTION get_to_server_reqdata
 * 
-* Send an <get> operation to the specified server
+* Generate a <get> operation data to the specified server
 *
 * Fills out the <filter> node based on the config_target node
 * Any missing key nodes will be collected (via CLI prompt)
@@ -4130,9 +4129,9 @@ static status_t
 *   withdef == the desired with-defaults parameter
 *              It may be ignored or altered, depending on
 *              whether the server supports the capability or not
+*   reqdata_out == request data value
 *
 * OUTPUTS:
-*    server_cb->state may be changed or other action taken
 *
 *    !!! valroot is consumed -- freed or transfered to a PDU
 *    !!! that will be freed later
@@ -4146,30 +4145,29 @@ static status_t
 * RETURNS:
 *    status
 *********************************************************************/
-static status_t
-    send_get_to_server (server_cb_t *server_cb,
+static status_t get_to_server_reqdata(server_cb_t *server_cb,
                         val_value_t *valroot,
                         val_value_t *get_content,
                         val_value_t *selectval,
                         val_value_t *source,
-                        uint32 timeoutval,
                         boolean dofill,
-                        ncx_withdefaults_t withdef)
+                        ncx_withdefaults_t withdef,
+                        val_value_t** reqdata_out)
 {
+
     obj_template_t        *rpc, *input, *withdefobj;
     val_value_t           *reqdata, *filter;
     val_value_t           *withdefval, *dummy_parm;
-    mgr_rpc_req_t         *req;
     ses_cb_t              *scb;
     mgr_scb_t             *mscb;
     status_t               res;
     boolean                freeroot;
 
-    req = NULL;
     reqdata = NULL;
     res = NO_ERR;
     input = NULL;
     filter = NULL;
+    *reqdata_out = NULL;
 
     if (LOGDEBUG) {
         if (source != NULL) {
@@ -4197,13 +4195,12 @@ static status_t
     if (!input) {
         res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     } else {
-        /* construct a method + parameter tree */
-        reqdata = xml_val_new_struct(obj_get_name(rpc), 
-                                     obj_get_nsid(rpc));
+        reqdata = val_new_value();
         if (!reqdata) {
             log_error("\nError allocating a new RPC request");
             res = ERR_INTERNAL_MEM;
         }
+        val_init_from_template(reqdata,rpc);
     }
 
     /* add /get-star/input/source */
@@ -4323,49 +4320,14 @@ static status_t
                      "capability not-supported so parameter ignored");
         }
     }
-
-    if (res == NO_ERR) {
-        /* allocate an RPC request and send it */
-        req = mgr_rpc_new_request(scb);
-        if (!req) {
-            res = ERR_INTERNAL_MEM;
-            log_error("\nError allocating a new RPC request");
-        } else {
-            req->data = reqdata;
-            req->rpc = rpc;
-            req->timeout = timeoutval;
-        }
-    }
-        
-    if (res == NO_ERR) {
-        if (LOGDEBUG2) {
-            log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_max(reqdata, 
-                               0,
-                               server_cb->defindent,
-                               DUMP_VAL_LOG,
-                               server_cb->display_mode,
-                               FALSE,
-                               FALSE);
-        }
-
-        /* the request will be stored if this returns NO_ERR */
-        res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
-    }
-
     if (res != NO_ERR) {
-        if (req) {
-            mgr_rpc_free_request(req);
-        } else if (reqdata) {
+        if (reqdata) {
             val_free_value(reqdata);
         }
-    } else {
-        server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
-
+    *reqdata_out=reqdata;
     return res;
-
-} /* send_get_to_server */
+}
 
 
 /********************************************************************
@@ -5712,6 +5674,9 @@ static status_t
  *    rpc == RPC method for the create command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
+ *    reqdata = remote rpc val
+ *    timeoutval = timeout param
+
  *
  * OUTPUTS:
  *   the completed data node is output and
@@ -5724,14 +5689,16 @@ static status_t
     do_xget (server_cb_t *server_cb,
              obj_template_t *rpc,
              const xmlChar *line,
-             uint32  len)
+             uint32  len,
+             val_value_t** reqdata,
+             uint32* timeoutval)
 {
     const ses_cb_t      *scb;
     const mgr_scb_t     *mscb;
     val_value_t         *valset, *content, *parm, *valroot;
     const xmlChar       *str;
     status_t             res;
-    uint32               retcode, timeoutval;
+    uint32               retcode;
     ncx_withdefaults_t   withdef;
 
     /* init locals */
@@ -5758,9 +5725,9 @@ static status_t
     /* get the timeout parameter */
     parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
-        timeoutval = VAL_UINT(parm);
+        *timeoutval = VAL_UINT(parm);
     } else {
-        timeoutval = server_cb->timeout;
+        *timeoutval = server_cb->timeout;
     }
 
     /* get the with-defaults parameter */
@@ -5837,8 +5804,8 @@ static status_t
                  * as the filter 
                  * !! passing off content memory even on error !!
                  */
-                res = send_get_to_server(server_cb, valroot, NULL, content, 
-                                        NULL, timeoutval, FALSE, withdef);
+                res = get_to_server_reqdata(server_cb, valroot, NULL, content, 
+                                        NULL, FALSE, withdef, reqdata);
                 content = NULL;
                 if (res != NO_ERR) {
                     log_error("\nError: send get operation"
@@ -6650,6 +6617,8 @@ static status_t
 *   rpc == template for the local RPC
 *   line == input command line from user
 *   len == line length
+*   reqdata = remote rpc val
+*   timeoutval = timeout val
 *
 * OUTPUTS:
 *    server_cb->state may be changed or other action taken
@@ -6664,7 +6633,10 @@ static status_t
     do_local_conn_command (server_cb_t *server_cb,
                            obj_template_t *rpc,
                            xmlChar *line,
-                           uint32  len)
+                           uint32  len,
+                           val_value_t** reqdata,
+                           uint32* timeoutval)
+
 {
     const xmlChar *rpcname;
     status_t       res;
@@ -6676,35 +6648,35 @@ static status_t
 
     if (!xml_strcmp(rpcname, YANGCLI_CREATE)) {
         if (cond) {
-            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_CREATE);
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_CREATE, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
         if (cond) {
-            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_DELETE);
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_DELETE, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_REMOVE)) {
         if (cond) {
-            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REMOVE);
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REMOVE, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_GET_LOCKS)) {
         if (cond) {
-            res = do_get_locks(server_cb, rpc, line, len);
+            res = do_get_locks(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
         if (cond) {
-            res = do_insert(server_cb, rpc, line, len);
+            res = do_insert(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
         if (cond) {
-            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_MERGE);
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_MERGE, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_RELEASE_LOCKS)) {
         if (cond) {
-            res = do_release_locks(server_cb, rpc, line, len);
+            res = do_release_locks(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
         if (cond) {
-            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REPLACE);
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REPLACE, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {
         if (cond) {
@@ -6713,24 +6685,24 @@ static status_t
                 log_error("\nError: Extra characters found (%s)",
                           &line[len]);
             } else {
-                res = do_save(server_cb);
+                res = do_save(server_cb, reqdata, timeoutval);
             }
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET)) {
         if (cond) {
-            res = do_sget(server_cb, rpc, line, len);
+            res = do_sget(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET_CONFIG)) {
         if (cond) {
-            res = do_sget_config(server_cb, rpc, line, len);
+            res = do_sget_config(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET)) {
         if (cond) {
-            res = do_xget(server_cb, rpc, line, len);
+            res = do_xget(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET_CONFIG)) {
         if (cond) {
-            res = do_xget_config(server_cb, rpc, line, len);
+            res = do_xget_config(server_cb, rpc, line, len, reqdata, timeoutval);
         }
     } else {
         res = ERR_NCX_SKIPPED;
@@ -7090,9 +7062,45 @@ status_t
             res = ERR_NCX_OPERATION_FAILED;
             log_stdout("\nError: Already connected");
         } else {
-            res = do_local_conn_command(server_cb, rpc, useline, len);
+            val_value_t* reqdata;
+            uint32 timeoutval;
+            res = do_local_conn_command(server_cb, rpc, useline, len, &reqdata, &timeoutval);
             if (res == ERR_NCX_SKIPPED) {
                 res = do_local_command(server_cb, rpc, useline, len);
+            } else if(res == NO_ERR && reqdata!=NULL){
+                /* get the session control block */
+                scb = mgr_ses_get_scb(server_cb->mysid);
+                assert(scb);
+                /* allocate an RPC request and send it */
+                req = mgr_rpc_new_request(scb);
+                if (!req) {
+                    res = ERR_INTERNAL_MEM;
+                    log_error("\nError allocating a new RPC request");
+                } else {
+                    req->data = reqdata;
+                    req->rpc = reqdata->obj;
+                    req->timeout = timeoutval;
+                }
+            }
+
+            if (res == NO_ERR) {
+                if (LOGDEBUG2) {
+                    log_debug2("\nabout to send RPC request with reqdata:");
+                    val_dump_value_max(reqdata,
+                                       0,
+                                       server_cb->defindent,
+                                       DUMP_VAL_LOG,
+                                       server_cb->display_mode,
+                                       FALSE,
+                                       FALSE);
+                }
+
+                /* the request will be stored if this returns NO_ERR */
+                res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+            }
+
+            if (res == NO_ERR) {
+                server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
             }
         }
         if (newline) {

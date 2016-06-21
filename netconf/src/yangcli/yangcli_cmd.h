@@ -308,6 +308,37 @@ extern status_t
 extern status_t
     do_line_recall_string (server_cb_t *server_cb,
                            const xmlChar *line);
+/********************************************************************
+* FUNCTION parse_rpc_cli
+* 
+*  Call the cli_parse for an RPC input value set
+* 
+* INPUTS:
+*   server_cb == server control block to use
+*   rpc == RPC to parse CLI for
+*   line == input line to parse, starting with the parms to parse
+*   res == pointer to status output
+*
+* OUTPUTS: 
+*   *res == status
+*
+* RETURNS:
+*    pointer to malloced value set or NULL if none created,
+*    may have errors, check *res
+*********************************************************************/
+
+val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
+                                    obj_template_t *rpc,
+                                    const xmlChar *args,
+                                    status_t  *res );
+
+status_t
+    do_local_conn_command_reqdata(server_cb_t *server_cb,
+                           obj_template_t *rpc,
+                           xmlChar *line,
+                           uint32  len,
+                           val_value_t** reqdata,
+                           uint32* timeoutval);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

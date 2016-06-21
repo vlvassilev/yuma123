@@ -94,6 +94,7 @@ date         init     comment
 #include "yangcli_tab.h"
 #include "yangcli_uservars.h"
 #include "yangcli_util.h"
+#include "yangcli_globals.h"
 
 
 /********************************************************************
@@ -135,9 +136,6 @@ static dlq_hdr_t      server_cbQ;
  * server processing context; later search by session ID
  */
 static server_cb_t    *cur_server_cb;
-
-/* yangcli.yang file used for quicker lookups */
-static ncx_module_t  *yangcli_mod;
 
 /* yangcli-ex.yang file used for quicker lookups */
 static ncx_module_t  *yangcli_ex_mod;
@@ -235,9 +233,6 @@ static const xmlChar  *uservars_file;
  * NCX_BAD_DATA_ERROR to prompt user to re-enter value
  */
 static ncx_bad_data_t  baddata;
-
-/* global connect param set, copied to server connect parmsets */
-static val_value_t   *connect_valset;
 
 /* name of external CLI config file used on invocation */
 static xmlChar        *confname;
@@ -4999,7 +4994,11 @@ void
 *                       FUNCTION main                               *
 *                                                                   *
 *********************************************************************/
+#ifdef SKIP_MAIN
+static int main2 (int argc, char *argv[])
+#else
 int main (int argc, char *argv[])
+#endif
 {
     status_t   res;
 

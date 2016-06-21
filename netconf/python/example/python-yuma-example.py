@@ -27,4 +27,6 @@ if(res!=0):
 
 print(yuma.val_string(message_val))
 
+yuma.val_dump_value(root_val,1)
+
 print("Done.")

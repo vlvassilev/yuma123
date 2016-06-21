@@ -66,7 +66,7 @@
 #include "yangcli_tab.h"
 #include "yangcli_uservars.h"
 #include "yangcli_util.h"
-
+#include "yangcli_globals.h"
 
 #include "yangrpc.h"
 
@@ -75,8 +75,6 @@
 /* TBD: use multiple server control blocks, stored in this Q */
 static dlq_hdr_t      server_cbQ;
 
-/* yangcli.yang file used for quicker lookups */
-static ncx_module_t  *yangcli_mod;
 
 /* netconf.yang file used for quicker lookups */
 static ncx_module_t  *netconf_mod;
@@ -171,9 +169,6 @@ static const xmlChar  *uservars_file;
  * NCX_BAD_DATA_ERROR to prompt user to re-enter value
  */
 static ncx_bad_data_t  baddata;
-
-/* global connect param set, copied to server connect parmsets */
-static val_value_t   *connect_valset;
 
 /* name of external CLI config file used on invocation */
 static xmlChar        *confname;
@@ -1032,122 +1027,6 @@ static void
 }  /* yangcli_notification_handler */
 
 
-
-/********************************************************************
-* FUNCTION get_yangcli_mod
-* 
-*  Get the yangcli module
-* 
-* RETURNS:
-*    yangcli module
-*********************************************************************/
-ncx_module_t *
-    get_yangcli_mod (void)
-{
-    return yangcli_mod;
-}  /* get_yangcli_mod */
-
-
-/********************************************************************
-* FUNCTION get_connect_valset
-* 
-*  Get the connect value set
-* 
-* RETURNS:
-*    connect_valset variable
-*********************************************************************/
-val_value_t *
-    get_connect_valset (void)
-{
-    return connect_valset;
-}  /* get_connect_valset */
-
-
-/********************************************************************
-* FUNCTION get_autocomp
-* 
-*  Get the autocomp parameter value
-* 
-* RETURNS:
-*    autocomp boolean value
-*********************************************************************/
-boolean
-    get_autocomp (void)
-{
-    return autocomp;
-}  /* get_autocomp */
-
-/********************************************************************
-* FUNCTION get_batchmode
-*
-*  Get the batchmode parameter value
-*
-* RETURNS:
-*    batchmode boolean value
-*********************************************************************/
-boolean
-    get_batchmode (void)
-{
-    return batchmode;
-}  /* get_batchmode */
-
-/********************************************************************
-* FUNCTION replace_connect_valset
-* 
-*  Replace the current connect value set with a clone
-* of the specified connect valset
-* 
-* INPUTS:
-*    valset == value node to clone that matches the object type
-*              of the input section of the connect operation
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    replace_connect_valset (const val_value_t *valset)
-{
-    val_value_t   *findval, *replaceval;
-
-#ifdef DEBUG
-    if (valset == NULL) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    if (connect_valset == NULL) {
-        connect_valset = val_clone(valset);
-        if (connect_valset == NULL) {
-            return ERR_INTERNAL_MEM;
-        } else {
-            return NO_ERR;
-        }
-    }
-
-    /* go through the connect value set passed in and compare
-     * to the existing connect_valset; only replace the
-     * parameters that are not already set
-     */
-    for (findval = val_get_first_child(valset);
-         findval != NULL;
-         findval = val_get_next_child(findval)) {
-
-        replaceval = val_find_child(connect_valset,
-                                    val_get_mod_name(findval),
-                                    findval->name);
-        if (replaceval == NULL) {
-            replaceval = val_clone(findval);
-            if (replaceval == NULL) {
-                return ERR_INTERNAL_MEM;
-            }
-            val_add_child(replaceval, connect_valset);
-        }
-    }
-
-    return NO_ERR;
-
-}  /* replace_connect_valset */
-
 /********************************************************************
 * FUNCTION create_session
 * 
@@ -1349,7 +1228,7 @@ static void
 
 
 /********************************************************************
- * FUNCTION do_connect
+ * FUNCTION do_connect_
  * 
  * INPUTS:
  *   server_cb == server control block to use
@@ -1372,7 +1251,7 @@ static void
  *   status
  *********************************************************************/
 status_t
-    do_connect (server_cb_t *server_cb,
+    do_connect_ (server_cb_t *server_cb,
                 obj_template_t *rpc,
                 const xmlChar *line,
                 uint32 start,
@@ -1551,7 +1430,7 @@ status_t
 
     return res;
 
-}  /* do_connect */
+}  /* do_connect_ */
 
 /********************************************************************
 * FUNCTION process_cli_input
@@ -2114,201 +1993,6 @@ int yangrpc_init(int argc, char* argv[])
 
     return NO_ERR;
 }
-
-/********************************************************************
-* FUNCTION report_capabilities
-*
-* Generate a start session report, listing the capabilities
-* of the NETCONF server
-*
-* INPUTS:
-*  server_cb == server control block to use
-*  scb == session control block
-*  isfirst == TRUE if first call when session established
-*             FALSE if this is from show session command
-*  mode == help mode; ignored unless first == FALSE
-*********************************************************************/
-void
-    report_capabilities (server_cb_t *server_cb,
-                         const ses_cb_t *scb,
-                         boolean isfirst,
-                         help_mode_t mode)
-{
-    const mgr_scb_t    *mscb;
-    const xmlChar      *server;
-    const val_value_t  *parm;
-
-    if (!LOGINFO) {
-        /* skip unless log level is INFO or higher */
-        return;
-    }
-
-    mscb = (const mgr_scb_t *)scb->mgrcb;
-
-    parm = val_find_child(server_cb->connect_valset,
-                          YANGCLI_MOD,
-                          YANGCLI_SERVER);
-    if (parm && parm->res == NO_ERR) {
-        server = VAL_STR(parm);
-    } else {
-        server = (const xmlChar *)"--";
-    }
-
-    log_write("\n\nNETCONF session established for %s on %s",
-              scb->username,
-              mscb->target ? mscb->target : server);
-
-
-    log_write("\n\nClient Session Id: %u", scb->sid);
-    log_write("\nServer Session Id: %u", mscb->agtsid);
-
-    if (isfirst || mode > HELP_MODE_BRIEF) {
-        log_write("\n\nServer Protocol Capabilities");
-        cap_dump_stdcaps(&mscb->caplist);
-
-        log_write("\n\nServer Module Capabilities");
-        cap_dump_modcaps(&mscb->caplist);
-
-        log_write("\n\nServer Enterprise Capabilities");
-        cap_dump_entcaps(&mscb->caplist);
-        log_write("\n");
-    }
-
-    log_write("\nProtocol version set to: ");
-    switch (ses_get_protocol(scb)) {
-    case NCX_PROTO_NETCONF10:
-        log_write("RFC 4741 (base:1.0)");
-        break;
-    case NCX_PROTO_NETCONF11:
-        log_write("RFC 6241 (base:1.1)");
-        break;
-    default:
-        log_write("unknown");
-    }
-
-    if (!isfirst && (mode <= HELP_MODE_BRIEF)) {
-        return;
-    }
-
-    log_write("\nDefault target set to: ");
-
-    switch (mscb->targtyp) {
-    case NCX_AGT_TARG_NONE:
-        if (isfirst) {
-            server_cb->default_target = NULL;
-        }
-        log_write("none");
-        break;
-    case NCX_AGT_TARG_CANDIDATE:
-        if (isfirst) {
-            server_cb->default_target = NCX_EL_CANDIDATE;
-        }
-        log_write("<candidate>");
-        break;
-    case NCX_AGT_TARG_RUNNING:
-        if (isfirst) {
-            server_cb->default_target = NCX_EL_RUNNING;
-        }
-        log_write("<running>");
-        break;
-    case NCX_AGT_TARG_CAND_RUNNING:
-        if (force_target != NULL &&
-            !xml_strcmp(force_target, NCX_EL_RUNNING)) {
-            /* set to running */
-            if (isfirst) {
-                server_cb->default_target = NCX_EL_RUNNING;
-            }
-            log_write("<running> (<candidate> also supported)");
-        } else {
-            /* set to candidate */
-            if (isfirst) {
-                server_cb->default_target = NCX_EL_CANDIDATE;
-            }
-            log_write("<candidate> (<running> also supported)");
-        }
-        break;
-    case NCX_AGT_TARG_LOCAL:
-        if (isfirst) {
-            server_cb->default_target = NULL;
-        }
-        log_write("none -- local file");
-        break;
-    case NCX_AGT_TARG_REMOTE:
-        if (isfirst) {
-            server_cb->default_target = NULL;
-        }
-        log_write("none -- remote file");
-        break;
-    default:
-        if (isfirst) {
-            server_cb->default_target = NULL;
-        }
-        SET_ERROR(ERR_INTERNAL_VAL);
-        log_write("none -- unknown (%d)", mscb->targtyp);
-        break;
-    }
-
-    log_write("\nSave operation mapped to: ");
-    switch (mscb->targtyp) {
-    case NCX_AGT_TARG_NONE:
-        log_write("none");
-        break;
-    case NCX_AGT_TARG_CANDIDATE:
-    case NCX_AGT_TARG_CAND_RUNNING:
-        if (!xml_strcmp(server_cb->default_target,
-                        NCX_EL_CANDIDATE)) {
-            log_write("commit");
-            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-                log_write(" + copy-config <running> <startup>");
-            }
-        } else {
-            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-                log_write("copy-config <running> <startup>");
-            } else {
-                log_write("none");
-            }
-        }
-        break;
-    case NCX_AGT_TARG_RUNNING:
-        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-            log_write("copy-config <running> <startup>");
-        } else {
-            log_write("none");
-        }
-        break;
-    case NCX_AGT_TARG_LOCAL:
-    case NCX_AGT_TARG_REMOTE:
-        /* no way to assign these enums from the capabilities alone! */
-        if (cap_std_set(&mscb->caplist, CAP_STDID_URL)) {
-            log_write("copy-config <running> <url>");
-        } else {
-            log_write("none");
-        }
-        break;
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        log_write("none");
-        break;
-    }
-
-    log_write("\nDefault with-defaults behavior: ");
-    if (mscb->caplist.cap_defstyle) {
-        log_write("%s", mscb->caplist.cap_defstyle);
-    } else {
-        log_write("unknown");
-    }
-
-    log_write("\nAdditional with-defaults behavior: ");
-    if (mscb->caplist.cap_supported) {
-        log_write("%s", mscb->caplist.cap_supported);
-    } else {
-        log_write("unknown");
-    }
-
-    log_write("\n");
-
-} /* report_capabilities */
-
 
 /********************************************************************
 * FUNCTION namespace_mismatch_warning
@@ -2904,7 +2588,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     if (connect_valset) {
         parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_SERVER);
         if (parm && parm->res == NO_ERR) {
-            res = do_connect(server_cb, NULL, NULL, 0, TRUE);
+            res = do_connect_(server_cb, NULL, NULL, 0, TRUE);
             if (res != NO_ERR) {
                 if (!batchmode) {
                     res = NO_ERR;
@@ -2914,7 +2598,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     }
 
     /* the request will be stored if this returns NO_ERR */
-    //res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+    //res = mgr_rpc_send_request(scb, req, yangcli_reply_handler_);
     //assert(res==NO_ERR);
     //mgr_io_run();
 
@@ -2952,7 +2636,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
 val_value_t* global_reply_val;
 
 /********************************************************************
- * FUNCTION yangcli_reply_handler
+ * FUNCTION yangcli_reply_handler_
  * 
  *  handle incoming <rpc-reply> messages
  * 
@@ -2965,7 +2649,7 @@ val_value_t* global_reply_val;
  *   none
  *********************************************************************/
 void
-    yangcli_reply_handler (ses_cb_t *scb,
+    yangcli_reply_handler_ (ses_cb_t *scb,
                            mgr_rpc_req_t *req,
                            mgr_rpc_rpy_t *rpy)
 {
@@ -3029,7 +2713,172 @@ void
         mgr_rpc_free_reply(rpy);
     }
 
-}  /* yangcli_reply_handler */
+}  /* yangcli_reply_handler_ */
+
+#include "yangcli_cmd.h"
+status_t yangrpc_parse_cli(yangrpc_cb_t *yangrpc_cb, char* original_line, val_value_t** request_val)
+{
+
+
+    obj_template_t        *rpc, *input;
+    val_value_t           *reqdata = NULL, *valset = NULL, *parm;
+    xmlChar               *newline, *useline = NULL;
+    uint32                 len, linelen;
+    status_t               res = NO_ERR;
+    boolean                shut = FALSE;
+    ncx_node_t             dtyp;
+    char* line;
+
+    server_cb_t* server_cb;
+    server_cb = (server_cb_t*)yangrpc_cb;
+
+    line = strdup(original_line);
+#ifdef DEBUG
+    if (!server_cb || !line) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* make sure there is something to parse */
+    linelen = xml_strlen(line);
+    if (!linelen) {
+        return res;
+    }
+
+#if 0
+    /* first check the command keyword to see if it is an alias */
+    newline = expand_alias(line, &res);
+    if (res == ERR_NCX_SKIPPED) {
+        res = NO_ERR;
+        useline = line;
+    } else if (res == NO_ERR) {
+        if (newline == NULL) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        useline = newline;
+        linelen = xml_strlen(newline);
+    } else {
+        log_error("\nError: %s\n", get_error_string(res));
+        if (newline) {
+            m__free(newline);
+        }
+        return res;
+    }
+#else
+    useline = line;
+#endif
+    /* get the RPC method template */
+    dtyp = NCX_NT_OBJ;
+    rpc = (obj_template_t *)parse_def(server_cb, &dtyp, useline, &len, &res);
+    if (rpc == NULL || !obj_is_rpc(rpc)) {
+        if (server_cb->result_name || server_cb->result_filename) {
+            res = finish_result_assign(server_cb, NULL, useline);
+        } else {
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                /* this is an unknown command */
+                log_error("\nError: Unrecognized command");
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                log_error("\n");
+            } else {
+                log_error("\nError: %s", get_error_string(res));
+            }
+        }
+        if (newline) {
+            m__free(newline);
+        }
+        return res;
+    }
+
+    /* check local commands */
+    if (is_yangcli_ns(obj_get_nsid(rpc))) {
+        if (!xml_strcmp(obj_get_name(rpc), YANGCLI_CONNECT)) {
+            res = ERR_NCX_OPERATION_FAILED;
+            log_stdout("\nError: Already connected");
+        } else {
+            uint32 timeval;
+            res = do_local_conn_command_reqdata(server_cb, rpc, useline, len, &reqdata, &timeval);
+            if (res == ERR_NCX_SKIPPED) {
+                assert(0);
+                res = do_local_command(server_cb, rpc, useline, len);
+            }
+        }
+        if (newline) {
+            m__free(newline);
+        }
+    } else {
+
+        /* else treat this as an RPC request going to the server
+         * make sure this is a TRUE conditional command
+         */
+
+        /* construct a method + parameter tree */
+        reqdata = xml_val_new_struct(obj_get_name(rpc), obj_get_nsid(rpc));
+        if (!reqdata) {
+            log_error("\nError allocating a new RPC request");
+            res = ERR_INTERNAL_MEM;
+            input = NULL;
+        } else {
+            /* should find an input node */
+            input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+        }
+
+        /* check if any params are expected */
+        if (res == NO_ERR && input) {
+            while (useline[len] && xml_isspace(useline[len])) {
+                len++;
+            }
+
+            if (len < linelen) {
+                valset = parse_rpc_cli(server_cb, rpc, &useline[len], &res);
+                if (res != NO_ERR) {
+                    log_error("\nError in the parameters for '%s' command (%s)",
+                            obj_get_name(rpc), get_error_string(res));
+                }
+            }
+
+            /* check no input from user, so start a parmset */
+            if (res == NO_ERR && !valset) {
+                valset = val_new_value();
+                if (!valset) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    val_init_from_template(valset, input);
+                }
+            }
+        }
+
+#if 0
+        /* fill in any missing parameters from the CLI */
+        if (res == NO_ERR) {
+            if (interactive_mode()) {
+                res = fill_valset(server_cb, rpc, valset, NULL, TRUE, FALSE);
+                if (res == ERR_NCX_SKIPPED) {
+                    res = NO_ERR;
+                }
+            }
+        }
+#endif
+
+        /* make sure the values are in canonical order
+         * so compliant some servers will not complain
+         */
+        val_set_canonical_order(valset);
+
+        /* go through the parm list and move the values 
+         * to the reqdata struct. 
+         */
+        if (res == NO_ERR) {
+            parm = val_get_first_child(valset);
+            while (parm) {
+                val_remove_child(parm);
+                val_add_child(parm, reqdata);
+                parm = val_get_first_child(valset);
+            }
+        }
+    }
+    *request_val = reqdata;
+    return res;
+}
 
 status_t yangrpc_exec(yangrpc_cb_t *yangrpc_cb, val_value_t* request_val, val_value_t** reply_val)
 {
@@ -3056,7 +2905,7 @@ status_t yangrpc_exec(yangrpc_cb_t *yangrpc_cb, val_value_t* request_val, val_va
 
     /* the request will be stored if this returns NO_ERR */
     global_reply_val=NULL;
-    res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+    res = mgr_rpc_send_request(scb, req, yangcli_reply_handler_);
 
     //mgr_io_run();
     res = ses_msg_send_buffs(scb);

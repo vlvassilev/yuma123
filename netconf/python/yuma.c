@@ -140,6 +140,21 @@ yuma_val_string(PyObject *self, PyObject *args)
     return Py_BuildValue("s", VAL_STRING(val));
 }
 
+static PyObject *
+yuma_val_dump_value(PyObject *self, PyObject *args)
+{
+    PyObject *py_val;
+    int res;
+    val_value_t* val;
+    int flag;
+
+    if (!PyArg_ParseTuple(args, (char *) "Oi:yuma_val_dump_value", &py_val,&flag)) {
+        return (NULL);
+    }
+    val = (val_value_t*)PyCapsule_GetPointer(py_val, "val_value_t_ptr");
+    val_dump_value(val,flag);
+}
+
 /*  define functions in module */
 static PyMethodDef YumaMethods[] =
 {
@@ -148,6 +163,7 @@ static PyMethodDef YumaMethods[] =
      {"cfg_load", yuma_cfg_load, METH_VARARGS, "load configuration"},
      {"val_find_child", yuma_val_find_child, METH_VARARGS, "find child of parent val"},
      {"val_string", yuma_val_string, METH_VARARGS, "get value of val represented as string"},
+     {"val_dump_value", yuma_val_dump_value, METH_VARARGS, "dump the value of the provided variable to stdout"},
      {NULL, NULL, 0, NULL}
 };
 
@@ -157,3 +173,4 @@ inityuma(void)
 {
     (void) Py_InitModule("yuma", YumaMethods);
 }
+

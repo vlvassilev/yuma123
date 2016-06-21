@@ -153,6 +153,7 @@ yuma_val_dump_value(PyObject *self, PyObject *args)
     }
     val = (val_value_t*)PyCapsule_GetPointer(py_val, "val_value_t_ptr");
     val_dump_value(val,flag);
+    Py_RETURN_NONE;
 }
 
 /*  define functions in module */

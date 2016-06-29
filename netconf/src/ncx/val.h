@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -3686,6 +3687,50 @@ extern status_t
 *********************************************************************/
 extern void
     val_free_editvars (val_value_t *val);
+
+#ifdef YUMA123_API_EXTENSIONS
+/********************************************************************
+* FUNCTION val_dump_value_max_w_file
+*
+* Printf the specified val_value_t struct to
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to dump
+*    startindent == start indent char count
+*    indent_amount == number of spaces for each indent
+*    display_mode == formatting mode for display
+*    with_meta == TRUE if metaQ should be printed
+*                 FALSE to skip meta data
+*    configonly == TRUE if config only nodes should be displayed
+*                  FALSE if all nodes should be displayed
+*    outputfile == FILE* destination for the serialized data
+*********************************************************************/
+extern status_t
+    val_dump_value_max_w_file (val_value_t *val,
+                        int32 startindent,
+                        int32 indent_amount,
+                        ncx_display_mode_t display_mode,
+                        boolean with_meta,
+                        boolean configonly,
+                        FILE*   outputfile);
+
+/********************************************************************
+* FUNCTION val_make_serialized_string
+*
+* Serializes val_value_t struct to selected formatting mode (xml,json)
+*
+* INPUTS:
+*    val == value to serialize
+*    mode == formatting mode for display
+*                  FALSE if all nodes should be displayed
+* RETURNS:
+*    Allocated buffer with the serialized string
+*********************************************************************/
+extern status_t
+    val_make_serialized_string (val_value_t *val, ncx_display_mode_t mode, xmlChar** str);
+#endif /* YUMA123_API_EXTENSIONS */
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

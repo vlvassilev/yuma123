@@ -156,6 +156,29 @@ yuma_val_dump_value(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *
+yuma_val_make_serialized_string(PyObject *self, PyObject *args)
+{
+    PyObject *py_retval;
+    PyObject *py_val;
+    status_t res;
+    val_value_t* val;
+    ncx_display_mode_t mode;
+    char* str;
+
+    if (!PyArg_ParseTuple(args, (char *) "Oi:yuma_val_find_child", &py_val, &mode)) {
+        return (NULL);
+    }
+    val = (val_value_t*)PyCapsule_GetPointer(py_val, "val_value_t_ptr");
+    res=val_make_serialized_string(val, mode, &str);
+
+    py_retval = PyTuple_New(2);
+    PyTuple_SetItem(py_retval, 0, Py_BuildValue("i", (int)res));
+    PyTuple_SetItem(py_retval, 1, Py_BuildValue("s", str));
+    free(str);
+    return py_retval;
+}
+
 /*  define functions in module */
 static PyMethodDef YumaMethods[] =
 {
@@ -165,6 +188,7 @@ static PyMethodDef YumaMethods[] =
      {"val_find_child", yuma_val_find_child, METH_VARARGS, "find child of parent val"},
      {"val_string", yuma_val_string, METH_VARARGS, "get value of val represented as string"},
      {"val_dump_value", yuma_val_dump_value, METH_VARARGS, "dump the value of the provided variable to stdout"},
+     {"val_make_serialized_string", yuma_val_make_serialized_string, METH_VARARGS, "serialize val variable to new dynamic memory buffer string"},
      {NULL, NULL, 0, NULL}
 };
 
@@ -172,6 +196,13 @@ static PyMethodDef YumaMethods[] =
 PyMODINIT_FUNC
 inityuma(void)
 {
-    (void) Py_InitModule("yuma", YumaMethods);
+    PyObject *m;
+    int res;
+    m = Py_InitModule("yuma", YumaMethods);
+    res = PyModule_AddIntConstant(m, "NCX_DISPLAY_MODE_XML", NCX_DISPLAY_MODE_XML);
+    assert(res==0);
+    res = PyModule_AddIntConstant(m, "NCX_DISPLAY_MODE_XML_NONS", NCX_DISPLAY_MODE_XML_NONS);
+    assert(res==0);
+    res = PyModule_AddIntConstant(m, "NCX_DISPLAY_MODE_JSON", NCX_DISPLAY_MODE_JSON);
+    assert(res==0);
 }
-

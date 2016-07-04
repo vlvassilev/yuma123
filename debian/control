@@ -19,7 +19,7 @@ Description: netconf (RFC-6241) agent
 
 Package: yangcli
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base
+Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base, libyuma
 Description: netconf/YANG command line client application
  The netconf protocol and the YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

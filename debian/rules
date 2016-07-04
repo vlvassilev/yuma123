@@ -1,13 +1,111 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
-
-# Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+# TODO
+# without -pie build fails during perl module build somehow...
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all,-pie
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+LIB_VERSION =
+UPSTREAM_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ':' | sed 's/ //' | sed 's/~dfsg.*$$//')
+COMPAT_VERSION = $(UPSTREAM_VERSION)~dfsg
+PYTHON_VERSION = 1.0a1
+
+MIB_MODULES = smux ucd-snmp/dlmod mibII/mta_sendmail disman/event-mib
+EXCL_MIB_MODULES =
+
+OLD_MIBS_DIR="/usr/share/mibs/site:/usr/share/snmp/mibs:/usr/share/mibs/iana:/usr/share/mibs/ietf:/usr/share/mibs/netsnmp"
+MIBS_DIR="/usr/share/snmp/mibs:/usr/share/snmp/mibs/iana:/usr/share/snmp/mibs/ietf"
+
+ifeq (linux,$(DEB_BUILD_ARCH_OS))
+MIB_MODULES += ucd-snmp/diskio ucd-snmp/lmsensorsMib etherlike-mib/dot3StatsTable
+IPV6 = --enable-ipv6
+DEB_DH_GENCONTROL_ARGS=-- -Vos-specific-dev="libsensors4-dev"
+else
+ifeq (kfreebsd,$(DEB_BUILD_ARCH_OS))
+IPV6 = --disable-ipv6
+DEB_DH_GENCONTROL_ARGS=-- -Vos-specific-dev="libkvm-dev"
+endif
+endif
+ifeq (hurd,$(DEB_BUILD_ARCH_OS))
+IPV6 = --enable-ipv6
+EXCL_MIB_MODULES += mibII
+else
+MIB_MODULES += host
+endif
+
 %:
-	dh $@ 
+	dh $@ --with autotools-dev,autoreconf,python2
+
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
+	  --with-persistent-directory=/var/lib/yuma \
+	  --enable-ucd-snmp-compatibility \
+	  --enable-shared --with-cflags="$(CFLAGS) -DNETSNMP_USE_INLINE" \
+	  --with-ldflags="$(LDFLAGS)" \
+	  --with-perl-modules="INSTALLDIRS=vendor" --enable-as-needed \
+	  $(IPV6) --with-logfile=none \
+	  --without-rpm --with-libwrap --with-openssl \
+	  --without-dmalloc --without-efence --without-rsaref \
+	  --with-sys-contact="root" --with-sys-location="Unknown" \
+	  --with-mib-modules="$(MIB_MODULES)" \
+	  --with-out-mib-modules="$(EXCL_MIB_MODULES)" \
+	  --enable-mfd-rewrites \
+	  --with-mnttab=/etc/mtab \
+	  --with-mibdirs="\$$HOME/.snmp/mibs:$(MIBS_DIR):$(OLD_MIBS_DIR)" \
+	  --with-mysql \
+	  --with-defaults
+# --with-python-modules=""  # don't specify it, since dh_python2 cannot handle it.
+# --with-dnssec-local-validation  # not enabled since libval doesn't exist in Debian yet
+
+override_dh_clean:
+	dh_clean
+	rm -rf `find . -name .libs` \
+	       netconf/python/build         \
+	       netcont/python/yangcli_python.egg-info
+
+override_dh_strip:
+	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg
+	dh_strip
+
+#override_dh_makeshlibs:
+#	dh_makeshlibs -plibyuma$(LIB_VERSION) -V"libyuma$(LIB_VERSION) (>= $(COMPAT_VERSION))"
+
+override_dh_install:
+	cd netconf/python; python setup.py build ; \
+		   python setup.py install --root=$(CURDIR)/debian/tmp --install-layout=deb ; \
+		   find $(CURDIR) -name *.pyc -delete
+	dh_install
+
+override_dh_installdocs:
+	dh_installdocs --link-doc=libyuma$(LIB_VERSION) \
+		       -plibyuma-dev \
+		       -plibyuma$(LIB_VERSION)-dbg \
+		       -ppython-yuma \
+		       -pnetconfd \
+		       -pyangcli
+	dh_installdocs  -plibyuma-perl -plibyuma-base
+	# dh_installdocs has a bug when --link-doc is called it don't install copyright file to referenced package
+	# so specify to copy it
+	install -d $(CURDIR)/debian/libyuma$(LIB_VERSION)/usr/share/doc/libyuma$(LIB_VERSION)/
+	install -m644 debian/copyright $(CURDIR)/debian/libyuma$(LIB_VERSION)/usr/share/doc/libyuma$(LIB_VERSION)/
+
+override_dh_fixperms:
+	dh_fixperms
+#	chmod -x debian/libyuma-dev/etc/yuma/*.conf
+#	chmod 600 debian/netconfd/etc/netconf/netconfd.conf
+
+override_dh_auto_test:
+	# prevent test since it fails with network configuration under pbuilder/etc.
+	true
+
+get-orig-source:
+	@uscan --download-version $(UPSTREAM_VERSION) --destdir /tmp --force-download --no-symlink
+	@tar xf /tmp/net-snmp-$(UPSTREAM_VERSION).tar.gz -C /tmp
+	@rm -rf /tmp/net-snmp-$(UPSTREAM_VERSION)/doc
+	@cd /tmp/net-snmp-$(UPSTREAM_VERSION)/mibs; \
+	 grep ^iana ianalist | while read iana mibs; do rm -f `echo $$mibs | sed -e s/$$/.txt/`; done; \
+	 cat rfclist | while read rfc mibs; do rm -f `echo $$mibs | sed 's/:/.txt /g' | sed 's/$$/.txt/'`; done
+	@rm -f /tmp/net-snmp-$(UPSTREAM_VERSION)/mibs/RFC-1215.txt
+	@cd /tmp; tar cJf net-snmp_$(COMPAT_VERSION).orig.tar.xz net-snmp-$(UPSTREAM_VERSION)
+	@rm -rf /tmp/net-snmp-$(UPSTREAM_VERSION)

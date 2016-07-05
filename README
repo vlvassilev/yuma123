@@ -1,8 +1,6 @@
 Yuma123 README
 -----------
 
-Last Updated: 2015-06-18 (v2.5-1)
-
 ==What is Yuma123==
 The purpose of the Yuma123 project is to provide an opensource YANG API in C and netconf cli (yangcli) and server (netconfd) appications. 
 Branching from the last BSD licensed branch of the Yuma project the code has evolved in the following direction:

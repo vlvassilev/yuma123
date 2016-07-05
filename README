@@ -12,6 +12,11 @@ Branching from the last BSD licensed branch of the Yuma project the code has evo
 - support was added for new YANG extensions
 
 ==Checkout, Build and Installation steps (ment for Debian should be easy to figure out on other systems)==
+===Option 1: Install from the Debian repository==
+sudo add-apt-repository "deb http://yuma123.org/repos/apt/debian jessie main"
+wget -O - http://yuma123.org/repos/yuma123.gpg.key | sudo apt-key add -
+sudo apt-get install netconfd yangcli
+===Option 2: Build from source===
 sudo apt-get install git autoconf gcc libtool libxml2-dev libssl-dev libssh2-1-dev
 
 git clone git://git.code.sf.net/p/yuma123/git yuma123-git
@@ -20,10 +25,12 @@ autoreconf -i -f
 ./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
 make
 sudo make install
+
+==Configure and start==
 touch /tmp/startup-cfg.xml
 /usr/sbin/netconfd --module=helloworld --startup=/tmp/startup-cfg.xml --log-level="debug4" --superuser="$USER"
 
-If there were no missing dependencies the server is now started with the example helloworld module.
+The server is now started with the example helloworld module.
 
 Tell sshd to listen on port 830. Add the following 2 lines to /etc/ssh/sshd_config:
 

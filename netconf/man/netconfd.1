@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "February 6, 2012" Linux "netconfd 2.2"
+.TH netconfd 1 "July 5, 2016" Linux "netconfd 2.5"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -20,7 +20,7 @@ netconfd \- YANG-based NETCONF-over-SSH server
 is a YANG-based NETCONF server, which can be used with
 an SSH server such as OpenSSH.
 This version of netconfd supports the YANG data modeling language
-defined in \fBdraft-ietf-netmod-yang-12.txt\fP.
+defined in \fBRFC 6020\fP.
 .SH USAGE
 Parameters can be entered in any order, and have the form:
 
@@ -103,7 +103,7 @@ The name of the configuration file to use.
 Any parameter except this one can be set in the config file.
 The default config file 
 .I /etc/yuma/netconfd.conf
-will be not be checked if this parameter is present.
+will not be checked if this parameter is present.
 .IP --\fBdatapath\fP=list
 Internal file search path for configuration data files.
 Overrides the YUMA_DATAPATH environment variable.
@@ -247,6 +247,14 @@ name is expected to follow.
 
       $workdir/some/path ==> <workdir-env-var>/some/path
 .fi
+.IP --\fBncxserver-sockname\fP=path
+Overrides the default /tmp/ncxserver.sock UNIX
+socket name netconfd listens on for incomming connections.
+You have to add corresponding entry to /etc/ssh/sshd_config e.g.:
+...
+Port 1830
+Subsystem netconf \"/usr/sbin/netconf-subsystem --ncxserver-sockname=/tmp/ncxserver1.sock\"
+...
 .IP --\fBport\fP=number
 Specifies the TCP ports that the server will accept
 connections from.  These ports must also be configured
@@ -467,9 +475,9 @@ The \fBmodpath\fP parameter will override this
 environment variable, if both are present.
 
 .SH CONFIGURATION FILES
-.IP \fByangdump.conf\fP
+.IP \fBnetconfd.conf\fP
 YANG config file
-The default is: \fB/etc/yuma/yangdump.conf\fP
+The default is: \fB/etc/yuma/netconfd.conf\fP
     
 An ASCII configuration file format is supported to
 store command line parameters. 
@@ -532,14 +540,12 @@ type of message if any bugs are detected at runtime:
          filename.c:linenum error-number (error-msg)
 
 .fi
-.SH AUTHOR
+.SH AUTHORS
 Andy Bierman, <andy at netconfcentral dot org>
+Vladimir Vassilev, <vladimir at transpacket dot com>
 
 .SH SEE ALSO
 .BR netconf-subsystem (1)
 .BR pyang (1)
-.BR smidump (1)
 .BR yangcli (1)
-.BR yangdiff (1)
-.BR yangdump (1)
 

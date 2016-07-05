@@ -1,2 +1,4 @@
 usr/sbin/netconfd
 usr/sbin/netconf-subsystem
+usr/share/man/man1/netconfd.1
+usr/share/man/man1/netconf-subsystem.1

@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconf-subsystem 1 "February 6, 2012" Linux "netconf-subsystem 2.2"
+.TH netconf-subsystem 1 "July 5, 2016" Linux "netconf-subsystem 2.5"
 .SH NAME
 netconf-subsystem \- thin client to access netconfd server
 
@@ -31,11 +31,29 @@ The actual filespec in the last line will depend
 on the location that this program is installed.
 The default value is shown in the example above.
 
-There are no program options or environment variables
-used by this program.
+.SH OPTIONS
+.IP --\fBncxserver-sockname\fP=port@filespec
+Specifies the corresponding pairs of SSH ports
+and UNIX socket names. This option allows multiple
+netconfd instances to run on the same host.
 
-.SH AUTHOR
+/etc/ssh/sshd_config:
+...
+
+Port 830
+
+Port 1830
+
+Port 2830
+
+Subsystem netconf "/usr/sbin/netconf-subsystem \
+--ncxserver-sockname=830@/tmp/ncxserver.sock \
+--ncxserver-sockname=1830@/tmp/ncxserver-right.sock \
+--ncxserver-sockname=2830@/tmp/ncxserver-middle.sock"
+...
+
+.SH AUTHORS
 Andy Bierman, <andy at netconfcentral dot org>
-
+Vladimir Vassilev, <vladimir at transpacket dot com>
 .SH SEE ALSO
 .BR netconfd (1)

@@ -29,7 +29,7 @@ py_yangrpc_connect(PyObject *self, PyObject *args)
         return (NULL);
     }
     if(yangrpc_init_done==0) {
-        yangrpc_init();
+        yangrpc_init(0,NULL);
         yangrpc_init_done=1;
     }
 

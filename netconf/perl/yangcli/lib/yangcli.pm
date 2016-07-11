@@ -31,6 +31,26 @@ require XSLoader;
 XSLoader::load('yangcli', $VERSION);
 
 # Preloaded methods go here.
+sub yangcli {
+    my $conn = $_[0];
+    my $cli_cmd = $_[1];
+    my $rpc_val=0;
+    my $reply_val=0;
+    my $reply_xml_str=0;
+    my $res;
+
+    $res = yangrpc::parse_cli($conn,$cli_cmd, $rpc_val);
+
+    $res = yangrpc::rpc($conn,$rpc_val,$reply_val);
+
+    $res = yangrpc::rpc($conn,$rpc_val,$reply_val);
+
+    $res = yuma::val_make_serialized_string($reply_val, 5, $reply_xml_str);
+
+    my $parser = XML::LibXML->new();
+    my $doc    = $parser->parse_string( $reply_xml_str );
+    return $doc;
+}
 
 1;
 __END__

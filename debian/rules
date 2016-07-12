@@ -75,6 +75,9 @@ override_dh_install:
 	cd netconf/python; python setup.py build ; \
 		   python setup.py install --root=$(CURDIR)/debian/tmp --install-layout=deb ; \
 		   find $(CURDIR) -name *.pyc -delete
+	cd netconf/perl/yuma; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
+	cd netconf/perl/yangrpc; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
+	cd netconf/perl/yangcli; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
 	dh_install
 
 override_dh_installdocs:

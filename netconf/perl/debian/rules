@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE=1
+
+# TODO
+# without -pie build fails during perl module build somehow...
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all,-pie
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+LIB_VERSION =
+UPSTREAM_VERSION = $(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ':' | sed 's/ //' | sed 's/~dfsg.*$$//')
+COMPAT_VERSION = $(UPSTREAM_VERSION)~dfsg
+
+
+%:
+	dh $@ 
+
+override_dh_install:
+	cd yuma; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
+	cd yangrpc; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
+	cd yangcli; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
+	dh_install
+

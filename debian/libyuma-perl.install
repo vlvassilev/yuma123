@@ -1,6 +1,0 @@
-#!/usr/bin/perl -w
-
-use Config;
-# expand the perl binary module directory at build time
-print substr($Config{installvendorarch}, 1) . "\n";
-

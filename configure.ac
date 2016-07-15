@@ -46,9 +46,6 @@ AC_SUBST(platform_netconf_includedir)
 apachemoduledir="$libdir/apache2/modules"
 AC_SUBST(apachemoduledir)
 
-pythondir="/usr/lib/python2.7/dist-packages"
-AC_SUBST(pythondir)
-
 CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2 -DENABLE_DIRECT_MUST_AUGMENT_EX=1"
 AC_SUBST(CFLAGS)
 
@@ -86,7 +83,6 @@ AC_CONFIG_FILES([
         netconf/test/sys-test/Makefile
         netconf/test/integ-tests/Makefile
         netconf/test/sys-test-python/Makefile
-        netconf/python/Makefile
         netconf/man/Makefile
 ])
 

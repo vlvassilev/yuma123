@@ -35,7 +35,8 @@ MIB_MODULES += host
 endif
 
 %:
-	dh $@ --with autotools-dev,autoreconf,python2
+	dh $@ --with autotools-dev,autoreconf
+
 
 override_dh_auto_configure:
 	dh_auto_configure -- --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
@@ -71,23 +72,15 @@ override_dh_strip:
 #override_dh_makeshlibs:
 #	dh_makeshlibs -plibyuma$(LIB_VERSION) -V"libyuma$(LIB_VERSION) (>= $(COMPAT_VERSION))"
 
-override_dh_install:
-	cd netconf/python; python setup.py build ; \
-		   python setup.py install --root=$(CURDIR)/debian/tmp --install-layout=deb ; \
-		   find $(CURDIR) -name *.pyc -delete
-	cd netconf/perl/yuma; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
-	cd netconf/perl/yangrpc; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
-	cd netconf/perl/yangcli; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
-	dh_install
+#override_dh_install:
 
 override_dh_installdocs:
 	dh_installdocs --link-doc=libyuma$(LIB_VERSION) \
 		       -plibyuma-dev \
 		       -plibyuma$(LIB_VERSION)-dbg \
-		       -ppython-yuma \
 		       -pnetconfd \
 		       -pyangcli
-	dh_installdocs  -plibyuma-perl -plibyuma-base
+	dh_installdocs  -plibyuma-base
 	# dh_installdocs has a bug when --link-doc is called it don't install copyright file to referenced package
 	# so specify to copy it
 	install -d $(CURDIR)/debian/libyuma$(LIB_VERSION)/usr/share/doc/libyuma$(LIB_VERSION)/

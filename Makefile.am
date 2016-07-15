@@ -1,4 +1,4 @@
-SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc netconf/src/yangrpc/example netconf/src/yangdump netconf/python netconf/man
+SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc netconf/src/yangrpc/example netconf/src/yangdump netconf/man
 
 #netconf/src/yangrpc/yanghttpd
 

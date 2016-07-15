@@ -2,7 +2,7 @@ Source: yuma123
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev
+Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
 Standards-Version: 3.8.1
 Homepage: http://transpacket.com/
 
@@ -77,8 +77,7 @@ Section: libdevel
 Architecture: any
 Provides: libyuma-dev
 Depends: libc6-dev, libyuma (=${binary:Version}), libwrap0-dev, libssl-dev, procps, 
-         libkvm-dev [kfreebsd-any], libsensors4-dev [linux-any], ${misc:Depends},
-         libpci-dev
+         ${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
@@ -88,57 +87,3 @@ Description: Netconf/YANG development files
  libraries, and documentation needed for development of custom netconf/YANG
  applications.
 
-Package: libyuma-perl
-Section: perl
-Architecture: any
-Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Description:  Netconf/YANG Perl5 support
- The Netconf protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
- .
- The yuma123 Perl5 support files provide the Perl functions for
- integration of netconf and YANG into applications written in Perl.
-
-Package: python-yuma
-Section: python
-Architecture: any
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Provides: libyuma-python, ${python:Provides}
-XB-Python-Version: ${python:Versions}
-Description:  Netconf/YANG Python support
- The Netconf protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
- .
- The yuma123 Python support files provide the Python functions for
- integration of netconf/YANG into applications written in Python.
-
-#Package: yuma123
-#Architecture: any
-#Depends: libncurses5, libssh2-1, libxml2, ${shlibs:Depends}, ${misc:Depends}
-#Conflicts: yuma
-#Description: YANG-based Unified Modular Automation tools
-# Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-# development toolkit.  The netconfd server includes an automated
-# central NETCONF protocol stack, based directly on YANG modules.
-# The yangdump and yangdiff development tools are also
-# included, to compile and process YANG modules.
-#
-#Package: yuma-dev
-#Architecture: all
-#Depends: yuma, ${misc:Depends}
-#Description: YANG-based Unified Modular Automation tools (dev)
-# Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-# development toolkit.  This package contains H files, scripts,
-# and other files needed to create SIL code for use with
-# the netconfd server.
-
-#Package: yuma-doc
-#Architecture: all
-#Section: doc
-#Depends: ${misc:Depends}
-#Description: YANG-based Unified Modular Automation tools (doc)
-# Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-# development toolkit.  This package contains the user and developer
-# manuals.

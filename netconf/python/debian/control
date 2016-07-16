@@ -9,7 +9,7 @@ Homepage: http://yuma123.org/
 Package: python-yuma
 Section: python
 Architecture: any
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, python-lxml
 Provides: libyuma-python, ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description:  Netconf/YANG Python support

@@ -1,6 +1,7 @@
 package yangcli;
 
-use 5.020002;
+#use 5.020002;
+use 5.018002;
 use strict;
 use warnings;
 

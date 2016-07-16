@@ -13,7 +13,7 @@ cd netconf
 tar -czvf yuma123-python_1.0.orig.tar.gz python
 cd python
 #dpkg-checkbuilddeps
-sudo apt-get install -y python2.7-dev
+sudo apt-get install -y python2.7-dev python-lxml
 debuild -us -uc
 cd ..
 tar -czvf yuma123-perl_1.0.orig.tar.gz perl

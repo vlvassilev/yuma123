@@ -9,7 +9,7 @@ Homepage: http://transpacket.com/
 Package: libyuma-perl
 Section: perl
 Architecture: any
-Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, libxml-libxml-perl
 Description:  Netconf/YANG Perl5 support
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

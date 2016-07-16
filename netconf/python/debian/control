@@ -2,7 +2,7 @@ Source: yuma123-python
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libyuma-dev
+Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libyuma-dev, python2.7-dev
 Standards-Version: 3.8.1
 Homepage: http://yuma123.org/
 

@@ -15,8 +15,8 @@ COMPAT_VERSION = $(UPSTREAM_VERSION)~dfsg
 	dh $@ 
 
 override_dh_install:
-	cd yuma; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
-	cd yangrpc; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
-	cd yangcli; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install
+	cd yuma; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install ; make clean
+	cd yangrpc; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install ; make clean
+	cd yangcli; perl Makefile.PL PREFIX=$(CURDIR)/debian/tmp/usr installdirs=vendor; make; make install ; make clean
 	dh_install
 

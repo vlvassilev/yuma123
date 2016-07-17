@@ -1,0 +1,26 @@
+#!/usr/bin/python
+from yangcli import yangcli
+from lxml import etree
+import yangrpc
+import sys
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--server", help="Address of the server")
+parser.add_argument("--ncport", help="Netconf port")
+parser.add_argument("--user", help="Username")
+parser.add_argument("--password", help="Password")
+parser.add_argument("--public-key", help="Public key path")
+parser.add_argument("--private-key", help="Private key path")
+parser.add_argument("--run-command", help="Run this command in yangcli synthax")
+parser.add_argument("--batch-mode", help="Terminate after run-command or run-script", action="store_true")
+args = parser.parse_args()
+conn = yangrpc.connect(args.server, int(args.ncport), args.user, args.password, args.private_key, args.public_key)
+if(conn==None):
+    print("Error: yangrpc failed to connect!")
+    sys.exit(1)
+
+
+result = yangcli(conn, args.run_command)
+
+print etree.tostring(result, pretty_print=True)

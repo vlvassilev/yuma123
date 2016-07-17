@@ -4006,19 +4006,6 @@ static status_t
         val_set_canonical_order(parm);
     }
         
-    /* if all OK, send the RPC request */
-    if (res == NO_ERR) {
-        if (LOGDEBUG2) {
-            log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_max(reqdata, 0, server_cb->defindent,
-                               DUMP_VAL_LOG, server_cb->display_mode,
-                               FALSE, FALSE);
-        }
-
-        /* the request will be stored if this returns NO_ERR */
-        res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
-    }
-
     /* cleanup and set next state */
     if (res != NO_ERR) {
         if (reqdata) {
@@ -4027,6 +4014,7 @@ static status_t
     } else {
         server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
+    *reqdata_out=reqdata;
 
     return res;
 

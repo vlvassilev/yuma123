@@ -1,4 +1,4 @@
-AC_INIT([yuma123], [2.5-2], [vladimir@transpacket.com])
+AC_INIT([yuma123], [2.6-1], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 
@@ -46,7 +46,7 @@ AC_SUBST(platform_netconf_includedir)
 apachemoduledir="$libdir/apache2/modules"
 AC_SUBST(apachemoduledir)
 
-CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=2 -DENABLE_DIRECT_MUST_AUGMENT_EX=1"
+CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1 -DRELEASE=1 -DENABLE_DIRECT_MUST_AUGMENT_EX=1"
 AC_SUBST(CFLAGS)
 
 #libreadline<default> or libtecla

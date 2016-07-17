@@ -1,3 +1,23 @@
+yuma123 (2.6-1) stable; urgency=medium
+
+  * ncx
+    - Added val_make_serialized_string to the API
+  * netconfd
+    - Fixed a bug caused by system time adjustments and the use of nonmonotonic time function for timer callback implementation
+    - Fixed bugs both in netconf 1.0 and netconf 1.1 message parsers
+    - Added readline as default cli interface library with option to build with tecla instead
+    - Fixed bugs in must statement validation
+  * yangcli
+    - Added readline as default cli interface library with option to build with tecla instead
+  * examples
+    - Added standalone automake based example projects building ietf-interfaces.yang and ietf-system.yang implementations for linux
+  * yangrpc
+    - Added yangrpc_parse_cli API parsing yangcli style command lines based on the schema context of the connection
+  * python/perl
+    - Initial perl and python bindings
+
+ --  <vladimir@transpacket.com>  Sat, 17 Jul 2016 10:10:00 +0200
+
 yuma123 (2.5-1) stable; urgency=low
 
   * Implemented direct-must-augment-ex:augment extension

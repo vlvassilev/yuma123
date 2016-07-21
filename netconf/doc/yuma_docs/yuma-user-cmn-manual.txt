@@ -244,7 +244,7 @@ be pre-installed:
 The following shared (or static) library is built by Yuma and used by
 almost all of its programs:
 
-* '''libncx'''
+* '''libyumancx'''
 ** YANG parser
 ** YANG validation
 ** basic NETCONF support
@@ -253,9 +253,9 @@ almost all of its programs:
 
 The following libraries are built by Yuma, and used within executables:
 
-* '''libagt'''
+* '''libyumaagt'''
 ** NETCONF server support
-* '''libmgr'''
+* '''libyumamgr'''
 ** NETCONF client support
 * '''libyangrpc'''
 ** NETCONF minimalistic client support

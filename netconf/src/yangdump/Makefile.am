@@ -19,7 +19,7 @@ $(top_srcdir)/netconf/src/ydump/yangstats.c \
 $(top_srcdir)/netconf/src/ydump/yangyin.c
 
 yangdump_CPPFLAGS = -I $(top_srcdir)/libtecla -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml -I$(top_srcdir)/netconf/src/yangrpc -I$(top_srcdir)/netconf/src/ydump
-yangdump_LDFLAGS = $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la $(top_builddir)/netconf/src/yangrpc/libyangrpc.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
+yangdump_LDFLAGS = $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la $(top_builddir)/netconf/src/yangrpc/libyangrpc.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
 
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yangdump.yang

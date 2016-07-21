@@ -339,7 +339,7 @@ netconf/src''' directory.
 
 === src/ncx Directory ===
 This directory contains the code that is used to build the'''
-libncx.so''' binary shared library that is used by all Yuma Tools
+libyumancx.so''' binary shared library that is used by all Yuma Tools
 programs. It handles many of the core NETCONF/YANG data structure
 support, including all of the YANG/YIN, XML, and XPath processing. The
 following table describes the purpose of each file. Refer to the actual
@@ -613,7 +613,7 @@ Yuma files.
 
 === src/agt Directory ===
 This directory contains the NETCONF server implementation and built-in
-module SIL code. A library called '''libagt.so''' is  built and loaded
+module SIL code. A library called '''libyumaagt.so''' is  built and loaded
 by the '''netconfd''' program.
 
 The following table describes the C modules contained in this directory:
@@ -749,7 +749,7 @@ constraint validation</nowiki>
 
 === src/mgr Directory ===
 This directory contains the NETCONF server implementation and built-in
-module SIL code. A library called '''libagt.so''' is  built and loaded
+module SIL code. A library called '''libyumaagt.so''' is  built and loaded
 by the '''netconfd''' program.
 
 The following table describes the C modules contained in this directory:
@@ -757,7 +757,7 @@ The following table describes the C modules contained in this directory:
 This directory contains the NETCONF client support code. It handles all
 the basic NETCONF details so a simple internal API can be used by
 NETCONF applications such as '''yangcli'''. A library called
-'''libmgr.so''' is built and installed. The '''yangcli''' program uses
+'''libyumamgr.so''' is built and installed. The '''yangcli''' program uses
 this library.
 
 The following table describes the C modules contained in this directory:
@@ -993,7 +993,7 @@ again, instead of exiting the program.
 Yuma uses YANG source modules directly to implement NETCONF protocol
 operations automatically within the server. The same YANG parser is used
 by all Yuma programs. It is located in the 'ncx' source directory
-(libncx.so). There are several different parsing modes, which is set by
+(libyumancx.so). There are several different parsing modes, which is set by
 the application.
 
 In the 'server mode', the descriptive statements, such as 'description'
@@ -1320,7 +1320,7 @@ The file '''netconfd/netconfd.c''' contains the initial 'main' function
 that is used to start the server.
 
 * The common services support for most core data structures is located
-in 'libncx.so'. The ''''ncx_init'''' function is called to setup these
+in 'libyumancx.so'. The ''''ncx_init'''' function is called to setup these
 data structures. This function also calls the bootstrap_cli function in
 ncx/ncx.c, which processes some key configuration parameters that need
 to be set right away, such as the logging parameters and the module
@@ -3447,7 +3447,7 @@ string.
 === SIL Utility Functions ===
 There are some high-level SIL callback utilities in
 '''agt/agt_util.h'''. These functions access the lower-level functions
-in libncx to provide simpler functions for common SIL tasks.
+in libyumancx to provide simpler functions for common SIL tasks.
 
 The following table highlights the functions available in this module:
 
@@ -5889,7 +5889,7 @@ This will build the libtoaster.so SIL from toaster.c:
  gcc -shared  -fPIC -DPIC  -I. -I/usr/include/yuma/agt
 -I/usr/include/yuma/ncx -I/usr/include/yuma/platform
 -I/usr/include/libxml2 -I/usr/include/libxml2/libxml -rdynamic toaster.c
-/usr/lib/libncx.so /usr/lib/libagt.so /usr/lib/i386-linux-gnu/libxml2.so
+/usr/lib/libyumancx.so /usr/lib/libyumaagt.so /usr/lib/i386-linux-gnu/libxml2.so
 -lz -ldl -O0 -o libtoaster.so
 This will install it .. and the module is ready to be used:
  sudo cp libtoaster.so /usr/lib/yuma/

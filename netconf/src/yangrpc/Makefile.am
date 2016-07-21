@@ -21,4 +21,4 @@ $(top_srcdir)/netconf/src/yangcli/yangcli_globals.c
 
 
 libyangrpc_la_CPPFLAGS = -DSKIP_MAIN -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml -I$(top_srcdir)/netconf/src/yangrpc -I$(top_srcdir)/netconf/src/yangcli -I$(top_srcdir)/libtecla
-libyangrpc_la_LDFLAGS = $(top_builddir)/libtecla/libtecla.la $(top_builddir)/netconf/src/mgr/libmgr.la $(top_builddir)/netconf/src/agt/libagt.la $(top_builddir)/netconf/src/ncx/libncx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
+libyangrpc_la_LDFLAGS = $(top_builddir)/libtecla/libtecla.la $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses

@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libncx.la
+lib_LTLIBRARIES = libyumancx.la
 
-libncx_la_SOURCES = \
+libyumancx_la_SOURCES = \
 $(top_srcdir)/netconf/src/ncx/b64.c \
 $(top_srcdir)/netconf/src/ncx/blob.c \
 $(top_srcdir)/netconf/src/ncx/bobhash.c \
@@ -64,6 +64,6 @@ $(top_srcdir)/netconf/src/ncx/yinyang.c \
 $(top_srcdir)/netconf/src/ncx/val_parse.c \
 $(top_srcdir)/netconf/src/ncx/uptime.c
 
-libncx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
-libncx_la_LDFLAGS = -version-info 2:0 -lxml2 -lz  -ldl -lrt
+libyumancx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+libyumancx_la_LDFLAGS = -version-info 2:0 -lxml2 -lz  -ldl -lrt
 

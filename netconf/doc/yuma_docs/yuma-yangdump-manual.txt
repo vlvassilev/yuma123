@@ -261,7 +261,7 @@ The following formatting conventions are used throughout this document:
 [[Image:]]
 
 == Introduction ==
-The '''yangdump''' program is used to validate YANG files, and convert them to other formats. It is normally used by authors while developing new YANG data models. The compiler and validation engine portion of '''yangdump''' (libncx.so) is used in all '''Yuma''' programs.
+The '''yangdump''' program is used to validate YANG files, and convert them to other formats. It is normally used by authors while developing new YANG data models. The compiler and validation engine portion of '''yangdump''' (libyumancx.so) is used in all '''Yuma''' programs.
 
 The '''yangdumpcode''' program is the same as '''yangdump''', except that the '''--format '''parameter allows more options to generate code for Yuma applications.
 

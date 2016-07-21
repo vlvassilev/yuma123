@@ -226,9 +226,9 @@ Assuming you have no unresolved dependencies:
 ** netconfd
 ** netconf-subsystem
 * '''/usr/lib '''directory contains the following files:
-** libncx.so
-** libagt.so
-** libmgr.so
+** libyumancx.so
+** libyumaagt.so
+** libyumamgr.so
 ** libyangrpc.so
 * '''/usr/lib/yuma''' directory contains the following file:
 ** libhelloworld.so

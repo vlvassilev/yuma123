@@ -5,11 +5,6 @@ Copyright: (C) 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
 Copyright: (C) 2013-2016 Transpacket AS <support@transpacket.com>
 License: BSD
 
-Files: debian/*
-Copyright: (C) 2016 Vladimir Vassilev <vladimir@transpacket.com>
-Copyright: (C) 2016 Transpacket AS <support@transpacket.com>
-License: BSD
-
 Files: libtecla/*
 Copyright: (C) 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd.
 License: MIT

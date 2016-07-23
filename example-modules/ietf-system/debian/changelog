@@ -1,3 +1,9 @@
+yuma123-netconfd-module-ietf-system (1.1-1) stable; urgency=medium
+
+  * Renamed yuma libraries libncx->libyumancx, libagt->libyumaagt, libmgr->libyumamgr
+
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 21 Jul 2016 18:25:01 +0200
+
 yuma123-netconfd-module-ietf-system (1.0-1) unstable; urgency=low
    * initial 1.0 release;
  -- Vladimir Vassilev <vladimir@transpacket.com>  Fri, 15 Jul 2016 14:43:06 +0200

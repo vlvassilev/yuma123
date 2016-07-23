@@ -1,3 +1,10 @@
+yuma123 (2.7-1) stable; urgency=medium
+
+  * Cleaned up debian
+  * Renamed yuma libraries libncx->libyumancx, libagt->libyumaagt, libmgr->libyumamgr
+
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 21 Jul 2016 18:16:16 +0200
+
 yuma123 (2.6-1) stable; urgency=medium
 
   * ncx
@@ -16,7 +23,7 @@ yuma123 (2.6-1) stable; urgency=medium
   * python/perl
     - Initial perl and python bindings
 
- --  <vladimir@transpacket.com>  Sat, 17 Jul 2016 10:10:00 +0200
+ --  <vladimir@transpacket.com>  Sun, 17 Jul 2016 10:10:00 +0200
 
 yuma123 (2.5-1) stable; urgency=low
 

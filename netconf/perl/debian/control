@@ -2,14 +2,14 @@ Source: yuma123-perl
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libyuma-dev
+Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libyuma-dev (>=2.7)
 Standards-Version: 3.8.1
 Homepage: http://transpacket.com/
 
 Package: libyuma-perl
 Section: perl
 Architecture: any
-Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, libxml-libxml-perl
+Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, libxml-libxml-perl, libyuma (>=2.7)
 Description:  Netconf/YANG Perl5 support
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

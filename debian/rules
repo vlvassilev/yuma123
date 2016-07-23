@@ -9,8 +9,8 @@
 override_dh_auto_configure:
 	dh_auto_configure -- --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
 	  --with-persistent-directory=/var/lib/yuma \
-	  --enable-shared --with-cflags="$(CFLAGS) \
-	  --with-ldflags="$(LDFLAGS)" \
+	  --enable-shared --with-cflags="$(CFLAGS)" \
+	  --with-ldflags="$(LDFLAGS)"
 
 override_dh_strip:
 	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg

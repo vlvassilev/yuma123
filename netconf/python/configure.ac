@@ -1,4 +1,4 @@
-AC_INIT([python-yuma123], [1.0], [vladimir@transpacket.com])
+AC_INIT([python-yuma123], [1.1], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 

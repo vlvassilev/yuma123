@@ -2,8 +2,8 @@ Source: yuma123
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
-Standards-Version: 3.8.1
+Build-Depends: debhelper (>= 9), autoconf, dh-autoreconf, autotools-dev, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
+Standards-Version: 3.9.6
 Homepage: http://transpacket.com/
 
 Package: netconfd

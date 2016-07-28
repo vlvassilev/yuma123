@@ -2,6 +2,7 @@ yuma123 (2.8-1) UNRELEASED; urgency=medium
 
   * Resolved bobhash license-problem-non-free-RFC-BCP78
   * Fixed unescaped dots in man pages
+  * Fixed debian lintian warning out-of-date-standards-version
 
  -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 28 Jul 2016 23:19:24 +0200
 

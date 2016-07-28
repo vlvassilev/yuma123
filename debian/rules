@@ -14,6 +14,7 @@ override_dh_auto_configure:
 
 override_dh_strip:
 	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg
+	dh_strip -plibyangrpc$(LIB_VERSION) --dbg-package=libyangrpc$(LIB_VERSION)-dbg
 	dh_strip
 
 override_dh_installdocs:

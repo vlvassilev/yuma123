@@ -1,3 +1,9 @@
+yuma123 (2.8-1) UNRELEASED; urgency=medium
+
+  * Resolved bobhash license-problem-non-free-RFC-BCP78
+
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 28 Jul 2016 23:19:24 +0200
+
 yuma123 (2.7-1) stable; urgency=medium
 
   * Cleaned up debian

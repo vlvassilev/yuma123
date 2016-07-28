@@ -38,19 +38,17 @@ and UNIX socket names. This option allows multiple
 netconfd instances to run on the same host.
 
 /etc/ssh/sshd_config:
-...
-
+.nf
+\&...
 Port 830
-
 Port 1830
-
 Port 2830
-
 Subsystem netconf "/usr/sbin/netconf-subsystem \
 --ncxserver-sockname=830@/tmp/ncxserver.sock \
 --ncxserver-sockname=1830@/tmp/ncxserver-right.sock \
 --ncxserver-sockname=2830@/tmp/ncxserver-middle.sock"
-...
+\&...
+.fi
 
 .SH AUTHORS
 Andy Bierman, <andy at netconfcentral dot org>

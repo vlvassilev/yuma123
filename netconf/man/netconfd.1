@@ -251,10 +251,12 @@ name is expected to follow.
 Overrides the default /tmp/ncxserver.sock UNIX
 socket name netconfd listens on for incomming connections.
 You have to add corresponding entry to /etc/ssh/sshd_config e.g.:
-...
+.nf
+\&...
 Port 1830
 Subsystem netconf \"/usr/sbin/netconf-subsystem --ncxserver-sockname=/tmp/ncxserver1.sock\"
-...
+\&...
+.fi
 .IP --\fBport\fP=number
 Specifies the TCP ports that the server will accept
 connections from.  These ports must also be configured

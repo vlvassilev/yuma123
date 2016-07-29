@@ -1,3 +1,2 @@
 usr/include/*
-usr/lib/*/libyuma*.a
 usr/lib/*/libyuma*.so

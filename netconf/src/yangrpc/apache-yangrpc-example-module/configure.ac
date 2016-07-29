@@ -1,4 +1,4 @@
-AC_INIT([apache-yangrpc-example-module], [1.0], [vladimir@transpacket.com])
+AC_INIT([apache-yangrpc-example-module], [2.8], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 

@@ -1,4 +1,4 @@
-AC_INIT([yuma123], [2.7-1], [vladimir@transpacket.com])
+AC_INIT([yuma123], [2.8], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 

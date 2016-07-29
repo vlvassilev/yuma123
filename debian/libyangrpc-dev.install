@@ -1,2 +1,2 @@
-usr/include/yangrpc.h
+usr/include/yuma/yangrpc/*
 usr/lib/*/libyangrpc*.so

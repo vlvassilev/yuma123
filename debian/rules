@@ -17,15 +17,3 @@ override_dh_strip:
 	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg
 	dh_strip -plibyangrpc$(LIB_VERSION) --dbg-package=libyangrpc$(LIB_VERSION)-dbg
 	dh_strip
-
-override_dh_installdocs:
-	dh_installdocs --link-doc=libyuma$(LIB_VERSION) \
-		       -plibyuma-dev \
-		       -plibyuma$(LIB_VERSION)-dbg \
-		       -pnetconfd \
-		       -pyangcli \
-		       -plibyangrpc$(LIB_VERSION) \
-		       -plibyangrpc-dev \
-		       -plibyangrpc$(LIB_VERSION)-dbg
-	dh_installdocs  -plibyuma-base
-

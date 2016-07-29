@@ -1,4 +1,18 @@
-SUBDIRS=libtecla netconf/src/mgr netconf/src/agt netconf/src/ncx netconf/src/netconfd netconf/src/subsys netconf/src/yangcli libtoaster/src netconf/modules example-modules/helloworld netconf/src/yangrpc netconf/src/yangrpc/example netconf/src/yangdump netconf/man
+SUBDIRS=\
+libtecla \
+netconf/src/mgr \
+netconf/src/agt \
+netconf/src/ncx \
+netconf/src/netconfd \
+netconf/src/subsys \
+netconf/src/yangcli \
+libtoaster/src \
+netconf/modules \
+example-modules/helloworld \
+netconf/src/yangrpc \
+netconf/src/yangrpc/example \
+netconf/src/yangdump \
+netconf/man
 
 #netconf/src/yangrpc/yanghttpd
 
@@ -108,6 +122,14 @@ $(top_srcdir)/netconf/src/agt/agt_cli.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_complete.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_validate.h \
 $(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.h
+
+mgr_netconf_include_HEADERS= \
+$(top_srcdir)/netconf/src/mgr/mgr.h \
+$(top_srcdir)/netconf/src/mgr/mgr_hello.h \
+$(top_srcdir)/netconf/src/mgr/mgr_io.h \
+$(top_srcdir)/netconf/src/mgr/mgr_not.h \
+$(top_srcdir)/netconf/src/mgr/mgr_rpc.h \
+$(top_srcdir)/netconf/src/mgr/mgr_ses.h
 
 yangrpc_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/yangrpc/yangrpc.h

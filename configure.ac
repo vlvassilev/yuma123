@@ -37,6 +37,9 @@ AC_SUBST(ncx_netconf_includedir)
 agt_netconf_includedir="$prefix/include/yuma/agt"
 AC_SUBST(agt_netconf_includedir)
 
+mgr_netconf_includedir="$prefix/include/yuma/mgr"
+AC_SUBST(mgr_netconf_includedir)
+
 yangrpc_netconf_includedir="$prefix/include/yuma/yangrpc"
 AC_SUBST(yangrpc_netconf_includedir)
 

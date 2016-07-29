@@ -1,4 +1,4 @@
-yuma123 (2.8-1) UNRELEASED; urgency=medium
+yuma123 (2.8) UNRELEASED; urgency=medium
 
   * Resolved bobhash license-problem-non-free-RFC-BCP78
   * Fixed unescaped dots in man pages

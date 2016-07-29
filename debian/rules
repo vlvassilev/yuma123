@@ -28,6 +28,6 @@ override_dh_installdocs:
 	# so specify to copy it
 	install -d $(CURDIR)/debian/libyuma$(LIB_VERSION)/usr/share/doc/libyuma$(LIB_VERSION)/
 	install -m644 debian/copyright $(CURDIR)/debian/libyuma$(LIB_VERSION)/usr/share/doc/libyuma$(LIB_VERSION)/
-	install -d $(CURDIR)/debian/libyangrpc$(YANGRPC_LIB_VERSION)/usr/share/doc/libyuma$(YANGRPC_LIB_VERSION)/
+	install -d $(CURDIR)/debian/libyangrpc$(YANGRPC_LIB_VERSION)/usr/share/doc/libyangrpc$(YANGRPC_LIB_VERSION)/
 	install -m644 debian/copyright $(CURDIR)/debian/libyangrpc$(YANGRPC_LIB_VERSION)/usr/share/doc/libyangrpc$(YANGRPC_LIB_VERSION)/
 

@@ -1,2 +1,5 @@
-usr/include/*
+usr/include/yuma/ncx/*
+usr/include/yuma/agt/*
+usr/include/yuma/mgr/*
+usr/include/yuma/platform/*
 usr/lib/*/libyuma*.so

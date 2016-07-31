@@ -1,0 +1,77 @@
+module netconfd-ex {
+
+  namespace
+    "http://yuma123.org/ns/netconfd-ex";
+
+  prefix "netconfd-ex";
+
+  import netconfd { prefix netconfd; }
+
+  import yuma-types { prefix nt; }
+
+  import ietf-inet-types { prefix inet; }
+
+  organization
+    "Yuma123";
+
+  contact
+    "Vladimir Vassilev <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module contains extra parameters for netconfd";
+
+  revision 2016-07-31 {
+    description
+      "Initial revision. Integrates all yuma123 introduced changes
+       to netconfd.yang as augments and restored it to the original
+       netconfcentral 2012-10-05 version";
+  }
+
+  augment "/netconfd:netconfd" {
+    description
+      "Adds extra parameters to netconfd.";
+     leaf ncxserver-sockname {
+       description
+         "Overrides the default /tmp/ncxserver.sock UNIX
+          socket name netconfd listens on for incomming connections.
+          You have to add corresponding entry to /etc/ssh/sshd_config e.g.:
+          ...
+          Port 1830
+          Subsystem netconf \"/usr/sbin/netconf-subsystem \\
+          --ncxserver-sockname=/tmp/ncxserver1.sock\"
+          ...";
+       type string;
+     }
+
+     leaf tcp-direct-address {
+       description
+         "The server will use this local TCP address to listen for
+          incomming connections instead of the default
+          /tmp/ncxserver.sock UNIX socket. By default if only
+          tcp-direct-port is specified the addressed used is
+          localhost.";
+
+       type inet:host;
+     }
+
+     leaf tcp-direct-port {
+       description
+         "The server will use this local TCP port to listen for
+          incomming connections instead of the default
+          /tmp/ncxserver.sock UNIX socket. tcp-direct-address controls
+          the server bind address.";
+
+        type inet:port-number;
+     }
+
+     leaf non-advertised-module {
+       description
+         "Specifying a module as non advertised excludes it from the
+          capabilities list in the <hello> message. For example taking
+          out the RPCs defined in a given module from the list of
+          available commands in a cli.";
+
+       type nt:NcModuleSpec;
+     }
+  }
+}

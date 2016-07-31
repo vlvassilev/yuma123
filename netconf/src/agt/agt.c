@@ -1522,14 +1522,14 @@ boolean
     }
 
     clivalset = agt_cli_get_valset();
-    val = val_find_child(clivalset, NCXMOD_NETCONFD, NCX_EL_NON_ADVERTISED_MODULE);
+    val = val_find_child(clivalset, NCXMOD_NETCONFD_EX, NCX_EL_NON_ADVERTISED_MODULE);
 
     while (val) {
         if (!xml_strcmp(modname, VAL_STRING(val))) {
             return FALSE;
         }
         val = val_find_next_child(clivalset,
-                                  NCXMOD_NETCONFD,
+                                  NCXMOD_NETCONFD_EX,
                                   NCX_EL_NON_ADVERTISED_MODULE,
                                   val);
     }

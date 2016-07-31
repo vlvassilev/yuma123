@@ -277,14 +277,14 @@ status_t
     if (clivalset) {
 
         val = val_find_child(clivalset,
-                             NCXMOD_NETCONFD,
+                             NCXMOD_NETCONFD_EX,
                              NCX_EL_TCP_DIRECT_PORT);
         if(val != NULL) {
             tcp_direct_port = VAL_INT(val);
         }
 
         val = val_find_child(clivalset,
-                             NCXMOD_NETCONFD,
+                             NCXMOD_NETCONFD_EX,
                              NCX_EL_TCP_DIRECT_ADDRESS);
         if(val != NULL) {
             tcp_direct_address = VAL_STR(val);
@@ -292,7 +292,7 @@ status_t
         }
 
         val = val_find_child(clivalset,
-                             NCXMOD_NETCONFD,
+                             NCXMOD_NETCONFD_EX,
                              NCX_EL_NCXSERVER_SOCKNAME);
         if(val != NULL) {
             ncxserver_sockname = VAL_STR(val);

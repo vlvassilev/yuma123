@@ -79,7 +79,7 @@ static status_t load_base_schema (void)
     }
 
     /* load in the server boot parameter definition file */
-    res = ncxmod_load_module( NCXMOD_NETCONFD, NULL, NULL, NULL );
+    res = ncxmod_load_module( NCXMOD_NETCONFD_EX, NULL, NULL, NULL );
     if (res != NO_ERR) {
         return res;
     }

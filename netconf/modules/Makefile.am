@@ -38,4 +38,6 @@ $(top_srcdir)/netconf/modules/yang/ietf-inet-types.yang \
 $(top_srcdir)/netconf/modules/yang/yang-smi.yang
 
 yuma123_yang_DATA = \
-$(top_srcdir)/netconf/modules/yuma123/yangcli-ex.yang
+$(top_srcdir)/netconf/modules/yuma123/yangcli-ex.yang \
+$(top_srcdir)/netconf/modules/yuma123/netconfd-ex.yang
+

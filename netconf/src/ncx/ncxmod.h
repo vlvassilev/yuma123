@@ -94,6 +94,8 @@ extern "C" {
  */
 #define NCXMOD_NETCONFD   (const xmlChar *)"netconfd"
 
+#define NCXMOD_NETCONFD_EX   (const xmlChar *)"netconfd-ex"
+
 #define NCXMOD_NCX        (const xmlChar *)"yuma-ncx"
 
 #define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-netconf-with-defaults"

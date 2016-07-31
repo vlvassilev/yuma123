@@ -1,5 +1,5 @@
-yuma123-python (2.8-0) UNRELEASED; urgency=low
+yuma123-python (2.8-0) stable; urgency=low
 
   * Unofficial package.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 28 Jul 2016 23:19:24 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sun, 31 Jul 2016 15:44:29 +0200

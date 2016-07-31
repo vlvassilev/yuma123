@@ -3619,6 +3619,17 @@ xmlChar *
         return buff;
     }
 
+#ifdef NCXMOD_SIL_INSTALL_PATH
+    /* 6 or 7) ${NCXMOD_SIL_INSTALL_PATH} e.g. /usr/lib/x86_64-linux-gnu/yuma directory */
+    if (test_file(buff,
+                  bufflen,
+                  NCXMOD_SIL_INSTALL_PATH,
+                  NULL,
+                  fname)) {
+        return buff;
+    }
+#endif
+
     if (generrors) {
         log_error("\nError: SIL file (%s) not found.\n", fname);
     }

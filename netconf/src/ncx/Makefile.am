@@ -64,5 +64,5 @@ $(top_srcdir)/netconf/src/ncx/yinyang.c \
 $(top_srcdir)/netconf/src/ncx/val_parse.c \
 $(top_srcdir)/netconf/src/ncx/uptime.c
 
-libyumancx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+libyumancx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml -DNCXMOD_SIL_INSTALL_PATH=\"${netconfmoduledir}\"
 libyumancx_la_LDFLAGS = -version-info 2:0:0 -lxml2 -lz  -ldl -lrt

@@ -1,0 +1,597 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
+<!DOCTYPE rfc SYSTEM 'rfc2629.dtd'>
+<?rfc toc="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no"?>
+<?rfc strict="yes"?>
+<rfc ipr="trust200902"   category="std"
+     docName="draft-vassilev-netmod-yang-direct-must-augment-ext-00" >
+    <front>
+    <title abbrev="DIRECT-MUST-AUGMENT-EX">YANG Direct Must Augment Extension</title>
+
+    <author initials="V" surname="Vassilev" fullname='Vladimir Vassilev' >
+      <organization>Transpacket</organization>
+      <address>
+        <email>vladimir@transpacket.com</email>
+      </address>
+    </author>
+	<date/>
+    <abstract>
+	<t>
+This document introduces new YANG extension statement for assignment of
+must sub-statements to existing data nodes through augment without
+the requirement for a parent data node containing the must statement.
+	</t>
+    </abstract>
+</front>
+<middle>
+<section title="Introduction">
+    <t>
+The possibility to introduce new sub-statements to existing data nodes
+available in YANG <xref target="RFC6020"/> provides great flexibility to the authors of data models.
+However not all sub-statements can be added to existing data nodes through augment.
+It is not possible to add new must sub-statements. In certain use cases this limitation complicates the task of expressing valid data constraints as must statements. This document explains the problem <xref target="problem"/> and proposes a solution <xref target="solution"/>.
+    </t>
+<section title="Terminology">
+    <t>
+The keywords &quot;MUST&quot;, &quot;MUST NOT&quot;, &quot;REQUIRED&quot;, &quot;SHALL&quot;, &quot;SHALL NOT&quot;,
+&quot;SHOULD&quot;, &quot;SHOULD NOT&quot;, &quot;RECOMMENDED&quot;, &quot;NOT RECOMMENDED&quot;, &quot;MAY&quot;, and
+&quot;OPTIONAL&quot; in this document are to be interpreted as described in BCP
+14, <xref target="RFC2119"/>.
+    </t>
+<section title="YANG">
+    <t>
+The following terms are defined in <xref target="RFC6020"/>:
+    </t>
+<t>
+ <list style="symbols">
+ <t>
+must statement
+ </t>
+ <t>
+augment statement
+ </t>
+ <t>
+context node
+ </t>
+ <t>
+container
+ </t>
+ <t>
+data node
+ </t>
+ <t>
+key leaf
+ </t>
+ <t>
+leaf
+ </t>
+ <t>
+leaf-list
+ </t>
+ <t>
+list
+ </t>
+ </list>
+</t>
+</section>
+<section title="Tree Diagrams">
+    <t>
+A simplified graphical representation of the data model is used in
+this document.  The meaning of the symbols in these
+diagrams is as follows:
+    </t>
+<t>
+ <list style="symbols">
+ <t>
+Brackets &quot;[&quot; and &quot;]&quot; enclose list keys.
+ </t>
+ <t>
+Abbreviations before data node names: &quot;rw&quot; means configuration
+(read-write) and &quot;ro&quot; state data (read-only).
+ </t>
+ <t>
+Symbols after data node names: &quot;?&quot; means an optional node and &quot;*&quot;
+denotes a &quot;list&quot; and &quot;leaf&#8209;list&quot;.
+ </t>
+ <t>
+Parentheses enclose choice and case nodes, and case nodes are also
+marked with a colon (&quot;:&quot;).
+ </t>
+ <t>
+Ellipsis (&quot;...&quot;) stands for contents of subtrees that are not shown.
+ </t>
+ </list>
+</t>
+</section>
+</section>
+<section anchor="problem" title="Problem Statement">
+    <t>
+This document attempts to address the problem YANG model authors encounter
+when expressing valid data constraints with must statements and wish to use
+existing model data node as context node for the Xpath expression. The
+problem is significant in the cases where the context data node has to be
+evaluated as part of a relative path expressions using . or current().
+An example where this problem is encountered is the design of entertainment
+facility data model. The existing model defines a list of facilities. Each
+with identity leaf and list of visitors. The authors task is to design a
+model for a casino and a zoo. For the casino he only needs to define
+the identity and a constraint for the visitors to be adults older then 18.
+For the zoo except the identity definition he has to define a constraint
+that allows only children with adult supervision to be included in the
+visitors list.
+    </t>
+</section>
+<section anchor="solution" title="Solution">
+    <t>
+This document defines a YANG extension of the augment statement
+- ietf-direct-must-augment-extension:augment. The extension accepts must as
+sub-statement. The extension enables model authors to specify
+must statements with context nodes in existing models.
+    </t>
+    <t>
+The extension is completely backward-compatible
+with the current definitions in <xref target="RFC6020"/>.
+An old YANG parser will ignore any must statements
+introduced by ietf-direct-must-augment-extension:augment
+No existing models are affected
+by the new extension, so its introduction will be transparent to
+the existing YANG parsers.
+    </t>
+</section>
+</section>
+<section title="Using Direct Must Augment Extension">
+<t>
+A YANG extension statement "ietf-direct-must-augment-extension:augment" is introduced in
+the YANG module in <xref target="direct-must-augment-extension-module"/>.
+Its intended use is to allow must as sub-statement which is not possible with 
+the augment statement defined in  <xref target="RFC6020"/>.
+For example:
+	<figure>
+	    <artwork><![CDATA[
+
+module entertainment-facilities-casino {
+...
+  identity casino {
+    base ef:entertainment-facility-generic;
+  }
+
+  direct-must-augment-ex:augment
+    "/ef:entertainment-facilities/ef:entertainment-facility" +
+    "ef:visitor" {
+    when "../ef:type='ef-casino:casino'";
+    must "(/people/person[name=current()]/age>=18)" {
+      error-message
+        "Only adults are allowed in a casino.";
+    }
+  }
+}
+	    ]]></artwork>
+	</figure>
+
+</t>
+</section>
+<section title="Direct Must Augment Extension Module" anchor="direct-must-augment-extension-module">
+    <t>
+RFC Ed.: update the date below with the date of RFC publication and
+remove this note.
+    </t>
+<t>&lt;CODE BEGINS> file "ietf-direct-must-augment-extension@2015-06-12.yang"</t>
+	<figure>
+	    <artwork><![CDATA[
+module ietf-direct-must-augment-extension {
+
+  namespace
+    "urn:ietf:params:xml:ns:yang:ietf-direct-must-augment-extension";
+  prefix "direct-must-augment-ex";
+
+  organization
+    "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+
+  contact
+    "WG Web:   <http://tools.ietf.org/wg/netmod/>
+     WG List:  <mailto:netmod@ietf.org>
+
+     Editor:   Vladimir Vassilev
+               <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module contains extension of the standard augment statement.
+
+     Copyright (c) 2015 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX; see
+     the RFC itself for full legal notices.";
+
+  // RFC Ed.: replace XXXX with actual RFC number and remove this
+  // note.
+
+  // RFC Ed.: update the date below with the date of RFC publication
+  // and remove this note.
+  revision 2015-06-12 {
+    description
+      "Initial revision.";
+    reference
+      "RFC XXXX: Direct Must Augment Extension";
+  }
+
+  /*
+   * Extension
+   */
+
+  extension augment {
+    argument target;
+    description
+      "This extension introduces a direct must augment statement
+       capable of augmenting existing data nodes with new must
+       sub-statements.";
+  }
+}
+
+	    ]]></artwork>
+	</figure>
+<t>&lt;CODE ENDS></t>
+
+</section>
+<section title="IANA Considerations" anchor="iana">
+<section title="DIRECT-MUST-AUGMENT-EX XML Namespace">
+    <t>
+This document registers a URI in the IETF XML registry
+<xref target="RFC3688"/>. Following the format in RFC 3688, the following
+registration is requested:
+    </t>
+	<figure>
+	    <artwork><![CDATA[
+URI: urn:ietf:params:xml:ns:yang:ietf-direct-must-augment-extension
+Registrant Contact: The NETMOD WG of the IETF.
+XML: N/A, the requested URI is an XML namespace.
+	    ]]></artwork>
+	</figure>
+</section>
+<section title="DIRECT-MUST-AUGMENT-EX YANG Module">
+    <t>
+This document registers 1 YANG module in the YANG Module Names
+registry <xref target="RFC6020"/>.
+    </t>
+	<figure>
+	    <artwork><![CDATA[
+name:    ietf-direct-must-augment-extension
+namespace:
+         urn:ietf:params:xml:ns:yang:ietf-direct-must-augment-extension
+prefix:  direct-must-augment-ex
+// RFC Ed. remove this line and replace XXXX in next line
+reference:    RFC XXXX
+	    ]]></artwork>
+	</figure>
+</section>
+</section>
+<section title="Security Considerations">
+    <t>
+This document does not introduce any new security concerns
+in addition to those specified in <xref target="RFC6020"/>, section 15.
+    </t>
+</section>
+</middle>
+<back>
+<references title="Normative References">
+
+<reference anchor="RFC2119">
+  <front>
+    <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+    <author initials="S." surname="Bradner" fullname="S.  Bradner">
+      <organization>Harvard University</organization>
+    </author>
+    <date month="March" year="1997"/>
+    <abstract>
+      <t>In many standards track documents several words are used to signify the requirements in the specification.  These words are often capitalized.  This document defines these words as they should be interpreted in IETF documents.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="BCP" value="14"/>
+  <seriesInfo name="RFC" value="2119"/>
+  <format type="TXT" octets="4723" target="ftp://ftp.isi.edu/in-notes/rfc2119.txt"/>
+</reference>
+<!-- END RFC 2119 -->
+
+
+<reference anchor='RFC3688'>
+<front>
+<title>The IETF XML Registry</title>
+<author initials='M.' surname='Mealling' fullname='M. Mealling'>
+<organization /></author>
+<date year='2004' month='January' />
+<abstract>
+<t>This document describes an IANA maintained registry for IETF standards which use Extensible Markup Language (XML) related items such as Namespaces, Document Type Declarations (DTDs), Schemas, and Resource Description Framework (RDF) Schemas.</t></abstract></front>
+<seriesInfo name='BCP' value='81' />
+<seriesInfo name='RFC' value='3688' />
+<format type='TXT' octets='17325' target='http://www.rfc-editor.org/rfc/rfc3688.txt' />
+</reference>
+<!-- END RFC 3688 -->
+
+<reference anchor="RFC6020">
+  <front>
+    <title>YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</title>
+    <author initials="M." surname="Bjorklund" fullname="M. Bjorklund">
+      <organization/>
+    </author>
+    <date year="2010" month="October"/>
+    <abstract>
+      <t>YANG is a data modeling language used to model configuration and state data manipulated by the Network Configuration Protocol (NETCONF), NETCONF remote procedure calls, and NETCONF notifications. [STANDARDS TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name="RFC" value="6020"/>
+  <format type="TXT" octets="324178" target="http://www.rfc-editor.org/rfc/rfc6020.txt"/>
+</reference>
+<!-- END RFC 6020 -->
+
+<reference anchor='RFC6241'>
+  <front>
+    <title>Network Configuration Protocol (NETCONF)</title>
+    <author initials='R.' surname='Enns' fullname='R. Enns' role="editor">
+      <organization/>
+    </author>
+    <author initials='M.' surname='Bjorklund' fullname='M. Bjorklund' role="editor">
+      <organization/>
+    </author>
+    <author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder' role="editor">
+      <organization/>
+    </author>
+    <author initials='A.' surname='Bierman' fullname='A. Bierman' role="editor">
+      <organization/>
+    </author>
+    <date year='2011' month='June'/>
+  </front>
+  <seriesInfo name='RFC' value='6241'/>
+</reference>
+<!-- END RFC 6241 -->
+
+<reference anchor='RFC6991'>
+<front>
+<title>Common YANG Data Types</title>
+<author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder'>
+<organization /></author>
+<date year='2013' month='July' />
+<abstract>
+<t>This document introduces a collection of common data types to be used with the YANG data modeling language.  This document obsoletes RFC 6021.</t></abstract></front>
+
+<seriesInfo name='RFC' value='6991' />
+<format type='TXT' octets='60242' target='http://www.rfc-editor.org/rfc/rfc6991.txt' />
+</reference>
+<!-- END RFC 6991 -->
+
+<reference anchor="XSD" 
+           target="http://www.w3.org/TR/2004/REC-xmlschema-2-20041028">
+<front>
+  <title>XML Schema Part 2: Datatypes Second Edition</title>
+  <author initials="A." surname="Malhotra" fullname="Ashok Malhotra">
+    <organization/>
+  </author>
+  <author initials="P." surname="Biron" fullname="Paul V. Biron">
+    <organization/>
+  </author>
+  <date month="October" day="28" year="2004"/>
+</front>
+<seriesInfo name="World Wide Web Consortium Recommendation" 
+            value="REC-xmlschema-2-20041028"/>
+<format type="HTML" 
+        target="http://www.w3.org/TR/2004/REC-xmlschema-2-20041028"/>
+</reference>
+<!-- END XML Schema -->
+
+
+
+</references>
+<section title="Example Data Models" anchor="example-models">
+<section title="Model of a Generic Entertainment Facility">
+    <t>
+The &quot;entertainment&#8209;facilities&quot; YANG module models a collection of people and entertainment-facilities. Each person in the people collection has a name and age.
+Each entertainment-facility has a name, type and list of visitors referencing entries in the people collection. This example model is the target module for direct must augment extension statements defined in <xref target="entertainment-facilities-casino"/> and <xref target="entertainment-facilities-zoo"/>.
+    </t>
+	<figure>
+	    <artwork><![CDATA[
+module: entertainment-facilities
+   +--rw people
+   |  +--rw person* [name]
+   |     +--rw name    string
+   |     +--rw age     uint32
+   +--rw entertainment-facilities
+      +--rw entertainment-facility* [name]
+         +--rw name       string
+         +--rw type       identityref
+         +--rw visitor*   -> /people/person/name
+	    ]]></artwork>
+	</figure>
+	<figure>
+	    <artwork><![CDATA[
+
+module entertainment-facilities {
+  namespace "http://example.com/ns/entertainment-facilities";
+  prefix entertainment-facilities;
+  organization "Example, Inc.";
+  contact "support@example.com";
+
+  description
+    "Module used in DIRECT-MUST-AUGMENT-EX example.";
+
+  revision 2015-06-12 {
+    description "Initial version";
+  }
+
+  container people {
+    description
+      "Contains all people.";
+
+    list person {
+      key name;
+
+      leaf name {
+        type string;
+      }
+
+      leaf age {
+        type uint32;
+        mandatory true;
+      }
+    }
+  }
+
+  identity entertainment-facility-generic {
+    description
+      "Base identity from which specific" +
+      "entertainment facility types are derived.";
+  }
+
+  container entertainment-facilities {
+    description
+      "Container for all entertainment-facilities information.";
+
+    list entertainment-facility {
+      key name;
+
+      leaf name {
+        type string;
+      }
+
+      leaf type {
+        type identityref {
+          base entertainment-facility-generic;
+        }
+        mandatory true;
+      }
+
+      leaf-list visitor {
+        type leafref {
+          path "/people/person/name";
+        }
+      }
+    }
+  }
+}
+	    ]]></artwork>
+	</figure>
+</section>
+<section anchor="entertainment-facilities-casino" title="Model of a Casino">
+	<figure>
+	    <artwork><![CDATA[
+module entertainment-facilities-casino {
+  namespace "http://example.com/ns/entertainment-facilities-casino";
+  prefix ef-casino;
+  import ietf-direct-must-augment-extension
+    { prefix direct-must-augment-ex; }
+  import entertainment-facilities { prefix ef; }
+  organization "Example, Inc.";
+  contact "support@example.com";
+
+  description
+    "Module used in DIRECT-MUST-AUGMENT-EX example. " +
+    "Defines entertainment facility of type casino where" +
+    "only adults are allowed.";
+
+  revision 2015-06-12 {
+    description "Initial version";
+  }
+
+  identity casino {
+    base ef:entertainment-facility-generic;
+  }
+
+  direct-must-augment-ex:augment
+    "/ef:entertainment-facilities/ef:entertainment-facility/" +
+    "ef:visitor" {
+    when "../ef:type='ef-casino:casino'";
+    must "(/people/person[name=current()]/age>=18)" {
+      error-message
+        "Only adults are allowed in a casino.";
+    }
+  }
+}
+	    ]]></artwork>
+	</figure>
+</section>
+<section anchor="entertainment-facilities-zoo" title="Model of a Zoo">
+	<figure>
+	    <artwork><![CDATA[
+module: entertainment-facilities-zoo
+augment /ef:entertainment-facilities/ef:entertainment-facility:
+   +--rw child-supervision* [child]
+      +--rw child    -> ../../ef:visitor
+      +--rw adult    -> ../../ef:visitor
+	    ]]></artwork>
+	</figure>
+	<figure>
+	    <artwork><![CDATA[
+module entertainment-facilities-zoo {
+  namespace "http://example.com/ns/entertainment-facilities-zoo";
+  prefix ef-zoo;
+  import ietf-direct-must-augment-extension
+    { prefix direct-must-augment-ex; }
+  import entertainment-facilities { prefix ef; }
+  organization "Example, Inc.";
+  contact "support@example.com";
+
+  description
+    "Module used in DIRECT-MUST-AUGMENT-EX example. " +
+    "Defines entertainment facility of type zoo where" +
+    "no children without adult supervision are allowed.";
+
+  revision 2015-06-12 {
+    description "Initial version";
+  }
+
+  identity zoo {
+    base ef:entertainment-facility-generic;
+  }
+  augment
+    "/ef:entertainment-facilities/ef:entertainment-facility" {
+    when "ef:type='ef-zoo:zoo'";
+    list child-supervision {
+      key child;
+      leaf child {
+        type leafref {
+          path "../../ef:visitor";
+        }
+        must "/people/person[name=current()]/age<=14" {
+          error-message
+            "People older then 14 are not children.";
+        }
+      }
+      leaf adult {
+        mandatory true;
+        type leafref {
+          path "../../ef:visitor";
+        }
+        must "/people/person[name=current()]/age>=18" {
+          error-message
+            "People younger then 18 are not adults.";
+        }
+      }
+    }
+  }
+
+  direct-must-augment-ex:augment
+    "/ef:entertainment-facilities/ef:entertainment-facility/" +
+    "ef:visitor" {
+    when "../ef:type='ef-zoo:zoo'";
+    must "((../child-supervision[child=current()]) or
+          (/people/person[name=current()]/age>=14))" {
+      error-message
+        "Children without adult supervision are not allowed in a zoo.";
+    }
+  }
+}
+	    ]]></artwork>
+	</figure>
+</section>
+</section>
+</back></rfc>

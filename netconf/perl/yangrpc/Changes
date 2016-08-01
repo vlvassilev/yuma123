@@ -1,0 +1,6 @@
+Revision history for Perl extension yangrpc.
+
+0.01  Fri Jul  8 13:58:45 2016
+	- original version; created by h2xs 1.23 with options
+		-A -n yangrpc
+

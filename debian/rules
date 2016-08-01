@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE=1
+
+LIB_VERSION = 2
+
+%:
+	dh $@ --with autotools-dev,autoreconf
+
+
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
+	  --with-persistent-directory=/var/lib/yuma \
+	  --enable-shared --with-cflags="$(CFLAGS)" \
+	  --with-ldflags="$(LDFLAGS)"
+
+override_dh_strip:
+	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg
+	dh_strip -plibyangrpc$(LIB_VERSION) --dbg-package=libyangrpc$(LIB_VERSION)-dbg
+	dh_strip
+
+override_dh_installdocs:
+	dh_installdocs  -plibyuma-base
+	dh_installdocs  -plibyuma$(LIB_VERSION)
+	dh_installdocs --link-doc=libyuma$(LIB_VERSION) \
+	  -plibyuma-dev \
+	  -plibyuma$(LIB_VERSION)-dbg \
+	  -pnetconfd \
+	  -pyangcli \
+	  -plibyangrpc$(LIB_VERSION) \
+	  -plibyangrpc-dev \
+	  -plibyangrpc$(LIB_VERSION)-dbg

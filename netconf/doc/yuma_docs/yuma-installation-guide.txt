@@ -1,0 +1,322 @@
+<center>'''Yuma Installation Guide'''</center>
+
+
+<center>YANG-Based Unified Modular Automation Tools</center>
+
+
+<center>YUMA Package Installation</center>
+
+
+<center>Version yuma123-2.5</center>
+
+
+<center>Last Updated: 2015-12-09</center>
+= Preface =
+== Legal Statements ==
+Copyright 2009 â 2012, Andy Bierman, All Rights Reserved.
+
+Copyright 2013 â 2015, Vladimir Vassilev, All Rights Reserved.
+
+== Additional Resources ==
+
+Other documentation includes:
+
+[[Yuma Quickstart Guide]]
+
+[[Yuma User Manual]]
+
+[[Yuma netconfd Manual]]
+
+[[Yuma yangcli Manual]]
+
+[[Yuma Developer Manual]]
+
+There are several sources of free information and tools for use with
+YANG and/or NETCONF.
+
+The following section lists the resources available at this time.
+
+=== WEB Sites ===
+* '''Netconf Central'''
+** [http://www.netconfcentral.org/ http://www.netconfcentral.org/]
+** Yuma Home Page
+** Free information on NETCONF and YANG, tutorials, on-line YANG module
+validation and documentation database 
+* '''Yuma123 SourceForge open source Project'''
+** [http://sourceforge.net/projects/yuma123/
+http://sourceforge.net/projects/yuma123/]
+** Download Yuma source and documentation
+* '''Yang Central'''
+** [http://www.yang-central.org/ http://www.yang-central.org]
+** Free information and tutorials on YANG, free YANG tools for download
+* '''NETCONF Working Group Wiki Page'''
+** [http://trac.tools.ietf.org/wg/netconf/trac/wiki
+http://trac.tools.ietf.org/wg/netconf/trac/wiki]
+** Free information on NETCONF standardization activities and NETCONF
+implementations
+* '''NETCONF WG Status Page'''
+** http://tools.ietf.org/wg/netconf/
+** IETF Internet draft status for NETCONF documents
+* '''libsmi Home Page'''
+** [http://www.ibr.cs.tu-bs.de/projects/libsmi/
+http://www.ibr.cs.tu-bs.de/projects/libsmi/]
+** Free tools such as smidump, to convert SMIv2 to YANG
+* '''YumaWorks'''
+** [http://www.yumaworks.com/ http://www.yumaworks.com]
+** Offers support, training, and consulting for Yuma.
+** Offers YumaPro, a professional version of Yuma that includes
+concurrency, external database support, sub-agent support, multiple
+northbound interfaces, and more. API compatible with Yuma. Availability:
+September, 2012. Licensed.
+* '''Transpacket'''
+** [http://www.transpacket.com/ http://www.transpacket.com]
+** Offers Linux based embedded operating system distribution which uses
+Yuma for configuration and monitoring.
+** Offers support, training, and consulting for YANG and netconf.
+
+=== Mailing Lists ===
+* '''NETCONF Working Group'''
+** http://www.ietf.org/html.charters/netconf-charter.html
+** Technical issues related to the NETCONF protocol are discussed on the
+NETCONF WG mailing list. Refer to the instructions on the WEB page for
+joining the mailing list.
+* '''NETMOD Working Group'''
+** [http://www.ietf.org/html.charters/netmod-charter.html
+http://www.ietf.org/html.charters/netmod-charter.html]
+** Technical issues related to the YANG language and YANG data types are
+discussed on the NETMOD WG mailing list. Refer to the instructions on
+the WEB page for joining the mailing list.
+
+== Conventions Used in this Document ==
+The following formatting conventions are used throughout this document:
+
+{| class="wikitable" border="1"
+!Convention
+!Description
+
+|-
+| '''--foo'''
+| CLI parameter foo
+
+|-
+| '''<nowiki><foo></nowiki>'''
+| XML parameter foo
+
+|-
+| '''foo'''
+| '''yangcli''' command or parameter
+
+|-
+| '''$FOO'''
+| Environment variable FOO
+
+|-
+| '''$$foo'''
+| '''yangcli''' global variable foo
+
+|-
+|
+ some text
+| Example command or PDU
+
+|-
+| some text
+| Plain text
+|}
+
+= Introduction =
+[[Image:yuma-tools.png]]
+
+Refer to section 3 of the Yuma User Manual for a complete introduction
+to Yuma.
+
+This section focuses on the client and server tools within the Yuma
+programs.
+
+== Intended Audience ==
+This document is intended for users of the Yuma NETCONF client and
+server programs. It covers the installation of the Yuma packages.
+
+= Installation Requirements =
+The following requirements must be met for Yuma to be installed.
+
+== Supported Platforms ==
+There are no binary packages distributed at this time. Binaries can be
+compiled from source and installed using Autotools/Automake or built as
+Debian package from source using the Debian package management tools.
+The build scripts are tested on the following platforms:
+
+* Debian 8.0 "jessie" (32 bit x86 and 64-bit AMD)
+* Ubuntu 12.04.5 LTS (Precise Pangolin) (32 bit x86 and 64-bit AMD)
+
+== External Packages ==
+The following programs and libraries need to be available for Yuma to
+work.
+
+=== libxml2 ===
+The '''libxml2''' package is needed by the yuma package for some of the
+XML parsing functions. This package is installed by the default Linux
+installation process.
+
+To build yuma sources, also install the developer version of this
+package. It is called '''libxml2-dev '''on Ubuntu systems.
+
+=== libssh2 ===
+The '''libssh2''' package is needed by the yuma package for the
+'''yangcli''' program to connect to NETCONF servers using the SSH
+protocol. This package is called '''libssh2-1''' on Ubuntu platforms.
+This package is '''not''' installed by the default Linux installation
+process.
+
+To build yuma sources, also install the developer version of this
+package. It is called '''libssh2-1-dev '''on Ubuntu systems.
+
+=== ncurses ===
+The '''ncurses''' library is needed by the yuma package for some
+terminal support. This package is installed by the default Linux
+installation process.
+
+It is called '''libncurses5''' on Ubuntu systems. 
+
+To build yuma sources, also install the developer version of this
+package. It is called '''libncurses5-dev '''on Ubuntu systems.
+
+=== zlib ===
+The '''zlib''' library is needed by the yuma package for some
+compression support, used by other libraries that yuma imports. This
+package is installed by the default Linux installation process.
+
+To build yuma sources, also install the developer version of this
+package. It is called '''libz-dev '''on Ubuntu systems.
+
+= Getting the source =
+ ~> git clone git://git.code.sf.net/p/yuma123/git yuma123
+ ~> cd yuma123
+
+= Building and Installation =
+You can either use the Debian/Ubuntu package management tools or
+directly the Autotools build scripts if the platform you have is not
+Debian based or you need more flexibility.
+== Alternative 1:  Debian/Ubuntu *.deb package build and installation
+steps ==
+Check if you have any unmet dependencies:
+ yuma123> dpkg-checkbuilddeps
+ dpkg-checkbuilddeps: Unmet build dependencies: libssh2-1-dev
+libxml2-dev 
+Install the missing packages:
+ yuma123> sudo apt-get install libssh2-1-dev libxml2-dev
+Build the *.deb:
+ yuma123> dpkg-buildpackage -rfakeroot -uc -b
+The generated *.deb package e.g. ../yuma123_2.5-1_i386.deb can be
+installed:
+ yuma123> sudo dpkg -i ../yuma123_2.5-1_i386.deb
+
+== Alternative 2: Autotools build and installation steps==
+Assuming you have no unresolved dependencies:
+ yuma123> autoreconf -i -f
+ yuma123> ./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
+ yuma123> make
+ yuma123> sudo make install
+
+= Installed Files =
+* '''/usr/bin''' directory contains the following programs:
+**yangcli
+**yangrpc-example
+* '''/usr/sbin''' directory contains the following server programs:
+** netconfd
+** netconf-subsystem
+* '''/usr/lib '''directory contains the following files:
+** libyumancx.so
+** libyumaagt.so
+** libyumamgr.so
+** libyangrpc.so
+* '''/usr/lib/yuma''' directory contains the following file:
+** libhelloworld.so
+** libtoaster.so
+* '''/usr/share/yuma/modules''' directory contains all the YANG modules:
+**yang/
+**ietf/
+**netconfcentral/
+**ietf-draft/
+**helloworld.yang
+* '''/usr/share/doc/yuma123''' directory (*.deb only) containing the
+following files:
+** copyright
+** changelog.Debian.gz
+* '''/usr/include/yuma '''directory contains H files needed to compile
+SIL code so it can be loaded into the server at runtime:
+** ncx/*.h
+** agt/*.h
+** platform/*.h
+** yangrpc/*.h
+
+= Next Steps =
+== More Documentation ==
+
+[[Yuma Quickstart Guide]]
+
+[[Yuma User Manual]]
+
+[[Yuma netconfd Manual]]
+
+[[Yuma yangcli Manual]]
+
+[[Yuma Developer Manual]]
+
+Each program also has extensive help information available with the'''
+--help''' CLI parameter. For example:
+
+* '''yangcli --help'''
+* '''netconfd --help'''
+
+== Running the Yuma Programs ==
+=== yangcli  ===
+If you are just using the Yuma client applications, then there is no
+further mandatory setup required.
+
+* If a work directory is used, then the '''$YUMA_HOME '''environment
+variable needs to be defined. Refer to the user manual for details.
+* If Yuma is installed in a location other than the default location
+described above, then the '''$YUMA_INSTALL''' environment variable needs
+to be defined. Refer to the user manual for details.
+* The following binary applications are available:
+** '''/usr/bin/yangcli''': NETCONF-over-SSH client application
+
+=== netconfd and netconf-subsystem ===
+The Yuma server does not automatically start running when installed.
+This will be supported in a future release.
+
+The following steps must be taken to start the '''netconfd''' server:
+
+* You must modify the '''/etc/ssh/sshd_config''' file, and add the
+'netconf' subsystem, as described in the user manual.If the yuma package
+was installed in a non-default location, then the path to the
+netconf-subsystem will be different than the example below. The
+following commands must be present:
+     
+     '''Port 22'''
+     '''Port 830'''
+     '''Subsystem netconf /usr/sbin/netconf-subsystem'''
+
+* Start the '''netconfd''' server, as described in the [[Yuma User
+Manual]] or the  [[Yuma Quickstart Guide]]. This can be in the
+foreground or the background. If it is in the background, then the
+''''--log'''' CLI parameter should be provided, as shown below:
+
+ 
+     mydir> /'''usr/sbin/netconfd --log=$HOME/mylog &'''
+     
+
+
+* Restart the SSH server. This is a platform-specific task. Refer to the
+'''sshd''' manual page for your system for more details. This step may
+need to be run as root or with the 'sudo' program.
+
+
+Debian/Ubuntu:
+     
+     mydir> sudo  /etc/init.d/ssh restart   
+
+Fedora 12 version:
+ 
+     mydir> sudo /etc/rc.d/init.d/sshd restart

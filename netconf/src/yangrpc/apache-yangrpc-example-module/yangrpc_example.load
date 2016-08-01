@@ -1,0 +1,1 @@
+LoadModule yangrpc_example_module /usr/lib/apache2/modules/mod_yangrpc_example.so

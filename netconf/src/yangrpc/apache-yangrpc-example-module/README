@@ -1,0 +1,33 @@
+=Description=
+Example module for Apache using the Yuma API to execute RPCs over netconf
+
+=Configuration=
+#edit yangrpc_example.conf
+
+=Building and installing=
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0" CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+
+Enable the module:
+ sudo a2enmod yangrpc_example
+
+=Generating SSH keys for passwordless access=
+To avoid keeping passwords in plaintext generate dedicated key pair:
+ sudo su
+ mkdir /var/www/.ssh
+ ssh-keygen -t rsa -f /var/www/.ssh/id_rsa -P ""
+ chown www-data:www-data /var/www/.ssh/id_rsa*
+ cat /var/www/.ssh/id_rsa.pub | tee -a /root/.ssh/authorized_keys
+
+=Running=
+Start netconfd:
+ sudo netconfd --no-startup
+Start apache:
+ sudo su
+ source /etc/apache2/envvars
+ gdb --args /usr/sbin/apache2 -k start -X -e Debug
+
+Load the web link:
+ wget http://localhost/state.xml

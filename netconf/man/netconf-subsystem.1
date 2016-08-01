@@ -1,0 +1,57 @@
+.\" Process this file with
+.\" nroff -e -mandoc foo.1
+.\"
+.TH netconf-subsystem 1 "July 5, 2016" Linux "netconf-subsystem 2.5"
+.SH NAME
+netconf-subsystem \- thin client to access netconfd server
+
+.SH SYNOPSIS
+.nf
+
+   netconf-subsystem
+
+.fi
+.SH DESCRIPTION
+.B netconf-subsystem
+is a thin-client application that is called by the
+OpenSSH server to access the netconfd server, when 
+the 'netconf' subsystem is requested.
+.SH USAGE
+The location of this program needs to be configured
+in the /etc/ssh/sshd_config file.  The following
+configuration needs to be present:
+.nf
+
+  Port 22
+  Port 830
+  Subsystem netconf /usr/sbin/netconf-subsystem
+
+.fi
+The actual filespec in the last line will depend
+on the location that this program is installed.
+The default value is shown in the example above.
+
+.SH OPTIONS
+.IP --\fBncxserver-sockname\fP=port@filespec
+Specifies the corresponding pairs of SSH ports
+and UNIX socket names. This option allows multiple
+netconfd instances to run on the same host.
+
+/etc/ssh/sshd_config:
+.nf
+\&...
+Port 830
+Port 1830
+Port 2830
+Subsystem netconf "/usr/sbin/netconf-subsystem \
+--ncxserver-sockname=830@/tmp/ncxserver.sock \
+--ncxserver-sockname=1830@/tmp/ncxserver-right.sock \
+--ncxserver-sockname=2830@/tmp/ncxserver-middle.sock"
+\&...
+.fi
+
+.SH AUTHORS
+Andy Bierman, <andy at netconfcentral dot org>
+Vladimir Vassilev, <vladimir at transpacket dot com>
+.SH SEE ALSO
+.BR netconfd (1)

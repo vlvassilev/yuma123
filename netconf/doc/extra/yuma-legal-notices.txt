@@ -1,0 +1,103 @@
+'''Yuma ''Legal Notices '''''Copyright 2009 - 2012, Andy Bierman ALL RIGHTS RESERVED. All Yuma distributions include code from the following sources:
+
+
+The '''libxml2''' library is licensed from http://xmlsoft.org/ under the MIT License.
+
+<nowiki>--------------</nowiki>
+
+
+The '''libssh2''' library is licensed from http://www.libssh2.org/ under the New BSD License
+
+(http://www.ohloh.net/licenses/bsd_ish).
+
+
+<nowiki>---------------</nowiki>
+
+
+The '''ncurses''' library is licensed from http://www.gnu.org/software/ncurses/ under the GNU/Linux license.
+
+
+<nowiki>----------------</nowiki>
+
+
+The '''libtecla''' library is licensed from http://www.astro.caltech.edu/~mcs/tecla/ under the license found at http://www.astro.caltech.edu/~mcs/tecla/LICENSE.TERMS
+
+
+<nowiki>----------------</nowiki>
+
+
+The base64 content transfer encoding functions in '''ncx/b64.c''' are by Bob Trower, under the MIT license.
+
+
+MODULE NAME: b64.c
+
+AUTHOR: Bob Trower 08/04/01
+
+PROJECT: Crypt Data Packaging
+
+COPYRIGHT: Copyright (c) Trantor Standard Systems Inc., 2001
+
+
+LICENCE: Copyright (c) 2001 Bob Trower, Trantor Standard Systems Inc.
+
+
+Permission is hereby granted, free of charge, to any person
+
+obtaining a copy of this software and associated
+
+documentation files (the "Software"), to deal in the
+
+Software without restriction, including without limitation
+
+the rights to use, copy, modify, merge, publish, distribute,
+
+sublicense, and/or sell copies of the Software, and to
+
+permit persons to whom the Software is furnished to do so,
+
+subject to the following conditions:
+
+
+The above copyright notice and this permission notice shall
+
+be included in all copies or substantial portions of the
+
+Software.
+
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+<nowiki>-----------------</nowiki>
+
+
+The bobhash function in '''ncx/bobhash.c '''implements the BOB hash algorithm that is
+originally published as Public domain code in the 1997 Dr Dobbs article
+"By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.  You may use this
+code any way you wish, private, educational, or commercial.  It's free."
+
+This function is referenced in - From Packet Sampling Techniques
+RFC 5475 -  implemented from <draft-ietf-psamp-sample-tech-07.txt> 
+
+<nowiki>-----------------</nowiki>
+
+
+Notice to U.S. Government End Users:
+
+. 
+
+RESTRICTED RIGHTS LEGEND. This software is provided with RESTRICTED RIGHTS. Use, duplication, or disclosure by the U.S. Government is subject to restrictions set forth in subparagraph (c)(1)(ii) of the Rights in Technical Data and Computer Software clause at DFARS 252.227-7013 or subparagraphs (c)(1) and (2) of the Commercial Computer Software - Restricted Rights at 48 CFR 52.227-19, as applicable. The "Manufacturer" for purposes of these regulations is Netconf Central, Inc. 374 Laguna Terrace, Simi Valley, CA 93065 USA.

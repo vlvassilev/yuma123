@@ -87,45 +87,24 @@ Description: netconf/YANG command line client application
  The yuma123 yangcli application allows the user to issue netconf requests
  to agents according to the specific YANG models of the agents.
 
-Package: libyangrpc2
-Section: libs
+Package: netconfd-module-ietf-interfaces
 Architecture: any
-Multi-Arch: same
-Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base, libyuma2
-Description: Netconf/YANG library for simple manager clients
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.8)
+Description: SIL module for netconfd implementing ietf-interfaces.yang
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
  .
- The yuma123 yangrpc library contains common functions for the construction,
- sending, receiving, decoding, and manipulation of the netconf requests
- and responses used on simple manager clients.
+ The yuma123 netconfd module ietf-interfaces implements the functionality
+ modeled in ietf-interfaces.yang using some common command line tools.
 
-Package: libyangrpc2-dbg
-Section: debug
-Priority: extra
+Package: netconfd-module-ietf-system
 Architecture: any
-Depends: libyangrpc2 (=${binary:Version}), ${misc:Depends}
-Description: Netconf/YANG library debug
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.8)
+Description: SIL module for netconfd implementing ietf-system.yang
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
  .
- This package contains the debug symbols for the yuma123 libyangrpc library.
- .
-
-Package: libyangrpc-dev
-Section: libdevel
-Architecture: any
-Provides: libyuma-dev
-Depends: libc6-dev, libyangrpc2 (=${binary:Version}), libwrap0-dev, libssl-dev, procps,
-         ${misc:Depends}
-Description: Netconf/YANG development files
- The Netconf protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
- .
- The yuma123 libyangrpc development files include the library headers, static
- libraries, and documentation needed for development of custom netconf/YANG
- applications.
+ The yuma123 netconfd module ietf-interfaces implements the functionality
+ modeled in ietf-system.yang using some common command line tools.

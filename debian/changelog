@@ -1,5 +1,6 @@
-yuma123 (2.8-0) stable; urgency=low
+yuma123 (2.8-1) UNRELEASED; urgency=low
 
-  * Unofficial package.
+  * Integrated netconfd-module-ietf-* netconfd SIL module packages.
+  * Removed libyangrpc packages. The API is not stable yet.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Sun, 31 Jul 2016 15:45:03 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 01 Aug 2016 15:55:23 +0200

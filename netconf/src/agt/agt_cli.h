@@ -60,6 +60,7 @@ extern "C" {
 *********************************************************************/
 
 #define AGT_CLI_MODULE     (const xmlChar *)"netconfd"
+#define AGT_CLI_MODULE_EX  (const xmlChar *)"netconfd-ex"
 #define AGT_CLI_CONTAINER  (const xmlChar *)"netconfd"
 
 

@@ -36,6 +36,7 @@ date         init     comment
 
 #include "procdefs.h"
 #include "agt_cli.h"
+#include "agt_ncxserver.h"
 #include "cli.h"
 #include "conf.h"
 #include "help.h"
@@ -318,9 +319,35 @@ static void
     }
 
     /* get max-sessions param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_MAX_SESSIONS);
+    val = val_find_child(valset, AGT_CLI_MODULE_EX, NCX_EL_MAX_SESSIONS);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_max_sessions = VAL_UINT(val);
+    }
+
+    val = val_find_child(valset,
+                         AGT_CLI_MODULE_EX,
+                         NCX_EL_TCP_DIRECT_PORT);
+    agt_profile->agt_tcp_direct_port = -1;
+    if(val != NULL) {
+        agt_profile->agt_tcp_direct_port = VAL_INT(val);
+    }
+
+    val = val_find_child(valset,
+                         AGT_CLI_MODULE_EX,
+                         NCX_EL_TCP_DIRECT_ADDRESS);
+    agt_profile->agt_tcp_direct_address = NULL;
+    if(val != NULL) {
+        agt_profile->agt_tcp_direct_address = VAL_STR(val);
+        if(agt_profile->agt_tcp_direct_port==-1) agt_profile->agt_tcp_direct_port = 2023;
+    }
+
+    val = val_find_child(valset,
+                         AGT_CLI_MODULE_EX,
+                         NCX_EL_NCXSERVER_SOCKNAME);
+    if(val != NULL) {
+        agt_profile->agt_ncxserver_sockname = VAL_STR(val);
+    } else {
+        agt_profile->agt_ncxserver_sockname = NCXSERVER_SOCKNAME;
     }
 
 } /* set_server_profile */

@@ -264,7 +264,12 @@ typedef struct agt_profile_t_ {
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;
     uint16              agt_ports[AGT_MAX_PORTS];
+
+    /* yuma123 extended parameters */
     uint32              agt_max_sessions;
+    const xmlChar      *agt_tcp_direct_address;
+    int32               agt_tcp_direct_port;
+    const xmlChar      *agt_ncxserver_sockname;
 
     /****** state variables; TBD: move out of profile ******/
 

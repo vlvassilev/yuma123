@@ -20,6 +20,11 @@ module netconfd-ex {
   description
     "This module contains extra parameters for netconfd";
 
+  revision 2016-08-02 {
+    description
+      "Restored max-sessions";
+  }
+
   revision 2016-07-31 {
     description
       "Initial revision. Integrates all yuma123 introduced changes
@@ -72,6 +77,14 @@ module netconfd-ex {
           available commands in a cli.";
 
        type nt:NcModuleSpec;
+     }
+
+     leaf max-sessions {
+       description
+         "Specifies the maximum number of sessions
+          that can be accepted.";
+       type uint32;
+       default 1024;
      }
   }
 }

@@ -266,62 +266,28 @@ status_t
     socklen_t              size;
     status_t               res;
     boolean                done, done2, stream_output;
-    char*                  tcp_direct_address = NULL;
-    int                    tcp_direct_port = -1;
-    char*                  ncxserver_sockname;
     val_value_t            *clivalset;
     val_value_t            *val;
 
-    /* Create the socket and set it up to accept connections. */
-    clivalset = agt_cli_get_valset();
-    if (clivalset) {
-
-        val = val_find_child(clivalset,
-                             NCXMOD_NETCONFD_EX,
-                             NCX_EL_TCP_DIRECT_PORT);
-        if(val != NULL) {
-            tcp_direct_port = VAL_INT(val);
-        }
-
-        val = val_find_child(clivalset,
-                             NCXMOD_NETCONFD_EX,
-                             NCX_EL_TCP_DIRECT_ADDRESS);
-        if(val != NULL) {
-            tcp_direct_address = VAL_STR(val);
-            if(tcp_direct_port==-1) tcp_direct_port = 2023;
-        }
-
-        val = val_find_child(clivalset,
-                             NCXMOD_NETCONFD_EX,
-                             NCX_EL_NCXSERVER_SOCKNAME);
-        if(val != NULL) {
-            ncxserver_sockname = VAL_STR(val);
-        } else {
-            ncxserver_sockname = NCXSERVER_SOCKNAME;
-        }
-
-    } else {
-            log_error("\n*** agt_ncxserver_run:agt_cli_get_valset failed.\n");
-            return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    if(tcp_direct_port!=-1) {
-        res = make_tcp_socket(tcp_direct_address, tcp_direct_port, &ncxsock);
-        if (res != NO_ERR) {
-            log_error("\n*** Cannot connect to ncxserver socket listen tcp port: %d\n",tcp_direct_port);
-            return res;
-        }
-    } else {
-        res = make_named_socket(ncxserver_sockname, &ncxsock);
-        if (res != NO_ERR) {
-            log_error("\n*** Cannot connect to ncxserver socket"
-                      "\n*** If no other instances of netconfd are running,"
-                      "\n*** try deleting %s\n",ncxserver_sockname);
-            return res;
-        }
-    }
     profile = agt_get_profile();
     if (profile == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if(profile->agt_tcp_direct_port!=-1) {
+        res = make_tcp_socket(profile->agt_tcp_direct_address, profile->agt_tcp_direct_port, &ncxsock);
+        if (res != NO_ERR) {
+            log_error("\n*** Cannot connect to ncxserver socket listen tcp port: %d\n",profile->agt_tcp_direct_port);
+            return res;
+        }
+    } else {
+        res = make_named_socket(profile->agt_ncxserver_sockname, &ncxsock);
+        if (res != NO_ERR) {
+            log_error("\n*** Cannot connect to ncxserver socket"
+                      "\n*** If no other instances of netconfd are running,"
+                      "\n*** try deleting %s\n",profile->agt_ncxserver_sockname);
+            return res;
+        }
     }
 
     stream_output = profile->agt_stream_output;

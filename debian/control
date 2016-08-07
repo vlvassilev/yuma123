@@ -75,7 +75,7 @@ Description: netconf/YANG command line client application
 
 Package: netconfd-module-ietf-interfaces
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.8)
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
 Description: SIL module for netconfd implementing ietf-interfaces.yang
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
@@ -86,7 +86,7 @@ Description: SIL module for netconfd implementing ietf-interfaces.yang
 
 Package: netconfd-module-ietf-system
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.8)
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
 Description: SIL module for netconfd implementing ietf-system.yang
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

@@ -3,7 +3,7 @@ Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 9), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 Homepage: http://transpacket.com/
 
 Package: libyuma-base

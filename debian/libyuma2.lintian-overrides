@@ -1,0 +1,3 @@
+#The three libraries share the same source and API/ABI versioning and don't
+#need 3 different packages
+libyuma2: package-name-doesnt-match-sonames libyumaagt2 libyumamgr2 libyumancx2

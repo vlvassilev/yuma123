@@ -13,10 +13,6 @@ override_dh_auto_configure:
 	  --enable-shared --with-cflags="$(CFLAGS)" \
 	  --with-ldflags="$(LDFLAGS)"
 
-override_dh_strip:
-	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg
-	dh_strip
-
 override_dh_installdocs:
 	dh_installdocs  -plibyuma-base
 	dh_installdocs  -plibyuma$(LIB_VERSION)

@@ -36,18 +36,6 @@ Description: Netconf/YANG library
  sending, receiving, decoding, and manipulation of the netconf requests
  and responses.
 
-Package: libyuma2-dbg
-Section: debug
-Priority: extra
-Architecture: any
-Depends: libyuma2 (=${binary:Version}), ${misc:Depends}
-Description: Netconf/YANG library debug
- The Netconf protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
- .
- This package contains the debug symbols for the yuma123 libyuma libraries.
-
 Package: libyuma-dev
 Section: libdevel
 Architecture: any

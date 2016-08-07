@@ -53,7 +53,7 @@ Description: Netconf/YANG development files
 
 Package: netconfd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, debconf, lsb-base (>= 3.2-13), libyuma-base, libyuma2
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, debconf, lsb-base, libyuma-base, libyuma2
 Description: netconf (RFC-6241) agent
  Netconf provides a framework
  for the exchange of management information between agents (servers)

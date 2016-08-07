@@ -5,18 +5,31 @@ Source: https://sourceforge.net/projects/yuma123
 
 Files: *
 Copyright: (C) 2008-2012 Andy Bierman <andy@yumaworks.com>
+Copyright: (C) 2009-2010 Netconf Central, Inc.
 Copyright: (C) 2012 YumaWorks, Inc. <support@yumaworks.com>
 Copyright: (C) 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
 Copyright: (C) 2013-2016 Transpacket AS <support@transpacket.com>
 License: BSD
 
-Files: */debian
+Files: debian/*
 Copyright: (C) 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
 License: BSD
 
 Files: libtecla/*
 Copyright: (C) 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd.
 License: MIT
+
+Files: netconf/src/ncx/b64.c
+Copyright: (C) 2001, Bob Tower
+Copyright: (C) 2001, Trantor Standard Systems Inc.
+License: MIT
+
+Files: netconf/src/ncx/bobhash.c
+License: public-domain
+ The bobhash function implements the BOB hash algorithm that is
+ originally published as Public domain code in the 1997 Dr Dobbs article
+ "By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.  You may use this
+ code any way you wish, private, educational, or commercial.  It's free.
 
 License: BSD
  Redistribution and use in source and binary forms, with or without

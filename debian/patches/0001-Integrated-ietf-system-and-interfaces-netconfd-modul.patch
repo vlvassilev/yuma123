@@ -3,10 +3,10 @@ Date: Mon, 1 Aug 2016 16:51:54 +0200
 Subject: Integrated ietf system and interfaces netconfd module packages
 
 ---
- Makefile.am                                        |  2 ++
- configure.ac                                       |  2 ++
- example-modules/ietf-interfaces/Makefile.am        |  9 +++++--
- example-modules/ietf-system/Makefile.am            |  9 +++++--
+ Makefile.am                                 | 2 ++
+ configure.ac                                | 2 ++
+ example-modules/ietf-interfaces/Makefile.am | 9 +++++++--
+ example-modules/ietf-system/Makefile.am     | 9 +++++++--
  4 files changed, 18 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile.am b/Makefile.am

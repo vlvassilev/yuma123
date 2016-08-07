@@ -1,5 +1,5 @@
-yuma123 (2.8-1) unstable; urgency=low
+yuma123 (2.8+dfsg-1) UNRELEASED; urgency=medium
 
-  * Initial release (Closes: #831753)
+  * Initial release (Closes: #833187)
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 01 Aug 2016 18:26:54 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sun, 07 Aug 2016 18:07:39 +0200

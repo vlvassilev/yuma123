@@ -1,0 +1,3 @@
+version=3
+opts=dversionmangle=s/~dfsg$// \
+  http://sf.net/yuma123/yuma123_([\d+\.]+|\d+)\.tar\.gz

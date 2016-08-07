@@ -40,7 +40,7 @@ Package: libyuma-dev
 Section: libdevel
 Architecture: any
 Provides: libyuma-dev
-Depends: libyuma2 (=${binary:Version}), libwrap0-dev, libssl-dev, procps,
+Depends: libwrap0-dev, libssl-dev, procps,
          ${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework

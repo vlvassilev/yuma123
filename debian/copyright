@@ -4,24 +4,24 @@ Upstream-Contact: Vladimir Vassilev <vladimir@transpacket.com>
 Source: https://sourceforge.net/projects/yuma123
 
 Files: *
-Copyright: (C) 2008-2012 Andy Bierman <andy@yumaworks.com>
-Copyright: (C) 2009-2010 Netconf Central, Inc.
-Copyright: (C) 2012 YumaWorks, Inc. <support@yumaworks.com>
-Copyright: (C) 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
-Copyright: (C) 2013-2016 Transpacket AS <support@transpacket.com>
+Copyright: 2008-2012 Andy Bierman <andy@yumaworks.com>
+           2009-2010 Netconf Central, Inc.
+           2012 YumaWorks, Inc. <support@yumaworks.com>
+           2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
+           2013-2016 Transpacket AS <support@transpacket.com>
 License: BSD
 
 Files: debian/*
-Copyright: (C) 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
+Copyright: 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
 License: BSD
 
 Files: libtecla/*
-Copyright: (C) 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd.
+Copyright: 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd.
 License: MIT
 
 Files: netconf/src/ncx/b64.c
-Copyright: (C) 2001, Bob Tower
-Copyright: (C) 2001, Trantor Standard Systems Inc.
+Copyright: 2001, Bob Tower
+           2001, Trantor Standard Systems Inc.
 License: MIT
 
 Files: netconf/src/ncx/bobhash.c

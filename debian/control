@@ -20,7 +20,6 @@ Description: Netconf configuration script, YANG models and documentation
  models for the netconf an YANG libraries, agents and
  applications. YANG models contain a formal description of the data that can be
  managed using netconf and applications.
- .
 
 Package: libyuma2
 Section: libs
@@ -48,7 +47,6 @@ Description: Netconf/YANG library debug
  and clients.
  .
  This package contains the debug symbols for the yuma123 libyuma libraries.
- .
 
 Package: libyuma-dev
 Section: libdevel

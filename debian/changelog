@@ -1,5 +1,26 @@
-yuma123 (2.8+dfsg-1) UNRELEASED; urgency=medium
+yuma123 (2.8+dfsg-1) unstable; urgency=medium
 
   * Initial release (Closes: #833187)
+  * debian/control:
+    - The latest Standards-Version is 3.9.8.
+    - The Homepage changed to the homepage of the software,
+      not the homepage of the company backing it.
+    - Removed extra dot at the end of the long description of libyuma-base.
+    - Dropped the libyuma2-dbg package, they are now generated automatically.
+    - No need to depends on libc6-dev for libyuma-dev, this package is part
+      of build-essentials.
+    - Dropped the versioned dependency on lsb-base.
+    - libyuma2 dependency comes directly from ${shlibs:Depends}.
+  * debian/copyright:
+    - DEB5 format conformant.
+    - Added a section for debian/*.
+    - Added missing files and copyright holders.
+  * debian/rules:
+    - Only using autoreconf, dh_strip generates dbgsym package itself.
+  * Add a lintian override for with a comment for
+    libyuma2: package-name-doesnt-match-sonames
+  * Simplified patch 0001 by not removing all example-modulels/ietf-*/debian
+    folders.
+  * Add patch: 0002-Fixed-ancient-autotools-helper-file.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Sun, 07 Aug 2016 18:07:39 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 08 Aug 2016 02:17:35 +0200

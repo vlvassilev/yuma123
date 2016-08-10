@@ -128,10 +128,10 @@ static tk_ent_t tlist [] = {
     { TK_TT_GT, 1, ">", "greater than", FL_XPATH },
 
     /* TWO CHAR TOKENS */
-    { TK_TT_RANGESEP, 2, "..", "range seperator", 
+    { TK_TT_RANGESEP, 2, "..", "range separator", 
       (FL_REDO|FL_XPATH) },
     { TK_TT_DBLCOLON, 2, "::", "double colon", FL_XPATH },
-    { TK_TT_DBLFSLASH, 2, "//", "double foward slash", FL_XPATH },
+    { TK_TT_DBLFSLASH, 2, "//", "double forward slash", FL_XPATH },
     { TK_TT_NOTEQUAL, 2, "!=", "not equal sign", FL_XPATH },
     { TK_TT_LEQUAL, 2, "<=", "less than or equal", FL_XPATH },
     { TK_TT_GEQUAL, 2, ">=", "greater than or equal", FL_XPATH },

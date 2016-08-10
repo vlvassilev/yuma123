@@ -1939,7 +1939,7 @@ void
     }
 
     if (LOGDEBUG2) {
-        log_debug2("\nQueing <%s> notification to send (id: %u)",
+        log_debug2("\nQueueing <%s> notification to send (id: %u)",
                    (notif->notobj) ? 
                    obj_get_name(notif->notobj) : (const xmlChar *)"??",
                    notif->msgid);

@@ -15,24 +15,56 @@ module yangcli-ex {
   description
     "This module contains extra parameters for yangcli";
 
+  revision 2016-08-10 {
+    description
+      "Added dump-session parameter.";
+  }
+
   revision 2016-04-28 {
     description
       "Initial revision.";
+  }
+
+  grouping ConnectParmsEx {
+    description
+      "Common extended parms for connecting to a NETCONF server.
+       Used by the connect operation and if present at
+       the command line invocation, then the connect
+       operation will be invoked automatically.";
+
+    leaf dump-session {
+      description
+        "Filespec base for dumping the raw netconf
+         traffic data and timestamp information. Example:
+         --dump-session=<base> The following files are created:
+          * <base>out - session data sent to server
+          * <base>in - session data received from server
+          * <base>out.ts - timestamp-tee formated output transactions report
+          * <base>in.ts - timestamp-tee formated input transactions report
+          ";
+         type string;
+    }
   }
 
   augment "/yc:yangcli" {
     description
       "Adds extra parameters to yangcli.";
 
-      leaf keep-session-model-copies-after-compilation {
-        description
-          "Controls if temporary session model copies are kept
-           after compilation in ~/.yuma/tmp/<>/<sid> until yangcli
-           is terminated.";
-        type boolean;
-        default true;
-      }
+    leaf keep-session-model-copies-after-compilation {
+      description
+        "Controls if temporary session model copies are kept
+         after compilation in ~/.yuma/tmp/<>/<sid> until yangcli
+         is terminated.";
+      type boolean;
+      default true;
+    }
+    uses ConnectParmsEx;
+  }
+
+  augment "/yc:connect/yc:input" {
+    description
+      "Adds extra parameters to connect.";
+
+    uses ConnectParmsEx;
   }
 }
-
-

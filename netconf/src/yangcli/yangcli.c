@@ -2361,6 +2361,16 @@ static status_t
         }
     }
 
+    /* get the --dump-session parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_EX_MOD, YANGCLI_DUMP_SESSION);
+    if (parm && parm->res == NO_ERR) {
+        /* save to the connect_valset parmset */
+        res = add_clone_parm(parm, connect_valset);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
     /* get the run-script parameter */
     runscript = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_RUN_SCRIPT);
 

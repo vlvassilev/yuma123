@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
  * Copyright (c) 2012, YumaWorks, Inc., All Rights Reserved.
+ * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
+ * Copyright (c) 2013 - 2016, Transpacket AS, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,6 +48,7 @@ date         init     comment
 #include <fcntl.h>
 #include <netdb.h>
 #include <libssh2.h>
+#include <assert.h>
 
 #include "procdefs.h"
 #include "def_reg.h"
@@ -760,7 +763,7 @@ void
 *             needed
 *   retsid == address of session ID output
 *   getvar_cb == XPath get varbind callback function
-*   protocols_parent == pointer to val_value_t that may contain
+*   params_val == pointer to val_value_t that may contain
 *         a session-specific --protocols variable to set
 *         == NULL if not used
 *
@@ -781,7 +784,7 @@ status_t
                          ncxmod_temp_progcb_t *progcb,
                          ses_id_t *retsid,
                          xpath_getvar_fn_t getvar_fn,
-                         val_value_t *protocols_parent)
+                         val_value_t *params_val)
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
@@ -921,8 +924,8 @@ status_t
         if (transport == SES_TRANSPORT_TCP) {
             /* force base:1.0 framing for TCP */
             ses_set_protocols_requested(scb, NCX_PROTO_NETCONF10);
-        } else if (protocols_parent != NULL) {
-            res = val_set_ses_protocols_parm(scb, protocols_parent);
+        } else if (params_val != NULL) {
+            res = val_set_ses_protocols_parm(scb, params_val);
         }
     }
 
@@ -931,6 +934,31 @@ status_t
             tcp_setup_direct(scb, user, port);
     	} else {
             tcp_setup(scb, user);
+        }
+    }
+
+    scb->dump_output_data=NULL;
+    scb->dump_input_data=NULL;
+    scb->dump_output_timestamps=NULL;
+    scb->dump_input_timestamps=NULL;
+    if (res == NO_ERR) {
+        if (params_val != NULL) {
+            char* str;
+            val_value_t* val;
+            val = val_find_child(params_val,
+                                 NULL,
+                                 "dump-session");
+            if(val!=NULL) {
+                str=malloc(strlen("out")+strlen(VAL_STRING(val)));
+                sprintf(str,"%sout",VAL_STRING(val));
+                scb->dump_output_data=fopen(str,"w");
+                assert(scb->dump_output_data!=NULL);
+
+                str=malloc(strlen("out.ts")+strlen(VAL_STRING(val)));
+                sprintf(str,"%sout.ts",VAL_STRING(val));
+                scb->dump_output_timestamps=fopen(str,"w");
+                assert(scb->dump_output_timestamps!=NULL);
+            }
         }
     }
 
@@ -958,7 +986,6 @@ status_t
     return res;
 
 }  /* mgr_ses_new_session */
-
 
 /********************************************************************
 * FUNCTION mgr_ses_free_session
@@ -1488,6 +1515,20 @@ status_t
                 if (LOGDEBUG3) {
                     for (i=0; i < buff->bufflen; i++) {
                         log_debug3("%c", buff->buff[i]);
+                    }
+                }
+                if (scb->dump_output_data != NULL) {
+                    if(fwrite(buff->buff,buff->bufflen,1,scb->dump_output_data) != 1) {
+                        assert(0);
+                    }
+                }
+                if (scb->dump_output_timestamps != NULL) {
+                    struct timespec tp;
+                    char buf[]="0123456789.123456789 0123456789\n";
+                    ret = clock_gettime(CLOCK_MONOTONIC, &tp);
+                    sprintf(buf,"%010u.%09u %d\n",(unsigned int)tp.tv_sec,(unsigned int)tp.tv_nsec, (unsigned int)buff->bufflen);
+                    if (ret || (fwrite (buf, strlen(buf), 1, scb->dump_output_timestamps) != 1)) {
+                        assert(0);
                     }
                 }
             } else {

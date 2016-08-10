@@ -343,6 +343,12 @@ typedef struct ses_cb_t_ {
      */
     struct agt_acm_cache_t_ *acm_cache;
 
+    /* session dump files */
+    FILE* dump_output_data;
+    FILE* dump_output_timestamps;
+    FILE* dump_input_data;
+    FILE* dump_input_timestamps;
+
 } ses_cb_t;
 
 

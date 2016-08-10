@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2012 - 2016, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -36,42 +37,15 @@ date	     init     comment
 //#include <sys/time.h>
 #include <xmlstring.h>
 #include "libtecla.h"
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_mgr_io
 #include "mgr_io.h"
-#endif
-
-#ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
-#endif
-
-#ifndef _H_runstack
 #include "runstack.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -206,7 +180,6 @@ extern "C" {
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
 #define YANGCLI_ID          (const xmlChar *)"id"
 #define YANGCLI_INDEX       (const xmlChar *)"index"
-#define YANGCLI_KEEP_SESSION_MODEL_COPIES_AFTER_COMPILATION    (const xmlChar *)"keep-session-model-copies-after-compilation"
 #define YANGCLI_LOAD        (const xmlChar *)"load"
 #define YANGCLI_LOCK_TIMEOUT (const xmlChar *)"lock-timeout"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
@@ -248,6 +221,14 @@ extern "C" {
 #define YANGCLI_VARS        (const xmlChar *)"vars"
 #define YANGCLI_VARTYPE     (const xmlChar *)"vartype"
 #define YANGCLI_WITH_DEFAULTS  (const xmlChar *)"with-defaults"
+
+/*
+ * matches augmented parm clauses in yangcli container
+ * from yangcli-ex.yang
+ */
+
+#define YANGCLI_KEEP_SESSION_MODEL_COPIES_AFTER_COMPILATION    (const xmlChar *)"keep-session-model-copies-after-compilation"
+#define YANGCLI_DUMP_SESSION  (const xmlChar *)"dump-session"
 
 /* YANGCLI local RPC commands */
 #define YANGCLI_ALIAS   (const xmlChar *)"alias"

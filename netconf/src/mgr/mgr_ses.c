@@ -958,6 +958,16 @@ status_t
                 sprintf(str,"%sout.ts",VAL_STRING(val));
                 scb->dump_output_timestamps=fopen(str,"w");
                 assert(scb->dump_output_timestamps!=NULL);
+
+                str=malloc(strlen("in")+strlen(VAL_STRING(val)));
+                sprintf(str,"%sin",VAL_STRING(val));
+                scb->dump_input_data=fopen(str,"w");
+                assert(scb->dump_input_data!=NULL);
+
+                str=malloc(strlen("in.ts")+strlen(VAL_STRING(val)));
+                sprintf(str,"%sin.ts",VAL_STRING(val));
+                scb->dump_input_timestamps=fopen(str,"w");
+                assert(scb->dump_input_timestamps!=NULL);
             }
         }
     }
@@ -1407,6 +1417,24 @@ ssize_t
                        scb->sid,
                        mscb->agtsid);
         }
+        if (scb->dump_input_data != NULL) {
+            if(fwrite(buff,ret,1,scb->dump_input_data) != 1) {
+                assert(0);
+            }
+            fflush(scb->dump_input_data);
+        }
+
+        if (scb->dump_input_timestamps != NULL) {
+            int ret;
+            struct timespec tp;
+            char tsbuf[]="0123456789.123456789 0123456789\n";
+            ret = clock_gettime(CLOCK_MONOTONIC, &tp);
+            sprintf(tsbuf,"%010u.%09u %d\n",(unsigned int)tp.tv_sec,(unsigned int)tp.tv_nsec, (unsigned int)ret);
+            if (ret || (fwrite (tsbuf, strlen(tsbuf), 1, scb->dump_input_timestamps) != 1)) {
+                assert(0);
+            }
+            fflush(scb->dump_input_timestamps);
+        }
     } else {
         if (LOGDEBUG2) {
             log_debug2("\nmgr_ses: channel closed on session %u (a:%u)", 
@@ -1518,9 +1546,10 @@ status_t
                     }
                 }
                 if (scb->dump_output_data != NULL) {
-                    if(fwrite(buff->buff,buff->bufflen,1,scb->dump_output_data) != 1) {
+                    if(fwrite(&buff->buff[buff->buffstart],buff->bufflen,1,scb->dump_output_data) != 1) {
                         assert(0);
                     }
+                    fflush(scb->dump_output_data);
                 }
                 if (scb->dump_output_timestamps != NULL) {
                     struct timespec tp;
@@ -1530,6 +1559,7 @@ status_t
                     if (ret || (fwrite (buf, strlen(buf), 1, scb->dump_output_timestamps) != 1)) {
                         assert(0);
                     }
+                    fflush(scb->dump_output_timestamps);
                 }
             } else {
                 res = ERR_NCX_OPERATION_FAILED;

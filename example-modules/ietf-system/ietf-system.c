@@ -118,6 +118,81 @@ static status_t
     return NO_ERR;
 }
 
+static status_t
+    y_ietf_system_system_hostname_edit (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        /* description-stmt validation here */
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+        case OP_EDITOP_CREATE:
+        case OP_EDITOP_DELETE:
+            if(newval!=NULL) {
+                char* buf;
+                int ret;
+                buf=malloc(strlen("hostname ") + strlen(VAL_STRING(newval))+1);
+                sprintf(buf,"hostname %s", VAL_STRING(newval));
+                printf("Setting /system/hostname to %s - cmd=%s\n", VAL_STRING(newval), buf);
+                ret=system(buf);
+                if(ret != 0) {
+                    errorval=newval;
+                    errorstr="Can't set hostname. Are you sure your server is running as root?"; /* strdup(strerror(errno)); */
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
+            break;
+        default:
+            assert(0);
+        }
+
+        break;
+    case AGT_CB_ROLLBACK:
+        /* undo device instrumentation here */
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+
+    return res;
+}
+
 
 /* The 3 mandatory callback functions: y_ietf_system_init, y_ietf_system_init2, y_ietf_system_cleanup */
 
@@ -145,6 +220,15 @@ status_t
         "system-state");
     if (system_state_obj == NULL) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/hostname",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        y_ietf_system_system_hostname_edit);
+    if (res != NO_ERR) {
+        return res;
     }
 
     res = agt_rpc_register_method(

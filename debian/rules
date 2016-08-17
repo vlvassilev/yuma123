@@ -18,7 +18,6 @@ override_dh_installdocs:
 	dh_installdocs  -plibyuma$(LIB_VERSION)
 	dh_installdocs --link-doc=libyuma$(LIB_VERSION) \
 	  -plibyuma-dev \
-	  -plibyuma$(LIB_VERSION)-dbg \
 	  -pnetconfd \
 	  -pyangcli \
 	  -plibyangrpc$(LIB_VERSION) \

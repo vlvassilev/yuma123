@@ -20,6 +20,11 @@ module netconfd-ex {
   description
     "This module contains extra parameters for netconfd";
 
+  revision 2016-08-08 {
+    description
+      "Fixed spelling errors.";
+  }
+
   revision 2016-08-02 {
     description
       "Restored max-sessions";
@@ -38,7 +43,7 @@ module netconfd-ex {
      leaf ncxserver-sockname {
        description
          "Overrides the default /tmp/ncxserver.sock UNIX
-          socket name netconfd listens on for incomming connections.
+          socket name netconfd listens on for incoming connections.
           You have to add corresponding entry to /etc/ssh/sshd_config e.g.:
           ...
           Port 1830
@@ -51,7 +56,7 @@ module netconfd-ex {
      leaf tcp-direct-address {
        description
          "The server will use this local TCP address to listen for
-          incomming connections instead of the default
+          incoming connections instead of the default
           /tmp/ncxserver.sock UNIX socket. By default if only
           tcp-direct-port is specified the addressed used is
           localhost.";
@@ -62,7 +67,7 @@ module netconfd-ex {
      leaf tcp-direct-port {
        description
          "The server will use this local TCP port to listen for
-          incomming connections instead of the default
+          incoming connections instead of the default
           /tmp/ncxserver.sock UNIX socket. tcp-direct-address controls
           the server bind address.";
 

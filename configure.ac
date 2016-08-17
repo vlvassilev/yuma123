@@ -82,11 +82,12 @@ AC_CONFIG_FILES([
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangdump/Makefile
-        netconf/test/Makefile
-        netconf/test/sys-test/Makefile
-        netconf/test/integ-tests/Makefile
-        netconf/test/sys-test-python/Makefile
         netconf/man/Makefile
 ])
+# Test framework
+#        netconf/test/Makefile
+#        netconf/test/sys-test/Makefile
+#        netconf/test/integ-tests/Makefile
+#        netconf/test/sys-test-python/Makefile
 
 AC_OUTPUT

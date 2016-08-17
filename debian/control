@@ -3,8 +3,8 @@ Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 9), autoconf, dh-autoreconf, autotools-dev, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
-Standards-Version: 3.9.6
-Homepage: http://transpacket.com/
+Standards-Version: 3.9.8
+Homepage: https://sourceforge.net/projects/yuma123
 
 Package: libyuma-base
 Section: libs
@@ -20,7 +20,6 @@ Description: Netconf configuration script, YANG models and documentation
  models for the netconf an YANG libraries, agents and
  applications. YANG models contain a formal description of the data that can be
  managed using netconf and applications.
- .
 
 Package: libyuma2
 Section: libs
@@ -37,24 +36,11 @@ Description: Netconf/YANG library
  sending, receiving, decoding, and manipulation of the netconf requests
  and responses.
 
-Package: libyuma2-dbg
-Section: debug
-Priority: extra
-Architecture: any
-Depends: libyuma2 (=${binary:Version}), ${misc:Depends}
-Description: Netconf/YANG library debug
- The Netconf protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
- .
- This package contains the debug symbols for the yuma123 libyuma libraries.
- .
-
 Package: libyuma-dev
 Section: libdevel
 Architecture: any
 Provides: libyuma-dev
-Depends: libc6-dev, libyuma2 (=${binary:Version}), libwrap0-dev, libssl-dev, procps,
+Depends: libwrap0-dev, libssl-dev, procps,
          ${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework
@@ -67,7 +53,7 @@ Description: Netconf/YANG development files
 
 Package: netconfd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, debconf, lsb-base (>= 3.2-13), libyuma-base, libyuma2
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, debconf, lsb-base, libyuma-base, libyuma2
 Description: netconf (RFC-6241) agent
  Netconf provides a framework
  for the exchange of management information between agents (servers)
@@ -87,6 +73,28 @@ Description: netconf/YANG command line client application
  The yuma123 yangcli application allows the user to issue netconf requests
  to agents according to the specific YANG models of the agents.
 
+Package: netconfd-module-ietf-interfaces
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
+Description: SIL module for netconfd implementing ietf-interfaces.yang
+ The Netconf protocol and YANG modeling language provide a framework
+ for the exchange of management information between agents (servers)
+ and clients.
+ .
+ The yuma123 netconfd module ietf-interfaces implements the functionality
+ modeled in ietf-interfaces.yang using some common command line tools.
+
+Package: netconfd-module-ietf-system
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
+Description: SIL module for netconfd implementing ietf-system.yang
+ The Netconf protocol and YANG modeling language provide a framework
+ for the exchange of management information between agents (servers)
+ and clients.
+ .
+ The yuma123 netconfd module ietf-interfaces implements the functionality
+ modeled in ietf-system.yang using some common command line tools.
+
 Package: libyangrpc2
 Section: libs
 Architecture: any
@@ -101,24 +109,10 @@ Description: Netconf/YANG library for simple manager clients
  The yuma123 yangrpc library contains common functions for the construction,
  sending, receiving, decoding, and manipulation of the netconf requests
  and responses used on simple manager clients.
-
-Package: libyangrpc2-dbg
-Section: debug
-Priority: extra
-Architecture: any
-Depends: libyangrpc2 (=${binary:Version}), ${misc:Depends}
-Description: Netconf/YANG library debug
- The Netconf protocol and YANG modeling language provide a framework
- for the exchange of management information between agents (servers)
- and clients.
- .
- This package contains the debug symbols for the yuma123 libyangrpc library.
- .
-
 Package: libyangrpc-dev
 Section: libdevel
 Architecture: any
-Provides: libyuma-dev
+Provides: libyangrpc-dev
 Depends: libc6-dev, libyangrpc2 (=${binary:Version}), libwrap0-dev, libssl-dev, procps,
          ${misc:Depends}
 Description: Netconf/YANG development files
@@ -129,3 +123,5 @@ Description: Netconf/YANG development files
  The yuma123 libyangrpc development files include the library headers, static
  libraries, and documentation needed for development of custom netconf/YANG
  applications.
+
+

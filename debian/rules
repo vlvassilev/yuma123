@@ -13,11 +13,6 @@ override_dh_auto_configure:
 	  --enable-shared --with-cflags="$(CFLAGS)" \
 	  --with-ldflags="$(LDFLAGS)"
 
-override_dh_strip:
-	dh_strip -plibyuma$(LIB_VERSION) --dbg-package=libyuma$(LIB_VERSION)-dbg
-	dh_strip -plibyangrpc$(LIB_VERSION) --dbg-package=libyangrpc$(LIB_VERSION)-dbg
-	dh_strip
-
 override_dh_installdocs:
 	dh_installdocs  -plibyuma-base
 	dh_installdocs  -plibyuma$(LIB_VERSION)
@@ -28,4 +23,8 @@ override_dh_installdocs:
 	  -pyangcli \
 	  -plibyangrpc$(LIB_VERSION) \
 	  -plibyangrpc-dev \
-	  -plibyangrpc$(LIB_VERSION)-dbg
+	  -pnetconfd-module-ietf-interfaces \
+	  -pnetconfd-module-ietf-system
+
+override_dh_makeshlibs:
+	dh_makeshlibs -Xhelloworld -Xtoaster -Xietf-interfaces -Xietf-system

@@ -193,7 +193,6 @@ static status_t
     return res;
 }
 
-
 /* The 3 mandatory callback functions: y_ietf_system_init, y_ietf_system_init2, y_ietf_system_cleanup */
 
 status_t

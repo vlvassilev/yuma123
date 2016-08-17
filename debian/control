@@ -109,6 +109,7 @@ Description: Netconf/YANG library for simple manager clients
  The yuma123 yangrpc library contains common functions for the construction,
  sending, receiving, decoding, and manipulation of the netconf requests
  and responses used on simple manager clients.
+
 Package: libyangrpc-dev
 Section: libdevel
 Architecture: any

@@ -44,8 +44,6 @@ sub yangcli {
 
     $res = yangrpc::rpc($conn,$rpc_val,$reply_val);
 
-    $res = yangrpc::rpc($conn,$rpc_val,$reply_val);
-
     $res = yuma::val_make_serialized_string($reply_val, 5, $reply_xml_str);
 
     my $parser = XML::LibXML->new();

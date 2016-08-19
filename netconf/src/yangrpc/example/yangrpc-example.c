@@ -8,7 +8,7 @@
 int main(int argc, char* argv[])
 {
     status_t res;
-    yangrpc_cb_t *yangrpc_cb;
+    yangrpc_cb_ptr_t yangrpc_cb_ptr;
     ncx_module_t * ietf_netconf_mod;
     obj_template_t* rpc_obj;
     obj_template_t* input_obj;
@@ -20,9 +20,10 @@ int main(int argc, char* argv[])
     val_value_t* type_meta_val;
     val_value_t* select_meta_val;
 
-    res = yangrpc_init(argc, argv);
+    res = yangrpc_init(NULL);
     assert(res==NO_ERR);
-    yangrpc_cb = yangrpc_connect("127.0.0.1"/*server*/, 830/*port*/, "vladimir"/*user*/,""/*password*/,"/home/vladimir/.ssh/id_rsa.pub"/*public_key*/, "/home/vladimir/.ssh/id_rsa"/*private_key*/);
+    res = yangrpc_connect("127.0.0.1"/*server*/, 830/*port*/, "vladimir"/*user*/,""/*password*/,"/home/vladimir/.ssh/id_rsa.pub"/*public_key*/, "/home/vladimir/.ssh/id_rsa"/*private_key*/, NULL, &yangrpc_cb_ptr);
+    assert(res==NO_ERR);
 
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
     assert(res==NO_ERR);
@@ -46,7 +47,7 @@ int main(int argc, char* argv[])
     val_add_meta(type_meta_val, filter_val);
     val_add_child(filter_val, request_val);
 
-    res = yangrpc_exec(yangrpc_cb, request_val, &reply_val);
+    res = yangrpc_exec(yangrpc_cb_ptr, request_val, &reply_val);
     assert(res==0);
 
     val_dump_value(reply_val,0);
@@ -58,8 +59,9 @@ int main(int argc, char* argv[])
         val_dump_value(interfaces_state_val,0);
     }
 
+    val_free_value(request_val);
     val_free_value(reply_val);
 
-    yangrpc_close(yangrpc_cb);
+    yangrpc_close(yangrpc_cb_ptr);
     return 0;
 }

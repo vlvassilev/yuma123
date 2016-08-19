@@ -15,27 +15,28 @@ static int yangrpc_init_done = 0;
 static PyObject *
 py_yangrpc_connect(PyObject *self, PyObject *args)
 {
-    int res;
+    status_t res;
     char* server;
     int port;
     char* user;
     char* password;
     char* private_key;
     char* public_key;
-    yangrpc_cb_t *yangrpc_cb;
+    yangrpc_cb_ptr_t yangrpc_cb_ptr;
 
 
     if (!PyArg_ParseTuple(args, (char *) "sissss:yangrpc_yangrpc_connect", &server,&port,&user,&password,&public_key,&private_key)) {
         return (NULL);
     }
     if(yangrpc_init_done==0) {
-        yangrpc_init(0,NULL);
+        res=yangrpc_init(NULL);
+        assert(res==NO_ERR);
         yangrpc_init_done=1;
     }
 
-    yangrpc_cb = yangrpc_connect(server, port, user, password, NULL/*public_key*/, NULL/*private_key*/);
+    res = yangrpc_connect(server, port, user, password, NULL/*public_key*/, NULL/*private_key*/, NULL, &yangrpc_cb_ptr);
 
-    return Py_BuildValue("O", PyCapsule_New(yangrpc_cb, "yangrpc_cb_t_ptr", NULL));
+    return Py_BuildValue("O", PyCapsule_New(yangrpc_cb_ptr, "yangrpc_cb_ptr_t", NULL));
 }
 
 static PyObject *
@@ -43,22 +44,22 @@ py_yangrpc_exec(PyObject *self, PyObject *args)
 {
     PyObject *py_retval;
 
-    PyObject *py_yangrpc_cb;
+    PyObject *py_yangrpc_cb_ptr;
     PyObject *py_rpc_val;
 
     int res;
-    yangrpc_cb_t *yangrpc_cb;
+    yangrpc_cb_ptr_t yangrpc_cb_ptr;
     val_value_t  *rpc_val;
     val_value_t  *reply_val;
 
-    if (!PyArg_ParseTuple(args, (char *) "OO:yangrpc_yangrpc_exec", &py_yangrpc_cb, &py_rpc_val)) {
+    if (!PyArg_ParseTuple(args, (char *) "OO:yangrpc_yangrpc_exec", &py_yangrpc_cb_ptr, &py_rpc_val)) {
         return (NULL);
     }
 
-    yangrpc_cb = (val_value_t*)PyCapsule_GetPointer(py_yangrpc_cb, "yangrpc_cb_t_ptr");
+    yangrpc_cb_ptr = (val_value_t*)PyCapsule_GetPointer(py_yangrpc_cb_ptr, "yangrpc_cb_ptr_t");
     rpc_val = (val_value_t*)PyCapsule_GetPointer(py_rpc_val, "val_value_t_ptr");
 
-    res = yangrpc_exec(yangrpc_cb, rpc_val, &reply_val);
+    res = yangrpc_exec(yangrpc_cb_ptr, rpc_val, &reply_val);
 
     py_retval = PyTuple_New(2);
     PyTuple_SetItem(py_retval, 0, Py_BuildValue("i", (int)res));
@@ -71,21 +72,21 @@ py_yangrpc_parse_cli(PyObject *self, PyObject *args)
 {
     PyObject *py_retval;
 
-    PyObject *py_yangrpc_cb;
+    PyObject *py_yangrpc_cb_ptr;
     PyObject *py_rpc_val;
 
     int res;
-    yangrpc_cb_t *yangrpc_cb;
+    yangrpc_cb_ptr_t *yangrpc_cb_ptr;
     val_value_t  *rpc_val;
     char* cmd;    
 
-    if (!PyArg_ParseTuple(args, (char *) "Os:yangrpc_yangrpc_parse_cli", &py_yangrpc_cb, &cmd)) {
+    if (!PyArg_ParseTuple(args, (char *) "Os:yangrpc_yangrpc_parse_cli", &py_yangrpc_cb_ptr, &cmd)) {
         return (NULL);
     }
 
-    yangrpc_cb = (val_value_t*)PyCapsule_GetPointer(py_yangrpc_cb, "yangrpc_cb_t_ptr");
+    yangrpc_cb_ptr = (val_value_t*)PyCapsule_GetPointer(py_yangrpc_cb_ptr, "yangrpc_cb_ptr_t");
 
-    res = yangrpc_parse_cli(yangrpc_cb, cmd, &rpc_val);
+    res = yangrpc_parse_cli(yangrpc_cb_ptr, cmd, &rpc_val);
 
     py_retval = PyTuple_New(2);
     PyTuple_SetItem(py_retval, 0, Py_BuildValue("i", (int)res));

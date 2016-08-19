@@ -67,6 +67,7 @@
 #include "yangcli_uservars.h"
 #include "yangcli_util.h"
 #include "yangcli_globals.h"
+#include "yangcli_wordexp.h"
 
 #include "yangrpc.h"
 
@@ -1842,15 +1843,25 @@ static status_t
 
 } /* process_cli_input */
 
-int yangrpc_init(int argc, char* argv[])
+status_t yangrpc_init(char* args)
 {
+    int ret;
     obj_template_t       *obj;
     status_t              res;
     log_debug_t           log_level;
-
+    yangcli_wordexp_t p;
+    char* prog_w_args;
 #ifdef YANGCLI_DEBUG
     int   i;
 #endif
+    prog_w_args = malloc(strlen("prog-placeholder ") + ((args==NULL)?0:strlen(args)) + 1);
+    sprintf(prog_w_args, "prog-placeholder %s",(args==NULL)?"":args);
+    ret = yangcli_wordexp(prog_w_args, &p, 0);
+    free(prog_w_args);
+    if(ret!=0) {
+        perror(args);
+        return ERR_CMDLINE_OPT_UNKNOWN;
+    }
 
     /* set the default debug output level */
     log_level = LOG_DEBUG_INFO;
@@ -1900,13 +1911,13 @@ int yangrpc_init(int argc, char* argv[])
      * to be processed.  No module can get its internal config
      * until the NCX module parser and definition registry is up
      */
-    res = ncx_init(NCX_SAVESTR, log_level, TRUE, NULL, argc, argv);
+    res = ncx_init(NCX_SAVESTR, log_level, TRUE, NULL, p.we_wordc, p.we_wordv);
     if (res != NO_ERR) {
         return res;
     }
 
 #ifdef YANGCLI_DEBUG
-    if (argc>1 && LOGDEBUG2) {
+    if (p.we_wordc>1 && LOGDEBUG2) {
         log_debug2("\nCommand line parameters:");
         for (i=0; i<argc; i++) {
             log_debug2("\n   arg%d: %s", i, argv[i]);
@@ -2368,7 +2379,7 @@ static void
 
 } /* check_module_capabilities */
 
-yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key)
+status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key, char* extra_args, yangrpc_cb_ptr_t* yangrpc_cb_ptr)
 {
     char* server_arg;
     char* port_arg;
@@ -2376,8 +2387,10 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     char* password_arg;
     char* public_key_arg;
     char* private_key_arg;
-    char* argv[]={"exec-name-dummy", "--server=?", "--port=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
-    int argc=sizeof(argv)/sizeof(char*);
+    char* mandatory_argv[]={"exec-name-dummy", "--server=?", "--port=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
+    int mandatory_argc=sizeof(mandatory_argv)/sizeof(char*);
+    char** argv;
+    int argc;
     server_cb_t          *server_cb;
     ses_cb_t             *ses_cb;
     status_t res;
@@ -2386,13 +2399,32 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     dlq_hdr_t             savedevQ;
     xmlChar              *savestr, *revision;
     uint32                modlen;
+    int                   ret;
+    yangcli_wordexp_t     p;
+
+    if(extra_args!=NULL) {
+        ret = yangcli_wordexp(extra_args, &p, 0);
+        if(ret!=0) {
+            perror(extra_args);
+            return ERR_CMDLINE_OPT_UNKNOWN;
+        }
+        argc = mandatory_argc+p.we_wordc;
+        argv = malloc(argc*sizeof(char*));
+        memcpy(argv,mandatory_argv,mandatory_argc*sizeof(char*));
+        memcpy(argv+mandatory_argc,p.we_wordv,p.we_wordc*sizeof(char*));
+        yangcli_wordfree(&p);
+    } else {
+        argc = mandatory_argc;
+        argv = malloc(argc*sizeof(char*));
+        memcpy(argv,mandatory_argv,argc*sizeof(char*));
+    }
 
     dlq_createSQue(&savedevQ);
 
     /* create a default server control block */
     server_cb = new_server_cb(YANGCLI_DEF_SERVER);
     if (server_cb==NULL) {
-        return NULL;
+        return ERR_INTERNAL_PTR;
     }
 
     argc=1;
@@ -2436,7 +2468,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);
     if (res != NO_ERR) {
-        return NULL;
+        return res;
     }
 
     /* check print version */
@@ -2445,8 +2477,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
         if (res == NO_ERR) {
             log_stdout("\nyangcli version %s\n", versionbuffer);
         } else {
-            SET_ERROR(res);
-            return NULL;
+            return res;
         }
     }
 
@@ -2457,7 +2488,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
 
     /* check quick exit */
     if (helpmode || versionmode) {
-        return NULL;
+        return ERR_NCX_SKIPPED;
     }
 
     /* set any server control block defaults which were supplied
@@ -2469,7 +2500,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     if (autoload) {
         res = load_core_schema();
         if (res != NO_ERR) {
-            return NULL;
+            return res;
         }
     }
 
@@ -2524,19 +2555,19 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     /* discard any deviations loaded from the CLI or conf file */
     ncx_clean_save_deviationsQ(&savedevQ);
     if (res != NO_ERR) {
-        return NULL;
+        return res;
     }
 
     /* load the system (read-only) variables */
     res = init_system_vars(server_cb);
     if (res != NO_ERR) {
-        return NULL;
+        return res;
     }
 
     /* load the system config variables */
     res = init_config_vars(server_cb);
     if (res != NO_ERR) {
-        return NULL;
+        return res;
     }
 
     /* initialize the module library search result queue */
@@ -2550,7 +2581,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
         res = ncxmod_find_all_modules(&modlibQ);
         log_set_debug_level(dbglevel);
         if (res != NO_ERR) {
-            return NULL;
+            return res;
         }
     }
 #if 0
@@ -2558,7 +2589,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     if (autoaliases) {
         res = load_aliases(aliases_file);
         if (res != NO_ERR) {
-            return NULL;
+            return res;
         }
     }
 
@@ -2566,7 +2597,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
     if (autouservars) {
         res = load_uservars(server_cb, uservars_file);
         if (res != NO_ERR) {
-            return NULL;
+            return res;
         }
     }
 
@@ -2614,7 +2645,7 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
         while(1) {
             res = ses_accept_input(scb);
             if(res!=NO_ERR) {
-                return NULL;
+                return res;
             }
             if(mgr_ses_process_first_ready()) {
                 break;
@@ -2629,8 +2660,8 @@ yangrpc_cb_t* yangrpc_connect(char* server, uint16_t port, char* user, char* pas
 
     }
 
-
-    return (yangrpc_cb_t*)server_cb;
+    *yangrpc_cb_ptr = (yangrpc_cb_ptr_t)server_cb;
+    return NO_ERR;
 }
 
 val_value_t* global_reply_val;
@@ -2716,7 +2747,7 @@ void
 }  /* yangcli_reply_handler_ */
 
 #include "yangcli_cmd.h"
-status_t yangrpc_parse_cli(yangrpc_cb_t *yangrpc_cb, char* original_line, val_value_t** request_val)
+status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line, val_value_t** request_val)
 {
 
 
@@ -2730,7 +2761,7 @@ status_t yangrpc_parse_cli(yangrpc_cb_t *yangrpc_cb, char* original_line, val_va
     char* line;
 
     server_cb_t* server_cb;
-    server_cb = (server_cb_t*)yangrpc_cb;
+    server_cb = (server_cb_t*)yangrpc_cb_ptr;
 
     line = strdup(original_line);
 #ifdef DEBUG
@@ -2880,13 +2911,13 @@ status_t yangrpc_parse_cli(yangrpc_cb_t *yangrpc_cb, char* original_line, val_va
     return res;
 }
 
-status_t yangrpc_exec(yangrpc_cb_t *yangrpc_cb, val_value_t* request_val, val_value_t** reply_val)
+status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val, val_value_t** reply_val)
 {
     status_t res;
     ses_cb_t* scb;
     mgr_rpc_req_t         *req;
     server_cb_t* server_cb;
-    server_cb = (server_cb_t*)yangrpc_cb;
+    server_cb = (server_cb_t*)yangrpc_cb_ptr;
 
     scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
@@ -2926,6 +2957,6 @@ status_t yangrpc_exec(yangrpc_cb_t *yangrpc_cb, val_value_t* request_val, val_va
     return NO_ERR;
 }
 
-void yangrpc_close(yangrpc_cb_t *yangrpc_cb)
+void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)
 {
 }

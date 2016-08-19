@@ -40,7 +40,7 @@ static void register_hooks(apr_pool_t *pool);
 static int example_handler(request_rec *r);
 
 typedef struct {
-    yangrpc_cb_t* yangrpc_cb;
+    yangrpc_cb_ptr_t yangrpc_cb_ptr;
 } my_svr_cfg ;
 
 static void* my_create_svr_conf(apr_pool_t* pool, server_rec* svr)
@@ -48,7 +48,7 @@ static void* my_create_svr_conf(apr_pool_t* pool, server_rec* svr)
     my_svr_cfg* svr_cfg = (my_svr_cfg*)apr_pcalloc(pool, sizeof(my_svr_cfg));
     /* Set up the default values for fields of svr */
 
-    svr_cfg->yangrpc_cb=NULL;
+    svr_cfg->yangrpc_cb_ptr=NULL;
     return svr_cfg;
 }
 
@@ -356,7 +356,7 @@ static int edit_config(request_rec *r)
         edit_config_rpc_val = NULL;
         edit_config_rpc_reply_val=NULL;
     } else {
-        res = yangrpc_exec(svr_cfg->yangrpc_cb, edit_config_rpc_val, &edit_config_rpc_reply_val);
+        res = yangrpc_exec(svr_cfg->yangrpc_cb_ptr, edit_config_rpc_val, &edit_config_rpc_reply_val);
         assert(res==NO_ERR);
     }
 
@@ -365,7 +365,7 @@ static int edit_config(request_rec *r)
         assert(obj_is_rpc(commit_rpc_obj));
         commit_rpc_val = val_new_value();
         val_init_from_template(commit_rpc_val, commit_rpc_obj);
-        res = yangrpc_exec(svr_cfg->yangrpc_cb, commit_rpc_val, &commit_rpc_reply_val);
+        res = yangrpc_exec(svr_cfg->yangrpc_cb_ptr, commit_rpc_val, &commit_rpc_reply_val);
         assert(res==NO_ERR);
     } else {
         commit_rpc_val=NULL;
@@ -426,15 +426,14 @@ static int example_handler(request_rec *r)
 
     svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
 
-    if(svr_cfg->yangrpc_cb == NULL) {
+    if(svr_cfg->yangrpc_cb_ptr == NULL) {
         int res;
-        char* argv[] = {"blah"};
-        int argc = 1;
-        res = yangrpc_init(argc, argv);
+        char* arg = "--keep-session-model-copies-after-compilation=false";
+        res = yangrpc_init(arg);
         assert(res==NO_ERR);
 
-        svr_cfg->yangrpc_cb = yangrpc_connect(server_address, server_port, username, password, public_key_path, private_key_path);
-        if(svr_cfg->yangrpc_cb==NULL) {
+        res = yangrpc_connect(server_address, server_port, username, password, public_key_path, private_key_path, NULL /*extra_args*/, &svr_cfg->yangrpc_cb_ptr);
+        if(res!=NO_ERR) {
             assert(0);
             return OK;
         }
@@ -468,7 +467,7 @@ static int example_handler(request_rec *r)
     val_add_child(filter_val, request_val);
 
 
-    res = yangrpc_exec(svr_cfg->yangrpc_cb, request_val, &reply_val);
+    res = yangrpc_exec(svr_cfg->yangrpc_cb_ptr, request_val, &reply_val);
     assert(res==NO_ERR);
 
     {

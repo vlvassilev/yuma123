@@ -2753,7 +2753,7 @@ status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line,
 
     obj_template_t        *rpc, *input;
     val_value_t           *reqdata = NULL, *valset = NULL, *parm;
-    xmlChar               *newline, *useline = NULL;
+    xmlChar               *newline = NULL, *useline = NULL;
     uint32                 len, linelen;
     status_t               res = NO_ERR;
     boolean                shut = FALSE;

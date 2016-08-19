@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangcli 1 "July 5, 2016" Linux "yangcli 2.5"
+.TH yangcli 1 "August 20, 2016" Linux "yangcli 2.9"
 .SH NAME
 yangcli \- YANG-based NETCONF-over-SSH client application
 
@@ -206,6 +206,17 @@ to STDOUT or a log file.
           JSON format.
 
 .fi
+.IP --\fBdump-session\fP=<filespec-base>
+Filespec base for dumping the raw netconf
+traffic data and timestamp information. Example:
+.nf
+       --dump-session=/tmp/ses- The following files are created:
+        * /tmp/ses-out - session data sent to server
+        * /tmp/ses-in - session data received from server
+        * /tmp/ses-out.ts - size and timestamp for data transmitted
+        * /tmp/ses-in.ts - size and timestamp for data received
+.fi
+
 .IP --\fBecho-replies\fP=boolean
 Allow RPC replies to be echoes to the log or STDOUT.
 
@@ -635,6 +646,7 @@ type of message if any bugs are detected at runtime:
 .fi
 .SH AUTHORS
 Andy Bierman, <andy at netconfcentral dot org>
+
 Vladimir Vassilev, <vladimir at transpacket dot com>
 
 .SH SEE ALSO

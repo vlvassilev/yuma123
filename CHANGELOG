@@ -4,7 +4,7 @@ yuma123 (2.9) stable; urgency=medium
   * yangrpc API refactored for stability allowing new options passed as yangcli  parameter string
   * Added dump-session yangcli parameter
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Sat, 20 Aug 2016 01:16:38 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sat, 20 Aug 2016 11:36:10 +0200
 
 yuma123 (2.8+dfsg) stable; urgency=medium
 

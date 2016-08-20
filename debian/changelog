@@ -1,5 +1,6 @@
-yuma123 (2.9-0) UNRELEASED; urgency=low
+yuma123 (2.9-0) stable; urgency=low
 
   * Unofficial package.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Wed, 17 Aug 2016 04:19:59 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sat, 20 Aug 2016 01:16:38 +0200
+

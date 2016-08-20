@@ -1,8 +1,10 @@
-yuma123 (2.9) UNRELEASED; urgency=medium
+yuma123 (2.9) stable; urgency=medium
 
-  * TODO
+  * Removed IETF copyrighted MIBs to avoid the complications related to +dfsg releases
+  * yangrpc API refactored for stability allowing new options passed as yangcli  parameter string
+  * Added dump-session yangcli parameter
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Tue, 02 Aug 2016 12:20:15 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sat, 20 Aug 2016 01:16:38 +0200
 
 yuma123 (2.8+dfsg) stable; urgency=medium
 

@@ -1,3 +1,9 @@
+yuma123 (2.10) UNRELEASED; urgency=medium
+
+  * Removed unnecessary libyumancx dependencies on libyumamgr
+
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 22 Aug 2016 20:40:13 +0200
+
 yuma123 (2.9) stable; urgency=medium
 
   * Removed IETF copyrighted MIBs to avoid the complications related to +dfsg releases

@@ -341,7 +341,7 @@ extern boolean
 * RETURNS:
 *    status
 *********************************************************************/
-extern status_t 
+extern status_t
     xml_node_match (const xml_node_t *node,
 		    xmlns_id_t nsid,
 		    const xmlChar *elname,
@@ -1061,6 +1061,28 @@ extern status_t
                       xml_node_t  *xmlnode,
                       boolean nserr,
                       boolean adv);
+
+/********************************************************************
+* FUNCTION xml_skip_subtree
+*
+* Already encountered an error, so advance nodes until the
+* matching start-node is reached or a terminating error occurs
+*   - end of input
+*   - start depth level reached
+*
+* INPUTS:
+*   reader == XmlReader already initialized from File, Memory,
+*             or whatever
+*   startnode  == xml_node_t of the start node of the sub-tree to skip
+* RETURNS:
+*   status of the operation
+* SIDE EFFECTS:
+*   the xmlreader state is advanced until the current node is the
+*   end node of the specified start node or a fatal error occurs
+*********************************************************************/
+status_t
+    xml_skip_subtree (xmlTextReaderPtr reader,
+                          const xml_node_t *startnode);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -1,5 +1,11 @@
+yuma123 (2.10-0) UNRELEASED; urgency=medium
+
+  * 
+
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 22 Aug 2016 20:39:51 +0200
+
 yuma123 (2.9-0) stable; urgency=medium
 
   * Unofficial package
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Sat, 20 Aug 2016 11:36:10 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sat, 20 Aug 2016 11:46:34 +0200

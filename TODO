@@ -1,15 +1,9 @@
 Yuma to-do List (2012-06-26)
 
 This file contains the list of known items not finished in the source code.
-They should be added to the bug tracker.
   -- Docs
     -- Design spec
     -- Doxygen
-  -- Makefiles
-    -- need automated regression tests (make test)
-    -- automake and autoconf need to replace platform/*
-    -- support for Windows needed
-    -- MAC fink packaging not done
   -- yangdump
    -- comments are not translated at all; they are always discarded
    -- ncx:cli YANG convert to unix man files
@@ -26,7 +20,6 @@ They should be added to the bug tracker.
         parms for this functionality is not done
      -- when-stmt auto-gen code is not done
   -- yangcli to-do:
-     -- replace libtecla with readline
      -- command completion for more data types
      -- command completion based on mirror of database
   -- server bugs:

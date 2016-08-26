@@ -25,6 +25,63 @@
 static ncx_module_t *ietf_interfaces_mod;
 static obj_template_t* interfaces_state_obj;
 
+static status_t
+    get_oper_status(ses_cb_t *scb,
+                       getcb_mode_t cbmode,
+                       val_value_t *vir_val,
+                       val_value_t  *dst_val)
+{
+    status_t res;
+    int oper_status = 0;
+    val_value_t *interface_val;
+    val_value_t *name_val;
+    ncx_btype_t btyp;
+    typ_def_t *typdef, *basetypdef;
+    typ_enum_t  *typenum;
+    FILE* f;
+    char cmd_buf[NCX_MAX_LINELEN];
+    char status_buf[NCX_MAX_LINELEN];
+
+    interface_val = vir_val->parent;
+    assert(interface_val);
+
+    name_val = val_find_child(interface_val,
+                              "ietf-interfaces",
+                              "name");
+    assert(name_val);
+
+    /* open the /proc/net/dev file for reading */
+    sprintf(cmd_buf, "cat /sys/class/net/%s/operstate", VAL_STRING(name_val));
+    f = popen(cmd_buf, "r");
+    if (f == NULL) {
+        return errno_to_status();
+    }
+    fgets((char *)status_buf, NCX_MAX_LINELEN, f);
+    fclose(f);
+    strtok(status_buf,"\n");
+    /* check if we have corresponding entry in the oper-status enum */
+    btyp = obj_get_basetype(dst_val->obj);
+    typdef = obj_get_typdef(dst_val->obj);
+    basetypdef = typ_get_base_typdef(typdef);
+    assert(btyp==NCX_BT_ENUM);
+    for (typenum = typ_first_enumdef(basetypdef);
+         typenum != NULL;
+         typenum = typ_next_enumdef(typenum)) {
+        if(0==strcmp((const char *)typenum->name, status_buf)) {
+            res = val_set_simval_obj(dst_val,
+                             dst_val->obj,
+                             (const char *)typenum->name);
+            return res;
+        }
+    }
+    printf("Warning: unknown oper-status %s, reporting \"unknown\" instead.\n", status_buf);
+
+    res = val_set_simval_obj(dst_val,
+                             dst_val->obj,
+                             "unknown");
+    return res;
+}
+
 /*
 
 Inter-|   Receive                                                |  Transmit
@@ -40,12 +97,14 @@ static status_t
     /*objs*/
     obj_template_t* interface_obj;
     obj_template_t* name_obj;
+    obj_template_t* oper_status_obj;
     obj_template_t* statistics_obj;
     obj_template_t* obj;
 
     /*vals*/
     val_value_t* interface_val;
     val_value_t* name_val;
+    val_value_t* oper_status_val;
     val_value_t* statistics_val;
     val_value_t* val;
 
@@ -138,10 +197,27 @@ static status_t
     res = val_gen_index_chain(interface_obj, interface_val);
     assert(res == NO_ERR);
 
+    /* /interfaces-state/interface/oper-state */
+    oper_status_obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "oper-status");
+
+    oper_status_val = val_new_value();
+    assert(oper_status_val);
+
+    val_init_from_template(oper_status_val,
+                           oper_status_obj);
+
+    val_init_virtual(oper_status_val,
+                     get_oper_status,
+                     oper_status_val->obj);
+
+    val_add_child(oper_status_val, interface_val);
+
     /* /interfaces-state/interface/statistics */
     statistics_obj = obj_find_child(interface_obj,
-                                   "ietf-interfaces",
-                                   "statistics");
+                         "ietf-interfaces",
+                         "statistics");
     assert(statistics_obj != NULL);
     statistics_val = val_new_value();
     if (statistics_val == NULL) {
@@ -217,6 +293,7 @@ static status_t
     line = 0;
 
     while (!done) {
+
         if (NULL == fgets((char *)buf, NCX_MAX_LINELEN, f)) {
             done = TRUE;
             continue;

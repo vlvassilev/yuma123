@@ -25,6 +25,125 @@
 static ncx_module_t *ietf_interfaces_mod;
 static obj_template_t* interfaces_state_obj;
 
+static val_value_t* root_prev_val=NULL;
+
+static val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* needle_val)
+{
+    val_value_t* val;
+    char* pathbuff;
+    status_t res = val_gen_instance_id(NULL, needle_val, NCX_IFMT_XPATH1, (xmlChar **) &pathbuff);
+    assert(res==NO_ERR);
+    res = xpath_find_val_target(haystack_root_val, NULL/*mod*/, pathbuff, &val);
+    return val;
+}
+
+static status_t val123_clone_instance_ex(val_value_t* clone_root_val, val_value_t* original_val, val_value_t** return_clone_val, boolean without_non_index_children)
+{
+    status_t res;
+    val_value_t* clone_parent_val;
+    val_value_t* clone_val;
+    val_index_t* index;
+    val_value_t* val;
+
+    if(obj_is_root(original_val->obj) || (original_val->parent==NULL)) {
+        return ERR_NCX_INVALID_VALUE;
+    }
+    if(obj_is_root(original_val->parent->obj)) {
+        clone_parent_val = clone_root_val;
+    } else {
+        res = val123_clone_instance_ex(clone_root_val, original_val->parent, &clone_parent_val, TRUE);
+        if(res != NO_ERR) {
+            return res;
+        }
+    }
+
+    clone_val = val_clone(original_val);
+    assert(clone_val);
+    if(without_non_index_children) {
+        clone_val = val_new_value();
+        val_init_from_template(clone_val, original_val->obj);
+        for(index = val_get_first_index(original_val);
+            index != NULL;
+            index = val_get_next_index(index)) {
+            val = val_clone(index->val);
+            assert(val!=NULL);
+            val_add_child(val, clone_val);
+        }
+    } else {
+        clone_val = val_clone(original_val);
+    }
+    val_add_child(clone_val,clone_parent_val);
+    *return_clone_val = clone_val;
+    return NO_ERR;
+}
+
+status_t val123_clone_instance(val_value_t* root_val, val_value_t* original_val, val_value_t** clone_val)
+{
+    return val123_clone_instance_ex(root_val, original_val, clone_val, FALSE);
+}
+
+void oper_status_update(val_value_t* cur_val)
+{
+    status_t res;
+    val_value_t* prev_val;
+    val_value_t* val;
+    val_value_t* last_change_prev_val;
+    val_value_t* dummy_val;
+    /* compare the oper-status with the corresponding value in the prev root */
+    prev_val = val123_find_match(root_prev_val, cur_val);
+    if(prev_val==NULL) {
+        res=val123_clone_instance(root_prev_val, cur_val, &prev_val);
+        assert(res==NO_ERR);
+    }
+
+    prev_val = val_clone(prev_val);
+
+    if(0!=strcmp(VAL_STRING(cur_val),VAL_STRING(prev_val))) {
+        obj_template_t* last_change_obj;
+        val_value_t* last_change_val;
+        char tstamp_buf[32];
+        tstamp_datetime(tstamp_buf);
+        last_change_val = val_new_value();
+        assert(last_change_val);
+        last_change_obj = obj_find_child(cur_val->parent->obj,"ietf-interfaces","last-change");
+        assert(last_change_obj);
+        val_init_from_template(last_change_val, last_change_obj);
+        val_set_simval_obj(last_change_val, last_change_obj, tstamp_buf);
+
+        val = val123_find_match(root_prev_val, cur_val);
+        val_remove_child(val);
+        val_free_value(val);
+        res=val123_clone_instance(root_prev_val, cur_val, &val);
+
+        last_change_prev_val = val_find_child(val->parent, "ietf-interfaces", "last-change");
+        if(last_change_prev_val) {
+            val_remove_child(last_change_prev_val);
+            val_free_value(last_change_prev_val);
+        }
+        val_add_child(last_change_val, val->parent);
+
+        /* notify */
+        printf("Notification: oper-status changes from %s to %s at %s\n",VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
+        val_free_value(prev_val);
+    }
+}
+
+static status_t
+    get_last_change(ses_cb_t *scb,
+                       getcb_mode_t cbmode,
+                       val_value_t *vir_val,
+                       val_value_t  *dst_val)
+{
+    status_t res;
+    val_value_t* last_change_val;
+    last_change_val = val123_find_match(root_prev_val, dst_val);
+    if(last_change_val==NULL) {
+        return ERR_NCX_SKIPPED;
+    }
+    val_set_simval_obj(dst_val, dst_val->obj, VAL_STRING(last_change_val));
+    return NO_ERR;
+}
+
 static status_t
     get_oper_status(ses_cb_t *scb,
                        getcb_mode_t cbmode,
@@ -68,17 +187,22 @@ static status_t
          typenum != NULL;
          typenum = typ_next_enumdef(typenum)) {
         if(0==strcmp((const char *)typenum->name, status_buf)) {
-            res = val_set_simval_obj(dst_val,
-                             dst_val->obj,
-                             (const char *)typenum->name);
-            return res;
+            break;
         }
     }
-    printf("Warning: unknown oper-status %s, reporting \"unknown\" instead.\n", status_buf);
+
+    if(typenum==NULL) {
+        printf("Warning: unknown oper-status %s, reporting \"unknown\" instead.\n", status_buf);
+
+        strcpy(status_buf, "unknown");
+    }
 
     res = val_set_simval_obj(dst_val,
                              dst_val->obj,
-                             "unknown");
+                             (const char *)status_buf);
+
+    oper_status_update(dst_val);
+
     return res;
 }
 
@@ -98,6 +222,7 @@ static status_t
     obj_template_t* interface_obj;
     obj_template_t* name_obj;
     obj_template_t* oper_status_obj;
+    obj_template_t* last_change_obj;
     obj_template_t* statistics_obj;
     obj_template_t* obj;
 
@@ -105,6 +230,7 @@ static status_t
     val_value_t* interface_val;
     val_value_t* name_val;
     val_value_t* oper_status_val;
+    val_value_t* last_change_val;
     val_value_t* statistics_val;
     val_value_t* val;
 
@@ -213,6 +339,23 @@ static status_t
                      oper_status_val->obj);
 
     val_add_child(oper_status_val, interface_val);
+
+    /* /interfaces-state/interface/oper-state */
+    last_change_obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "last-change");
+
+    last_change_val = val_new_value();
+    assert(last_change_val);
+
+    val_init_from_template(last_change_val,
+                           last_change_obj);
+
+    val_init_virtual(last_change_val,
+                     get_last_change,
+                     last_change_val->obj);
+
+    val_add_child(last_change_val, interface_val);
 
     /* /interfaces-state/interface/statistics */
     statistics_obj = obj_find_child(interface_obj,
@@ -386,6 +529,10 @@ status_t y_ietf_interfaces_init2(void)
                      interfaces_state_val->obj);
 
     val_add_child(interfaces_state_val, runningcfg->root);
+
+    /* init a root value to store copies of prev state data values */
+    root_prev_val = val_new_value();
+    val_init_from_template(root_prev_val, runningcfg->root->obj);
 
     return res;
 }

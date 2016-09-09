@@ -331,12 +331,9 @@ static status_t
     oper_status_val = val_new_value();
     assert(oper_status_val);
 
-    val_init_from_template(oper_status_val,
-                           oper_status_obj);
-
     val_init_virtual(oper_status_val,
                      get_oper_status,
-                     oper_status_val->obj);
+                     oper_status_obj);
 
     val_add_child(oper_status_val, interface_val);
 
@@ -348,12 +345,9 @@ static status_t
     last_change_val = val_new_value();
     assert(last_change_val);
 
-    val_init_from_template(last_change_val,
-                           last_change_obj);
-
     val_init_virtual(last_change_val,
                      get_last_change,
-                     last_change_val->obj);
+                     last_change_obj);
 
     val_add_child(last_change_val, interface_val);
 
@@ -521,12 +515,9 @@ status_t y_ietf_interfaces_init2(void)
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    val_init_from_template(interfaces_state_val,
-                           interfaces_state_obj);
-
     val_init_virtual(interfaces_state_val,
                      get_interfaces_state,
-                     interfaces_state_val->obj);
+                     interfaces_state_obj);
 
     val_add_child(interfaces_state_val, runningcfg->root);
 

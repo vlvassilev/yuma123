@@ -311,12 +311,9 @@ status_t y_ietf_system_init2(void)
     current_datetime_val = val_new_value();
     assert(current_datetime_val != NULL);
 
-    val_init_from_template(current_datetime_val,
-                           obj);
-
     val_init_virtual(current_datetime_val,
                      get_system_state_clock_current_datetime,
-                     current_datetime_val->obj);
+                     obj);
 
     val_add_child(current_datetime_val, clock_val);
 

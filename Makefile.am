@@ -12,6 +12,7 @@ example-modules/helloworld \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
 netconf/src/yangdump \
+netconf/src/yangdiff \
 netconf/man
 
 #netconf/src/yangrpc/yanghttpd

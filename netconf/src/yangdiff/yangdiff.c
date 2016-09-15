@@ -848,7 +848,7 @@ static void
         if (res == NO_ERR) {
             ses_putstr(cp->scb, versionbuffer);
             ses_putstr(cp->scb, (const xmlChar *)"\n// ");
-            ses_putstr(cp->scb, (const xmlChar *)COPYRIGHT_STRING);
+            ses_putstr(cp->scb, (const xmlChar *)COPYRIGHT_STRING_LINE0);
         } else {
             SET_ERROR(res);
         }

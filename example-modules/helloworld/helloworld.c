@@ -57,9 +57,9 @@ status_t
 {
     status_t res;
     cfg_template_t* runningcfg;
-    obj_template_t* helloworld_obj;
+    obj_template_t* helloworld_state_obj;
     obj_template_t* message_obj;    
-    val_value_t* helloworld_val;
+    val_value_t* helloworld_state_val;
     val_value_t* message_val;
 
     res = NO_ERR;
@@ -69,24 +69,24 @@ status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    helloworld_obj = ncx_find_object(
+    helloworld_state_obj = ncx_find_object(
         helloworld_mod,
-        "helloworld");
-    if (helloworld_obj == NULL) {
+        "helloworld-state");
+    if (helloworld_state_obj == NULL) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    helloworld_val = val_new_value();
-    if (helloworld_val == NULL) {
+    helloworld_state_val = val_new_value();
+    if (helloworld_state_val == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    val_init_from_template(helloworld_val,
-                 helloworld_obj);
+    val_init_from_template(helloworld_state_val,
+                 helloworld_state_obj);
 
-    val_add_child(helloworld_val, runningcfg->root);
+    val_add_child(helloworld_state_val, runningcfg->root);
 
-    message_obj = obj_find_child(helloworld_obj,
+    message_obj = obj_find_child(helloworld_state_obj,
                                  "helloworld",
                                  "message");
     if (message_obj == NULL) {
@@ -102,7 +102,7 @@ status_t
     
     res = val_set_simval_obj(message_val,message_val->obj, "Hello World!");
 
-    val_add_child(message_val, helloworld_val);
+    val_add_child(message_val, helloworld_state_val);
     
     return res;
 }

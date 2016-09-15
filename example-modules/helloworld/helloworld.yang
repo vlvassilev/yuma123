@@ -9,16 +9,28 @@ module helloworld {
     description 
       "helloworld module";
 
+    revision 2016-09-15 {
+        description
+            "Added config false; /helloworld-state";
+    }
+
     revision 2013-04-02 {
         description
             "Initial revision";
     }
 
+    container helloworld-state {
+        config false;
+        description
+           "Helloworld example for creating YANG-netconfd SIL modules";
+        leaf message {
+            type string;
+        }
+    }
     container helloworld {
         description
            "Helloworld example for creating YANG-netconfd SIL modules";
         leaf message {
-            config false;
             type string;
         }
     }

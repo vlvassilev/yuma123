@@ -3852,9 +3852,9 @@ status_t
     fp=fopencookie (&ser, "w", io_functions);
     assert(fp != NULL);
 
-    ser.buf=(char*)malloc(ser.buf_len);
+    ser.buf=(char*)malloc(ser.buf_len+1);
     ser.cur=ser.buf;
-
+    ser.buf[ser.buf_len]=0;
     res = val_dump_value_max_w_file(val,
                         0/*startident*/,
                         NCX_DEF_INDENT/*indent_amount*/,

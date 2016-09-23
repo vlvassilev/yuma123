@@ -2,7 +2,7 @@ FILES:
  * run.sh - shell script executing the testcase
  * session.py - python script connecting to the started netconfd server
  * startup-cfg.xml - initial configuration
- * test-rollback-on-error.c - SIL module test implementation based on ietf-system.yang
+ * rollback-on-error.c - SIL module test implementation based on ietf-system.yang
 
 PURPOSE:
  Verify edit callbacks in case of supported rollback-on-error are correct

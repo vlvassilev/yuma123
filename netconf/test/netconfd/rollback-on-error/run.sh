@@ -6,5 +6,5 @@ cp startup-cfg.xml tmp
 NETCONFD_PID=$!
 sleep 1
 python session.py
-cat /tmp/std*
 kill $NETCONFD_PID
+cat /tmp/netconf.stdout

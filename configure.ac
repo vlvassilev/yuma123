@@ -84,6 +84,7 @@ AC_CONFIG_FILES([
         netconf/src/yangdump/Makefile
         netconf/src/yangdiff/Makefile
         netconf/man/Makefile
+        netconf/test/netconfd/rollback-on-error/Makefile
 ])
 # Test framework
 #        netconf/test/Makefile

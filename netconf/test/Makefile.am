@@ -52,7 +52,7 @@ $(top_srcdir)/netconf/test/support/misc-util/ptree-utils.cpp \
 $(top_srcdir)/netconf/test/support/misc-util/base64.cpp
 
 libyumatest_la_CPPFLAGS = -DBOOST_TEST_DYN_LINK -std=c++0x -I $(top_srcdir)/netconf -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
-libyumatest_la_LDFLAGS=-lboost_unit_test_framework  $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl -lssh2 -lssl -lcrypto -lncurses
+libyumatest_la_LDFLAGS=-lboost_unit_test_framework  $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl -lssh2 -lncurses
 
 #Test modules - YANGs
 yang_DATA = \

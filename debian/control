@@ -2,7 +2,7 @@ Source: yuma123
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 9), autoconf, dh-autoreconf, autotools-dev, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
+Build-Depends: debhelper (>= 9), autoconf, dh-autoreconf, autotools-dev, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev
 Standards-Version: 3.9.8
 Homepage: https://sourceforge.net/projects/yuma123
 
@@ -40,7 +40,7 @@ Package: libyuma-dev
 Section: libdevel
 Architecture: any
 Provides: libyuma-dev
-Depends: libwrap0-dev, libssl-dev, procps,
+Depends: libwrap0-dev, procps,
          ${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework
@@ -114,7 +114,7 @@ Package: libyangrpc-dev
 Section: libdevel
 Architecture: any
 Provides: libyangrpc-dev
-Depends: libc6-dev, libyangrpc2 (=${binary:Version}), libwrap0-dev, libssl-dev, procps,
+Depends: libc6-dev, libyangrpc2 (=${binary:Version}), libwrap0-dev, procps,
          ${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework
@@ -126,3 +126,4 @@ Description: Netconf/YANG development files
  applications.
 
 
+ 

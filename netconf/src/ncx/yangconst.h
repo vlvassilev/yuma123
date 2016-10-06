@@ -57,8 +57,8 @@ extern "C" {
 #define YIN_MODULE      (const xmlChar *)"yin"  /***  no mod ! ***/
 #define YIN_SUFFIX      (const xmlChar *)"yin"
 
-#define YANG_VERSION_STR          (const xmlChar *)"1"
-#define YANG_VERSION_NUM          1
+#define YANG_VERSION10_STR          (const xmlChar *)"1"
+#define YANG_VERSION11_STR          (const xmlChar *)"1.1"
 
 #define YANG_FILE_SEPCHAR         '@'
 

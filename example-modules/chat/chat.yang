@@ -1,0 +1,41 @@
+module chat {
+
+  namespace "http://yuma123.org/ns/chat";
+
+  prefix "chat";
+
+  organization  "yuma123.org";
+
+  description 
+    "chat module";
+
+  revision 2016-10-17 {
+      description
+          "Initial revision";
+  }
+
+  rpc send-message {
+    description
+      "Sends message.";
+    input {
+      leaf text {
+        type string;
+        mandatory true;
+        description
+          "Text of the message.";
+      }
+    }
+  }
+
+  notification message {
+    description
+      "This notification is used to report a message.";
+
+    leaf text {
+      type string;
+      mandatory true;
+      description
+        "Text of the message.";
+    }
+  }
+}

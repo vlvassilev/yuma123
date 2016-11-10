@@ -1,0 +1,11 @@
+netconfmodule_LTLIBRARIES = libietf-alarms.la
+
+libietf_alarms_la_SOURCES = \
+ietf-alarms.c
+
+libietf_alarms_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+libietf_alarms_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
+
+ietf_draft_yang_DATA = \
+ietf-alarms@2016-10-05.yang \
+ietf-alarms-x733@2016-10-05.yang

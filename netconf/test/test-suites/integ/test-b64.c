@@ -17,8 +17,10 @@ int check_b64_transcode(uint32_t data_len, uint32_t linesize)
     uint32_t u;
     inbuff=(uint8_t*)malloc(data_len);
     transcoded_buff=(uint8_t*)malloc(data_len);
-    expected_retlen=data_len%3 ? 4 * ( 1 + data_len/3 )
-                               : 4 * ( data_len/3 );
+    expected_retlen=4*((data_len+2)/3);
+    if(linesize) {
+        expected_retlen+=2*(expected_retlen/linesize);
+    }
 
     outbuff=(uint8_t*)malloc(expected_retlen+1); /* NULL termination */
 
@@ -105,13 +107,13 @@ int main(char** argv, unsigned int argc)
 {
     int ret;
     int i,j;
-    unsigned int data_len[] = {4, 10, 100, 1000, 10000};
-    unsigned int linesize[] = {0, 1, 10, 100, 1000, 10000};
+    uint32_t data_len[] = {4, 10, 100, 1000, 10000};
+    uint32_t linesize[] = {0, 1, 10, 100, 1000, 10000};
 
     check_b64_transcoder_w_known_pairs();
     
-    for(i=0;i<sizeof(data_len);i++) {
-        for(j=0;j<sizeof(linesize);j++) {
+    for(i=0;i<sizeof(data_len)/sizeof(uint32_t);i++) {
+        for(j=0;j<sizeof(linesize)/sizeof(uint32_t);j++) {
             printf("check_b64_transcode: data_len=%u, linesize=%u ... ",data_len[i],linesize[j]);
             ret=check_b64_transcode(data_len[i], linesize[j]);
             printf("OK\n");

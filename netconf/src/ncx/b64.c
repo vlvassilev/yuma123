@@ -13,13 +13,14 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
 #include "log.h"
 
 /** translation Table used for encoding characters */
-static const char encodeCharacterTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+static const char encode_character_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                            "abcdefghijklmnopqrstuvwxyz"
                                            "0123456789+/";
 
@@ -92,17 +93,21 @@ static uint32_t get_num_valid_characters( const uint8_t* inbuff,
 }
 // ---------------------------------------------------------------------------|
 /**
- * Decode the 4 byte array pf base64 values into 3 bytes.
+ * Decode the valid_bytes_count+1 byte array pf base64 values into valid_bytes_count bytes.
  *
  * \param inbuff the buffer to decode
  * \param outbuff the output buffer for decoded bytes.
+ * \param valid_bytes_count number of expected result bytes to convert
  */
-static void decode4Bytes( const uint8_t inbuff[4], uint8_t* outbuff )
+static void decode_bytes( const uint8_t inbuff[4], uint8_t* outbuff, unsigned int valid_bytes_count)
 {
+    assert(valid_bytes_count>0 && valid_bytes_count<=3);
     outbuff[0] = (decodeCharacterTable[ inbuff[0] ] << 2) + 
                  ((decodeCharacterTable[ inbuff[1] ] & 0x30) >> 4);
+    if(valid_bytes_count==1) return;
     outbuff[1] = ((decodeCharacterTable[ inbuff[1] ] & 0xf) << 4) + 
                  ((decodeCharacterTable[ inbuff[2] ] & 0x3c) >> 2);
+    if(valid_bytes_count==2) return;
     outbuff[2] = ((decodeCharacterTable[ inbuff[2] ] & 0x3) << 6) + 
                  decodeCharacterTable[ inbuff[3] ];
 }
@@ -189,34 +194,34 @@ static bool extract_3bytes( const uint8_t** iterPos, const uint8_t* endPos,
 
 
 // ---------------------------------------------------------------------------|
-static bool encode_3bytes( const uint8_t** iterPos, const uint8_t* endPos, 
-                                 uint8_t** outPos )
+static void encode_3bytes(const uint8_t data[3], uint8_t b64[4])
 {
-    uint8_t arr3[3];
-    uint32_t numBytes;
 
-    bool endReached = extract_3bytes( iterPos, endPos, arr3, &numBytes );
+    b64[0] = encode_character_table[ ( data[0] & 0xfc) >> 2 ];
+    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 ) + 
+                                          ( ( data[1] & 0xf0 ) >> 4 ) ];
+    b64[2] = encode_character_table[ ( ( data[1] & 0x0f ) << 2 ) + 
+                                          ( ( data[2] & 0xc0 ) >> 6 ) ];
+    b64[3] = encode_character_table[ data[2] & 0x3f ];
+}
 
-    if ( numBytes )
-    {
-        uint8_t* outArr = *outPos;
-        outArr[0] = encodeCharacterTable[ ( arr3[0] & 0xfc) >> 2 ];
-        outArr[1] = encodeCharacterTable[ ( ( arr3[0] & 0x03 ) << 4 ) + 
-                                          ( ( arr3[1] & 0xf0 ) >> 4 ) ];
-        outArr[2] = encodeCharacterTable[ ( ( arr3[1] & 0x0f ) << 2 ) + 
-                                          ( ( arr3[2] & 0xc0 ) >> 6 ) ];
-        outArr[3] = encodeCharacterTable[ arr3[2] & 0x3f ];
+static void encode_last_2bytes(const uint8_t data[3], uint8_t b64[4])
+{
 
-        // pad with '=' characters
-        while ( numBytes < 3 )
-        {
-            outArr[numBytes+1] = '=';
-            ++numBytes;
-        }
-        *outPos += 4;
-    }
+    b64[0] = encode_character_table[ ( data[0] & 0xfc) >> 2 ];
+    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 ) + 
+                                          ( ( data[1] & 0xf0 ) >> 4 ) ];
+    b64[2] = encode_character_table[ ( ( data[1] & 0x0f ) << 2 )];
+    b64[3] = '=';
+}
 
-    return endReached;
+static void encode_last_1byte(const uint8_t data[3], uint8_t b64[4])
+{
+
+    b64[0] = encode_character_table[ ( data[0] & 0xfc) >> 2 ];
+    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 )]; 
+    b64[2] = '=';
+    b64[3] = '=';
 }
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
@@ -224,14 +229,13 @@ static bool encode_3bytes( const uint8_t** iterPos, const uint8_t* endPos,
 // ---------------------------------------------------------------------------|
 uint32_t b64_get_encoded_str_len( uint32_t inbufflen, uint32_t linesize )
 {
-    uint32_t requiredBufLen = inbufflen%3 ? 4 * ( 1 + inbufflen/3 )  
+    uint32_t outbufflen = inbufflen%3 ? 4 * ( 1 + inbufflen/3 )  
                                           : 4 * ( inbufflen/3 );
     if(linesize != 0) {
-        requiredBufLen += 2 * ( inbufflen/linesize );  // allow for line breaks
-        requiredBufLen += 2; // allow for final CR-LF
+        outbufflen += 2 * ( inbufflen/linesize );  /* allow for line breaks*/
     }
-    requiredBufLen += 1; //null terminator
-    return requiredBufLen;
+    outbufflen += 1; /* NULL termination */
+    return outbufflen;
 }
 
 // ---------------------------------------------------------------------------|
@@ -254,53 +258,44 @@ status_t b64_encode ( const uint8_t* inbuff, uint32_t inbufflen,
                             uint8_t* outbuff, uint32_t outbufflen,
                             uint32_t linesize, uint32_t* retlen)
 {
+    uint32_t i,j,wrapindex;
+    uint8_t b64_4[4];
+    uint8_t* outptr;
+
     assert( inbuff && "b64_decode() inbuff is NULL!" );
     assert( outbuff && "b64_decode() outbuff is NULL!" );
-    assert((linesize>4) || (linesize==0));
-    if ( b64_get_encoded_str_len( inbufflen, linesize ) > outbufflen )
-    {
+    if ( b64_get_encoded_str_len( inbufflen, linesize ) > outbufflen ) {
         return ERR_BUFF_OVFL;
     }
 
-    bool endReached = false;
-    const uint8_t* endPos = inbuff+inbufflen;
-    const uint8_t* iter = inbuff;
-    uint8_t* outIter = outbuff;
-    uint32_t numBlocks=0;
-    int line_index=0;
+    outptr=outbuff;
+    wrapindex=0;
 
-    while( !endReached )
-    {
-        endReached = encode_3bytes( &iter, endPos, &outIter );
-        ++numBlocks;
-        if(linesize==0) {
-            continue;
+    for(i=0;i<((inbufflen+2)/3);i++) {
+
+        if((inbufflen-i*3)==1) {
+            encode_last_1byte(inbuff+i*3,b64_4);
+        } else if((inbufflen-i*3)==2) {
+            encode_last_2bytes(inbuff+i*3,b64_4);
+        } else {
+            encode_3bytes(inbuff+i*3,b64_4);
         }
-        if ( (numBlocks*4) >= ((line_index+1)*linesize) )
-        {
-            int new_lined_bytes;
-            new_lined_bytes = (numBlocks*4)% linesize;
-            
-            if(new_lined_bytes) {
-            	memmove(*outIter-new_lined_bytes+2, *outIter-new_lined_bytes, new_lined_bytes);
+
+        for(j=0;j<4;j++) {
+            *outptr++=b64_4[j];
+            if(linesize && ++wrapindex==linesize) {
+                *outptr++='\r';
+                *outptr++='\n';
+                wrapindex=0;
             }
-            *(outIter-new_lined_bytes+0)='\r';
-            *(outIter-new_lined_bytes+1)='\n';
-            *outIter+=2;
-            line_index++;
         }
     }
-    if(linesize!=0) {
-        *outIter++ ='\r';
-        *outIter++ ='\n';
-    }
 
-    *retlen = outIter - outbuff;
-    *outIter++ ='\0';
+    *retlen=outptr-outbuff;
+    *outptr++='\0';
     return NO_ERR;
 }
 
-// ---------------------------------------------------------------------------|
 status_t b64_decode ( const uint8_t* inbuff, uint32_t inbufflen,
                             uint8_t* outbuff, uint32_t outbufflen,
                             uint32_t* retlen )
@@ -316,17 +311,14 @@ status_t b64_decode ( const uint8_t* inbuff, uint32_t inbufflen,
 
     *retlen=0;
 
-    while ( !endReached )
-    {
+    while ( !endReached ) {
         endReached = extract_4bytes( &iter, endPos, arr4, &numExtracted ); 
 
-        if ( numExtracted )
-        {
-            if ( *retlen+3 > outbufflen )
-            {
+        if ( numExtracted ) {
+            if ( (*retlen+numExtracted-1)>outbufflen) {
                 return ERR_BUFF_OVFL;
             }
-            decode4Bytes( arr4, outbuff+*retlen );
+            decode_bytes( arr4, outbuff+*retlen, numExtracted-1);
             *retlen += numExtracted-1;
         }
     }

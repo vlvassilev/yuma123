@@ -52,7 +52,7 @@ extern "C" {
  * \param inbufflen number of binary chars in inbuff
  * \param outbuff pointer to the output buffer to use.
  * \param outbufflen max number of chars to write to outbuff
- * \param linesize the output line length to use
+ * \param linesize the output line length to use or 0 for no wrapping
  * \param retlen address of return length
  * \returns NO_ERR if all OK, ERR_BUFF_OVFL if outbuff not big enough
  */
@@ -92,7 +92,7 @@ status_t b64_decode ( const uint8_t* inbuff, uint32_t inbufflen,
  * @param inputlen the length of inbuff.
  * @return the length of the required buffer.
  */
-uint32_t b64_get_decoded_str_len( const uint8_t* inbuff, size_t inputLen );
+uint32_t b64_get_decoded_str_len( const uint8_t* inbuff, size_t inputlen );
 
 /**
  * Get the output buffer size required for encoding the string. 

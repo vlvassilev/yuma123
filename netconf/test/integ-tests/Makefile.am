@@ -6,6 +6,15 @@ $(top_srcdir)/netconf/src/yangcli/yangcli_wordexp.c
 test_yangcli_wordex_CPPFLAGS = -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
 test_yangcli_wordex_LDFLAGS = $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl -lssh2 -lncurses
 
+TESTS=test-b64
+check_PROGRAMS=test_b64
+test_b64_SOURCES = \
+$(top_srcdir)/netconf/src/ncx/b64.c \
+$(top_srcdir)/netconf/test/test-suites/integ/test-b64.c
+
+test_b64_CPPFLAGS = -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+test_b64_LDFLAGS = $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl -lssh2 -lncurses
+
 TESTS+=test-base-64
 check_PROGRAMS+=test-base-64
 test_base_64_SOURCES = \

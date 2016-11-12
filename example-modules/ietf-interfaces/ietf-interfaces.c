@@ -82,6 +82,55 @@ status_t val123_clone_instance(val_value_t* root_val, val_value_t* original_val,
     return val123_clone_instance_ex(root_val, original_val, clone_val, FALSE);
 }
 
+static void my_send_link_state_notification(char* new_state, char* if_name)
+{
+    status_t res;
+    obj_template_t* notification_obj;
+    obj_template_t* link_up_obj;
+    obj_template_t* link_down_obj;
+    obj_template_t* if_name_obj;
+    val_value_t* if_name_val;
+    agt_not_msg_t *notif;
+    ncx_module_t *mod;
+
+    mod = ncx_find_module("interfaces-notifications", NULL);
+    if(mod==NULL) {
+        /* only send notification if the model is loaded */
+        return;
+    }
+
+    link_down_obj = ncx_find_object(mod,"link-down");
+    assert(link_down_obj);
+
+    link_up_obj = ncx_find_object(mod,"link-up");
+    assert(link_up_obj);
+
+    if(0==strcmp(new_state, "up")) {
+        notification_obj = link_up_obj;
+    } else if(0==strcmp(new_state, "down")) {
+        notification_obj = link_down_obj;
+    }
+    notif = agt_not_new_notification(notification_obj);
+    assert (notif != NULL);
+
+    /* add params to payload */
+    if_name_obj = obj_find_child(notification_obj,
+                      "interfaces-notifications",
+                      "if-name");
+    assert(if_name_obj != NULL);
+    if_name_val = val_new_value();
+    assert(if_name_val != NULL);
+
+    val_init_from_template(if_name_val, if_name_obj);
+    res = val_set_simval_obj(if_name_val,
+                         if_name_val->obj,
+                         if_name);
+    agt_not_add_to_payload(notif, if_name_val);
+
+    agt_not_queue_notification(notif);
+}
+
+
 void oper_status_update(val_value_t* cur_val)
 {
     status_t res;
@@ -89,6 +138,8 @@ void oper_status_update(val_value_t* cur_val)
     val_value_t* val;
     val_value_t* last_change_prev_val;
     val_value_t* dummy_val;
+    val_value_t* name_val;
+
     /* compare the oper-status with the corresponding value in the prev root */
     prev_val = val123_find_match(root_prev_val, cur_val);
     if(prev_val==NULL) {
@@ -123,7 +174,11 @@ void oper_status_update(val_value_t* cur_val)
         val_add_child(last_change_val, val->parent);
 
         /* notify */
-        printf("Notification: oper-status changes from %s to %s at %s\n",VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
+        name_val=val_find_child(cur_val->parent,"ietf-interfaces","name");
+        assert(name_val);
+        printf("Notification /interfaces-state/interface[name=%s]: oper-status changes from %s to %s at %s\n", VAL_STRING(name_val), VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
+        my_send_link_state_notification(VAL_STRING(cur_val), VAL_STRING(name_val));
+
         val_free_value(prev_val);
     }
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -25,7 +26,7 @@ static const char encode_character_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                            "0123456789+/";
 
 /** translation Table used for decoding characters */
-static const char decodeCharacterTable[256] = {
+static const char decode_character_table[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
@@ -43,7 +44,6 @@ static const char decodeCharacterTable[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
-// ---------------------------------------------------------------------------|
 /**
  * Determine if a character is a valid base64 value.
  *
@@ -55,7 +55,6 @@ static bool is_base64(unsigned char c)
    return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-// ---------------------------------------------------------------------------|
 /**
  * Count the number of valid base64 characters in the supplied input
  * buffer.
@@ -70,14 +69,14 @@ static bool is_base64(unsigned char c)
 static uint32_t get_num_valid_characters( const uint8_t* inbuff, 
                                           size_t inputlen ) 
 {
-    uint32_t validCharCount=0;
+    uint32_t valid_char_count=0;
     uint32_t idx=0;
 
     while ( idx < inputlen )
     {
         if ( is_base64( inbuff[idx] ) )
         {
-            ++validCharCount;
+            ++valid_char_count;
             ++idx;
         }
         else if ( inbuff[idx] == '\r' || inbuff[idx] == '\n' ) 
@@ -89,118 +88,36 @@ static uint32_t get_num_valid_characters( const uint8_t* inbuff,
             break;
         }
     }
-    return validCharCount;
+    return valid_char_count;
 }
-// ---------------------------------------------------------------------------|
+
 /**
  * Decode the valid_bytes_count+1 byte array pf base64 values into valid_bytes_count bytes.
  *
  * \param inbuff the buffer to decode
  * \param outbuff the output buffer for decoded bytes.
- * \param valid_bytes_count number of expected result bytes to convert
+ * \param valid_data_bytes_count number of expected result bytes to convert
  */
-static void decode_bytes( const uint8_t inbuff[4], uint8_t* outbuff, unsigned int valid_bytes_count)
+static void decode_bytes( const uint8_t* b64, uint8_t* data, unsigned int valid_data_bytes_count)
 {
-    assert(valid_bytes_count>0 && valid_bytes_count<=3);
-    outbuff[0] = (decodeCharacterTable[ inbuff[0] ] << 2) + 
-                 ((decodeCharacterTable[ inbuff[1] ] & 0x30) >> 4);
-    if(valid_bytes_count==1) return;
-    outbuff[1] = ((decodeCharacterTable[ inbuff[1] ] & 0xf) << 4) + 
-                 ((decodeCharacterTable[ inbuff[2] ] & 0x3c) >> 2);
-    if(valid_bytes_count==2) return;
-    outbuff[2] = ((decodeCharacterTable[ inbuff[2] ] & 0x3) << 6) + 
-                 decodeCharacterTable[ inbuff[3] ];
+    assert(valid_data_bytes_count>0 && valid_data_bytes_count<=3);
+    data[0] = (decode_character_table[ b64[0] ] << 2) +
+                 ((decode_character_table[ b64[1] ] & 0x30) >> 4);
+    if(valid_data_bytes_count==1) return;
+    data[1] = ((decode_character_table[ b64[1] ] & 0xf) << 4) +
+                 ((decode_character_table[ b64[2] ] & 0x3c) >> 2);
+    if(valid_data_bytes_count==2) return;
+    data[2] = ((decode_character_table[ b64[2] ] & 0x3) << 6) +
+                 decode_character_table[ b64[3] ];
 }
 
-// ---------------------------------------------------------------------------|
-/**
- * Extract up to 4 bytes of base64 data to decode.
- * this function skips CR anf LF characters and extracts up to 4 bytes
- * from the input buffer. Any invalid characters are treated as end of
- * buffer markers.
- *
- * \param iterPos the start of the data to decode. This value is updated.
- * \param endpos the end of the buffer marker.
- * \param arr4 the output buffer for extracted bytes (zero padded if
- * less than 4 bytes were extracted)
- * \param numExtracted the number of valid bytes that were extracted.
- * output buffer for extracted bytes.
- * \return true if the end of buffer was reached.
- */
-static bool extract_4bytes( const uint8_t** iterPos, const uint8_t* endPos, 
-                            uint8_t arr4[4], uint32_t* numExtracted )
-{
-    const uint8_t* iter=*iterPos;
-    uint32_t validBytes = 0;
-    bool endReached = false;
-
-    while ( iter < endPos && validBytes<4 && !endReached )
-    {
-        if ( is_base64( *iter ) )
-        {
-            arr4[validBytes++] = *iter;
-            ++iter;
-        }
-        else if ( *iter == '\r' || *iter == '\n' ) 
-        {
-            ++iter;
-        }
-        else 
-        {
-            // encountered a dodgy character or an =
-            if ( *iter != '=' )
-            {
-               log_warn( "b64_decode() encountered invalid character(%c), "
-                         "output string truncated!", *iter );
-            }
-
-            // pad the remaining characters to decode
-            size_t pad = validBytes;
-            for ( ; pad<4; ++pad )
-            {
-                arr4[pad] = 0;
-            }
-            endReached = true;
-        }
-    }
-
-    *numExtracted = validBytes;
-    *iterPos = iter;
-    return endReached ? endReached : iter >= endPos;
-}
-
-// ---------------------------------------------------------------------------|
-static bool extract_3bytes( const uint8_t** iterPos, const uint8_t* endPos, 
-                            uint8_t arr3[3], uint32_t* numExtracted )
-{
-    const uint8_t* iter=*iterPos;
-    uint32_t byteCount = 0;
-
-    while ( iter < endPos && byteCount < 3 )
-    {
-        arr3[ byteCount++ ] = *iter;
-        ++iter;
-    }
-
-    *numExtracted = byteCount;
-    while ( byteCount < 3 )
-    {
-        arr3[byteCount++] = 0;
-    }
-
-    *iterPos = iter;
-    return iter >= endPos;
-}
-
-
-// ---------------------------------------------------------------------------|
 static void encode_3bytes(const uint8_t data[3], uint8_t b64[4])
 {
 
     b64[0] = encode_character_table[ ( data[0] & 0xfc) >> 2 ];
-    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 ) + 
+    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 ) +
                                           ( ( data[1] & 0xf0 ) >> 4 ) ];
-    b64[2] = encode_character_table[ ( ( data[1] & 0x0f ) << 2 ) + 
+    b64[2] = encode_character_table[ ( ( data[1] & 0x0f ) << 2 ) +
                                           ( ( data[2] & 0xc0 ) >> 6 ) ];
     b64[3] = encode_character_table[ data[2] & 0x3f ];
 }
@@ -209,7 +126,7 @@ static void encode_last_2bytes(const uint8_t data[3], uint8_t b64[4])
 {
 
     b64[0] = encode_character_table[ ( data[0] & 0xfc) >> 2 ];
-    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 ) + 
+    b64[1] = encode_character_table[ ( ( data[0] & 0x03 ) << 4 ) +
                                           ( ( data[1] & 0xf0 ) >> 4 ) ];
     b64[2] = encode_character_table[ ( ( data[1] & 0x0f ) << 2 )];
     b64[3] = '=';
@@ -226,7 +143,6 @@ static void encode_last_1byte(const uint8_t data[3], uint8_t b64[4])
 
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
-// ---------------------------------------------------------------------------|
 uint32_t b64_get_encoded_str_len( uint32_t inbufflen, uint32_t linesize )
 {
     uint32_t outbufflen = inbufflen%3 ? 4 * ( 1 + inbufflen/3 )  
@@ -238,22 +154,20 @@ uint32_t b64_get_encoded_str_len( uint32_t inbufflen, uint32_t linesize )
     return outbufflen;
 }
 
-// ---------------------------------------------------------------------------|
 uint32_t b64_get_decoded_str_len( const uint8_t* inbuff, size_t inputlen )
 {
-    uint32_t validCharCount= get_num_valid_characters( inbuff, inputlen );
+    uint32_t valid_char_count= get_num_valid_characters( inbuff, inputlen );
 
-    uint32_t requiredBufLen = 3*(validCharCount/4);
-    uint32_t rem=validCharCount%4;
+    uint32_t required_buf_len = 3*(valid_char_count/4);
+    uint32_t rem=valid_char_count%4;
     if ( rem )
     {
-        requiredBufLen += rem-1;
+        required_buf_len += rem-1;
     }
 
-    return requiredBufLen;
+    return required_buf_len;
 }
 
-// ---------------------------------------------------------------------------|
 status_t b64_encode ( const uint8_t* inbuff, uint32_t inbufflen,
                             uint8_t* outbuff, uint32_t outbufflen,
                             uint32_t linesize, uint32_t* retlen)
@@ -296,35 +210,54 @@ status_t b64_encode ( const uint8_t* inbuff, uint32_t inbufflen,
     return NO_ERR;
 }
 
-status_t b64_decode ( const uint8_t* inbuff, uint32_t inbufflen,
+status_t b64_decode( const uint8_t* inbuff, uint32_t inbufflen,
                             uint8_t* outbuff, uint32_t outbufflen,
                             uint32_t* retlen )
 {
-    uint8_t arr4[4];
-    uint32_t numExtracted = 0;
-    bool endReached = false;
-    const uint8_t* endPos = inbuff+inbufflen;
-    const uint8_t* iter = inbuff;
+    int i;
+    int b64_byte_index;
+    uint8_t b64_4[4];
+    int padding;
 
     assert( inbuff && "b64_decode() inbuff is NULL!" );
     assert( outbuff && "b64_decode() outbuff is NULL!" );
 
+    b64_byte_index=0;
+    padding=0;
     *retlen=0;
-
-    while ( !endReached ) {
-        endReached = extract_4bytes( &iter, endPos, arr4, &numExtracted ); 
-
-        if ( numExtracted ) {
-            if ( (*retlen+numExtracted-1)>outbufflen) {
+    for(i=0;i<inbufflen;i++) {
+        if(is_base64(inbuff[i]) && padding==0) {
+            b64_4[b64_byte_index++]=inbuff[i];
+        } else if(inbuff[i]=='\r' || inbuff[i]=='\n') {
+            /*do nothing skip*/
+        } else if(inbuff[i]=='=' && b64_byte_index>=2) {
+            if(padding==0) {
+                padding=4-b64_byte_index;
+            }
+            b64_4[b64_byte_index++]=inbuff[i];
+        } else {
+            /* encountered a dodgy character */
+            log_warn( "b64_decode() encountered invalid character(%c), "
+                      "output string truncated!", inbuff[i]);
+            return ERR_NCX_WRONG_TKVAL;
+        }
+        if(b64_byte_index==4) {
+            if((*retlen+3-padding)>outbufflen) {
                 return ERR_BUFF_OVFL;
             }
-            decode_bytes( arr4, outbuff+*retlen, numExtracted-1);
-            *retlen += numExtracted-1;
+            b64_byte_index=0;
+            decode_bytes(b64_4, outbuff+*retlen, 3-padding);
+            *retlen+=3-padding;
         }
+    }
+
+    if(b64_byte_index!=0) {
+        /* encountered a dodgy character */
+        log_warn( "b64_decode() encountered trailing %d bytes data not aligned to 4 bytes!", b64_byte_index);
+        return ERR_NCX_WRONG_TKVAL;
     }
 
     return NO_ERR;
 }
 
 /* END b64.c */
-

@@ -105,11 +105,14 @@ static void my_send_link_state_notification(char* new_state, char* if_name)
     link_up_obj = ncx_find_object(mod,"link-up");
     assert(link_up_obj);
 
-    if(0==strcmp(new_state, "up")) {
-        notification_obj = link_up_obj;
-    } else if(0==strcmp(new_state, "down")) {
+    if(0==strcmp(new_state, "down")) {
         notification_obj = link_down_obj;
+    } else if(0==strcmp(new_state, "up")) {
+        notification_obj = link_up_obj;
+    } else {
+        notification_obj = link_up_obj; /* work around */
     }
+
     notif = agt_not_new_notification(notification_obj);
     assert (notif != NULL);
 
@@ -510,6 +513,33 @@ static status_t
     return res;
 }
 
+int
+    my_timer_fn (uint32 timer_id,
+                      void *cookie)
+{
+    /*
+     * Brute force method for polling for connection state changes
+     * without this link-up and link-down notifications will be
+     * generated only when someone reads oper-state
+     */
+    cfg_template_t* runningcfg;
+    val_value_t* interfaces_state_val;
+    xmlChar* dummy_serialized_data_str;
+    status_t res;
+
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    assert(runningcfg && runningcfg->root);
+
+    interfaces_state_val = val_find_child(runningcfg->root,
+                                          "ietf-interfaces",
+                                          "interfaces-state");
+    assert(interfaces_state_val);
+    res = val_make_serialized_string (interfaces_state_val, NCX_DISPLAY_MODE_JSON, &dummy_serialized_data_str);
+    free(dummy_serialized_data_str);
+    return 0;
+
+}
+
 /* The 3 mandatory callback functions: y_ietf_interfaces_init, y_ietf_interfaces_init2, y_ietf_interfaces_cleanup */
 
 status_t
@@ -546,6 +576,7 @@ status_t y_ietf_interfaces_init2(void)
     status_t res;
     cfg_template_t* runningcfg;
     val_value_t* interfaces_state_val;
+    uint32 timer_id;
 
     res = NO_ERR;
 
@@ -580,6 +611,11 @@ status_t y_ietf_interfaces_init2(void)
     root_prev_val = val_new_value();
     val_init_from_template(root_prev_val, runningcfg->root->obj);
 
+    res = agt_timer_create(1/* 1 sec period */,
+                           TRUE/*periodic*/,
+                           my_timer_fn,
+                           NULL/*cookie*/,
+                           &timer_id);
     return res;
 }
 

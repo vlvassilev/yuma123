@@ -1,0 +1,29 @@
+module alarms-interfaces {
+
+  namespace "http://yuma123.org/ns/alarms-interfaces";
+  prefix alarms-if;
+
+  import ietf-alarms {
+    prefix alarms;
+  }
+
+  organization
+    "yuma123.org";
+
+  contact
+    "Editor:   Vladimir Vassilev
+               <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module contains a single YANG definition of
+     the link-alarm identity based on alarm-identity.";
+
+  revision 2016-11-12 {
+    description
+      "Initial revision.";
+  }
+
+  identity link-alarm {
+    base alarms:alarm-identity;
+  }
+}

@@ -1,0 +1,42 @@
+module interfaces-notifications {
+
+  namespace "http://yuma123.org/ns/interfaces-notifications";
+  prefix if-notif;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization
+    "yuma123.org";
+
+  contact
+    "Editor:   Vladimir Vassilev
+               <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module contains a collection of YANG definitions for
+     notifications for managing network interfaces.";
+
+  revision 2016-11-12 {
+    description
+      "Initial revision.";
+  }
+
+  notification link-up {
+    leaf if-name {
+      type leafref {
+        path "/if:interfaces/if:interface/if:name";
+      }
+    }
+  }
+
+  notification link-down {
+    leaf if-name {
+      type leafref {
+        path "/if:interfaces/if:interface/if:name";
+      }
+    }
+  }
+
+}

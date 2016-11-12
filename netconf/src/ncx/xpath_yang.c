@@ -1846,7 +1846,7 @@ status_t
          * if obj is config, it can point at only config targobj
          * if obj not config, it can point at any targobj node
          */
-        if (obj_get_config_flag(obj) &&
+        if (mod->langver<NCX_YANG_VERSION11 && obj_get_config_flag(obj) &&
             !obj_get_config_flag(pcb->targobj)) {
 
             doerror = TRUE;

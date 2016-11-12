@@ -162,6 +162,9 @@ extern "C" {
 #define YANG_K_YANG_VERSION      (const xmlChar *)"yang-version"
 #define YANG_K_YIN_ELEMENT       (const xmlChar *)"yin-element"
 
+/*YANG 1.1*/
+#define YANG_K_ACTION            (const xmlChar *)"action"
+
 /**
  * Check if parsing should terminate.
  *

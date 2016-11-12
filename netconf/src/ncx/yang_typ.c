@@ -2129,6 +2129,7 @@ static status_t
                 retres = ERR_NCX_ENTRY_EXISTS;
                 log_error("\nError: path statement already entered");
                 ncx_print_errormsg(tkc, mod, retres);
+                return res;
             }
 
             /* get the path string value and save it */
@@ -2185,6 +2186,20 @@ static status_t
                 CHK_EXIT(res, retres);
             }
             sim->constrained = TRUE;
+        } else if ((mod->langver>=NCX_YANG_VERSION11) &&  !xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
+            if (constrained) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: require-instance statement already entered");
+                ncx_print_errormsg(tkc, mod, retres);
+                return res;
+            }
+            res = yang_consume_boolean(tkc,
+                                       mod,
+                                       &sim->constrained,
+                                       &constrained,
+                                       &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+
         } else {
             retres = ERR_NCX_WRONG_TKTYPE;
             expstr = "path statement";

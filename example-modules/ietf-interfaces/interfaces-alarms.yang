@@ -1,6 +1,6 @@
-module alarms-interfaces {
+module interfaces-alarms {
 
-  namespace "http://yuma123.org/ns/alarms-interfaces";
+  namespace "http://yuma123.org/ns/interfaces-alarms";
   prefix alarms-if;
 
   import ietf-alarms {

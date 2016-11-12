@@ -8,5 +8,12 @@ libietf_alarms_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
 
 ietf_draft_yang_DATA = \
 ietf-alarms@2016-10-27.yang \
-ietf-alarms-x733@2016-10-05.yang \
-alarms-interfaces.yang
+ietf-alarms-x733@2016-10-05.yang
+
+#public alarm control library
+lib_LTLIBRARIES = libalarmctrl.la
+libalarmctrl_la_SOURCES = \
+alarmctrl.c
+
+include_HEADERS= \
+alarmctrl.h

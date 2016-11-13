@@ -178,6 +178,11 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
 
 static void update_alarm(val_value_t* alarm_val, char* severity_str, char* alarm_text_str, int enable)
 {
+    val_value_t* is_cleared_val;
+    /*is-cleared*/
+    is_cleared_val=val_find_child(alarm_val,"ietf-alarms","is-cleared");
+    assert(is_cleared_val != NULL);
+    VAL_BOOL(is_cleared_val)=enable?FALSE:TRUE;
 }
 
 int alarmctrl_event(char* resource_str, char* alarm_type_id_str, char* alarm_type_qualifier_str, char* severity_str, char* alarm_text_str, int enable)

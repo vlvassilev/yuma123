@@ -104,7 +104,7 @@ status_t notification_cb(agt_not_msg_t *notif)
                 //alarm_event_w_type(description_str, "minor", "communications", down?1:0);
                 resource_str=malloc(strlen("/interfaces/interface[name=\'%s\']")+strlen(VAL_STRING(payload_val))+1);
                 sprintf(resource_str,"/interfaces/interface[name=\'%s\']",VAL_STRING(payload_val));
-                ret=alarmctrl_event(resource_str, "if-alarms:link-alarm"/*alarm_type_id_str*/, ""/*alarm_type_qualifier_str*/, "major", "Probably someone disconnected something?!", down?1:0);
+                ret=alarmctrl_event(resource_str, "link-alarm"/*alarm_type_id_str*/, ""/*alarm_type_qualifier_str*/, "major", "Probably someone disconnected something?!", down?1:0);
                 //assert(ret==0);
                 free(resource_str);
                 break;

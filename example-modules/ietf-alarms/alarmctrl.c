@@ -34,7 +34,47 @@
 */
 static val_value_t* find_alarm(val_value_t* alarm_list_val, char* resource_str, char* alarm_type_id_str, char* alarm_type_qualifier_str)
 {
-    return NULL;
+    status_t res;
+    val_value_t* alarm_val;
+    val_value_t* resource_val;
+    val_value_t* alarm_type_id_val;
+    val_value_t* alarm_type_id_match_val;
+    val_value_t* alarm_type_qualifier_val;
+
+    for (alarm_val = val_find_child(alarm_list_val,"ietf-alarms","alarm");
+         alarm_val != NULL;
+         alarm_val = val_find_next_child(alarm_list_val,
+                                         "ietf-alarms",
+                                         "alarm",
+                                          alarm_val)) {
+        resource_val = val_find_child(alarm_val,
+                                      "ietf-alarms",
+                                      "resource");
+        alarm_type_id_val = val_find_child(alarm_val,
+                                      "ietf-alarms",
+                                      "alarm-type-id");
+        alarm_type_qualifier_val = val_find_child(alarm_val,
+                                      "ietf-alarms",
+                                      "alarm-type-qualifier");
+        alarm_type_id_match_val=val_new_value();
+        assert(alarm_type_id_match_val != NULL);
+        val_init_from_template(alarm_type_id_match_val, alarm_type_id_val->obj);
+        res = val_set_simval_obj(alarm_type_id_match_val,
+                                 alarm_type_id_val->obj,
+                                 alarm_type_id_str);
+        assert(res==NO_ERR);
+
+        if(0==strcmp(VAL_STRING(resource_val),resource_str) &&
+           //0==strcmp(VAL_STRING(alarm_type_id_val),alarm_type_id_str) &&
+           0==val_compare(alarm_type_id_match_val,alarm_type_id_val) &&
+           0==strcmp(VAL_STRING(alarm_type_qualifier_val),alarm_type_qualifier_str)
+        ) {
+            val_free_value(alarm_type_id_match_val);
+            break;
+        }
+        val_free_value(alarm_type_id_match_val);
+    }
+    return alarm_val;
 }
 
 static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str, char* alarm_type_id_str, char* alarm_type_qualifier_str, char* perceived_severity_str, char* alarm_text_str)

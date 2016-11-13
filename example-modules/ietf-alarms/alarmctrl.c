@@ -43,12 +43,14 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
     obj_template_t* resource_obj;
     obj_template_t* alarm_type_id_obj;
     obj_template_t* alarm_type_qualifier_obj;
+    obj_template_t* is_cleared_obj;
     obj_template_t* perceived_severity_obj;
     obj_template_t* alarm_text_obj;
     val_value_t* alarm_val;
     val_value_t* resource_val;
     val_value_t* alarm_type_id_val;
     val_value_t* alarm_type_qualifier_val;
+    val_value_t* is_cleared_val;
     val_value_t* perceived_severity_val;
     val_value_t* alarm_text_val;
     val_value_t* number_of_alarms_val;
@@ -103,6 +105,17 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
                          alarm_type_qualifier_str);
     val_add_child(alarm_type_qualifier_val, alarm_val);
 
+    /*is-cleared*/
+    is_cleared_obj = obj_find_child(alarm_obj,
+                         "ietf-alarms",
+                         "is-cleared");
+    assert(is_cleared_obj);
+    is_cleared_val=val_new_value();
+    assert(is_cleared_val != NULL);
+    val_init_from_template(is_cleared_val, is_cleared_obj);
+    VAL_BOOL(is_cleared_val)=FALSE;
+    val_add_child(is_cleared_val, alarm_val);
+
 
     /*perceived-severity*/
     perceived_severity_obj = obj_find_child(alarm_obj,
@@ -123,7 +136,7 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
     VAL_UINT32(number_of_alarms_val)+=1;
 }
 
-static void update_alarm(val_value_t* alarm_val, char* resource_str, char* alarm_type_id_str, char* alarm_type_qualifier_str, char* severity_str, char* alarm_text_str, int enable)
+static void update_alarm(val_value_t* alarm_val, char* severity_str, char* alarm_text_str, int enable)
 {
 }
 
@@ -158,13 +171,13 @@ int alarmctrl_event(char* resource_str, char* alarm_type_id_str, char* alarm_typ
         if(alarm_val==NULL) {
             alarm_val = create_alarm(alarm_list_val, resource_str, alarm_type_id_str, alarm_type_qualifier_str, severity_str, alarm_text_str);
         } else {
-            update_alarm(alarm_val, resource_str, alarm_type_id_str, alarm_type_qualifier_str, severity_str, alarm_text_str, enable);
+            update_alarm(alarm_val, severity_str, alarm_text_str, enable);
         }
     } else {
         if(alarm_val==NULL) {
             return -1;
         }
-        update_alarm(alarm_val, resource_str, alarm_type_id_str, alarm_type_qualifier_str, severity_str, alarm_text_str, enable);
+        update_alarm(alarm_val, severity_str, alarm_text_str, enable);
     }
     return 0;
 }

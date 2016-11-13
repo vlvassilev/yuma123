@@ -99,8 +99,14 @@ status_t notification_cb(agt_not_msg_t *notif)
              payload_val != NULL;
              payload_val = (val_value_t *)dlq_nextEntry(payload_val)) {
             if(0==strcmp("if-name",obj_get_name(payload_val->obj))) {
+                char* resource_str;
                 sprintf(description_str,"Link down - %s",VAL_STRING(payload_val));
-                alarm_event_w_type(description_str, "minor", "communications", down?1:0);
+                //alarm_event_w_type(description_str, "minor", "communications", down?1:0);
+                resource_str=malloc(strlen("/interfaces/interface[name=\'%s\']")+strlen(VAL_STRING(payload_val))+1);
+                sprintf(resource_str,"/interfaces/interface[name=\'%s\']",VAL_STRING(payload_val));
+                ret=alarmctrl_event(resource_str, "if-alarms:link-alarm"/*alarm_type_id_str*/, ""/*alarm_type_qualifier_str*/, "major", "Probably someone disconnected something?!", down?1:0);
+                //assert(ret==0);
+                free(resource_str);
                 break;
             }
         }

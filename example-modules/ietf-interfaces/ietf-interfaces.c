@@ -537,7 +537,7 @@ int
     res = val_make_serialized_string (interfaces_state_val, NCX_DISPLAY_MODE_JSON, &dummy_serialized_data_str);
     free(dummy_serialized_data_str);
 
-#if 1
+#if 0 /*for simulation*/
     {
         static unsigned int counter=0;
         my_send_link_state_notification((counter%2)?"up":"down", "eth0");

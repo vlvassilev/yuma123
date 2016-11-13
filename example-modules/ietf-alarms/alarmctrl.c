@@ -12,6 +12,7 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "rpc.h"
+#include "tstamp.h"
 
 #include <string.h>
 #include <assert.h>
@@ -83,17 +84,22 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
     obj_template_t* resource_obj;
     obj_template_t* alarm_type_id_obj;
     obj_template_t* alarm_type_qualifier_obj;
+    obj_template_t* time_created_obj;
     obj_template_t* is_cleared_obj;
+    obj_template_t* last_changed_obj;
     obj_template_t* perceived_severity_obj;
     obj_template_t* alarm_text_obj;
     val_value_t* alarm_val;
     val_value_t* resource_val;
     val_value_t* alarm_type_id_val;
     val_value_t* alarm_type_qualifier_val;
+    val_value_t* time_created_val;
     val_value_t* is_cleared_val;
+    val_value_t* last_changed_val;
     val_value_t* perceived_severity_val;
     val_value_t* alarm_text_val;
     val_value_t* number_of_alarms_val;
+    char tstamp_buf[21];
     status_t res;
 
     /*alarm*/
@@ -145,6 +151,18 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
                          alarm_type_qualifier_str);
     val_add_child(alarm_type_qualifier_val, alarm_val);
 
+    /*time-created*/
+    tstamp_datetime (tstamp_buf);
+    time_created_obj = obj_find_child(alarm_obj,
+                         "ietf-alarms",
+                         "time-created");
+    assert(time_created_obj);
+    time_created_val=val_new_value();
+    assert(time_created_val != NULL);
+    val_init_from_template(time_created_val, time_created_obj);
+    res = val_set_simval_obj(time_created_val, time_created_obj, tstamp_buf);
+    val_add_child(time_created_val, alarm_val);
+
     /*is-cleared*/
     is_cleared_obj = obj_find_child(alarm_obj,
                          "ietf-alarms",
@@ -156,6 +174,16 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
     VAL_BOOL(is_cleared_val)=FALSE;
     val_add_child(is_cleared_val, alarm_val);
 
+    /*last-changed*/
+    last_changed_obj = obj_find_child(alarm_obj,
+                         "ietf-alarms",
+                         "last-changed");
+    assert(last_changed_obj);
+    last_changed_val=val_new_value();
+    assert(last_changed_val != NULL);
+    val_init_from_template(last_changed_val, last_changed_obj);
+    res = val_set_simval_obj(last_changed_val, last_changed_obj, tstamp_buf);
+    val_add_child(last_changed_val, alarm_val);
 
     /*perceived-severity*/
     perceived_severity_obj = obj_find_child(alarm_obj,
@@ -179,10 +207,20 @@ static val_value_t* create_alarm(val_value_t* alarm_list_val, char* resource_str
 static void update_alarm(val_value_t* alarm_val, char* severity_str, char* alarm_text_str, int enable)
 {
     val_value_t* is_cleared_val;
+    val_value_t* last_changed_val;
+    char tstamp_buf[21];
+    status_t res;
+
     /*is-cleared*/
     is_cleared_val=val_find_child(alarm_val,"ietf-alarms","is-cleared");
     assert(is_cleared_val != NULL);
     VAL_BOOL(is_cleared_val)=enable?FALSE:TRUE;
+
+    /*last-changed*/
+    tstamp_datetime (tstamp_buf);
+    last_changed_val=val_find_child(alarm_val,"ietf-alarms","last-changed");
+    assert(last_changed_val != NULL);
+    res = val_set_simval_obj(last_changed_val, last_changed_val->obj, tstamp_buf);
 }
 
 int alarmctrl_event(char* resource_str, char* alarm_type_id_str, char* alarm_type_qualifier_str, char* severity_str, char* alarm_text_str, int enable)

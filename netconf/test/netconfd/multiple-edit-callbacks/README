@@ -1,0 +1,11 @@
+FILES:
+ * run.sh - shell script executing the testcase
+ * session.py - python script connecting to the started netconfd server
+ * startup-cfg.xml - initial configuration
+ * multiple-edit-callbacks-a.c - SIL module test implementation based on ietf-interfaces.yang
+ * multiple-edit-callbacks-b.c
+PURPOSE:
+ Verify seperate modules can register edit callbacks for the same data object identifier
+
+OPERATION:
+ Starts 2 modules registering callbacks for /interfaces/interface one registers /interfaces/interface/a the other /interfaces/interface/b virtual config=false leafs for each created interface instance.

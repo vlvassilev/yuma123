@@ -1,0 +1,30 @@
+module test-multiple-edit-callbacks {
+
+  namespace "http://yuma123.org/ns/test-multiple-edit-callbacks";
+  prefix interfaces-loopback;
+  
+  import ietf-interfaces { prefix if; }
+
+  organization  "yuma123.org";
+  
+  description 
+    "Model for the /interfaces/interface/ ./a and ./b leafs";
+  
+  revision 2016-11-21 {
+    description
+      "1.st version";
+  }
+
+
+  augment "/if:interfaces/if:interface" {
+    leaf a {
+      type string;
+    }
+    leaf b {
+      type string;
+    }
+
+  }
+}
+
+

@@ -639,12 +639,18 @@ static status_t
     /* find the right callback function to call */
     done = FALSE;
     while (!done) {
-        cbset = NULL;
-        if (val->obj && val->obj->cbset) {
-            cbset = val->obj->cbset;
-        }
-        if (cbset != NULL && cbset->cbfn[cbtyp] != NULL) {
+        agt_cb_fnset_node_t *cbset_node;
+        unsigned int cbfn_calls=0;
 
+        for(cbset_node=val->obj?(agt_cb_fnset_node_t *)dlq_firstEntry(&val->obj->cbsetQ):NULL;
+            cbset_node!=NULL;
+            cbset_node=(agt_cb_fnset_node_t *)dlq_nextEntry(cbset_node)) {
+            cbset = cbset_node->fnset_ptr;
+            if(cbset->cbfn[cbtyp]==NULL) {
+                continue;
+            } else {
+                cbfn_calls++;
+            }
             if (LOGDEBUG2) {
                 log_debug2("\nFound %s user callback for %s:%s",
                            agt_cbtype_name(cbtyp),
@@ -657,19 +663,22 @@ static status_t
 
             res = (*cbset->cbfn[cbtyp])(scb, msg, cbtyp, editop, 
                                         newnode, curnode);
-            if (val->res == NO_ERR) {
-                val->res = res;
-            }
-
-            if (LOGDEBUG && res != NO_ERR) {
-                log_debug("\n%s user callback failed (%s) for %s on %s:%s",
+            if(res != NO_ERR) {
+                if (LOGDEBUG) {
+                    log_debug("\n%s user callback failed (%s) for %s on %s:%s",
                           agt_cbtype_name(cbtyp),
                           get_error_string(res),
                           op_editop_name(editop),
                           val_get_mod_name(val),
                           val->name);
+                }
+                return res;
             }
+        }
+        if(cbfn_calls>0) {
             if (res == NO_ERR) {
+                val->res = NO_ERR;
+
                 switch (editop) {
                 case OP_EDITOP_CREATE:
                 case OP_EDITOP_MERGE:
@@ -685,6 +694,7 @@ static status_t
                 }
             }
             return res;
+
         } else if (!lookparent) {
             done = TRUE;
         } else if (val->parent != NULL &&

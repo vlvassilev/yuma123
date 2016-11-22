@@ -870,7 +870,7 @@ static status_t
     }
 
     /* make sure the agent callback set for this RPC is ok */
-    agt_rpc_cbset_t *cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
+    agt_rpc_cbset_t *cbset = (agt_rpc_cbset_t *)rpcobj->rpc_cbset;
     if (!cbset) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -1129,15 +1129,15 @@ status_t
     }
 
     /* get the agent CB set, or create a new one */
-    if (rpcobj->cbset) {
-        cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
+    if (rpcobj->rpc_cbset) {
+        cbset = (agt_rpc_cbset_t *)rpcobj->rpc_cbset;
     } else {
         cbset = m__getObj(agt_rpc_cbset_t);
         if (!cbset) {
             return SET_ERROR(ERR_INTERNAL_MEM);
         }
         memset(cbset, 0x0, sizeof(agt_rpc_cbset_t));
-        rpcobj->cbset = (void *)cbset;
+        rpcobj->rpc_cbset = (void *)cbset;
     }
     rpcobj->def.rpc->supported = TRUE;
 
@@ -1249,9 +1249,9 @@ void
     }
 
     /* get the agent CB set and delete it */
-    if (rpcobj->cbset) {
-        m__free(rpcobj->cbset);
-        rpcobj->cbset = NULL;
+    if (rpcobj->rpc_cbset) {
+        m__free(rpcobj->rpc_cbset);
+        rpcobj->rpc_cbset = NULL;
     }
 
 } /* agt_rpc_unregister_method */
@@ -1476,7 +1476,7 @@ void
                  * if NULL, no agent instrumentation has been 
                  * registered yet for this RPC method
                  */
-                cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
+                cbset = (agt_rpc_cbset_t *)rpcobj->rpc_cbset;
             }
         }
     }

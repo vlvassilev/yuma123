@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2016, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -185,13 +186,15 @@ static void
 * INPUTS:
 *   modhdr == agt_cb_modhdr_t struct to check
 *   defpath == definition path string to find
+*   cbfn == callback function pointer
 *
 * RETURNS:
 *   pointer to found callback record or NULL if not found
 *********************************************************************/
 static agt_cb_set_t *
     find_callback (agt_cb_modhdr_t *modhdr,
-                   const xmlChar *defpath)
+                   const xmlChar *defpath,
+                   const agt_cb_fn_t cbfn)
 {
     agt_cb_set_t *callback;
     int           ret;
@@ -203,7 +206,9 @@ static agt_cb_set_t *
 
          ret = xml_strcmp(defpath, callback->defpath);
          if (ret == 0) {
-             return callback;
+             if(cbfn==NULL || callback->cbset.cbfn[AGT_CB_VALIDATE]==cbfn) {
+                 return callback;
+             }
          } else if (ret < 0) {
              return NULL;
          }
@@ -238,9 +243,7 @@ static status_t
          cb = (agt_cb_set_t *)dlq_nextEntry(cb)) {
 
          ret = xml_strcmp(callback->defpath, cb->defpath);
-         if (ret == 0) {
-             return ERR_NCX_ENTRY_EXISTS;
-         } else if (ret < 0) {
+         if (ret < 0) {
              dlq_insertAhead(callback, cb);
              return NO_ERR;
          }
@@ -402,8 +405,15 @@ static status_t
     /* find the object template for this callback */
     res = xpath_find_schema_target_int(callback->defpath, &obj);
     if (res == NO_ERR) {
+        agt_cb_fnset_node_t* cbset_node;
         /* set the callbacks in the object */
-        obj->cbset = &callback->cbset;
+        cbset_node = m__getObj(agt_cb_fnset_node_t);
+        if(!cbset_node) {
+            return ERR_INTERNAL_MEM;
+        }
+        cbset_node->fnset_ptr = &callback->cbset;
+        dlq_enque(cbset_node, &obj->cbsetQ);
+
         callback->loadstatus = AGTCB_STAT_LOADED;
         callback->status = NO_ERR;
 
@@ -559,11 +569,6 @@ status_t
         }
     }
 
-    callback = find_callback(modhdr, defpath);
-    if (callback) {
-        return SET_ERROR(ERR_NCX_DUP_ENTRY);
-    }
-
     memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
     for (cbtyp = AGT_CB_VALIDATE;
          cbtyp <= AGT_CB_ROLLBACK;
@@ -571,9 +576,9 @@ status_t
         cbset.cbfn[cbtyp] = cbfn;
     }
 
-    callback = new_callback(modhdr, 
-                            defpath, 
-                            version, 
+    callback = new_callback(modhdr,
+                            defpath,
+                            version,
                             &cbset);
     if (!callback) {
         return ERR_INTERNAL_MEM;
@@ -651,11 +656,6 @@ status_t
         }
     }
 
-    callback = find_callback(modhdr, defpath);
-    if (callback) {
-        return SET_ERROR(ERR_NCX_DUP_ENTRY);
-    }
-
     callback = new_callback(modhdr, 
                             defpath, 
                             version, 
@@ -687,8 +687,9 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_cb_unregister_callback
-* 
-* Unregister all callback functions for a specific object
+*
+* Unregister all callback functions for a specific object with mathching
+* callback function pointers.
 *
 * INPUTS:
 *   modname == module containing the object for this callback
@@ -698,8 +699,9 @@ status_t
 *   none
 *********************************************************************/
 void
-    agt_cb_unregister_callbacks (const xmlChar *modname,
-                                 const xmlChar *defpath)
+    agt_cb_unregister_callback(const xmlChar *modname,
+                               const xmlChar *defpath,
+                               const agt_cb_fn_t cbfn)
 {
     agt_cb_modhdr_t  *modhdr;
     agt_cb_set_t     *callback;
@@ -719,10 +721,25 @@ void
         return;
     }
 
-    callback = find_callback(modhdr, defpath);
+    callback = find_callback(modhdr, defpath, cbfn);
     if (!callback) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return;
+    }
+
+    res = xpath_find_schema_target_int(defpath, &obj);
+    if (res == NO_ERR) {
+        agt_cb_fnset_node_t* cbset_node;
+        for (cbset_node = (agt_cb_fnset_node_t*)dlq_firstEntry(&obj->cbsetQ);
+             cbset_node!=NULL;
+             cbset_node = (xpath_pcb_t *)dlq_nextEntry(cbset_node)) {
+             if(cbset_node->fnset_ptr->cbfn[AGT_CB_VALIDATE] == cbfn) {
+                 break;
+             }
+        }
+        if(cbset_node!=NULL) {
+            dlq_remove(cbset_node);
+        }
     }
 
     dlq_remove(callback);
@@ -733,12 +750,25 @@ void
         free_modhdr(modhdr);
     }
 
-    res = xpath_find_schema_target_int(defpath, &obj);
-    if (res == NO_ERR) {
-        obj->cbset = NULL;
-    }
+}  /* agt_cb_unregister_callback */
 
+/********************************************************************
+* FUNCTION agt_cb_unregister_callbacks
+*
+* Unregister all callback functions for a specific object
+*
+* INPUTS:
+*   modname == module containing the object for this callback
+*   defpath == definition XPath location
+*
+* RETURNS:
+*   none
+*********************************************************************/
+void
+    agt_cb_unregister_callbacks (const xmlChar *modname,
+                                 const xmlChar *defpath)
+{
+    agt_cb_unregister_callback(modname,defpath,NULL);
 }  /* agt_cb_unregister_callbacks */
-
 
 /* END file agt_cb.c */

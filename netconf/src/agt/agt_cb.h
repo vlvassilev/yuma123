@@ -94,6 +94,11 @@ typedef struct agt_cb_fnset_t_ {
     agt_cb_fn_t    cbfn[AGT_NUM_CB];
 } agt_cb_fnset_t;
 
+typedef struct agt_cb_fnset_node_t_ {
+    dlq_hdr_t          qhdr;
+    agt_cb_fnset_t*    fnset_ptr;
+} agt_cb_fnset_node_t;
+
 
 /********************************************************************
 *								    *
@@ -153,6 +158,8 @@ extern status_t
 
 /********************************************************************
 * FUNCTION agt_cb_register_callbacks
+*   !!!DEPRECATED - breaks multiple callbacks per obj id
+*   Use agt_cb_register_callback instead.
 * 
 * Register an object specific callback function
 * setup array of callbacks, could be different or NULL
@@ -180,8 +187,11 @@ extern status_t
 
 
 /********************************************************************
-* FUNCTION agt_cb_unregister_callback
+* FUNCTION agt_cb_unregister_callbacks
+*   !!!DEPRECATED - breaks multiple callbacks per obj id
+*   Use agt_cb_unregister_callbacks instead.
 * 
+*
 * Unregister all callback functions for a specific object
 *
 * INPUTS:
@@ -194,6 +204,27 @@ extern status_t
 extern void
     agt_cb_unregister_callbacks (const xmlChar *modname,
 				 const xmlChar *defpath);
+
+/********************************************************************
+* FUNCTION agt_cb_unregister_callback
+*
+* Unregister all callback functions for a specific object with mathching
+* callback function pointers.
+*
+* INPUTS:
+*   modname == module containing the object for this callback
+*   defpath == definition XPath location
+*   cbfn == pointer to registered callback function, if NULL will remove
+*           the first matching callback
+*
+* RETURNS:
+*   none
+*********************************************************************/
+extern void
+    agt_cb_unregister_callback(const xmlChar *modname,
+                               const xmlChar *defpath,
+                               const agt_cb_fn_t cbfn);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

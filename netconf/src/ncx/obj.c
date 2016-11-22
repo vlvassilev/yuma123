@@ -129,6 +129,8 @@ static void init_template (obj_template_t *obj)
     dlq_createSQue(&obj->iffeatureQ);
     dlq_createSQue(&obj->inherited_iffeatureQ);
     dlq_createSQue(&obj->inherited_whenQ);
+    dlq_createSQue(&obj->cbsetQ);
+    obj->rpc_cbset=NULL;
 
 }  /* init_template */
 
@@ -6513,8 +6515,6 @@ obj_template_t *
         obj_free_template(newobj);
         return NULL;
     }
-    
-    //newobj->cbset not set
 
     newobj->mod = mod;
     newobj->nsid = mod->nsid;

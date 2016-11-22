@@ -460,8 +460,11 @@ typedef struct obj_template_t_ {
     dlq_hdr_t          inherited_iffeatureQ;   /* Q of obj_iffeature_ptr_t */
     dlq_hdr_t          inherited_whenQ;     /* Q of obj_xpath_ptr_t */
 
-    /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
-    void                   *cbset;   
+    /* callbacks */
+    /* agt_rpc_fnset_t for RPC */
+    void                        *rpc_cbset;
+    /* ...or agt_cb_fnset_node_t queue for data OBJ */
+    dlq_hdr_t                   cbsetQ;
 
     /* object module and namespace ID 
      * assigned at runtime

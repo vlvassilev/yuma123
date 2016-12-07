@@ -13,7 +13,9 @@ $(top_srcdir)/netconf/modules/ietf/iana-timezones.yang \
 $(top_srcdir)/netconf/modules/ietf/notifications.yang
 
 ietf_draft_yang_DATA = \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network@2016-11-30.yang  \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology@2016-11-30.yang
 
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \

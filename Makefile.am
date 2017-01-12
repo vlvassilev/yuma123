@@ -15,6 +15,8 @@ netconf/src/yangdump \
 netconf/src/yangdiff \
 netconf/man
 
+#netconf/test
+
 #netconf/src/yangrpc/yanghttpd
 
 
@@ -87,8 +89,8 @@ $(top_srcdir)/netconf/src/ncx/xml_val.h \
 $(top_srcdir)/netconf/src/ncx/cfg.h \
 $(top_srcdir)/netconf/src/ncx/help.h \
 $(top_srcdir)/netconf/src/ncx/yang_parse.h \
-$(top_srcdir)/netconf/src/ncx/libncx.h
-
+$(top_srcdir)/netconf/src/ncx/libncx.h \
+$(top_srcdir)/netconf/src/ncx/val123.h
 
 agt_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/agt/agt_yuma_arp.h \

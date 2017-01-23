@@ -77,6 +77,7 @@ val_value_t* val123_get_first_obj_instance(val_value_t* top_val, obj_template_t*
 {
     obj_template_t* child_obj;
     val_value_t* child_val;
+    val_value_t* result_val=NULL;
     assert(obj);
     if(top_val==NULL) {
         return NULL;
@@ -86,7 +87,18 @@ val_value_t* val123_get_first_obj_instance(val_value_t* top_val, obj_template_t*
     }
     child_obj = obj123_get_child_ancestor_of_descendant(top_val->obj, obj);
     child_val = val_find_child(top_val, obj_get_mod_name(child_obj), obj_get_name(child_obj));
-    return val123_get_first_obj_instance(child_val,obj);
+    while(child_val) {
+        result_val = val123_get_first_obj_instance(child_val,obj);
+        if(result_val!=NULL) {
+            break;
+        }
+        if(child_val->obj->objtype==OBJ_TYP_LIST) {
+            child_val = val_find_next_child(top_val, obj_get_mod_name(child_val->obj), obj_get_name(child_val->obj),child_val);
+        } else {
+            break;
+        }
+    };
+    return result_val;
 }
 
 val_value_t* val123_get_next_obj_instance(val_value_t* top_val, val_value_t* cur_val)

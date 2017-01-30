@@ -2491,6 +2491,8 @@ status_t
             xmlnode->nodetyp = XML_NT_END;
             done = TRUE;
             break;
+
+        case XML_CDATA_SECTION_NODE:
         case XML_TEXT_NODE:
      /* case XML_DTD_NODE: */
             xmlnode->nodetyp = XML_NT_STRING;

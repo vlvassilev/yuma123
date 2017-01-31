@@ -1541,6 +1541,12 @@ static boolean
         return TRUE;
     }
 
+    /* super user is allowed to access anything except user-write blocked */
+    if (is_superuser(user)) {
+        (*logfn)("\nagt_acm: PERMIT (superuser)");
+        return TRUE;
+    }
+
     /* ncx:user-write blocking has highest priority */
     if(iswrite) {
         switch (editop) {
@@ -1575,12 +1581,6 @@ static boolean
         }
     } else {
         access = "read";
-    }
-
-    /* super user is allowed to access anything except user-write blocked */
-    if (is_superuser(user)) {
-        (*logfn)("\nagt_acm: PERMIT (superuser)");
-        return TRUE;
     }
 
     if (cache->mode == AGT_ACMOD_DISABLED) {

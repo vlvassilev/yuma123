@@ -1,9 +1,15 @@
-Yuma to-do List (2016-08-26)
+yuma123 to-do List (2017-01-31)
 
 This file contains the list of known items not finished in the source code.
-  -- Docs
-    -- Design spec
-    -- Doxygen
+  -- Move from the notifications in yuma-system.yang to the ones in ietf-netconf-notifications.yang (sysConfigChange->netconfd-config-change , .. etc.)
+  -- ietf-yang-library.yang implementation
+  -- YANG 1.1 support (RFC 7950)
+   -- new Xpath functions - re-match, deref, derived-from*, enum-value, bit-is-set
+   -- if-feature in identities, enum, bit
+   -- action statement
+   -- anydata statement
+   -- modifier statement
+   -- ... to be continued
   -- yangdump
    -- comments are not translated at all; they are always discarded
    -- ncx:cli YANG convert to unix man files

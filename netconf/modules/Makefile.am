@@ -10,7 +10,9 @@ $(top_srcdir)/netconf/modules/ietf/nc-notifications.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-with-defaults.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-acm.yang \
 $(top_srcdir)/netconf/modules/ietf/iana-timezones.yang \
-$(top_srcdir)/netconf/modules/ietf/notifications.yang
+$(top_srcdir)/netconf/modules/ietf/notifications.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-netconf-notifications.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-library@2016-06-21.yang
 
 ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang \

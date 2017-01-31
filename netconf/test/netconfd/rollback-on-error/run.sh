@@ -7,4 +7,4 @@ NETCONFD_PID=$!
 sleep 1
 python session.py
 kill $NETCONFD_PID
-cat /tmp/netconf.stdout
+cat tmp/netconfd.stdout

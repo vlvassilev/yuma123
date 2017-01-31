@@ -1,0 +1,10 @@
+FILES:
+ * run.sh - shell script executing the testcase
+ * session.ncclient.py - python script connecting to the started netconfd server copy config and rerify the configuration is correctly committed
+ * startup-cfg.xml - initial configuration
+
+PURPOSE:
+ Verify copy-config works
+
+OPERATION:
+ Uses copy-config and reads back the configuration with get-config for verification.

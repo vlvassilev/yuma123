@@ -1,0 +1,10 @@
+FILES:
+ * run.sh - shell script executing the testcase
+ * session.ncclient.py - python script connecting to the started netconfd server performing edit-config RPCs and verify the configuration is correctly committed
+ * startup-cfg.xml - initial configuration
+
+PURPOSE:
+ Verify edit-config works
+
+OPERATION:
+ Uses edit-config and reads back the configuration with get-config for verification.

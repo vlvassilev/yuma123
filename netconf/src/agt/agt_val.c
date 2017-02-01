@@ -3291,6 +3291,10 @@ static status_t
                 /* deleted in the source, so delete in the target */
                 res = handle_callback(AGT_CB_APPLY, OP_EDITOP_DELETE, 
                                       scb, msg, target, NULL, curval, runval);
+                assert(res==NO_ERR);
+            } else {
+                res = apply_commit_deletes(scb, msg, target, matchval, curval);
+                assert(res==NO_ERR);
             }
         }  /* else skip non-config database node */
     }

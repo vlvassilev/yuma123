@@ -282,7 +282,7 @@ void
         }
     } else {
         log_debug("\nagt_connect msg ok");
-        agt_sys_send_sysSessionStart(scb);
+        agt_sys_send_netconf_session_start(scb);
     }
     
 } /* agt_connect_dispatch */

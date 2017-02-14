@@ -32,29 +32,12 @@ date             init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_dlq
 #include "dlq.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_ses
 #include "ses.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include "tstamp.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -130,9 +113,9 @@ extern void
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysSessionStart
+* FUNCTION agt_sys_send_netconf_session_start
 *
-* Queue the <sysSessionStart> notification
+* Queue the <netconf-session-start> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
@@ -142,18 +125,18 @@ extern void
 *
 *********************************************************************/
 extern void
-    agt_sys_send_sysSessionStart (const ses_cb_t *scb);
+    agt_sys_send_netconf_session_start (const ses_cb_t *scb);
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysSessionEnd
+* FUNCTION agt_sys_send_netconf_session_end
 *
-* Queue the <sysSessionEnd> notification
+* Queue the <netconf-session-end> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
-*   termreason == enum for the terminationReason leaf
-*   killedby == session-id for killedBy leaf if termreason == "killed"
+*   termreason == enum for the termination-reason leaf
+*   killedby == session-id for killedBy leaf if termination-reason == "killed"
 *               ignored otherwise
 *
 * OUTPUTS:
@@ -161,15 +144,15 @@ extern void
 *
 *********************************************************************/
 extern void
-    agt_sys_send_sysSessionEnd (const ses_cb_t *scb,
+    agt_sys_send_netconf_session_end (const ses_cb_t *scb,
 				ses_term_reason_t termreason,
 				ses_id_t killedby);
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysConfigChange
+* FUNCTION agt_sys_send_netconf_config_change
 *
-* Queue the <sysConfigChange> notification
+* Queue the <netconf-config-change> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
@@ -181,7 +164,8 @@ extern void
 *
 *********************************************************************/
 extern void
-    agt_sys_send_sysConfigChange (const ses_cb_t *scb,
+
+    agt_sys_send_netconf_config_change (const ses_cb_t *scb,
                                   dlq_hdr_t *auditrecQ);
 
 

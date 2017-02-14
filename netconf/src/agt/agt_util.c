@@ -733,6 +733,7 @@ xmlChar *
     /* check for whitespace and other chars */
     str = &urlstr[schemelen];
     while (*str) {
+//        if (xml_isspace(*str) || *str==';' /*|| *str==NCXMOD_PSCHAR*/) {
         if (xml_isspace(*str) || *str==';' || *str==NCXMOD_PSCHAR) {
             *res = ERR_NCX_INVALID_VALUE;
             return NULL;

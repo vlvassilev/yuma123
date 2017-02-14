@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -184,9 +185,12 @@ date         init     comment
 
 static boolean              agt_sys_init_done = FALSE;
 
-/* system.yang */
+/* ietf-system.yang */
 static ncx_module_t         *ietf_sysmod;
+/* system.yang */
 static ncx_module_t         *sysmod;
+/* ietf-netconf-notifications.yang */
+static ncx_module_t         *ietf_netconf_notifications_mod;
 
 /* cached pointer to the <system> element template */
 static obj_template_t *ietf_system_state_obj;
@@ -194,9 +198,7 @@ static obj_template_t *yuma_system_obj;
 
 /* cached pointers to the eventType nodes for this module */
 static obj_template_t *sysStartupobj;
-static obj_template_t *sysConfigChangeobj;
 static obj_template_t *sysCapabilityChangeobj;
-static obj_template_t *sysSessionStartobj;
 static obj_template_t *sysSessionEndobj;
 static obj_template_t *sysConfirmedCommitobj;
 
@@ -493,6 +495,91 @@ static void
 
 } /* add_common_session_parms */
 
+/********************************************************************
+* FUNCTION netconf_notifications_add_common_session_parms
+*
+* Add the leafs from the SysCommonSessionParms grouping
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*   not == notification msg to use to add parms into
+*
+* OUTPUTS:
+*   'not' payloadQ has malloced entries added to it
+*********************************************************************/
+static void
+    netconf_notifications_add_common_session_parms (const ses_cb_t *scb,
+                              agt_not_msg_t *not,
+                              val_value_t* parent_val)
+{
+    obj_template_t  *parent_obj;
+    val_value_t     *leafval;
+    status_t         res;
+    ses_id_t         use_sid;
+
+    if(not!=NULL) {
+        assert(parent_val==NULL);
+        parent_obj = not->notobj;
+    } else if(parent_val!=NULL) {
+        assert(not==NULL);
+        parent_obj=parent_val->obj;
+    } else {
+        assert(0);
+    }
+
+    /* add userName */
+    if (scb->username) {
+        leafval = agt_make_leaf(parent_obj,
+                                "username",
+                                scb->username,
+                                &res);
+        assert(leafval);
+        if(not) {
+            agt_not_add_to_payload(not, leafval);
+        } else {
+            val_add_child(leafval, parent_val);
+        }
+    }
+
+    /* add sessionId */
+    if (scb->sid) {
+        use_sid = scb->sid;
+    } else if (scb->rollback_sid) {
+        use_sid = scb->rollback_sid;
+    } else {
+        res = ERR_NCX_NOT_IN_RANGE;
+        use_sid = 0;
+    }
+
+    if (use_sid) {
+        leafval = agt_make_uint_leaf(parent_obj,
+                                "session-id",
+                                use_sid,
+                                &res);
+        assert(leafval);
+        if(not) {
+            agt_not_add_to_payload(not, leafval);
+        } else {
+            val_add_child(leafval, parent_val);
+        }
+    }
+
+    /* add remoteHost */
+    if (scb->peeraddr) {
+        leafval = agt_make_leaf(parent_obj,
+                                "source-host",
+                                scb->peeraddr,
+                                &res);
+        assert(leafval);
+        if(not) {
+            agt_not_add_to_payload(not, leafval);
+        } else {
+            val_add_child(leafval, parent_val);
+        }
+    }
+
+} /* netconf_notifications_add_common_session_parms */
+
 
 /********************************************************************
 * FUNCTION init_static_vars
@@ -508,9 +595,7 @@ static void
     ietf_system_state_obj = NULL;
     yuma_system_obj = NULL;
     sysStartupobj = NULL;
-    sysConfigChangeobj = NULL;
     sysCapabilityChangeobj = NULL;
-    sysSessionStartobj = NULL;
     sysSessionEndobj = NULL;
     sysConfirmedCommitobj = NULL;
 
@@ -567,6 +652,15 @@ status_t
         return res;
     }
 
+    /* load the ietf-netconf-notifications module */
+    res = ncxmod_load_module("ietf-netconf-notifications",
+                             NULL,
+                             &agt_profile->agt_savedevQ,
+                             &ietf_netconf_notifications_mod);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* find the object definition for the system element */
     ietf_system_state_obj = ncx_find_object(ietf_sysmod,
                                 ietf_system_N_system_state);
@@ -590,24 +684,10 @@ status_t
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    sysConfigChangeobj = 
-        ncx_find_object(sysmod,
-                        system_N_sysConfigChange);
-    if (!sysConfigChangeobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
     sysCapabilityChangeobj = 
         ncx_find_object(sysmod,
                         system_N_sysCapabilityChange);
     if (!sysCapabilityChangeobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    sysSessionStartobj = 
-        ncx_find_object(sysmod,
-                        system_N_sysSessionStart);
-    if (!sysSessionStartobj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -871,9 +951,9 @@ void
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysSessionStart
+* FUNCTION agt_sys_send_netconf_session_start
 *
-* Queue the <sysSessionStart> notification
+* Queue the <netconf-session-start> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
@@ -883,31 +963,37 @@ void
 *
 *********************************************************************/
 void
-    agt_sys_send_sysSessionStart (const ses_cb_t *scb)
+    agt_sys_send_netconf_session_start (const ses_cb_t *scb)
 {
     agt_not_msg_t         *not;
+    obj_template_t        *netconf_session_start_obj;
 
     if (LOGDEBUG) {
-        log_debug("\nagt_sys: generating <sysSessionStart> "
+        log_debug("\nagt_sys: generating <netconf-session-start> "
                   "notification");
     }
 
-    not = agt_not_new_notification(sysSessionStartobj);
+    netconf_session_start_obj = 
+        ncx_find_object(ietf_netconf_notifications_mod,
+                        "netconf-session-start");
+    assert(netconf_session_start_obj);
+
+    not = agt_not_new_notification(netconf_session_start_obj);
     if (!not) {
         log_error("\nError: malloc failed; cannot "
-                  "send <sysSessionStartup>");
+                  "send <netconf-session-start>");
         return;
     }
 
-    add_common_session_parms(scb, not);
+    netconf_notifications_add_common_session_parms(scb, not, NULL /*parent_val*/);
 
     agt_not_queue_notification(not);
 
-} /* agt_sys_send_sysSessionStart */
+} /* agt_sys_send_netconf_session_start */
 
 
 /********************************************************************
-* FUNCTION getTermReasonStr
+* FUNCTION get_termination_reason_str
 *
 * Convert the termination reason enum to a string
 *
@@ -919,7 +1005,7 @@ void
 *
 *********************************************************************/
 static const xmlChar*
-    getTermReasonStr ( ses_term_reason_t termreason)
+    get_termination_reason_str ( ses_term_reason_t termreason)
 {
     const xmlChar         *termreasonstr;
 
@@ -943,12 +1029,10 @@ static const xmlChar*
     case SES_TR_OTHER:
         termreasonstr = (const xmlChar *)"other";
         break;
-    case SES_TR_BAD_START:
-        termreasonstr = (const xmlChar *)"bad-start";
-        break;
     case SES_TR_BAD_HELLO:
         termreasonstr = (const xmlChar *)"bad-hello";
         break;
+    case SES_TR_BAD_START:
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         termreasonstr = (const xmlChar *)"other";
@@ -959,14 +1043,14 @@ static const xmlChar*
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysSessionEnd
+* FUNCTION agt_sys_send_netconf_session_end
 *
-* Queue the <sysSessionEnd> notification
+* Queue the <netconf-session-end> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
-*   termreason == enum for the terminationReason leaf
-*   killedby == session-id for killedBy leaf if termreason == "killed"
+*   termreason == enum for the termination-reason leaf
+*   killedby == session-id for killed-by leaf if termination_reason == "killed"
 *               ignored otherwise
 *
 * OUTPUTS:
@@ -974,61 +1058,61 @@ static const xmlChar*
 *
 *********************************************************************/
 void
-    agt_sys_send_sysSessionEnd (const ses_cb_t *scb,
-                                ses_term_reason_t termreason,
-                                ses_id_t killedby)
+    agt_sys_send_netconf_session_end(const ses_cb_t *scb,
+                                ses_term_reason_t termination_reason,
+                                ses_id_t killed_by)
 {
     agt_not_msg_t         *not;
     val_value_t           *leafval;
-    const xmlChar         *termreasonstr;
+    const xmlChar         *termination_reason_str;
     status_t               res;
 
-    assert(scb && "agt_sys_send_sysSessionEnd() - param scb is NULL");
+    obj_template_t        *netconf_session_end_obj;
 
-    log_debug("\nagt_sys: generating <sysSessionEnd> notification");
 
-    not = agt_not_new_notification(sysSessionEndobj);
-    if (!not) {
-        log_error("\nError: malloc failed; cannot send <sysSessionEnd>");
-        return;
-    }
+    assert(scb && "agt_sys_send_netconf_session_end() - param scb is NULL");
+
+    log_debug("\nagt_sys: generating <netconf-session-end> notification");
+
+    netconf_session_end_obj = 
+        ncx_find_object(ietf_netconf_notifications_mod,
+                        "netconf-session-end");
+    assert(netconf_session_end_obj);
+
+    not = agt_not_new_notification(netconf_session_end_obj);
+    assert(not);
 
     /* session started;  not just being killed
      * in the <ncxconnect> message handler */
-    if (termreason != SES_TR_BAD_START) {
-        add_common_session_parms(scb, not);
+    if (termination_reason != SES_TR_BAD_START) {
+        netconf_notifications_add_common_session_parms(scb, not, NULL /*parent_val*/);
     }
 
     /* add sysSessionEnd/killedBy */
-    if (termreason == SES_TR_KILLED) {
-        leafval = agt_make_uint_leaf( sysSessionEndobj, system_N_killedBy, 
-                                      killedby, &res );
-        if (leafval) {
-            agt_not_add_to_payload(not, leafval);
-        } else {
-            payload_error(system_N_killedBy, res);
-        }
+    if (termination_reason == SES_TR_KILLED) {
+        leafval = agt_make_uint_leaf( netconf_session_end_obj, "killed-by", 
+                                      killed_by, &res );
+        assert(leafval);
+        agt_not_add_to_payload(not, leafval);
     }
 
     /* add sysSessionEnd/terminationReason */
-    termreasonstr = getTermReasonStr(termreason);
-    leafval = agt_make_leaf( sysSessionEndobj, system_N_terminationReason, 
-                             termreasonstr, &res );
-    if (leafval) {
-        agt_not_add_to_payload(not, leafval);
-    } else {
-        payload_error(system_N_terminationReason, res);
-    }
+    termination_reason_str = get_termination_reason_str(termination_reason);
+    leafval = agt_make_leaf( netconf_session_end_obj, "termination-reason", 
+                             termination_reason_str, &res );
+    assert(leafval);
+
+    agt_not_add_to_payload(not, leafval);
 
     agt_not_queue_notification(not);
-} /* agt_sys_send_sysSessionEnd */
+} /* agt_sys_send_netconf_session_end */
 
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysConfigChange
+* FUNCTION agt_sys_send_netconf_config_change
 *
-* Queue the <sysConfigChange> notification
+* Queue the <netconf-config-change> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
@@ -1040,12 +1124,13 @@ void
 *
 *********************************************************************/
 void
-    agt_sys_send_sysConfigChange (const ses_cb_t *scb,
+    agt_sys_send_netconf_config_change (const ses_cb_t *scb,
                                   dlq_hdr_t *auditrecQ)
 {
     agt_not_msg_t         *not;
     agt_cfg_audit_rec_t   *auditrec;
     val_value_t           *leafval, *listval;
+    obj_template_t        *netconf_config_change_obj; 
     obj_template_t        *listobj;
     status_t               res;
 
@@ -1057,22 +1142,39 @@ void
 #endif
 
     if (LOGDEBUG) {
-        log_debug("\nagt_sys: generating <sysConfigChange> "
+        log_debug("\nagt_sys: generating <netconf-config-change> "
                   "notification");
     }
+    netconf_config_change_obj = 
+        ncx_find_object(ietf_netconf_notifications_mod,
+                        "netconf-config-change");
+    assert(netconf_config_change_obj);
 
-    not = agt_not_new_notification(sysConfigChangeobj);
+    not = agt_not_new_notification(netconf_config_change_obj);
     if (!not) {
         log_error("\nError: malloc failed; cannot "
-                  "send <sysConfigChange>");
+                  "send <netconf-config-change>");
         return;
     }
+    {
+        obj_template_t  *changed_by_obj;
+        val_value_t     *changed_by_val;
 
-    add_common_session_parms(scb, not);
+        changed_by_obj = 
+            obj_find_child(not->notobj,
+                            "ietf-netconf-notifications",
+                            "changed-by");
+        assert(changed_by_obj);
+        changed_by_val = val_new_value();
+        val_init_from_template(changed_by_val, changed_by_obj);
 
-    listobj = obj_find_child(sysConfigChangeobj,
-                             AGT_SYS_MODULE,
-                             system_N_edit);
+
+        netconf_notifications_add_common_session_parms(scb, NULL /*not*/, changed_by_val);
+    }
+
+    listobj = obj_find_child(netconf_config_change_obj,
+                             "ietf-netconf-notifications",
+                             "edit");
     if (listobj == NULL) {
         SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     } else {
@@ -1080,19 +1182,18 @@ void
              auditrec != NULL;
              auditrec = (agt_cfg_audit_rec_t *)dlq_nextEntry(auditrec)) {
 
-            /* add sysConfigChange/edit */
+            /* add netconf-config-change/edit */
             listval = val_new_value();
-            if (listval == NULL) {
-                payload_error(system_N_edit, ERR_INTERNAL_MEM);
-            } else {
+            assert(listval != NULL);
+            {
                 val_init_from_template(listval, listobj);
 
                 /* pass off listval malloc here */
                 agt_not_add_to_payload(not, listval);            
 
-                /* add sysConfigChange/edit/target */
+                /* add netconf-config-change/edit/target */
                 leafval = agt_make_leaf(listobj,
-                                        system_N_target,
+                                        "target",
                                         auditrec->target,
                                         &res);
                 if (leafval) {
@@ -1101,9 +1202,9 @@ void
                     payload_error(system_N_target, res);
                 }
 
-                /* add sysConfigChange/edit/operation */
+                /* add netconf-config-change/edit/operation */
                 leafval = agt_make_leaf(listobj,
-                                        system_N_operation,
+                                        "operation",
                                         op_editop_name(auditrec->editop),
                                         &res);
                 if (leafval) {
@@ -1117,7 +1218,7 @@ void
 
     agt_not_queue_notification(not);
 
-} /* agt_sys_send_sysConfigChange */
+} /* agt_sys_send_netconf_config_change */
 
 
 /********************************************************************

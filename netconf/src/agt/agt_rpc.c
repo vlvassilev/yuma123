@@ -1661,7 +1661,7 @@ void
      * the running config were made
      */
     if (msg->rpc_txcb && !dlq_empty(&msg->rpc_txcb->auditQ)) {
-        agt_sys_send_sysConfigChange(scb, &msg->rpc_txcb->auditQ);
+        agt_sys_send_netconf_config_change(scb, &msg->rpc_txcb->auditQ);
     }
 
     /* only reset the session state to idle if was not changed

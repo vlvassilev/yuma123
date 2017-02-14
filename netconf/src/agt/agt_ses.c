@@ -788,7 +788,7 @@ void
         }
     }
 
-    agt_sys_send_sysSessionEnd(scb,
+    agt_sys_send_netconf_session_end(scb,
                                termreason,
                                killedby);
 

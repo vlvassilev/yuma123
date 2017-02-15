@@ -2324,7 +2324,7 @@ static status_t
                 }
                 save_nvstore = FALSE;
                 timeout_extended = TRUE;
-                agt_sys_send_sysConfirmedCommit(scb, NCX_CC_EVENT_EXTEND);
+                agt_sys_send_netconf_confirmed_commit(scb, NCX_CC_EVENT_EXTEND);
             }
         } else {
             /* confirmedval == NULL; finishing conf-commit */
@@ -2343,7 +2343,7 @@ static status_t
                 res = agt_ncx_cfg_save(running, FALSE);
             }
             if (res == NO_ERR) {
-                agt_sys_send_sysConfirmedCommit(scb, NCX_CC_EVENT_COMPLETE);
+                agt_sys_send_netconf_confirmed_commit(scb, NCX_CC_EVENT_COMPLETE);
 
                 clear_commit_cb();
             }
@@ -2403,7 +2403,7 @@ static status_t
                                "%u seconds",
                                commit_cb.cc_cancel_timeout);
                 }
-                agt_sys_send_sysConfirmedCommit(scb, NCX_CC_EVENT_START);
+                agt_sys_send_netconf_confirmed_commit(scb, NCX_CC_EVENT_START);
             }
         } else {
             /* no confirmed commit is starting */
@@ -3040,7 +3040,7 @@ static status_t
         if (!moduri) {
             res = ERR_INTERNAL_MEM;
         } else {
-            agt_sys_send_sysCapabilityChange(scb, TRUE, moduri);
+            agt_sys_send_netconf_capability_change(scb, TRUE, moduri);
             m__free(moduri);
         }
     }
@@ -3930,7 +3930,7 @@ void
         }
     }
 
-    agt_sys_send_sysConfirmedCommit(scb, event);
+    agt_sys_send_netconf_confirmed_commit(scb, event);
 
     clear_commit_cb();
 

@@ -170,12 +170,12 @@ extern void
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysCapabilityChange
+* FUNCTION agt_sys_send_netconf_capability_change
 *
-* Send a <sysCapabilityChange> event for a module
+* Send a <netconf-capability-change> event for a module
 * being added
 *
-* Queue the <sysCapabilityChange> notification
+* Queue the <netconf-capability-change> notification
 *
 * INPUTS:
 *   changed_by == session control block that made the
@@ -190,15 +190,15 @@ extern void
 *
 *********************************************************************/
 extern void
-    agt_sys_send_sysCapabilityChange (ses_cb_t *changed_by,
+    agt_sys_send_netconf_capability_change (ses_cb_t *changed_by,
                                       boolean is_add,
                                       const xmlChar *capstr);
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysConfirmedCommit
+* FUNCTION agt_sys_send_netconf_confirmed_commit
 *
-* Queue the <sysConfirmedCommit> notification
+* Queue the <netconf-confirmed-commit> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
@@ -209,7 +209,7 @@ extern void
 *
 *********************************************************************/
 extern void
-    agt_sys_send_sysConfirmedCommit (const ses_cb_t *scb,
+    agt_sys_send_netconf_confirmed_commit (const ses_cb_t *scb,
                                      ncx_confirm_event_t event);
 
 #ifdef __cplusplus

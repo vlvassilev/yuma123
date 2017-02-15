@@ -425,77 +425,6 @@ static void
 
 
 /********************************************************************
-* FUNCTION add_common_session_parms
-*
-* Add the leafs from the SysCommonSessionParms grouping
-*
-* INPUTS:
-*   scb == session control block to use for payload values
-*   not == notification msg to use to add parms into
-*
-* OUTPUTS:
-*   'not' payloadQ has malloced entries added to it
-*********************************************************************/
-static void
-    add_common_session_parms (const ses_cb_t *scb,
-                              agt_not_msg_t *not)
-{
-    val_value_t     *leafval;
-    status_t         res;
-    ses_id_t         use_sid;
-
-    /* add userName */
-    if (scb->username) {
-        leafval = agt_make_leaf(not->notobj,
-                                system_N_userName,
-                                scb->username,
-                                &res);
-        if (leafval) {
-            agt_not_add_to_payload(not, leafval);
-        } else {
-            payload_error(system_N_userName, res);
-        }
-    }
-
-    /* add sessionId */
-    if (scb->sid) {
-        use_sid = scb->sid;
-    } else if (scb->rollback_sid) {
-        use_sid = scb->rollback_sid;
-    } else {
-        res = ERR_NCX_NOT_IN_RANGE;
-        use_sid = 0;
-    }
-
-    leafval = NULL;
-    if (use_sid) {
-        leafval = agt_make_uint_leaf(not->notobj,
-                                     system_N_sessionId,
-                                     use_sid,
-                                     &res);
-    }
-    if (leafval) {
-        agt_not_add_to_payload(not, leafval);
-    } else {
-        payload_error(system_N_sessionId, res);
-    }
-
-    /* add remoteHost */
-    if (scb->peeraddr) {
-        leafval = agt_make_leaf(not->notobj,
-                                system_N_remoteHost,
-                                scb->peeraddr,
-                                &res);
-        if (leafval) {
-            agt_not_add_to_payload(not, leafval);
-        } else {
-            payload_error(system_N_remoteHost, res);
-        }
-    }
-
-} /* add_common_session_parms */
-
-/********************************************************************
 * FUNCTION netconf_notifications_add_common_session_parms
 *
 * Add the leafs from the SysCommonSessionParms grouping
@@ -1145,17 +1074,13 @@ void
         log_debug("\nagt_sys: generating <netconf-config-change> "
                   "notification");
     }
-    netconf_config_change_obj = 
+    netconf_config_change_obj =
         ncx_find_object(ietf_netconf_notifications_mod,
                         "netconf-config-change");
     assert(netconf_config_change_obj);
 
     not = agt_not_new_notification(netconf_config_change_obj);
-    if (!not) {
-        log_error("\nError: malloc failed; cannot "
-                  "send <netconf-config-change>");
-        return;
-    }
+    assert(not);
     {
         obj_template_t  *changed_by_obj;
         val_value_t     *changed_by_val;
@@ -1170,6 +1095,8 @@ void
 
 
         netconf_notifications_add_common_session_parms(scb, NULL /*not*/, changed_by_val);
+        agt_not_add_to_payload(not, changed_by_val);
+
     }
 
     listobj = obj_find_child(netconf_config_change_obj,
@@ -1196,22 +1123,16 @@ void
                                         "target",
                                         auditrec->target,
                                         &res);
-                if (leafval) {
-                    val_add_child(leafval, listval);
-                } else {
-                    payload_error(system_N_target, res);
-                }
+                assert(leafval);
+                val_add_child(leafval, listval);
 
                 /* add netconf-config-change/edit/operation */
                 leafval = agt_make_leaf(listobj,
                                         "operation",
                                         op_editop_name(auditrec->editop),
                                         &res);
-                if (leafval) {
-                    val_add_child(leafval, listval);
-                } else {
-                    payload_error(system_N_operation, res);
-                }
+                assert(leafval);
+                val_add_child(leafval, listval);
             }
         }
     }
@@ -1222,12 +1143,12 @@ void
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysCapabilityChange
+* FUNCTION agt_sys_send_netconf_capablity_change
 *
-* Send a <sysCapabilityChange> event for a module
+* Send a <netconf-capability-change> event for a module
 * being added
 *
-* Queue the <sysCapabilityChange> notification
+* Queue the <netconf-capability-change> notification
 *
 * INPUTS:
 *   changed_by == session control block that made the
@@ -1242,13 +1163,13 @@ void
 *
 *********************************************************************/
 void
-    agt_sys_send_sysCapabilityChange (ses_cb_t *changed_by,
+    agt_sys_send_netconf_capability_change (ses_cb_t *changed_by,
                                       boolean is_add,
                                       const xmlChar *capstr)
 {
     agt_not_msg_t         *not;
-    val_value_t           *changedbyval, *leafval;
-    obj_template_t        *changedbyobj;
+    obj_template_t        *netconf_capability_change_obj;
+    val_value_t           *leafval;
     status_t               res;
 
 #ifdef DEBUG
@@ -1259,113 +1180,69 @@ void
 #endif
 
     if (LOGDEBUG) {
-        log_debug("\nagt_sys: generating <sysCapabilityChange> "
+        log_debug("\nagt_sys: generating <netconf-capability-change> "
                   "notification");
     }
 
-    changedbyobj = obj_find_child(sysCapabilityChangeobj,
-                                  AGT_SYS_MODULE,
-                                  system_N_changed_by);
-    if (!changedbyobj) {
-        SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-        return;
-    }
+    netconf_capability_change_obj =
+        ncx_find_object(ietf_netconf_notifications_mod,
+                        "netconf-capability-change");
+    assert(netconf_capability_change_obj);
 
-    not = agt_not_new_notification(sysCapabilityChangeobj);
-    if (!not) {
-        log_error("\nError: malloc failed; cannot "
-                  "send <sysCapabilityChange>");
-        return;
-    }
+    not = agt_not_new_notification(netconf_capability_change_obj);
+    assert(not);
 
-    changedbyval = val_new_value();
-    if (!changedbyval) {
-        log_error("\nError: malloc failed; cannot "
-                  "send <sysCapabilityChange>");
-        agt_not_free_notification(not);
-        return;
-    }
-    val_init_from_template(changedbyval, changedbyobj);
-    agt_not_add_to_payload(not, changedbyval);
+    {
+        obj_template_t  *changed_by_obj;
+        val_value_t     *changed_by_val;
 
-    if (changed_by) {
-        /* add userName */
-        if (changed_by->username) {
-            leafval = agt_make_leaf(changedbyobj,
-                                    system_N_userName,
-                                    changed_by->username,
-                                    &res);
-            if (leafval) {
-                val_add_child(leafval, changedbyval);
-            } else {
-                payload_error(system_N_userName, res);
-            }
-        }
+        changed_by_obj = 
+            obj_find_child(not->notobj,
+                            "ietf-netconf-notifications",
+                            "changed-by");
+        assert(changed_by_obj);
+        changed_by_val = val_new_value();
+        val_init_from_template(changed_by_val, changed_by_obj);
 
-        /* add sessionId */
-        leafval = agt_make_uint_leaf(changedbyobj,
-                                     system_N_sessionId,
-                                     changed_by->sid,
-                                     &res);
-        if (leafval) {
-            val_add_child(leafval, changedbyval);
+        if(changed_by) {
+            netconf_notifications_add_common_session_parms(changed_by, NULL /*not*/, changed_by_val);
         } else {
-            payload_error(system_N_sessionId, res);
-        }
-
-        /* add remoteHost */
-        if (changed_by->peeraddr) {
-            leafval = agt_make_leaf(changedbyobj,
-                                    system_N_remoteHost,
-                                    changed_by->peeraddr,
+            leafval = agt_make_leaf(changed_by_obj,
+                                    "server",
+                                    NULL,
                                     &res);
-            if (leafval) {
-                val_add_child(leafval, changedbyval);
-            } else {
-                payload_error(system_N_remoteHost, res);
-            }
+            assert(leafval);
+            val_add_child(leafval, changed_by_val);
         }
-    } else {
-        leafval = agt_make_leaf(changedbyobj,
-                                NCX_EL_SERVER,
-                                NULL,
-                                &res);
-        if (leafval) {
-            val_add_child(leafval, changedbyval);
-        } else {
-            payload_error(NCX_EL_SERVER, res);
-        }
+        agt_not_add_to_payload(not, changed_by_val);
+
     }
 
     if (is_add) {
-        /* add sysCapoabilityChange/added-capability */
-        leafval = agt_make_leaf(sysCapabilityChangeobj,
-                                system_N_added_capability,
+        /* add netconf-capability-change/added-capability */
+        leafval = agt_make_leaf(netconf_capability_change_obj,
+                                "added-capability",
                                 capstr,
                                 &res);
     } else {
-        /* add sysCapoabilityChange/deleted-capability */
-        leafval = agt_make_leaf(sysCapabilityChangeobj,
-                                system_N_deleted_capability,
+        /* add netconf-capability-change/deleted-capability */
+        leafval = agt_make_leaf(netconf_capability_change_obj,
+                                "deleted-capability",
                                 capstr,
                                 &res);
     }
-    if (leafval) {
-        agt_not_add_to_payload(not, leafval);
-    } else {
-        payload_error(is_add ? system_N_added_capability :
-                      system_N_deleted_capability, res);
-    }
+    assert(leafval);
+    agt_not_add_to_payload(not, leafval);
 
     agt_not_queue_notification(not);
 
-} /* agt_sys_send_sysCapabilityChange */
+} /* agt_sys_send_netconf_capability_change */
 
 
 /********************************************************************
-* FUNCTION agt_sys_send_sysConfirmedCommit
+* FUNCTION agt_sys_send_netconf_confirmed_commit
 *
-* Queue the <sysConfirmedCommit> notification
+* Queue the <netconf-confirmed-commit> notification
 *
 * INPUTS:
 *   scb == session control block to use for payload values
@@ -1376,10 +1253,11 @@ void
 *
 *********************************************************************/
 void
-    agt_sys_send_sysConfirmedCommit (const ses_cb_t *scb,
+    agt_sys_send_netconf_confirmed_commit (const ses_cb_t *scb,
                                      ncx_confirm_event_t event)
 {
     agt_not_msg_t         *not;
+    obj_template_t        *netconf_confirmed_commit_obj;
     val_value_t           *leafval;
     const xmlChar         *eventstr;
     status_t               res;
@@ -1394,36 +1272,35 @@ void
     }
 
     if (LOGDEBUG) {
-        log_debug("\nagt_sys: generating <sysConfirmedCommit> "
+        log_debug("\nagt_sys: generating <netconf-confirmed-commit> "
                   "notification (%s)",
                   eventstr);
     }
 
-    not = agt_not_new_notification(sysConfirmedCommitobj);
-    if (!not) {
-        log_error("\nError: malloc failed; cannot "
-                  "send <sysConfirmedCommit>");
-        return;
-    }
+    netconf_confirmed_commit_obj =
+        ncx_find_object(ietf_netconf_notifications_mod,
+                        "netconf-confirmed-commit");
+    assert(netconf_confirmed_commit_obj);
 
-    if (scb) {
-        add_common_session_parms(scb, not);
+    not = agt_not_new_notification(netconf_confirmed_commit_obj);
+    assert(not);
+
+    if (event!=NCX_CC_EVENT_TIMEOUT) {
+        assert(scb);
+        netconf_notifications_add_common_session_parms(scb, not, NULL /*changed_by_val*/);
     }
 
     /* add sysConfirmedCommit/confirmEvent */
-    leafval = agt_make_leaf(sysConfirmedCommitobj,
-                            system_N_confirmEvent,
+    leafval = agt_make_leaf(netconf_confirmed_commit_obj,
+                            "confirm-event",
                             eventstr,
                             &res);
-    if (leafval) {
-        agt_not_add_to_payload(not, leafval);
-    } else {
-        payload_error(system_N_confirmEvent, res);
-    }
+    assert(leafval);
+    agt_not_add_to_payload(not, leafval);
 
     agt_not_queue_notification(not);
 
-} /* agt_sys_send_sysConfirmedCommit */
+} /* agt_sys_send_netconf_confirmed_commit */
 
 
 

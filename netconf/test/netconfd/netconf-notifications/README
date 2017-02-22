@@ -1,0 +1,15 @@
+FILES:
+ * run.sh - shell script executing the testcase
+ * session.netconf-io.py - python script connecting to the started netconfd server and generate sequence of actions to force the tested notifications to be sent.
+ * startup-cfg.xml - initial configuration
+
+PURPOSE:
+ Verify ietf-netconf-notifications (RFC6470) implementation
+
+OPERATION:
+ * Open session and <create-subscription>
+ * Open additional session and verify <netconf-session-start> is sent with correct paramenters.
+ * Close the additional session and verify <netconf-session-end> is sent with correct parameters.
+ * Make change to the configuration and verify <netconf-configuration-change> is sent with correct parameters.
+ * Make change to the configuration with confirmed commit and verify <netconf-confirmed-commit> notification is sent when the timeout elapses and the old configuration is restored.
+ * Load new module and verify <netconf-capability-change> is sent with correct parameters.

@@ -1417,12 +1417,21 @@ status_t
 
     /* check if all params present yet */
     if (s1 && s2 && ((s3 || (s4 && s5)) || tcp)) {
+        ses_cb_t *scb;
+        mgr_scb_t *mscb;
+
         res = replace_connect_valset(server_cb->connect_valset);
         if (res != NO_ERR) {
             log_warn("\nWarning: connection parameters could not be saved");
             res = NO_ERR;
         }
         create_session(server_cb);
+        /* associate the server_cb with the session */
+        scb = mgr_ses_get_scb(server_cb->mysid);
+        assert(scb);
+        assert(scb->mgrcb);
+        mscb = (mgr_scb_t *)scb->mgrcb;
+        mscb->context_ptr=(void*)server_cb;
     } else {
         res = ERR_NCX_MISSING_PARM;
         log_write("\nError: Connect failed due to missing parameter(s)");

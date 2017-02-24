@@ -1983,7 +1983,7 @@ static status_t
 
     /* $$optional = boolean */
     res = create_config_var(server_cb, YANGCLI_OPTIONAL, 
-                            (cur_server_cb->get_optional) 
+                            (server_cb->get_optional) 
                             ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
@@ -3587,8 +3587,7 @@ static void
         ncx_set_temp_modQ(&mgrcb->temp_modQ);
     }
 
-    /***  TBD: multi-session support ***/
-    server_cb = cur_server_cb;
+    server_cb = (server_cb_t*) mgrcb->context_ptr;
 
     /* check the contents of the notification */
     if (msg && msg->notification) {
@@ -4456,7 +4455,7 @@ void
     }
 
     /***  TBD: multi-session support ***/
-    server_cb = cur_server_cb;
+    server_cb = (server_cb_t*) mgrcb->context_ptr;
 
     anyout = FALSE;
     anyerrors = FALSE;

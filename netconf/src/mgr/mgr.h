@@ -35,29 +35,12 @@ date	     init     comment
 /* used by the manager for the SSH2 interface */
 #include <libssh2.h>
 
-#ifndef _H_cap
 #include "cap.h"
-#endif
-
-#ifndef _H_cfg
 #include "cfg.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xpath
 #include "xpath.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,6 +96,8 @@ typedef struct mgr_scb_t_ {
     /* XPath variable binding callback function */
     xpath_getvar_fn_t   getvar_fn;
 
+    /* User defined context */
+    void* context_ptr;
 } mgr_scb_t;
 
 

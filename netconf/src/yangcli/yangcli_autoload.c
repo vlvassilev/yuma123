@@ -1270,11 +1270,15 @@ status_t
         }
 
         mod = NULL;
-        res = autoload_module(searchresult->module,
-                              searchresult->revision,
-                              &searchresult->cap->cap_deviation_list,
-                              &mod);
+        mod = ncx_find_module(searchresult->module,
+                              searchresult->revision);
+        if(mod==NULL) {
+            res = autoload_module(searchresult->module,
+                                  searchresult->revision,
+                                  &searchresult->cap->cap_deviation_list,
+                                  &mod);
 
+        }
         if (res == NO_ERR) {
             if (mod == NULL) {
                 /* ??? not sure if this could happen ?? */

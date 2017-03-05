@@ -213,7 +213,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 </head><body><table cellspacing=\"0\" width=\"620\">\
  <tbody><tr><td><h1>Statistics</h1>\
   </td><td width=\"60\"><form action=\"ietf-interfaces-state.html\"><input value=\"Refresh\" type=\"submit\"></form>\
-   </td><td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html?clear=1\"><input value=\"Clear Counters\" type=\"submit\"></form>\
+   </td><td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html\"><input value=\"Clear Counters\" type=\"submit\"><input name=\"clear\" value=\"1\" type=\"hidden\"></form>\
    </td></tr></tbody></table>");
 
 

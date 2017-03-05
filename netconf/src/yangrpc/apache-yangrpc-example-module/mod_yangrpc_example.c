@@ -177,6 +177,78 @@ boolean nodetest_fn (ncx_withdefaults_t withdef,
     return val_is_config_data(node);
 }
 
+void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
+{
+    int i;
+    char* counter_name[]= {"in-octets","out-octets","out-unicast-pkts","in-unicast-pkts","in-errors", "in-discards"};
+    val_value_t* interfaces_state_val;
+    val_value_t* interface_val;
+
+    ap_rprintf(r, "%s","<html><head>\
+<meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">\
+</head><body><table cellspacing=\"0\" width=\"620\">\
+ <tbody><tr><td><h1>Statistics</h1>\
+  </td><td width=\"60\"><form action=\"ietf-interfaces-state.html\"><input value=\"Refresh\" type=\"submit\"></form>\
+   </td><td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html?clear=1\"><input value=\"Clear Counters\" type=\"submit\"></form>\
+   </td></tr></tbody></table>");
+
+    if(0==strcmp(r->uri,"/ietf-interfaces-state.html?clear=1")) {
+        ap_rprintf(r, "%s","</tbody></table></body></html>");
+        return;
+    }
+
+    ap_rprintf(r, "<table border=\"1\" cellspacing=\"0\" width=\"620\">\
+   <tbody>\
+   <tr align=\"center\">\
+    <td width=\"30\"><b>name</b></td>\
+    <td width=\"70\"><b>in-octets</b></td>\
+    <td width=\"70\"><b>out-octets</b></td>\
+    <td width=\"70\"><b>out-unicast-pkts</b></td>\
+    <td width=\"70\"><b>in-unicast-pkts</b></td>\
+    <td width=\"70\"><b>in-errors</b></td>\
+    <td width=\"70\"><b>in-discards</b></td>\
+    </tr>\
+");
+
+//          
+//         <tr>
+//          <td align="center"><a href="state.xml?xpath=/interfaces-state/interface[name='xe1']"><b>xe1</b></a></td><td align="right">257228880</td><td align="right">111662312</td><td align="right">0</td><td align="right">0</td>
+//          </tr>
+//res = xpath_find_val_target(root_val, NULL/*mod*/, "//forward-unmatched-packets" , &val);
+
+    interfaces_state_val = val_find_child(root_val,
+                                    "ietf-interfaces",
+                                    "interfaces-state");
+    for (interface_val = val_get_first_child(interfaces_state_val);
+         interface_val != NULL;
+         interface_val = val_get_next_child(interface_val)) {
+ 
+        val_value_t* name_val;
+        val_value_t* statistics_val;
+        name_val = val_find_child(interface_val,"ietf-interfaces","name");
+
+        ap_rprintf(r, "<tr><td align=\"center\"><a href=\"state.xml?xpath=/interfaces-state/interface[name='%s']\"><b>%s</b></a></td>", VAL_STRING(name_val), VAL_STRING(name_val));
+
+        statistics_val = val_find_child(interface_val, "ietf-interfaces", "statistics");
+
+        for(i=0;i<6;i++) {
+            val_value_t* val; 
+            val = val_find_child(statistics_val,
+                                    "ietf-interfaces",
+                                    counter_name[i]);
+
+            ap_rprintf(r, "<td align=\"right\">");
+            if(val!=NULL) {
+                char buf[20+1];
+                sprintf(buf,"%lld",VAL_UINT64(val));
+                ap_rprintf(r, buf);
+            }
+            ap_rprintf(r, "</td>");
+        }
+    }
+    ap_rprintf(r, "%s","</tbody></table></body></html>");
+}
+
 void serialize_val(request_rec *r, val_value_t* root_val)
 {
     status_t res;
@@ -396,6 +468,86 @@ static int edit_config(request_rec *r)
     return OK;
 }
 
+
+static int ietf_interfaces_state_report(request_rec *r)
+{
+    status_t res;
+    ncx_module_t * ietf_netconf_mod;
+    apr_table_t *tab=NULL;
+    const char* config_xml_str;
+    obj_template_t* root_obj;
+    obj_template_t* rpc_obj;
+    obj_template_t* filter_obj;
+    val_value_t* root_val;
+    val_value_t* request_val;
+    val_value_t* filter_val;
+    val_value_t* select_meta_val;
+    val_value_t* type_meta_val;
+    val_value_t* reply_val;
+    int rc;
+    obj_template_t* input_obj;
+    char* rpc_format_str;
+    char* rpc_str;
+    my_svr_cfg* svr_cfg;
+
+    FILE *fp = NULL;
+    rc = read_post(r, &tab);
+    if(rc!=OK) return rc;
+
+    svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
+
+
+    res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
+    assert(res==NO_ERR);
+
+    rpc_obj = ncx_find_object(ietf_netconf_mod, "get");
+    assert(obj_is_rpc(rpc_obj));
+    input_obj = obj_find_child(rpc_obj, NULL, "input");
+    assert(input_obj!=NULL);
+    filter_obj = obj_find_child(input_obj, NULL, "filter");
+    assert(filter_obj!=NULL);
+
+    request_val = val_new_value();
+    val_init_from_template(request_val, rpc_obj);
+    filter_val = val_new_value();
+    val_init_from_template(filter_val, filter_obj);
+    
+    type_meta_val = val_make_string(0, "type","xpath");
+    select_meta_val = val_make_string(0, "select", "/interfaces-state");
+
+    val_add_meta(select_meta_val, filter_val);
+    val_add_meta(type_meta_val, filter_val);
+    val_add_child(filter_val, request_val);
+
+
+    res = yangrpc_exec(svr_cfg->yangrpc_cb_ptr, request_val, &reply_val);
+    assert(res==NO_ERR);
+
+    {
+        obj_template_t* config_obj;
+        val_value_t* config_val;
+        val_value_t* data_val;
+        val_value_t* interfaces_val;
+        val_value_t* interface_val;
+        char* interface_row_str[512];
+
+        data_val = val_find_child(reply_val,NULL,"data");
+        config_obj = ncx_find_object(ietf_netconf_mod, "config");
+        config_val = val_new_value();
+        val_init_from_template(config_val, config_obj);
+        val_move_children(data_val,config_val);
+        //serialize_val(r, config_val);
+	serialize_ietf_interfaces_state_val(r,config_val);
+        val_free_value(config_val);
+
+    }
+    val_free_value(request_val);
+    val_free_value(reply_val);
+
+    //ap_rprintf(r,"</netconf-chat>");
+    return OK;
+}
+
 /* The handler function for our module.
  * This is where all the fun happens!
  */
@@ -421,7 +573,8 @@ static int example_handler(request_rec *r)
     if (!r->handler || (0!=strcmp(r->uri, "/config.xml") &&
                         0!=strcmp(r->uri, "/state.xml") &&
                         0!=strcmp(r->uri, "/edit-config.html") &&
-                        0!=strcmp(r->uri, "/edit-config.xml")
+                        0!=strcmp(r->uri, "/edit-config.xml") &&
+                        ((strlen(r->uri)<strlen("/ietf-interfaces-state.html")) || 0!=memcmp(r->uri, "/ietf-interfaces-state.html", strlen("/ietf-interfaces-state.html")))
        )) return (DECLINED);
 
     svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
@@ -443,6 +596,8 @@ static int example_handler(request_rec *r)
     assert(res==NO_ERR);
     if(0==strcmp(r->uri, "/edit-config.html")) {
         return edit_config_form(r);
+    } else if((strlen(r->uri)>=strlen("/ietf-interfaces-state.html")) &&  0==memcmp(r->uri, "/ietf-interfaces-state.html", strlen("/ietf-interfaces-state.html"))) {
+        return ietf_interfaces_state_report(r);
     } else if(0==strcmp(r->uri, "/edit-config.xml")) {
         return edit_config(r);
     }

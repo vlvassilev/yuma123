@@ -203,47 +203,90 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
     int i;
     char* counter_name[]= {"in-octets","in-unicast-pkts","out-octets","out-unicast-pkts","in-errors", "in-discards"};
 
-    static val_value_t* root_base_val=NULL;
+    char timestamp_string[]="2017-03-05T14:59:00+1234";
+    struct tm* time_info;
+    static val_value_t* root_epoch_val=NULL;
+    static val_value_t* root_prev_val=NULL;
+    static time_t ts_epoch=0;
+    static time_t ts_cur;
+    static time_t ts_prev;
 
     val_value_t* interfaces_state_val;
     val_value_t* interface_val;
 
-    ap_rprintf(r, "%s","<html><head>\
+    ts_cur=time(NULL);
+
+    if(r->args && 0==strcmp(r->args,"clear=1")) {
+        if(root_epoch_val!=NULL) {
+            val_free_value(root_epoch_val);
+        }
+        ts_epoch=ts_cur;
+        root_epoch_val = val_clone(root_val);
+
+        if(root_prev_val!=NULL) {
+            val_free_value(root_prev_val);
+        }
+        root_prev_val = NULL;
+    }
+
+
+
+    ap_rprintf(r, "<html><head>\
 <meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">\
 </head><body><table cellspacing=\"0\" width=\"620\">\
- <tbody><tr><td><h1>Statistics</h1>\
-  </td><td width=\"60\"><form action=\"ietf-interfaces-state.html\"><input value=\"Refresh\" type=\"submit\"></form>\
+ <tbody><tr><td><h1>Statistics</h1></td><td width=\"60\"><form action=\"ietf-interfaces-state.html\"><input value=\"Refresh\" type=\"submit\"></form>\
    </td><td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html\"><input value=\"Clear Counters\" type=\"submit\"><input name=\"clear\" value=\"1\" type=\"hidden\"></form>\
-   </td></tr></tbody></table>");
+   </td></tr></tbody></table>", timestamp_string);
 
+    ap_rprintf(r, "<html><head>\
+<meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">\
+</head><body><table cellspacing=\"0\" width=\"620\">\
+ <tbody>");
+
+    time_info = localtime(&ts_epoch);
+    strftime(timestamp_string, sizeof(timestamp_string), "%Y-%m-%dT%H:%M:%S%z", time_info);
+    ap_rprintf(r, "<tr><td>Epoch:</td><td width=\"60\" align=\"right\">%s</td></tr>", timestamp_string);
+
+    if(root_prev_val!=NULL) {
+    time_info = localtime(&ts_prev);
+    strftime(timestamp_string, sizeof(timestamp_string), "%Y-%m-%dT%H:%M:%S%z", time_info);
+    ap_rprintf(r, "<tr><td>Tic:</td><td width=\"60\" align=\"right\">%s</td></tr>", timestamp_string);
+
+    time_info = localtime(&ts_cur);
+    strftime(timestamp_string, sizeof(timestamp_string), "%Y-%m-%dT%H:%M:%S%z", time_info);
+    ap_rprintf(r, "<tr><td>Toc:</td><td width=\"60\" align=\"right\">%s</td></tr>", timestamp_string);
+
+    ap_rprintf(r, "<tr><td>Interval (sec):</td><td width=\"60\" align=\"right\">%u</td></tr>", ts_cur-ts_prev);
+    }
+
+    ap_rprintf(r, "</tbody></table>");
 
     ap_rprintf(r, "<table border=\"1\" cellspacing=\"0\" width=\"620\">\
    <tbody>\
    <tr align=\"center\">\
-    <td width=\"30\"><b>name</b></td>");
+    <th width=\"30\"><b>name</b></th>");
 
     for(i=0;i<6;i++) {
-        ap_rprintf(r, "<td width=\"70\"><b>%s</b></td>", counter_name[i]);
+        ap_rprintf(r, "<th width=\"70\" colspan=\"3\"><b>%s</b></th>", counter_name[i]);
     }
     ap_rprintf(r, "</tr>");
 
-//          
-//         <tr>
-//          <td align="center"><a href="state.xml?xpath=/interfaces-state/interface[name='xe1']"><b>xe1</b></a></td><td align="right">257228880</td><td align="right">111662312</td><td align="right">0</td><td align="right">0</td>
-//          </tr>
-//res = xpath_find_val_target(root_val, NULL/*mod*/, "//forward-unmatched-packets" , &val);
+   ap_rprintf(r, "<tr align=\"center\">\
+    <td width=\"30\"><b>name</b></td>");
+
+    for(i=0;i<6;i++) {
+        ap_rprintf(r, "<td width=\"70\"><b>abs</b></th>");
+        ap_rprintf(r, "<td width=\"70\"><b>rate</b></td>");
+        ap_rprintf(r, "<td width=\"70\"><b>%</b></td>");
+    }
+    ap_rprintf(r, "</tr>");
+
 
 
     interfaces_state_val = val_find_child(root_val,
                                     "ietf-interfaces",
                                     "interfaces-state");
 
-    if(r->args && 0==strcmp(r->args,"clear=1")) {
-    	if(root_base_val!=NULL) {
-    	    val_free_value(root_base_val);
-    	}
-        root_base_val = val_clone(root_val);
-    }
 
     for (interface_val = val_get_first_child(interfaces_state_val);
          interface_val != NULL;
@@ -259,6 +302,8 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 
         for(i=0;i<6;i++) {
             val_value_t* val; 
+            uint64_t rate;
+            uint64_t speed_in_bytes=100000000/8;
             val = val_find_child(statistics_val,
                                     "ietf-interfaces",
                                     counter_name[i]);
@@ -268,14 +313,51 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 uint64_t counter;
                 char buf[20+1];
                 //counter = VAL_UINT64(val);
-                counter=get_counter(val,root_base_val);
+                counter=get_counter(val,root_epoch_val);
                 sprintf(buf,"%lld",counter);
                 ap_rprintf(r, buf);
+            }
+            ap_rprintf(r, "</td>");
+
+            /* per sec. */
+            ap_rprintf(r, "<td align=\"right\">");
+            if(val!=NULL && root_prev_val!=NULL && (ts_cur-ts_prev)!=0) {
+                uint64_t counter;
+                char buf[20+1];
+                //counter = VAL_UINT64(val);
+                counter=get_counter(val,root_prev_val);
+                rate=counter/(ts_cur-ts_prev);
+                sprintf(buf,"%lld",rate);
+                if(root_prev_val!=NULL) {
+                    ap_rprintf(r, buf);
+                }
+            }
+            ap_rprintf(r, "</td>");
+
+            /* % */
+            /* per sec. */
+            ap_rprintf(r, "<td align=\"right\">");
+            if(val!=NULL && root_prev_val!=NULL && (ts_cur-ts_prev)!=0) {
+                uint64_t counter;
+                char buf[20+1];
+                //counter = VAL_UINT64(val);
+                counter=get_counter(val,root_prev_val);
+                rate=counter/(ts_cur-ts_prev);
+                sprintf(buf,"%lld %",100*rate/speed_in_bytes);
+                if(root_prev_val!=NULL) {
+                    ap_rprintf(r, buf);
+                }
             }
             ap_rprintf(r, "</td>");
         }
     }
     ap_rprintf(r, "%s","</tbody></table></body></html>");
+
+    if(root_prev_val!=NULL) {
+        val_free_value(root_prev_val);
+    }
+    root_prev_val = val_clone(root_val);
+    ts_prev=ts_cur;
 }
 
 void serialize_val(request_rec *r, val_value_t* root_val)

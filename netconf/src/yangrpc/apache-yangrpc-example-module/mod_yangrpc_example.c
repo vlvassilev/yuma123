@@ -177,10 +177,34 @@ boolean nodetest_fn (ncx_withdefaults_t withdef,
     return val_is_config_data(node);
 }
 
+uint64_t get_counter(val_value_t* counter_abs_val, val_value_t* root_base_val)
+{
+    val_value_t* name_val;
+    val_value_t* base_val;
+    char xpath_str[1024];
+    status_t res;
+    uint64_t counter;
+    counter=VAL_UINT64(counter_abs_val);
+    if(root_base_val==NULL) {
+        return counter;
+    }
+    name_val = val_find_child(counter_abs_val->parent->parent,"ietf-interfaces","name");
+    sprintf(xpath_str,"/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
+    res = xpath_find_val_target(root_base_val, NULL/*mod*/, xpath_str , &base_val);
+    assert(res==NO_ERR);
+    if(base_val) {
+        counter -= VAL_UINT64(base_val);
+    }
+    return counter;
+}
+
 void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 {
     int i;
-    char* counter_name[]= {"in-octets","out-octets","out-unicast-pkts","in-unicast-pkts","in-errors", "in-discards"};
+    char* counter_name[]= {"in-octets","in-unicast-pkts","out-octets","out-unicast-pkts","in-errors", "in-discards"};
+
+    static val_value_t* root_base_val=NULL;
+
     val_value_t* interfaces_state_val;
     val_value_t* interface_val;
 
@@ -192,23 +216,16 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
    </td><td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html?clear=1\"><input value=\"Clear Counters\" type=\"submit\"></form>\
    </td></tr></tbody></table>");
 
-    if(0==strcmp(r->uri,"/ietf-interfaces-state.html?clear=1")) {
-        ap_rprintf(r, "%s","</tbody></table></body></html>");
-        return;
-    }
 
     ap_rprintf(r, "<table border=\"1\" cellspacing=\"0\" width=\"620\">\
    <tbody>\
    <tr align=\"center\">\
-    <td width=\"30\"><b>name</b></td>\
-    <td width=\"70\"><b>in-octets</b></td>\
-    <td width=\"70\"><b>out-octets</b></td>\
-    <td width=\"70\"><b>out-unicast-pkts</b></td>\
-    <td width=\"70\"><b>in-unicast-pkts</b></td>\
-    <td width=\"70\"><b>in-errors</b></td>\
-    <td width=\"70\"><b>in-discards</b></td>\
-    </tr>\
-");
+    <td width=\"30\"><b>name</b></td>");
+
+    for(i=0;i<6;i++) {
+        ap_rprintf(r, "<td width=\"70\"><b>%s</b></td>", counter_name[i]);
+    }
+    ap_rprintf(r, "</tr>");
 
 //          
 //         <tr>
@@ -216,9 +233,18 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 //          </tr>
 //res = xpath_find_val_target(root_val, NULL/*mod*/, "//forward-unmatched-packets" , &val);
 
+
     interfaces_state_val = val_find_child(root_val,
                                     "ietf-interfaces",
                                     "interfaces-state");
+
+    if(r->args && 0==strcmp(r->args,"clear=1")) {
+    	if(root_base_val!=NULL) {
+    	    val_free_value(root_base_val);
+    	}
+        root_base_val = val_clone(root_val);
+    }
+
     for (interface_val = val_get_first_child(interfaces_state_val);
          interface_val != NULL;
          interface_val = val_get_next_child(interface_val)) {
@@ -227,7 +253,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         val_value_t* statistics_val;
         name_val = val_find_child(interface_val,"ietf-interfaces","name");
 
-        ap_rprintf(r, "<tr><td align=\"center\"><a href=\"state.xml?xpath=/interfaces-state/interface[name='%s']\"><b>%s</b></a></td>", VAL_STRING(name_val), VAL_STRING(name_val));
+        ap_rprintf(r, "<tr><td align=\"left\"><a href=\"state.xml?xpath=/interfaces-state/interface[name='%s']\"><b>%s</b></a></td>", VAL_STRING(name_val), VAL_STRING(name_val));
 
         statistics_val = val_find_child(interface_val, "ietf-interfaces", "statistics");
 
@@ -239,8 +265,11 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 
             ap_rprintf(r, "<td align=\"right\">");
             if(val!=NULL) {
+                uint64_t counter;
                 char buf[20+1];
-                sprintf(buf,"%lld",VAL_UINT64(val));
+                //counter = VAL_UINT64(val);
+                counter=get_counter(val,root_base_val);
+                sprintf(buf,"%lld",counter);
                 ap_rprintf(r, buf);
             }
             ap_rprintf(r, "</td>");
@@ -574,7 +603,7 @@ static int example_handler(request_rec *r)
                         0!=strcmp(r->uri, "/state.xml") &&
                         0!=strcmp(r->uri, "/edit-config.html") &&
                         0!=strcmp(r->uri, "/edit-config.xml") &&
-                        ((strlen(r->uri)<strlen("/ietf-interfaces-state.html")) || 0!=memcmp(r->uri, "/ietf-interfaces-state.html", strlen("/ietf-interfaces-state.html")))
+                        0!=strcmp(r->uri, "/ietf-interfaces-state.html")
        )) return (DECLINED);
 
     svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
@@ -596,7 +625,7 @@ static int example_handler(request_rec *r)
     assert(res==NO_ERR);
     if(0==strcmp(r->uri, "/edit-config.html")) {
         return edit_config_form(r);
-    } else if((strlen(r->uri)>=strlen("/ietf-interfaces-state.html")) &&  0==memcmp(r->uri, "/ietf-interfaces-state.html", strlen("/ietf-interfaces-state.html"))) {
+    } else if(0==strcmp(r->uri, "/ietf-interfaces-state.html")) {
         return ietf_interfaces_state_report(r);
     } else if(0==strcmp(r->uri, "/edit-config.xml")) {
         return edit_config(r);

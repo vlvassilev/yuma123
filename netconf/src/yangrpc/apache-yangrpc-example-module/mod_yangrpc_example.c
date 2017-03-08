@@ -267,17 +267,23 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
     <th width=\"30\"><b>name</b></th>");
 
     for(i=0;i<6;i++) {
-        ap_rprintf(r, "<th width=\"70\" colspan=\"3\"><b>%s</b></th>", counter_name[i]);
+        if(0==strcmp(counter_name[i],"in-octets") || 0==strcmp(counter_name[i],"out-octets")) {
+            ap_rprintf(r, "<th width=\"70\" colspan=\"3\"><b>%s</b></th>", counter_name[i]);
+        } else {
+            ap_rprintf(r, "<th width=\"70\" colspan=\"2\"><b>%s</b></th>", counter_name[i]);
+        }
     }
     ap_rprintf(r, "</tr>");
 
    ap_rprintf(r, "<tr align=\"center\">\
-    <td width=\"30\"><b>name</b></td>");
+    <td width=\"30\"><b>type</b></td>");
 
     for(i=0;i<6;i++) {
         ap_rprintf(r, "<td width=\"70\"><b>abs</b></th>");
         ap_rprintf(r, "<td width=\"70\"><b>rate</b></td>");
-        ap_rprintf(r, "<td width=\"70\"><b>%</b></td>");
+        if(0==strcmp(counter_name[i],"in-octets") || 0==strcmp(counter_name[i],"out-octets")) {
+            ap_rprintf(r, "<td width=\"70\"><b>%</b></td>");
+        }
     }
     ap_rprintf(r, "</tr>");
 
@@ -294,16 +300,23 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
  
         val_value_t* name_val;
         val_value_t* statistics_val;
+        val_value_t* speed_val;
         name_val = val_find_child(interface_val,"ietf-interfaces","name");
 
         ap_rprintf(r, "<tr><td align=\"left\"><a href=\"state.xml?xpath=/interfaces-state/interface[name='%s']\"><b>%s</b></a></td>", VAL_STRING(name_val), VAL_STRING(name_val));
 
         statistics_val = val_find_child(interface_val, "ietf-interfaces", "statistics");
+        speed_val = val_find_child(interface_val, "ietf-interfaces", "speed");
 
         for(i=0;i<6;i++) {
             val_value_t* val; 
             uint64_t rate;
-            uint64_t speed_in_bytes=100000000/8;
+            uint64_t speed_in_bytes;
+            if(speed_val) {
+                speed_in_bytes=VAL_UINT64(speed_val)/8;
+            } else {
+                speed_in_bytes=100000000/8; /* workaround use 100Mb */
+            }
             val = val_find_child(statistics_val,
                                     "ietf-interfaces",
                                     counter_name[i]);
@@ -334,6 +347,9 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
             }
             ap_rprintf(r, "</td>");
 
+            if(0!=strcmp(counter_name[i],"in-octets") && 0!=strcmp(counter_name[i],"out-octets")) {
+                continue;
+            }
             /* % */
             /* per sec. */
             ap_rprintf(r, "<td align=\"right\">");

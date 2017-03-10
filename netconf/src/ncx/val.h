@@ -3688,7 +3688,7 @@ extern status_t
 extern void
     val_free_editvars (val_value_t *val);
 
-#ifdef YUMA123_API_EXTENSIONS
+#if 1 /*def YUMA123_API_EXTENSIONS*/
 /********************************************************************
 * FUNCTION val_dump_value_max_w_file
 *

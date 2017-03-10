@@ -4,8 +4,11 @@
 
 val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* needle_val)
 {
-    val_value_t* val;
+    val_value_t* val=NULL;
     char* pathbuff;
+    if(haystack_root_val==NULL) {
+        return NULL;
+    }
     status_t res = val_gen_instance_id(NULL, needle_val, NCX_IFMT_XPATH1, (xmlChar **) &pathbuff);
     assert(res==NO_ERR);
     res = xpath_find_val_target(haystack_root_val, NULL/*mod*/, pathbuff, &val);

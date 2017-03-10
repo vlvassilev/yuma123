@@ -15,7 +15,7 @@ sudo add-apt-repository "deb http://yuma123.org/repos/apt/debian jessie main"
 wget -O - http://yuma123.org/repos/yuma123.gpg.key | sudo apt-key add -
 sudo apt-get install netconfd yangcli
 ===Option 2: Build from source===
-sudo apt-get install git autoconf gcc libtool libxml2-dev libssl-dev libssh2-1-dev
+sudo apt-get install git autoconf gcc libtool libxml2-dev libssh2-1-dev make libncurses5-dev zlib1g-dev libreadline-dev
 
 git clone git://git.code.sf.net/p/yuma123/git yuma123-git
 cd yuma123-git

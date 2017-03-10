@@ -4,6 +4,9 @@
  */
  
 #include <xmlstring.h>
+#include <ctype.h>
+#include <string.h>
+#include <assert.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"
@@ -17,9 +20,8 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "rpc.h"
-
-#include <string.h>
-#include <assert.h>
+#include "val.h"
+#include "val123.h"
 
 /* module static variables */
 static ncx_module_t *ietf_interfaces_mod;
@@ -127,8 +129,8 @@ void oper_status_update(val_value_t* cur_val)
         printf("Notification /interfaces-state/interface[name=%s]: oper-status changes from %s to %s at %s\n", VAL_STRING(name_val), VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
         my_send_link_state_notification(VAL_STRING(cur_val), VAL_STRING(name_val));
 
-        val_free_value(prev_val);
     }
+    val_free_value(prev_val);
 }
 
 static status_t

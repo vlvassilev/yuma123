@@ -24,7 +24,9 @@
 #include "ncx.h"
 #include "val.h"
 #include "val_util.h"
-//#include "val_parse.h"
+#include "val_set_cplxval_obj.h"
+#include "xml_rd.h"
+#include "xml_wr.h"
 #include "yangrpc.h"
 
 static char* server_address;

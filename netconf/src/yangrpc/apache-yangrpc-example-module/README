@@ -3,7 +3,8 @@ Example module for Apache using the Yuma API to execute RPCs over netconf
 
 =Configuration=
 #edit yangrpc_example.conf
-
+=Dependencies=
+ sudo apt-get install apache2-dev
 =Building and installing=
  autoreconf -i -f
  ./configure CFLAGS="-g -O0" CXXFLAGS="-g -O0" --prefix=/usr

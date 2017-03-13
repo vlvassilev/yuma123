@@ -2020,7 +2020,7 @@ static status_t
 *    the session setup
 *
 *********************************************************************/
-static void
+void
     create_session (server_cb_t *server_cb)
 {
     const xmlChar          *server, *username, *password;
@@ -2172,6 +2172,9 @@ static void
                               xpath_getvar_fn,
                               server_cb->connect_valset);
     if (res == NO_ERR) {
+        ses_cb_t *scb;
+        mgr_scb_t *mscb;
+
         startedsession = TRUE;
         server_cb->state = MGR_IO_ST_CONN_START;
         log_debug("\nyangcli: Start session %d OK for server '%s'", 
@@ -2183,6 +2186,15 @@ static void
         if (res != NO_ERR) {
             log_error("\nError: Could not set XPath variable callback");
         }
+
+        /* associate the server_cb with the session */
+        scb = mgr_ses_get_scb(server_cb->mysid);
+        if(scb!=NULL) {
+            assert(scb->mgrcb);
+            mscb = (mgr_scb_t *)scb->mgrcb;
+            mscb->context_ptr=(void*)server_cb;
+        }
+
     }
 
     if (res != NO_ERR) {
@@ -7675,8 +7687,6 @@ status_t
 
     /* check if all params present yet */
     if (s1 && s2 && (s3 || tcp)) {
-        ses_cb_t *scb;
-        mgr_scb_t *mscb;
 
         res = replace_connect_valset(server_cb->connect_valset);
         if (res != NO_ERR) {
@@ -7684,13 +7694,6 @@ status_t
             res = NO_ERR;
         }
         create_session(server_cb);
-        /* associate the server_cb with the session */
-        scb = mgr_ses_get_scb(server_cb->mysid);
-        assert(scb);
-        assert(scb->mgrcb);
-        mscb = (mgr_scb_t *)scb->mgrcb;
-        mscb->context_ptr=(void*)server_cb;
-
     } else {
         res = ERR_NCX_MISSING_PARM;
         log_write("\nError: Connect failed due to missing parameter(s)");

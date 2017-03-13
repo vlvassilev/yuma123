@@ -1028,205 +1028,8 @@ static void
 }  /* yangcli_notification_handler */
 
 
-/********************************************************************
-* FUNCTION create_session
-* 
-* Start a NETCONF session and change the program state
-* Since this is called in sequence with readline, the STDIN IO
-* handler may get called if the user enters keyboard text 
-*
-* The STDIN handler will not do anything with incoming chars
-* while state == MGR_IO_ST_CONNECT
-* 
-* INPUTS:
-*   server_cb == server control block to use
-*
-* OUTPUTS:
-*   'server_cb->mysid' is set to the output session ID, if NO_ERR
-*   'server_cb->state' is changed based on the success of 
-*    the session setup
-*
-*********************************************************************/
-static void
-    create_session (server_cb_t *server_cb)
-{
-    const xmlChar          *server, *username, *password;
-    const char             *publickey, *privatekey;
-    modptr_t               *modptr;
-    ncxmod_search_result_t *searchresult;
-    val_value_t            *val;
-    status_t                res;
-    uint16                  port;
-    boolean                 startedsession, tcp, portbydefault;
-    boolean                 tcp_direct_enable;
-
-    if (LOGDEBUG) {
-        log_debug("\nConnect attempt with following parameters:");
-        val_dump_value_max(server_cb->connect_valset,
-                           0,
-                           server_cb->defindent,
-                           DUMP_VAL_LOG,
-                           server_cb->display_mode,
-                           FALSE,
-                           FALSE);
-        log_debug("\n");
-    }
-    
-    /* make sure session not already running */
-    if (server_cb->mysid) {
-        if (mgr_ses_get_scb(server_cb->mysid)) {
-            /* already connected; fn should not have been called */
-            SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-            return;
-        } else {
-            /* OK: reset session ID */
-            server_cb->mysid = 0;
-        }
-    }
-
-    /* make sure no stale search results in the control block */
-    while (!dlq_empty(&server_cb->searchresultQ)) {
-        searchresult = (ncxmod_search_result_t *)
-            dlq_deque(&server_cb->searchresultQ);
-        ncxmod_free_search_result(searchresult);
-    }
-
-    /* make sure no stale modules in the control block */
-    while (!dlq_empty(&server_cb->modptrQ)) {
-        modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
-        free_modptr(modptr);
-    }
-
-    /* retrieving the parameters should not fail */
-    username = NULL;
-    val =  val_find_child(server_cb->connect_valset,
-                          YANGCLI_MOD, YANGCLI_USER);
-    if (val && val->res == NO_ERR) {
-        username = VAL_STR(val);
-    } else {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-
-    server = NULL;
-    val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_SERVER);
-    if (val && val->res == NO_ERR) {
-        server = VAL_STR(val);
-    } else {
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
-    }
-
-    password = NULL;
-    val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_PASSWORD);
-    if (val && val->res == NO_ERR) {
-        password = VAL_STR(val);
-    }
-
-    port = 0;
-    portbydefault = FALSE;
-    val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_NCPORT);
-    if (val && val->res == NO_ERR) {
-        port = VAL_UINT16(val);
-        portbydefault = val_set_by_default(val);
-    }
-
-    publickey = NULL;
-    val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_PUBLIC_KEY);
-    if (val && val->res == NO_ERR) {
-        publickey = (const char *)VAL_STR(val);
-    }
-
-    privatekey = NULL;
-    val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_PRIVATE_KEY);
-    if (val && val->res == NO_ERR) {
-        privatekey = (const char *)VAL_STR(val);
-    }
-
-    tcp = FALSE;
-    val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_TRANSPORT);
-    if (val != NULL && 
-        val->res == NO_ERR && 
-        !xml_strcmp(VAL_ENUM_NAME(val),
-                    (const xmlChar *)"tcp")) {
-        tcp = TRUE;
-    }
-
-     tcp_direct_enable = FALSE;
-     val = val_find_child(server_cb->connect_valset,
-                          YANGCLI_MOD, 
-                          YANGCLI_TCP_DIRECT_ENABLE);
-     if(val == NULL) printf("val is NULL.\n");
-     if(val->res == NO_ERR) printf("val->res is NO_ERR.\n");
-
-     if (val != NULL && 
-         val->res == NO_ERR && 
-        VAL_BOOL(val)) {
-        tcp_direct_enable = TRUE;
-    }
-    if (tcp) {
-        if (port == 0 || portbydefault) {
-            port = SES_DEF_TCP_PORT;
-        }
-    }
-        
-    log_info("\nyangcli: Starting NETCONF session for %s on %s",
-             username, 
-             server);
-
-    startedsession = FALSE;
-    server_cb->state = MGR_IO_ST_CONNECT;
-
-    /* this function call will cause us to block while the
-     * protocol layer connect messages are processed
-     */
-    res = mgr_ses_new_session(username, 
-                              password, 
-                              publickey,
-                              privatekey,
-                              server, 
-                              port,
-                              (tcp) ? ((tcp_direct_enable) ? SES_TRANSPORT_TCP_DIRECT : SES_TRANSPORT_TCP)
-                              : SES_TRANSPORT_SSH,
-                              server_cb->temp_progcb,
-                              &server_cb->mysid,
-                              xpath_getvar_fn,
-                              server_cb->connect_valset);
-    if (res == NO_ERR) {
-        startedsession = TRUE;
-        server_cb->state = MGR_IO_ST_CONN_START;
-        log_debug("\nyangcli: Start session %d OK for server '%s'", 
-                  server_cb->mysid, 
-                  server_cb->name);
-
-        res = mgr_set_getvar_fn(server_cb->mysid,
-                                xpath_getvar_fn);
-        if (res != NO_ERR) {
-            log_error("\nError: Could not set XPath variable callback");
-        }
-    }
-
-    if (res != NO_ERR) {
-        if (startedsession) {
-            mgr_ses_free_session(server_cb->mysid);
-            server_cb->mysid = 0;
-        }
-        log_info("\nyangcli: Start session failed for user %s on "
-                 "%s (%s)\n", 
-                 username, 
-                 server, 
-                 get_error_string(res));
-        server_cb->state = MGR_IO_ST_IDLE;
-    }
-    
-} /* create_session */
-
+extern void
+    create_session (server_cb_t *server_cb);
 
 /********************************************************************
  * FUNCTION do_connect_
@@ -1417,8 +1220,6 @@ status_t
 
     /* check if all params present yet */
     if (s1 && s2 && ((s3 || (s4 && s5)) || tcp)) {
-        ses_cb_t *scb;
-        mgr_scb_t *mscb;
 
         res = replace_connect_valset(server_cb->connect_valset);
         if (res != NO_ERR) {
@@ -1426,12 +1227,6 @@ status_t
             res = NO_ERR;
         }
         create_session(server_cb);
-        /* associate the server_cb with the session */
-        scb = mgr_ses_get_scb(server_cb->mysid);
-        assert(scb);
-        assert(scb->mgrcb);
-        mscb = (mgr_scb_t *)scb->mgrcb;
-        mscb->context_ptr=(void*)server_cb;
     } else {
         res = ERR_NCX_MISSING_PARM;
         log_write("\nError: Connect failed due to missing parameter(s)");

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "obj.h"
 #include "val.h"
+#include "val_util.h"
 
 val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* needle_val)
 {

@@ -1899,6 +1899,33 @@ static status_t
             }
             break;
         case OBJ_TYP_CONTAINER:
+            if(!obj_is_mandatory(parm)) {
+                /* prompt for confirmation non-mandatory container is to be filled */
+                char* buf;
+                char fmt[]="Fill non-mandatory container %s?";
+                buf=malloc(strlen(fmt)+strlen(obj_get_name(parm))+1);
+                assert(buf);
+                sprintf(buf,fmt,obj_get_name(parm));
+                res = get_yesno(server_cb, buf,
+                                YESNO_NO, &yesnocode);
+                free(buf);
+                if (res == NO_ERR) {
+                    switch (yesnocode) {
+                    case YESNO_CANCEL:
+                        res = ERR_NCX_CANCELED;
+                        break;
+                    case YESNO_NO:
+                        continue;
+                    case YESNO_YES:
+                        break;
+                    default:
+                        assert(0);
+                    }
+                    if(res!=NO_ERR) {
+                        break;
+                    }
+                }
+            }
         case OBJ_TYP_NOTIF:
         case OBJ_TYP_RPCIO:
             /* if the parm is not already set and is not read-only

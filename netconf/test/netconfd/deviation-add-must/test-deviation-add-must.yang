@@ -1,0 +1,25 @@
+module test-deviation-add-must {
+
+  namespace "http://yuma123.org/ns/test-deviation-add-must";
+  prefix test-dam;
+  
+  import ietf-interfaces { prefix if; }
+
+  organization  "yuma123";
+  
+  description 
+    "Test module for deviation-add-must";
+  
+  revision 2017-03-19 {
+    description
+      "1.st version";
+  }
+
+  deviation /if:interfaces/if:interface {
+    deviate add {
+      must "name='foo'" {
+        error-message "Only foo.";
+      }
+    }
+  }
+}

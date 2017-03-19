@@ -4316,16 +4316,13 @@ static status_t apply_all_object_deviations( yang_pcb_t *pcb,
     for ( ; deviation && res == NO_ERR; 
             deviation = (obj_deviation_t *) dlq_nextEntry(deviation)) {
 
-        /* make sure deviation is for this module */
-        if ( !xml_strcmp(deviation->targmodname, mod->name) &&
-             deviation->targobj ) {
-            /* make sure not already processed all the deviate structs from 
-             * this deviation have been moved to the object deviate Q */
-             res = apply_object_deviations( pcb, tkc, mod, deviation->targobj,
-                                            deviation );
-             if ( terminate_parse( res ) ) {
-                 return res;
-             }
+        assert(deviation->targobj);
+        /* make sure not already processed all the deviate structs from
+         * this deviation have been moved to the object deviate Q */
+        res = apply_object_deviations( pcb, tkc, mod, deviation->targobj,
+                                       deviation );
+        if ( terminate_parse( res ) ) {
+            return res;
         }
     }
 

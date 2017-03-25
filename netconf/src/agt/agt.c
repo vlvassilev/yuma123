@@ -60,7 +60,6 @@ date         init     comment
 #include "agt_time_filter.h"
 #include "agt_timer.h"
 #include "agt_util.h"
-#include "agt_yuma_arp.h"
 #include "log.h"
 #include "ncx.h"
 #include "ncx_str.h"
@@ -750,12 +749,6 @@ status_t
         return res;
     }
 
-    /* load the yuma-arp module */
-    res = y_yuma_arp_init(y_yuma_arp_M_yuma_arp, NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
     /* check the module parameter set from CLI or conf file
      * for any modules to pre-load
      */
@@ -952,12 +945,6 @@ status_t
      * this currently does not do anything
      */
     res = y_yuma_time_filter_init2();
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    /* load the yuma arp callbacks */
-    res = y_yuma_arp_init2();
     if (res != NO_ERR) {
         return res;
     }
@@ -1166,7 +1153,6 @@ void
         y_ietf_netconf_partial_lock_cleanup();
         agt_if_cleanup();
         y_yuma_time_filter_cleanup();
-        y_yuma_arp_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();
         agt_rpc_cleanup();

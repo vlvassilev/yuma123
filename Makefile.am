@@ -93,7 +93,6 @@ $(top_srcdir)/netconf/src/ncx/libncx.h \
 $(top_srcdir)/netconf/src/ncx/val123.h
 
 agt_netconf_include_HEADERS= \
-$(top_srcdir)/netconf/src/agt/agt_yuma_arp.h \
 $(top_srcdir)/netconf/src/agt/agt_val_parse.h \
 $(top_srcdir)/netconf/src/agt/agt_rpcerr.h \
 $(top_srcdir)/netconf/src/agt/agt_connect.h \

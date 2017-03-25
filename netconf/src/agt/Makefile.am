@@ -29,7 +29,6 @@ $(top_srcdir)/netconf/src/agt/agt_val.c \
 $(top_srcdir)/netconf/src/agt/agt_val_parse.c \
 $(top_srcdir)/netconf/src/agt/agt_xml.c \
 $(top_srcdir)/netconf/src/agt/agt_xpath.c \
-$(top_srcdir)/netconf/src/agt/agt_yuma_arp.c \
 $(top_srcdir)/netconf/src/agt/agt_cfg.c \
 $(top_srcdir)/netconf/src/agt/agt_commit_complete.c \
 $(top_srcdir)/netconf/src/agt/agt_commit_validate.c \

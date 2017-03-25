@@ -22,7 +22,6 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology@2016-11-30.yang
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-xsd.yang \
-$(top_srcdir)/netconf/modules/netconfcentral/yuma-arp.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yangcli.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-netconf.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-ncx.yang \

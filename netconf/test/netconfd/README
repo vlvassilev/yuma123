@@ -1,0 +1,7 @@
+If you have installed netconfd, paramico and lxml and configured OpenSSH to accept netconf connections on port 830 then:
+
+autoreconf -i -a
+./configure --prefix=/usr
+make
+sudo make install
+make check

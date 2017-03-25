@@ -6,6 +6,7 @@ rm /tmp/ncxserver.sock || true
 
 NETCONFD_PID=$!
 sleep 3
-python session.ncclient.py
+python session.netconf.py
 kill $NETCONFD_PID
 cat tmp/netconfd.stdout
+sleep 1

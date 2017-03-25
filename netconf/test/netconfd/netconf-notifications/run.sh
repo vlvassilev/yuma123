@@ -10,3 +10,4 @@ sleep 3
 python session.netconf-io.py
 kill $NETCONFD_PID
 cat tmp/netconfd.stdout
+sleep 1

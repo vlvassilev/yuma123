@@ -10,3 +10,5 @@ sleep 3
 python session.ncclient.py
 kill $NETCONFD_PID
 cat tmp/netconfd.stdout
+sleep 1
+

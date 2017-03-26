@@ -111,7 +111,7 @@ date         init     comment
     (const xmlChar *)"notificationComplete"
 
 
-#define AGT_NOT_SEQID_MOD   (const xmlChar *)"yuma-system"
+#define AGT_NOT_SEQID_MOD   (const xmlChar *)"yuma123-system"
 
 /********************************************************************
 *                                                                   *

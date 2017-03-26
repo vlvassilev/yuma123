@@ -613,27 +613,6 @@ status_t
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    sysCapabilityChangeobj = 
-        ncx_find_object(sysmod,
-                        system_N_sysCapabilityChange);
-    if (!sysCapabilityChangeobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    sysSessionEndobj = 
-        ncx_find_object(sysmod,
-                        system_N_sysSessionEnd);
-    if (!sysSessionEndobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    sysConfirmedCommitobj = 
-        ncx_find_object(sysmod,
-                        system_N_sysConfirmedCommit);
-    if (!sysConfirmedCommitobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
     /* set up set-log-level RPC operation */
     res = agt_rpc_register_method(AGT_SYS_MODULE,
                                   system_N_set_log_level,

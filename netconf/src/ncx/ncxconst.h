@@ -50,7 +50,7 @@ extern "C" {
 #define NC_VER          "1.0"
 #define NC_PREFIX       (const xmlChar *)"nc"
 
-#define NC_MODULE       (const xmlChar *)"yuma-netconf"
+#define NC_MODULE       (const xmlChar *)"yuma123-netconf"
 
 #define NCN_MODULE       (const xmlChar *)"notifications"
 
@@ -170,7 +170,7 @@ extern "C" {
 
 #define EMPTY_STRING  (const xmlChar *)""
 
-#define NCX_DEF_MODULE  (const xmlChar *)"yuma-netconf"
+#define NCX_DEF_MODULE  (const xmlChar *)"yuma123-netconf"
 
 #define NCX_DEF_LANG    (const xmlChar *)"en"
 

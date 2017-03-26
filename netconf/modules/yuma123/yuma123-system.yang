@@ -1,8 +1,8 @@
-module yuma-system {
+module yuma123-system {
 
-    namespace "http://netconfcentral.org/ns/yuma-system";
+    namespace "http://yuma123.org/ns/yuma123-system";
 
-    prefix "yuma-sys";
+    prefix "yuma123-sys";
 
     import ietf-system { prefix sys; }
 
@@ -10,7 +10,7 @@ module yuma-system {
 
     import ietf-yang-types { prefix yang; }
 
-    import yuma-netconf { prefix nc; }
+    import ietf-netconf { prefix nc; }
 
     import notifications { prefix notif; }
 
@@ -18,22 +18,25 @@ module yuma-system {
 
     import yuma-types { prefix nt; }
 
+    import yuma123-netconf-types { prefix nct; }
+
     import yuma-ncx { prefix ncx; }
 
-    // choose ietf-netconf-acm or yuma-nacm
     import ietf-netconf-acm { prefix nacm; }
-    //import yuma-nacm { prefix nacm; }
 
-    organization  "Netconf Central";
+    organization  "yuma123";
 
-    contact "Andy Bierman <andy@netconfcentral.org>.";
+    contact "Vladimir Vassilev <vladimir@transpacket.com>.";
 
     description 
       "NETCONF Basic System Group.";
 
-    revision 2014-11-27 {
-        description  
-          "Old top level /system is moved. Now augment container /ietf-system:system-state/yuma-system:yuma .";
+    revision 2017-03-26 {
+        description 
+          "Original netconfcentral yuma-system top level /system is moved.
+           Now augment container /ietf-system:system-state/yuma-system:yuma.
+           Notifications replaced with corresponding ietf-netconf-notifications
+           removed.";
     }
 
     revision 2012-10-05 {
@@ -189,7 +192,6 @@ augment "/sys:system-state" {
             }
         }
     }
-
     notification sysStartup {
        description
           "Generated when the system restarts.
@@ -212,210 +214,7 @@ augment "/sys:system-state" {
               The <rpc-error> fields are used directly.
               There is no particular order, so no key is defined.";
 
-          uses nc:RpcErrorType;
-       }
-    }
-
-
-    /*
-    notification sysShutdown {
-       description
-          "Generated when the system is about to shutdown.";
-
-       leaf timeLeft {
-          description
-             "Number of seconds left before the system is
-              shutdown.";
-          type uint32;
-          units seconds;
-       }
-
-       leaf mode {
-          description
-             "Indicates the type of shutdown mode and 
-              restart (if any) requested.";
-          type enumeration {
-             enum halt {
-                description "System will power down and halt.";
-             }
-             enum restart {
-                description 
-                   "System will restart, but the image
-                    will not be reloaded.";
-             }
-             enum reload {
-                description 
-                   "System will restart, and the image
-                    will be reloaded.";
-             }
-          }
-       }
-    }
-    */
-
-    notification sysConfigChange {
-       description
-          "Generated when the <running> configuration is changed.";
-
-       uses SysCommonSessionParms;
-
-       list edit {
-          description
-             "An edit record will be present for each distinct
-              edit operation on the running config.";
-          leaf target {
-             description
-               "Topmost node associated with the configuration change.";
-             type instance-identifier;
-          }
-          leaf operation {
-             description
-               "Type of edit operation performed.";
-               type nc:edit-operation-type;
-          }
-       }
-    }
-
-    notification sysCapabilityChange {
-       description
-          "Generated when a <capability> is added or deleted.";
-
-       container changed-by {
-          description
-            "Indicates who caused this capability change.
-             If caused by internal action, then the
-             empty leaf 'server' will be present.
-             If caused by a management session, then
-             the name, remote host address, and session ID
-             of the session that made the change will be reported.";
-          choice server-or-user {
-            leaf server {
-              description
-                "The capability change was caused by the server.";
-              type empty;
-            }
-            case by-user {
-              uses SysCommonSessionParms;
-            }
-          }
-       }
-
-       leaf-list added-capability {
-          description
-            "List of capabilities that have been just added.";
-	  type inet:uri;
-       }
-
-       leaf-list deleted-capability {
-          description
-            "List of capabilities that have been just deleted.";
-	  type inet:uri;
-       }
-    }
-
-    notification sysSessionStart {
-       description
-          "Generated when a new management session is started.";
-
-       uses SysCommonSessionParms;
-    }
-
-
-    notification sysSessionEnd {
-       description
-          "Generated when a management session is terminated.";
-
-       uses SysCommonSessionParms;
-
-       leaf killedBy {
-          when "../terminationReason = 'killed'";
-          description
-             "Session ID that issued the <kill-session>,
-              if the session was terminated by this operation.";
-          type nc:session-id-type;
-       }
-
-       leaf terminationReason {
-          description
-             "Reason the session was terminated.";
-          mandatory true;
-          type enumeration {
-             enum closed {
-                description
-                   "The session was terminated with 
-                    the <close-session> operation.";
-             }
-             enum killed {
-                description
-                   "The session was terminated with 
-                    the <kill-session> operation.";
-             }
-             enum dropped {
-                description
-                   "The session was terminated because
-                    the SSH session or TCP connection was
-                    unexpectedly closed.";
-             }
-             enum timeout {
-                description
-                   "The session was terminated because
-                    of inactivity, either waiting for
-                    the <hello> or <rpc> PDUs.";
-             }
-             enum bad-start {
-                description
-                   "The session startup sequence failed.";
-             }
-             enum bad-hello {
-                description
-                   "The client's <hello> message was 
-                    bad or never arrived.";
-             }
-             enum other {
-                description
-                   "The session was terminated for
-                    some other reason.";
-             }
-          }
-       }
-    }
-
-    notification sysConfirmedCommit {
-       description
-          "Generated when a confirmed-commit event occurs.";
-
-       uses SysCommonSessionParms;
-
-       leaf confirmEvent {
-          description
-             "Indicates the event that caused the notification.";
-          mandatory true;
-          type enumeration {
-             enum start {
-                description
-                   "The confirm-commit procedure has started.";
-             }
-             enum cancel {
-                description
-                   "The confirm-commit procedure has been canceled,
-                    due to the session being terminated.";
-             }
-             enum timeout {
-                description
-                   "The confirm-commit procedure has been canceled,
-                    due to the confirm-timeout interval expiring.
-                    The common session parameters will not be present
-                    in this sub-mode.";
-             }
-             enum extend {
-                description
-                   "The confirm-commit timeout has been extended.";
-             }
-             enum complete {
-                description
-                   "The confirm-commit procedure has been completed.";
-             }
-          }
+          uses nct:RpcErrorType;
        }
     }
 

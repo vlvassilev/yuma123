@@ -20,7 +20,7 @@ module yangcli-ex {
       "Added dump-session parameter.";
   }
 
-  revision 2016-04-28 {
+  revision 2016-03-28 {
     description
       "Initial revision.";
   }

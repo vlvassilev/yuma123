@@ -105,9 +105,9 @@ extern "C" {
 /* name of the NETCONF module containing NETCONF protocol definitions,
  * that is loaded by default during startup 
  */
-#define NCXMOD_NETCONF        (const xmlChar *)"yuma-netconf"
+#define NCXMOD_NETCONF        (const xmlChar *)"yuma123-netconf"
 
-#define NCXMOD_YUMA_NETCONF   (const xmlChar *)"yuma-netconf"
+#define NCXMOD_YUMA_NETCONF   (const xmlChar *)"yuma123-netconf"
 
 #define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
 

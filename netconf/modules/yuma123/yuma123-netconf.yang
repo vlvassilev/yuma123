@@ -1,4 +1,4 @@
-module yuma-netconf {
+module yuma123-netconf {
 
    namespace "urn:ietf:params:xml:ns:netconf:base:1.0";
 
@@ -13,6 +13,9 @@ module yuma-netconf {
    // for NCX 'metadata' language extension
    import yuma-ncx { prefix "ncx"; }
 
+   // for the uri data type
+   import yuma123-netconf-types { prefix "nct"; }
+
    description 
       "NETCONF Protocol 
         * Data Types
@@ -24,57 +27,15 @@ module yuma-netconf {
      "Translated by Andy Bierman.
       Send comments to <andy@netconfcentral.org>.";
 
-   revision 2012-10-05 {
-       description  
-         "Updated typedefs to RFC versions where they overlapped.
-          Remove nacm extension usage; not needed due to
-          server code which not not allow any client session
-          to invoke this operation, even superuser.";
+   revision 2017-03-26 {
+     description
+       "Changed namespace in order to edit the original
+        netconfcentral model. Splitted yuma-netconf
+        into yuma123-netconf and yuma123-netconf-types";
    }
 
-   revision "2011-05-30" {
-     description 
-       "Update for NETCONF base:1.1 version";
-   }
-
-   revision "2010-05-24" {
-     description 
-       "Align rpc statements with ietf-netconf.yang";
-   }
-
-   revision "2010-05-06" {
-     description 
-       "Remove nacm:secure on delete-config;
-        Fix bugs in parameters that did not match ietf-netconf.yang.";
-   }
-
-   revision "2009-04-10" {
-     description 
-       "Remove rpc-type extension usage.";
-   }
-
-   revision "2009-02-24" {
-     description 
-       "Change yang:uri to inet:uri (import moved).";
-   }
-
-   revision "2008-08-30" {
-     description 
-       "Add some NCX extensions to automate some server processing.";
-   }
-
-   revision "2008-04-26" {
-     description 
-       "Change get-config and get output from 'config' to 'data'.";
-   }
-
-   revision "2008-04-16" {
-     description 
-       "Initial conversion from netconf.ncx version 0.6.";
-   }
-
-  extension get-filter-element-attributes {
-    description
+   extension get-filter-element-attributes {
+     description
       "If this extension is present within the
        an 'anyxml' statement named 'filter', which must be
        conceptually defined within the RPC input section
@@ -95,7 +56,7 @@ module yuma-netconf {
                  string representing an XPath expression.
                  The 'type' attribute must be equal to 'xpath'
                  if this attribute is present.";
-  }
+   }
 
    // NETCONF capabilities defined as features
    feature writable-running {
@@ -180,318 +141,13 @@ module yuma-netconf {
      reference "RFC 6241, section 8.9.";
    }
 
-   // NETCONF Simple Types
-
-   typedef Language {
-     description "XML language type for LangString";
-     type string {
-       pattern '[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*';
-     }
-   }
-
-   typedef session-id-type {
-     type uint32 {
-       range "1..max"; 
-     }
-     description
-       "NETCONF Session Id";
-   }
-  
-   typedef session-id-or-zero-type {
-     type uint32; 
-     description 
-       "NETCONF Session Id or Zero to indicate none";
-   }
-
-   typedef ConfigURIType {
-     type inet:uri;
-   }
-
-   typedef LangString {
-     description "XML string with a language attribute.";
-     type string;
-     ncx:metadata "Language lang";
-   }
-
-   typedef MessageId {
-     description "NETCONF message-id attribute";
-     type  string {
-        length "1..4095";
-     }
-   }
-
-   typedef ErrorType {
-     description "NETCONF Error Type";
-     type enumeration {
-       enum transport;
-       enum rpc;
-       enum protocol;
-       enum application;
-     }
-   }
-
-
-   // NETCONF Simple Types
-
-   typedef error-tag-type {
-     type enumeration {
-        enum in-use {
-          description
-            "The request requires a resource that
-             already is in use.";
-        }
-        enum invalid-value {
-          description
-            "The request specifies an unacceptable value for one
-             or more parameters.";
-        }
-        enum too-big {
-          description
-            "The request or response (that would be generated) is
-             too large for the implementation to handle.";
-        }
-        enum missing-attribute {
-          description
-            "An expected attribute is missing.";
-        }
-        enum bad-attribute {
-          description
-            "An attribute value is not correct; e.g., wrong type,
-             out of range, pattern mismatch.";
-        }
-        enum unknown-attribute {
-          description
-            "An unexpected attribute is present.";
-        }
-        enum missing-element {
-          description
-            "An expected element is missing.";
-        }
-        enum bad-element {
-          description
-            "An element value is not correct; e.g., wrong type,
-             out of range, pattern mismatch.";
-        }
-        enum unknown-element {
-          description
-            "An unexpected element is present.";
-        }
-        enum unknown-namespace {
-          description
-            "An unexpected namespace is present.";
-        }
-        enum access-denied {
-          description
-            "Access to the requested protocol operation, or
-             data model is denied because authorization failed.";
-        }
-        enum lock-denied {
-          description
-            "Access to the requested lock is denied because the
-             lock is currently held by another entity.";
-        }
-        enum resource-denied {
-          description
-            "Request could not be completed because of
-             insufficient resources.";
-        }
-        enum rollback-failed {
-          description
-            "Request to rollback some configuration change (via
-             rollback-on-error or discard-changes operations) was
-             not completed for some reason.";
-
-        }
-        enum data-exists {
-          description
-            "Request could not be completed because the relevant
-             data model content already exists. For example,
-             a 'create' operation was attempted on data that
-             already exists.";
-        }
-        enum data-missing {
-          description
-            "Request could not be completed because the relevant
-             data model content does not exist.  For example,
-             a 'delete' operation was attempted on
-             data that does not exist.";
-        }
-        enum operation-not-supported {
-          description
-            "Request could not be completed because the requested
-             operation is not supported by this implementation.";
-        }
-        enum operation-failed {
-          description
-            "Request could not be completed because the requested
-             operation failed for some reason not covered by
-             any other error condition.";
-        }
-        enum partial-operation {
-          description
-            "This error-tag is obsolete, and SHOULD NOT be sent
-             by servers conforming to this document.";
-        }
-        enum malformed-message {
-          description
-            "A message could not be handled because it failed to
-             be parsed correctly. For example, the message is not
-             well-formed XML or it uses an invalid character set.";
-        }
-      }
-      description "NETCONF Error Tag";
-      reference "RFC 6241, Appendix A.";
-   }
-
-   typedef error-severity-type {
-     type enumeration {
-       enum error {
-         description "Error severity";
-       }
-       enum warning {
-         description "Warning severity";
-       }
-     }
-     description "NETCONF Error Severity";
-     reference "RFC XXXX, section 4.3.";
-   }
-
-   typedef TestOptionType {
-     description 
-       "NETCONF 'test-option' Element Content.";
-     type enumeration {
-       enum test-then-set;
-       enum set;
-       enum test-only;
-     }
-   }
-
-   typedef ErrorOptionType {
-     description "NETCONF 'error-option' Element Content";
-     type enumeration { 
-       enum stop-on-error;
-       enum continue-on-error;
-       enum rollback-on-error;
-     }
-     default "stop-on-error";
-   }
-
-   typedef FilterType {
-     description "NETCONF 'filter' Attribute Content";
-     type enumeration {
-       enum subtree;
-       enum xpath;
-     }
-     default "subtree";
-   }
-
-   typedef SelectString {
-     description "XPath string used in the select attribute.";
-     type string {
-       ncx:xpath;
-     }
-   }
-
-
-   typedef edit-operation-type {
-     type enumeration {
-       enum merge {
-         description
-           "The configuration data identified by the
-            element containing this attribute is merged
-            with the configuration at the corresponding
-            level in the configuration datastore identified
-            by the target parameter.";
-       }
-       enum replace {
-         description
-           "The configuration data identified by the element
-            containing this attribute replaces any related
-            configuration in the configuration datastore
-            identified by the target parameter.  If no such
-            configuration data exists in the configuration
-            datastore, it is created. Unlike a
-            <copy-config> operation, which replaces the
-            entire target configuration, only the configuration
-            actually present in the config parameter is affected.";
-       }
-       enum create {
-         description
-           "The configuration data identified by the element
-            containing this attribute is added to the
-            configuration if and only if the configuration
-            data does not already exist in the configuration
-            datastore.  If the configuration data exists, an
-            <rpc-error> element is returned with an
-            <error-tag> value of 'data-exists'.";
-       }
-       enum delete {
-         description
-           "The configuration data identified by the element
-            containing this attribute is deleted from the
-            configuration if and only if the configuration
-            data currently exists in the configuration
-            datastore.  If the configuration data does not
-            exist, an <rpc-error> element is returned with
-            an <error-tag> value of 'data-missing'.";
-       }
-       enum remove {
-         description
-           "The configuration data identified by the element
-            containing this attribute is deleted from the
-            configuration if the configuration
-            data currently exists in the configuration
-            datastore.  If the configuration data does not
-            exist, the 'remove' operation is silently ignored
-            by the server.";
-       }
-     }
-     default "merge";
-     description "NETCONF 'operation' attribute values";
-     reference "RFC XXXX, section 7.2.";
-   }
-
-   typedef DefaultOperationType {
-     description "NETCONF 'default-operation' Element Content";
-     type enumeration { 
-       enum merge;
-       enum replace;
-       enum none;
-     }
-     default "merge";
-   }
-
-   typedef ConfirmTimeoutType {
-     description 
-       "NETCONF 'confirm-timeout' Element Content";
-     type uint32 { 
-       range "1..max";
-     }
-     units "seconds";
-     default "600";   // 10 minutes
-   }
-
-   // NETCONF Hello PDU Data Types
-    
-   grouping NcCapabilities {
-     description "Generic Capabilities List.";
-
-     container capabilities { 
-       config false;
-       leaf-list capability {
-          description "One Generic Capability URI.";
-          type inet:uri;
-       }
-     }
-   }
-
    container server-hello {
      description "Generic Server Hello Message Parameters.";
 
-     uses NcCapabilities;
+     uses nct:NcCapabilities;
 
      leaf session-id {
-        type session-id-type;
+        type nc:session-id-type;
         config false;
      }
 
@@ -503,7 +159,7 @@ module yuma-netconf {
 
      description "Generic Client Hello Message Parameters.";
 
-     uses NcCapabilities;
+     uses nct:NcCapabilities;
 
      ncx:hidden;
      ncx:abstract;
@@ -581,6 +237,79 @@ module yuma-netconf {
         config false;
       }
    }
+   // NETCONF Simple Types
+
+   typedef session-id-type {
+     type uint32 {
+       range "1..max"; 
+     }
+     description
+       "NETCONF Session Id";
+   }
+  
+   typedef session-id-or-zero-type {
+     type uint32; 
+     description 
+       "NETCONF Session Id or Zero to indicate none";
+   }
+
+   typedef edit-operation-type {
+     type enumeration {
+       enum merge {
+         description
+           "The configuration data identified by the
+            element containing this attribute is merged
+            with the configuration at the corresponding
+            level in the configuration datastore identified
+            by the target parameter.";
+       }
+       enum replace {
+         description
+           "The configuration data identified by the element
+            containing this attribute replaces any related
+            configuration in the configuration datastore
+            identified by the target parameter.  If no such
+            configuration data exists in the configuration
+            datastore, it is created. Unlike a
+            <copy-config> operation, which replaces the
+            entire target configuration, only the configuration
+            actually present in the config parameter is affected.";
+       }
+       enum create {
+         description
+           "The configuration data identified by the element
+            containing this attribute is added to the
+            configuration if and only if the configuration
+            data does not already exist in the configuration
+            datastore.  If the configuration data exists, an
+            <rpc-error> element is returned with an
+            <error-tag> value of 'data-exists'.";
+       }
+       enum delete {
+         description
+           "The configuration data identified by the element
+            containing this attribute is deleted from the
+            configuration if and only if the configuration
+            data currently exists in the configuration
+            datastore.  If the configuration data does not
+            exist, an <rpc-error> element is returned with
+            an <error-tag> value of 'data-missing'.";
+       }
+       enum remove {
+         description
+           "The configuration data identified by the element
+            containing this attribute is deleted from the
+            configuration if the configuration
+            data currently exists in the configuration
+            datastore.  If the configuration data does not
+            exist, the 'remove' operation is silently ignored
+            by the server.";
+       }
+     }
+     default "merge";
+     description "NETCONF 'operation' attribute values";
+     reference "RFC XXXX, section 7.2.";
+   }
 
    grouping RpcErrorType {
       description "NETCONF 'rpc-error' Element Content";
@@ -588,14 +317,14 @@ module yuma-netconf {
       leaf error-type {
         description 
           "Defines the conceptual layer that the error occurred.";
-        type ErrorType;
+        type nct:ErrorType;
         mandatory true;
       }
 
       leaf error-tag {
         description
           "Contains a string identifying the error condition.";
-        type error-tag-type;
+        type nct:error-tag-type;
         mandatory true;
       }
 
@@ -603,7 +332,7 @@ module yuma-netconf {
         description
           "Contains a string identifying the error severity, as
            determined by the device.";
-        type error-severity-type;
+        type nct:error-severity-type;
         mandatory true;
       }
 
@@ -638,7 +367,7 @@ module yuma-netconf {
           describes the error condition.  This element will not be present
           if no appropriate message is provided for a particular error
           condition.  This element SHOULD include an xml:lang attribute.";
-        type LangString;
+        type nct:LangString;
       }
 
       anyxml error-info {
@@ -714,7 +443,7 @@ module yuma-netconf {
    leaf operation {
      description 
        "Internal object for the nc:operation attribute.";
-     type edit-operation-type;
+     type nc:edit-operation-type;
      ncx:abstract;
      ncx:hidden;
    }
@@ -727,7 +456,7 @@ module yuma-netconf {
      reference "RFC 4741, section 4.1";
 
      // do not treat missing message-id as an error
-     ncx:metadata  "MessageId message-id";
+     ncx:metadata  "nct:MessageId message-id";
      ncx:abstract;
    }
 
@@ -739,7 +468,7 @@ module yuma-netconf {
      uses RpcReplyType;
 
      // do not treat missing message-id as an error
-     ncx:metadata  "MessageId message-id";
+     ncx:metadata  "nct:MessageId message-id";
      ncx:abstract;
    }
 
@@ -779,8 +508,8 @@ module yuma-netconf {
           description 
             "Subtree or Xpath filter to use.";
           nc:get-filter-element-attributes;
-          ncx:metadata "FilterType type";
-          ncx:metadata "SelectString select";
+          ncx:metadata "nct:FilterType type";
+          ncx:metadata "nct:SelectString select";
         }
       }
 
@@ -838,7 +567,7 @@ module yuma-netconf {
         leaf default-operation {
           description 
             "Default operation to apply if not explicitly set.";
-          type DefaultOperationType;
+          type nct:DefaultOperationType;
           default "merge";
         }
 
@@ -848,12 +577,12 @@ module yuma-netconf {
             "Test option if validate capability supported.
              The 'validate' capability must be present to set
              this object to 'test-then-set'.";
-          type TestOptionType;
+          type nct:TestOptionType;
         }
 
         leaf error-option {
           description "Error recovery option.";
-          type ErrorOptionType;
+          type nct:ErrorOptionType;
           default "stop-on-error";
         }
 
@@ -1088,7 +817,7 @@ module yuma-netconf {
              the select attribute of the filter element contains an XPath
              expression.";
           nc:get-filter-element-attributes;
-          ncx:metadata "FilterType type";
+          ncx:metadata "nct:FilterType type";
           ncx:metadata "string select";
         }
       }
@@ -1142,7 +871,7 @@ module yuma-netconf {
       input {
         leaf session-id {
           description "Particular session to kill.";
-          type session-id-type;
+          type nc:session-id-type;
           mandatory true;
         }
       }
@@ -1187,7 +916,7 @@ module yuma-netconf {
             "Request a specific timeout period for a confirmed commit
              if 'confirmed-commit' capability supported.";
           reference "RFC 4741, section 8.4.5.1";
-          type ConfirmTimeoutType;
+          type nct:ConfirmTimeoutType;
         }
 
         leaf persist {

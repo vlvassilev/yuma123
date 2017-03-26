@@ -74,7 +74,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#define TX_ID_MODULE    (const xmlChar *)"yuma-system"
+#define TX_ID_MODULE    (const xmlChar *)"yuma123-system"
 #define TX_ID_OBJECT    (const xmlChar *)"transaction-id"
 
 

@@ -1,6 +1,6 @@
 module yangcli {
 
-    namespace "http://netconfcentral.org/ns/yangcli";
+    namespace "http://yuma123.org/ns/yangcli";
 
     prefix yc;
 
@@ -12,11 +12,13 @@ module yangcli {
 
     import yuma-types { prefix nt; }
 
-    import yuma-netconf { prefix nc; }
+    import ietf-netconf { prefix nc; }
 
-    organization  "Netconf Central";
+    import yuma123-netconf-types { prefix nct; }
 
-    contact "Andy Bierman <support@netconfcentral.org>.";
+    organization  "yuma123";
+
+    contact "Vladimir Vassilev <vladimir@transpacket.com>.";
 
     description 
        "
@@ -50,80 +52,11 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2012-10-05 {
+    revision 2017-03-26 {
         description
-          "Add uses for YumaHomeParm";
-    }
-
-    revision 2011-10-10 {
-       description 
-         "Add CLI parameters:
-            --aliases-file
-            --autoaliases
-            --autouservars
-            --uservars-file
-            --home
-          Add yangcli local commands:
-            alias
-            aliases
-            unset
-            uservars
-         ";
-    }
-
-    revision 2011-09-05 {
-       description 
-         "Add 'json' to --display-mode enumerations.";
-    }
-
-    revision 2011-08-06 {
-       description 
-         "Add --transport to ConnectParms grouping.";
-    }
-
-    revision 2011-07-19 {
-       description 
-         "Add PublicKeyParms grouping.
-          Added MatchParms (--match-names and --alt-names).
-          Added --force-target parameter.
-          Added show session command.
-          Added --urltarget=<url> parameter to FillParms grouping
-          to allow URL encoded requests to be converted to XPath
-          before use.
-          Added --use-xmlheader=<boolean> parameter to control
-          how XML file variables are generated when written.";
-    }
-
-    revision 2011-06-05 {
-       description 
-          "Added start-timer and stop-timer local RPC functions.
-           Added --echo-replies parameter and system variable.
-           Added --time-rpcs parameter and system variable
-           Added remove command for base:1.1 support";
-    }
-
-    revision 2011-04-22 {
-       description 
-          "Added --protocols parm via uses ProtocolsParm.
-           Also allow setting --protocols in <connect> RPC.";
-    }
-
-    revision 2011-03-19 {
-       description 
-          "Added 'xml-nons' display mode to display-mode parameter.
-           Added 'cli' and 'system' to show command; subset of 
-           show vars.
-           Changed history show default from -1 to 25.";
-    }
-
-    revision 2010-04-16 {
-       description 
-          "Added eval command for XPath expression support";
-    }
-
-    revision 2010-01-14 {
-       description 
-          "Initial published version for 0.9.9 release";
+          "Changed namespace in order to edit the original
+           netconfcentral model. Splitted yuma-netconf
+           into yuma123-netconf and yuma123-netconf-types";
     }
 
     typedef LogCount {
@@ -1770,7 +1703,7 @@ module yangcli {
               description 
                 "URL pointing to config data. Only available
                  if 'url' capability supported.";
-             type nc:ConfigURIType;
+             type nct:ConfigURIType;
             }
           }
         }
@@ -2008,7 +1941,7 @@ module yangcli {
               description 
                 "URL pointing to config data. Only available
                  if 'url' capability supported.";
-             type nc:ConfigURIType;
+             type nct:ConfigURIType;
             }
           }
         }

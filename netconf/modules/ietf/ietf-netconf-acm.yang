@@ -45,7 +45,8 @@ module ietf-netconf-acm {
 
   revision "2012-02-22" {
     description
-      "Initial version";
+      "Initial version;
+       Errata ID: 3862 and 3863";
     reference
       "RFC 6536: Network Configuration Protocol (NETCONF)
                  Access Control Model";
@@ -100,7 +101,7 @@ module ietf-netconf-acm {
 
   typedef matchall-string-type {
     type string {
-      pattern "\*";
+      pattern '\*';
     }
     description
       "The string containing a single asterisk '*' is used
@@ -141,7 +142,7 @@ module ietf-netconf-acm {
   typedef group-name-type {
     type string {
       length "1..max";
-      pattern "[^\*].*";
+      pattern '[^\*].*';
     }
     description
       "Name of administrative group to which

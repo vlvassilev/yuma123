@@ -1507,6 +1507,10 @@ boolean
         return FALSE;
     }
 
+    if (!xml_strcmp(modname, NCXMOD_NETCONFD_EX)) {
+        return FALSE;
+    }
+
     clivalset = agt_cli_get_valset();
     val = val_find_child(clivalset, NCXMOD_NETCONFD_EX, NCX_EL_NON_ADVERTISED_MODULE);
 

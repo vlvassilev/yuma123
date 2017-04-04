@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import time
 import sys, os
-sys.path.append("../../netconf-io")
-import netconf
-import netconf_lxml
+sys.path.append("../../litenc")
+import litenc
+import litenc_lxml
 
 def main():
 	print("""
@@ -14,16 +14,17 @@ def main():
 #3 - TODO
 """)
 
+	user=os.getenv('USER')
 	port=830
 	server="127.0.0.1"
 
-	conn = netconf.netconf()
-	ret = conn.connect('server=%(server)s port=%(port)d user=%(user)s dump-session=nc-session-log-' % {'server':server, 'port':port, 'user':os.getenv('USER')})
+	conn = litenc.litenc()
+	ret = conn.connect(server=server, port=port, user=user)
 	if ret != 0:
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
-	conn_lxml=netconf_lxml.netconf_lxml(conn)
+	conn_lxml=litenc_lxml.litenc_lxml(conn)
 	ret = conn.send("""
 <hello>
  <capabilities>
@@ -57,8 +58,8 @@ def main():
 
 	print "[OK] Receiving <create-subscription> reply =%(reply_xml)s:" % {'reply_xml':reply_xml}
 
-	conn2 = netconf.netconf()
-	ret = conn2.connect('server=%(server)s port=%(port)d user=%(user)s dump-session=nc-session-log-' % {'server':server, 'port':port, 'user':os.getenv('USER')})
+	conn2 = litenc.litenc()
+	ret = conn2.connect(server=server, port=port, user=user)
 	if ret != 0:
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)

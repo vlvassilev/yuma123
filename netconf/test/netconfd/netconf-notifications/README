@@ -1,6 +1,6 @@
 FILES:
  * run.sh - shell script executing the testcase
- * session.netconf-io.py - python script connecting to the started netconfd server and generate sequence of actions to force the tested notifications to be sent.
+ * session.litenc.py - python script connecting to the started netconfd server and generate sequence of actions to force the tested notifications to be sent.
  * startup-cfg.xml - initial configuration
 
 PURPOSE:

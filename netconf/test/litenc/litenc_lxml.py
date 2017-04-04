@@ -1,4 +1,4 @@
-import netconf
+import litenc
 import lxml
 from lxml import etree
 
@@ -30,13 +30,13 @@ def strip_namespaces(tree):
 	tree = transform(tree)
 	return tree
 
-class netconf_lxml():
-	def __init__(self, netconf):
-		self.netconf=netconf
+class litenc_lxml():
+	def __init__(self, litenc):
+		self.litenc=litenc
 		self.strip_namespaces=True
 
 	def receive(self):
-		(ret,reply_xml)=self.netconf.receive()
+		(ret,reply_xml)=self.litenc.receive()
 		if(ret!=0):
 			return None
 		reply_lxml = lxml.etree.fromstring(reply_xml)
@@ -45,11 +45,11 @@ class netconf_lxml():
  		return reply_lxml_striped
 
 	def rpc(self, xml, message_id=1):
-		ret=self.netconf.send('''<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="'''+str(message_id)+'''">'''+xml+"</rpc>")
+		ret=self.litenc.send('''<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="'''+str(message_id)+'''">'''+xml+"</rpc>")
 		if(ret!=0):
 			return None
 		reply_lxml=self.receive()
 		return reply_lxml
 
 	def send(self, xml):
-		return self.netconf.send(xml)
+		return self.litenc.send(xml)

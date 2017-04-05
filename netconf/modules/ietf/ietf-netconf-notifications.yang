@@ -47,7 +47,7 @@ module ietf-netconf-notifications {
 
    revision "2012-02-06" {
      description
-       "Initial version.";
+       "Initial version. Errata 3957 added.";
      reference
        "RFC 6470: NETCONF Base Notifications";
    }
@@ -309,7 +309,7 @@ module ietf-netconf-notifications {
       "RFC 6241, Section 8.4";
 
     uses common-session-parms {
-      when "../confirm-event != 'timeout'";
+      when "confirm-event != 'timeout'";
     }
 
     leaf confirm-event {

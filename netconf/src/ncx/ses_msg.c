@@ -720,7 +720,7 @@ void ses_msg_unmake_inready (ses_cb_t *scb)
     assert( scb && "scb is NULL" );
 
     if (scb->inready.inq) {
-        dlq_deque(&scb->inready);
+        dlq_deque(&scb->inready.hdr);
         scb->inready.inq = FALSE;
     }
 
@@ -753,7 +753,7 @@ void ses_msg_unmake_outready (ses_cb_t *scb)
     assert( scb && "scb is NULL" );
 
     if (scb->outready.inq) {
-        dlq_deque(&scb->outready);
+        dlq_deque(&scb->outready.hdr);
         scb->outready.inq = FALSE;
     }
 

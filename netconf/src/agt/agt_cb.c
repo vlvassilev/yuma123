@@ -732,7 +732,7 @@ void
         agt_cb_fnset_node_t* cbset_node;
         for (cbset_node = (agt_cb_fnset_node_t*)dlq_firstEntry(&obj->cbsetQ);
              cbset_node!=NULL;
-             cbset_node = (xpath_pcb_t *)dlq_nextEntry(cbset_node)) {
+             cbset_node = (agt_cb_fnset_node_t*)dlq_nextEntry(cbset_node)) {
              if(cbset_node->fnset_ptr->cbfn[AGT_CB_VALIDATE] == cbfn) {
                  break;
              }

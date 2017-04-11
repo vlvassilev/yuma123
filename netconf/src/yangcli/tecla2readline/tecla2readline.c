@@ -88,7 +88,7 @@ GetLine *del_GetLine(GetLine *gl)
     return gl;
 }
 
-static char* expand_path_with_home_prefix(char* filename)
+static char* expand_path_with_home_prefix(const char* filename)
 {
     char* expanded;
     assert(filename!=NULL);
@@ -141,7 +141,7 @@ static unsigned int my_completions_max_len=0;
 
 static int my_cpl_word_start; /* value determined by the completion callback strips the prefix base e.g. path /interfaces/.../ or optional arg prefix "--" */
 
-static void add_cpl_prefix(char* text, int start)
+static void add_cpl_prefix(const char* text, int start)
 {
     char* str;
     int prefix_len;
@@ -155,7 +155,7 @@ static void add_cpl_prefix(char* text, int start)
     free(my_completions[0]);
     my_completions[0]=str;
 }
-my_completion (const char *text, int start, int end)
+char** my_completion (const char *text, int start, int end)
 {
     my_completions = malloc(1024*sizeof(char*));
     rl_attempted_completion_over = 1;

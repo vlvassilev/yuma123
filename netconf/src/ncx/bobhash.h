@@ -15,6 +15,6 @@ typedef  unsigned       char ub1;   /* unsigned 1-byte quantities */
 #define hashsize(n) ((ub4)1<<(n))
 #define hashmask(n) (hashsize(n)-1)
 
-extern ub4 bobhash(register ub1 *k,         /* the key */
+extern ub4 bobhash(register const ub1 *k,         /* the key */
                    register ub4  length,    /* the length of the key */
                    register ub4  initval);  /* the previous hash, or an arbitrary value */

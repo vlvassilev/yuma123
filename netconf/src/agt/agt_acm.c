@@ -1236,7 +1236,7 @@ static const char* get_rule_queue_access_str(unsigned int access_id)
     }
 }
 
-static unsigned int get_rule_queue_access_id(char* access_str)
+static unsigned int get_rule_queue_access_id(const char* access_str)
 {
     if(0==strcmp("read", access_str)) {
         return DATA_RULE_QUEUE_READ;

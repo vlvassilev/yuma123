@@ -7789,7 +7789,7 @@ static status_t
         /* Move the must statements */
         xpath_pcb_t   *must;
         xpath_pcb_t   *must_clone;
-        must = (obj_template_t *)dlq_firstEntry(aug_mustQ);
+        must = (xpath_pcb_t *)dlq_firstEntry(aug_mustQ);
         for (; must != NULL; must = (xpath_pcb_t*)dlq_nextEntry(must)) {
             must_clone = xpath_clone_pcb(must);
             dlq_enque(must_clone, targ_mustQ);

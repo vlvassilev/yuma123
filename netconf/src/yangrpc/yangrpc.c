@@ -55,6 +55,7 @@
 #include "val_util.h"
 #include "var.h"
 #include "xml_util.h"
+#include "xml_val.h"
 #include "xml_wr.h"
 #include "yangconst.h"
 #include "yangcli.h"

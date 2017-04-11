@@ -222,12 +222,15 @@ static val_value_t*
 *********************************************************************/
 val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
                                     obj_template_t *rpc,
-                                    const xmlChar *args,
+                                    const xmlChar *args_in,
                                     status_t  *res )
 {
     obj_template_t   *obj;
     char             *myargv[2];
     val_value_t      *retval = NULL;
+    xmlChar          *args;
+
+    args = strdup(args_in);
 
     /* construct an argv array, convert the CLI into a parmset */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
@@ -282,6 +285,7 @@ val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
     } else {
         *res = SET_ERROR(ERR_INTERNAL_VAL);
     }
+    free(args);
     return retval;
 }  /* parse_rpc_cli */
 
@@ -4740,9 +4744,10 @@ static val_value_t *
                     if(secondary_args) {
                         status_t status;
                         char* argv[2];
-                        argv[0] = obj_get_name(mytarg->obj);
+                        argv[0] = strdup(obj_get_name(mytarg->obj));
                         argv[1] = secondary_args;
                         curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &status);
+                        free(argv[0]);
                         res = val_replace(curparm, mytarg);
                     }
                     res = fill_valset(server_cb, rpc, mytarg, curparm, 
@@ -5161,6 +5166,7 @@ static status_t
     boolean                isdelete, topcontainer, doattr;
     op_defop_t             def_editop;
     char                   *secondary_args;
+    char                   *secondary_args_buf;
     int                    secondary_args_flag;
 
     /* init locals */
@@ -5209,7 +5215,8 @@ static status_t
         dofill = FALSE;
     }
 
-    secondary_args = line;
+    secondary_args_buf = strdup(line);
+    secondary_args = secondary_args_buf;
     secondary_args_flag = 0;
     while(strlen(secondary_args)>=strlen("--")) {
         if(memcmp(secondary_args, "--", strlen("--"))==0) {
@@ -5224,6 +5231,9 @@ static status_t
                                       isdelete, dofill,
                                       TRUE, /* iswrite */
                                       &res, &valroot, secondary_args_flag?secondary_args:NULL);
+    free(secondary_args_buf);
+    secondary_args=NULL;
+
     if (content == NULL) {
         if (res != NO_ERR) {
             if (LOGDEBUG2) {

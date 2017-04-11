@@ -79,7 +79,7 @@ acceptable.  Do NOT use for cryptographic purposes.
 */
 
 ub4 bobhash( k, length, initval)
-register ub1 *k;        /* the key */
+register const ub1 *k;        /* the key */
 register ub4  length;   /* the length of the key */
 register ub4  initval;  /* the previous hash, or an arbitrary value */
 {

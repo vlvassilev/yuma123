@@ -3825,7 +3825,7 @@ status_t
     FILE* fp;
     cookie_io_functions_t io_functions;
     io_functions.read=NULL;
-    io_functions.write=writer_fn;
+    io_functions.write=(cookie_write_function_t *)writer_fn;
     io_functions.seek=NULL;
     io_functions.close=NULL;
 

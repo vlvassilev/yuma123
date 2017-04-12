@@ -168,11 +168,12 @@ static status_t cmn_init ( int argc, char *argv[], boolean *showver,
     /* initialize the NCX Library first to allow NCX modules to be processed.  
      * No module can get its internal config until the NCX module parser and 
      * definition registry is up */
-    len = strlen(START_MSG) + strlen(COPYRIGHT_STRING) + 2;
+    len = strlen(START_MSG) + strlen(COPYRIGHT_STRING_LINE0) + strlen(COPYRIGHT_STRING_LINE1) + 2;
 
     if (len < BUFFLEN) {
         strcpy(buff, START_MSG);
-        strcat(buff, COPYRIGHT_STRING);
+        strcat(buff, COPYRIGHT_STRING_LINE0);
+        strcat(buff, COPYRIGHT_STRING_LINE1);
     } else {
         return ERR_BUFF_OVFL;
     }

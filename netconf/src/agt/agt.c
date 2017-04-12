@@ -49,6 +49,7 @@ date         init     comment
 #include "agt_if.h"
 #include "agt_ncx.h"
 #include "agt_not.h"
+#include "agt_not_queue_notification_cb.h"
 #include "agt_plock.h"
 #include "agt_proc.h"
 #include "agt_rpc.h"
@@ -60,6 +61,7 @@ date         init     comment
 #include "agt_time_filter.h"
 #include "agt_timer.h"
 #include "agt_util.h"
+
 #include "log.h"
 #include "ncx.h"
 #include "ncx_str.h"

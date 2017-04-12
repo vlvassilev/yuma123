@@ -1295,7 +1295,7 @@ static status_t
         } else if((p.we_word_line_offset[i]<=word_end) && (p.we_word_line_offset[i]+strlen(p.we_wordv[i])>word_end)) {
             /*cursor in the middle of parameter[=value] - completion not possible*/
             *emptyexit=TRUE;
-            return;
+            return NO_ERR;
         }
     }
     if(i==p.we_wordc) {

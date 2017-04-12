@@ -50,6 +50,7 @@
 #include "op.h"
 #include "rpc.h"
 #include "runstack.h"
+#include "ses_msg.h"
 #include "status.h"
 #include "val.h"
 #include "val_util.h"
@@ -2635,7 +2636,7 @@ status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line,
             res = do_local_conn_command_reqdata(server_cb, rpc, useline, len, &reqdata, &timeval);
             if (res == ERR_NCX_SKIPPED) {
                 assert(0);
-                res = do_local_command(server_cb, rpc, useline, len);
+		/*res = do_local_command(server_cb, rpc, useline, len);*/
             }
         }
         if (newline) {

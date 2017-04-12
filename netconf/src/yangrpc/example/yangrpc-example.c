@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "ncx.h"
+#include "ncxmod.h"
 #include "val.h"
 #include "yangrpc.h"
 

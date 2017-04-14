@@ -7,177 +7,31 @@
 <center>YANG Module Compiler</center>
 
 
-<center>Version 2.2</center>
+<center>Version yuma123-2.10</center>
 
 
-<center>Last Updated: 2012-07-24</center>== <center>'''Table Of Contents'''</center> ==
-1 Preface4
-
-1.1 Legal Statements4
-
-1.2 Additional Resources4
-
-1.2.1 WEB Sites4
-
-1.2.2 Mailing Lists5
-
-1.3 Conventions Used in this Document5
-
-2 yangdump6
-
-2.1 Introduction6
-
-2.1.1 Features7
-
-2.1.2 Starting yangdump9
-
-2.1.3 Stopping yangdump10
-
-2.1.4 Configuration Parameter List10
-
-2.2 Validating YANG Files12
-
-2.2.1 Yangdump Validation Messages13
-
-2.2.2 Validation Example13
-
-2.3 Translating YANG to Other Formats14
-
-2.3.1 YIN Format14
-
-2.3.2 HTML Translation15
-
-2.3.3 XSD Translation18
-
-2.3.4 SQL Translation21
-
-2.3.5 SQL Documentation Database Translation21
-
-2.3.6 Canonical YANG Translation21
-
-2.3.7 Copy and Rename YANG Files22
-
-2.3.8 Agent Instrumentation H File Generation22
-
-2.3.9 Agent Instrumentation C File Generation22
-
-3 CLI Reference24
-
-3.1 --config24
-
-3.2 --defnames24
-
-3.3 --dependencies25
-
-3.4 --deviation25
-
-3.5 --exports26
-
-3.6 --feature-code-default27
-
-3.7 --feature-disable27
-
-3.8 --feature-dynamic28
-
-3.9 --feature-enable28
-
-3.10 --feature-enable-default29
-
-3.11 --feature-static30
-
-3.12 --format30
-
-3.13 --help31
-
-3.14 --help-mode32
-
-3.15 --html-div33
-
-3.16 --html-toc33
-
-3.17 --identifiers34
-
-3.18 --indent35
-
-3.19 --log35
-
-3.20 --log-append36
-
-3.21 --log-level36
-
-3.22 --modpath37
-
-3.23 --module37
-
-3.24 --modversion38
-
-3.25 --objview38
-
-3.26 --output39
-
-3.27 --show-errors40
-
-3.28 --simurls41
-
-3.29 --stats41
-
-3.30 --subdirs43
-
-3.31 --subtree44
-
-3.32 --totals45
-
-3.33 --tree-identifiers46
-
-3.34 --unified46
-
-3.35 --urlstart47
-
-3.36 --version48
-
-3.37 --versionnames48
-
-3.38 --warn-idlen49
-
-3.39 --warn-linelen49
-
-3.40 --warn-off50
-
-3.41 --xsd-schemaloc50
-
-3.42 --yuma-home51= Preface =
 == Legal Statements ==
 Copyright 2009 – 2012, Andy Bierman, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as described in the printed document:
 
-Yuma<sup> </sup>Installation Guide
+Yuma Installation Guide
 
 
 Other documentation includes:
 
-Yuma<sup> </sup>Quickstart Guide
+Yuma Quickstart Guide
 
 Yuma User Manual
 
-Yuma<sup> </sup>netconfd Manual
+Yuma netconfd Manual
 
-Yuma<sup> </sup>yangcli Manual
+Yuma yangcli Manual
 
-Yuma<sup> </sup>yangdiff Manual
+Yuma yangdiff Manual
 
-Yuma<sup> </sup>Developer Manual
-
-
-To obtain additional support you may join the yuma-users group on sourceforge.net and send email to this e-mail address:
-
-[mailto:yuma-users@lists.sourceforge.net yuma-users@lists.sourceforge.net]
-
-
-The SourceForge.net Support Page for Yuma can be found at this WEB page:
-
-http://sourceforge.net/projects/yuma/support
+Yuma Developer Manual
 
 
 There are several sources of free information and tools for use with YANG and/or NETCONF.
@@ -224,37 +78,37 @@ The following formatting conventions are used throughout this document:
 
 
 
-{| style="border-spacing:0;"
+{| class=wikitable border="1"
 ! <center>Convention</center>
 ! <center>Description</center>
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''--foo'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| CLI parameter foo
+|  '''--foo'''
+|  CLI parameter foo
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''<nowiki><foo></nowiki>'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| XML parameter foo
+|  '''<nowiki><foo></nowiki>'''
+|  XML parameter foo
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''foo'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| '''yangcli''' command or parameter
+|  '''foo'''
+|  '''yangcli''' command or parameter
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''$FOO'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Environment variable FOO
+|  '''$FOO'''
+|  Environment variable FOO
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''$$foo'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| '''yangcli''' global variable foo
+|  '''$$foo'''
+|  '''yangcli''' global variable foo
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"|  some text
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Example command or PDU
+|   some text
+|  Example command or PDU
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| some text
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Plain text
+|  some text
+|  Plain text
 
 |}
 = yangdump =
@@ -426,189 +280,189 @@ The following configuration parameters are used by '''yangdump'''. Refer to the 
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| <center>'''parameter'''</center>
-| style="border:0.5pt solid #000000;padding:0.0382in;"| <center>'''description'''</center>
+{| class=wikitable border="1"
+|  <center>'''parameter'''</center>
+|  <center>'''description'''</center>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --config
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the configuration file to use for parameters.
+|  --config
+|  Specifies the configuration file to use for parameters.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --datapath
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Sets the data file search path.
+|  --datapath
+|  Sets the data file search path.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --defnames
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies if the default naming scheme is used for any output files.
+|  --defnames
+|  Specifies if the default naming scheme is used for any output files.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --dependencies
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Generate the module dependencies report.
+|  --dependencies
+|  Generate the module dependencies report.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --deviation
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Species one or more YANG modules to load as deviations.
+|  --deviation
+|  Species one or more YANG modules to load as deviations.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --exports
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Generate the module exports report.
+|  --exports
+|  Generate the module exports report.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-code-default
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies if a feature should use static or dynamic code by default
+|  --feature-code-default
+|  Specifies if a feature should use static or dynamic code by default
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-disable
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Leaf list of features to disable
+|  --feature-disable
+|  Leaf list of features to disable
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-dynamic
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies a feature that uses dynamic code
+|  --feature-dynamic
+|  Specifies a feature that uses dynamic code
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-enable
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies a feature that should be enabled
+|  --feature-enable
+|  Specifies a feature that should be enabled
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-enable-default
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies if a feature should be enabled or disabled by default
+|  --feature-enable-default
+|  Specifies if a feature should be enabled or disabled by default
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-static
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies a feature that uses static code
+|  --feature-static
+|  Specifies a feature that uses static code
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --format
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the type of translation format that should be used for the output.
+|  --format
+|  Specifies the type of translation format that should be used for the output.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --help
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Get context-sensitive help, then exit.
+|  --help
+|  Get context-sensitive help, then exit.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --help-mode
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Adjust the help output (--brief, or --full).
+|  --help-mode
+|  Adjust the help output (--brief, or --full).
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --html-div
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| <nowiki>For HTML translation, controls whether to generate a <div> element instead of a complete HTML document.</nowiki>
+|  --html-div
+|  <nowiki>For HTML translation, controls whether to generate a <div> element instead of a complete HTML document.</nowiki>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --html-toc
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| For HTML translation, controls the table of contents that is gnerated.
+|  --html-toc
+|  For HTML translation, controls the table of contents that is gnerated.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --identifiers
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Generate the module object identifiers report.
+|  --identifiers
+|  Generate the module object identifiers report.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --indent
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the indent count to use when writing data.
+|  --indent
+|  Specifies the indent count to use when writing data.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --log
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the log file to use instead of STDOUT.
+|  --log
+|  Specifies the log file to use instead of STDOUT.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --log-append
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether a log file will be reused or overwritten.
+|  --log-append
+|  Controls whether a log file will be reused or overwritten.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --log-level
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls the verbosity of logging messages.
+|  --log-level
+|  Controls the verbosity of logging messages.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --modpath
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Sets the module search path.
+|  --modpath
+|  Sets the module search path.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --module
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies one or more YANG modules to load upon startup.
+|  --module
+|  Specifies one or more YANG modules to load upon startup.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --modversion
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Generate the module version report.
+|  --modversion
+|  Generate the module version report.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --subdirs
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether sub-directories will be searched during file searches.
+|  --subdirs
+|  Controls whether sub-directories will be searched during file searches.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --versionnames
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether the revision date is used in YANG module file names.
+|  --versionnames
+|  Controls whether the revision date is used in YANG module file names.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --objview
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies whether raw or cooked objects will be generated during HTML and YANG translation.
+|  --objview
+|  Specifies whether raw or cooked objects will be generated during HTML and YANG translation.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --output
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies where output files should be generated.
+|  --output
+|  Specifies where output files should be generated.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --runpath
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Sets the executable file search path.
+|  --runpath
+|  Sets the executable file search path.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --show-errors
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Print all the error and warning messages, then exit.
+|  --show-errors
+|  Print all the error and warning messages, then exit.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --simurls
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls how URL parameters are generated during HTML file output.
+|  --simurls
+|  Controls how URL parameters are generated during HTML file output.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --stats
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Control YANG usage statistics reporting for each input module.
+|  --stats
+|  Control YANG usage statistics reporting for each input module.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --subdirs
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether sub-directories are searched for YANG files.
+|  --subdirs
+|  Controls whether sub-directories are searched for YANG files.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --subtree
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies one or more directory subtrees to search for YANG modules.
+|  --subtree
+|  Specifies one or more directory subtrees to search for YANG modules.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --tree-identifiers
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Generate the module object identifier local-names report in tree format.
+|  --tree-identifiers
+|  Generate the module object identifier local-names report in tree format.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --totals
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls statistics summary reporting for a set of input modules.
+|  --totals
+|  Controls statistics summary reporting for a set of input modules.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --unified
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether to combine submodules into the main module in the translation output.
+|  --unified
+|  Controls whether to combine submodules into the main module in the translation output.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --urlstart
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the start of URLs to use during HTML file generation.
+|  --urlstart
+|  Specifies the start of URLs to use during HTML file generation.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --version
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Prints the program version and then exit.
+|  --version
+|  Prints the program version and then exit.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --warn-idlen
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls how identifier lengths are checked.
+|  --warn-idlen
+|  Controls how identifier lengths are checked.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --warn-linelen
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls how line lengths are checked.
+|  --warn-linelen
+|  Controls how line lengths are checked.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --warn-off
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Suppresses the specified warning number.
+|  --warn-off
+|  Suppresses the specified warning number.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --xsd-schemaloc
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Generate schemaLocation attributes during XSD translation.
+|  --xsd-schemaloc
+|  Generate schemaLocation attributes during XSD translation.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --yuma-home
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the '''$YUMA_HOME''' project root to use when searching for files.
+|  --yuma-home
+|  Specifies the '''$YUMA_HOME''' project root to use when searching for files.
 
 |}
 == Validating YANG Files ==
@@ -1069,21 +923,21 @@ Example renamed file, if '''--output=~/workdir''':
 There are 3 different parameters for generating SIL developer H files:
 
 
-{| style="border-spacing:0;"
+{| class=wikitable border="1"
 ! <center>Parameter</center>
 ! <center>Description</center>
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| --format=h
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Generate combined User and Yuma SIL H file
+|  --format=h
+|  Generate combined User and Yuma SIL H file
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| --format=uh
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Generate split User SIL H file
+|  --format=uh
+|  Generate split User SIL H file
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| --format=yh
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Generate split Yuma SIL H file
+|  --format=yh
+|  Generate split Yuma SIL H file
 
 |}
 These''' '''parameter values are only relevant for Yuma server developers. Refer to the Yuma Developer Guide for more details.
@@ -1092,21 +946,21 @@ These''' '''parameter values are only relevant for Yuma server developers. Refer
 There are 3 different parameters for generating SIL developer C files:
 
 
-{| style="border-spacing:0;"
+{| class=wikitable border="1"
 ! <center>Parameter</center>
 ! <center>Description</center>
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| --format=c
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Generate combined User and Yuma SIL C file
+|  --format=c
+|  Generate combined User and Yuma SIL C file
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| --format=uc
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Generate split User SIL C file
+|  --format=uc
+|  Generate split User SIL C file
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| --format=yc
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Generate split Yuma SIL C file
+|  --format=yc
+|  Generate split Yuma SIL C file
 
 |}
 These''' '''parameter values are only relevant for Yuma server developers. Refer to the Yuma Developer Guide for more details.
@@ -1125,29 +979,29 @@ Refer to the 'Configuration Files' section for details on the format of this fil
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: complete file specification of the text file to parse for more parameters.
+{| class=wikitable border="1"
+|  Syntax
+|  string: complete file specification of the text file to parse for more parameters.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| <nowiki>/etc/yuma/<program-name>.conf</nowiki>
+|  Default:
+|  <nowiki>/etc/yuma/<program-name>.conf</nowiki>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|      yangdump testmod \
+|  Example:
+|       yangdump testmod \
           --config=~/testconf.conf
 
 |}
@@ -1162,29 +1016,29 @@ This parameter is ignored if the '''--format''' parameter is missing.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| FALSE
+|  Default:
+|  FALSE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --defnames=true \
    --subtree=~/workdir/ \
    --format=html
@@ -1210,29 +1064,29 @@ Example report for module 'yangdump':
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --dependencies \
    --module=test4
 
@@ -1257,29 +1111,29 @@ For the '''yangdump '''and''' yangcli''' programs, each module will be processed
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| module name or filespec
+{| class=wikitable border="1"
+|  Syntax
+|  module name or filespec
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdump
+|  Supported by:
+|  netconfdyangcliyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangcli \
+|  Example:
+|   yangcli \
    --module=test1 \
    --deviation=test1_deviations
 
@@ -1309,29 +1163,29 @@ It includes the following information, generated in this order:
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --exports \
    --module=test3
 
@@ -1350,29 +1204,29 @@ If a '''--feature-dynamic''' or '''--feature-static''' parameter is present for 
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enum (dynamic or static)
+{| class=wikitable border="1"
+|  Syntax
+|  enum (dynamic or static)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| dynamic
+|  Default:
+|  dynamic
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --format=c \
+|  Example:
+|   yangdump --format=c \
      --feature-code-default=static \
      --module=test
 
@@ -1394,29 +1248,29 @@ Parameters for unknown features will be ignored.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| formatted string (module:feature
+{| class=wikitable border="1"
+|  Syntax
+|  formatted string (module:feature
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangcliyangdiffyangdumpnetconfd
+|  Supported by:
+|  yangcliyangdiffyangdumpnetconfd
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --format=c \
+|  Example:
+|   yangdump --format=c \
      --feature-disable=test:feature1 \
      --module=test
 
@@ -1438,29 +1292,29 @@ Parameters for unknown features will be ignored.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| formatted string (module:feature
+{| class=wikitable border="1"
+|  Syntax
+|  formatted string (module:feature
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --format=c \
+|  Example:
+|   yangdump --format=c \
      --feature-dynamic=test:feature1 \
      --module=test
 
@@ -1482,29 +1336,29 @@ Parameters for unknown features will be ignored.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| formatted string (module:feature
+{| class=wikitable border="1"
+|  Syntax
+|  formatted string (module:feature
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangcliyangdiffyangdumpnetconfd
+|  Supported by:
+|  yangcliyangdiffyangdumpnetconfd
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --format=c \
+|  Example:
+|   yangdump --format=c \
      --feature-enable=test:feature1 \
      --module=test
 
@@ -1523,29 +1377,29 @@ If a '''--feature-enable''' or '''--feature-disable''' parameter is present for 
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean (true or false)
+{| class=wikitable border="1"
+|  Syntax
+|  boolean (true or false)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| TRUE
+|  Default:
+|  TRUE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangcliyangdiffyangdumpnetconfd
+|  Supported by:
+|  yangcliyangdiffyangdumpnetconfd
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  netconfd \
+|  Example:
+|   netconfd \
     --feature-enable-default=false
 
 |}
@@ -1566,29 +1420,29 @@ Parameters for unknown features will be ignored.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| formatted string (module:feature
+{| class=wikitable border="1"
+|  Syntax
+|  formatted string (module:feature
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --format=c \
+|  Example:
+|   yangdump --format=c \
      --feature-static=test:feature1 \
      --module=test
 
@@ -1635,29 +1489,29 @@ The following values are supported:
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enumeration (xsd, sql, sqldb, html, yang, copy, h, c, uc, uh, yc, yh))
+{| class=wikitable border="1"
+|  Syntax
+|  enumeration (xsd, sql, sqldb, html, yang, copy, h, c, uc, uh, yc, yh))
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump test1 test2 \
+|  Example:
+|   yangdump test1 test2 \
    --format=xsd \
    --defnames=true \
    --output=~/workdir
@@ -1677,29 +1531,29 @@ The program configuration parameters will be displayed in alphabetical order, no
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --help
+|  Example:
+|   yangdump --help
 
 |}
 == --help-mode ==
@@ -1710,31 +1564,31 @@ The '''--help-mode''' parameter is used to control the amount of detail printed 
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| choice of 3 empty leafs
+{| class=wikitable border="1"
+|  Syntax
+|  choice of 3 empty leafs
 
 '''--brief --normal --full'''
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| normal
+|  Default:
+|  normal
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --help --help-mode=full
+|  Example:
+|   yangdump --help --help-mode=full
 
 |}
 * '''default choice: '''normal
@@ -1767,29 +1621,29 @@ The default filename extension will be '.div' instead of '.html' if this paramet
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| FALSE
+|  Default:
+|  FALSE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --html-div=true  --format=html
    --module=test
 
@@ -1820,29 +1674,29 @@ Note that if the 'menu' enumeration is used, then the following javascript file 
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enumeration (none, plain, menu)
+{| class=wikitable border="1"
+|  Syntax
+|  enumeration (none, plain, menu)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| menu
+|  Default:
+|  menu
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --html-toc=plain  --format=html
    --module=test
 
@@ -1876,29 +1730,29 @@ Example report for module 'yuma-mysession':
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --identifiers \
    --module=yuma-mysession
 
@@ -1910,29 +1764,29 @@ The '''--indent''' parameter specifies the number of spaces that will be used to
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32 (0 .. 9)
+{| class=wikitable border="1"
+|  Syntax
+|  uint32 (0 .. 9)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 2
+|  Default:
+|  2
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --indent=4
+|  Example:
+|   yangdump --indent=4
 
 |}
 == --log ==
@@ -1942,29 +1796,29 @@ The '''--log''' parameter specifies the file name to be used for logging program
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: log file specification
+{| class=wikitable border="1"
+|  Syntax
+|  string: log file specification
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --log=~/test.log&
+|  Example:
+|   yangdump --log=~/test.log&
 
 |}
 == --log-append ==
@@ -1975,29 +1829,29 @@ The '''--log-append''' parameter specifies that the existing log file (if any) s
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --log-append \
+|  Example:
+|   yangdump --log-append \
    --log=~/test.log&
 
 |}
@@ -2020,29 +1874,29 @@ There are 7 settings that can be used:
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enumeration: '''off error warn info debug debug2 debug3 debug4'''
+{| class=wikitable border="1"
+|  Syntax
+|  enumeration: '''off error warn info debug debug2 debug3 debug4'''
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| --info (--debug for DEBUG builds)
+|  Default:
+|  --info (--debug for DEBUG builds)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --log-level=debug \
+|  Example:
+|   yangdump --log-level=debug \
    --log=~/test.log&
 
 |}
@@ -2056,29 +1910,29 @@ This parameter overrides the '''$YUMA_MODPATH''' environment variable, if it is 
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: list of directory specifications
+{| class=wikitable border="1"
+|  Syntax
+|  string: list of directory specifications
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| '''$YUMA_MODPATH''' environment variable
+|  Default:
+|  '''$YUMA_MODPATH''' environment variable
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --modpath=”~/testmodules:~/modules:~/trunk/netconf/modules” \
    --module=~/test42.yang
 
@@ -2097,29 +1951,29 @@ For the '''yangdump''' program, each module will be processed as requested.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| module name or filespec
+{| class=wikitable border="1"
+|  Syntax
+|  module name or filespec
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdump
+|  Supported by:
+|  netconfdyangcliyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangcli \
+|  Example:
+|   yangcli \
    --module=test1 \
    --module=test2
 
@@ -2137,29 +1991,29 @@ Example output for module 'test':
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --modversion \
    --module=test
 
@@ -2183,29 +2037,29 @@ XSD output is always 'cooked', since refined groupings and locally-scoped defini
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enumeration (raw, cooked)
+{| class=wikitable border="1"
+|  Syntax
+|  enumeration (raw, cooked)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| raw
+|  Default:
+|  raw
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --objview=cooked \
    --module=test \
    --format=html
@@ -2242,29 +2096,29 @@ The '''--output''' parameter specifies where the output files generated by the p
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string (path or file specification)
+{| class=wikitable border="1"
+|  Syntax
+|  string (path or file specification)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdumpyangdiff
+|  Supported by:
+|  yangdumpyangdiff
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --output=~/html-files
    --subtree=testfiles \
    --format=html
@@ -2306,29 +2160,29 @@ The NETCONF error-tag values are used directly when no other error number is app
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --show-errors
+|  Example:
+|   yangdump --show-errors
 
 |}
 == --simurls ==
@@ -2346,29 +2200,29 @@ If HTML translation is requested, then setting this parameter to 'true' will cau
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| FALSE
+|  Default:
+|  FALSE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --simurls=true \
    --format=html \
    --module=test
@@ -2385,20 +2239,20 @@ The verbosity of the statistics report is controlled with this parameter. Each e
 
 
 
-{| style="border-spacing:0;"
+{| class=wikitable border="1"
 ! <center>counter</center>
 ! <center>level</center>
 ! <center>description</center>
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Complexity score
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| brief
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Numeric score characterizing the level of implementation complexity for the module. A higher number indicates a more complex module.
+|  Complexity score
+|  brief
+|  Numeric score characterizing the level of implementation complexity for the module. A higher number indicates a more complex module.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Total nodes
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| brief
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The total number of object nodes (data, notification, rpc) in the module.
+|  Total nodes
+|  brief
+|  The total number of object nodes (data, notification, rpc) in the module.
 
 * The Config nodes + Non-config nodes should equal this counter.
 * The Mandatory nodes + Optional nodes should equal this counter.
@@ -2406,223 +2260,223 @@ The verbosity of the statistics report is controlled with this parameter. Each e
 
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Extensions
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of extension statements.
+|  Extensions
+|  basic
+|  The number of extension statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Features
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of feature statements.
+|  Features
+|  basic
+|  The number of feature statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Groupings
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of exported groupings.
+|  Groupings
+|  basic
+|  The number of exported groupings.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Typedefs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of exported typedefs.
+|  Typedefs
+|  basic
+|  The number of exported typedefs.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Deviations
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of deviation statements.
+|  Deviations
+|  basic
+|  The number of deviation statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Top Data Nodes
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of top-level data nodes.
+|  Top Data Nodes
+|  basic
+|  The number of top-level data nodes.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Config nodes
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of configurable nodes.
+|  Config nodes
+|  basic
+|  The number of configurable nodes.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Non-config nodes
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| basic
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of non-configurable nodes.
+|  Non-config nodes
+|  basic
+|  The number of non-configurable nodes.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Mandatory nodes
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of mandatory nodes.
+|  Mandatory nodes
+|  advanced
+|  The number of mandatory nodes.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Optional nodes
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of optional nodes.
+|  Optional nodes
+|  advanced
+|  The number of optional nodes.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Notifications
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of notification statements.
+|  Notifications
+|  advanced
+|  The number of notification statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Rpcs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of rpc statements.
+|  Rpcs
+|  advanced
+|  The number of rpc statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Rpc inputs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of RPC input statements.
+|  Rpc inputs
+|  advanced
+|  The number of RPC input statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Rpc outputs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of rpc output statements
+|  Rpc outputs
+|  advanced
+|  The number of rpc output statements
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Augments
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of top-level augment statements within data nodes (not groupings).
+|  Augments
+|  advanced
+|  The number of top-level augment statements within data nodes (not groupings).
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Uses
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of uses statements within data nodes (not groupings).
+|  Uses
+|  advanced
+|  The number of uses statements within data nodes (not groupings).
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Choices
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of choice statements.
+|  Choices
+|  advanced
+|  The number of choice statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Cases
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of case statements. This includes implied cases which contain a single data node.
+|  Cases
+|  advanced
+|  The number of case statements. This includes implied cases which contain a single data node.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Anyxmls
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of anyxml statements.
+|  Anyxmls
+|  advanced
+|  The number of anyxml statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| NP containers
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of non-presence containers.
+|  NP containers
+|  advanced
+|  The number of non-presence containers.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| P containers
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of presence containers.
+|  P containers
+|  advanced
+|  The number of presence containers.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Lists
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of list statements.
+|  Lists
+|  advanced
+|  The number of list statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Leaf-lists
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf-list statements.
+|  Leaf-lists
+|  advanced
+|  The number of leaf-list statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Key leafs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf statements which are defined within a list to be a key.
+|  Key leafs
+|  advanced
+|  The number of leaf statements which are defined within a list to be a key.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Plain leafs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of plain leaf statements.
+|  Plain leafs
+|  advanced
+|  The number of plain leaf statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Imports
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| all
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of import statements.
+|  Imports
+|  all
+|  The number of import statements.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Integral numbers
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used a numeric data type other than decimal64.
+|  Integral numbers
+|  advanced
+|  The number of leaf and leaf-list statements that used a numeric data type other than decimal64.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Decimal64s
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the decimal64 data type.
+|  Decimal64s
+|  advanced
+|  The number of leaf and leaf-list statements that used the decimal64 data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Enumerations
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the enumeration data type.
+|  Enumerations
+|  advanced
+|  The number of leaf and leaf-list statements that used the enumeration data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Bits
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the bits data type.
+|  Bits
+|  advanced
+|  The number of leaf and leaf-list statements that used the bits data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Booleans
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the boolean data type.
+|  Booleans
+|  advanced
+|  The number of leaf and leaf-list statements that used the boolean data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Emptys
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the empty data type.
+|  Emptys
+|  advanced
+|  The number of leaf and leaf-list statements that used the empty data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Strings
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the string data type.
+|  Strings
+|  advanced
+|  The number of leaf and leaf-list statements that used the string data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Binarys
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the binary data type.
+|  Binarys
+|  advanced
+|  The number of leaf and leaf-list statements that used the binary data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Instance Identifiers
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the instance-identifier data type.
+|  Instance Identifiers
+|  advanced
+|  The number of leaf and leaf-list statements that used the instance-identifier data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Leafrefs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the leafref data type.
+|  Leafrefs
+|  advanced
+|  The number of leaf and leaf-list statements that used the leafref data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Identityrefs
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the identityref data type.
+|  Identityrefs
+|  advanced
+|  The number of leaf and leaf-list statements that used the identityref data type.
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| Unions
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| advanced
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| The number of leaf and leaf-list statements that used the union data type.
+|  Unions
+|  advanced
+|  The number of leaf and leaf-list statements that used the union data type.
 
 |}
 <center>'''--stats parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| <nowiki>enumeration [none, brief, basic, advanced, all]</nowiki>
+{| class=wikitable border="1"
+|  Syntax
+|  <nowiki>enumeration [none, brief, basic, advanced, all]</nowiki>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --stats=advanced
    --module=test
 
@@ -2637,29 +2491,29 @@ If false, the file search paths for modules, scripts, and data files will not in
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| TRUE
+|  Default:
+|  TRUE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --subdirs=false \
    --subtree=/testpath
 
@@ -2693,29 +2547,29 @@ Examples:
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: path specification
+{| class=wikitable border="1"
+|  Syntax
+|  string: path specification
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdiffyangdump
+|  Supported by:
+|  yangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --format=html \
    --subtree=~/testmods
    --subtree=./workdir
@@ -2734,29 +2588,29 @@ The '''--totals''' parameter is used with the '''--stats''' parameter to control
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| <nowiki>enumeration [none, summary, summary-only]</nowiki>
+{| class=wikitable border="1"
+|  Syntax
+|  <nowiki>enumeration [none, summary, summary-only]</nowiki>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    ---stats=basic
    --totals=summary-only
    --subtree=~/my-test-modules
@@ -2791,29 +2645,29 @@ Example report for module 'yuma-mysession':
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --tree-identifiers \
    --module=yuma-mysession
 
@@ -2837,29 +2691,29 @@ If set to 'false', then a separate output file is generated for each input file,
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| FALSE
+|  Default:
+|  FALSE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --unified=true \
    --format=html \
    --subtree=$PROJECT_X/modules \
@@ -2896,29 +2750,29 @@ http://acme.com/public/FOO_2008-01-01.html#bar.53
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string (URL format)
+{| class=wikitable border="1"
+|  Syntax
+|  string (URL format)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --urlstart="/example.com/public/" \
    --unified=true \
    --format=html \
@@ -2950,29 +2804,29 @@ This parameter can be combined with the '''--help '''parameter.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --version
+|  Example:
+|   yangdump --version
 
 |}
 == --versionnames ==
@@ -2985,29 +2839,29 @@ If present, the default filenames will not contain the module version string. <n
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| TRUE
+|  Default:
+|  TRUE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --versionnames=false \
    --subtree=/testpath \
    --defnames=true \
@@ -3025,29 +2879,29 @@ The value zero disables all identifier length checking. If non-zero, then a warn
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32: 0 to disable, or 8 .. 1023
+{| class=wikitable border="1"
+|  Syntax
+|  uint32: 0 to disable, or 8 .. 1023
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 64
+|  Default:
+|  64
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --warn-idlen=50
+|  Example:
+|   yangdump --warn-idlen=50
 
 |}
 == --warn-linelen ==
@@ -3062,29 +2916,29 @@ Tab characters are counted as 8 spaces.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32: 0 to disable, or 40 .. 4095
+{| class=wikitable border="1"
+|  Syntax
+|  uint32: 0 to disable, or 40 .. 4095
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 72
+|  Default:
+|  72
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --warn-linelen=79
+|  Example:
+|   yangdump --warn-linelen=79
 
 |}
 == --warn-off ==
@@ -3099,29 +2953,29 @@ The specific warning message will be disabled for all modules. No message will b
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32: 400 .. 899
+{| class=wikitable border="1"
+|  Syntax
+|  uint32: 400 .. 899
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 499
+|  Max Allowed:
+|  499
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump --warn-off=435
+|  Example:
+|   yangdump --warn-off=435
  <nowiki># revision order not descending</nowiki>
 
 |}
@@ -3155,29 +3009,29 @@ The 'schemaLocation' XSD for the module test3 (version 10-19-2008) would be:
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string (URL formal)
+{| class=wikitable border="1"
+|  Syntax
+|  string (URL formal)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdump
+|  Supported by:
+|  yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
   --xsd-schemaloc="[http://example.com/ http://example.com]"
   --format=xsd
   --module=test3
@@ -3203,29 +3057,29 @@ The following directories are searched when either the '''$YUMA_HOME''' environm
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: directory specification
+{| class=wikitable border="1"
+|  Syntax
+|  string: directory specification
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| '''$YUMA_HOME''' environment variable
+|  Default:
+|  '''$YUMA_HOME''' environment variable
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdump \
+|  Example:
+|   yangdump \
    --yuma-home=~/sw/netconf \
    --log=~/server.log&
 

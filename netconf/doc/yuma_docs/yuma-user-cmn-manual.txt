@@ -7,15 +7,14 @@
 <center>Common User Manual</center>
 
 
-<center>Version yuma123-2.5</center>
+<center>Version yuma123-2.10</center>
 
 
-<center>Last Updated 2015-12-15</center>
 = Preface =
 == Legal Statements ==
 Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 ‚ 2015, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as
@@ -129,17 +128,18 @@ Yuma is a set of programs providing a complete network management system
 and development environment, which implements the following standards:
 
 * Network Configuration Protocol (RFC 4741)
-* NETCONF over SSH (RFC 4742)
+* NETCONF over SSH (RFC 4742, RFC 6242)
 * NETCONF Notifications (RFC 5277)
 * Partial Lock RPC for NETCONF (RFC 5717)
-* YANG Data Modeling Language (RFC 6020)
+* YANG 1.0 Data modeling language (RFC 6020)
+* YANG 1.1 partial support* (7950)
 * Common YANG Data Types (RFC 6021)
 * NETCONF Monitoring Schema (RFC 6022)
 * With-defaults capability for NETCONF (RFC TBD)
 * SSH2 (RFC 4252 - 4254)
 * XML 1.0
 * XPath 1.0
-* YANG Data modeling language (RFC 6020)
+* NETCONF Base Notifications (RFC 6470)
 
 The following programs are included in the Yuma suite:
 * '''yangcli''': NETCONF over SSH client, providing a simple but
@@ -234,11 +234,7 @@ be installed by you:
 * '''libxml2'''
 ** xmlTextReader XML parser
 ** pattern support
-
-The following external library is built within Yuma and does not need to
-be pre-installed:
-
-* '''libtecla'''
+* '''libreadline'''
 ** command line support for '''yangcli'''
 
 The following shared (or static) library is built by Yuma and used by
@@ -255,7 +251,7 @@ The following libraries are built by Yuma, and used within executables:
 
 * '''libyumaagt'''
 ** NETCONF server support
-* '''libyumamgr'''
+* '''libmgr'''
 ** NETCONF client support
 * '''libyangrpc'''
 ** NETCONF minimalistic client support
@@ -282,6 +278,12 @@ creating server instrumentation libraries.
 
 * '''libtoaster'''
 * Server instrumentation code for the YANG module libtoaster.yang.
+* '''libietf-interfaces'''
+* Example server instrumentation code for the YANG module
+ietf-interfaces.yang.
+* '''libietf-system'''
+* Example server instrumentation code for the YANG module
+ietf-system.yang.
 
 === YANG ===
 A YANG module define the semantics and syntax of a specific management
@@ -423,7 +425,7 @@ Separate defaults for read, write, and exec (RPC operation) access are
 provided.
 
 === YANG-based Automation ===
-Yuma is a 100% ‚native YANG‚ implementation. This means that YANG
+Yuma is a 100% ‚Äúnative YANG‚Äù implementation. This means that YANG
 modules are used directly by all the tools to control all aspects of
 NETCONF protocol usage. There are no lossy translations, or complicated
 configuration steps, in order to use a YANG module. Simply load a module
@@ -476,7 +478,7 @@ suggestion, and the client can rely on it. Defaults can be specified in
 leaf default will be used.
 
 |-
-| '''deviation '''''deviation-target-path'' { ‚¶ }
+| '''deviation '''''deviation-target-path'' { ‚Ä¶ }
 | The '''deviation''' statement allows any YANG object be customized for
 a particular platform or implementation.. The tools can automatically
 support the altered objects, based on the sub-statements within the
@@ -604,7 +606,7 @@ indicate the minimum and maximum values from the parent typedef (if
 any), not the built-in type.
 
 |-
-| '''refine '''''refine-target-path'' { ‚¶ }
+| '''refine '''''refine-target-path'' { ‚Ä¶ }
 | The '''refine''' statement is defined within a '''uses''' statement,
 and allows the specific grouping to be customized for each individual
 copy of the grouping contents. The tools can automatically support the
@@ -612,7 +614,7 @@ refined objects, based on the sub-statements within the '''refine'''
 statement.
 
 |-
-| '''revision''' ''revision-date'' { ‚¶ }
+| '''revision''' ''revision-date'' { ‚Ä¶ }
 | The '''revision''' statement identifies the most current version of a
 YANG module or sub-module. Multiple versions at once are supported in
 YANG.
@@ -670,7 +672,7 @@ automatic documentation generation. Help will not be available for the
 object in '''yangcli'''.
 
 |-
-| '''ncx:metadata ''' ‚''attr-type  attr-name''‚;
+| '''ncx:metadata ''' ‚Äú''attr-type  attr-name''‚Äù;
 |Defines a qualified XML attribute in the module namespace.
 
 Allowed within an RPC input parameter.
@@ -734,7 +736,7 @@ that will be allowed for the object (create, update, delete).
 Only the 'superuser' will be allowed to access the object, by default.
 
 |-
-|'''ncx:xsdlist''' ‚''list-type''‚<nowiki>;</nowiki>
+|'''ncx:xsdlist''' ‚Äú''list-type''‚Äù<nowiki>;</nowiki>
 |Declares that a string data type is really an XSD style list.
 
 '''list-type''' is a valid type name with optional YANG prefix.
@@ -1070,13 +1072,13 @@ Default value: none
 CLI override: --modpath
 
 CLI example:
-     --modpath=‚$HOME/modules2:/usr/local/modules‚
+     --modpath=‚Äù$HOME/modules2:/usr/local/modules‚Äù
  
 C shell example:
-     setenv YUMA_MODPATH  ‚$HOME/modules2:/usr/local/modules‚
+     setenv YUMA_MODPATH  ‚Äú$HOME/modules2:/usr/local/modules‚Äù
  
 Bash shell example:
-     export YUMA_MODPATH=‚$HOME/modules2:/usr/local/modules‚
+     export YUMA_MODPATH=‚Äú$HOME/modules2:/usr/local/modules‚Äù
  
 
 === $YUMA_DATAPATH ===
@@ -1102,7 +1104,7 @@ searching for files.
 By default, each entire directory and all its sub-directory contents
 will be searched for the requested file. This can be overridden with
 the''' --subdirs''' parameter. Refer to the Command Line Parameter
-Reference for more details. If '''‚-subdirs=false''' is used, then only
+Reference for more details. If '''--subdirs=false''' is used, then only
 the specified directory will be searched instead.
 
 Note: This parameter specifies the exact directory locations when
@@ -1116,13 +1118,13 @@ Default value: none
 CLI override: --datapath
 
 CLI example:
-     --datapath=‚$HOME/mydata:$HOME/project1/data‚
+     --datapath=‚Äù$HOME/mydata:$HOME/project1/data‚Äù
 
 C shell example:
-     setenv YUMA_DATAPATH  ‚$HOME/mydata:$HOME/project1/data‚
+     setenv YUMA_DATAPATH  ‚Äú$HOME/mydata:$HOME/project1/data‚Äù
 
 Bash shell example:
-     export YUMA_DATAPATH=‚$HOME/mydata:$HOME/project1/data‚
+     export YUMA_DATAPATH=‚Äú$HOME/mydata:$HOME/project1/data‚Äù
  
 
 === $YUMA_RUNPATH ===
@@ -1156,13 +1158,13 @@ Default value: none
 CLI override: --runpath
 
 CLI example:
-     --runpath=‚$HOME/scripts:/usr/local/scripts‚
+     --runpath=‚Äù$HOME/scripts:/usr/local/scripts‚Äù
 
 C shell example:
-     setenv YUMA_RUNPATH  ‚$HOME/scripts:/usr/local/scripts‚
+     setenv YUMA_RUNPATH  ‚Äú$HOME/scripts:/usr/local/scripts‚Äù
  
 Bash shell example:
-     export YUMA_RUNPATH=‚$HOME/scripts:/usr/local/scripts‚
+     export YUMA_RUNPATH=‚Äú$HOME/scripts:/usr/local/scripts‚Äù
 
 == Searching for Files ==
 All Yuma programs search for YANG and other files in the same manner,
@@ -1259,7 +1261,7 @@ by '''yangcli'''.
 
 === Parameter Searches ===
 A parameter search is started on behalf of a CLI parameter, such as the
-'''‚-module''' parameter, used by the '''yangdump '''program. A search
+'''--module''' parameter, used by the '''yangdump '''program. A search
 of this type can include directory path and file extension in the search
 parameter. If a filename with a file extension (must be '.yang') is
 given, then only that exact file will be checked. The current working
@@ -1298,7 +1300,7 @@ module search path will be checked as follows:
 First, find a file with the same revision-date in the file name:
 
      import foo {
-         revision-date ‚2009-01-15‚;
+         revision-date ‚Äú2009-01-15‚Äù;
          prefix foo;
      }
 
@@ -1309,14 +1311,14 @@ successfully terminated.
      // file foo.2009-01-15.yang
      module foo {
  
-         namespace ‚[http://example.com/ns/foo
-http://example.com/ns/foo]‚;
+         namespace ‚Äú[http://example.com/ns/foo
+http://example.com/ns/foo]‚Äù;
          prefix foo;
  
          // rest of header follows
  
          revision 2009-01-15 {
-           description ‚Initial version.‚;
+           description ‚ÄúInitial version.‚Äù;
          }
  
          // rest of module follows
@@ -1330,14 +1332,14 @@ equal to '2009-01-15', then the search is successfully terminated.
      // file foo.yang
      module foo {
  
-         namespace ‚[http://example.com/ns/foo
-http://example.com/ns/foo]‚;
+         namespace ‚Äú[http://example.com/ns/foo
+http://example.com/ns/foo]‚Äù;
          prefix foo;
  
          // rest of header follows
  
          revision 2009-01-15 {
-           description ‚Initial version.‚;
+           description ‚ÄúInitial version.‚Äù;
          }
  
          // rest of module follows
@@ -1388,21 +1390,21 @@ exhausted and no match is found then the search terminates in failure.
 # The current working directory is checked. No sub-directories are
 checked, if any are present.
 # Each directory specified in the '''$YUMA_MODPATH''' environment
-variable, or set with the '''‚modpath''' configuration parameter, is
+variable, or set with the '''‚Äìmodpath''' configuration parameter, is
 checked. 
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$HOME/modules''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$YUMA_HOME/modules''' directory is checked.
-#*If the '''‚-subdirs=false''' parameter is set, then only each
+#*If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$YUMA_INSTALL/modules''' directory is checked.
-#* If the '''‚-subdirs=fasle''' parameter is set, then only each
+#* If the '''--subdirs=fasle''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 
@@ -1417,28 +1419,28 @@ An example of a data file is the startup configuration file used by
 file location is tried. If no match is found, then the search will
 terminate in failure.
 # Each directory specified in the '''$YUMA_DATAPATH''' environment
-variable, or set with the '''‚datapath''' configuration parameter, is
+variable, or set with the '''‚Äìdatapath''' configuration parameter, is
 checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The current working directory is checked. No sub-directories are
 checked, if any are present
 # The '''$HOME/data''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$YUMA_HOME/data''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$HOME/.yuma''' directory is checked.
 # The '''$YUMA_INSTALL/data''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''/usr/share/yuma/data''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''/etc/yuma''' directory is checked.
@@ -1453,21 +1455,21 @@ terminate in failure.
 # The current working directory is checked. No sub-directories are
 checked, if any are present.
 # Each directory specified in the '''$YUMA_RUNPATH''' environment
-variable, or set with the '''‚runpath''' configuration parameter, is
+variable, or set with the '''‚Äìrunpath''' configuration parameter, is
 checked. 
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$HOME/scripts''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$YUMA_HOME/scripts''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 # The '''$YUMA_INSTALL/scripts''' directory is checked.
-#* If the '''‚-subdirs=false''' parameter is set, then only each
+#* If the '''--subdirs=false''' parameter is set, then only each
 top-level directory will be checked. If it is not set, then
 sub-directories will be searched.
 
@@ -1475,12 +1477,12 @@ sub-directories will be searched.
 The Yuma program configuration parameters can be stored in text or XML
 files.
 
-The '''-‚config '''parameter is used to specify that configuration
+The '''-‚Äìconfig '''parameter is used to specify that configuration
 parameters should be retrieved from a file instead of the command line.
 
 [[Image:default-linux-data-directories.png]]
 
-Any other configuration parameter (except '''-‚config''') can be stored
+Any other configuration parameter (except '''-‚Äìconfig''') can be stored
 in a configuration file used for program input.
 
 === XML Configuration Files ===
@@ -1736,7 +1738,7 @@ forms.</nowiki>
 When invoking the '''yangdump''' program, the default CLI parameter is
 '''--module'''. These two command lines are equivalent:
 
-     yangdump ‚-module=test1 ‚-module=test2
+     yangdump --module=test1 --module=test2
      yangdump test1 test2
 
 A string that does not start with any dashes will still be tried as a

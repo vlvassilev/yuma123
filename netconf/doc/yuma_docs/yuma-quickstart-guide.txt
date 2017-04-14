@@ -7,15 +7,13 @@
 <center>Client/Server Quickstart Guide</center>
 
 
-<center>Version yuma123-2.5</center>
+<center>Version yuma123-2.10</center>
 
-
-<center>Last Updated: 2015-12-09</center>
 = Preface =
 == Legal Statements ==
 Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 â 2015, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as
@@ -195,10 +193,10 @@ operation.</nowiki>
 <nowiki>When a NETCONF session starts, a <hello> message is sent by the
 server that has all the NETCONF capabilities and YANG modules supported
 by the server. </nowiki>Capabilities are optional protocol mechanisms,
-beyond those defined in the base protocol (RFC 4741). <nowiki>The client
-application knows what operations, notification events, and database
-contents are supported on the server, based on the information in the
-<hello> message.</nowiki>
+beyond those defined in the base protocol (RFC 4741, RFC 6241).
+<nowiki>The client application knows what operations, notification
+events, and database contents are supported on the server, based on the
+information in the <hello> message.</nowiki>
 
 NETCONF has a set of basic database (CRUD) operations for managing the
 configuration database. In addition, any YANG module can define new
@@ -237,11 +235,14 @@ address 'localhost' is used in the examples below.
 
 == What is libtoaster? ==
 There is a sample server instrumentation library (SIL) included, named
-libtoaster. This is the module-specific server instrumentation code for
-the management data defined in toaster.yang. This is based on the
-original TOASTER-MIB by Epilogue. This YANG module provides simple
-operations to make toast, and some simple NETCONF database objects to
-enable and monitor the toaster.
+libtoaster.
+[https://sourceforge.net/p/yuma123/git/ci/master/tree/libtoaster/src/toaster.c
+toaster.c] is the module-specific server instrumentation code for the
+management data defined in
+[https://sourceforge.net/p/yuma123/git/ci/master/tree/netconf/modules/netconfcentral/toaster.yang
+toaster.yang ]. This is based on the original TOASTER-MIB by Epilogue.
+This YANG module provides simple operations to make toast, and some
+simple NETCONF database objects to enable and monitor the toaster.
 
 The new YANG version of the TOASTER-MIB is different is some ways:
 
@@ -259,8 +260,29 @@ service availability.
 * A notification is generated when the toast is done or canceled. This
 notification can be used instead of polling the toaster status object.
 
-The complete text of '''toaster.yang''' and TOASTER-MIB can be found at
-the end of this document.
+== Other examples: ietf-interfaces and ietf-system ==
+The partial SIL implementations of the stadard ietf-system.yang and
+ietf-interfaces.yang models are included as examples and should work out
+of the box for standard Linux distributions.
+
+*Model:
+[https://sourceforge.net/p/yuma123/git/ci/master/tree/netconf/modules/ietf/ietf-interfaces.yang
+ietf-interfaces.yang ] ([https://tools.ietf.org/rfc/rfc7223.txt
+rfc7223]) + Implementation:
+[https://sourceforge.net/p/yuma123/git/ci/master/tree/example-modules/ietf-interfaces/ietf-interfaces.c
+ietf-interfaces.c]
+*Model:
+[https://sourceforge.net/p/yuma123/git/ci/master/tree/netconf/modules/ietf/ietf-system.yang
+ietf-system.yang] ([https://tools.ietf.org/rfc/rfc7317.txt rfc7317]) +
+Implementation:
+[https://sourceforge.net/p/yuma123/git/ci/master/tree/example-modules/ietf-system/ietf-system.c
+ietf-system.c]
+
+One can start (provided you have already compiled installed and
+configured netconfd and the modules) netconfd and load the YANG models
+with the installed SIL implementations like this:
+
+ /usr/sbin/netconfd --module=ietf-system --module=ietf-interfaces
 
 == Start the netconfd server ==
 If the '''netconfd''' server is already running, then skip this section.
@@ -308,14 +330,18 @@ done with a CLI parameter, and the user name 'joe' is used. Replace
 'joe' with your username.
 
 To start the '''netconfd''' server in the foreground:
+ <nowiki>
+mydir> '''/usr/sbin/netconfd --superuser=joe'''
+Starting netconfd...
+Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.
+Copyright (c) 2013-2017, Vladimir Vassilev, All Rights Reserved.
 
- mydir> '''/usr/sbin/netconfd --superuser=joe'''
- Starting netconfd... 
- Copyright (c) 2009, Netconf Central, Inc., All Rights Reserved. 
- 
- Default startup config file (startup-cfg.xml) not found.
-    Booting with default running configuration!
+Warning: Parse <load-config> failed and --startup-error=continue
+agt: Startup config loaded OK
+     Source: /home/vladimir/.yuma/startup-cfg.xml
 
+Running netconfd server (2.10-0)
+</nowiki>
 If no startup configuration is available, then the server defaults will
 be used instead. Any message about 'startup-cfg.xml' not found can be
 ignored. It just means the server booted with the factory default
@@ -1395,47 +1421,100 @@ There are several types of internal variables available in the
 
 The command 'show vars' can be used to see the current value of all
 program variables:
+ <nowiki>
+ yangcli joe@localhost> '''show vars '''
+CLI Variables
 
- yangcli andy@localhost> '''show vars '''
- 
- No CLI variables 
- 
- Read-only system variables 
- 
-    HOME /home/joe
-    HOSTNAME 
-    LANG en_US.UTF-8 
-    PWD /home/joe
-    SHELL /bin/bash 
-    USER joe 
-    YUMA_DATAPATH 
-    YUMA_HOME
-    YUMA_MODPATH 
-    YUMA_RUNPATH 
- 
- Read-write system variables 
- 
-    autocomp true 
-    autoload true 
-    bad-data check 
-    default-module 
-    default-operation none 
-    display-mode plain 
-    error-option none 
-    fixorder true 
-    log-level info 
-    optional false 
-    server 
-    test-option none 
-    timeout 30 
-    user joe
-    with-defaults none 
- 
- No global variables 
- 
- No local variables 
- 
- yangcli joe@localhost>
+yangcli {
+  aliases-file ~/.yuma/.yangcli_aliases
+  alt-names true
+  autoaliases true
+  autocomp true
+  autohistory true
+  autoload true
+  autouservars true
+  bad-data check
+  display-mode plain
+  echo-replies true
+  feature-enable-default true
+  fixorder true
+  force-target candidate
+  indent 2
+  log-level info
+  match-names one-nocase
+  ncport 830
+  password ****
+  private-key /home/joe/.ssh/id_rsa
+  public-key /home/joe/.ssh/id_rsa.pub
+  server localhost
+  subdirs true
+  tcp-direct-enable false
+  time-rpcs false
+  timeout 30
+  transport ssh
+  use-xmlheader true
+  user vladimir
+  uservars-file ~/.yuma/yangcli_uservars.xml
+  warn-idlen 64
+  warn-linelen 0
+  keep-session-model-copies-after-compilation false
+}
+
+Read-only environment variables
+
+  HOME /home/joe
+  HOSTNAME 
+  LANG en_US.utf8
+  PWD /home/joe
+  SHELL /bin/bash
+  USER joe
+  YUMA_DATAPATH 
+  YUMA_HOME 
+  YUMA_MODPATH 
+  YUMA_RUNPATH 
+
+Read-write system variables
+
+  aliases-file ~/.yuma/.yangcli_aliases
+  alt-names true
+  autoaliases true
+  autocomp true
+  autohistory true
+  autoload true
+  autouservars true
+  bad-data check
+  default-module 
+  default-operation merge
+  display-mode plain
+  echo-replies true
+  error-option none
+  fixorder true
+  indent 2
+  keep-session-model-copies-after-compilation false
+  log-level info
+  match-names one-nocase
+  optional false
+  server localhost
+  test-option set
+  time-rpcs false
+  timeout 30
+  use-xmlheader true
+  user vladimir
+  uservars-file ~/.yuma/yangcli_uservars.xml
+  with-defaults none
+
+Global variables
+
+  backup {
+    interfaces 
+    nacm 
+  }
+
+Local variables
+
+  itf //interface[name='eth0']
+yangcli joe@localhost>
+</nowiki>
 
 == Scripts ==
 Scripts are simply a collection of '''yangcli''' commands and/or
@@ -1462,285 +1541,3 @@ runstack levels will be canceled, not just the current script.
 
 Script syntax will be expanded in a future release to provide loops and
 conditional statements.
-
-= toaster.yang =
-The toaster.yang module is included here for reference.
-
- module toaster {
- 
-     namespace "http://netconfcentral.org/ns/toaster";
- 
-     prefix "toast";
- 
-     organization
-         "Netconf Central";
- 
-     contact
-         "Andy Bierman <andy@netconfcentral.org>";
- 
-     description
-         "YANG version of the TOASTER-MIB.";
- 
- 
-     revision 2009-11-20 {
-         description "Toaster module in progress.";
-     }
- 
-     identity toast-type {
-         description
-           "Base for all bread types supported by the toaster.
-            New bread types not listed here nay be added in the 
-            future.";
-     }
- 
-     identity white-bread {
-         description
-           "White bread.";
-         base toast:toast-type;
-     }
- 
-     identity wheat-bread {
-         description
-           "Wheat bread.";
-         base toast-type;
-     }
- 
-     identity wonder-bread {
-         description
-           "Wonder bread.";
-         base toast-type;
-     }
- 
-     identity frozen-waffle {
-         description
-           "Frozen waffle.";
-         base toast-type;
-     }
- 
-     identity frozen-bagel {
-         description
-           "Frozen bagel.";
-         base toast-type;
-     }
- 
-     identity hash-brown {
-         description
-           "Hash browned potatos.";
-         base toast-type;
-     }
- 
-     typedef DisplayString {
-         description
-           "YANG version of the SMIv2 DisplayString
-TEXTUAL-CONVENTION.";
-         reference "RFC 2579, section 2.";
-         type string {
-             length "0 .. 255";
-         }
-     }
- 
-     container toaster {
-         presence
-           "Indicates the toaster service is available";
- 
-         description
-           "Top-level container for all toaster database objects.";
- 
-         leaf toasterManufacturer {
-             type DisplayString;
-             config false;
-             mandatory true;
-             description 
-               "The name of the toaster's manufacturer. For instance, 
-                 Microsoft Toaster.";
-         }
-  
-         leaf toasterModelNumber {
-             type DisplayString;
-             config false;
-             mandatory true;
-             description
-               "The name of the toaster's model. For instance,
-                Radiant Automatic.";
-         }
- 
-         leaf toasterStatus {
-             type enumeration {
-                 enum up {
-                   value 1;
-                   description
-                     "The toaster knob position is up.
-                       No toast is being made now.";
-                 }
-                 enum down {
-                   value 2;
-                   description
-                     "The toaster knob position is down.
-                       Toast is being made now.";
- 
-                 }
-             }
-             config false;
-             mandatory true;
-             description
-               "This variable indicates the current state of 
-                the toaster.";
-         }
-     }
- 
-     rpc make-toast {
-         description
-           "Make some toast.
-            The toastDone notification will be sent when 
-            the toast is finished.
-            An 'in-use' error will be returned if toast
-            is already being made.
-            A 'resource-denied' error will be returned 
-            if the toaster service is disabled.";
-         input {
-             leaf toasterDoneness {
-                 type uint32 {
-                     range "1 .. 10";
-                 }
-                 default 5;
-                 description
-                   "This variable controls how well-done is the 
-                    ensuing toast. It should be on a scale of 1 to 10.
-                    Toast made at 10 generally is considered unfit 
-                    for human consumption; toast made at 1 is warmed 
-                    lightly.";
-             }
-             leaf toasterToastType {
-                 type identityref {
-                     base toast:toast-type;
-                 }
-                 default toast:wheat-bread;
-                 description
-                   "This variable informs the toaster of the type of 
-                    material that is being toasted. The toaster 
-                    uses this information, combined with 
-                    toasterDoneness, to compute for how 
-                    long the material must be toasted to achieve 
-                    the required doneness.";
-             }
-         }
-     }
- 
-     rpc cancel-toast {
-         description
-           "Stop making toast, if any is being made.
-            A 'resource-denied' error will be returned 
-            if the toaster service is disabled.";
-     }
- 
-     notification toastDone {
-         description
-           "Indicates that the toast in progress has completed.";
- 
-         leaf toastStatus {
-            description
-              "Indicates the final toast status";
-            type enumeration {
-                enum done {
-                   description
-                     "The toast is done.";
-                }
-                enum cancelled {
-                   description
-                     "The toast was cancelled.";
-                }
-                enum error {
-                   description
-                     "The toaster service was disabled or
-                      the toaster is broken.";
-                }
-             }
-         }
-     }
-                
-                        
- /*************************************************************
- 
-    Original TOASTER-MIB
- 
- TOASTER-MIB DEFINITIONS ::= BEGIN
- 
- IMPORTS
-         enterprises
-                 FROM RFC1155-SMI
-         OBJECT-TYPE
-                 FROM RFC-1212
-         DisplayString
-                 FROM RFC-1213;
- 
- epilogue        OBJECT IDENTIFIER ::= {enterprises 12}
- toaster         OBJECT IDENTIFIER ::= {epilogue 2}
- 
- 
- toasterManufacturer OBJECT-TYPE
-   SYNTAX  DisplayString
-   ACCESS  read-only
-   STATUS  mandatory
-   DESCRIPTION
-           "The name of the toaster's manufacturer. For  instance, 
-           Microsoft Toaster."
-   ::= {toaster 1}
- 
- toasterModelNumber OBJECT-TYPE
-   SYNTAX  DisplayString
-   ACCESS  read-only
-   STATUS  mandatory
-   DESCRIPTION
-           "The name of the toaster's model. For instance,
-           Radiant Automatic."
-   ::= {toaster 2}
- 
- toasterControl OBJECT-TYPE
-   SYNTAX  INTEGER  {up (1), down (2)}
-   ACCESS  read-write
-   STATUS  mandatory
-   DESCRIPTION
-           "This variable controls the current state of the toaster.
-            To begin toasting, set it to down (2). To abort toasting 
-           (perhaps in the event of an emergency), set it to up (2)."
-   ::= {toaster 3}
- 
- toasterDoneness OBJECT-TYPE
-   SYNTAX  INTEGER (1..10)
-   ACCESS  read-write
-   STATUS  mandatory
-   DESCRIPTION
-           "This variable controls how well-done is the 
-            ensuing toast. It should be on a scale of 1 to 10.
-            Toast made at 10 generally is considered unfit 
-            for human consumption; toast made at 1 is warmed 
-            lightly."
-   ::= {toaster 4}
- 
- toasterToastType OBJECT-TYPE
-   SYNTAX  INTEGER {
-                     white-bread (1),
-                     wheat-bread (2),
-                     wonder-bread (3),
-                     frozen-waffle (4),
-                     frozen-bagel (5),
-                     hash-brown (6),
-                     other (7)
-                   }
-   ACCESS  read-write
-   STATUS  mandatory
-   DESCRIPTION
-           "This variable informs the toaster of the type of 
-            material that is being toasted. The toaster 
-            uses this information, combined with 
-            toasterToastDoneness, to compute for how 
-            long the material must be toasted to achieve 
-            the required doneness."
-   ::= {toaster 5}
- 
- END
- 
- *************************************************************/
-         
- 
- }

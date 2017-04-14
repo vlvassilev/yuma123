@@ -7,15 +7,14 @@
 <center>YUMA Package Installation</center>
 
 
-<center>Version yuma123-2.5</center>
+<center>Version yuma123-2.10</center>
 
 
-<center>Last Updated: 2015-12-09</center>
 = Preface =
 == Legal Statements ==
-Copyright 2009 â 2012, Andy Bierman, All Rights Reserved.
+Copyright 2009 â€“ 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 â 2015, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 â€“ 2017, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 
@@ -159,7 +158,7 @@ XML parsing functions. This package is installed by the default Linux
 installation process.
 
 To build yuma sources, also install the developer version of this
-package. It is called '''libxml2-dev '''on Ubuntu systems.
+package. It is called '''libxml2-dev '''on Debian systems.
 
 === libssh2 ===
 The '''libssh2''' package is needed by the yuma package for the
@@ -169,7 +168,7 @@ This package is '''not''' installed by the default Linux installation
 process.
 
 To build yuma sources, also install the developer version of this
-package. It is called '''libssh2-1-dev '''on Ubuntu systems.
+package. It is called '''libssh2-1-dev '''on Debian systems.
 
 === ncurses ===
 The '''ncurses''' library is needed by the yuma package for some
@@ -179,7 +178,7 @@ installation process.
 It is called '''libncurses5''' on Ubuntu systems. 
 
 To build yuma sources, also install the developer version of this
-package. It is called '''libncurses5-dev '''on Ubuntu systems.
+package. It is called '''libncurses5-dev '''on Debian systems.
 
 === zlib ===
 The '''zlib''' library is needed by the yuma package for some
@@ -187,7 +186,15 @@ compression support, used by other libraries that yuma imports. This
 package is installed by the default Linux installation process.
 
 To build yuma sources, also install the developer version of this
-package. It is called '''libz-dev '''on Ubuntu systems.
+package. It is called '''libz-dev '''on Debian systems.
+
+=== libreadline ===
+The '''libreadline''' library is needed by the yuma package for command
+line handling. This package is installed by the default Linux
+installation process.
+
+To build yuma sources, also install the developer version of this
+package. It is called '''libreadline-dev '''on Debian systems.
 
 = Getting the source =
  ~> git clone git://git.code.sf.net/p/yuma123/git yuma123

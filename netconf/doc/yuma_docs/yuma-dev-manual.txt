@@ -7,16 +7,13 @@
 <center>Server Instrumentation Library Development</center>
 
 
-<center>Version 2.5</center>
-
-
-<center>Last Updated: 2015-12-22</center>
+<center>Version yuma123-2.10</center>
 
 = Preface =
 == Legal Statements ==
 Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 - 2015, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as
@@ -48,7 +45,7 @@ The following section lists the resources available at this time.
 ** Yuma Home Page
 *** Free information on NETCONF and YANG, tutorials, on-line YANG module
 validation and documentation database 
-* '''Yuma123 SourceFource OpenSource Project'''
+* '''Yuma123 OpenSource Project'''
 ** [http://sourceforge.net/projects/yuma123/
 http://sourceforge.net/projects/yuma123/]
 *** Download Yuma source and documentation
@@ -309,7 +306,7 @@ pointing to your Yuma development tree.
 '''make_sil_dir''' script, installed in the''' /usr/bin''' directory.
 This step will also call '''yangdump''' to generate the initial H and C
 files file the SIL.
-** Example: mydir> '''make_sil_dir âsplit test'''
+** Example: mydir> '''make_sil_dir Ã¢split test'''
 * '''Use your text editor to fill in the device-specific instrumentation
 '''for each object, RPC method, and notification. (In this example, edit
 '''test/src/u_test.c''') Almost all possible NETCONF-specific code is
@@ -613,8 +610,8 @@ Yuma files.
 
 === src/agt Directory ===
 This directory contains the NETCONF server implementation and built-in
-module SIL code. A library called '''libyumaagt.so''' is  built and loaded
-by the '''netconfd''' program.
+module SIL code. A library called '''libyumaagt.so''' is  built and
+loaded by the '''netconfd''' program.
 
 The following table describes the C modules contained in this directory:
 
@@ -749,16 +746,16 @@ constraint validation</nowiki>
 
 === src/mgr Directory ===
 This directory contains the NETCONF server implementation and built-in
-module SIL code. A library called '''libyumaagt.so''' is  built and loaded
-by the '''netconfd''' program.
+module SIL code. A library called '''libyumaagt.so''' is  built and
+loaded by the '''netconfd''' program.
 
 The following table describes the C modules contained in this directory:
 
 This directory contains the NETCONF client support code. It handles all
 the basic NETCONF details so a simple internal API can be used by
 NETCONF applications such as '''yangcli'''. A library called
-'''libyumamgr.so''' is built and installed. The '''yangcli''' program uses
-this library.
+'''libyumamgr.so''' is built and installed. The '''yangcli''' program
+uses this library.
 
 The following table describes the C modules contained in this directory:
 
@@ -993,8 +990,8 @@ again, instead of exiting the program.
 Yuma uses YANG source modules directly to implement NETCONF protocol
 operations automatically within the server. The same YANG parser is used
 by all Yuma programs. It is located in the 'ncx' source directory
-(libyumancx.so). There are several different parsing modes, which is set by
-the application.
+(libyumancx.so). There are several different parsing modes, which is set
+by the application.
 
 In the 'server mode', the descriptive statements, such as 'description'
 and 'reference' are discarded upon input. Only the machine-readable
@@ -1320,11 +1317,11 @@ The file '''netconfd/netconfd.c''' contains the initial 'main' function
 that is used to start the server.
 
 * The common services support for most core data structures is located
-in 'libyumancx.so'. The ''''ncx_init'''' function is called to setup these
-data structures. This function also calls the bootstrap_cli function in
-ncx/ncx.c, which processes some key configuration parameters that need
-to be set right away, such as the logging parameters and the module
-search path.
+in 'libyumancx.so'. The ''''ncx_init'''' function is called to setup
+these data structures. This function also calls the bootstrap_cli
+function in ncx/ncx.c, which processes some key configuration parameters
+that need to be set right away, such as the logging parameters and the
+module search path.
 * Most of the actual server code is located in the 'agt' directory. The
 ''''agt_init1'''' function is called to initialize core server
 functions. The configuration parameters are processed, and the server
@@ -3140,6 +3137,12 @@ val_init_from_template.
 | Set a malloced value node as a specified simple type. Used instead of
 val_init_from_template. Use a counted string value instead of a
 zero-terminated string value.
+|-
+| val_make_serialized_string
+| Serialize value into malloced buffer. Supported format modes:    
+NCX_DISPLAY_MODE_NONE, NCX_DISPLAY_MODE_PLAIN, NCX_DISPLAY_MODE_PREFIX,
+NCX_DISPLAY_MODE_MODULE, NCX_DISPLAY_MODE_XML,
+NCX_DISPLAY_MODE_XML_NONS, NCX_DISPLAY_MODE_JSON
 
 |-
 | val_make_string
@@ -3457,6 +3460,17 @@ The following table highlights the functions available in this module:
 ! <center>Function</center>
 ! <center>Description</center>
 
+
+|-
+| agt_commit_validate_register
+| Registers callback function called after the configuration is
+validated and before the first commit callback is called.
+
+|-
+| agt_commit_complete_register
+| Registers callback function called after the last commit callback is
+complete.
+
 |-
 | agt_get_cfg_from_parm
 | For value nodes that represent a NETCONF configuration database name
@@ -3553,9 +3567,13 @@ loaded from the startup file.
 unregister all callback functions.
 
 These are the only SIL functions that the server will invoke directly.
-They are generated by '''yangdump''' with the '''--format'''<nowiki>=c
-parameter, and usually do not require any editing by the
-developer.</nowiki>
+
+There is an option to generated a starting point/boilerplate code with
+'''yangdump''' with the '''--format'''<nowiki>=c</nowiki> parameter
+along with the rest of the definitions derived from the YANG model or
+one can simply write the 3 functions manually and not use '''yangdump'''
+(''helloworld'', ''toaster'', ''ietf-interfaces'' and ''ietf-system''
+SIL module examples can be used as reference for the code).
 
 Most of the work done by SIL code is through callback functions for
 specific RPC operations and database objects. These callback functions
@@ -5889,8 +5907,8 @@ This will build the libtoaster.so SIL from toaster.c:
  gcc -shared  -fPIC -DPIC  -I. -I/usr/include/yuma/agt
 -I/usr/include/yuma/ncx -I/usr/include/yuma/platform
 -I/usr/include/libxml2 -I/usr/include/libxml2/libxml -rdynamic toaster.c
-/usr/lib/libyumancx.so /usr/lib/libyumaagt.so /usr/lib/i386-linux-gnu/libxml2.so
--lz -ldl -O0 -o libtoaster.so
+/usr/lib/libyumancx.so /usr/lib/libyumaagt.so
+/usr/lib/i386-linux-gnu/libxml2.so -lz -ldl -O0 -o libtoaster.so
 This will install it .. and the module is ready to be used:
  sudo cp libtoaster.so /usr/lib/yuma/
 ====Autotools====
@@ -6055,3 +6073,4 @@ structure.
 | Clone the specified''' ncx_appinfo_t''' data structure.
 
 |}
+

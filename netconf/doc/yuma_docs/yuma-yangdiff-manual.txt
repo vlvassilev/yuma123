@@ -7,103 +7,23 @@
 <center>YANG Module Compare Tool</center>
 
 
-<center>Version 2.2</center>
+<center>Version yuma123-2.10</center>
 
-
-<center>Last Updated: 2012-07-24</center>== <center>'''Table Of Contents'''</center> ==
-1 Preface3
-
-1.1 Legal Statements3
-
-1.2 Additional Resources3
-
-1.2.1 WEB Sites3
-
-1.2.2 Mailing Lists4
-
-1.3 Conventions Used in this Document4
-
-2 yangdiff User Guide5
-
-2.1 Introduction5
-
-2.1.1 Features5
-
-2.1.2 Starting yangdiff6
-
-2.1.3 Stopping yangdiff7
-
-2.1.4 Configuration Parameter List7
-
-2.2 Comparing YANG Modules8
-
-2.3 Diff Reports8
-
-2.3.1 Terse Report8
-
-2.3.2 Normal Report9
-
-2.3.3 Revision Statement9
-
-3 CLI Reference11
-
-3.1 --config11
-
-3.2 --difftype11
-
-3.3 --feature-disable13
-
-3.4 --feature-enable13
-
-3.5 --feature-enable-default14
-
-3.6 --header15
-
-3.7 --help15
-
-3.8 --help-mode15
-
-3.9 --indent16
-
-3.10 --log17
-
-3.11 --log-append17
-
-3.12 --log-level17
-
-3.13 --modpath18
-
-3.14 --new19
-
-3.15 --old20
-
-3.16 --output20
-
-3.17 --subdirs21
-
-3.18 --version22
-
-3.19 --warn-idlen22
-
-3.20 --warn-linelen23
-
-3.21 --warn-off23
-
-3.22 --yuma-home24= Preface =
 == Legal Statements ==
 Copyright 2009 – 2012, Andy Bierman, All Rights Reserved.
 
 == Additional Resources ==
-This document assumes you have successfully set up the software as described in the printed document:
+This document assumes you have successfully set up the software as
+described in the printed document:
 
-Yuma<sup> </sup>Installation Guide
+Yuma Installation Guide
 
 
 Other documentation includes:
 
-Yuma<sup> </sup>Quickstart Guide
+Yuma Quickstart Guide
 
-Yuma<sup> </sup>User Manual
+Yuma User Manual
 
 Yuma netconfd Manual
 
@@ -113,52 +33,51 @@ Yuma yangdump Manual
 
 Yuma Developer Manual
 
-
-To obtain additional support you may join the yuma-users group on sourceforge.net and send email to this e-mail address:
-
-yuma-users@lists.sourceforge.net
-
-The SourceForge.net Support Page for Yuma can be found at this WEB page:
-
-[http://sourceforge.net/projects/yuma/support http://sourceforge.net/projects/yuma/support]
-
-
-There are several sources of free information and tools for use with YANG and/or NETCONF.
-
-The following section lists the resources available at this time.
-
 === WEB Sites ===
 * '''Netconf Central'''
 ** [http://www.netconfcentral.org/ http://www.netconfcentral.org/]
 ** Yuma Home Page
-*** Free information on NETCONF and YANG, tutorials, on-line YANG module validation and documentation database 
+*** Free information on NETCONF and YANG, tutorials, on-line YANG module
+validation and documentation database 
 * '''Yuma SourceFource OpenSource Project'''
-** [http://sourceforge.net/projects/yuma/ http://sourceforge.net/projects/yuma/]
+** [http://sourceforge.net/projects/yuma/
+http://sourceforge.net/projects/yuma/]
 *** Download Yuma source and binaries; project forums and help
 * '''Yang Central'''
 ** [http://www.yang-central.org/ http://www.yang-central.org]
 ** Free information and tutorials on YANG, free YANG tools for download
 * '''NETCONF Working Group Wiki Page'''
-** [http://trac.tools.ietf.org/wg/netconf/trac/wiki http://trac.tools.ietf.org/wg/netconf/trac/wiki]
-** Free information on NETCONF standardization activities and NETCONF implementations
+** [http://trac.tools.ietf.org/wg/netconf/trac/wiki
+http://trac.tools.ietf.org/wg/netconf/trac/wiki]
+** Free information on NETCONF standardization activities and NETCONF
+implementations
 * '''NETCONF WG Status Page'''
 ** http://tools.ietf.org/wg/netconf/
 ** IETF Internet draft status for NETCONF documents
 * '''libsmi Home Page'''
-** [http://www.ibr.cs.tu-bs.de/projects/libsmi/ http://www.ibr.cs.tu-bs.de/projects/libsmi/]
+** [http://www.ibr.cs.tu-bs.de/projects/libsmi/
+http://www.ibr.cs.tu-bs.de/projects/libsmi/]
 ** Free tools such as smidump, to convert SMIv2 to YANG
 * '''YumaWorks'''
 ** [http://www.yumaworks.com/ http://www.yumaworks.com]
 ** Offers support, training, and consulting for Yuma.
-** Offers YumaPro, a professional version of Yuma that includes concurrency, external database support, sub-agent support, multiple northbound interfaces, and more. API compatible with Yuma. Availability: September, 2012. Licensed.
+** Offers YumaPro, a professional version of Yuma that includes
+concurrency, external database support, sub-agent support, multiple
+northbound interfaces, and more. API compatible with Yuma. Availability:
+September, 2012. Licensed.
 
 === Mailing Lists ===
 * '''NETCONF Working Group'''
 ** http://www.ietf.org/html.charters/netconf-charter.html
-** Technical issues related to the NETCONF protocol are discussed on the NETCONF WG mailing list. Refer to the instructions on the WEB page for joining the mailing list.
+** Technical issues related to the NETCONF protocol are discussed on the
+NETCONF WG mailing list. Refer to the instructions on the WEB page for
+joining the mailing list.
 * '''NETMOD Working Group'''
-** [http://www.ietf.org/html.charters/netmod-charter.html http://www.ietf.org/html.charters/netmod-charter.html]
-** Technical issues related to the YANG language and YANG data types are discussed on the NETMOD WG mailing list. Refer to the instructions on the WEB page for joining the mailing list.
+** [http://www.ietf.org/html.charters/netmod-charter.html
+http://www.ietf.org/html.charters/netmod-charter.html]
+** Technical issues related to the YANG language and YANG data types are
+discussed on the NETMOD WG mailing list. Refer to the instructions on
+the WEB page for joining the mailing list.
 
 == Conventions Used in this Document ==
 The following formatting conventions are used throughout this document:
@@ -167,37 +86,37 @@ The following formatting conventions are used throughout this document:
 
 
 
-{| style="border-spacing:0;"
+{| class=wikitable border="1"
 ! <center>Convention</center>
 ! <center>Description</center>
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''--foo'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| CLI parameter foo
+|  '''--foo'''
+|  CLI parameter foo
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''<nowiki><foo></nowiki>'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| XML parameter foo
+|  '''<nowiki><foo></nowiki>'''
+|  XML parameter foo
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''foo'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| '''yangcli''' command or parameter
+|  '''foo'''
+|  '''yangcli''' command or parameter
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''$FOO'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Environment variable FOO
+|  '''$FOO'''
+|  Environment variable FOO
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| '''$$foo'''
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| '''yangcli''' global variable foo
+|  '''$$foo'''
+|  '''yangcli''' global variable foo
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"|  some text
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Example command or PDU
+|   some text
+|  Example command or PDU
 
 |-
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:none;padding:0.0382in;"| some text
-| style="border-top:none;border-bottom:0.05pt solid #000000;border-left:0.05pt solid #000000;border-right:0.05pt solid #000000;padding:0.0382in;"| Plain text
+|  some text
+|  Plain text
 
 |}
 = yangdiff User Guide =
@@ -205,18 +124,27 @@ The following formatting conventions are used throughout this document:
 
 
 == Introduction ==
-The '''yangdiff''' program is used to compare two revisions of the same YANG file. 
+The '''yangdiff''' program is used to compare two revisions of the same
+YANG file. 
 
 === Features ===
 The '''yangdiff''' program has the following features:
 
-* The conceptual YANG object trees are compared, not the actual YANG statements.
-* Two separate subtrees of modules can be compared, not just 1 file at a time.
-* The differences report format for differences is easy to read, and can be configured with 2 different levels of verbosity.
-* A YANG revision statement can be automatically generated instead of a list of differences. This will include an English text summary of the differences found.
+* The conceptual YANG object trees are compared, not the actual YANG
+statements.
+* Two separate subtrees of modules can be compared, not just 1 file at a
+time.
+* The differences report format for differences is easy to read, and can
+be configured with 2 different levels of verbosity.
+* A YANG revision statement can be automatically generated instead of a
+list of differences. This will include an English text summary of the
+differences found.
 
 === Starting yangdiff ===
-The current working directory in use when '''yangdiff''' is invoked is important. It is most convenient to run '''yangdiff''' from a work directory, rather than the installation directory or within the module library.
+The current working directory in use when '''yangdiff''' is invoked is
+important. It is most convenient to run '''yangdiff''' from a work
+directory, rather than the installation directory or within the module
+library.
 
 The '''yangdiff''' program can be invoked several ways:
 
@@ -232,24 +160,32 @@ The '''yangdiff''' program can be invoked several ways:
          '''yangdiff --help --full'''
 
 
-* To compare a new YANG module named 'foo', with an old version named foo.2008-09-01.yang, the following command line can be used
+* To compare a new YANG module named 'foo', with an old version named
+foo.2008-09-01.yang, the following command line can be used
 
          '''yangdiff --old=foo.2008-09-01.yang --new=foo'''
 
 
-* To get all the configuration parameters from a text file named '~/yangdiff-project1.conf':
+* To get all the configuration parameters from a text file named
+'~/yangdiff-project1.conf':
 
-             '''yangdiff'' --''config''<nowiki>=</nowiki>''~/yangdiff-project1.conf'''
+             '''yangdiff''
+--''config''<nowiki>=</nowiki>''~/yangdiff-project1.conf'''
 
 
-* To generate a terse differences report called ''~/project-X-diffs.log'' for the old files in the '''/public/project-X/modules''' with the new modules in the '''~/work''' directory:
+* To generate a terse differences report called
+''~/project-X-diffs.log'' for the old files in the
+'''/public/project-X/modules''' with the new modules in the '''~/work'''
+directory:
 
              '''yangdiff'' --''difftype=terse 
              --output=~/project-X-diffs.log \'''
              '''--old=/public/project-X/modules \'''
              '''--new=/work'''
 
-* To generate a revision statement differences to ''~/foo-projectX-revision.txt'' for the '~/work/foo.yang' module, with the old version in the in the '''/public/project-X/modules''':<br/> 
+* To generate a revision statement differences to
+''~/foo-projectX-revision.txt'' for the '~/work/foo.yang' module, with
+the old version in the in the '''/public/project-X/modules''':<br/> 
 
 
              '''yangdiff'' --''difftype=revision 
@@ -258,117 +194,122 @@ The '''yangdiff''' program can be invoked several ways:
              '''--new=/work/foo.yang'''
 
 === Stopping yangdiff ===
-There is no interactive mode for '''yangdiff''', so there is no need for a command to exit the program.
+There is no interactive mode for '''yangdiff''', so there is no need for
+a command to exit the program.
 
-The Control C character sequence can be used to cancel the '''yangdiff''' processing in progress. However, this will leave any partially completed output files in place.
+The Control C character sequence can be used to cancel the
+'''yangdiff''' processing in progress. However, this will leave any
+partially completed output files in place.
 
 === Configuration Parameter List ===
-The following configuration parameters are used by '''yangdiff'''. Refer to the CLI Reference for more details.
+The following configuration parameters are used by '''yangdiff'''. Refer
+to the CLI Reference for more details.
 
 
 <center>'''yangdiff CLI Parameters'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| <center>'''parameter'''</center>
-| style="border:0.5pt solid #000000;padding:0.0382in;"| <center>'''description'''</center>
+{| class=wikitable border="1"
+|  <center>'''parameter'''</center>
+|  <center>'''description'''</center>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --config
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the configuration file to use for parameters.
+|  --config
+|  Specifies the configuration file to use for parameters.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --datapath
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Sets the data file search path.
+|  --datapath
+|  Sets the data file search path.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --difftype
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the type of differences report that should be output.
+|  --difftype
+|  Specifies the type of differences report that should be output.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-disable
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Leaf list of features to disable
+|  --feature-disable
+|  Leaf list of features to disable
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-enable
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies a feature that should be enabled
+|  --feature-enable
+|  Specifies a feature that should be enabled
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --feature-enable-default
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies if a feature should be enabled or disabled by default
+|  --feature-enable-default
+|  Specifies if a feature should be enabled or disabled by default
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --header
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies whether the module header data should be compared or not.
+|  --header
+|  Specifies whether the module header data should be compared or not.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --help
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Get context-sensitive help, then exit.
+|  --help
+|  Get context-sensitive help, then exit.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --help-mode
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Adjust the help output (--brief, or --full).
+|  --help-mode
+|  Adjust the help output (--brief, or --full).
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --indent
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the indent count to use when writing data.
+|  --indent
+|  Specifies the indent count to use when writing data.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --log
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the log file to use instead of STDOUT.
+|  --log
+|  Specifies the log file to use instead of STDOUT.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --log-append
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether a log file will be reused or overwritten.
+|  --log-append
+|  Controls whether a log file will be reused or overwritten.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --log-level
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls the verbosity of logging messages.
+|  --log-level
+|  Controls the verbosity of logging messages.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --modpath
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Sets the module search path.
+|  --modpath
+|  Sets the module search path.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --new
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the location of the new revision to compare.
+|  --new
+|  Specifies the location of the new revision to compare.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --old
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the location of the old revision to compare.
+|  --old
+|  Specifies the location of the old revision to compare.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --output
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies where output files should be generated.
+|  --output
+|  Specifies where output files should be generated.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --runpath
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Sets the executable file search path.
+|  --runpath
+|  Sets the executable file search path.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --subdirs
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls whether sub-directories are searched for YANG files.
+|  --subdirs
+|  Controls whether sub-directories are searched for YANG files.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --version
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Prints the program version and then exit.
+|  --version
+|  Prints the program version and then exit.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --warn-idlen
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls how identifier lengths are checked.
+|  --warn-idlen
+|  Controls how identifier lengths are checked.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --warn-linelen
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Controls how line lengths are checked.
+|  --warn-linelen
+|  Controls how line lengths are checked.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --warn-off
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Suppresses the specified warning number.
+|  --warn-off
+|  Suppresses the specified warning number.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| --yuma-home
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Specifies the '''$YUMA_HOME''' project root to use when searching for files.
+|  --yuma-home
+|  Specifies the '''$YUMA_HOME''' project root to use when searching for
+files.
 
 |}
 == Comparing YANG Modules ==
@@ -377,50 +318,66 @@ The '''yangdiff''' program compares YANG files in the following maner:
 * The cooked object trees are compared, not the actual YANG statements.
 * Whitespace differences are ignored.
 * Non-semantic changes are ignored:
-** A uses-stmt can replace a set of objects if the grouping is identical to the old objects.
-** Refine statements are combined into the cooked objects, and not compared directly.
+** A uses-stmt can replace a set of objects if the grouping is identical
+to the old objects.
+** Refine statements are combined into the cooked objects, and not
+compared directly.
 ** A typedef statement can replace an inline type statement
 ** Changes to YANG comments are ignored.
-** Sub-statement order is ignored, however object order with a container or list is not ignored.
+** Sub-statement order is ignored, however object order with a container
+or list is not ignored.
 ** Objects can be moved to submodules, and include statements instead.
 
-If the '''--old''' parameter is missing, then the module search path will be used to find the specified module with the same name. If the''' --old '''parameter contains just a module name, then the module search path will be used to find a module with the new name.
+If the '''--old''' parameter is missing, then the module search path
+will be used to find the specified module with the same name. If the'''
+--old '''parameter contains just a module name, then the module search
+path will be used to find a module with the new name.
 
-The '''--new''' parameter is required. It can represent one YANG file or a directory of new YANG modules.
+The '''--new''' parameter is required. It can represent one YANG file or
+a directory of new YANG modules.
 
-The '''--difftype''' parameter is optional. The 'normal' report mode is used if this parameter is missing.
+The '''--difftype''' parameter is optional. The 'normal' report mode is
+used if this parameter is missing.
 
-The '''--output''' parameter will be used for the report file, if it is specified.
+The '''--output''' parameter will be used for the report file, if it is
+specified.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| <center>'''symbol'''</center>
-| style="border:0.5pt solid #000000;padding:0.0382in;"| <center>'''description'''</center>
-
-|-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| <center>'''A'''</center>
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Definition has bend added.
-
-|-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| <center>'''M'''</center>
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Definition has been modified.
+{| class=wikitable border="1"
+|  <center>'''symbol'''</center>
+|  <center>'''description'''</center>
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| <center>'''D'''</center>
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| Definition has been deleted.
+|  <center>'''A'''</center>
+|  Definition has bend added.
+
+|-
+|  <center>'''M'''</center>
+|  Definition has been modified.
+
+|-
+|  <center>'''D'''</center>
+|  Definition has been deleted.
 
 |}
 == Diff Reports ==
-This section uses the example module below (test/'''test3a.yang''') to demonstrate the different report formats available. The old module revision is '''test/test3.yang'''.
+This section uses the example module below (test/'''test3a.yang''') to
+demonstrate the different report formats available. The old module
+revision is '''test/test3.yang'''.
 
-The following command is used in all 3 examples, except the value of the --difftype parameter is changed each time.
+The following command is used in all 3 examples, except the value of the
+--difftype parameter is changed each time.
 
 
-     '''<nowiki>yangdiff --old=test3a --new=test3 –difftype=<enum></nowiki>'''
+     '''<nowiki>yangdiff --old=test3a --new=test3
+–difftype=<enum></nowiki>'''
 
 === Terse Report ===
-If '''--difftype=terse''' is selected, then a brief summary of all changes will be listed. There will be no indentation, and only the change (Add, Modify, Delete), and the top-level definition is identified.
+If '''--difftype=terse''' is selected, then a brief summary of all
+changes will be listed. There will be no indentation, and only the
+change (Add, Modify, Delete), and the top-level definition is
+identified.
 
 
  // Generated by yangdiff 0.9.7.473 
@@ -440,9 +397,11 @@ If '''--difftype=terse''' is selected, then a brief summary of all changes will 
  M container test33 
 
 === Normal Report ===
-If '''--difftype=normal''' is selected, then a complete summary of all changes will be listed.
+If '''--difftype=normal''' is selected, then a complete summary of all
+changes will be listed.
 
-If a change line is indented, it indicates a sub-statement of the object in the previous line has been changed.
+If a change line is indented, it indicates a sub-statement of the object
+in the previous line has been changed.
 
 
  // Generated by yangdiff 0.9.7.473 
@@ -469,7 +428,10 @@ If a change line is indented, it indicates a sub-statement of the object in the 
              A if-feature 'X' 
 
 === Revision Statement ===
-If '''--difftype=revision''' is selected, then a complete summary of all changes will be printed in the form of a YANG revision statement. The current date will be used for the revision-date field of the revision statement.
+If '''--difftype=revision''' is selected, then a complete summary of all
+changes will be printed in the form of a YANG revision statement. The
+current date will be used for the revision-date field of the revision
+statement.
 
 
  // Generated by yangdiff 0.9.7.473 
@@ -500,49 +462,56 @@ If '''--difftype=revision''' is selected, then a complete summary of all changes
     } 
 
 = CLI Reference =
-The '''yangdiff''' program uses command line interface (CLI) parameters to control program behavior.
+The '''yangdiff''' program uses command line interface (CLI) parameters
+to control program behavior.
 
-The following sections document all the Yuma CLI parameters relevant to this program, in alphabetical order.
+The following sections document all the Yuma CLI parameters relevant to
+this program, in alphabetical order.
 
 == --config ==
-The '''--config''' parameter specifies the name of a Yuma configuration file that contains more parameters to process, in addition to the CLI parameters.
+The '''--config''' parameter specifies the name of a Yuma configuration
+file that contains more parameters to process, in addition to the CLI
+parameters.
 
-Refer to the 'Configuration Files' section for details on the format of this file.
+Refer to the 'Configuration Files' section for details on the format of
+this file.
 
 
 <center>'''--config parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: complete file specification of the text file to parse for more parameters.
+{| class=wikitable border="1"
+|  Syntax
+|  string: complete file specification of the text file to parse for
+more parameters.
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| /etc/yuma/yangdiff.conf
+|  Default:
+|  /etc/yuma/yangdiff.conf
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --old=test1
+|  Example:
+|   yangdiff --old=test1
     --new=test1a \
     --config=~/testconf.conf
 
 |}
 == --difftype ==
-The '''--difftype''' parameter controls how differences are displayed in the '''yangdiff''' program.. 
+The '''--difftype''' parameter controls how differences are displayed in
+the '''yangdiff''' program.. 
 
 The allowed values are 'terse', 'normal', and 'revision'. 
 
@@ -550,9 +519,12 @@ The allowed values are 'terse', 'normal', and 'revision'.
 The basic report format is: 
 
 
-     '''<nowiki>[add/delete/modify] field-name [field-value] </nowiki>'''
+     '''<nowiki>[add/delete/modify] field-name [field-value]
+</nowiki>'''
 
-The ''''terse'''' option will include the names of the top-level fields that are different. The actual differences for modification lines ('M') are not printed.
+The ''''terse'''' option will include the names of the top-level fields
+that are different. The actual differences for modification lines ('M')
+are not printed.
 
 
      M typedef C 
@@ -560,7 +532,9 @@ The ''''terse'''' option will include the names of the top-level fields that are
      D leaf test-D 
      M container test33
 
-The ''''normal'''' option will include any changes for any nested fields or objects. A brief description of the changes made in a modification line ('M') are printed. This is the default reporting mode.
+The ''''normal'''' option will include any changes for any nested fields
+or objects. A brief description of the changes made in a modification
+line ('M') are printed. This is the default reporting mode.
 
 
  M typedef C 
@@ -575,7 +549,8 @@ The ''''normal'''' option will include any changes for any nested fields or obje
           M leaf f1 
              A if-feature 'X'
 
-The ''''revision'''' option will generate the differences report in YANG revision-stmt format. For example:
+The ''''revision'''' option will generate the differences report in YANG
+revision-stmt format. For example:
 
 
    revision 2009-09-10 { 
@@ -598,42 +573,45 @@ The ''''revision'''' option will generate the differences report in YANG revisio
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enumeration: '''terse normal revision'''
+{| class=wikitable border="1"
+|  Syntax
+|  enumeration: '''terse normal revision'''
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| normal
+|  Default:
+|  normal
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdiff
+|  Supported by:
+|  yangdiff
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --difftype=revision \
+|  Example:
+|   yangdiff --difftype=revision \
    --new=test3a\
    --old=~test3
 
 |}
 == --feature-disable ==
-The '''--feature-disable''' parameter directs all programs to disable a specific feature.
+The '''--feature-disable''' parameter directs all programs to disable a
+specific feature.
 
-This parameter is a formatted string containing a module name, followed by a colon ':', followed by a feature name, e.g.,
+This parameter is a formatted string containing a module name, followed
+by a colon ':', followed by a feature name, e.g.,
 
 
  test:feature1
 
-It is an error if a '''--feature-enable''' and '''--feature-disable''' parameter specify the same feature.
+It is an error if a '''--feature-enable''' and '''--feature-disable'''
+parameter specify the same feature.
 
 Parameters for unknown features will be ignored.
 
@@ -642,42 +620,45 @@ Parameters for unknown features will be ignored.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| formatted string (module:feature
+{| class=wikitable border="1"
+|  Syntax
+|  formatted string (module:feature
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangcliyangdiffyangdumpnetconfd
+|  Supported by:
+|  yangcliyangdiffyangdumpnetconfd
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  --format=c \
+|  Example:
+|   yangdiff  --format=c \
      --feature-disable=test:feature1 \
      --module=test
 
 |}
 == --feature-enable ==
-The '''--feature-enable''' parameter directs all programs to enable a specific feature.
+The '''--feature-enable''' parameter directs all programs to enable a
+specific feature.
 
-This parameter is a formatted string containing a module name, followed by a colon ':', followed by a feature name, e.g.,
+This parameter is a formatted string containing a module name, followed
+by a colon ':', followed by a feature name, e.g.,
 
 
  test:feature1
 
-It is an error if a '''--feature-disable''' and '''--feature-enable''' parameter specify the same feature.
+It is an error if a '''--feature-disable''' and '''--feature-enable'''
+parameter specify the same feature.
 
 Parameters for unknown features will be ignored.
 
@@ -686,574 +667,647 @@ Parameters for unknown features will be ignored.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| formatted string (module:feature
+{| class=wikitable border="1"
+|  Syntax
+|  formatted string (module:feature
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| unlimited
+|  Max Allowed:
+|  unlimited
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangcliyangdiffyangdumpnetconfd
+|  Supported by:
+|  yangcliyangdiffyangdumpnetconfd
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  \
+|  Example:
+|   yangdiff  \
      --feature-enable=test:feature1 \
      --old=test --new=test-new
 
 |}
 == --feature-enable-default ==
-The '''--feature-enable-default''' parameter controls how '''yangdump''' will generate C code for YANG features by default.
+The '''--feature-enable-default''' parameter controls how '''yangdump'''
+will generate C code for YANG features by default.
 
 If 'true', then by default, features will be enabled.
 
 If 'false', then by default, features will be disabled.
 
-If a '''--feature-enable''' or '''--feature-disable''' parameter is present for a specific feature, then this parameter will be ignored for that feature.
+If a '''--feature-enable''' or '''--feature-disable''' parameter is
+present for a specific feature, then this parameter will be ignored for
+that feature.
 
 
 <center>'''--feature-enable-default parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean (true or false)
+{| class=wikitable border="1"
+|  Syntax
+|  boolean (true or false)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| TRUE
+|  Default:
+|  TRUE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangcliyangdiffyangdumpnetconfd
+|  Supported by:
+|  yangcliyangdiffyangdumpnetconfd
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff \
+|  Example:
+|   yangdiff \
     --feature-enable-default=false
 
 |}
 == --header ==
-The '''--header''' parameter controls whether YANG header contents will be compared in the '''yangdiff''' program.
+The '''--header''' parameter controls whether YANG header contents will
+be compared in the '''yangdiff''' program.
 
 
 <center>'''--header parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean (true or false)
+{| class=wikitable border="1"
+|  Syntax
+|  boolean (true or false)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| TRUE
+|  Default:
+|  TRUE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdiff
+|  Supported by:
+|  yangdiff
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --header=false \
+|  Example:
+|   yangdiff --header=false \
    --old=~/saved-modules \
    -- new=~/work
 
 |}
 == --help ==
-The '''--help''' parameter causes program help text to be printed, and then the program will exit instead of running as normal.
+The '''--help''' parameter causes program help text to be printed, and
+then the program will exit instead of running as normal.
 
-This parameter can be combined with the '''--help-mode''' parameter to control the verbosity of the help text. Use '''--brief''' for less, and '''--full '''for more than the normal verbosity.
+This parameter can be combined with the '''--help-mode''' parameter to
+control the verbosity of the help text. Use '''--brief''' for less, and
+'''--full '''for more than the normal verbosity.
 
-This parameter can be combined with the '''--version''' parameter in all programs. It can also be combined with the '''--show-errors''' parameter in '''yangdump'''.
+This parameter can be combined with the '''--version''' parameter in all
+programs. It can also be combined with the '''--show-errors''' parameter
+in '''yangdump'''.
 
-The program configuration parameters will be displayed in alphabetical order, not in schema order.
+The program configuration parameters will be displayed in alphabetical
+order, not in schema order.
 
 
 <center>'''--help parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --help
+|  Example:
+|   yangdiff --help
 
 |}
 == --help-mode ==
-The '''--help-mode''' parameter is used to control the amount of detail printed when help text is requested in some command. It is always used with another command, and makes no sense by itself. It is ignored unless used with the '''--help''' parameter.
+The '''--help-mode''' parameter is used to control the amount of detail
+printed when help text is requested in some command. It is always used
+with another command, and makes no sense by itself. It is ignored unless
+used with the '''--help''' parameter.
 
 <center>'''--help-mode parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| choice of 3 empty leafs
+{| class=wikitable border="1"
+|  Syntax
+|  choice of 3 empty leafs
 
 '''--brief --normal --full'''
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| normal
+|  Default:
+|  normal
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --help --help-mode=full
+|  Example:
+|   yangdiff --help --help-mode=full
 
 |}
 * '''default choice: '''normal
 * '''choice help-mode'''
 ** '''brief'''
 *** type: empty
-*** This parameter specifies that brief documentation mode should be used.
+*** This parameter specifies that brief documentation mode should be
+used.
 ** '''normal'''
 *** type: empty
-*** This parameter specifies that normal documentation mode should be used.
+*** This parameter specifies that normal documentation mode should be
+used.
 ** '''full'''
 *** type: empty
-*** This parameter specifies that full documentation mode should be used.
+*** This parameter specifies that full documentation mode should be
+used.
 
 == --indent ==
-The '''--indent''' parameter specifies the number of spaces that will be used to add to the indentation level, each time a child node is printed during program operation.
+The '''--indent''' parameter specifies the number of spaces that will be
+used to add to the indentation level, each time a child node is printed
+during program operation.
 
 <center>'''--indent parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32 (0 .. 9)
+{| class=wikitable border="1"
+|  Syntax
+|  uint32 (0 .. 9)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 2
+|  Default:
+|  2
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangcli --indent=4
+|  Example:
+|   yangcli --indent=4
 
 |}
 == --log ==
-The '''--log''' parameter specifies the file name to be used for logging program messages, instead of STDOUT. It can be used with the optional''' --log-append''' and '''--log-level''' parameters to control how the log file is written.
+The '''--log''' parameter specifies the file name to be used for logging
+program messages, instead of STDOUT. It can be used with the optional'''
+--log-append''' and '''--log-level''' parameters to control how the log
+file is written.
 
 
 <center>'''--log parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: log file specification
+{| class=wikitable border="1"
+|  Syntax
+|  string: log file specification
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  --log=~/test.log&
+|  Example:
+|   yangdiff  --log=~/test.log&
 
 |}
 == --log-append ==
-The '''--log-append''' parameter specifies that the existing log file (if any) should be appended , instead of deleted. It is ignored unless the '''--log''' parameter is present.
+The '''--log-append''' parameter specifies that the existing log file
+(if any) should be appended , instead of deleted. It is ignored unless
+the '''--log''' parameter is present.
 
 
 <center>'''--log-append parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  --log-append \
+|  Example:
+|   yangdiff  --log-append \
    --log=~/server.log&
 
 |}
 == --log-level ==
-The '''--log-level''' parameter controls the verbosity level of messages printed to the log file or STDOUT, if no log file is specified.
+The '''--log-level''' parameter controls the verbosity level of messages
+printed to the log file or STDOUT, if no log file is specified.
 
-The log levels are incremental, meaning that each higher level includes everything from the previous level, plus additional messages.
+The log levels are incremental, meaning that each higher level includes
+everything from the previous level, plus additional messages.
 
 There are 7 settings that can be used:
 
 * '''none''': All logging is suppressed. Use with extreme caution!
-* '''error''': Error messages are printed, indicating problems that require attention.
-* '''warn''': Warning messages are printed, indicating problems that may require attention.
-* '''info''': Informational messages are printed, that indicate program status changes.
-* '''debug''': Debugging messages are printed that indicate program activity.
+* '''error''': Error messages are printed, indicating problems that
+require attention.
+* '''warn''': Warning messages are printed, indicating problems that may
+require attention.
+* '''info''': Informational messages are printed, that indicate program
+status changes.
+* '''debug''': Debugging messages are printed that indicate program
+activity.
 * '''debug2''': Protocol debugging and trace messages are enabled.
-* '''debug3''': Very verbose debugging messages are enabled. This has an impact on resources and performance, and should be used with caution.
+* '''debug3''': Very verbose debugging messages are enabled. This has an
+impact on resources and performance, and should be used with caution.
 
 <center>'''log-level parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| enumeration: '''off error warn info debug debug2 debug3'''
+{| class=wikitable border="1"
+|  Syntax
+|  enumeration: '''off error warn info debug debug2 debug3'''
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| --info (--debug for DEBUG builds)
+|  Default:
+|  --info (--debug for DEBUG builds)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  --log-level=debug \
+|  Example:
+|   yangdiff  --log-level=debug \
    --log=~/server.log&
 
 |}
 == --modpath ==
-The '''--modpath''' parameter specifies the YANG module search path to use while searching for YANG files. It consists of a colon (':') separated list of path specifications, commonly found in Unix, such as the '''$PATH''' environment variable.
+The '''--modpath''' parameter specifies the YANG module search path to
+use while searching for YANG files. It consists of a colon (':')
+separated list of path specifications, commonly found in Unix, such as
+the '''$PATH''' environment variable.
 
-This parameter overrides the '''$YUMA_MODPATH''' environment variable, if it is present.
+This parameter overrides the '''$YUMA_MODPATH''' environment variable,
+if it is present.
 
 
 <center>'''--modpath parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: list of directory specifications
+{| class=wikitable border="1"
+|  Syntax
+|  string: list of directory specifications
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| '''$YUMA_MODPATH''' environment variable
+|  Default:
+|  '''$YUMA_MODPATH''' environment variable
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff \
+|  Example:
+|   yangdiff \
    --modpath=”~/testmodules:~/modules:~/trunk/netconf/modules”
 
 |}
 == --new ==
-The '''--new''' parameter specifies the YANG file or directory containing the new revision to be compared in the '''yangdiff''' program.
+The '''--new''' parameter specifies the YANG file or directory
+containing the new revision to be compared in the '''yangdiff'''
+program.
 
-If this parameter indicates a filename, then it represents the YANG source module name to compare as the newer of the two revisions. 
+If this parameter indicates a filename, then it represents the YANG
+source module name to compare as the newer of the two revisions. 
 
-If this parameter indicates a directory (and the 'old' parameter indicates a filename), then it will be used to to search for a file with the same name as the 'new' parameter. 
+If this parameter indicates a directory (and the 'old' parameter
+indicates a filename), then it will be used to to search for a file with
+the same name as the 'new' parameter. 
 
-If the 'old' parameter identifies a directory as well (and the 'no-subdirs' parameter is present), then the modules within the 'new' directory will be compared to files with the same name in the 'old' directory. 
+If the 'old' parameter identifies a directory as well (and the
+'no-subdirs' parameter is present), then the modules within the 'new'
+directory will be compared to files with the same name in the 'old'
+directory. 
 
-If the '''--subdirs''' parameter is ''true'', then all sub-directories within the 'src' directory will also be checked. 
+If the '''--subdirs''' parameter is ''true'', then all sub-directories
+within the 'src' directory will also be checked. 
 
-If this string begins with a '~' character, then a username is expected to follow or a directory separator character. If it begins with a '$' character, then an environment variable name is expected to follow. 
+If this string begins with a '~' character, then a username is expected
+to follow or a directory separator character. If it begins with a '$'
+character, then an environment variable name is expected to follow. 
 
 
  <nowiki>~/some/path ==> <my-home-dir>/some/path </nowiki>
  <nowiki>~fred/some/path ==> <fred-home-dir>/some/path </nowiki>
  <nowiki>$workdir/some/path ==> <workdir-env-var>/some/path </nowiki>
 
-This parameter must be present unless the''' --help''' or '''--version''' parameters are present. 
+This parameter must be present unless the''' --help''' or
+'''--version''' parameters are present. 
 
 
 <center>'''--new parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string (module or directory specification. length 1 .. 4095)
+{| class=wikitable border="1"
+|  Syntax
+|  string (module or directory specification. length 1 .. 4095)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Min Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdiff
+|  Supported by:
+|  yangdiff
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff \
+|  Example:
+|   yangdiff \
    --new=test3a
    --difftype=terse 
    --old=test3\
 
 |}
 == --old ==
-The '''--old''' parameter specifies the YANG file or directory containing the older revision to be compared in the '''yangdiff''' program.
+The '''--old''' parameter specifies the YANG file or directory
+containing the older revision to be compared in the '''yangdiff'''
+program.
 
-If this parameter indicates a filename, then it represents the YANG source module name to compare as the older of the two revisions. 
+If this parameter indicates a filename, then it represents the YANG
+source module name to compare as the older of the two revisions. 
 
-If this parameter indicates a directory (and the 'old' parameter indicates a filename), then it will be used to to search for a file with the same name as the 'new' parameter. 
+If this parameter indicates a directory (and the 'old' parameter
+indicates a filename), then it will be used to to search for a file with
+the same name as the 'new' parameter. 
 
-If this string begins with a '~' character, then a username is expected to follow or a directory separator character. If it begins with a '$' character, then an environment variable name is expected to follow. 
+If this string begins with a '~' character, then a username is expected
+to follow or a directory separator character. If it begins with a '$'
+character, then an environment variable name is expected to follow. 
 
 
  <nowiki>~/some/path ==> <my-home-dir>/some/path </nowiki>
  <nowiki>~fred/some/path ==> <fred-home-dir>/some/path </nowiki>
  <nowiki>$workdir/some/path ==> <workdir-env-var>/some/path </nowiki>
 
-This parameter must be present unless the '''--help''' or '''--version''' parameters are present. 
+This parameter must be present unless the '''--help''' or
+'''--version''' parameters are present. 
 
 
 <center>'''--old parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string (module or directory specification. length 1 .. 4095)
+{| class=wikitable border="1"
+|  Syntax
+|  string (module or directory specification. length 1 .. 4095)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Min Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdiff
+|  Supported by:
+|  yangdiff
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff \
+|  Example:
+|   yangdiff \
    --old=test3
    --difftype=terse 
    --new=test3a\
 
 |}
 == --output ==
-The '''--output''' parameter specifies where the output files generated by the program will be stored.
+The '''--output''' parameter specifies where the output files generated
+by the program will be stored.
 
-* The default is STDOUT if this parameter is not specified and the '''--defnames''' parameter is set to 'false'. 
-* If this parameter represents an existing directory, then the '''--defnames''' parameter will be set to 'true' by default. 
-* If this parameter represents a file name, then the '''--defnames''' parameter will be ignored, and all translation output will be directed to the specified file. 
-* If this string begins with a '~' character, then a username is expected to follow or a directory separator character. If it begins with a '$' character, then an environment variable name is expected to follow. 
+* The default is STDOUT if this parameter is not specified and the
+'''--defnames''' parameter is set to 'false'. 
+* If this parameter represents an existing directory, then the
+'''--defnames''' parameter will be set to 'true' by default. 
+* If this parameter represents a file name, then the '''--defnames'''
+parameter will be ignored, and all translation output will be directed
+to the specified file. 
+* If this string begins with a '~' character, then a username is
+expected to follow or a directory separator character. If it begins with
+a '$' character, then an environment variable name is expected to
+follow. 
 
          <nowiki>~/some/path ==> <my-home-dir>/some/path </nowiki>
 
      <nowiki>~fred/some/path ==> <fred-home-dir>/some/path </nowiki>
 
-     <nowiki>$workdir/some/path ==> <workdir-env-var>/some/path </nowiki>
+     <nowiki>$workdir/some/path ==> <workdir-env-var>/some/path
+</nowiki>
 
 
 * If the target specified in this parameter '''does not '''exist:
-** If there is only one file to be output, then this parameter is used as the file name.
-** If there are multiple files to be output, then this parameter is used as a directory name. A new directory will be created, if it is needed.
+** If there is only one file to be output, then this parameter is used
+as the file name.
+** If there are multiple files to be output, then this parameter is used
+as a directory name. A new directory will be created, if it is needed.
 * If the target specified in this parameter '''does''' exist:
 ** If there is only one file to be output:
-*** If the existing target is also a file, then the current file is over-written.
-*** If the existing target is a directory, then the output file will be created in this directory.
+*** If the existing target is also a file, then the current file is
+over-written.
+*** If the existing target is a directory, then the output file will be
+created in this directory.
 ** If there are multiple files to be output:
-*** If the existing target is a file, then an error will be generated instead of the output files.
-*** If the existing target is a directory, then the output files will be created in the specified directory.
-* Use a trailing path separator character to force this parameter value to be treated as a path specification (e.g., '~/workfiles/').
+*** If the existing target is a file, then an error will be generated
+instead of the output files.
+*** If the existing target is a directory, then the output files will be
+created in the specified directory.
+* Use a trailing path separator character to force this parameter value
+to be treated as a path specification (e.g., '~/workfiles/').
 * This parameter is ignored if the '''--format''' parameter is missing.
 
 <center>'''--output parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string (path or file specification)
+{| class=wikitable border="1"
+|  Syntax
+|  string (path or file specification)
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdumpyangdiff
+|  Supported by:
+|  yangdumpyangdiff
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  \
+|  Example:
+|   yangdiff  \
    --output=~/diff-files
 
 |}
 == --subdirs ==
-The '''--subdirs''' parameter controls whether sub-directories should be searched or not, if they are found during a module search.
+The '''--subdirs''' parameter controls whether sub-directories should be
+searched or not, if they are found during a module search.
 
-If false, the file search paths for modules, scripts, and data files will not include sub-directories if they exist in the specified path. 
+If false, the file search paths for modules, scripts, and data files
+will not include sub-directories if they exist in the specified path. 
 
 
 <center>'''--subdirs parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| boolean
+{| class=wikitable border="1"
+|  Syntax
+|  boolean
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| TRUE
+|  Default:
+|  TRUE
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| yangdiff
+|  Supported by:
+|  yangdiff
 
 yangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangiff  \
+|  Example:
+|   yangiff  \
    --subdirs=false \
    --subtree=/testpath
 
 |}
 == --version ==
-The '''--version''' parameter causes the program version string to be printed, and then the program will exit instead of running as normal. 
+The '''--version''' parameter causes the program version string to be
+printed, and then the program will exit instead of running as normal. 
 
 All Yuma version strings use the same format:
 
@@ -1275,70 +1329,76 @@ This parameter can be combined with the '''--help '''parameter.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| empty
+{| class=wikitable border="1"
+|  Syntax
+|  empty
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  --version
+|  Example:
+|   yangdiff  --version
 
 |}
 == --warn-idlen ==
-The''' --warn-idlen''' parameter controls whether identifier length warnings will be generated.
+The''' --warn-idlen''' parameter controls whether identifier length
+warnings will be generated.
 
-The value zero disables all identifier length checking. If non-zero, then a warning will be generated if an identifier is defined which has a length is greater than this amount.
+The value zero disables all identifier length checking. If non-zero,
+then a warning will be generated if an identifier is defined which has a
+length is greater than this amount.
 
 
 <center>'''--warn-idlen parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32: 0 to disable, or 8 .. 1023
+{| class=wikitable border="1"
+|  Syntax
+|  uint32: 0 to disable, or 8 .. 1023
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 64
+|  Default:
+|  64
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --warn-idlen=50
+|  Example:
+|   yangdiff --warn-idlen=50
 
 |}
 == --warn-linelen ==
-The''' --warn-linelen''' parameter controls whether line length warnings will be generated.
+The''' --warn-linelen''' parameter controls whether line length warnings
+will be generated.
 
-The value zero disables all line length checking. If non-zero, then a warning will be generated if a YANG file line is entered which has a length is greater than this amount.
+The value zero disables all line length checking. If non-zero, then a
+warning will be generated if a YANG file line is entered which has a
+length is greater than this amount.
 
 Tab characters are counted as 8 spaces.
 
@@ -1347,75 +1407,84 @@ Tab characters are counted as 8 spaces.
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32: 0 to disable, or 40 .. 4095
+{| class=wikitable border="1"
+|  Syntax
+|  uint32: 0 to disable, or 40 .. 4095
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 72
+|  Default:
+|  72
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff --warn-linelen=79
+|  Example:
+|   yangdiff --warn-linelen=79
 
 |}
 == --warn-off ==
 The''' --warn-off''' parameter suppresses a specific warning number.
 
-The error and warning numbers, and the default messages, can be viewed with the yangdump program by using the '''--show-errors''' configuration parameter.
+The error and warning numbers, and the default messages, can be viewed
+with the yangdump program by using the '''--show-errors''' configuration
+parameter.
 
-The specific warning message will be disabled for all modules. No message will be printed and the warning will not count towards the total for that module.
+The specific warning message will be disabled for all modules. No
+message will be printed and the warning will not count towards the total
+for that module.
 
 
 <center>'''--warn-off parameter'''</center>
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| uint32: 400 .. 899
+{| class=wikitable border="1"
+|  Syntax
+|  uint32: 400 .. 899
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| none
+|  Default:
+|  none
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 499
+|  Max Allowed:
+|  499
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  --warn-off=435
+|  Example:
+|   yangdiff  --warn-off=435
  <nowiki># revision order not descending</nowiki>
 
 |}
 == --yuma-home ==
-The '''--yuma-home''' parameter specifies the project directory root to use when searching for files.
+The '''--yuma-home''' parameter specifies the project directory root to
+use when searching for files.
 
-If present, this directory location will override the ''''$YUMA_HOME''' environment variable, if it is set. If this parameter is set to a zero-length string, then the $'''YUMA_HOME''' environment variable will be ignored.
+If present, this directory location will override the ''''$YUMA_HOME'''
+environment variable, if it is set. If this parameter is set to a
+zero-length string, then the $'''YUMA_HOME''' environment variable will
+be ignored.
 
-The following directories are searched when either the '''$YUMA_HOME''' environment variable or this parameter is set:
+The following directories are searched when either the '''$YUMA_HOME'''
+environment variable or this parameter is set:
 
 * '''$YUMA_HOME/modules'''
 ** This sub-tree is searched for YANG files.
@@ -1428,30 +1497,29 @@ The following directories are searched when either the '''$YUMA_HOME''' environm
 
 
 
-{| style="border-spacing:0;"
-| style="border-top:0.5pt solid #000000;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Syntax
-| style="border:0.5pt solid #000000;padding:0.0382in;"| string: directory specification
+{| class=wikitable border="1"
+|  Syntax
+|  string: directory specification
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Default:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| '''$YUMA_HOME''' environment variable
+|  Default:
+|  '''$YUMA_HOME''' environment variable
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Min Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 0
+|  Min Allowed:
+|  0
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Max Allowed:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| 1
+|  Max Allowed:
+|  1
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Supported by:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"| netconfdyangcliyangdiffyangdump
+|  Supported by:
+|  netconfdyangcliyangdiffyangdump
 
 |-
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:none;padding:0.0382in;"| Example:
-| style="border-top:none;border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt solid #000000;padding:0.0382in;"|  yangdiff  \
+|  Example:
+|   yangdiff  \
    --yuma-home=~/sw/netconf 
 
 |}
-

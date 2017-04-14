@@ -46,6 +46,36 @@ module iana-if-type {
     "IANA 'ifType definitions' registry.
      <http://www.iana.org/assignments/smi-numbers>";
 
+  revision 2017-01-19 {
+    description
+      "Registered ifType 289.";
+  }
+
+  revision 2016-11-23 {
+    description
+      "Registered ifTypes 283-288.";
+  }
+
+  revision 2016-06-09 {
+    description
+      "Registered ifType 282.";
+  }
+  revision 2016-05-03 {
+    description
+      "Registered ifType 281.";
+  }
+  revision 2015-06-12 {
+    description
+      "Corrected formatting issue.";
+  }  
+  revision 2014-09-24 {
+    description
+      "Registered ifType 280.";
+  }
+  revision 2014-09-19 {
+    description
+      "Registered ifType 279.";
+  }
   revision 2014-07-03 {
     description
       "Registered ifTypes 277-278.";
@@ -1524,5 +1554,66 @@ module iana-if-type {
     base iana-interface-type;
     description
       "CATV Upstream OFDMA interface.";
+  }
+  identity gfast {
+    base iana-interface-type;
+    description
+      "G.fast port.";
+    reference
+      "ITU-T G.9701";
+  }
+  identity sdci {
+    base iana-interface-type;
+    description
+      "SDCI (IO-Link).";
+    reference
+      "IEC 61131-9 Edition 1.0 2013-09";
+  }
+  identity xboxWireless {
+    base iana-interface-type;
+    description
+      "Xbox wireless.";
+  }
+  identity fastdsl {
+    base iana-interface-type;
+    description
+      "FastDSL.";
+    reference
+      "BBF TR-355";
+  }
+  identity docsCableScte55d1FwdOob {
+    base iana-interface-type;
+    description
+      "Cable SCTE 55-1 OOB Forward Channel.";
+  }
+  identity docsCableScte55d1RetOob {
+    base iana-interface-type;
+    description
+      "Cable SCTE 55-1 OOB Return Channel.";
+  }
+  identity docsCableScte55d2DsOob {
+    base iana-interface-type;
+    description
+      "Cable SCTE 55-2 OOB Downstream Channel.";
+  }
+  identity docsCableScte55d2UsOob {
+    base iana-interface-type;
+    description
+      "Cable SCTE 55-2 OOB Upstream Channel.";
+  }
+  identity docsCableNdf {
+    base iana-interface-type;
+    description
+      "Cable Narrowband Digital Forward.";
+  }
+  identity docsCableNdr {
+    base iana-interface-type;
+    description
+      "Cable Narrowband Digital Return.";
+  }
+  identity ptm {
+    base iana-interface-type;
+    description
+      "Packet Transfer Mode.";
   }
 }

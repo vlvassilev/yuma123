@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-ietf-interfaces], [2.9], [vladimir@transpacket.com])
+AC_INIT([yuma123-netconfd-module-ietf-interfaces], [2.10], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 

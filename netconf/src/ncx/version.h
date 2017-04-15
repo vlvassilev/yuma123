@@ -40,6 +40,7 @@ date             init     comment
 21-jul-16    vv       Bumped trunk version to 2.7
 29-jul-16    vv       Bumped trunk version to 2.8
 20-aug-16    vv       Bumped trunk version to 2.9
+12-apr-17    vv       Bumped trunk version to 2.10
 */
 
 #ifdef __cplusplus
@@ -52,7 +53,7 @@ extern "C" {
 *                                                                   *
 *********************************************************************/
 
-#define YUMA_VERSION  (const xmlChar *)"2.9"
+#define YUMA_VERSION  (const xmlChar *)"2.10"
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -1,8 +1,29 @@
-yuma123 (2.10) UNRELEASED; urgency=medium
+yuma123 (2.10) stable; urgency=medium
 
-  * Removed unnecessary libyumancx dependencies on libyumamgr
+  * ncx
+    - Partial YANG 1.1 implementation.
+    - Fixed bug in handling of deviations.
+    - Fixed bug in apply_commit_deletes.
+    - Fixed bug in val_make_serialized_string.
+    - Refactored the base64 implementation. Fixed bugs and inconsistencies.
+    - Added support for multiple obj callback registrations.
+    - Fixed CDATA handling.
+    - Splitted yuma-netconf.yang to yuma123-netconf.yang and yuma123-netconf-types.yang
+    - Various ietf draft models updated. Erratas applied.
+    - Removed circular libyumancx dependencies on libyumamgr
+  * agt
+    - Replaced proprietary notifications with the ietf-netconf-notifications.yang defined.
+    - Moved agt_arp.c integrated module as standalone example-modules/yuma-arp
+  * yangdiff and yangdump
+    - Restored as build targets and added as debian packages.
+  * test
+    - Added netconfd testsuite netconf/test/netconfd.
+    - Added litenc client side session scripting python module.
+  * yangcli
+    - Fixed bug caused by attempted reload of already loaded module.
+    - Added yes/no container fill check promp.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 22 Aug 2016 20:40:13 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Sun, 16 Apr 2017 16:40:21 +0200
 
 yuma123 (2.9) stable; urgency=medium
 

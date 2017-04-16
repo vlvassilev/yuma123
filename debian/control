@@ -40,8 +40,7 @@ Package: libyuma-dev
 Section: libdevel
 Architecture: any
 Provides: libyuma-dev
-Depends: libwrap0-dev, procps,
-         ${misc:Depends}
+Depends: ${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
@@ -81,8 +80,15 @@ Description: Validate YANG modules and convert them to different formats
  for the exchange of management information between agents (servers)
  and clients.
  .
- The yuma123 yangdump application allows the user to validate YANG models
+ The yangdump application allows the user to validate YANG models
  and convert YANG to different formats.
+
+Package: yangdiff
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base, libyuma2
+Description: Compare YANG modules and print the differences.
+ .
+ The yangdiff application allows the user to compare YANG models.
 
 Package: netconfd-module-ietf-interfaces
 Architecture: any
@@ -125,8 +131,7 @@ Package: libyangrpc-dev
 Section: libdevel
 Architecture: any
 Provides: libyangrpc-dev
-Depends: libc6-dev, libyangrpc2 (=${binary:Version}), libwrap0-dev, procps,
-         ${misc:Depends}
+Depends: libc6-dev, libyangrpc2 (=${binary:Version}),${misc:Depends}
 Description: Netconf/YANG development files
  The Netconf protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

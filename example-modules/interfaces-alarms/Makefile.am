@@ -7,6 +7,5 @@ libinterfaces_alarms_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl -l
 
 #yang_DATA = ietf-interfaces.yang
 yang_DATA = \
-interfaces-notifications.yang \
 interfaces-alarms.yang
 

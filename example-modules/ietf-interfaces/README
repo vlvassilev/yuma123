@@ -60,3 +60,5 @@ Functionality:
  ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
  make
  sudo make install
+ #Starting netconfd: Note the iana-if-type.yang and interfaces-notifications.yang are not loaded by default
+ /usr/sbin/netconfd --module=ietf-interfaces --module=iana-if-type --module=interfaces-notifications

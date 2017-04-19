@@ -8,4 +8,4 @@ Functionality: Generates polls for /interfaces-state/inteface/oper-state and gen
  make
  sudo make install
  #Starting netconfd:
- netconfd --module=ietf-alarms --module=interfaces-alarms
+ /usr/sbin/netconfd --module=ietf-interfaces --module=ietf-alarms --module=iana-if-type --module=interfaces-notifications --module=interfaces-alarms

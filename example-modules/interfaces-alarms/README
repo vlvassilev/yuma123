@@ -1,0 +1,11 @@
+==Standalone project for netconfd module implementing link-up/link-down alarms==
+Dependency: installed netconfd run-time binaries and development shared libraries and headers. Dependency on loaded ietf-alarms SIL and installed libalarmctrl from ../ietf-alarms
+
+Functionality: Generates polls for /interfaces-state/inteface/oper-state and generates alarm when interface present in /interfaces goes down.
+===Build and install===
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+ #Starting netconfd:
+ netconfd --module=ietf-alarms --module=interfaces-alarms

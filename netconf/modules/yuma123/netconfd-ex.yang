@@ -20,6 +20,11 @@ module netconfd-ex {
   description
     "This module contains extra parameters for netconfd";
 
+  revision 2017-05-09 {
+    description
+      "Added validate-config-only CLI parameter.";
+  }
+
   revision 2016-08-08 {
     description
       "Fixed spelling errors.";
@@ -90,6 +95,15 @@ module netconfd-ex {
           that can be accepted.";
        type uint32;
        default 1024;
+     }
+
+     leaf validate-config-only {
+       description
+         "When present netconfd returns immediately after initialization
+          and startup configuration validation is complete without opening
+          socket and waiting for incoming NETCONF sessions. Enables use
+          of netconfd as command line configuration validator.";
+       type empty;
      }
   }
 }

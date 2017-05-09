@@ -58,6 +58,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
+#define NETCONFD_EX_MOD       (const xmlChar *)"netconfd-ex"
 #define NETCONFD_CLI       (const xmlChar *)"netconfd"
 
 #define START_MSG          "Starting netconfd...\n"
@@ -153,7 +154,7 @@ static status_t load_core_schema ( agt_profile_t *profile )
  * 
  *********************************************************************/
 static status_t cmn_init ( int argc, char *argv[], boolean *showver,
-                           help_mode_t *showhelpmode)
+                           help_mode_t *showhelpmode, boolean *validate_config_only_mode)
 {
 #define BUFFLEN 256
 
@@ -161,7 +162,10 @@ static status_t cmn_init ( int argc, char *argv[], boolean *showver,
     log_debug_t  dlevel;
     int          len;
     char         buff[BUFFLEN];
+    val_value_t* val;
+    val_value_t* cli_valset;
 
+    *validate_config_only_mode=FALSE;
     /* set the default debug output level */
     dlevel = LOG_DEBUG_INFO;
 
@@ -207,13 +211,19 @@ static status_t cmn_init ( int argc, char *argv[], boolean *showver,
         return NO_ERR;
     }
 
+    cli_valset = agt_cli_get_valset();
+    val = val_find_child(cli_valset, NETCONFD_EX_MOD, "validate-config-only");
+    if(val!=NULL) {
+        *validate_config_only_mode=TRUE;
+    }
+
     /* Load the core modules (netconfd and netconf) */
     res = load_core_schema(agt_get_profile());
     if (res != NO_ERR) {
         return res;
     }
 
-    /* finidh initializing server data structures */
+    /* finish initializing server data structures */
     res = agt_init2();
     if (res != NO_ERR) {
         return res;
@@ -321,6 +331,7 @@ int main (int argc, char *argv[])
     boolean            showver = FALSE;
     boolean            done = FALSE;
     help_mode_t        showhelpmode;
+    boolean            validate_config_only_mode = FALSE;
 
 #ifdef MEMORY_DEBUG
     mtrace();
@@ -331,7 +342,7 @@ int main (int argc, char *argv[])
      * scratch. If the shutdown operation (or Ctl-C exit) is used instead of 
      * restart, then the loop will only be executed once */
     while (!done) {
-        res = cmn_init( argc, argv, &showver, &showhelpmode );
+        res = cmn_init( argc, argv, &showver, &showhelpmode, &validate_config_only_mode);
     
         if (res != NO_ERR) {
             log_error( "\nnetconfd: init returned (%s)", 
@@ -342,6 +353,8 @@ int main (int argc, char *argv[])
                 show_version();
             } else if (showhelpmode != HELP_MODE_NONE) {
                 help_program_module( NETCONFD_MOD, NETCONFD_CLI, showhelpmode );
+                agt_request_shutdown(NCX_SHUT_EXIT);
+            } else if (validate_config_only_mode) {
                 agt_request_shutdown(NCX_SHUT_EXIT);
             } else {
                 res = netconfd_run();
@@ -370,7 +383,7 @@ int main (int argc, char *argv[])
     muntrace();
 #endif
 
-    return 0;
+    return res;
 } /* main */
 
 /* END netconfd.c */

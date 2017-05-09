@@ -351,6 +351,12 @@ generated if possible. Default is no enforcement of
 strict XML order.
 .IP --\fBversion\fP
 Print the program version string and exit.
+.IP --\fBvalidate-config-only\fP
+If present, netconfd acts as command line YANG
+configuration validator. Load the YANG
+schema modules, validate the startup
+configuration and exit without opening socket and
+listening for incoming sessions.
 .IP --\fBwarn-idlen\fP=number
  Control whether identifier length warnings will be
 generated.  The value zero disables all identifier

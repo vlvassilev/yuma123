@@ -8368,6 +8368,46 @@ This parameter can be combined with the '''--help '''parameter.
 |   netconfd --version
 
 |}
+
+== --validate-config-only ==
+If '''--validate-config-only''' parameter is present netconfd acts as
+command line YANG configuration validator. Loads the YANG schema
+modules, validates the startup configuration and exits without opening
+socket and listening for incoming sessions.
+
+This parameter can be combined with the '''--startup''' parameter
+specifying the xml configuration file and '''--module''' parameter
+specifying the modules (SILs or YANG modules).
+
+
+{| class=wikitable border="1"
+|  Syntax
+|  empty
+
+|-
+|  Default:
+|  none
+
+|-
+|  Min Allowed:
+|  0
+
+|-
+|  Max Allowed:
+|  1
+
+|-
+|  Supported by:
+|  netconfd
+
+|-
+|  Example:
+|   netconfd --validate-config-only --startup-error=stop
+--startup=startup-cfg-good.xml
+--module=/usr/share/yuma/modules/ietf/ietf-interfaces.yang
+--module=/usr/share/yuma/modules/ietf/iana-if-type.yang
+|}
+
 == --warn-idlen ==
 The''' --warn-idlen''' parameter controls whether identifier length
 warnings will be generated.

@@ -21,8 +21,7 @@ AC_SUBST(CFLAGS)
 
 AC_CONFIG_FILES([
         Makefile
-	copy-config/Makefile
-	deviation-add-must/Makefile
+	multiple-edit-callbacks/Makefile
 ])
 
 AC_OUTPUT

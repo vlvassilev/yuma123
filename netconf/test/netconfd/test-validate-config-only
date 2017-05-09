@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd validate-config-only
+./run.sh

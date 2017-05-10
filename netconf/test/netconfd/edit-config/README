@@ -1,10 +1,21 @@
 FILES:
- * run.sh - shell script executing the testcase
- * session.ncclient.py - python script connecting to the started netconfd server performing edit-config RPCs and verify the configuration is correctly committed
- * startup-cfg.xml - initial configuration
+ * run.sh - shell script executing the testcase. Starts netcond server and executes the session scripts.
+ * session.ncclient.py - python script using ncclient external python module.
+     Connects to the started netconf server performs edit-config RPCs and verify the configuration is
+     correctly committed.
+ * session.duplicated-list-entry.litenc.py - python script using litenc python module (added at ../litenc).
+     Connects to the started netconf server performs edit-config RPCs and verify edit-config attempting to
+     create duplicated interface list entry (equal 'name' keys) configuration is correctly rejected.
 
 PURPOSE:
  Verify edit-config works
 
 OPERATION:
  Uses edit-config and reads back the configuration with get-config for verification.
+
+ENVIRONMENT VARIABLES
+ One can start confd server instead of netconfd by exporting variable named RUN_WITH_CONFD
+ Example:
+  export RUN_WITH_CONFD=~/confd/root ; ./run.sh
+
+ The ~/confd/root in the example is the path to the confd installation where confdrc is located.

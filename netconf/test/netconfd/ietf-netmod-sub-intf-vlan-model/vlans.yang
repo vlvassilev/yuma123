@@ -1,0 +1,47 @@
+module vlans {
+
+    namespace "http://example.com/ns/vlans";
+
+    prefix "vlans";
+
+    import ietf-interfaces {
+      prefix if;
+    }
+
+    organization  "example.com";
+
+    description 
+      "Model binding interfaces into VLANs.";
+
+    revision 2017-05-12 {
+        description
+            "Initial revision";
+    }
+    container vlans {
+        description
+            "Container for all VLAN bridges.";
+ 
+        list vlan {
+            key name;
+
+            leaf name {
+                type string;
+                mandatory true;
+            }
+            leaf-list interface {
+                type if:interface-ref;
+                description "Symetrical interface participating
+                  as both ingress and egress member";
+            }
+            leaf-list egress-interface {
+                type if:interface-ref;
+                description "Egress interface member.";
+            }
+            leaf-list ingress-interface {
+                type if:interface-ref;
+                description "Ingress interface member.";
+            }
+        }
+    }
+}
+

@@ -1,0 +1,62 @@
+  <edit-config>
+    <target>
+      <candidate/>
+    </target>
+    <default-operation>merge</default-operation>
+    <test-option>set</test-option>
+    <config>
+      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+        <interface 
+          xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+          nc:operation="create">
+          <name>ge1-2</name>
+          <description>Usecase 2</description>
+          <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:l2vlan</type>
+          <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
+            <vlan xmlns="urn:ietf:params:xml:ns:yang:ietf-if-l3-vlan">
+              <tag>
+                <index>0</index>
+                <dot1q-tag>
+                  <tag-type
+                    xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
+                  <vlan-id>11</vlan-id>
+                </dot1q-tag>
+              </tag>
+            </vlan>
+          </encapsulation>
+          <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
+          <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">ge1</parent-interface>
+        </interface>
+        <interface 
+          xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+          nc:operation="create">
+          <name>xe0-2</name>
+          <description>Usecase 2 interface xe0 vlan_id(101,vlan_id(11))</description>
+          <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:l2vlan</type>
+          <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
+            <vlan xmlns="urn:ietf:params:xml:ns:yang:ietf-if-l3-vlan">
+              <tag>
+                <index>0</index>
+                <dot1q-tag>
+                  <tag-type
+                    xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:s-vlan</tag-type>
+                  <vlan-id>101</vlan-id>
+                </dot1q-tag>
+              </tag>
+              <tag>
+                <index>1</index>
+                <dot1q-tag>
+                  <tag-type
+                    xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
+                  <vlan-id>11</vlan-id>
+                </dot1q-tag>
+              </tag>
+            </vlan>
+          </encapsulation>
+          <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
+          <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">xe0</parent-interface>
+        </interface>
+      </interfaces>
+    </config>
+  </edit-config>
+

@@ -12,7 +12,11 @@ $(top_srcdir)/netconf/modules/ietf/ietf-netconf-with-defaults.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-acm.yang \
 $(top_srcdir)/netconf/modules/ietf/notifications.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-notifications.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-yang-library.yang
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-library.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-types.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-inet-types.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-smiv2.yang
 
 ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang \
@@ -29,12 +33,6 @@ $(top_srcdir)/netconf/modules/netconfcentral/yuma-app-common.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/netconfd.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-mysession.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/toaster.yang
-
-
-yang_yang_DATA = \
-$(top_srcdir)/netconf/modules/yang/ietf-yang-types.yang \
-$(top_srcdir)/netconf/modules/yang/ietf-inet-types.yang \
-$(top_srcdir)/netconf/modules/yang/yang-smi.yang
 
 yuma123_yang_DATA = \
 $(top_srcdir)/netconf/modules/yuma123/yangcli.yang \

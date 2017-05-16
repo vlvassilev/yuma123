@@ -1,0 +1,5 @@
+PURPOSE:
+ Verify modules of different revisions are handled correctly.
+
+OPERATION:
+ Uses 3 test modules a, b and c  referencing different revisions of ietf-yang-types. Module c should fail loading. When a and b are loaded simultaneously the server should have both ietf-yang-types in the capabilities list.

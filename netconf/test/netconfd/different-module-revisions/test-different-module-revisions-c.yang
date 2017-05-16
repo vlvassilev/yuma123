@@ -1,0 +1,25 @@
+module test-different-module-revisions-c {
+
+  namespace "http://yuma123.org/ns/test-different-module-revisions-c";
+  prefix test-dmr-c;
+
+  import ietf-yang-types { prefix yt; revision-date "2010-09-24";}
+
+  organization  "yuma123";
+  
+  description 
+    "Test module for different-module-revisions.
+     Should fail when loaded since it uses the yang-identifier
+     type defined in the newer 2013-07-15 revision of ietf-yang-types.";
+  
+  revision 2017-05-16 {
+    description
+      "1.st version";
+  }
+
+  container c {
+    leaf my-yang-identifier {
+        type yt:yang-identifier;
+    }
+  }
+}

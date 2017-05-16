@@ -356,8 +356,9 @@ static status_t
     cmdlen --;
     while(word_iter <= word_end) {
         if ((line[word_iter] == '/') || (line[word_iter] == '[')) {
-            // The second '/' or predicate condition starting with '[' is found
-            // find the top level obj and fill its child completion
+            /* The second '/' or predicate condition starting with '[' is found
+             * find the top level obj and fill its child completion
+             */
             char childName[128];
             int child_name_len = word_iter - word_start;
             strncpy (childName, &line[word_start], child_name_len);
@@ -370,8 +371,9 @@ static status_t
                                (const xmlChar *)childName);
             cmdlen = word_end - word_iter;
 
-            // put the children path with topObj into the recursive 
-            // lookup function
+            /* put the children path with topObj into the recursive
+             * lookup function
+             */
             if(line[word_iter] == '/') {
                 return fill_xpath_children_completion(rpc, childObj,
                                                       cpl,line, word_iter,
@@ -579,9 +581,12 @@ static obj_template_t *
                         int word_start,
                         int word_end)
 {
-    // line[word_end] == '/'
-    int cmdlen = (word_end - 1) - word_start;
+    int cmdlen = word_end - word_start;
     obj_template_t *modObj;
+
+    if(cmdlen==0) {
+        return NULL;
+    }
 
     if (use_servercb(comstate->server_cb)) {
         modptr_t *modptr;
@@ -816,17 +821,20 @@ static status_t
               // The second '/' is found
               // TODO: find the top level obj and fill its child completion
 //            log_write("more than 1\n");
-              obj_template_t * topObj = find_xpath_top_obj(comstate, line,
-                                                           word_start,
-                                                           word_iter);
+             obj_template_t * top_obj = find_xpath_top_obj(comstate, line,
+                                                          word_start,
+                                                          word_iter);
 
-              cmdlen = word_end - word_iter;
+             if(top_obj==NULL) {
+                 return NO_ERR;
+             }
+             cmdlen = word_end - word_iter;
 
-              // put the children path with topObj into the recursive 
-              // lookup function
-              return fill_xpath_children_completion (rpc, topObj, cpl, line,
-                                                     word_iter, word_end, 
-                                                     cmdlen);
+             // put the children path with topObj into the recursive
+             // lookup function
+             return fill_xpath_children_completion (rpc, top_obj, cpl, line,
+                                                    word_iter, word_end,
+                                                    cmdlen);
         }
         word_iter ++;
     }

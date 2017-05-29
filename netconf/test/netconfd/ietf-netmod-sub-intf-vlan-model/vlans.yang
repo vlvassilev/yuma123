@@ -13,9 +13,9 @@ module vlans {
     description 
       "Model binding interfaces into VLANs.";
 
-    revision 2017-05-12 {
+    revision 2017-05-15 {
         description
-            "Initial revision";
+            "Fixed typo.";
     }
     container vlans {
         description
@@ -30,7 +30,7 @@ module vlans {
             }
             leaf-list interface {
                 type if:interface-ref;
-                description "Symetrical interface participating
+                description "Symmetrical interface participating
                   as both ingress and egress member";
             }
             leaf-list egress-interface {

@@ -15,17 +15,21 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   confdc -c ietf-if-l3-vlan@2017-03-13.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
   confdc -c ieee802-dot1q-types@2016-09-22.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
   confdc -c ieee802-types@2016-07-24.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
+  confdc -c vlans.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
+  confdc -c composite-match.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
 
   NCPORT=2022
   NCUSER=admin
   NCPASSWORD=admin
-  confd --verbose --foreground --addloadpath /home/vladimir/transpacket/confd/root/src/confd --addloadpath . 2>&1 1>server.log &
+  #confd --verbose --foreground --addloadpath /home/vladimir/transpacket/confd/root/src/confd --addloadpath . 2>&1 1>server.log &
+  confd --verbose --foreground --addloadpath /home/vladimir/transpacket/confd/root/src/confd --addloadpath .
   SERVER_PID=$!
   cd ..
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=./ietf-interfaces-common@2017-03-13.yang --module=./ietf-interfaces-ethernet-like@2017-03-13.yang --module=./ietf-if-l3-vlan@2017-03-13.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --module=/usr/share/yuma/modules/vlans.yang --no-startup --superuser=$USER  1>tmp/server.log &
+  /usr/sbin/netconfd --module=./ietf-interfaces-common@2017-03-13.yang --module=./ietf-interfaces-ethernet-like@2017-03-13.yang --module=./ietf-if-l3-vlan@2017-03-13.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --module=./vlans.yang --module=./composite-match.yang --modpath=./:/usr/share/yuma/modules/ --no-startup --validate-config-only --superuser=$USER
+  exit 0
   SERVER_PID=$!
 fi
 

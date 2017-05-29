@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd identityref-typedef
+./run.sh

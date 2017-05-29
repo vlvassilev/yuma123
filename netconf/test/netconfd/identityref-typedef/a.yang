@@ -1,0 +1,34 @@
+module a {
+    yang-version 1.1;
+
+    namespace "http://example.com/ns/identityref-typedef-a";
+
+    prefix "a";
+
+    organization  "example.com";
+
+    description 
+      "Testing identityref typedef type defined in imported module.";
+
+    revision 2017-05-29 {
+        description
+            "Initial version.";
+    }
+    identity my-base-identity {
+      description
+          "Intended base identity.";
+    }
+
+    identity other-base-identity {
+      description
+          "Not the intended base identity.";
+    }
+
+    typedef my-identityref-typedef-type {
+        type identityref {
+            base "my-base-identity";
+        }
+    }
+
+}
+

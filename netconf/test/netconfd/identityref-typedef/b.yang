@@ -1,0 +1,26 @@
+module b {
+    yang-version 1.1;
+
+    namespace "http://example.com/ns/identityref-typedef-b";
+
+    prefix "b";
+
+    import a {
+      prefix a;
+    }
+
+    organization  "example.com";
+
+    description 
+      "Testing identityref typedef type defined in imported module.";
+
+    revision 2017-05-29 {
+        description
+            "Initial version.";
+    }
+    container b {
+        leaf my-identityref-typedef-type-leaf {
+            type a:my-identityref-typedef-type;
+        }
+    }
+}

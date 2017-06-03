@@ -3504,18 +3504,23 @@ static status_t
         case NCX_BT_IDREF:
             idref = typ_get_idref(typdef);
             if (idref) {
+                ncx_module_t  *referer_mod;
                 testidentity = NULL;
-                if (idref->baseprefix &&
-                    xml_strcmp(idref->baseprefix, mod->prefix)) {
+                if(0==strcmp(mod->name,idref->modname)) {
+                    referer_mod=mod;
+                } else {
+                    referer_mod = ncx_find_module(idref->modname,NULL);
+                }
+                if (idref->baseprefix && xml_strcmp(idref->baseprefix, mod->prefix)) {
 
-                    /* find the identity in another module */
-                    res = yang_find_imp_identity(pcb, tkc, mod, 
+                    /* find the identity referenced locally in another directly imported module */
+                    res = yang_find_imp_identity(pcb, tkc, referer_mod,
                                                  idref->baseprefix,
                                                  idref->basename, 
                                                  &typdef->tkerr,
                                                  &testidentity);
                 } else {
-                    testidentity = ncx_find_identity(mod, idref->basename, 
+                    testidentity = ncx_find_identity(referer_mod, idref->basename,
                                                      FALSE);
                     if (!testidentity) {
                         res = ERR_NCX_DEF_NOT_FOUND;

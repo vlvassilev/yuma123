@@ -128,6 +128,12 @@ static xpath_result_t* module_loaded_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
 static xpath_result_t* feature_enabled_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ, 
                                            status_t *res); 
 
+/*YANG 1.1*/
+static xpath_result_t* derived_from_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
+                                           status_t *res);
+static xpath_result_t* derived_from_or_self_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
+                                           status_t *res);
+
 /********************************************************************
 *                                  *
 *                         V A R I A B L E S                         *
@@ -165,6 +171,12 @@ static xpath_fncb_t functions [] = {
     { XP_FN_TRUE, XP_RT_BOOLEAN, 0, true_fn },
     { XP_FN_MODULE_LOADED, XP_RT_BOOLEAN, -1, module_loaded_fn },
     { XP_FN_FEATURE_ENABLED, XP_RT_BOOLEAN, 2, feature_enabled_fn },
+    { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
+};
+
+static xpath_fncb_t functions11 [] = {
+    { XP_FN_DERIVED_FROM, XP_RT_BOOLEAN, 2, derived_from_fn },
+    { XP_FN_DERIVED_FROM_OR_SELF, XP_RT_BOOLEAN, 2, derived_from_or_self_fn },
     { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
 };
 
@@ -4475,6 +4487,145 @@ static xpath_result_t *
 
 }  /* feature_enabled_fn */
 
+bool val123_is_identity_derived_from(val_value_t* idref_val, const ncx_identity_t * identity, const ncx_identity_t *identity_base)
+{
+    assert(identity);
+    assert(identity_base);
+    identity=identity->base;
+
+    while (identity) {
+        if (identity == identity_base) {
+            return TRUE;
+        } else {
+            identity = identity->base;
+        }
+    }
+    return FALSE;
+}
+
+static xpath_result_t *
+    derived_from_common (xpath_pcb_t *pcb,
+              dlq_hdr_t *parmQ,
+              status_t  *res,
+              bool or_self_flag)
+{
+    xpath_result_t *result;
+    xpath_result_t  *parm1, *parm2;
+    const xmlChar   *qname;
+
+    const ncx_identity_t *identity_base;
+    xmlns_id_t  nsid;
+    const xmlChar *name;
+    xpath_resnode_t  *resnode;
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+    assert(parm1->restype==XP_RT_NODESET);
+    assert(parm2->restype==XP_RT_STRING);
+
+    qname = parm2->r.str;
+
+    *res = val_parse_idref(pcb->tkerr.mod,
+                    qname,
+                    &nsid,
+                    &name,
+                    &identity_base);
+    if(*res != NO_ERR) {
+        return NULL;
+    }
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (result == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    if (pcb->val==NULL) {
+        result->r.boo = TRUE;
+        return result;
+    }
+
+    for (resnode = (xpath_resnode_t *) dlq_firstEntry(&parm1->r.nodeQ);
+         resnode != NULL;
+         resnode = (xpath_resnode_t *) dlq_nextEntry(resnode)) {
+        val_value_t* val;
+        val = val_get_first_leaf(resnode->node.valptr);
+        if (val && val->btyp==NCX_BT_IDREF) {
+            /* all nodes in the nodeset must be leafs of type identityref with bases parents of identity */
+            if((or_self_flag && val->v.idref.identity==identity_base) ||
+                val123_is_identity_derived_from(val, val->v.idref.identity, identity_base)) {
+                continue;
+            } else {
+                result->r.boo = FALSE;
+                return result;
+            }
+        } else {
+            *res = ERR_NCX_INVALID_VALUE;
+            break;
+        }
+    }
+
+
+    if(*res!=NO_ERR) {
+        return NULL;
+    }
+
+    result->r.boo = TRUE;
+
+
+    return result;
+
+}  /* derived_from_common */
+
+/********************************************************************
+* FUNCTION derived_from_fn
+*
+* derived_from(val,identityref) function [10.4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm (nodeset to get node count for)
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    derived_from_fn (xpath_pcb_t *pcb,
+              dlq_hdr_t *parmQ,
+              status_t  *res)
+{
+    return derived_from_common(pcb, parmQ, res, FALSE);
+}  /* derived_from_fn */
+
+/********************************************************************
+* FUNCTION derived_from_or_self_fn
+*
+* derived_from_or_self(val,identityref) function [10.4.2]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm (nodeset to get node count for)
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    derived_from_or_self_fn (xpath_pcb_t *pcb,
+              dlq_hdr_t *parmQ,
+              status_t  *res)
+{
+    return derived_from_common(pcb, parmQ, res, TRUE);
+}  /* derived_from_or_self_fn */
 
 /****************   U T I L I T Y    F U N C T I O N S   ***********/
 
@@ -4506,6 +4657,18 @@ static const xpath_fncb_t *
             return fncb;
         } else {
             fncb = &pcb->functions[++i];
+        }
+    }
+
+    if(pcb->tkerr.mod->langver == NCX_YANG_VERSION11) {
+        i = 0;
+        fncb = &functions11[i];
+        while (fncb && fncb->name) {
+            if (!xml_strcmp(name, fncb->name)) {
+                return fncb;
+            } else {
+                fncb = &functions11[++i];
+            }
         }
     }
     return NULL;

@@ -2328,6 +2328,7 @@ status_t
     const xmlChar         *str, *modname;
     ncx_module_t          *mod;
     const ncx_identity_t  *identity;
+    const ncx_identity_t  *identity_match;
     boolean                found;
 
 #ifdef DEBUG
@@ -2392,10 +2393,9 @@ status_t
      * has an ancestor-or-self node that is the same base
      * as the base specified in the typdef
      */
+    identity_match=identity;
     while (identity && !found) {
-        if (!xml_strcmp(ncx_get_modname(identity->tkerr.mod), 
-                        idref->modname) &&
-            !xml_strcmp(identity->name, idref->basename)) {
+        if (identity == idref->base) {
             found = TRUE;
         } else {
             identity = identity->base;
@@ -2407,7 +2407,7 @@ status_t
             *name = str;
         }
         if (id) {
-            *id = identity;
+            *id = identity_match;
         }
         return NO_ERR;
     }

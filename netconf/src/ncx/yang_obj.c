@@ -7677,7 +7677,7 @@ static status_t
                 continue;
             }
         
-            if (obj_is_mandatory(testobj)) {
+            if (testobj->tkerr.mod->langver == NCX_YANG_VERSION10 && obj_is_mandatory(testobj)) {
                 if (augextern) {
                     log_error("\nError: Mandatory object '%s' not allowed "
                               "in external augment statement",

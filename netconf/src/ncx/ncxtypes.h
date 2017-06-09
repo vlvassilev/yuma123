@@ -586,7 +586,6 @@ typedef struct ncx_filptr_t_ {
     dlq_hdr_t             childQ;  /* Q of ncx_filptr_t */
 } ncx_filptr_t;
 
-
 /* back pointer to a YANG identity
  * used to create an inline tree of valid values
  * for an identity used as a base
@@ -605,26 +604,29 @@ typedef struct ncx_idlink_t_ {
     boolean    inq;
 } ncx_idlink_t;
 
-
 /* YANG identity entry */
 typedef struct ncx_identity_t_ {
     dlq_hdr_t             qhdr;
-    struct ncx_identity_t_ *base;      /* back-ptr to base id */
+    dlq_hdr_t             baseQ;
     xmlChar              *name;
-    xmlChar              *baseprefix;
-    xmlChar              *basename;
     xmlChar              *descr;
     xmlChar              *ref;
     ncx_status_t          status;
-    dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
     dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
     status_t              res;     /* may be stored with errors */
-    boolean               isroot;    /* base==NULL not an error */
-    ncx_idlink_t          idlink;
+    boolean               isroot;    /* empty baseQ not an error */
+    dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
     ncx_error_t           tkerr;
     boolean               seen;                  /* for yangcli */
 } ncx_identity_t;
 
+typedef struct ncx_identity_base_t_ {
+    dlq_hdr_t             qhdr;
+    xmlChar              *prefix;
+    xmlChar              *name;
+    ncx_identity_t       *identity;
+    ncx_idlink_t          idlink;
+} ncx_identity_base_t;
 
 /* representation of one module or submodule during and after parsing */
 typedef struct ncx_module_t_ {

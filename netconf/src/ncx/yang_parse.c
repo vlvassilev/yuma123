@@ -43,7 +43,7 @@ date         init     comment
 #include <stdlib.h>
 #include <memory.h>
 #include <ctype.h>
-
+#include <assert.h>
 #include <xmlstring.h>
 
 #include "procdefs.h"
@@ -796,6 +796,15 @@ static status_t
 
 }  /* check_feature_loop */
 
+static ncx_identity_base_t* new_identity_base (void)
+{
+    ncx_identity_base_t *base = m__getObj(ncx_identity_base_t);
+    if (!base) {
+        return NULL;
+    }
+    memset(base, 0x0, sizeof(ncx_identity_base_t));
+    return base;
+}
 
 /********************************************************************
 * FUNCTION consume_identity
@@ -825,13 +834,12 @@ static status_t
     ncx_identity_t     *identity, *testidentity;
     yang_stmt_t        *stmt;
     tk_type_t           tktyp;
-    boolean             done, base, stat, desc, ref, keep;
+    boolean             done, stat, desc, ref, keep;
     status_t            res, retres;
 
     val = NULL;
     expstr = "identity name";
     done = FALSE;
-    base = FALSE;
     stat = FALSE;
     desc = FALSE;
     ref = FALSE;
@@ -927,13 +935,22 @@ static status_t
 
         /* Got a token string so check the value, should be 'prefix' */
         if (!xml_strcmp(val, YANG_K_BASE)) {
+            ncx_identity_base_t* base;
+            boolean dummy_duplication_flag = FALSE;
+
             identity->isroot = FALSE;
+
+            base = (ncx_identity_base_t*) new_identity_base();
+            assert(base);
+
             res = yang_consume_pid(tkc, 
                                    mod, 
-                                   &identity->baseprefix,
-                                   &identity->basename,
-                                   &base, 
+                                   &base->prefix,
+                                   &base->name,
+                                   &dummy_duplication_flag,
                                    &identity->appinfoQ);
+
+           dlq_enque(base, &identity->baseQ);
         } else if (!xml_strcmp(val, YANG_K_STATUS)) {
             res = yang_consume_status(tkc, 
                                       mod, 
@@ -1023,64 +1040,71 @@ static status_t
                       ncx_module_t  *mod,
                       ncx_identity_t *identity)
 {
-    if (identity->isroot) {
-        return NO_ERR;
-    }
 
-    ncx_identity_t *testidentity = NULL;
+    ncx_identity_base_t * base;
     status_t res = NO_ERR;
     boolean errdone = FALSE;
 
-    if (identity->baseprefix && mod->prefix &&
-        xml_strcmp(identity->baseprefix, mod->prefix)) {
+    if (identity->isroot) {
+        return NO_ERR;
+    } else {
+        base = (ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ);
+        assert(base);
+    }
 
-        /* find the identity in another module */
-        res = yang_find_imp_identity(pcb,
-                                     tkc, 
-                                     mod, 
-                                     identity->baseprefix,
-                                     identity->basename, 
-                                     &identity->tkerr,
-                                     &testidentity);
-        if (res != NO_ERR) {
+    for(;base!=NULL;base=(ncx_identity_base_t *)dlq_nextEntry(base)) {
+        ncx_identity_t *testidentity = NULL;
+
+        if (base->prefix && mod->prefix &&
+            xml_strcmp(base->prefix, mod->prefix)) {
+
+            /* find the identity in another module */
+            res = yang_find_imp_identity(pcb,
+                                         tkc,
+                                         mod,
+                                         base->prefix,
+                                         base->name,
+                                         &identity->tkerr,
+                                         &testidentity);
+            if (res != NO_ERR) {
+                errdone = TRUE;
+            }
+        } else if (identity->name && base->name &&
+                   !xml_strcmp(identity->name, base->name)) {
+            /* error: 'base foo' inside 'identity foo' */
+            res = ERR_NCX_DEF_LOOP;
+            log_error("\nError: 'base %s' inside identity '%s'",
+                      base->name, identity->name);
+            tkc->curerr = &identity->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
             errdone = TRUE;
+        } else if (base->name) {
+            testidentity = ncx_find_identity(mod, base->name, FALSE);
         }
-    } else if (identity->name && identity->basename && 
-               !xml_strcmp(identity->name, identity->basename)) {
-        /* error: 'base foo' inside 'identity foo' */
-        res = ERR_NCX_DEF_LOOP;
-        log_error("\nError: 'base %s' inside identity '%s'",
-                  identity->basename, identity->name);
-        tkc->curerr = &identity->tkerr;
-        ncx_print_errormsg(tkc, mod, res);
-        errdone = TRUE;
-    } else if (identity->basename) {
-        testidentity = ncx_find_identity(mod, identity->basename, FALSE);
-    }
-    if (!testidentity && !errdone) {
-        if (identity->baseprefix || identity->basename) {
-            log_error("\nError: Base '%s%s%s' not found "
-                      "for identity statement '%s'",
-                      (identity->baseprefix) ? 
-                      identity->baseprefix : EMPTY_STRING,
-                      (identity->baseprefix) ? ":" : "",
-                      (identity->basename) ? identity->basename : EMPTY_STRING,
-                      (identity->name) ? identity->name : NCX_EL_NONE);
-            res = ERR_NCX_DEF_NOT_FOUND;
-        } else {
-            log_error("\nError: Invalid base name for identity statement '%s'",
-                      (identity->name) ? identity->name : NCX_EL_NONE);
-            res = ERR_NCX_INVALID_NAME;
+        if (!testidentity && !errdone) {
+            if (base->prefix || base->name) {
+                log_error("\nError: Base '%s%s%s' not found "
+                          "for identity statement '%s'",
+                          (base->prefix) ?
+                          base->prefix : EMPTY_STRING,
+                          (base->prefix) ? ":" : "",
+                          (base->name) ? base->name : EMPTY_STRING,
+                          (identity->name) ? identity->name : NCX_EL_NONE);
+                res = ERR_NCX_DEF_NOT_FOUND;
+            } else {
+                log_error("\nError: Invalid base name for identity statement '%s'",
+                          (identity->name) ? identity->name : NCX_EL_NONE);
+                res = ERR_NCX_INVALID_NAME;
+            }
+
+            tkc->curerr = &identity->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
         }
 
-        tkc->curerr = &identity->tkerr;
-        ncx_print_errormsg(tkc, mod, res);
+        if (testidentity) {
+            base->identity = testidentity;
+        }
     }
-
-    if (testidentity) {
-        identity->base = testidentity;
-    }
-
     return res;
 
 }  /* resolve_identity */
@@ -1111,15 +1135,17 @@ static status_t
                          ncx_identity_t *startidentity)
 {
     status_t          res;
-
+    ncx_identity_base_t *base;
     res = NO_ERR;
 
     /* check if there is a base statement, and if it leads
      * back to startidentity or not
      */
-    if (!identity->base) {
-        res = NO_ERR;
-    } else if (identity->base == startidentity) {
+    for(base=(ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ);
+        base!=NULL;
+        base=(ncx_identity_base_t *)dlq_nextEntry(base)) {
+
+    if (base->identity == startidentity) {
         res = ERR_NCX_DEF_LOOP;
         startidentity->res = res;
         log_error("\nError: identity base loop detected for '%s' "
@@ -1128,15 +1154,16 @@ static status_t
                   identity->name);
         tkc->curerr = &startidentity->tkerr;
         ncx_print_errormsg(tkc, mod, res);
-    } else if (identity->base->res != ERR_NCX_DEF_LOOP) {
+    } else if (base->identity->res != ERR_NCX_DEF_LOOP) {
         res = check_identity_loop(tkc, mod, 
-                                  identity->base,
+                                  base->identity,
                                   startidentity);
         if (res == NO_ERR) {
             /* thread the idlink into the base identifier */
-            dlq_enque(&identity->idlink, &identity->base->childQ);
-            identity->idlink.inq = TRUE;
+            dlq_enque(&base->idlink, &base->identity->childQ);
+            base->idlink.inq = TRUE;
         }
+    }
     }
 
     return res;

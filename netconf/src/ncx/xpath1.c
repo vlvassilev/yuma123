@@ -43,6 +43,7 @@ date         init     comment
 #include "ncx_feature.h"
 #include "ncx_num.h"
 #include "obj.h"
+#include "val123.h"
 #include "tk.h"
 #include "typ.h"
 #include "xpath.h"
@@ -4487,21 +4488,6 @@ static xpath_result_t *
 
 }  /* feature_enabled_fn */
 
-bool val123_is_identity_derived_from(val_value_t* idref_val, const ncx_identity_t * identity, const ncx_identity_t *identity_base)
-{
-    assert(identity);
-    assert(identity_base);
-    identity=identity->base;
-
-    while (identity) {
-        if (identity == identity_base) {
-            return TRUE;
-        } else {
-            identity = identity->base;
-        }
-    }
-    return FALSE;
-}
 
 static xpath_result_t *
     derived_from_common (xpath_pcb_t *pcb,
@@ -4553,7 +4539,7 @@ static xpath_result_t *
         if (val && val->btyp==NCX_BT_IDREF) {
             /* all nodes in the nodeset must be leafs of type identityref with bases parents of identity */
             if((or_self_flag && val->v.idref.identity==identity_base) ||
-                val123_is_identity_derived_from(val, val->v.idref.identity, identity_base)) {
+                ncx123_identity_is_derived_from(val->v.idref.identity, identity_base)) {
                 continue;
             } else {
                 result->r.boo = FALSE;
@@ -8889,6 +8875,8 @@ status_t
     pcb->val_docroot = NULL;
     pcb->context.node.objptr = NULL;
     pcb->orig_context.node.objptr = NULL;
+    pcb->context.node.valptr = NULL;
+    pcb->orig_context.node.valptr = NULL;
     pcb->parseres = NO_ERR;
 
     if (pcb->source == XP_SRC_INSTANCEID) {
@@ -9034,6 +9022,8 @@ status_t
 
     pcb->context.node.objptr = get_context_objnode(obj);
     pcb->orig_context.node.objptr = pcb->context.node.objptr;
+    pcb->context.node.valptr = NULL;
+    pcb->orig_context.node.valptr = NULL;
 
     rootdone = FALSE;
     if (obj_is_root(obj) || 

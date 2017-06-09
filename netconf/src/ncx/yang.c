@@ -1040,7 +1040,7 @@ status_t
     retres = NO_ERR;
 
     if (dupflag) {
-        if (*dupflag) {
+        if ((mod->langver == NCX_YANG_VERSION10) && *dupflag) {
             retres = ERR_NCX_ENTRY_EXISTS;
             ncx_print_errormsg(tkc, mod, retres);
             save = FALSE;

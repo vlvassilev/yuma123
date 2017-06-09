@@ -142,3 +142,54 @@ val_value_t* val123_get_next_obj_instance(val_value_t* top_val, val_value_t* cur
     return NULL;
 }
 
+ncx_identity_t* ncx123_identity_get_first_base(const ncx_identity_t* identity)
+{
+    ncx_identity_base_t *base;
+    base=(ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ);
+    if(base) {
+        return base->identity;
+    } else {
+        return NULL;
+    }
+}
+
+ncx_identity_t* ncx123_identity_get_next_base(const ncx_identity_t* identity, const ncx_identity_t *identity_base)
+{
+    ncx_identity_base_t *base;
+    ncx_identity_base_t *next_base;
+    assert(identity);
+    assert(identity_base);
+    base=(ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ);
+    assert(base);
+    for(;base!=NULL;base=(ncx_identity_base_t *)dlq_nextEntry(base)) {
+        if(base->identity==identity_base) {
+            next_base=(ncx_identity_base_t *)dlq_nextEntry(base);
+            if(next_base) {
+                return next_base->identity;
+            } else {
+                return NULL;
+            }
+        }
+    }
+    assert(NULL); /*never found identity_base in baseQ*/
+}
+
+bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_identity_t *identity_base)
+{
+    ncx_identity_t * b;
+    assert(identity);
+    assert(identity_base);
+
+    for(b = ncx123_identity_get_first_base(identity);
+        b != NULL;
+        b = ncx123_identity_get_next_base(identity, b)) {
+        if(identity_base==b) {
+            return TRUE;
+        }
+        if(ncx123_identity_is_derived_from(b,identity_base)) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}

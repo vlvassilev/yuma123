@@ -61,6 +61,7 @@ date         init     comment
 #include "tk.h"
 #include "typ.h"
 #include "val.h"
+#include "val123.h"
 #include "val_util.h"
 #include "xml_util.h"
 #include "xml_wr.h"
@@ -2328,7 +2329,6 @@ status_t
     const xmlChar         *str, *modname;
     ncx_module_t          *mod;
     const ncx_identity_t  *identity;
-    const ncx_identity_t  *identity_match;
     boolean                found;
 
 #ifdef DEBUG
@@ -2393,13 +2393,13 @@ status_t
      * has an ancestor-or-self node that is the same base
      * as the base specified in the typdef
      */
-    identity_match=identity;
-    while (identity && !found) {
-        if (identity == idref->base) {
-            found = TRUE;
-        } else {
-            identity = identity->base;
-        }
+
+    if(identity == idref->base) {
+        found = TRUE;
+    }
+
+    if(ncx123_identity_is_derived_from(identity, idref->base)) {
+        found = TRUE;
     }
 
     if (found) {
@@ -2407,7 +2407,7 @@ status_t
             *name = str;
         }
         if (id) {
-            *id = identity_match;
+            *id = identity;
         }
         return NO_ERR;
     }

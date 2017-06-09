@@ -3261,8 +3261,8 @@ ncx_identity_t *
     memset(identity, 0x0, sizeof(ncx_identity_t));
 
     dlq_createSQue(&identity->childQ);
+    dlq_createSQue(&identity->baseQ);
     dlq_createSQue(&identity->appinfoQ);
-    identity->idlink.identity = identity;
     return identity;
 
 } /* ncx_new_identity */
@@ -3280,7 +3280,23 @@ void
 {
     assert ( identity && " param identity is NULL");
 
-    /*** !!! ignoring the back-ptr Q threading the
+    if (identity->name) {
+        m__free(identity->name);
+    }
+
+    if (!identity->isroot) {
+        ncx_identity_base_t * base;
+        for(base = (ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ);
+            base!=NULL;
+            base=(ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ)) {
+
+            if(base->prefix) {
+                m__free(base->prefix);
+            }
+            if(base->name) {
+                m__free(base->name);
+            }
+    /*** !!! ignoring the back-ptr childQ threading the
      *** !!! idlink headers; do not delete from system
      *** !!! until some way to clear all or issue an error
      *** !!! is done.  Assume this free is part of the 
@@ -3289,19 +3305,16 @@ void
      *** !!! Clearing out the back-ptrs in case the heap 'free'
      *** !!! function does not set these fields to garbage
      ***/
-    identity->idlink.inq = FALSE;
-    identity->idlink.identity = NULL;
-
-    if (identity->name) {
-        m__free(identity->name);
-    }
-
-    if (identity->baseprefix) {
-        m__free(identity->baseprefix);
-    }
-
-    if (identity->basename) {
-        m__free(identity->basename);
+            if(base->idlink.inq) {
+                dlq_remove(&base->idlink);
+                base->idlink.inq = FALSE;
+                base->idlink.identity = NULL;
+            }
+            dlq_remove(base);
+            m__free(base);
+        }
+    } else {
+        assert(dlq_firstEntry(&identity->baseQ)==NULL);
     }
 
     if (identity->descr) {

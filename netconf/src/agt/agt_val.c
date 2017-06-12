@@ -3718,7 +3718,7 @@ static status_t
 
         if (res == NO_ERR) {
             assert( scb && "scb is NULL!" );
-            result = xpath1_eval_xmlexpr(scb->reader, val->xpathpcb, 
+            result = xpath1_eval_expr(val->xpathpcb,
                                          val, root, FALSE, TRUE, &res);
             if (result && res == NO_ERR) {
                 /* check result: the string value in 'val'

@@ -11,10 +11,10 @@ netconf/modules \
 example-modules/helloworld \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
-netconf/src/yangdump \
-netconf/src/yangdiff \
 netconf/man
 
+#netconf/src/yangdiff \
+#netconf/src/yangdump \
 #netconf/test
 
 #netconf/src/yangrpc/yanghttpd

@@ -1818,6 +1818,13 @@ static status_t
                 }
                 continue;
             }
+            if(obj_is_mandatory(parm) && parm->augobj!=NULL && parm->augobj->when) {
+                /* mandatory object added through augment YANG 1.1 and above */
+                if (oldvalset != NULL) {
+                    res = clone_old_parm(oldvalset, valset, parm);
+                }
+                continue;
+            }
         }
 
         set_completion_state(&server_cb->completion_state, rpc, parm,

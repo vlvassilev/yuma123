@@ -840,15 +840,19 @@ static status_t
         boolean whentest = xpath_cvt_boolean(result);
         *condresult = whentest;
         if (LOGDEBUG3) {
+            char* pathbuff;
+            status_t res;
+            res = val_gen_instance_id(NULL, val, NCX_IFMT_XPATH1, (xmlChar **) &pathbuff);
             if (whentest) {
                 log_debug3("\nval: when test '%s' OK for node '%s' with "
                            "context '%s'", whenstmt->exprstr, 
-                           val->name, context->name);
+                           pathbuff, context->name);
             } else {
                 log_debug3("\nval: when test '%s' failed for node '%s' "
                            "with context '%s'", whenstmt->exprstr, 
-                           val->name, context->name);
+                           pathbuff, context->name);
             }
+            free(pathbuff);
         }
     }
     xpath_free_result(result);
@@ -2139,7 +2143,7 @@ status_t
             for (xptr = obj_first_xpath_ptr(testobj);
                  xptr; xptr = obj_next_xpath_ptr(xptr)) {
                 cnt++;
-                res = check_when_stmt(val, valroot, val->parent, 
+                res = check_when_stmt(val, valroot, val,
                                       xptr->xpath, condresult);
                 if (res != NO_ERR || !*condresult) {
                     if (whencount) {

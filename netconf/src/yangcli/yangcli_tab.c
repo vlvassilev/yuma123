@@ -266,6 +266,28 @@ static status_t
     btyp = obj_get_basetype(parmobj);
 
     switch (btyp) {
+    case NCX_BT_IDREF:
+        {
+            const typ_idref_t *idref;
+            ncx_module_t *mod;
+            ncx_identity_t* identity;
+            idref = typ_get_cidref(typdef);
+
+            for (mod = ncx_get_first_session_module();
+                 mod != NULL;
+                 mod = ncx_get_next_session_module(mod)) {
+                 for(identity=(ncx_identity_t*)dlq_firstEntry(&mod->identityQ);
+                     identity!=NULL;
+                     identity=(ncx_identity_t*)dlq_nextEntry(identity)) {
+                     if(ncx123_identity_is_derived_from(identity, idref->base)) {
+                         res = fill_one_parm_completion(cpl, comstate, line,
+                                                        (const char *)identity->name,
+                                                        word_start, word_end, parmlen);
+                     }
+                 }
+            }
+        }
+	return res;
     case NCX_BT_ENUM:
     case NCX_BT_BITS:
         for (typenum = typ_first_enumdef(basetypdef);
@@ -292,8 +314,6 @@ static status_t
         }
         return res;
     case NCX_BT_INSTANCE_ID:
-        break;
-    case NCX_BT_IDREF:
         break;
     default:
         break;

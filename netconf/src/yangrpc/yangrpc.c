@@ -79,9 +79,6 @@
 static dlq_hdr_t      server_cbQ;
 
 
-/* netconf.yang file used for quicker lookups */
-static ncx_module_t  *netconf_mod;
-
 /* need to save CLI parameters: other vars are back-pointers */
 static val_value_t   *mgr_cli_valset;
 
@@ -572,97 +569,6 @@ static void
     server_cb->use_xmlheader = use_xmlheader;
 
 }  /* update_server_cb_vars */
-
-/********************************************************************
- * FUNCTION load_base_schema 
- * 
- * Load the following YANG modules:
- *   yangcli
- *   yuma-netconf
- *
- * RETURNS:
- *     status
- *********************************************************************/
-static status_t
-    load_base_schema (void)
-{
-    status_t   res;
-
-    log_debug2("\nyangcli: Loading NCX yangcli-cli Parmset");
-
-    /* load in the server boot parameter definition file */
-    res = ncxmod_load_module(YANGCLI_MOD, 
-                             NULL, 
-                             NULL,
-                             &yangcli_mod);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_NETCONF, 
-                             NULL, 
-                             NULL,
-                             &netconf_mod);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    /* load the netconf-state module to use
-     * the <get-schema> operation 
-     */
-    res = ncxmod_load_module(NCXMOD_IETF_NETCONF_STATE, 
-                             NULL,
-                             NULL,
-                             NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-
-    return NO_ERR;
-
-}  /* load_base_schema */
-
-/********************************************************************
- * FUNCTION load_core_schema 
- * 
- * Load the following YANG modules:
- *   yuma-xsd
- *   yuma-types
- *
- * RETURNS:
- *     status
- *********************************************************************/
-static status_t
-    load_core_schema (void)
-{
-    status_t   res;
-
-    log_debug2("\nNcxmgr: Loading NETCONF Module");
-
-    /* load in the XSD data types */
-    res = ncxmod_load_module(XSDMOD, 
-                             NULL, 
-                             NULL,
-                             NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    /* load in the NCX data types */
-    res = ncxmod_load_module(NCXDTMOD, 
-                             NULL, 
-                             NULL,
-                             NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    return NO_ERR;
-
-}  /* load_core_schema */
-
 
 /********************************************************************
  * FUNCTION init_system_vars
@@ -1841,6 +1747,98 @@ static void
 
 }  /* namespace_mismatch_warning */
 
+/********************************************************************
+* FUNCTION autoload_blocking_get_modules
+* *
+* Go through all the search result records and 
+* make sure all files are present.  Try to use the
+* <get-schema> operation to fill in any missing modules
+*
+* INPUTS:
+*   server_cb == server session control block to use
+*   scb == session control block to use
+*
+* OUTPUTS:
+*   $HOME/.yuma/tmp/<progdir>/<sesdir>/ filled with
+*   the the specified YANG files that are ertrieved from
+*   the device with <get-schema>
+*   
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    autoload_blocking_get_modules (server_cb_t *server_cb,
+                                ses_cb_t *scb)
+{
+    ncxmod_search_result_t  *searchresult;
+    status_t                 res;
+    obj_template_t          *rpc;
+    val_value_t             *reqdata;
+    val_value_t             *reply_val;
+
+#ifdef DEBUG
+    if (!server_cb || !scb) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    /* find first file that needs to be retrieved with get-schema */
+    for (searchresult = (ncxmod_search_result_t *)
+             dlq_firstEntry(&server_cb->searchresultQ);
+         searchresult != NULL;
+         searchresult = (ncxmod_search_result_t *)
+             dlq_nextEntry(searchresult)) {
+
+        /* skip found entries */
+        if (searchresult->source != NULL) {
+            continue;
+        }
+
+        /* skip found modules with errors */          
+        if (!(searchresult->res == ERR_NCX_WRONG_VERSION ||
+              searchresult->res == ERR_NCX_MOD_NOT_FOUND)) {
+            continue;
+        }
+        server_cb->cursearchresult = searchresult;
+#if 0
+        res = send_get_schema_to_server(server_cb,
+                                       scb,
+                                       searchresult->module,
+                                       searchresult->revision);
+        if (res == NO_ERR) {
+            server_cb->command_mode = CMD_MODE_AUTOLOAD;
+            server_cb->cursearchresult = searchresult;
+        }
+        /* exit loop if we get here */
+#else
+	printf("<get-schema>:%s\n",searchresult->module);
+        res = make_get_schema_reqdata(server_cb,
+                                      scb,
+                                      searchresult->module,
+                                      searchresult->revision,
+                                      &rpc,
+                                      &reqdata);
+        assert(res == NO_ERR);
+        res = yangrpc_exec((yangrpc_cb_ptr_t) server_cb, reqdata, &reply_val);
+        res = get_schema_reply_to_temp_filcb(server_cb, (mgr_scb_t *)scb->mgrcb /*mscb*/, searchresult->module, searchresult->revision, reply_val);
+        if (res != NO_ERR) {
+            log_error("\nError: save <get-schema> content "
+                      " for module '%s' revision '%s' failed (%s)",
+                      searchresult->module,
+                      (searchresult->revision) ? searchresult->revision : EMPTY_STRING,
+                      get_error_string(res));
+            searchresult->res = res;
+        }
+	continue;
+#endif
+    }
+
+    return res;
+
+}  /* autoload_blocking_get_modules */
+
 
 /********************************************************************
 * FUNCTION check_module_capabilities
@@ -1969,20 +1967,6 @@ static void
                                            mod->ns);
                 /* force a new search or auto-load */
                 mod = NULL;
-            }
-        }
-
-        if (mod == NULL && module != NULL) {
-            /* check if there is a module in the modlibQ that
-             * has the same namespace URI as 'namespacestr' base
-             */
-            libresult = ncxmod_find_search_result(&modlibQ,
-                                                  NULL,
-                                                  NULL,
-                                                  namespacestr);
-            if (libresult != NULL) {
-                module = libresult->module;
-                revision = libresult->revision;
             }
         }
 
@@ -2159,10 +2143,10 @@ static void
         retrieval_supported &&
         server_cb->autoload) {
 
-        /* compile phase will be delayed until autoload
-         * get-schema operations are done
+        /* blocking autoload
+         * get-schema operations until done
          */
-        res = autoload_start_get_modules(server_cb, scb);
+        res = autoload_blocking_get_modules(server_cb, scb);
         if (res != NO_ERR) {
             log_error("\nError: autoload get modules failed (%s)",
                       get_error_string(res));
@@ -2182,7 +2166,7 @@ static void
                       get_error_string(res));
         }
     }
-
+    assert(res==NO_ERR);
 } /* check_module_capabilities */
 
 status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key, char* extra_args, yangrpc_cb_ptr_t* yangrpc_cb_ptr)

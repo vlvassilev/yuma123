@@ -72,15 +72,16 @@
 
 /***************** GLOBAL VARS ****************/
 
-/* yangcli.yang file used for quicker lookups */
+/* yangcli.yang module */
 ncx_module_t  *yangcli_mod;
+
+/* yangcli-ex.yang module */
+ncx_module_t  *yangcli_ex_mod;
+
+/* netconf.yang module */
+ncx_module_t  *netconf_mod;
+
 #if 0
-/* yangcli-ex.yang file used for quicker lookups */
-static ncx_module_t  *yangcli_ex_mod;
-
-/* netconf.yang file used for quicker lookups */
-static ncx_module_t  *netconf_mod;
-
 /* need to save CLI parameters: other vars are back-pointers */
 static val_value_t   *mgr_cli_valset;
 

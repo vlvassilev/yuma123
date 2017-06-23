@@ -751,6 +751,33 @@ extern void
                          boolean isfirst,
                          help_mode_t mode);
 
+/********************************************************************
+ * FUNCTION load_base_schema 
+ * 
+ * Load the following YANG modules:
+ *   yangcli
+ *   yuma-netconf
+ *
+ * RETURNS:
+ *     status
+ *********************************************************************/
+extern status_t
+    load_base_schema (void);
+
+
+/********************************************************************
+ * FUNCTION load_core_schema 
+ * 
+ * Load the following YANG modules:
+ *   yuma-xsd
+ *   yuma-types
+ *
+ * RETURNS:
+ *     status
+ *********************************************************************/
+extern status_t
+    load_core_schema (void);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -43,112 +43,39 @@ date         init     comment
 #include <ctype.h>
 #include "libtecla.h"
 
-#ifndef _H_procdefs
 #include "procdefs.h"
-#endif
-
-#ifndef _H_log
 #include "log.h"
-#endif
-
-#ifndef _H_mgr
 #include "mgr.h"
-#endif
-
-#ifndef _H_mgr_ses
 #include "mgr_ses.h"
-#endif
-
-#ifndef _H_ncx
 #include "ncx.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include "ncx_feature.h"
-#endif
-
-#ifndef _H_ncx_list
 #include "ncx_list.h"
-#endif
-
-#ifndef _H_ncxconst
 #include "ncxconst.h"
-#endif
-
-#ifndef _H_ncxmod
 #include "ncxmod.h"
-#endif
-
-#ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_op
 #include "op.h"
-#endif
-
-#ifndef _H_rpc
 #include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
 #include "rpc_err.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val_util
 #include "val_util.h"
-#endif
-
-#ifndef _H_var
 #include "var.h"
-#endif
-
-#ifndef _H_xmlns
 #include "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include "xml_val.h"
-#endif
-
-#ifndef _H_yangconst
 #include "yangconst.h"
-#endif
-
-#ifndef _H_yangcli
 #include "yangcli.h"
-#endif
-
-#ifndef _H_yangcli_autoload
 #include "yangcli_autoload.h"
-#endif
-
-#ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
-#endif
-
-#ifndef _H_yangcli_util
 #include "yangcli_util.h"
-#endif
 
 #ifdef DEBUG
 #define YANGCLI_AUTOLOAD_DEBUG 1
 #endif
 
-
 /********************************************************************
-* FUNCTION send_get_schema_to_server
+* FUNCTION make_get_schema_reqdata
 * 
-* Send an <get-schema> operation to the specified server
-* in MGR_IO_ST_AUTOLOAD state
+* Allocate and initialize reqdata value for <get-schema>
 *
 * format will be hard-wired to yang
 *
@@ -159,25 +86,25 @@ date         init     comment
 *   revision == revision to get
 *
 * OUTPUTS:
-*    server_cb->state may be changed or other action taken
+*    out_rpc == obj_template_t** of the get-schema RPC
+*    out_reqdata == val_value_t** of the get-schema data value
 *
 * RETURNS:
 *    status
 *********************************************************************/
-static status_t
-    send_get_schema_to_server (server_cb_t *server_cb,
+status_t make_get_schema_reqdata(server_cb_t *server_cb,
                               ses_cb_t *scb,
                               const xmlChar *module,
-                              const xmlChar *revision)
+                              const xmlChar *revision,
+                              obj_template_t** out_rpc,
+                              val_value_t** out_reqdata)
 {
     ncx_module_t          *mod;
     obj_template_t        *rpc, *input, *parmobj;
     val_value_t           *reqdata, *parmval;
-    mgr_rpc_req_t         *req;
     status_t               res;
     xmlns_id_t             nsid;
 
-    req = NULL;
     reqdata = NULL;
     res = NO_ERR;
     input = NULL;
@@ -251,6 +178,51 @@ static status_t
     if (res != NO_ERR) {
         val_free_value(reqdata);
         return res;
+    }
+
+    *out_rpc=rpc;
+    *out_reqdata=reqdata;
+
+    return res;
+
+} /* make_get_schema_reqdata */
+
+/********************************************************************
+* FUNCTION send_get_schema_to_server
+* 
+* Send an <get-schema> operation to the specified server
+* in MGR_IO_ST_AUTOLOAD state
+*
+* format will be hard-wired to yang
+*
+* INPUTS:
+*   server_cb == server control block to use
+*   scb == session control block to use
+*   module == module to get
+*   revision == revision to get
+*
+* OUTPUTS:
+*    server_cb->state may be changed or other action taken
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    send_get_schema_to_server (server_cb_t *server_cb,
+                              ses_cb_t *scb,
+                              const xmlChar *module,
+                              const xmlChar *revision)
+{
+    status_t              res;
+    obj_template_t*       rpc;
+    val_value_t*          reqdata;
+    mgr_rpc_req_t         *req;
+
+    req = NULL;
+
+    res = make_get_schema_reqdata(server_cb, scb, module, revision, &rpc, &reqdata);
+    if(res!=NO_ERR) {
+        return NO_ERR;
     }
 
     /* allocate an RPC request and send it */
@@ -412,28 +384,6 @@ static boolean
 
 }  /* reset_feature */
 
-
-/********************************************************************
- * FUNCTION copy_module_to_tempdir
- * 
- * Copy the source file to a different location and possibly
- * change the filename
- *
- * INPUTS:
- *   mscb == manager session control block to use
- *   module == module name to copy
- *   revision == revision date to copy
- *   isyang == TRUE if .yang extension needed
- *             FALSE if .yin extension needed
- *   res == address of return status
- *
- * OUTPUTS:
- *   *res == return status
- *
- * RETURNS:
- *   malloced and filled in temp file control block
- *   NULL if some error (see *res)
- *********************************************************************/
 static ncxmod_temp_filcb_t *
     get_new_temp_filcb (mgr_scb_t *mscb,
                         const xmlChar *module,
@@ -488,6 +438,44 @@ static ncxmod_temp_filcb_t *
     return temp_filcb;
 
 }   /* get_new_temp_filcb */
+
+status_t get_schema_reply_to_temp_filcb(server_cb_t * server_cb, mgr_scb_t *mscb, const xmlChar* module, const xmlChar* revision, val_value_t* reply)
+{
+    ncxmod_search_result_t  *searchresult;
+    ncxmod_temp_filcb_t     *temp_filcb;
+    val_value_t             *dataval;
+    status_t                 res;
+
+    /* get the data node out of the reply;
+     * it contains the requested YANG module
+     * in raw text form
+     */
+    dataval = val_find_child(reply, NULL, NCX_EL_DATA);
+    if (dataval == NULL) {
+        res = SET_ERROR(ERR_NCX_DATA_MISSING);
+    } else {
+        /* get a file handle in the temp session
+         * directory
+         */
+        temp_filcb = get_new_temp_filcb(mscb,
+                                        module,
+                                        revision,
+                                        TRUE,   /* isyang */
+                                        &res);
+        if (temp_filcb != NULL) {
+           /* copy the value node to the work directory
+            * as a YANG file
+            */
+            res = save_schema_file(server_cb,
+                                   module,
+                                   revision,
+                                   temp_filcb->source,
+                                   dataval);
+        }
+    }
+
+    return res;
+}
 
 
 /********************************************************************
@@ -1038,9 +1026,7 @@ status_t
 {
     mgr_scb_t               *mscb;
     ncxmod_search_result_t  *searchresult;
-    ncxmod_temp_filcb_t     *temp_filcb;
     const xmlChar           *module, *revision;
-    val_value_t             *dataval;
     status_t                 res;
     boolean                  done;
 
@@ -1078,34 +1064,7 @@ status_t
             }
         }
     } else {
-        /* get the data node out of the reply;
-         * it contains the requested YANG module
-         * in raw text form
-         */
-        dataval = val_find_child(reply, NULL, NCX_EL_DATA);
-        if (dataval == NULL) {
-            res = SET_ERROR(ERR_NCX_DATA_MISSING);
-        } else {
-            /* get a file handle in the temp session
-             * directory
-             */
-            temp_filcb = get_new_temp_filcb(mscb,
-                                            module,
-                                            revision,
-                                            TRUE,   /* isyang */
-                                            &res);
-            if (temp_filcb != NULL) {
-                /* copy the value node to the work directory
-                 * as a YANG file
-                 */
-                res = save_schema_file(server_cb,
-                                       module,
-                                       revision,
-                                       temp_filcb->source,
-                                       dataval);
-            }
-        }
-
+        res = get_schema_reply_to_temp_filcb(server_cb, mscb, module, revision, reply);
         if (res != NO_ERR) {
             log_error("\nError: save <get-schema> content "
                       " for module '%s' revision '%s' failed (%s)",
@@ -1114,6 +1073,7 @@ status_t
                       get_error_string(res));
             server_cb->cursearchresult->res = res;
         }
+
     }
 
     /* find next file that needs to be retrieved with get-schema */

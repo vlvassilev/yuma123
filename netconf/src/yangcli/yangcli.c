@@ -137,12 +137,6 @@ static dlq_hdr_t      server_cbQ;
  */
 static server_cb_t    *cur_server_cb;
 
-/* yangcli-ex.yang file used for quicker lookups */
-static ncx_module_t  *yangcli_ex_mod;
-
-/* netconf.yang file used for quicker lookups */
-static ncx_module_t  *netconf_mod;
-
 /* need to save CLI parameters: other vars are back-pointers */
 static val_value_t   *mgr_cli_valset;
 
@@ -2464,7 +2458,7 @@ static status_t
  * RETURNS:
  *     status
  *********************************************************************/
-static status_t
+status_t
     load_base_schema (void)
 {
     status_t   res;
@@ -2524,7 +2518,7 @@ static status_t
  * RETURNS:
  *     status
  *********************************************************************/
-static status_t
+status_t
     load_core_schema (void)
 {
     status_t   res;

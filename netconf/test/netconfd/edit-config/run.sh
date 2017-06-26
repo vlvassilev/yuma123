@@ -20,11 +20,10 @@ else
   /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
-cd ..
 sleep 3
 python session.ncclient.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 python session.duplicated-list-entry.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
-python session.replace-leaf.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+python session.replace-leaf.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 kill -KILL $SERVER_PID
 cat tmp/server.log
 sleep 1

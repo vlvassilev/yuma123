@@ -52,7 +52,6 @@ def main():
 
 
 	ok = yangcli(conn, '''delete /interfaces''').xpath('./ok')
-	assert(len(ok)==1)
 
 	ok = yangcli(conn, '''commit''').xpath('./ok')
 	assert(len(ok)==1)

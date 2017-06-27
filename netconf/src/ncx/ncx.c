@@ -3278,8 +3278,8 @@ ncx_identity_t *
 void 
     ncx_free_identity (ncx_identity_t *identity)
 {
+    ncx_idlink_t *idlink;
     assert ( identity && " param identity is NULL");
-
     if (identity->name) {
         m__free(identity->name);
     }
@@ -3290,12 +3290,6 @@ void
             base!=NULL;
             base=(ncx_identity_base_t *)dlq_firstEntry(&identity->baseQ)) {
 
-            if(base->prefix) {
-                m__free(base->prefix);
-            }
-            if(base->name) {
-                m__free(base->name);
-            }
     /*** !!! ignoring the back-ptr childQ threading the
      *** !!! idlink headers; do not delete from system
      *** !!! until some way to clear all or issue an error
@@ -3310,11 +3304,25 @@ void
                 base->idlink.inq = FALSE;
                 base->idlink.identity = NULL;
             }
+            if(base->prefix) {
+                m__free(base->prefix);
+            }
+            if(base->name) {
+                m__free(base->name);
+            }
+
             dlq_remove(base);
             m__free(base);
         }
     } else {
         assert(dlq_firstEntry(&identity->baseQ)==NULL);
+    }
+    for(idlink=(ncx_idlink_t *)dlq_firstEntry(&identity->childQ);
+        idlink!=NULL;
+        idlink=(ncx_idlink_t *)dlq_firstEntry(&identity->childQ)) {
+        assert(idlink->inq==TRUE);
+        dlq_remove(idlink);
+        idlink->inq=FALSE;
     }
 
     if (identity->descr) {

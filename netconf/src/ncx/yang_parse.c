@@ -1137,7 +1137,6 @@ static status_t
     status_t          res;
     ncx_identity_base_t *base;
     res = NO_ERR;
-
     /* check if there is a base statement, and if it leads
      * back to startidentity or not
      */
@@ -1158,12 +1157,21 @@ static status_t
         res = check_identity_loop(tkc, mod, 
                                   base->identity,
                                   startidentity);
-        if (res == NO_ERR) {
-            /* thread the idlink into the base identifier */
-            dlq_enque(&base->idlink, &base->identity->childQ);
-            base->idlink.inq = TRUE;
+        if(identity==startidentity) {
+            /* parent base */
+#if 1
+            if (res == NO_ERR) {
+                /* add idlink entry to */
+                /* thread the idlink into the base identifier */
+                dlq_enque(&base->idlink, &base->identity->childQ);
+                base->idlink.inq = TRUE;
+                base->idlink.identity = identity;
+            }
+#endif
         }
     }
+
+
     }
 
     return res;

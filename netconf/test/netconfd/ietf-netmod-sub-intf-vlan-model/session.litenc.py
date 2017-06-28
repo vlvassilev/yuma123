@@ -12,8 +12,12 @@ def main():
 	print("""
 #Description: Demonstrate that duplicated list entries in edit-config are detected.
 #Procedure:
-#1 - Create interface "foo" and commit. Verify commit succeeds.
-#2 - Create 2x duplicate interface "bar" and commit. Verify commit fails.
+#Description: Using sub-interfaces configure vlan bridge.
+#Procedure:
+#1 - Create interface "xe0", "ge0", "ge1" of type=ethernetCsmacd.
+#2 - Create sub-interface "xe0-green" - s-vlan-id=1000, "ge1-green" - c-vlan-id=10 of type=ethSubInterface.
+#3 - Create VLAN bridge with "ge0", "ge1-green" and "xe0-green".
+#4 - Commit.
 """)
 
 	parser = argparse.ArgumentParser()
@@ -85,89 +89,115 @@ def main():
    </target>
    <default-operation>merge</default-operation>
    <test-option>set</test-option>
-   <config>
-     <vlans xmlns="http://example.com/ns/vlans">
-       <vlan>
-         <name>green</name>
-         <interface>ge0-green</interface>
-         <interface>ge1-green</interface>
-         <interface>xe0-green</interface>
-       </vlan>
-     </vlans>
-     <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-       <interface 
-         xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-         nc:operation="create">
-         <name>ge0-green</name>
-         <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:l2vlan</type>
-         <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
-           <vlan xmlns="urn:ietf:params:xml:ns:yang:ietf-if-l3-vlan">
-             <tag>
-               <index>0</index>
-               <dot1q-tag>
-                 <tag-type
-                   xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
-                 <vlan-id>5</vlan-id>
-               </dot1q-tag>
-             </tag>
-           </vlan>
-         </encapsulation>
-         <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
-         <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">ge0</parent-interface>
-       </interface>
-       <interface 
-         xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-         nc:operation="create">
-         <name>ge1-green</name>
-         <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:l2vlan</type>
-         <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
-           <vlan xmlns="urn:ietf:params:xml:ns:yang:ietf-if-l3-vlan">
-             <tag>
-               <index>0</index>
-               <dot1q-tag>
-                 <tag-type
-                   xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
-                 <vlan-id>5</vlan-id>
-               </dot1q-tag>
-             </tag>
-           </vlan>
-         </encapsulation>
-         <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
-         <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">ge1</parent-interface>
-       </interface>
-       <interface 
-         xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-         nc:operation="create">
-         <name>xe0-green</name>
-         <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:l2vlan</type>
-         <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
-           <vlan xmlns="urn:ietf:params:xml:ns:yang:ietf-if-l3-vlan">
-             <tag>
-               <index>0</index>
-               <dot1q-tag>
-                 <tag-type
-                   xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:s-vlan</tag-type>
-                 <vlan-id>500</vlan-id>
-               </dot1q-tag>
-             </tag>
-             <tag>
-               <index>1</index>
-               <dot1q-tag>
-                 <tag-type
-                   xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
-                 <vlan-id>5</vlan-id>
-               </dot1q-tag>
-             </tag>
-           </vlan>
-         </encapsulation>
-         <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
-         <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">xe0</parent-interface>
-       </interface>
-     </interfaces>
-   </config>
+  <config>
+  <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+    <interface>
+      <name>ge0</name>
+      <type
+        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+    </interface>
+    <interface>
+      <name>ge1</name>
+      <type
+        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+    </interface>
+    <interface>
+      <name>ge1-green</name>
+      <type
+        xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:ethSubInterface</type>
+      <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
+        <flexible xmlns="urn:ietf:params:xml:ns:yang:ietf-flexible-encapsulation">
+          <match>
+            <vlan-tagged>
+              <tag>
+                <index>0</index>
+                <dot1q-tag>
+                  <tag-type
+                    xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
+                  <vlan-id>10</vlan-id>
+                </dot1q-tag>
+              </tag>
+            </vlan-tagged>
+          </match>
+        </flexible>
+      </encapsulation>
+      <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
+      <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">ge0</parent-interface>
+    </interface>
+    <interface>
+      <name>xe0</name>
+      <type
+        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+    </interface>
+    <interface>
+      <name>xe0-green</name>
+      <type
+        xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:ethSubInterface</type>
+      <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
+        <flexible xmlns="urn:ietf:params:xml:ns:yang:ietf-flexible-encapsulation">
+          <match>
+            <vlan-tagged>
+              <tag>
+                <index>0</index>
+                <dot1q-tag>
+                  <tag-type
+                    xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:s-vlan</tag-type>
+                  <vlan-id>1000</vlan-id>
+                </dot1q-tag>
+              </tag>
+            </vlan-tagged>
+          </match>
+        </flexible>
+      </encapsulation>
+      <forwarding-mode xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common" xmlns:if-cmn="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">if-cmn:layer-2-forwarding</forwarding-mode>
+      <parent-interface xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">xe0</parent-interface>
+    </interface>
+  </interfaces>
+  <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"/>
+  <vlans xmlns="http://example.com/ns/vlans">
+    <vlan>
+      <name>green</name>
+      <interface>ge0</interface>
+      <interface>ge1-green</interface>
+      <interface>xe0-green</interface>
+    </vlan>
+  </vlans>
+ </config>
  </edit-config>
 """
 	print("edit-config - create vlan ...")
+	result = conn.rpc(edit_config_rpc)
+	print lxml.etree.tostring(result)
+	ok = result.xpath('ok')
+	print result
+	print ok
+	print lxml.etree.tostring(result)
+	assert(len(ok)==1)
+
+	commit_rpc = """
+<commit/>
+"""
+	print("commit ...")
+	result = conn.rpc(commit_rpc)
+	print lxml.etree.tostring(result)
+	assert(len(ok)==1)
+
+	edit_config_rpc = """
+<edit-config>
+   <target>
+     <candidate/>
+   </target>
+   <default-operation>merge</default-operation>
+   <test-option>set</test-option>
+ <config>
+  <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete">
+  </interfaces>
+  <vlans xmlns="http://example.com/ns/vlans" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete">
+  </vlans>
+ </config>
+ </edit-config>
+"""
+	print("edit-config - clean-up ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
 	ok = result.xpath('ok')

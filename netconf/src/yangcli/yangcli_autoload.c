@@ -41,6 +41,7 @@ date         init     comment
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 #include "libtecla.h"
 
 #include "procdefs.h"
@@ -116,63 +117,45 @@ status_t make_get_schema_reqdata(server_cb_t *server_cb,
 
     /* get the <get-schema> input template */
     rpc = ncx_find_rpc(mod,  NCX_EL_GET_SCHEMA);
-    if (rpc) {
-        nsid = obj_get_nsid(rpc);
-        input = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    }
+    assert(rpc);
+    nsid = obj_get_nsid(rpc);
+    input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    assert(input);
 
-    if (!input) {
-        res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    } else {
-        /* construct a method + parameter tree */
-        reqdata = xml_val_new_struct(obj_get_name(rpc), 
-                                     nsid);
-        if (!reqdata) {
-            log_error("\nError allocating a new RPC request");
-            res = ERR_INTERNAL_MEM;
-        }
-    }
+    /* construct a method + parameter tree */
+    reqdata = val_new_value();
+    assert(reqdata);
+    val_init_from_template(reqdata, rpc);
 
     /* add /get-schema/input/identifier */
-    if (res == NO_ERR) {
-        parmval = xml_val_new_cstring(NCX_EL_IDENTIFIER,
-                                      nsid,
-                                      module);
-        if (parmval == NULL) {
-            res = ERR_INTERNAL_MEM;
-        } else {
-            val_add_child(parmval, reqdata);
-        }
-    }
+    parmobj = obj_find_child(input, NCXMOD_IETF_NETCONF_STATE, NCX_EL_IDENTIFIER);
+    assert(parmobj);
+    parmval = val_make_simval_obj(parmobj,
+                                  module,
+                                  &res);
+
+    assert(parmval);
+    val_add_child(parmval, reqdata);
 
     /* add /get-schema/input/version */
-    if (res == NO_ERR) {
-        parmval = xml_val_new_cstring(NCX_EL_VERSION,
-                                      nsid,
-                                      (revision) ? revision : EMPTY_STRING);
-        if (parmval == NULL) {
-            res = ERR_INTERNAL_MEM;
-        } else {
-            val_add_child(parmval, reqdata);
-        }
-    }
+    parmobj = obj_find_child(input, NCXMOD_IETF_NETCONF_STATE, NCX_EL_VERSION);
+    assert(parmobj);
+    parmval = val_make_simval_obj(parmobj,
+                                  (revision) ? revision : EMPTY_STRING,
+                                  &res);
+
+    assert(parmval);
+    val_add_child(parmval, reqdata);
 
     /* add /get-schema/input/format */
-    if (res == NO_ERR) {
-        parmobj = obj_find_child(input,
-                                 NCXMOD_IETF_NETCONF_STATE,
-                                 NCX_EL_FORMAT);
-        if (parmobj == NULL) {
-            res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-        } else {
-            parmval = val_make_simval_obj(parmobj,
-                                          (const xmlChar *)"yang",
-                                          &res);
-            if (parmval != NULL) {
-                val_add_child(parmval, reqdata);
-            }
-        }
-    }
+    parmobj = obj_find_child(input, NCXMOD_IETF_NETCONF_STATE, NCX_EL_FORMAT);
+    assert(parmobj);
+    parmval = val_make_simval_obj(parmobj,
+                                  "yang",
+                                  &res);
+
+    assert(parmval);
+    val_add_child(parmval, reqdata);
 
     /* check any errors so far */
     if (res != NO_ERR) {

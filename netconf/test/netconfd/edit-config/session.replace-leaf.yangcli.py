@@ -43,7 +43,7 @@ def main():
 	else:
 		password=args.password
 
-	conn = yangrpc.connect(server, port, user, "blah", "/home/vladimir/.ssh/id_rsa","/home/vladimir/.ssh/id_rsa.pub")
+	conn = yangrpc.connect(server, port, user, password, os.getenv('HOME')+"/.ssh/id_rsa.pub", os.getenv('HOME')+"/.ssh/id_rsa")
 	if(conn==None):
 		print("Error: yangrpc failed to connect!")
 		return(-1)

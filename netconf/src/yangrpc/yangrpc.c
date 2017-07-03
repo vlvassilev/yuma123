@@ -511,6 +511,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     int mandatory_argc=sizeof(mandatory_argv)/sizeof(char*);
     char** argv;
     int argc;
+    int extra_argc;
     server_cb_t          *server_cb;
     ses_cb_t             *ses_cb;
     status_t res;
@@ -522,23 +523,6 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     int                   ret;
     yangcli_wordexp_t     p;
 
-    if(extra_args!=NULL) {
-        ret = yangcli_wordexp(extra_args, &p, 0);
-        if(ret!=0) {
-            perror(extra_args);
-            return ERR_CMDLINE_OPT_UNKNOWN;
-        }
-        argc = mandatory_argc+p.we_wordc;
-        argv = malloc(argc*sizeof(char*));
-        memcpy(argv,mandatory_argv,mandatory_argc*sizeof(char*));
-        memcpy(argv+mandatory_argc,p.we_wordv,p.we_wordc*sizeof(char*));
-        yangcli_wordfree(&p);
-    } else {
-        argc = mandatory_argc;
-        argv = malloc(argc*sizeof(char*));
-        memcpy(argv,mandatory_argv,argc*sizeof(char*));
-    }
-
     dlq_createSQue(&savedevQ);
 
     /* create a default server control block */
@@ -546,8 +530,11 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     if (server_cb==NULL) {
         return ERR_INTERNAL_PTR;
     }
+    argv = mandatory_argv;
 
-    argc=1;
+    argc=0;
+    argv[argc++]="yangrpc-conn-instance";
+
     server_arg = malloc(strlen("--server=")+strlen(server)+1);
     assert(server_arg!=NULL);
     sprintf(server_arg,"--server=%s",server);
@@ -585,6 +572,20 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
         argv[argc++]=private_key_arg;
     }
 
+    /* process extra args */
+    if(extra_args!=NULL) {
+        ret = yangcli_wordexp(extra_args, &p, 0);
+        if(ret!=0) {
+            perror(extra_args);
+            return ERR_CMDLINE_OPT_UNKNOWN;
+        }
+        extra_argc = p.we_wordc;
+        argv = malloc((argc+extra_argc)*sizeof(char*));
+        memcpy(argv,mandatory_argv,argc*sizeof(char*));
+        memcpy(argv+argc,p.we_wordv,p.we_wordc*sizeof(char*));
+        argc+=extra_argc;
+        yangcli_wordfree(&p);
+    }
 
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);

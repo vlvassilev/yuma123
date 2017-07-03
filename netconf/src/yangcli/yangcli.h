@@ -518,6 +518,19 @@ typedef struct server_cb_t_ {
     xmlChar              clibuff[YANGCLI_BUFFLEN];
 } server_cb_t;
 
+/********************************************************************
+ * FUNCTION yangcli_init_module_static_vars
+ * 
+ * Init the NCX CLI application static vars
+ * 
+ * INPUTS:
+ *   argc == number of strings in argv array
+ *   argv == array of command line strings
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+void yangcli_init_module_static_vars();
 
 /********************************************************************
 * FUNCTION get_autocomp
@@ -778,6 +791,70 @@ extern status_t
 extern status_t
     load_core_schema (void);
 
+
+/********************************************************************
+* FUNCTION free_server_cb
+* 
+*  Clean and free an server control block
+* 
+* INPUTS:
+*    server_cb == control block to free
+*                MUST BE REMOVED FROM ANY Q FIRST
+*
+*********************************************************************/
+extern void
+    free_server_cb (server_cb_t *server_cb);
+
+/********************************************************************
+* FUNCTION new_server_cb
+* 
+*  Malloc and init a new server control block
+* 
+* INPUTS:
+*    name == name of server record
+*
+* RETURNS:
+*   malloced server_cb struct or NULL of malloc failed
+*********************************************************************/
+extern server_cb_t *
+    new_server_cb (const xmlChar *name, boolean interactive);
+
+/********************************************************************
+ * FUNCTION init_config_vars
+ * 
+ * create the read-write global variables
+ *
+ * INPUTS:
+ *   server_cb == server control block to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+extern status_t
+    init_config_vars (server_cb_t *server_cb);
+
+/********************************************************************
+ * FUNCTION init_system_vars
+ * 
+ * create the read-only system variables
+ *
+ * INPUTS:
+ *   server_cb == server control block to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+extern status_t
+    init_system_vars (server_cb_t *server_cb);
+
+extern void
+    check_module_capabilities (server_cb_t *server_cb,
+                               ses_cb_t *scb,
+                               status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*));
+extern status_t
+    process_cli_input (server_cb_t *server_cb,
+                       int argc,
+                       char *argv[]);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -81,10 +81,16 @@ ncx_module_t  *yangcli_ex_mod;
 /* netconf.yang module */
 ncx_module_t  *netconf_mod;
 
-#if 0
 /* need to save CLI parameters: other vars are back-pointers */
-static val_value_t   *mgr_cli_valset;
+val_value_t   *mgr_cli_valset;
 
+/* Q of ncxmod_search_result_t structs representing all modules
+ * and submodules found in the module library path at boot-time
+ */
+dlq_hdr_t      modlibQ;
+
+
+#if 0
 /* true if running a script from the invocation and exiting */
 static boolean         batchmode;
 
@@ -115,11 +121,6 @@ static dlq_hdr_t       mgrloadQ;
 
 /* temporary file control block for the program instance */
 static ncxmod_temp_progcb_t  *temp_progcb;
-
-/* Q of ncxmod_search_result_t structs representing all modules
- * and submodules found in the module library path at boot-time
- */
-static dlq_hdr_t      modlibQ;
 
 /* Q of alias_cb_t structs representing all command aliases */
 static dlq_hdr_t      aliasQ;

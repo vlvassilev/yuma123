@@ -137,9 +137,6 @@ static dlq_hdr_t      server_cbQ;
  */
 static server_cb_t    *cur_server_cb;
 
-/* need to save CLI parameters: other vars are back-pointers */
-static val_value_t   *mgr_cli_valset;
-
 /* true if running a script from the invocation and exiting */
 static boolean         batchmode;
 
@@ -167,14 +164,6 @@ static boolean autohistory;
 
 /* Q of modtrs that have been loaded with 'mgrload' */
 static dlq_hdr_t       mgrloadQ;
-
-/* temporary file control block for the program instance */
-static ncxmod_temp_progcb_t  *temp_progcb;
-
-/* Q of ncxmod_search_result_t structs representing all modules
- * and submodules found in the module library path at boot-time
- */
-static dlq_hdr_t      modlibQ;
 
 /* Q of alias_cb_t structs representing all command aliases */
 static dlq_hdr_t      aliasQ;
@@ -438,7 +427,7 @@ static void
 *                MUST BE REMOVED FROM ANY Q FIRST
 *
 *********************************************************************/
-static void
+void
     free_server_cb (server_cb_t *server_cb)
 {
 
@@ -529,11 +518,12 @@ static void
 * RETURNS:
 *   malloced server_cb struct or NULL of malloc failed
 *********************************************************************/
-static server_cb_t *
-    new_server_cb (const xmlChar *name)
+server_cb_t *
+    new_server_cb (const xmlChar *name, boolean interactive)
 {
     server_cb_t  *server_cb;
     int          retval;
+    status_t     res;
 
     server_cb = m__getObj(server_cb_t);
     if (server_cb == NULL) {
@@ -562,8 +552,12 @@ static server_cb_t *
     }
     server_cb->history_auto = autohistory;
 
-    /* store per-session temp files */
-    server_cb->temp_progcb = temp_progcb;
+
+    /* create the program instance temporary directory */
+    server_cb->temp_progcb = ncxmod_new_program_tempdir(&res);
+    if (server_cb->temp_progcb == NULL || res != NO_ERR) {
+        return NULL;
+    }
 
     /* the name is not used yet; needed when multiple
      * server profiles are needed at once instead
@@ -575,45 +569,47 @@ static server_cb_t *
         return NULL;
     }
 
-    /* get a tecla CLI control block */
-    server_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
-    if (server_cb->cli_gl == NULL) {
-        log_error("\nError: cannot allocate a new GL");
-        free_server_cb(server_cb);
-        return NULL;
-    }
-
-    /* setup CLI tab line completion */
-    retval = gl_customize_completion(server_cb->cli_gl,
-                                     &server_cb->completion_state,
-                                     yangcli_tab_callback);
-    if (retval != 0) {
-        log_error("\nError: cannot set GL tab completion");
-        free_server_cb(server_cb);
-        return NULL;
-    }
-
-    /* setup the inactivity timeout callback function */
-    retval = gl_inactivity_timeout(server_cb->cli_gl,
-                                   get_line_timeout,
-                                   server_cb,
-                                   1,
-                                   0);
-    if (retval != 0) {
-        log_error("\nError: cannot set GL inactivity timeout");
-        free_server_cb(server_cb);
-        return NULL;
-    }
-
-    /* setup the history buffer if needed */
-    if (server_cb->history_auto) {
-        retval = gl_load_history(server_cb->cli_gl,
-                                 (const char *)server_cb->history_filename,
-                                 "#");   /* comment prefix */
-        if (retval) {
-            log_error("\nError: cannot load command line history buffer");
+    if(interactive) {
+        /* get a tecla CLI control block */
+        server_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
+        if (server_cb->cli_gl == NULL) {
+            log_error("\nError: cannot allocate a new GL");
             free_server_cb(server_cb);
             return NULL;
+        }
+
+        /* setup CLI tab line completion */
+        retval = gl_customize_completion(server_cb->cli_gl,
+                                         &server_cb->completion_state,
+                                         yangcli_tab_callback);
+        if (retval != 0) {
+            log_error("\nError: cannot set GL tab completion");
+            free_server_cb(server_cb);
+            return NULL;
+        }
+
+        /* setup the inactivity timeout callback function */
+        retval = gl_inactivity_timeout(server_cb->cli_gl,
+                                       get_line_timeout,
+                                       server_cb,
+                                       1,
+                                       0);
+        if (retval != 0) {
+            log_error("\nError: cannot set GL inactivity timeout");
+            free_server_cb(server_cb);
+            return NULL;
+        }
+
+        /* setup the history buffer if needed */
+        if (server_cb->history_auto) {
+            retval = gl_load_history(server_cb->cli_gl,
+                                     (const char *)server_cb->history_filename,
+                                     "#");   /* comment prefix */
+            if (retval) {
+                log_error("\nError: cannot load command line history buffer");
+                free_server_cb(server_cb);
+                return NULL;
+            }
         }
     }
 
@@ -690,7 +686,7 @@ static server_cb_t *
 *     server_cb->foo is updated if it is a shadow of a global var
 *
 *********************************************************************/
-static void
+void
     update_server_cb_vars (server_cb_t *server_cb)
 {
     server_cb->baddata = baddata;
@@ -1724,7 +1720,7 @@ static status_t
  * RETURNS:
  *   status
  *********************************************************************/
-static status_t
+status_t
     init_system_vars (server_cb_t *server_cb)
 {
     const char *envstr;
@@ -1806,7 +1802,7 @@ static status_t
  * RETURNS:
  *   status
  *********************************************************************/
-static status_t
+status_t
     init_config_vars (server_cb_t *server_cb)
 {
     val_value_t    *parm;
@@ -2037,7 +2033,7 @@ static status_t
 * RETURNS:
 *    NO_ERR if all goes well
 *********************************************************************/
-static status_t
+status_t
     process_cli_input (server_cb_t *server_cb,
                        int argc,
                        char *argv[])
@@ -2613,11 +2609,14 @@ static void
 * INPUTS:
 *  server_cb == server control block to use
 *  scb == session control block
+*  blocking_get_modules == if true blocks until all modules are
+*   downloaded with synchroneous <get-schema> calls.
 *
 *********************************************************************/
-static void
+void
     check_module_capabilities (server_cb_t *server_cb,
-                               ses_cb_t *scb)
+                               ses_cb_t *scb,
+                               status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*))
 {
     mgr_scb_t              *mscb;
     ncx_module_t           *mod;
@@ -2883,10 +2882,10 @@ static void
         retrieval_supported && 
         server_cb->autoload) {
 
-        /* compile phase will be delayed until autoload
-         * get-schema operations are done
+        /*
+         * get-schema operations are done or just started
          */
-        res = autoload_start_get_modules(server_cb, scb);
+         res = get_modules_fn(server_cb, scb);
         if (res != NO_ERR) {
             log_error("\nError: autoload get modules failed (%s)",
                       get_error_string(res));
@@ -3240,7 +3239,7 @@ static mgr_io_state_t
             /* incoming hello OK and outgoing hello is sent */
             server_cb->state = MGR_IO_ST_CONN_IDLE;
             report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
-            check_module_capabilities(server_cb, scb);
+            check_module_capabilities(server_cb, scb, autoload_start_get_modules);
             mscb = (mgr_scb_t *)scb->mgrcb;
             ncx_set_temp_modQ(&mscb->temp_modQ);
         } else {
@@ -3599,11 +3598,10 @@ static void
     
 }  /* yangcli_notification_handler */
 
-
 /********************************************************************
- * FUNCTION yangcli_init
+ * FUNCTION yangcli_init_module_static_vars
  * 
- * Init the NCX CLI application
+ * Init the NCX CLI application static vars
  * 
  * INPUTS:
  *   argc == number of strings in argv array
@@ -3612,28 +3610,8 @@ static void
  * RETURNS:
  *   status
  *********************************************************************/
-static status_t 
-    yangcli_init (int argc,
-                  char *argv[])
+void yangcli_init_module_static_vars()
 {
-    obj_template_t       *obj;
-    server_cb_t          *server_cb;
-    val_value_t          *parm, *modval;
-    xmlChar              *savestr, *revision;
-    status_t              res;
-    uint32                modlen;
-    log_debug_t           log_level;
-    dlq_hdr_t             savedevQ;
-    xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
-
-#ifdef YANGCLI_DEBUG
-    int   i;
-#endif
-
-    /* set the default debug output level */
-    log_level = LOG_DEBUG_INFO;
-
-    dlq_createSQue(&savedevQ);
 
     /* init the module static vars */
     dlq_createSQue(&server_cbQ);
@@ -3671,12 +3649,49 @@ static status_t
     echo_replies = TRUE;
     time_rpcs = FALSE;
     uservars_file = YANGCLI_DEF_USERVARS_FILE;
-    temp_progcb = NULL;
     dlq_createSQue(&modlibQ);
     dlq_createSQue(&aliasQ);
 
     /* set the character set LOCALE to the user default */
     setlocale(LC_CTYPE, "");
+}
+
+/********************************************************************
+ * FUNCTION yangcli_init
+ * 
+ * Init the NCX CLI application
+ * 
+ * INPUTS:
+ *   argc == number of strings in argv array
+ *   argv == array of command line strings
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t 
+    yangcli_init (int argc,
+                  char *argv[])
+{
+    obj_template_t       *obj;
+    server_cb_t          *server_cb;
+    val_value_t          *parm, *modval;
+    xmlChar              *savestr, *revision;
+    status_t              res;
+    uint32                modlen;
+    log_debug_t           log_level;
+    dlq_hdr_t             savedevQ;
+    xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
+
+#ifdef YANGCLI_DEBUG
+    int   i;
+#endif
+
+    /* set the default debug output level */
+    log_level = LOG_DEBUG_INFO;
+
+    dlq_createSQue(&savedevQ);
+
+    yangcli_init_module_static_vars();
 
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
@@ -3761,17 +3776,11 @@ static status_t
         val_init_from_template(connect_valset, obj);
     }
 
-    /* create the program instance temporary directory */
-    temp_progcb = ncxmod_new_program_tempdir(&res);
-    if (temp_progcb == NULL || res != NO_ERR) {
-        return res;
-    }
-
     /* set the CLI handler */
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
 
     /* create a default server control block */
-    server_cb = new_server_cb(YANGCLI_DEF_SERVER);
+    server_cb = new_server_cb(YANGCLI_DEF_SERVER, TRUE);
     if (server_cb==NULL) {
         return ERR_INTERNAL_MEM;
     }
@@ -4030,14 +4039,6 @@ static void
 
     /* Cleanup the Netconf Server Library */
     mgr_cleanup();
-
-    /* free this after the mgr_cleanup in case any session is active
-     * and needs to be cleaned up before this main temp_progcb is freed
-     */
-    if (temp_progcb) {
-        ncxmod_free_program_tempdir(temp_progcb);
-        temp_progcb = NULL;
-    }
 
     /* cleanup the module library search results */
     ncxmod_clean_search_result_queue(&modlibQ);

@@ -42,6 +42,13 @@ module ietf-flexible-encapsulation {
     "This YANG module describes interface configuration for flexible
      VLAN matches and rewrites.";
 
+  revision 2017-07-04 {
+    description "Fix for c-vlan and s-vlan missing namespace prefixes.";
+
+    reference
+      "https://www.ietf.org/mail-archive/web/netmod/current/msg18367.html";
+  }
+
   revision 2017-07-03 {
     description "Latest draft revision";
 
@@ -142,8 +149,8 @@ module ietf-flexible-encapsulation {
 
           container second-tag {
             must
-              '../outer-tag/dot1q-tag/tag-type = "s-vlan" and ' +
-              'dot1q-tag/tag-type = "c-vlan"' {
+              '../outer-tag/dot1q-tag/tag-type = "dot1q-types:s-vlan" and ' +
+              'dot1q-tag/tag-type = "dot1q-types:c-vlan"' {
 
               error-message
                 "When matching two tags, the outermost tag must be
@@ -214,8 +221,8 @@ module ietf-flexible-encapsulation {
 
       container second-tag {
         must
-          '../outer-tag/dot1q-tag/tag-type = "s-vlan" and ' +
-          'dot1q-tag/tag-type = "c-vlan"' {
+          '../outer-tag/dot1q-tag/tag-type = "dot1q-types:s-vlan" and ' +
+          'dot1q-tag/tag-type = "dot1q-types:c-vlan"' {
 
           error-message
           "When pushing/rewriting two tags, the outermost tag must be
@@ -372,8 +379,8 @@ module ietf-flexible-encapsulation {
 
           container second-tag {
             must
-              '../outer-tag/dot1q-tag/tag-type = "s-vlan" and ' +
-               'dot1q-tag/tag-type = "c-vlan"' {
+              '../outer-tag/dot1q-tag/tag-type = "dot1q-types:s-vlan" and ' +
+               'dot1q-tag/tag-type = "dot1q-types:c-vlan"' {
 
             error-message
               "When specifying two tags, the outermost tag must be

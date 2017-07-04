@@ -573,7 +573,6 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     }
 
     /* process extra args */
-    memcpy(argv,mandatory_argv,argc*sizeof(char*));
     if(extra_args!=NULL) {
         ret = yangcli_wordexp(extra_args, &p, 0);
         if(ret!=0) {
@@ -582,9 +581,13 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
         }
         extra_argc = p.we_wordc;
         argv = malloc((argc+extra_argc)*sizeof(char*));
+        memcpy(argv,mandatory_argv,argc*sizeof(char*));
         memcpy(argv+argc,p.we_wordv,p.we_wordc*sizeof(char*));
         argc+=extra_argc;
         yangcli_wordfree(&p);
+    } else {
+        argv = malloc((argc)*sizeof(char*));
+        memcpy(argv,mandatory_argv,argc*sizeof(char*));
     }
 
     /* Get any command line and conf file parameters */

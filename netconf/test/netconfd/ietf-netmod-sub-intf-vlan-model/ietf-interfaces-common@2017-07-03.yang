@@ -2,6 +2,7 @@ module ietf-interfaces-common {
   yang-version 1.1;
 
   namespace "urn:ietf:params:xml:ns:yang:ietf-interfaces-common";
+
   prefix if-cmn;
 
   import ietf-interfaces {
@@ -21,7 +22,6 @@ module ietf-interfaces-common {
 
      WG Chair: Lou Berger
                <mailto:lberger@labn.net>
-
      WG Chair: Kent Watsen
                <mailto:kwatsen@juniper.net>
 
@@ -46,18 +46,18 @@ module ietf-interfaces-common {
      This version of this YANG module is part of XXX; see the RFC
      itself for full legal notices.";
 
-  revision 2017-03-13 {
+  revision 2017-07-03 {
     description
       "Initial version";
 
-    reference "Internet draft: draft-ietf-netmod-intf-ext-yang-04";
+    reference "Internet draft: draft-ietf-netmod-intf-ext-yang-05";
   }
 
-  feature bandwidth {
+  feature reservable-bandwidth {
     description
-      "This feature indicates that the device supports configurable
-       interface bandwidth.";
-    reference "Section 3.1 Bandwidth";
+      "This feature indicates that the device supports configuring
+       'reservable-bandwidth' on interfaces.";
+    reference "RFC XXX, Section 3.1 Reservable Bandwidth";
   }
 
   feature carrier-delay {
@@ -66,7 +66,7 @@ module ietf-interfaces-common {
        carrier delay is supported, which is a feature is used to
        limit the propagation of very short interface link state
        flaps.";
-    reference "Section 3.2 Carrier Delay";
+    reference "RFC XXX, Section 3.2 Carrier Delay";
   }
 
   feature dampening {
@@ -75,14 +75,14 @@ module ietf-interfaces-common {
        dampening, which is a feature that is used to limit the
        propagation of interface link state flaps over longer
        periods";
-    reference "Section 3.3 Dampening";
+    reference "RFC XXX, Section 3.3 Dampening";
   }
 
   feature loopback {
     description
       "This feature indicates that configurable interface loopback
        is supported.";
-    reference "Section 3.5 Loopback";
+    reference "RFC XXX, Section 3.5 Loopback";
   }
 
   feature configurable-l2-mtu {
@@ -94,7 +94,7 @@ module ietf-interfaces-common {
        derived from the layer 2 MTU, taking into account the size of
        the layer 2 header, or is further restricted by explicit layer
        3 or protocol specific MTU configuration.";
-    reference "Section 3.6 MTU";
+    reference "RFC XXX, Section 3.6 Layer 2 MTU";
   }
 
   feature sub-interfaces {
@@ -104,14 +104,14 @@ module ietf-interfaces-common {
        as logical child interfaces that allow features and forwarding
        decisions to be applied to a subset of the traffic processed
        on the specified parent interface.";
-    reference "Section 3.7 Sub-interface";
+    reference "RFC XXX, Section 3.7 Sub-interface";
   }
 
   feature forwarding-mode {
     description
       "This feature indicates that the device supports the
        configurable forwarding mode leaf";
-    reference "Section 3.8 Forwarding Mode";
+    reference "RFC XXX, Section 3.8 Forwarding Mode";
   }
 
   /*
@@ -119,9 +119,12 @@ module ietf-interfaces-common {
    * assigned properties.
    */
   identity sub-interface {
-    description "Base type for generic sub-interfaces.  New or custom
-                 interface types can derive from this type to
-                 inherit generic sub-interface configuration";
+    description
+      "Base type for generic sub-interfaces.
+
+       New or custom interface types can derive from this type to
+       inherit generic sub-interface configuration";
+    reference "RFC XXX, Section 3.7 Sub-interface";
   }
 
   identity ethSubInterface{
@@ -129,52 +132,61 @@ module ietf-interfaces-common {
     base sub-interface;
 
     description
-      "Sub-interface of any interface types that uses Ethernet
-       framing (with or without 802.1Q tagging)";
+      "This identity represents the child sub-interface of any
+       interface types that uses Ethernet framing (with or without
+       802.1Q tagging)";
   }
 
   identity loopback {
     description "Base identity for interface loopback options";
+    reference "RFC XXX, section 3.5";
   }
   identity loopback-internal {
     base loopback;
     description
       "All egress traffic on the interface is internally looped back
        within the interface to be received on the ingress path.";
+    reference "RFC XXX, section 3.5";
   }
   identity loopback-line {
     base loopback;
     description
       "All ingress traffic received on the interface is internally
        looped back within the interface to the egress path.";
+    reference "RFC XXX, section 3.5";
   }
   identity loopback-connector {
     base loopback;
     description
-      "The interface has a physical loopback connector attached to
+      "The interface has a physical loopback connector attached
        that loops all egress traffic back into the interface's
        ingress path, with equivalent semantics to loopback-internal";
+    reference "RFC XXX, section 3.5";
   }
 
   identity forwarding-mode {
-    description "Base identity for forwarding-mode options";
+    description "Base identity for forwarding-mode options.";
+    reference "RFC XXX, section 3.8";
   }
   identity optical-layer {
     base forwarding-mode;
     description
       "Traffic is being forwarded at the optical layer.  This
-       includes DWDM or OTN based switching";
+       includes DWDM or OTN based switching.";
+    reference "RFC XXX, section 3.8";
   }
   identity layer-2-forwarding {
     base forwarding-mode;
     description
       "Layer 2 based forwarding, such as Ethernet/VLAN based
        switching, or L2VPN services.";
+    reference "RFC XXX, section 3.8";
   }
   identity network-layer {
     base forwarding-mode;
     description
-      "Network layer based forwarding, such as IP, MPLS, or L3VPNs";
+      "Network layer based forwarding, such as IP, MPLS, or L3VPNs.";
+    reference "RFC XXX, section 3.8";
   }
 
   /*
@@ -185,21 +197,23 @@ module ietf-interfaces-common {
     description
       "Augments the IETF interface model with optional common
        interface level commands that are not formally covered by any
-       specific standard";
+       specific standard.";
 
-    leaf bandwidth {
-      if-feature "bandwidth";
+    leaf reservable-bandwidth {
+      if-feature "reservable-bandwidth";
       type uint64;
       units kbps;
       description
-        "The bandwidth available on the interface in Kb/s. This
-         configuration is used by routing protocols to adjust the
-         metrics associated with the interface, but does not limit
-         the amount of traffic that can be sent or received on the
-         interface. A separate QoS policy would need to be configured
-         to limit the ingress or egress traffic. If not configured,
-         the default bandwidth is the maximum available bandwidth of
-         the underlying interface.";
+        "The reservable-bandwidth configuration leaf allows the
+         bandwidth of an interface reported to upper layer protocols
+         to be changed (either higher or lower) from the inherent
+         interface bandwidth. The reservable-bandwidth leaf can
+         affect the routing metric cost associated with the
+         interface, but it does not directly limit the amount of
+         traffic that can be sent/received over the interface.  If
+         required, interface traffic can be limited to the required
+         bandwidth by configuring an explicit QoS policy.";
+        reference "RFC XXX, section 3.1";
     }
 
     /*
@@ -225,19 +239,19 @@ module ietf-interfaces-common {
       }
       leaf up {
         type uint32;
-          units milliseconds;
-          description
-            "Defines the minimum time interval (in milliseconds) that
-             the carrier signal must be continuously present and
-             error free before the interface state is allowed to
-             transition from down to up.  If not configured, the
-             behaviour is vendor/interface specific, but with the
-             general expectation that sufficient default delay
-             should be used to ensure that the interface is stable
-             when enabled before being reported as being up.
-             Configured values that are too low for the hardware
-             capabilties may be rejected.";
+        units milliseconds;
+        description
+          "Defines the minimum time interval (in milliseconds) that
+           the carrier signal must be continuously present and error
+           free before the interface state is allowed to transition
+           from down to up.  If not configured, the behaviour is
+           vendor/interface specific, but with the general
+           expectation that sufficient default delay should be used
+           to ensure that the interface is stable when enabled before
+           being reported as being up.  Configured values that are
+           too low for the hardware capabilties may be rejected.";
       }
+      reference "RFC XXX, Section 3.2 Carrier Delay";
     }
 
     /*
@@ -252,6 +266,7 @@ module ietf-interfaces-common {
       description
         "Interface dampening limits the propagation of interface link
          state flaps over longer periods";
+      reference "RFC XXX, Section 3.3 Dampening";
       leaf half-life {
         type uint32;
         units seconds;
@@ -262,6 +277,7 @@ module ietf-interfaces-common {
            half-life period. For some devices, the allowed values may
            be restricted to particular multiples of seconds. The
            default value is vendor/device specific.";
+        reference "RFC XXX, Section 3.3.2 Half-Life Period";
       }
       leaf reuse {
         type uint32;
@@ -270,6 +286,7 @@ module ietf-interfaces-common {
            unsuppressed (i.e. brought up) (no units).  The default
            value is vendor/device specific.  The penalty value for a
            link up->down state change is nominally 1000 units.";
+        reference "RFC XXX, Section 3.3.3 Reuse Threshold";
       }
 
       leaf suppress {
@@ -280,6 +297,7 @@ module ietf-interfaces-common {
            must be greater than the reuse threshold.  The default
            value is vendor/device specific.  The penalty value for a
            link up->down state change is nominally 1000 units.";
+        reference "RFC XXX, Section 3.3.1 Suppress Threshold";
       }
 
       leaf max-suppress-time {
@@ -290,6 +308,7 @@ module ietf-interfaces-common {
            suppressed. This value effectively acts as a ceiling that
            the penalty value cannot exceed.  The default value is
            vendor/device specific.";
+        reference "RFC XXX, Section 3.3.4 Maximum Suppress Time";
       }
     }
 
@@ -315,18 +334,15 @@ module ietf-interfaces-common {
         description
           "All interface types that can have a configurable L2
            encapsulation";
-        /*
-         * TODO - Should we introduce an abstract type to make this
-         *        extensible to new interface types, or vendor
-         *        specific interface types?
-         */
       }
 
       description
         "Holds the OSI layer 2 encapsulation associated with an
          interface";
       choice encaps-type {
-        description "Extensible choice of L2 encapsulations";
+        description
+          "Extensible choice of layer 2 encapsulations";
+        reference "RFC XXX, Section 3.4 Encapsulation";
       }
     }
 
@@ -348,6 +364,7 @@ module ietf-interfaces-common {
         base loopback;
       }
       description "Enables traffic loopback.";
+      reference "RFC XXX, Section 3.5 Loopback";
     }
 
     /*
@@ -364,6 +381,7 @@ module ietf-interfaces-common {
          In the case of Ethernet interfaces it also excludes the
          4-8 byte overhead of any known (i.e. explicitly matched by
          a child sub-interface) 801.1Q VLAN tags.";
+      reference "RFC XXX, Section 3.6 Layer 2 MTU";
     }
 
     /*
@@ -377,7 +395,8 @@ module ietf-interfaces-common {
       }
 
       description
-        "The forwarding mode that the interface is operating in";
+        "The forwarding mode that the interface is operating in.";
+      reference "RFC XXX, Section 3.8 Forwarding Mode";
     }
   }
 
@@ -408,6 +427,7 @@ module ietf-interfaces-common {
       description
         "This is the reference to the parent interface of this
          sub-interface.";
+      reference "RFC XXX, Section 3.7 Sub-interface";
     }
   }
 }

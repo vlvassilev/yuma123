@@ -7,6 +7,15 @@ from yangcli import yangcli
 from lxml import etree
 import yangrpc
 
+def yangcli_ok_script(conn, yangcli_script):
+	for line in yangcli_script.splitlines():
+		line=line.strip()
+		if not line:
+			continue
+		print("Executing: "+line)
+		ok = yangcli(conn, line).xpath('./ok')
+		assert(len(ok)==1)
+
 def main():
 	print("""
 #Description: Using sub-interfaces configure vlan bridge.
@@ -45,7 +54,7 @@ def main():
 	else:
 		password=args.password
 
-	conn = yangrpc.connect(server, port, user, password, os.getenv('HOME')+"/.ssh/id_rsa.pub", os.getenv('HOME')+"/.ssh/id_rsa")
+	conn = yangrpc.connect(server, port, user, password, os.getenv('HOME')+"/.ssh/id_rsa.pub", os.getenv('HOME')+"/.ssh/id_rsa", "--dump-session=tmp/nc-session-")
 	if(conn==None):
 		print("Error: yangrpc failed to connect!")
 		return(-1)
@@ -53,53 +62,29 @@ def main():
 	time.sleep(1)
 
 
+	ok = yangcli(conn, '''delete /vlans''').xpath('./ok')
 	ok = yangcli(conn, '''delete /interfaces''').xpath('./ok')
-
 	ok = yangcli(conn, '''commit''').xpath('./ok')
 	assert(len(ok)==1)
 
-	ok = yangcli(conn, '''create /interfaces/interface -- name='xe0' type='ethernetCsmacd' ''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface -- name='ge0' type='ethernetCsmacd' ''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface -- name='ge1' type='ethernetCsmacd' ''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface -- name='ge1-green' type=ethSubInterface parent-interface=ge0''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface[name='ge1-green']/forwarding-mode value=layer-2-forwarding''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface[name='ge1-green']/encapsulation/flexible/match/vlan-tagged/tag[index='0']/dot1q-tag -- tag-type=c-vlan vlan-id=10''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface -- name='xe0-green' type=ethSubInterface parent-interface=xe0''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface[name='xe0-green']/forwarding-mode value=layer-2-forwarding''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /interfaces/interface[name='xe0-green']/encapsulation/flexible/match/vlan-tagged/tag[index='0']/dot1q-tag -- tag-type=s-vlan vlan-id=1000''').xpath('./ok')
-	assert(len(ok)==1)
-
-#	ok = yangcli(conn, '''create /interfaces/interface[name='xe0-green']/encapsulation/flexible/match/vlan-tagged/tag[index='1']/dot1q-tag -- tag-type=c-vlan vlan-id=10''').xpath('./ok')
-#	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /vlans/vlan -- name=green''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''create /vlans/vlan[name='green']/interface value=ge0''').xpath('./ok')
-	assert(len(ok)==1)
-	ok = yangcli(conn, '''create /vlans/vlan[name='green']/interface value=ge1-green''').xpath('./ok')
-	assert(len(ok)==1)
-	ok = yangcli(conn, '''create /vlans/vlan[name='green']/interface value=xe0-green''').xpath('./ok')
-	assert(len(ok)==1)
-
-	ok = yangcli(conn, '''commit''').xpath('./ok')
-	assert(len(ok)==1)
+        yangcli_script='''
+create /interfaces/interface -- name='xe0' type='ethernetCsmacd'
+create /interfaces/interface -- name='ge0' type='ethernetCsmacd'
+create /interfaces/interface -- name='ge1' type='ethernetCsmacd'
+create /interfaces/interface -- name='ge1-green' type=ethSubInterface parent-interface=ge0
+create /interfaces/interface[name='ge1-green']/forwarding-mode value=layer-2-forwarding
+create /interfaces/interface[name='ge1-green']/encapsulation/flexible/match/dot1q-vlan-tagged/outer-tag/dot1q-tag -- tag-type=c-vlan vlan-id=10
+create /interfaces/interface -- name='xe0-green' type=ethSubInterface parent-interface=xe0
+create /interfaces/interface[name='xe0-green']/forwarding-mode value=layer-2-forwarding
+create /interfaces/interface[name='xe0-green']/encapsulation/flexible/match/dot1q-vlan-tagged/outer-tag/dot1q-tag -- tag-type=s-vlan vlan-id=1000
+create /interfaces/interface[name='xe0-green']/encapsulation/flexible/match/dot1q-vlan-tagged/second-tag/dot1q-tag -- tag-type=c-vlan vlan-id=10
+create /vlans/vlan -- name=green
+create /vlans/vlan[name='green']/interface value=ge0
+create /vlans/vlan[name='green']/interface value=ge1-green
+create /vlans/vlan[name='green']/interface value=xe0-green
+commit
+'''
+	yangcli_ok_script(conn, yangcli_script)
 
 	result = yangcli(conn, "xget /interfaces")
 	names = result.xpath('./data/interfaces/interface/name')
@@ -110,12 +95,12 @@ def main():
 		print type.text
 
 	#cleanup
-	ok = yangcli(conn, '''delete /vlans''').xpath('./ok')
-	assert(len(ok)==1)
-	ok = yangcli(conn, '''delete /interfaces''').xpath('./ok')
-	assert(len(ok)==1)
-	ok = yangcli(conn, '''commit''').xpath('./ok')
-	assert(len(ok)==1)
+#	ok = yangcli(conn, '''delete /vlans''').xpath('./ok')
+#	assert(len(ok)==1)
+#	ok = yangcli(conn, '''delete /interfaces''').xpath('./ok')
+#	assert(len(ok)==1)
+#	ok = yangcli(conn, '''commit''').xpath('./ok')
+#	assert(len(ok)==1)
 
 
 	return(0)

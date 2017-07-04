@@ -89,7 +89,7 @@ def main():
    </target>
    <default-operation>merge</default-operation>
    <test-option>set</test-option>
-  <config>
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
   <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
     <interface>
       <name>ge0</name>
@@ -108,16 +108,15 @@ def main():
       <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
         <flexible xmlns="urn:ietf:params:xml:ns:yang:ietf-flexible-encapsulation">
           <match>
-            <vlan-tagged>
-              <tag>
-                <index>0</index>
+            <dot1q-vlan-tagged>
+              <outer-tag>
                 <dot1q-tag>
                   <tag-type
                     xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
                   <vlan-id>10</vlan-id>
                 </dot1q-tag>
-              </tag>
-            </vlan-tagged>
+              </outer-tag>
+            </dot1q-vlan-tagged>
           </match>
         </flexible>
       </encapsulation>
@@ -136,16 +135,22 @@ def main():
       <encapsulation xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces-common">
         <flexible xmlns="urn:ietf:params:xml:ns:yang:ietf-flexible-encapsulation">
           <match>
-            <vlan-tagged>
-              <tag>
-                <index>0</index>
+            <dot1q-vlan-tagged>
+              <outer-tag>
                 <dot1q-tag>
                   <tag-type
                     xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:s-vlan</tag-type>
                   <vlan-id>1000</vlan-id>
                 </dot1q-tag>
-              </tag>
-            </vlan-tagged>
+              </outer-tag>
+              <second-tag>
+                <dot1q-tag>
+                  <tag-type
+                    xmlns:dot1q-types="urn:ieee:std:802.1Q:yang:ieee802-dot1q-types">dot1q-types:c-vlan</tag-type>
+                  <vlan-id>10</vlan-id>
+                </dot1q-tag>
+              </second-tag>
+            </dot1q-vlan-tagged>
           </match>
         </flexible>
       </encapsulation>
@@ -162,7 +167,7 @@ def main():
       <interface>xe0-green</interface>
     </vlan>
   </vlans>
- </config>
+</config>
  </edit-config>
 """
 	print("edit-config - create vlan ...")

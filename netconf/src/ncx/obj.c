@@ -10405,8 +10405,11 @@ boolean obj_is_data_db (const obj_template_t *obj)
 {
     assert(obj && "obj is NULL" );
 
-//    if (/*obj_is_abstract(obj) ||*/ obj_is_cli(obj)) {
-    if (obj_is_abstract(obj) || obj_is_cli(obj)) {
+    if (obj_is_cli(obj)) {
+        return FALSE;
+    }
+
+    if (obj_is_abstract(obj) && !obj_is_root(obj)) {
         return FALSE;
     }
 
@@ -10427,6 +10430,7 @@ boolean obj_is_data_db (const obj_template_t *obj)
             return TRUE;
         }
     }
+    assert(0);
     /*NOTREACHED*/
 
 }  /* obj_is_data_db */

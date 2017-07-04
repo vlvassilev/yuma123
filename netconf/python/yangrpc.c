@@ -22,10 +22,11 @@ py_yangrpc_connect(PyObject *self, PyObject *args)
     char* password;
     char* private_key;
     char* public_key;
+    char* other_args=NULL;
     yangrpc_cb_ptr_t yangrpc_cb_ptr;
 
 
-    if (!PyArg_ParseTuple(args, (char *) "sissss:yangrpc_yangrpc_connect", &server,&port,&user,&password,&public_key,&private_key)) {
+    if (!PyArg_ParseTuple(args, (char *) "siszzz|z:yangrpc_yangrpc_connect", &server,&port,&user,&password,&public_key,&private_key,&other_args)) {
         return (NULL);
     }
     if(yangrpc_init_done==0) {
@@ -34,8 +35,10 @@ py_yangrpc_connect(PyObject *self, PyObject *args)
         yangrpc_init_done=1;
     }
 
-    res = yangrpc_connect(server, port, user, password, NULL/*public_key*/, NULL/*private_key*/, NULL, &yangrpc_cb_ptr);
-
+    res = yangrpc_connect(server, port, user, password, public_key, private_key, other_args, &yangrpc_cb_ptr);
+    if(res!=NO_ERR) {
+        Py_RETURN_NONE; /*returning*/
+    }
     return Py_BuildValue("O", PyCapsule_New(yangrpc_cb_ptr, "yangrpc_cb_ptr_t", NULL));
 }
 

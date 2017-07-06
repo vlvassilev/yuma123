@@ -1,30 +1,14 @@
 yuma123 to-do List (2017-01-31)
 
 This file contains the list of known items not finished in the source code.
-  -- Move from the notifications in yuma-system.yang to the ones in ietf-netconf-notifications.yang (sysConfigChange->netconfd-config-change , .. etc.)
   -- ietf-yang-library.yang implementation
   -- YANG 1.1 support (RFC 7950)
-   -- new Xpath functions - re-match, deref, derived-from*, enum-value, bit-is-set
+   -- new Xpath functions - re-match, deref, enum-value, bit-is-set
    -- if-feature in identities, enum, bit
    -- action statement
    -- anydata statement
    -- modifier statement
    -- ... to be continued
-  -- yangdump
-   -- comments are not translated at all; they are always discarded
-   -- ncx:cli YANG convert to unix man files
-   -- ietf validation mode not supported
-   -- YANG to xml2rfc not supported
-   -- XSD translation:  
-   -- HTML generation:
-      -- JQuery menu not supported
-   -- SIL code generation not done:
-     -- RPC output
-     -- support for NCX_ERR_SKIPPED to PASS callback to parent
-        partially handled (or skipped)
-     -- conditional code generation for features and the CLI
-        parms for this functionality is not done
-     -- when-stmt auto-gen code is not done
   -- yangcli to-do:
      -- command completion for more data types
      -- command completion based on mirror of database

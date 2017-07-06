@@ -5,9 +5,6 @@ module yuma123-netconf-types {
    prefix "nct";
 
    // for the uri data type
-   import ietf-netconf { prefix "nc"; }
-
-   // for the uri data type
    import ietf-inet-types { prefix "inet"; }
 
    // for the xpath data type
@@ -27,11 +24,24 @@ module yuma123-netconf-types {
      "Originally Translated by Andy Bierman.
       Send comments to <vladimir@transpacket.com>.";
 
+   revision 2017-06-23 {
+     description
+       "Removed dependency to ietf-netconf.";
+   }
+
    revision 2017-03-26 {
      description
        "Changed namespace in order to edit the original
         netconfcentral model. Splitted yuma-netconf
         into yuma123-netconf and yuma123-netconf-types";
+   }
+
+   typedef session-id-or-zero-type {
+     type uint32;
+     description
+       "NETCONF Session Id or Zero to indicate none.
+        Duplicates the typedef from ietf-netconf module
+        to avoid dependency";
    }
 
    typedef Language {
@@ -264,30 +274,6 @@ module yuma123-netconf-types {
      }
    }
 
-   container server-hello {
-     description "Generic Server Hello Message Parameters.";
-
-     uses NcCapabilities;
-
-     leaf session-id {
-        type nc:session-id-type;
-        config false;
-     }
-
-     ncx:hidden;
-     ncx:abstract;
-   }
-
-   container client-hello {
-
-     description "Generic Client Hello Message Parameters.";
-
-     uses NcCapabilities;
-
-     ncx:hidden;
-     ncx:abstract;
-   }
-
    // NETCONF Operations PDU Data Types
 
    grouping ErrorInfoContent {
@@ -356,7 +342,7 @@ module yuma123-netconf-types {
          "Session ID of session holding the
           requested lock, or zero to indicate a non-NETCONF
           entity holds the lock.";
-        type nc:session-id-or-zero-type;
+        type session-id-or-zero-type;
         config false;
       }
    }
@@ -486,16 +472,6 @@ module yuma123-netconf-types {
            uses RpcDataReplyType;
         }
       }
-   }
-
-
-   // NETCONF operation attribute
-   leaf operation {
-     description 
-       "Internal object for the nc:operation attribute.";
-     type nc:edit-operation-type;
-     ncx:abstract;
-     ncx:hidden;
    }
 }
 

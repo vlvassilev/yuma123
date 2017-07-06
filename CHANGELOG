@@ -1,7 +1,7 @@
-yuma123 (2.10) stable; urgency=medium
+yuma123 (2.10) UNRELEASED; urgency=medium
 
   * ncx
-    - Partial YANG 1.1 implementation.
+    - Partial YANG 1.1 implementation. (derived-from, derived-from-or-self)
     - Fixed bug in handling of deviations.
     - Fixed bug in apply_commit_deletes.
     - Fixed bug in val_make_serialized_string.
@@ -23,7 +23,7 @@ yuma123 (2.10) stable; urgency=medium
     - Fixed bug caused by attempted reload of already loaded module.
     - Added yes/no container fill check promp.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Sun, 16 Apr 2017 16:40:21 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 06 Jul 2017 13:17:05 +0200
 
 yuma123 (2.9) stable; urgency=medium
 

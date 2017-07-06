@@ -16,6 +16,7 @@ $(top_srcdir)/netconf/modules/ietf/ietf-yang-library.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-types.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-inet-types.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-smiv2.yang
 
 ietf_draft_yang_DATA = \

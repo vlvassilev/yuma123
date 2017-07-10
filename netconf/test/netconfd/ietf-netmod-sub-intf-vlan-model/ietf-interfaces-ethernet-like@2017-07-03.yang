@@ -54,11 +54,13 @@ module ietf-interfaces-ethernet-like {
      This version of this YANG module is part of XXX; see the RFC
      itself for full legal notices.";
 
-  revision 2017-03-13 {
-    description "Updated reference to new internet draft name.";
+  revision 2017-07-03 {
+    description "Updated to conform to NMDA architecture";
+
     reference
-      "Internet draft: draft-ietf-netmod-intf-ext-yang-04";
+      "Internet draft: draft-ietf-netmod-intf-ext-yang-05";
   }
+
   /*
    * Configuration parameters for Ethernet-like interfaces.
    */
@@ -70,54 +72,30 @@ module ietf-interfaces-ethernet-like {
       description "Applies to all Ethernet-like interfaces";
     }
     description
-      "Augment the interface model with configuration parameters for
-       all Ethernet-like interfaces";
+      "Augment the interface model with parameters for all
+       Ethernet-like interfaces";
 
     container ethernet-like {
-      description "Contains configuration parameters for interfaces
-                   that use Ethernet framing and expose an Ethernet
-                   MAC layer.";
+      description
+        "Contains parameters for interfaces that use Ethernet framing
+         and expose an Ethernet MAC layer.";
       leaf mac-address {
         type yang:mac-address;
         description
-          "The configured MAC address of the interface.";
-      }
-    }
-  }
-
-  /*
-   * Operational state for Ethernet-like interfaces.
-   */
-  augment "/if:interfaces-state/if:interface" {
-    when "derived-from-or-self(if:type, 'ianaift:ethernetCsmacd') or
-          derived-from-or-self(if:type, 'ianaift:ieee8023adLag') or
-          derived-from-or-self(if:type, 'ianaift:l2vlan') or
-          derived-from-or-self(if:type, 'ianaift:ifPwType')" {
-      description "Applies to all Ethernet-like interfaces";
-    }
-    description
-      "Augments the interface model with operational state parameters
-       for all Ethernet-like interfaces.";
-    container ethernet-like {
-      description "Contains operational state parameters for
-                   interfaces that use Ethernet framing and expose an
-                   Ethernet MAC layer.";
-      leaf mac-address {
-        type yang:mac-address;
-        description
-          "The operational MAC address of the interface, if
-           applicable";
+          "The MAC address of the interface.";
       }
 
       leaf bia-mac-address {
         type yang:mac-address;
+        config false;
         description
           "The 'burnt-in' MAC address.  I.e the default MAC address
-           assigned to the interface if none is explicitly
-           configured.";
+           assigned to the interface if no MAC address has been
+           explicitly configured on it.";
       }
 
       container statistics {
+        config false;
         description
           "Packet statistics that apply to all Ethernet-like
            interfaces";

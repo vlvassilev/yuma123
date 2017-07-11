@@ -496,7 +496,7 @@ static int edit_config_form(request_rec *r)
 static int edit_config(request_rec *r)
 {
     status_t res;
-    ncx_module_t * ietf_netconf_mod;
+    ncx_module_t * netconf_mod;
     apr_table_t *tab=NULL;
     const char* config_xml_str;
     obj_template_t* root_obj;
@@ -532,13 +532,13 @@ static int edit_config(request_rec *r)
     }
 #else
     fp = fmemopen((void*)config_xml_str, strlen(config_xml_str), "r");
-    res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
-    root_obj = ncx_find_object(ietf_netconf_mod, "config");
+    res = ncxmod_load_module (NCXMOD_NETCONF, NULL, NULL, &netconf_mod);
+    root_obj = ncx_find_object(netconf_mod, "config");
 
     rc = xml_rd_open_file (fp, root_obj, &root_val);
 
 
-    edit_config_rpc_obj = ncx_find_object(ietf_netconf_mod, "edit-config");
+    edit_config_rpc_obj = ncx_find_object(netconf_mod, "edit-config");
     assert(obj_is_rpc(edit_config_rpc_obj));
     input_obj = obj_find_child(edit_config_rpc_obj, NULL, "input");
     assert(input_obj!=NULL);
@@ -562,7 +562,7 @@ static int edit_config(request_rec *r)
     }
 
     if(edit_config_rpc_reply_val!=NULL && NULL!=val_find_child(edit_config_rpc_reply_val,NULL,"ok")) {
-        commit_rpc_obj = ncx_find_object(ietf_netconf_mod, "commit");
+        commit_rpc_obj = ncx_find_object(netconf_mod, "commit");
         assert(obj_is_rpc(commit_rpc_obj));
         commit_rpc_val = val_new_value();
         val_init_from_template(commit_rpc_val, commit_rpc_obj);
@@ -601,7 +601,7 @@ static int edit_config(request_rec *r)
 static int ietf_interfaces_state_report(request_rec *r)
 {
     status_t res;
-    ncx_module_t * ietf_netconf_mod;
+    ncx_module_t * netconf_mod;
     apr_table_t *tab=NULL;
     const char* config_xml_str;
     obj_template_t* root_obj;
@@ -626,10 +626,10 @@ static int ietf_interfaces_state_report(request_rec *r)
     svr_cfg = ap_get_module_config(r->server->module_config, &yangrpc_example_module);
 
 
-    res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
+    res = ncxmod_load_module (NCXMOD_NETCONF, NULL, NULL, &netconf_mod);
     assert(res==NO_ERR);
 
-    rpc_obj = ncx_find_object(ietf_netconf_mod, "get");
+    rpc_obj = ncx_find_object(netconf_mod, "get");
     assert(obj_is_rpc(rpc_obj));
     input_obj = obj_find_child(rpc_obj, NULL, "input");
     assert(input_obj!=NULL);
@@ -661,7 +661,7 @@ static int ietf_interfaces_state_report(request_rec *r)
         char* interface_row_str[512];
 
         data_val = val_find_child(reply_val,NULL,"data");
-        config_obj = ncx_find_object(ietf_netconf_mod, "config");
+        config_obj = ncx_find_object(netconf_mod, "config");
         config_val = val_new_value();
         val_init_from_template(config_val, config_obj);
         val_move_children(data_val,config_val);
@@ -683,7 +683,7 @@ static int ietf_interfaces_state_report(request_rec *r)
 static int example_handler(request_rec *r)
 {
     status_t res;
-    ncx_module_t * ietf_netconf_mod;
+    ncx_module_t * netconf_mod;
     obj_template_t* rpc_obj;
     obj_template_t* input_obj;
     obj_template_t* filter_obj;
@@ -721,7 +721,7 @@ static int example_handler(request_rec *r)
         }
     }
 
-    res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
+    res = ncxmod_load_module (NCXMOD_NETCONF, NULL, NULL, &netconf_mod);
     assert(res==NO_ERR);
     if(0==strcmp(r->uri, "/edit-config.html")) {
         return edit_config_form(r);
@@ -731,7 +731,7 @@ static int example_handler(request_rec *r)
         return edit_config(r);
     }
 
-    rpc_obj = ncx_find_object(ietf_netconf_mod, "get");
+    rpc_obj = ncx_find_object(netconf_mod, "get");
     assert(obj_is_rpc(rpc_obj));
     input_obj = obj_find_child(rpc_obj, NULL, "input");
     assert(input_obj!=NULL);
@@ -763,7 +763,7 @@ static int example_handler(request_rec *r)
     	char* interface_row_str[512];
 
         data_val = val_find_child(reply_val,NULL,"data");
-        config_obj = ncx_find_object(ietf_netconf_mod, "config");
+        config_obj = ncx_find_object(netconf_mod, "config");
         config_val = val_new_value();
         val_init_from_template(config_val, config_obj);
         val_move_children(data_val,config_val);

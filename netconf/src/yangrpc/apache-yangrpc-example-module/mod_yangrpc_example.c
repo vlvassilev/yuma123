@@ -203,7 +203,6 @@ uint64_t get_counter(val_value_t* counter_abs_val, val_value_t* root_base_val)
 void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 {
     int i;
-    char* counter_name[]= {"in-octets","in-unicast-pkts","out-octets","out-unicast-pkts","in-errors", "in-discards"};
 
     char timestamp_string[]="2017-03-05T14:59:00+1234";
     struct tm* time_info;
@@ -213,10 +212,32 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
     static time_t ts_cur;
     static time_t ts_prev;
 
+    obj_template_t* interfaces_state_obj;
+    obj_template_t* interface_obj;
+    obj_template_t* statistics_obj;
+    obj_template_t* statistic_obj;
     val_value_t* interfaces_state_val;
     val_value_t* interface_val;
 
     ts_cur=time(NULL);
+
+    interfaces_state_val = val_find_child(root_val,
+                                    "ietf-interfaces",
+                                    "interfaces-state");
+
+    if(interfaces_state_val==NULL) {
+        ap_rprintf(r, "<html><body><b>Seems the ietf-interfaces:interfaces-state container does not exist on your device. No statistics!</b></body></html>");
+        return;
+    }
+    interface_obj = obj_find_child(interfaces_state_val->obj,
+                                       "ietf-interfaces",
+                                       "interface");
+    assert(interface_obj);
+
+    statistics_obj = obj_find_child(interface_obj,
+                                       "ietf-interfaces",
+                                       "statistics");
+    assert(statistics_obj);
 
     if(r->args && 0==strcmp(r->args,"clear=1")) {
         if(root_epoch_val!=NULL) {
@@ -268,33 +289,44 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
    <tr align=\"center\">\
     <th width=\"30\"><b>name</b></th>");
 
-    for(i=0;i<6;i++) {
-        if(0==strcmp(counter_name[i],"in-octets") || 0==strcmp(counter_name[i],"out-octets")) {
-            ap_rprintf(r, "<th width=\"70\" colspan=\"3\"><b>%s</b></th>", counter_name[i]);
-        } else {
-            ap_rprintf(r, "<th width=\"70\" colspan=\"2\"><b>%s</b></th>", counter_name[i]);
+    for(statistic_obj = obj_first_child(statistics_obj);
+        statistic_obj != NULL;
+        statistic_obj = obj_next_child(statistic_obj)) {
+        ncx_btype_t btyp;
+        int colspan;
+
+        btyp=obj_get_basetype(statistic_obj);
+        if(btyp!=NCX_BT_UINT32 && btyp!=NCX_BT_UINT64) {
+            continue;
         }
+        if(0==strcmp(obj_get_name(statistic_obj),"in-octets") || 0==strcmp(obj_get_name(statistic_obj),"out-octets")) {
+            colspan=3;
+        } else {
+            colspan=2;
+        }
+        ap_rprintf(r, "<th title=\"%s\" width=\"70\" colspan=\"%d\"><b>%s</b></th>", obj_get_description(statistic_obj)?obj_get_description(statistic_obj):"", colspan, obj_get_name(statistic_obj));
     }
     ap_rprintf(r, "</tr>");
 
    ap_rprintf(r, "<tr align=\"center\">\
     <td width=\"30\"><b>type</b></td>");
 
-    for(i=0;i<6;i++) {
+    for(statistic_obj = obj_first_child(statistics_obj);
+        statistic_obj != NULL;
+        statistic_obj = obj_next_child(statistic_obj)) {
+
+        ncx_btype_t btyp;
+        btyp=obj_get_basetype(statistic_obj);
+        if(btyp!=NCX_BT_UINT32 && btyp!=NCX_BT_UINT64) {
+            continue;
+        }
         ap_rprintf(r, "<td width=\"70\"><b>abs</b></th>");
         ap_rprintf(r, "<td width=\"70\"><b>rate</b></td>");
-        if(0==strcmp(counter_name[i],"in-octets") || 0==strcmp(counter_name[i],"out-octets")) {
+        if(0==strcmp(obj_get_name(statistic_obj),"in-octets") || 0==strcmp(obj_get_name(statistic_obj),"out-octets")) {
             ap_rprintf(r, "<td width=\"70\"><b>%</b></td>");
         }
     }
     ap_rprintf(r, "</tr>");
-
-
-
-    interfaces_state_val = val_find_child(root_val,
-                                    "ietf-interfaces",
-                                    "interfaces-state");
-
 
     for (interface_val = val_get_first_child(interfaces_state_val);
          interface_val != NULL;
@@ -310,18 +342,27 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         statistics_val = val_find_child(interface_val, "ietf-interfaces", "statistics");
         speed_val = val_find_child(interface_val, "ietf-interfaces", "speed");
 
-        for(i=0;i<6;i++) {
+        for(statistic_obj = obj_first_child(statistics_obj);
+            statistic_obj != NULL;
+            statistic_obj = obj_next_child(statistic_obj)) {
+
             val_value_t* val; 
             uint64_t rate;
             uint64_t speed_in_bytes;
+            ncx_btype_t btyp;
+            btyp=obj_get_basetype(statistic_obj);
+
+            if(btyp!=NCX_BT_UINT32 && btyp!=NCX_BT_UINT64) {
+                continue;
+            }
             if(speed_val) {
                 speed_in_bytes=VAL_UINT64(speed_val)/8;
             } else {
                 speed_in_bytes=100000000/8; /* workaround use 100Mb */
             }
             val = val_find_child(statistics_val,
-                                    "ietf-interfaces",
-                                    counter_name[i]);
+                                    obj_get_mod_name(statistic_obj),
+                                    obj_get_name(statistic_obj));
 
             ap_rprintf(r, "<td align=\"right\">");
             if(val!=NULL) {
@@ -349,7 +390,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
             }
             ap_rprintf(r, "</td>");
 
-            if(0!=strcmp(counter_name[i],"in-octets") && 0!=strcmp(counter_name[i],"out-octets")) {
+            if(0!=strcmp(obj_get_name(statistic_obj),"in-octets") && 0!=strcmp(obj_get_name(statistic_obj),"out-octets")) {
                 continue;
             }
             /* % */

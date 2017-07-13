@@ -8,7 +8,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   source $RUN_WITH_CONFD/confdrc
   confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces.yang --yangpath /usr/share/yuma/modules/ietf -o ietf-interfaces.fxs
   confdc -c /usr/share/yuma/modules/ietf/iana-if-type.yang --yangpath /usr/share/yuma/modules/ietf -o iana-if-type.fxs
-  confdc -c ../test-re-match.yang --yangpath /usr/share/yuma/modules/ietf -o test-re-match.fxs
+  confdc -c ../test-xpath-re-match.yang --yangpath /usr/share/yuma/modules/ietf -o test-xpath-re-match.fxs
   NCPORT=2022
   NCUSER=admin
   NCPASSWORD=admin
@@ -19,7 +19,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=./test-re-match.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=./test-xpath-re-match.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 sleep 3

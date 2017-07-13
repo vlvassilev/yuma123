@@ -6,6 +6,8 @@ test-netconf-notifications \
 test-rollback-on-error \
 test-validate-config-only \
 test-ietf-netmod-sub-intf-vlan-model \
-test-identityref-typedef
+test-identityref-typedef \
+test-xpath-current \
+test-xpath-re-match
 
 SUBDIRS=multiple-edit-callbacks

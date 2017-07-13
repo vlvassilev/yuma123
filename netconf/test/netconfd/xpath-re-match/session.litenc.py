@@ -12,8 +12,8 @@ def main():
 	print("""
 #Description: Demonstrate that re-match works.
 #Procedure:
-#1 - Validate 1.22.333 is accepted as /re-match-test-string value.
-#2 - Validate a.bb.ccc is not accepted as /re-match-test-string value..
+#1 - Validate 1.22.333 is accepted as /xpath-re-match-test-string value.
+#2 - Validate a.bb.ccc is not accepted as /xpath-re-match-test-string value..
 """)
 
 	parser = argparse.ArgumentParser()
@@ -86,11 +86,11 @@ def main():
     <default-operation>merge</default-operation>
     <test-option>set</test-option>
     <config>
-      <test-re-match-string xmlns="http://yuma123.org/ns/test-re-match">1.22.333</test-re-match-string>
+      <test-xpath-re-match-string xmlns="http://yuma123.org/ns/test-xpath-re-match">1.22.333</test-xpath-re-match-string>
     </config>
   </edit-config>
 """
-	print("edit-config - create  'test-re-match-string=1.22.333' ...")
+	print("edit-config - create  'test-xpath-re-match-string=1.22.333' ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
 	ok = result.xpath('ok')
@@ -116,11 +116,11 @@ def main():
     <default-operation>merge</default-operation>
     <test-option>set</test-option>
     <config>
-      <test-re-match-string xmlns="http://yuma123.org/ns/test-re-match" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete"/>
+      <test-xpath-re-match-string xmlns="http://yuma123.org/ns/test-xpath-re-match" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="delete"/>
     </config>
   </edit-config>
 """
-	print("edit-config - delete 'test-re-match-string' ...")
+	print("edit-config - delete 'test-xpath-re-match-string' ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
 	ok = result.xpath('//ok')
@@ -140,11 +140,11 @@ def main():
     <default-operation>merge</default-operation>
     <test-option>set</test-option>
     <config>
-      <test-re-match-string xmlns="http://yuma123.org/ns/test-re-match">a.bb.ccc</test-re-match-string>
+      <test-xpath-re-match-string xmlns="http://yuma123.org/ns/test-xpath-re-match">a.bb.ccc</test-xpath-re-match-string>
     </config>
   </edit-config>
 """
-	print("edit-config - create  'test-re-match-string=a.bb.ccc' ...")
+	print("edit-config - create  'test-xpath-re-match-string=a.bb.ccc' ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
 	ok = result.xpath('ok')

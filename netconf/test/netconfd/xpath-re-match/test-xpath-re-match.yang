@@ -1,7 +1,7 @@
-module test-re-match {
+module test-xpath-re-match {
   yang-version 1.1;
 
-  namespace "http://yuma123.org/ns/test-re-match";
+  namespace "http://yuma123.org/ns/test-xpath-re-match";
   prefix trm;
 
   import ietf-interfaces {
@@ -12,13 +12,13 @@ module test-re-match {
     "example.com";
 
   description
-    "Part of the re-match test.";
+    "Part of the xpath-re-match test.";
 
   revision 2017-07-13 {
     description
       "Initial version";
   }
-  leaf test-re-match-string {
+  leaf test-xpath-re-match-string {
     type string;
     must 're-match(.,"\d{1,3}\.\d{1,3}\.\d{1,3}")';
   }

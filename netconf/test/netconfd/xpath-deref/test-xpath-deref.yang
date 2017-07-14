@@ -1,0 +1,37 @@
+module test-xpath-deref {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-xpath-deref";
+  prefix trm;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-deref test.";
+
+  revision 2017-07-14 {
+    description
+      "Initial version";
+  }
+  container mgmt-interface {
+    leaf name {
+      type leafref {
+        path "/if:interfaces/if:interface/if:name";
+      }
+    }
+    leaf type {
+      type leafref {
+        path "/if:interfaces/if:interface[if:name=current()/../name]/if:type";
+      }
+      must 'deref(.)/../if:enabled = "true"' {
+        error-message
+          "The management interface cannot be disabled.";
+      }
+    }
+  }
+}

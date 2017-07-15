@@ -1,0 +1,17 @@
+<config>
+  <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+    <interface>
+      <name>foo</name>
+      <type
+        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+      <flags xmlns="http://yuma123.org/ns/test-xpath-bit-is-set">UP DISABLED</flags>
+    </interface>
+    <interface>
+      <name>bar</name>
+      <type
+        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+      <flags xmlns="http://yuma123.org/ns/test-xpath-bit-is-set">PROMISCUOUS DISABLED</flags>
+    </interface>
+  </interfaces>
+  <redundancy xmlns="http://yuma123.org/ns/test-xpath-bit-is-set"/>
+</config>

@@ -1,0 +1,47 @@
+module test-xpath-derived-from {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-xpath-derived-from";
+  prefix txdf;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  import ietf-yang-types {prefix yang;}
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-derived-from test.";
+
+  revision 2017-07-15 {
+    description
+      "Initial version";
+  }
+
+  identity ethernet {
+    base if:interface-type;
+  }
+
+  identity other {
+    base if:interface-type;
+  }
+
+  identity fast-ethernet {
+    base ethernet;
+  }
+
+  identity gigabit-ethernet {
+    base ethernet;
+  }
+
+  augment "/if:interfaces/if:interface" {
+    when 'derived-from(if:type, "txdf:ethernet")';
+
+    leaf ethernet-mac {
+          type yang:mac-address;
+    }
+  }
+}

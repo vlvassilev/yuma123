@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd xpath-derived-from-or-self
+./run.sh

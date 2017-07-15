@@ -10,6 +10,7 @@ test-identityref-typedef \
 test-xpath-current \
 test-xpath-re-match \
 test-xpath-deref \
-test-xpath-derived-from
+test-xpath-derived-from \
+test-xpath-derived-from-or-self
 
 SUBDIRS=multiple-edit-callbacks

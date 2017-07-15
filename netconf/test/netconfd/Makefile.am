@@ -11,6 +11,7 @@ test-xpath-current \
 test-xpath-re-match \
 test-xpath-deref \
 test-xpath-derived-from \
-test-xpath-derived-from-or-self
+test-xpath-derived-from-or-self \
+test-xpath-enum-value
 
 SUBDIRS=multiple-edit-callbacks

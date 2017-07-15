@@ -1,0 +1,51 @@
+module test-xpath-enum-value {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-xpath-enum-value";
+  prefix txev;
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-enum-value test.";
+
+  revision 2017-07-15 {
+    description
+      "Initial version";
+  }
+
+  list alarm {
+    key id;
+    leaf id {
+        type string;
+    }
+    leaf severity {
+      type enumeration {
+        enum cleared {
+          value 1;
+        }
+        enum indeterminate {
+          value 2;
+        }
+        enum minor {
+          value 3;
+        }
+        enum warning {
+          value 4;
+        }
+        enum major {
+          value 5;
+        }
+        enum critical {
+          value 6;
+        }
+      }
+    }
+  }
+
+  container call-for-help {
+    presence "Call for help mode.";
+    must "/alarm[enum-value(severity) >= 5]";
+  }
+}

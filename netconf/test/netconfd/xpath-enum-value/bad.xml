@@ -1,0 +1,7 @@
+<config>
+ <alarm xmlns="http://yuma123.org/ns/test-xpath-enum-value">
+  <id>foo</id>
+  <severity>minor</severity>
+ </alarm>
+ <call-for-help xmlns="http://yuma123.org/ns/test-xpath-enum-value"/>
+</config>

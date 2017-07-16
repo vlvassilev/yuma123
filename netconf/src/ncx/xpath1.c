@@ -130,6 +130,8 @@ static xpath_result_t* feature_enabled_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
                                            status_t *res); 
 
 /*YANG 1.1*/
+static xpath_result_t* re_match_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
+                                           status_t *res);
 static xpath_result_t* derived_from_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
                                            status_t *res);
 static xpath_result_t* derived_from_or_self_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
@@ -176,6 +178,7 @@ static xpath_fncb_t functions [] = {
 };
 
 static xpath_fncb_t functions11 [] = {
+    { XP_FN_RE_MATCH, XP_RT_BOOLEAN, 2, re_match_fn },
     { XP_FN_DERIVED_FROM, XP_RT_BOOLEAN, 2, derived_from_fn },
     { XP_FN_DERIVED_FROM_OR_SELF, XP_RT_BOOLEAN, 2, derived_from_or_self_fn },
     { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
@@ -4488,6 +4491,113 @@ static xpath_result_t *
 
 }  /* feature_enabled_fn */
 
+/********************************************************************
+* FUNCTION re_match_fn
+*
+* re_match(srting subject,string pattern) function [10.2.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 2 parms
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    re_match_fn (xpath_pcb_t *pcb,
+              dlq_hdr_t *parmQ,
+              status_t  *res)
+{
+    int ret;
+    xpath_result_t *result;
+    xpath_result_t  *parm1, *parm2;
+    xmlRegexpPtr regex;
+
+    xmlns_id_t  nsid;
+    const xmlChar *name;
+    xpath_resnode_t  *resnode;
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+    assert(parm1->restype==XP_RT_STRING || parm1->restype==XP_RT_NODESET);
+    assert(parm2->restype==XP_RT_STRING);
+
+    regex=xmlRegexpCompile(parm2->r.str);
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    assert(result);
+    result->r.boo = FALSE;
+
+    if (pcb->val==NULL) {
+        /*No data context. Just make sure the regex is valid.*/
+        if(regex) {
+            result->r.boo = TRUE;
+        } else {
+            *res = ERR_NCX_INVALID_PATTERN;
+        }
+    } else if(parm1->restype==XP_RT_NODESET) {
+    for (resnode = (xpath_resnode_t *) dlq_firstEntry(&parm1->r.nodeQ);
+         resnode != NULL;
+         resnode = (xpath_resnode_t *) dlq_nextEntry(resnode)) {
+        val_value_t* val;
+        val = val_get_first_leaf(resnode->node.valptr);
+
+        if (val && val->btyp==NCX_BT_STRING) {
+            /* all nodes in the nodeset must be leafs of type string */
+            ret = xmlRegexpExec(regex, VAL_STRING(val));
+            if (ret==1) {
+                /*at least one match in the set*/
+                result->r.boo = TRUE;
+                break;
+            } else if (ret==0) {
+                /*no match*/
+                continue;
+            } else if (ret < 0) {
+                /* pattern match execution error, but compiled ok */
+                assert(0);
+            } else {
+                /*the pattern should have been verified already*/
+                assert(0);
+            }
+        } else {
+            *res = ERR_NCX_INVALID_VALUE;
+            break;
+        }
+    }
+    } else if(parm1->restype==XP_RT_STRING) {
+        ret = xmlRegexpExec(regex, parm1->r.str);
+        if (ret==1) {
+            /*at least one match in the set*/
+            result->r.boo = TRUE;
+        } else if (ret==0) {
+            /*no match*/
+            result->r.boo = FALSE;
+        } else if (ret < 0) {
+            /* pattern match execution error, but compiled ok */
+            assert(0);
+        } else {
+            /*the pattern should have been verified already*/
+            assert(0);
+        }
+    }
+
+    if(regex) {
+        xmlRegFreeRegexp(regex);
+    }
+
+    if(*res!=NO_ERR) {
+        xpath_free_result(result);
+        return NULL;
+    }
+
+    return result;
+
+}  /* re_match_fn */
 
 static xpath_result_t *
     derived_from_common (xpath_pcb_t *pcb,

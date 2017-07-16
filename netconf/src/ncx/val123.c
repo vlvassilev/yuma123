@@ -2,6 +2,26 @@
 #include "obj.h"
 #include "val.h"
 #include "val_util.h"
+#include "val_get_leafref_targval.h"
+
+
+val_value_t* val123_deref(val_value_t* leafref_val)
+{
+    val_value_t* val;
+    val_value_t* parent_val;
+    val_value_t* root_val;
+
+    assert(leafref_val->parent);
+    parent_val=leafref_val->parent;
+    while(parent_val->parent) {
+        parent_val = parent_val->parent;
+    }
+
+    root_val=parent_val;
+
+    val=val_get_leafref_targval(leafref_val, root_val);
+    return val;
+}
 
 val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* needle_val)
 {

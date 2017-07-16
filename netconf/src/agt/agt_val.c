@@ -5292,15 +5292,15 @@ static status_t
         }
     }
 
-    if (testflags & AGT_TEST_FL_MUST) {
-        res = must_stmt_check(scb, msghdr, root, val);
+    if (testflags & AGT_TEST_FL_XPATH_TYPE) {
+        res = instance_xpath_check(scb, msghdr, val, root, NCX_LAYER_CONTENT);
         if (res != NO_ERR) {
             CHK_EXIT(res, retres);
         }
     }
 
-    if (testflags & AGT_TEST_FL_XPATH_TYPE) {
-        res = instance_xpath_check(scb, msghdr, val, root, NCX_LAYER_CONTENT);
+    if (testflags & AGT_TEST_FL_MUST) {
+        res = must_stmt_check(scb, msghdr, root, val);
         if (res != NO_ERR) {
             CHK_EXIT(res, retres);
         }

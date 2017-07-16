@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -136,6 +137,8 @@ static xpath_result_t* derived_from_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
                                            status_t *res);
 static xpath_result_t* derived_from_or_self_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
                                            status_t *res);
+static xpath_result_t* deref_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
+                                           status_t *res);
 
 /********************************************************************
 *                                  *
@@ -181,6 +184,7 @@ static xpath_fncb_t functions11 [] = {
     { XP_FN_RE_MATCH, XP_RT_BOOLEAN, 2, re_match_fn },
     { XP_FN_DERIVED_FROM, XP_RT_BOOLEAN, 2, derived_from_fn },
     { XP_FN_DERIVED_FROM_OR_SELF, XP_RT_BOOLEAN, 2, derived_from_or_self_fn },
+    { XP_FN_DEREF, XP_RT_NODESET, 1, deref_fn },
     { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
 };
 
@@ -772,9 +776,9 @@ static xpath_result_t *
 
     if (obj || val) {
         if (pcb->val) {
-            resnode = new_val_resnode(pcb, 
-                                      position, 
-                                      dblslash, 
+            resnode = new_val_resnode(pcb,
+                                      position,
+                                      dblslash,
                                       val);
             result->isval = TRUE;
         } else {
@@ -4722,6 +4726,75 @@ static xpath_result_t *
 {
     return derived_from_common(pcb, parmQ, res, TRUE);
 }  /* derived_from_or_self_fn */
+
+/********************************************************************
+* FUNCTION deref_fn
+*
+* node-set deref(node-set nodes) function [10.3.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    deref_fn (xpath_pcb_t *pcb,
+              dlq_hdr_t *parmQ,
+              status_t  *res)
+{
+    int ret;
+    xpath_result_t *result;
+    xpath_result_t  *parm1;
+    xmlRegexpPtr regex;
+
+    xmlns_id_t  nsid;
+    const xmlChar *name;
+    xpath_resnode_t  *resnode;
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    assert(parm1->restype==XP_RT_NODESET);
+
+
+    //result = new_nodeset(pcb,obj,val,0/*position*/,false /*boolean dblslash*/);
+
+    result = new_result(pcb, XP_RT_NODESET);
+    assert(result);
+
+    for (resnode = (xpath_resnode_t *) dlq_firstEntry(&parm1->r.nodeQ);
+         resnode != NULL;
+         resnode = (xpath_resnode_t *) dlq_nextEntry(resnode)) {
+        val_value_t* val;
+
+        val=val123_deref(resnode->node.valptr);
+        if(val==NULL) {
+            *res = ERR_NCX_INVALID_VALUE;
+            break;
+        }
+        resnode = new_val_resnode(pcb,
+                                  0/*position*/,
+                                  FALSE/*dblslash*/,
+                                  val);
+        assert(resnode);
+        result->isval = TRUE;
+
+        dlq_enque(resnode, &result->r.nodeQ);
+    }
+
+    if(*res!=NO_ERR) {
+        xpath_free_result(result);
+        return NULL;
+    }
+
+    return result;
+
+}  /* deref_fn */
 
 /****************   U T I L I T Y    F U N C T I O N S   ***********/
 

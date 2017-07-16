@@ -14,12 +14,13 @@ module test-xpath-re-match {
   description
     "Part of the xpath-re-match test.";
 
-  revision 2017-07-13 {
+  revision 2017-07-16 {
     description
-      "Initial version";
+      "Added non-trivial re-match expression";
   }
   leaf test-xpath-re-match-string {
     type string;
+    must 're-match("1.22.333","\d{1,3}\.\d{1,3}\.\d{1,3}")';
     must 're-match(.,"\d{1,3}\.\d{1,3}\.\d{1,3}")';
   }
 

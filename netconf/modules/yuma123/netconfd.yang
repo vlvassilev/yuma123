@@ -1,6 +1,6 @@
 module netconfd {
 
-    namespace "http://netconfcentral.org/ns/netconfd";
+    namespace "http://yuma123.org/ns/netconfd";
 
     prefix "nd";
 
@@ -12,14 +12,20 @@ module netconfd {
 
     import ietf-inet-types { prefix inet; }
 
-    organization  "Netconf Central";
+    organization  "yuma123";
 
-    contact "Andy Bierman <support@netconfcentral.org>.";
+    contact "Vladimir Vassilev <vladimir@transpacket.com>.";
 
     description 
        "Configuration Parameters for netconfd;
         This module is not advertised by the server.
         It contains only CLI parameters.";
+
+    revision 2017-07-25 {
+        description
+          "Changed --startup-error default value to 'stop'.
+           Changed responsible contact from Netconf central to yuma123";
+    }
 
     revision 2012-10-05 {
         description
@@ -372,7 +378,7 @@ module netconfd {
                 to the running configuration at boot-time.";
            }
         }
-        default continue;
+        default stop;
       }
 
       leaf superuser {

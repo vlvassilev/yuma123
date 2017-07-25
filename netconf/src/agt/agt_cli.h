@@ -70,6 +70,7 @@ extern "C" {
 #define AGT_CLI_RUNNING_ERROR (const xmlChar *)"running-error"
 #define AGT_CLI_STARTUP_ERROR (const xmlChar *)"startup-error"
 #define AGT_CLI_STARTUP_STOP  (const xmlChar *)"stop"
+#define AGT_CLI_STARTUP_CONTINUE  (const xmlChar *)"continue"
 #define AGT_CLI_DELETE_EMPTY_NPCONTAINERS \
     (const xmlChar *)"delete-empty-npcontainers"
 

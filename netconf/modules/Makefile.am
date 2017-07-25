@@ -31,11 +31,11 @@ $(top_srcdir)/netconf/modules/netconfcentral/yuma-ncx.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-time-filter.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-proc.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-app-common.yang \
-$(top_srcdir)/netconf/modules/netconfcentral/netconfd.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-mysession.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/toaster.yang
 
 yuma123_yang_DATA = \
+$(top_srcdir)/netconf/modules/yuma123/netconfd.yang \
 $(top_srcdir)/netconf/modules/yuma123/yangcli.yang \
 $(top_srcdir)/netconf/modules/yuma123/yangcli-ex.yang \
 $(top_srcdir)/netconf/modules/yuma123/netconfd-ex.yang \

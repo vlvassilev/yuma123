@@ -128,8 +128,8 @@ static void
     agt_profile.agt_has_startup = FALSE;
     agt_profile.agt_usestartup = TRUE;
     agt_profile.agt_factorystartup = FALSE;
-    agt_profile.agt_startup_error = FALSE;
-    agt_profile.agt_running_error = FALSE;
+    agt_profile.agt_startup_error = TRUE;
+    agt_profile.agt_running_error = TRUE;
     agt_profile.agt_logappend = FALSE;
     agt_profile.agt_xmlorder = FALSE;
     agt_profile.agt_deleteall_ok = FALSE;

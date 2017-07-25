@@ -261,8 +261,8 @@ static void
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP_ERROR);
     if (val && val->res == NO_ERR) {
         if (!xml_strcmp(VAL_ENUM_NAME(val),
-                        AGT_CLI_STARTUP_STOP)) {
-            agt_profile->agt_startup_error = TRUE;
+                        AGT_CLI_STARTUP_CONTINUE)) {
+            agt_profile->agt_startup_error = FALSE;
         }
     }
 

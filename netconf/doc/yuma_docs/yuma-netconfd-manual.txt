@@ -8089,7 +8089,7 @@ recoverable errors.
 
 |-
 |  Default:
-|  continue
+|  stop
 
 |-
 |  Min Allowed:
@@ -8105,7 +8105,7 @@ recoverable errors.
 
 |-
 |  Example:
-|   netconfd  --startup-error=stop
+|   netconfd  --startup-error=continue
 
 |}
 == --subdirs ==

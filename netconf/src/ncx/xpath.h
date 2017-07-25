@@ -140,6 +140,7 @@ extern "C" {
 #define XP_FN_DERIVED_FROM         (const xmlChar *)"derived-from"
 #define XP_FN_DERIVED_FROM_OR_SELF (const xmlChar *)"derived-from-or-self"
 #define XP_FN_DEREF                (const xmlChar *)"deref"
+#define XP_FN_ENUM_VALUE           (const xmlChar *)"enum-value"
 
 /* XPath NodeType values */
 #define XP_NT_COMMENT              (const xmlChar *)"comment"

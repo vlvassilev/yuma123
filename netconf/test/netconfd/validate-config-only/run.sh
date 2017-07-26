@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [ "$RUN_WITH_CONFD" != "" ] ; then
+    # skipped test return value
+    exit 77
+fi
+
 rm -rf tmp || true
 mkdir tmp
 

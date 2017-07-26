@@ -213,3 +213,27 @@ bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_
 
     return FALSE;
 }
+
+bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
+{
+    ncx_lmem_t         *listmem;
+    assert(bits_val);
+    assert(bit_str);
+
+    if(dlq_empty(&bits_val->v.list.memQ)) {
+        return FALSE;
+    }
+
+    assert(NCX_BT_BITS == bits_val->v.list.btyp);
+    for (listmem = (ncx_lmem_t *)
+         dlq_firstEntry(&bits_val->v.list.memQ);
+         listmem != NULL;
+        listmem = (ncx_lmem_t *)dlq_nextEntry(listmem)) {
+        assert(listmem->val.str);
+        if(0==strcmp(listmem->val.str, bit_str)) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}

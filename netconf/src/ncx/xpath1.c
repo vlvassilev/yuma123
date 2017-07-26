@@ -141,6 +141,8 @@ static xpath_result_t* deref_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
                                            status_t *res);
 static xpath_result_t* enum_value_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
                                            status_t *res);
+static xpath_result_t* bit_is_set_fn( xpath_pcb_t *pcb, dlq_hdr_t *parmQ,
+                                           status_t *res);
 
 /********************************************************************
 *                                  *
@@ -188,6 +190,7 @@ static xpath_fncb_t functions11 [] = {
     { XP_FN_DERIVED_FROM_OR_SELF, XP_RT_BOOLEAN, 2, derived_from_or_self_fn },
     { XP_FN_DEREF, XP_RT_NODESET, 1, deref_fn },
     { XP_FN_ENUM_VALUE, XP_RT_NUMBER, 1, enum_value_fn },
+    { XP_FN_BIT_IS_SET, XP_RT_BOOLEAN, 2, bit_is_set_fn },
     { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
 };
 
@@ -4854,6 +4857,89 @@ static xpath_result_t *
     return result;
 
 }  /* enum_value_fn */
+
+/********************************************************************
+* FUNCTION bit_is_set_fn
+*
+*  boolean bit-is-set(node-set nodes, string bit-name) function [10.6.1]
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 parm
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    bit_is_set_fn (xpath_pcb_t *pcb,
+              dlq_hdr_t *parmQ,
+              status_t  *res)
+{
+    int ret;
+    xpath_result_t *result;
+    xpath_result_t  *parm1;
+    xpath_result_t  *parm2;
+    xmlRegexpPtr regex;
+
+    xmlns_id_t  nsid;
+    const xmlChar *name;
+    xpath_resnode_t  *resnode;
+
+    parm1 = (xpath_result_t *)dlq_firstEntry(parmQ);
+    assert(parm1->restype==XP_RT_NODESET);
+
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm1);
+    assert(parm2->restype==XP_RT_STRING);
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    assert(result);
+
+    result->r.boo = TRUE;
+
+
+    for (resnode = (xpath_resnode_t *) dlq_firstEntry(&parm1->r.nodeQ);
+         resnode != NULL;
+         resnode = (xpath_resnode_t *) dlq_nextEntry(resnode)) {
+
+        uint32 position;
+        obj_template_t* obj;
+
+        if(pcb->val) {
+            obj = resnode->node.valptr->obj;
+        } else {
+            obj = resnode->node.objptr;
+        }
+
+        const typ_def_t *typdef = obj_get_ctypdef(obj);
+        *res = val_bit_ok (typdef,
+                           parm2->r.str,
+                           &position);
+
+        if(*res != NO_ERR) {
+           break;
+        }
+
+        if(pcb->val) {
+            if(!val123_bit_is_set(resnode->node.valptr, parm2->r.str)) {
+                result->r.boo = FALSE;
+            }
+        }
+        break;
+    }
+
+    if(*res!=NO_ERR) {
+        xpath_free_result(result);
+        return NULL;
+    }
+
+    return result;
+
+}  /* bit_is_set_fn */
 
 /****************   U T I L I T Y    F U N C T I O N S   ***********/
 

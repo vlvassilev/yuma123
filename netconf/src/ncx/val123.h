@@ -9,3 +9,4 @@ bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_
 ncx_identity_t* ncx123_identity_get_first_base(const ncx_identity_t* identity);
 ncx_identity_t* ncx123_identity_get_next_base(const ncx_identity_t* identity, const ncx_identity_t *identity_base);
 val_value_t* val123_deref(val_value_t* leafref_val);
+bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str);

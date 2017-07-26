@@ -1,0 +1,39 @@
+module test-xpath-bit-is-set-bad-bit-name {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-xpath-bit-is-set-bad-bit-name";
+  prefix txevbbn;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-bit-is-set test.";
+
+  revision 2017-07-25 {
+    description
+      "Initial version";
+  }
+
+  
+  augment "/if:interfaces/if:interface" {
+    leaf flags {
+      type bits {
+        bit UP;
+        bit PROMISCUOUS;
+        bit DISABLED;
+      }
+    }
+  }
+
+  container redundancy {
+    presence "Enables redundancy.";
+    description "At least 2 interfaces must have UP bits to configure redundancy";
+    must '2<=count(/if:interfaces/if:interface[bit-is-set(txevbbn:flags, "BAD-BIT-NAME")])';
+    //must '/if:interfaces/if:interface[bit-is-set(txevbbn:flags, "BAD-BIT-NAME")]';
+  }
+}

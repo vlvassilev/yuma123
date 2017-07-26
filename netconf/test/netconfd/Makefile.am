@@ -13,6 +13,8 @@ test-xpath-deref \
 test-xpath-derived-from \
 test-xpath-derived-from-or-self \
 test-xpath-enum-value \
-test-xpath-bit-is-set
+test-xpath-bit-is-set \
+test-yang-library
+
 
 SUBDIRS=multiple-edit-callbacks

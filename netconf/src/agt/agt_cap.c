@@ -273,6 +273,19 @@ status_t
         }
     }
 
+    /* set the yang-library capability */
+    if (res == NO_ERR) {
+        res = cap_add_std(newmycaps, CAP_STDID_YANG_LIBRARY);
+        if (res == NO_ERR) {
+#if 0
+            res = cap_add_stdval(newcaps,
+                                 CAP_STDID_YANG_LIBRARY);
+#else
+            res = cap_add_yang_library_val(newcaps, "2016-06-21", "123");
+#endif
+        }
+    }
+
     /* set the with-defaults capability */
     if (res == NO_ERR) {
         res = cap_add_withdef(newmycaps, defstyle);

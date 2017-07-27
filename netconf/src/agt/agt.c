@@ -697,6 +697,12 @@ status_t
     /* initialize the session handler data structures */
     agt_ses_init();
 
+    /* load the yang library module */
+    res = agt_yang_library_init();
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* load the system module */
     res = agt_sys_init();
     if (res != NO_ERR) {
@@ -903,6 +909,12 @@ status_t
 
     /* load the nacm access control DM module */
     res = agt_acm_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* load any yang library module non-config data */
+    res = agt_yang_library_init2();
     if (res != NO_ERR) {
         return res;
     }
@@ -1148,6 +1160,7 @@ void
         agt_ncx_cleanup();
         agt_hello_cleanup();
         agt_cli_cleanup();
+        agt_yang_library_cleanup();
         agt_sys_cleanup();
         agt_state_cleanup();
         agt_not_cleanup();

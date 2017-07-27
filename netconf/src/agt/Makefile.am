@@ -19,6 +19,7 @@ $(top_srcdir)/netconf/src/agt/agt_rpcerr.c \
 $(top_srcdir)/netconf/src/agt/agt_ses.c \
 $(top_srcdir)/netconf/src/agt/agt_signal.c \
 $(top_srcdir)/netconf/src/agt/agt_state.c \
+$(top_srcdir)/netconf/src/agt/agt_yang_library.c \
 $(top_srcdir)/netconf/src/agt/agt_sys.c \
 $(top_srcdir)/netconf/src/agt/agt_time_filter.c \
 $(top_srcdir)/netconf/src/agt/agt_timer.c \

@@ -43,63 +43,22 @@ date         init     comment
 #include  <stdlib.h>
 #include  <string.h>
 #include  <memory.h>
+#include  <assert.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_cap
 #include  "cap.h"
-#endif
-
-#ifndef _H_dlq
 #include  "dlq.h"
-#endif
-
-#ifndef _H_log
 #include  "log.h"
-#endif
-
-#ifndef _H_ncx
 #include  "ncx.h"
-#endif
-
-#ifndef _H_ncx_feature
 #include  "ncx_feature.h"
-#endif
-
-#ifndef _H_ncx_list
 #include  "ncx_list.h"
-#endif
-
-#ifndef _H_ncxconst
 #include  "ncxconst.h"
-#endif
-
-#ifndef _H_ncxtypes
 #include  "ncxtypes.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_xmlns
 #include  "xmlns.h"
-#endif
-
-#ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
-
-#ifndef _H_xml_val
 #include  "xml_val.h"
-#endif
-
-#ifndef _H_yangconst
 #include  "yangconst.h"
-#endif
-
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -151,6 +110,7 @@ static cap_stdrec_t stdcaps[] =
   { CAP_STDID_V11, CAP_BIT_V11, CAP_NAME_V11 },
   { CAP_STDID_VALIDATE11, CAP_BIT_VALIDATE11, CAP_NAME_VALIDATE11 },
   { CAP_STDID_CONF_COMMIT11, CAP_BIT_CONF_COMMIT11, CAP_NAME_CONF_COMMIT11 },
+  { CAP_STDID_YANG_LIBRARY, CAP_BIT_YANG_LIBRARY, CAP_NAME_YANG_LIBRARY },
   { CAP_STDID_LAST_MARKER, 0x0, 
     (const xmlChar *)"" } /* end-of-list marker */
 };
@@ -1482,6 +1442,46 @@ status_t
     return NO_ERR;
 
 }  /* cap_add_withdefval */
+
+/********************************************************************
+* FUNCTION cap_add_yang_library_val
+*
+* Add the :yang-library:1.0 capability to the list
+* value struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap
+*    revision == the basic-mode with-default style
+*    module_set_id == the module_set_id hash
+*
+* OUTPUTS:
+*    status
+*********************************************************************/
+status_t
+    cap_add_yang_library_val (val_value_t *caplist,
+                        const xmlChar *revision,
+                        const xmlChar *module_set_id)
+{
+    char* format = "urn:ietf:params:netconf:capability:yang-library:1.0?revision=%s&module-set-id=%s";
+    val_value_t          *capval;
+    char*                 buf;
+
+    assert(caplist && revision && module_set_id);
+
+    /* setup the string */
+    buf = (char*)malloc(strlen(format)+strlen(revision)+strlen(module_set_id)+1);
+    assert(buf);
+    sprintf(buf,format,revision,module_set_id);
+
+    /* make the capability element */
+    capval = xml_val_new_string(NCX_EL_CAPABILITY,
+                                xmlns_nc_id(),
+                                buf);
+
+    val_add_child(capval, caplist);
+    return NO_ERR;
+
+}  /* cap_add_yang_library_val */
 
 
 /********************************************************************

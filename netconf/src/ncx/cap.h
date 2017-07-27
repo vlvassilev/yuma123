@@ -31,17 +31,9 @@ date             init     comment
 */
 #include <xmlstring.h>
 
-#ifndef _H_ncxtypes
 #include "ncxtypes.h"
-#endif
-
-#ifndef _H_status
 #include "status.h"
-#endif
-
-#ifndef _H_val
 #include "val.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,6 +94,7 @@ extern "C" {
 #define CAP_BIT_V11           bit13
 #define CAP_BIT_CONF_COMMIT11 bit14
 #define CAP_BIT_VALIDATE11    bit15
+#define CAP_BIT_YANG_LIBRARY  bit16
 
 /* put the version numbers in the capability names for now */
 #define CAP_NAME_V1                 ((const xmlChar *)"base:1.0")
@@ -120,6 +113,7 @@ extern "C" {
 #define CAP_NAME_V11                ((const xmlChar *)"base:1.1")
 #define CAP_NAME_VALIDATE11         ((const xmlChar *)"validate:1.1")
 #define CAP_NAME_CONF_COMMIT11      ((const xmlChar *)"confirmed-commit:1.1")
+#define CAP_NAME_YANG_LIBRARY       ((const xmlChar *)"yang-library:1.0")
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="
@@ -130,6 +124,7 @@ extern "C" {
 #define CAP_PROTOCOL_EQ        (const xmlChar *)"protocol="
 #define CAP_BASIC_EQ           (const xmlChar *)"basic-mode="
 #define CAP_SUPPORTED_EQ       (const xmlChar *)"also-supported="
+#define CAP_MODULE_SET_ID_EQ   (const xmlChar *)"module-set-id="
 
 
 #define CAP_SCHEMA_RETRIEVAL \
@@ -169,6 +164,7 @@ typedef enum cap_stdid_t_ {
     CAP_STDID_V11,
     CAP_STDID_VALIDATE11,
     CAP_STDID_CONF_COMMIT11,
+    CAP_STDID_YANG_LIBRARY,
     CAP_STDID_LAST_MARKER
 } cap_stdid_t;
 
@@ -275,7 +271,7 @@ extern void
 * Add a standard protocol capability to the list
 *
 * INPUTS:
-*    caplist == capability list that will contain the standard cap 
+*    caplist == capability list that will contain the standard cap
 *    capstd == the standard capability ID
 * RETURNS:
 *    status, should always be NO_ERR
@@ -407,6 +403,25 @@ extern status_t
 extern status_t
     cap_add_withdefval (val_value_t *caplist,
 			const xmlChar *defstyle);
+
+/********************************************************************
+* FUNCTION cap_add_yang_library_val
+*
+* Add the :yang-library:1.0 capability to the list
+* value struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    revision == the basic-mode with-default style
+*    module_set_id == the module_set_id hash
+*
+* OUTPUTS:
+*    status
+*********************************************************************/
+extern status_t
+    cap_add_yang_library (val_value_t *caplist,
+			const xmlChar *revision,
+			const xmlChar *module_set_id);
 
 
 /********************************************************************

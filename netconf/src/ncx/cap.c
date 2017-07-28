@@ -752,7 +752,7 @@ status_t
     const xmlChar *str;
     uint32         caplen, namelen, schemelen, basiclen;
     cap_stdid_t    stdid;
-
+    status_t       res;
 #ifdef DEBUG
     if (!caplist || !uri) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -851,6 +851,43 @@ status_t
                         }
                     }
                 }
+            }
+            break;
+        case CAP_STDID_YANG_LIBRARY:
+            namelen = xml_strlen(stdcaps[stdid].cap_name);
+            if (!xml_strncmp(str, stdcaps[stdid].cap_name,
+                             namelen)) {
+
+                char* params_str;
+                char* revision_str;
+                char* module_set_id_str;
+                int i;
+
+                /* parsing ?revision=2016-06-21&module-set-id=.. */
+                str += namelen;
+
+                params_str=strdup(str);
+
+
+                revision_str = strstr(params_str,CAP_REVISION_EQ);
+                module_set_id_str = strstr(params_str,CAP_MODULE_SET_ID_EQ);
+
+                for(i=0;params_str[i]!=0;i++) {
+                    if(params_str[i]=='&') params_str[i]=0;
+                }
+
+
+                if(params_str[0]!='?' ||
+                   revision_str==NULL ||
+                   module_set_id_str==NULL ||
+                   strlen(revision_str)!=(strlen(CAP_REVISION_EQ)+strlen("2017-07-28")) ||
+                   strlen(module_set_id_str)<=strlen(CAP_MODULE_SET_ID_EQ)
+                   ) {
+                    log_warn("Warning: Bad yang-library:1.0 capability uri: %s\n", uri);
+                }
+                res=cap_add_std(caplist, stdid);
+                free(params_str);
+                return res;
             }
             break;
         default:

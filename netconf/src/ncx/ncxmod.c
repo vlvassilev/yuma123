@@ -5762,6 +5762,7 @@ ncxmod_search_result_t *
     newsr->res = sr->res;
     newsr->nslen = sr->nslen;
     newsr->cap = sr->cap;
+    newsr->module_val = sr->module_val;
     newsr->capmatch = sr->capmatch;
     newsr->ismod = sr->ismod;
 

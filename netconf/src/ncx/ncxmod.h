@@ -238,6 +238,7 @@ typedef struct ncxmod_search_result_t_ {
     status_t       res;           /* search result, only use if NO_ERR */
     uint32         nslen;         /* length of base part of namespacestr */
     cap_rec_t     *cap;           /* back-ptr to source capability URI */
+    val_value_t   *module_val;    /* back-ptr to yang-library /module-state/module */
     boolean        capmatch;      /* set by yangcli; internal use only */
     boolean        ismod;         /* TRUE=module; FALSE=submodule */
 } ncxmod_search_result_t;

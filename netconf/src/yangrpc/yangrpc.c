@@ -64,6 +64,7 @@
 #include "yangcli_alias.h"
 #include "yangcli_autoload.h"
 #include "yangcli_autolock.h"
+#include "yangcli_yang_library.h"
 #include "yangcli_save.h"
 #include "yangcli_tab.h"
 #include "yangcli_uservars.h"
@@ -499,6 +500,42 @@ status_t
 
 }  /* autoload_blocking_get_modules */
 
+/********************************************************************
+* FUNCTION yang_library_blocking_get_modules
+*
+* Send <get> for /modules-state
+*
+* INPUTS:
+*   server_cb == server session control block to use
+*   scb == session control block to use
+*
+* OUTPUTS:
+*
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    yang_library_blocking_get_module_set (server_cb_t *server_cb,
+                                ses_cb_t *scb)
+{
+    status_t                 res;
+    obj_template_t          *rpc;
+    val_value_t             *reqdata;
+    val_value_t             *reply_val;
+
+    res = make_get_yang_library_modules_state_reqdata(server_cb,
+                                      scb,
+                                      &rpc,
+                                      &reqdata);
+    assert(res == NO_ERR);
+    res = yangrpc_exec((yangrpc_cb_ptr_t) server_cb, reqdata, &reply_val);
+    assert(res == NO_ERR);
+    res = get_yang_library_modules_state_reply_to_searchresult_entries(server_cb, scb, reply_val);
+    return res;
+
+}  /* yang_library_blocking_get_modules */
+
 status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key, char* extra_args, yangrpc_cb_ptr_t* yangrpc_cb_ptr)
 {
     char* server_arg;
@@ -758,10 +795,10 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
         }
         /* incoming hello OK and outgoing hello is sent */
         server_cb->state = MGR_IO_ST_CONN_IDLE;
-        report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
-        check_module_capabilities(server_cb, scb, autoload_blocking_get_modules);
         mscb = (mgr_scb_t *)scb->mgrcb;
         ncx_set_temp_modQ(&mscb->temp_modQ);
+        report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
+        check_module_capabilities(server_cb, scb, autoload_blocking_get_modules, yang_library_blocking_get_module_set);
 
     }
 

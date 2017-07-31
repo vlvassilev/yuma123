@@ -3,6 +3,7 @@ lib_LTLIBRARIES = libyangrpc.la
 libyangrpc_la_SOURCES = \
 $(top_srcdir)/netconf/src/yangrpc/yangrpc.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_autoload.c \
+$(top_srcdir)/netconf/src/yangcli/yangcli_yang_library.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_cmd.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_util.c\
 $(top_srcdir)/netconf/src/yangcli/yangcli_autolock.c \

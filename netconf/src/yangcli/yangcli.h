@@ -339,7 +339,8 @@ typedef enum command_mode_t {
     CMD_MODE_AUTOLOCK,
     CMD_MODE_AUTOUNLOCK,
     CMD_MODE_AUTODISCARD,
-    CMD_MODE_SAVE
+    CMD_MODE_SAVE,
+    CMD_MODE_YANG_LIBRARY
 } command_mode_t;
 
 
@@ -850,7 +851,8 @@ extern status_t
 extern void
     check_module_capabilities (server_cb_t *server_cb,
                                ses_cb_t *scb,
-                               status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*));
+                               status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*),
+                               status_t (*get_module_set_fn)(server_cb_t*,ses_cb_t*));
 extern status_t
     process_cli_input (server_cb_t *server_cb,
                        int argc,

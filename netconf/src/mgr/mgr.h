@@ -83,6 +83,9 @@ typedef struct mgr_scb_t_ {
     val_value_t    *lastroot;
     xmlChar        *lastchtime;
 
+    /* yang-library */
+    val_value_t    *modules_state_val;
+
     /* transport info */
     xmlChar         *target;
     LIBSSH2_SESSION *session;

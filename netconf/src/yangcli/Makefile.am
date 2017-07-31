@@ -2,6 +2,7 @@ bin_PROGRAMS = yangcli
 
 yangcli_SOURCES = \
 $(top_srcdir)/netconf/src/yangcli/yangcli_autoload.c \
+$(top_srcdir)/netconf/src/yangcli/yangcli_yang_library.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_autolock.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli.c \
 $(top_srcdir)/netconf/src/yangcli/yangcli_cmd.c \

@@ -44,6 +44,7 @@ date         init     comment
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>
+#include <assert.h>
 
 /* #define MEMORY_DEBUG 1 */
 
@@ -89,6 +90,7 @@ date         init     comment
 #include "yangcli_cmd.h"
 #include "yangcli_alias.h"
 #include "yangcli_autoload.h"
+#include "yangcli_yang_library.h"
 #include "yangcli_autolock.h"
 #include "yangcli_save.h"
 #include "yangcli_tab.h"
@@ -2606,17 +2608,23 @@ static void
 * then searches for any missing imports will be done
 * using the normal search path, including YUMA_MODPATH.
 *
+* If yang library is enabled and supported get_module_set_fn is
+* called to resolve the yang library module set.
+*
 * INPUTS:
 *  server_cb == server control block to use
 *  scb == session control block
-*  blocking_get_modules == if true blocks until all modules are
-*   downloaded with synchroneous <get-schema> calls.
+*  get_modules_fn  == function retrieving schema with <get-schema> calls.
+*    can be either blocking or async
+*  get_module_set_fn == when yang-library is supported <get> /module-state
+*    can be either bloocking or async
 *
 *********************************************************************/
 void
     check_module_capabilities (server_cb_t *server_cb,
                                ses_cb_t *scb,
-                               status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*))
+                               status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*),
+                               status_t (*get_module_set_fn)(server_cb_t*,ses_cb_t*))
 {
     mgr_scb_t              *mscb;
     ncx_module_t           *mod;
@@ -2625,8 +2633,29 @@ void
     ncxmod_search_result_t *searchresult, *libresult;
     status_t                res;
     boolean                 retrieval_supported;
+    val_value_t             *module_val;
 
     mscb = (mgr_scb_t *)scb->mgrcb;
+
+
+    if(cap_std_set(&mscb->caplist, CAP_STDID_YANG_LIBRARY) && mscb->modules_state_val==NULL ) {
+        assert(get_module_set_fn);
+        /* use yang-library  <get> /modules-state to figure module-set instead of the <hello> capabilities */
+        res = get_module_set_fn(server_cb, scb);
+        if (res != NO_ERR) {
+            log_error("\nError: get_module_set_fn failed (%s)",
+                       get_error_string(res));
+            return;
+        } else if (res == NO_ERR && server_cb->command_mode == CMD_MODE_YANG_LIBRARY) {
+            log_info("\n\nStarted yang library module set retrieval ...\n");
+            return;
+        } else {
+            log_info("\n\nRetrived yang library module set.\n");
+        }
+    }
+
+    retrieval_supported = cap_set(&mscb->caplist,
+                                  CAP_SCHEMA_RETRIEVAL);
 
     log_info("\n\nChecking Server Modules...\n");
 
@@ -2634,46 +2663,72 @@ void
         log_warn("\nWarning: NETCONF v1 capability not found");
     }
 
-    retrieval_supported = cap_set(&mscb->caplist,
-                                  CAP_SCHEMA_RETRIEVAL);
-
     /* check all the YANG modules;
      * build a list of modules that
      * the server needs to get somehow
      * or proceed without them
      * save the results in the server_cb->searchresultQ
      */
-    cap = cap_first_modcap(&mscb->caplist);
-    while (cap) {
+
+    if(mscb->modules_state_val) {
+        /* yang-library supported */
+        cap=NULL;
+        module_val = val_find_child(mscb->modules_state_val, "ietf-yang-library", "module");
+    } else {
+        cap = cap_first_modcap(&mscb->caplist);
+        module_val=NULL;
+    }
+
+    do {
+
         mod = NULL;
         module = NULL;
         revision = NULL;
         namespacestr = NULL;
         libresult = NULL;
 
-        cap_split_modcap(cap,
-                         &module,
-                         &revision,
-                         &namespacestr);
+        if(module_val) {
+           val_value_t* val;
+           val = val_find_child(module_val, "ietf-yang-library", "name");
+           assert(val);
+           module = VAL_STRING(val);
 
-        if (namespacestr == NULL) {
-            /* try the entire base part of the URI if there was
-             * no module capability parsed
-             */
-            namespacestr = cap->cap_uri;
-        }
+           val = val_find_child(module_val, "ietf-yang-library", "revision");
+           assert(val);
+           revision = VAL_STRING(val);
 
-        if (namespacestr == NULL) {
-            if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
-                log_warn("\nWarning: skipping enterprise capability "
-                         "for URI '%s'", 
-                         cap->cap_uri);
+           val = val_find_child(module_val, "ietf-yang-library", "namespace");
+           assert(val);
+           namespacestr = VAL_STRING(val);
+        } else {
+            if(cap==NULL) {
+                break;
             }
-            cap = cap_next_modcap(cap);
-            continue;
+            cap_split_modcap(cap,
+                             &module,
+                             &revision,
+                             &namespacestr);
+
+            if (namespacestr == NULL) {
+                /* try the entire base part of the URI if there was
+                 * no module capability parsed
+                 */
+                namespacestr = cap->cap_uri;
+            }
+
+            if (namespacestr == NULL) {
+                if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
+                    log_warn("\nWarning: skipping enterprise capability "
+                             "for URI '%s'",
+                             cap->cap_uri);
+                }
+                cap = cap_next_modcap(cap);
+                continue;
+            }
         }
 
         if (module == NULL) {
+            assert(cap);
             /* check if there is a module in the modlibQ that
              * has the same namespace URI as 'namespacestr' base
              */
@@ -2726,7 +2781,10 @@ void
                     searchresult = ncxmod_find_module(module, revision);
                 }
                 if (searchresult) {
+
                     searchresult->cap = cap;
+                    searchresult->module_val = module_val;
+
                     if (searchresult->res != NO_ERR) {
                         if (LOGDEBUG2) {
                             log_debug2("\nLocal module search failed (%s)",
@@ -2819,6 +2877,7 @@ void
                                                          revision);
                         if (searchresult) {
                             searchresult->cap = cap;
+                            searchresult->module_val = module_val;
                             dlq_enque(searchresult, &server_cb->searchresultQ);
                             if (LOGDEBUG) {
                                 log_debug("\nyangcli_autoload: Module '%s' "
@@ -2856,14 +2915,19 @@ void
                 return;
             } else {
                 searchresult->cap = cap;
+                searchresult->module_val = module_val;
                 searchresult->capmatch = TRUE;
                 dlq_enque(searchresult, &server_cb->searchresultQ);
             }
         }
 
         /* move on to the next module */
-        cap = cap_next_modcap(cap);
-    }
+        if(cap) {
+            cap = cap_next_modcap(cap);
+        } else {
+            module_val = val_find_next_child(mscb->modules_state_val, "ietf-yang-library", "module", module_val);
+        }
+    } while(cap || module_val);
 
     /* get all the advertised YANG data model modules into the
      * session temp work directory that are local to the system
@@ -3174,7 +3238,8 @@ static mgr_io_state_t
 
             /* check locks timeout */
             if (!(server_cb->command_mode == CMD_MODE_NORMAL ||
-                  server_cb->command_mode == CMD_MODE_AUTOLOAD)) {
+                  server_cb->command_mode == CMD_MODE_AUTOLOAD ||
+                  server_cb->command_mode == CMD_MODE_YANG_LIBRARY)) {
 
                 if (check_locks_timeout(server_cb)) {
                     res = ERR_NCX_TIMEOUT;
@@ -3184,7 +3249,6 @@ static mgr_io_state_t
                     }
 
                     switch (server_cb->command_mode) {
-                    break;
                     case CMD_MODE_AUTODISCARD:
                     case CMD_MODE_AUTOLOCK:
                         handle_locks_cleanup(server_cb);
@@ -3238,9 +3302,10 @@ static mgr_io_state_t
                    && dlq_empty(&scb->outQ)) {
             /* incoming hello OK and outgoing hello is sent */
             server_cb->state = MGR_IO_ST_CONN_IDLE;
-            report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
-            check_module_capabilities(server_cb, scb, autoload_start_get_modules);
             mscb = (mgr_scb_t *)scb->mgrcb;
+
+            report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
+            check_module_capabilities(server_cb, scb, autoload_start_get_modules, yang_library_start_get_module_set);
             ncx_set_temp_modQ(&mscb->temp_modQ);
         } else {
             /* check timeout */
@@ -3273,6 +3338,7 @@ static mgr_io_state_t
                 res = ERR_NCX_TIMEOUT;
             } else if (!(server_cb->command_mode == CMD_MODE_NORMAL ||
                          server_cb->command_mode == CMD_MODE_AUTOLOAD ||
+                         server_cb->command_mode == CMD_MODE_YANG_LIBRARY ||
                          server_cb->command_mode == CMD_MODE_SAVE)) {
                 if (check_locks_timeout(server_cb)) {
                     res = ERR_NCX_TIMEOUT;
@@ -3286,6 +3352,7 @@ static mgr_io_state_t
                 server_cb->state = MGR_IO_ST_CONN_IDLE;
 
                 switch (server_cb->command_mode) {
+                    break;
                 case CMD_MODE_NORMAL:
                     break;
                 case CMD_MODE_AUTOLOAD:
@@ -4571,6 +4638,15 @@ void
                                             scb,
                                             rpy->reply,
                                             anyerrors);
+            break;
+        case CMD_MODE_YANG_LIBRARY:
+            (void)yang_library_handle_rpc_reply(server_cb,
+                                            scb,
+                                            rpy->reply,
+                                            anyerrors);
+            /* re-check now with the yang library module set */
+            check_module_capabilities(server_cb, scb, autoload_start_get_modules, NULL);
+
             break;
         case CMD_MODE_AUTOLOCK:
             done = FALSE;

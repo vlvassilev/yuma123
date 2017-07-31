@@ -178,7 +178,7 @@ status_t make_get_schema_reqdata(server_cb_t *server_cb,
 *
 * format will be hard-wired to yang
 *
-* INPUTS:
+* INPUT:
 *   server_cb == server control block to use
 *   scb == session control block to use
 *   module == module to get
@@ -253,7 +253,6 @@ static status_t
     return res;
 
 } /* send_get_schema_to_server */
-
 
 /********************************************************************
 * FUNCTION save_schema_file
@@ -460,7 +459,6 @@ status_t get_schema_reply_to_temp_filcb(server_cb_t * server_cb, mgr_scb_t *mscb
     return res;
 }
 
-
 /********************************************************************
  * FUNCTION copy_module_to_tempdir
  * 
@@ -521,7 +519,7 @@ static status_t
 #endif
 
     /* open the destination file for writing */
-    destfile = fopen((const char *)temp_filcb->source, "w");
+    destfile = fopen((const char *)temp_filcb->source, "w+");
     if (destfile == NULL) {
         res = errno_to_status();
         ncxmod_free_session_tempfile(temp_filcb);
@@ -1023,6 +1021,21 @@ status_t
     res = NO_ERR;
     mscb = (mgr_scb_t *)scb->mgrcb;
     searchresult = server_cb->cursearchresult;
+
+    if(searchresult==NULL) {
+        /* check if this is yang-library <get> for /modules-state and add new searchresult entries */
+        res = get_yang_library_modules_state_reply_to_searchresult_entries(server_cb, scb, reply);
+        if (res == NO_ERR) {
+            searchresult = server_cb->cursearchresult;
+        } else {
+            assert(0);
+        }
+        if(searchresult==NULL) {
+            /* no search results left to get */
+            return autoload_compile_modules(server_cb, scb);
+        }
+    }
+
     module = searchresult->module;
     revision = searchresult->revision;
 
@@ -1196,7 +1209,7 @@ status_t
      * the modules in order; all imports should already
      * be preloaded into the session work directory
      */
-    while (res == NO_ERR && 
+    while (/*res == NO_ERR && */
            !dlq_empty(&server_cb->searchresultQ)) {
 
         searchresult = (ncxmod_search_result_t *)
@@ -1218,10 +1231,12 @@ status_t
         if(mod==NULL) {
             res = autoload_module(searchresult->module,
                                   searchresult->revision,
-                                  &searchresult->cap->cap_deviation_list,
+                                  searchresult->cap?&searchresult->cap->cap_deviation_list:NULL,
                                   &mod);
 
+            searchresult->res = res;
         }
+
         if (res == NO_ERR) {
             if (mod == NULL) {
                 /* ??? not sure if this could happen ?? */
@@ -1246,8 +1261,8 @@ status_t
                  * in the temp_modQ 
                  */
                 modptr = new_modptr(mod, 
-                                    &searchresult->cap->cap_feature_list,
-                                    &searchresult->cap->cap_deviation_list);
+                                    searchresult->cap?&searchresult->cap->cap_feature_list:NULL,
+                                    searchresult->cap?&searchresult->cap->cap_deviation_list:NULL);
                 if (modptr == NULL) {
                     log_error("\nMalloc failure");
                 } else {

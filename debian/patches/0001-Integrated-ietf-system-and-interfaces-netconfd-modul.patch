@@ -1,31 +1,20 @@
-From: Vladimir Vassilev <vladimir@transpacket.com>
-Date: Mon, 1 Aug 2016 16:51:54 +0200
-Subject: Integrated ietf system and interfaces netconfd module packages
-
----
- Makefile.am                                 | 2 ++
- configure.ac                                | 2 ++
- example-modules/ietf-interfaces/Makefile.am | 9 +++++++--
- example-modules/ietf-system/Makefile.am     | 9 +++++++--
- 4 files changed, 18 insertions(+), 4 deletions(-)
-
-diff --git a/Makefile.am b/Makefile.am
-index d5a3a98..9473b60 100644
---- a/Makefile.am
-+++ b/Makefile.am
+Index: yuma123_2.10/Makefile.am
+===================================================================
+--- yuma123_2.10.orig/Makefile.am
++++ yuma123_2.10/Makefile.am
 @@ -9,6 +9,8 @@ netconf/src/yangcli \
  libtoaster/src \
  netconf/modules \
  example-modules/helloworld \
-+example-modules/ietf-system \
 +example-modules/ietf-interfaces \
++example-modules/ietf-system \
  netconf/src/yangrpc \
  netconf/src/yangrpc/example \
- netconf/src/yangdump \
-diff --git a/configure.ac b/configure.ac
-index 0057431..1ae9ae2 100644
---- a/configure.ac
-+++ b/configure.ac
+ netconf/man
+Index: yuma123_2.10/configure.ac
+===================================================================
+--- yuma123_2.10.orig/configure.ac
++++ yuma123_2.10/configure.ac
 @@ -79,6 +79,8 @@ AC_CONFIG_FILES([
          netconf/src/subsys/Makefile
          libtoaster/src/Makefile
@@ -35,40 +24,43 @@ index 0057431..1ae9ae2 100644
          netconf/src/yangrpc/Makefile
          netconf/src/yangrpc/example/Makefile
          netconf/src/yangdump/Makefile
-diff --git a/example-modules/ietf-interfaces/Makefile.am b/example-modules/ietf-interfaces/Makefile.am
-index a574867..357e7e8 100755
---- a/example-modules/ietf-interfaces/Makefile.am
-+++ b/example-modules/ietf-interfaces/Makefile.am
-@@ -3,7 +3,12 @@ netconfmodule_LTLIBRARIES = libietf-interfaces.la
- libietf_interfaces_la_SOURCES = \
+Index: yuma123_2.10/example-modules/ietf-interfaces/Makefile.am
+===================================================================
+--- yuma123_2.10.orig/example-modules/ietf-interfaces/Makefile.am
++++ yuma123_2.10/example-modules/ietf-interfaces/Makefile.am
+@@ -4,12 +4,12 @@ libietf_interfaces_la_SOURCES = \
  ietf-interfaces.c
  
--libietf_interfaces_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
--libietf_interfaces_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
-+#Integrated yuma123 build
+ #Integrated yuma123 build
+-#libietf_interfaces_la_CPPFLAGS = -I $(top_srcdir)/netconf/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+-#libietf_interfaces_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl
 +libietf_interfaces_la_CPPFLAGS = -I $(top_srcdir)/netconf/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
 +libietf_interfaces_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl
-+
-+#Standalone mode. Depends on installed libyuma-dev
+ 
+ #Standalone mode. Depends on installed libyuma-dev
+-libietf_interfaces_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+-libietf_interfaces_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
 +#libietf_interfaces_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
 +#libietf_interfaces_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
  
- #yang_DATA = ietf-interfaces.yang
-diff --git a/example-modules/ietf-system/Makefile.am b/example-modules/ietf-system/Makefile.am
-index ce0a2e8..cc62108 100755
---- a/example-modules/ietf-system/Makefile.am
-+++ b/example-modules/ietf-system/Makefile.am
-@@ -3,7 +3,12 @@ netconfmodule_LTLIBRARIES = libietf-system.la
- libietf_system_la_SOURCES = \
+ yang_DATA = \
+ interfaces-notifications.yang
+Index: yuma123_2.10/example-modules/ietf-system/Makefile.am
+===================================================================
+--- yuma123_2.10.orig/example-modules/ietf-system/Makefile.am
++++ yuma123_2.10/example-modules/ietf-system/Makefile.am
+@@ -4,11 +4,11 @@ libietf_system_la_SOURCES = \
  ietf-system.c
  
--libietf_system_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
--libietf_system_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
-+#Integrated yuma123 build
+ #Integrated yuma123 build
+-#libietf_system_la_CPPFLAGS = -I $(top_srcdir)/netconf/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+-#libietf_system_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl
 +libietf_system_la_CPPFLAGS = -I $(top_srcdir)/netconf/src/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
 +libietf_system_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl
-+
-+#Standalone mode. Depends on installed libyuma-dev
+ 
+ #Standalone mode. Depends on installed libyuma-dev
+-libietf_system_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
+-libietf_system_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
 +#libietf_system_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
 +#libietf_system_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
  

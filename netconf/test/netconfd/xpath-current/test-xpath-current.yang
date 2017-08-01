@@ -1,0 +1,30 @@
+module test-xpath-current {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-xpath-current";
+  prefix txc;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-curent test.";
+
+  revision 2017-07-13 {
+    description
+      "Initial version";
+  }
+
+  augment "/if:interfaces/if:interface" {
+    leaf outgoing-interface {
+      type leafref {
+        path "/if:interfaces/if:interface/if:name";
+      }
+      must '/if:interfaces/if:interface[if:name=current()]/if:enabled = "true"';
+    }
+  }
+}

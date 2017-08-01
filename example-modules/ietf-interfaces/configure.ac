@@ -13,7 +13,7 @@ AC_PROG_LIBTOOL
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 
-yangdir="$prefix/share/yuma/modules/yuma123"
+yangdir="$prefix/share/yuma/modules"
 AC_SUBST(yangdir)
 
 ncx_netconf_includedir="$includedir/yuma/ncx"

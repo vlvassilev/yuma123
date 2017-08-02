@@ -1,5 +1,3 @@
-TESTS=run.sh
-
 netconfmodule_LTLIBRARIES = libtest-rollback-on-error.la
 
 libtest_rollback_on_error_la_SOURCES = rollback-on-error.c

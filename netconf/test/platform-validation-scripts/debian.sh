@@ -21,16 +21,19 @@ dpkg -i ../*.deb
 cd ~
 apt-get -y install rsync
 rsync -rav yuma123_2.10/netconf/python/ yuma123-python_2.10
-tar -czvf yuma123-python_2.10.orig.tar.gz --exclude .git yuma123_python_2.10
-cd yuma123_python_2.10
+tar -czvf yuma123-python_2.10.orig.tar.gz --exclude .git yuma123-python_2.10
+cd yuma123-python_2.10
 mk-build-deps  -i -t 'apt-get -y'
-git clean -f
+cd ..
+rm -rf yuma123-python_2.10
+tar -xzvf yuma123-python_2.10.orig.tar.gz
+cd yuma123-python_2.10
 debuild -us -uc
 apt-get -y install python-paramiko python-lxml
 dpkg -i ../python-yuma*.deb
 
 #testing
-ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
+ssh-keyscan -t rsa -H localhost > ~/.ssh/known_hosts
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 

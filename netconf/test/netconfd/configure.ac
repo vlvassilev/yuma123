@@ -22,6 +22,7 @@ AC_SUBST(CFLAGS)
 AC_CONFIG_FILES([
         Makefile
 	multiple-edit-callbacks/Makefile
+        rollback-on-error/Makefile
 ])
 
 AC_OUTPUT

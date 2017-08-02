@@ -17,4 +17,6 @@ test-xpath-bit-is-set \
 test-yang-library
 
 
-SUBDIRS=multiple-edit-callbacks
+SUBDIRS= \
+multiple-edit-callbacks \
+rollback-on-error

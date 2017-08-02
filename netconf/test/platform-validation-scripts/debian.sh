@@ -17,6 +17,18 @@ cd yuma123_2.10
 debuild -us -uc
 dpkg -i ../*.deb
 
+#build and install python-yuma (used in the testsuite)
+cd ~
+apt-get -y install rsync
+rsync -rav yuma123_2.10/netconf/python/ yuma123-python_2.10
+tar -czvf yuma123-python_2.10.orig.tar.gz --exclude .git yuma123_python_2.10
+cd yuma123_python_2.10
+mk-build-deps  -i -t 'apt-get -y'
+git clean -f
+debuild -us -uc
+apt-get -y install python-paramiko python-lxml
+dpkg -i ../python-yuma*.deb
+
 #testing
 ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
@@ -27,8 +39,8 @@ echo "Port 1830" >> /etc/ssh/sshd_config
 echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock --ncxserver-sockname=1830@/tmp/ncxserver.1830.sock"' >> /etc/ssh/sshd_config
 /etc/init.d/ssh restart
 
-cd netconf/test/netconfd
-apt-get -y install python-ncclient python-paramiko python-lxml
+cd ~/yuma123_2.10/netconf/test/netconfd
+apt-get -y install python-ncclient
 
 autoreconf -i -f
 ./configure --prefix=/usr

@@ -1,7 +1,7 @@
-yuma123 (2.10) UNRELEASED; urgency=medium
+yuma123 (2.11) UNRELEASED; urgency=medium
 
   * ncx
-    - Partial YANG 1.1 implementation. (derived-from, derived-from-or-self)
+    - YANG 1.1 Xpath functions implementation.
     - Fixed bug in handling of deviations.
     - Fixed bug in apply_commit_deletes.
     - Fixed bug in val_make_serialized_string.
@@ -12,18 +12,18 @@ yuma123 (2.10) UNRELEASED; urgency=medium
     - Various ietf draft models updated. Erratas applied.
     - Removed circular libyumancx dependencies on libyumamgr
   * agt
+    - Implementation of ietf-yang-library
     - Replaced proprietary notifications with the ietf-netconf-notifications.yang defined.
     - Moved agt_arp.c integrated module as standalone example-modules/yuma-arp
-  * yangdiff and yangdump
-    - Restored as build targets and added as debian packages.
   * test
     - Added netconfd testsuite netconf/test/netconfd.
     - Added litenc client side session scripting python module.
   * yangcli
+    - Implemented ietf-yang-library client side support.
     - Fixed bug caused by attempted reload of already loaded module.
     - Added yes/no container fill check promp.
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 06 Jul 2017 13:17:05 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Wed, 02 Aug 2017 14:46:13 +0200
 
 yuma123 (2.9) stable; urgency=medium
 

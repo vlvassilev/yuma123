@@ -51,5 +51,13 @@ make
 make install
 make check
 
-echo "Success!"
+cd ~/yuma123_2.10/netconf/test/yangcli
+apt-get -y install expect
 
+autoreconf -i -f
+./configure --prefix=/usr
+make
+make install
+make check
+
+echo "Success!"

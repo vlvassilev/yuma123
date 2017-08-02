@@ -1,0 +1,118 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "xget /\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "crea\t\t"}
+    timeout {exit 1}
+}
+
+expect {
+    "te" {sleep 1}
+    timeout {exit 1}
+}
+
+send "\t"
+
+expect {
+    "create" {sleep 1}
+    timeout {exit 1}
+}
+expect {
+    "create-subscription" {sleep 1}
+    timeout {exit 1}
+}
+
+send " /interf\t\t"
+expect {
+    "aces" {sleep 1}
+    timeout {exit 1}
+}
+
+send "/interf\t\t"
+expect {
+    "ace" {sleep 1}
+    timeout {exit 1}
+}
+
+send "\n"
+
+expect {
+    "Enter string value for leaf <name>" {sleep 1}
+    timeout {exit 1}
+}
+
+send "foo\n"
+
+expect {
+    "Enter identityref value for leaf <type>"  {sleep 1}
+    timeout {exit 1}
+}
+
+send "\t\t"
+
+expect {
+    "ethernetCsmacd"  {sleep 1}
+    timeout {exit 1}
+}
+
+send "ethernetC\t"
+
+expect {
+    "smacd"  {sleep 1}
+    timeout {exit 1}
+}
+
+send "\n"
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+send "comm\t"
+
+expect {
+    "it " {sleep 1}
+    timeout {exit 1}
+}
+
+send "\n"
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+send "delete /interfaces/interface\[n\t"
+
+expect {
+    "ame" {sleep 1}
+    timeout {exit 1}
+}
+
+send "='foo']\n"
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+send "commit\n"
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

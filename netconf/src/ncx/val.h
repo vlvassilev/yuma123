@@ -785,7 +785,7 @@ extern status_t
 *    status
 *********************************************************************/
 extern status_t
-    val_bit_ok (typ_def_t *typdef,
+    val_bit_ok (const typ_def_t *typdef,
 		const xmlChar *bitname,
 		uint32 *position);
 

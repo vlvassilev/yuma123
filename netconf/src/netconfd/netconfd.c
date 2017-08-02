@@ -43,6 +43,7 @@ date         init     comment
 #include  "agt.h"
 #include  "agt_ncxserver.h"
 #include  "agt_util.h"
+#include  "agt_cli.h"
 #include  "help.h"
 #include  "log.h"
 #include  "ncx.h"

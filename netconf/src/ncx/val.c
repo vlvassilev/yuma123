@@ -392,7 +392,7 @@ static boolean
 *********************************************************************/
 static status_t
     check_svalQ_enum (const xmlChar *name,
-                      dlq_hdr_t *checkQ,
+                      const dlq_hdr_t *checkQ,
                       typ_enum_t  **reten)
 {
     typ_enum_t  *en;
@@ -2214,11 +2214,11 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_bit_ok (typ_def_t *typdef,
+    val_bit_ok (const typ_def_t *typdef,
                 const xmlChar *bitname,
                 uint32 *position)
 {
-    dlq_hdr_t  *checkQ;
+    const dlq_hdr_t  *checkQ;
     status_t       res;
     boolean        last;
     typ_enum_t    *en;

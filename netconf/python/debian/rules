@@ -15,8 +15,8 @@ COMPAT_VERSION = $(UPSTREAM_VERSION)~dfsg
 	dh $@ --with autotools-dev,autoreconf,python2
 
 override_dh_install:
-	cd python setup.py build ; \
-		   python setup.py install --root=$(CURDIR)/debian/tmp --install-layout=deb ; \
-		   find $(CURDIR) -name *.pyc -delete
+	python setup.py build ; \
+	python setup.py install --root=$(CURDIR)/debian/tmp --install-layout=deb ; \
+	find $(CURDIR) -name *.pyc -delete
 	dh_install
 

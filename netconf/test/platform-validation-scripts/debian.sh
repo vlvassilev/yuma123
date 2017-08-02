@@ -33,9 +33,9 @@ apt-get -y install python-paramiko python-lxml
 dpkg -i ../python-yuma*.deb
 
 #testing
-ssh-keyscan -t rsa -H localhost > ~/.ssh/known_hosts
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
 
 echo "Port 830" >> /etc/ssh/sshd_config
 echo "Port 1830" >> /etc/ssh/sshd_config

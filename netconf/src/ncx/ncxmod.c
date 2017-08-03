@@ -2782,7 +2782,19 @@ status_t
         pcb->savedevQ = savedevQ;
 
         res = try_load_module(pcb, YANG_PT_TOP, modname, revision, retmod);
+        if(res==NO_ERR) {
+            ncx_module_t* mod;
+            if(retmod) {
+                mod = *retmod;
+            } else {
+                mod = ncx_find_module(modname, revision);
+                assert(mod);
+            }
+            /* module loaded directly - in yang-library context implemented (not just imported) */
+            mod->implemented = TRUE;
+        }
     }
+
 
     if (LOGINFO && res != NO_ERR) {
         if (revision) {

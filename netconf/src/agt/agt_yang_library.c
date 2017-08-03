@@ -107,8 +107,12 @@ static status_t
     status_t res;
     ncx_module_t *mod;
     obj_template_t *module_obj;
+    obj_template_t *deviation_obj;
     val_value_t *module_val;
+    val_value_t *deviation_val;
     val_value_t *childval;
+    ncx_feature_t *feature;
+    ncx_lmem_t           *listmember;
 
     module_obj = obj_find_child(ietf_yang_library_modules_state_obj, "ietf-yang-library", "module");
     assert(module_obj);
@@ -151,12 +155,81 @@ static status_t
                              "namespace",
                              ncx_get_modnamespace(mod), 
                              &res);
+        assert(res==NO_ERR && childval);
         val_add_child(childval, module_val);
+
+        /* conformance-type */
+        childval = agt_make_leaf(module_obj,
+                             "conformance-type",
+                             mod->implemented?"implement":"import",
+                             &res);
+        assert(res==NO_ERR && childval);
+        val_add_child(childval, module_val);
+
+        /* feature */
+        for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+            feature != NULL;
+            feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+
+            if (ncx_feature_enabled(feature)) {
+                childval = agt_make_leaf(module_obj,
+                             "feature",
+                             feature->name,
+                             &res);
+                assert(res==NO_ERR && childval);
+                val_add_child(childval, module_val);
+            }
+        }
+
+        /* deviation */
+        deviation_obj = obj_find_child(module_obj, "ietf-yang-library", "deviation");
+        assert(deviation_obj);
+        for (listmember = ncx_first_lmem(&mod->devmodlist);
+             listmember != NULL;
+             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+            ncx_module_t *match_mod;
+            char* revision_str;
+
+            deviation_val = val_new_value();
+            assert(deviation_val);
+            val_init_from_template(deviation_val, deviation_obj);
+
+            childval = agt_make_leaf(deviation_obj,
+                                 "name",
+                                 listmember->val.str,
+                                &res);
+            assert(res==NO_ERR && childval);
+            val_add_child(childval, deviation_val);
+
+            for (match_mod = ncx_get_first_module();
+                 match_mod != NULL;
+                 match_mod = ncx_get_next_module(match_mod)) {
+                if(0==strcmp(match_mod->name,listmember->val.str) && match_mod->implemented) {
+                    revision_str=match_mod->version;
+                    break;
+                }
+            }
+            assert(match_mod); /* match must exist */
+
+            childval = agt_make_leaf(deviation_obj,
+                                 "revision",
+                                 revision_str,
+                                &res);
+            assert(res==NO_ERR && childval);
+
+            val_add_child(childval, deviation_val);
+
+            res = val_gen_index_chain(deviation_obj, deviation_val);
+            assert(res == NO_ERR);
+
+            val_add_child(deviation_val, module_val);
+        }
 
         res = val_gen_index_chain(module_obj, module_val);
         assert(res == NO_ERR);
 
         val_add_child(module_val, dst_val);
+
     }
 
     return NO_ERR;

@@ -631,7 +631,7 @@ typedef struct ncx_identity_base_t_ {
 /* representation of one module or submodule during and after parsing */
 typedef struct ncx_module_t_ {
     dlq_hdr_t         qhdr;
-    xmlChar          *name; 
+    xmlChar          *name;
     xmlChar          *version;
     xmlChar          *organization;
     xmlChar          *contact_info;
@@ -681,6 +681,9 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         incchainQ;   /* used if parent == NULL */
 
     ncx_list_t        devmodlist;     /* for deviations list */
+
+   /* yang-library conformance-type {implement,import} */
+   boolean implemented;
 
 } ncx_module_t;
 

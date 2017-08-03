@@ -1,0 +1,29 @@
+module test-yang-library-deviation {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-yang-library-deviation";
+  prefix tyld;
+
+  import test-yang-library {
+    prefix tyl;
+  }
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the yang-library test.";
+
+  revision 2017-08-03 {
+    description
+      "Initial version";
+  }
+
+  deviation /tyl:foo/tyl:foo {
+    deviate add {
+      must ".=5" {
+        error-message "Only foo=5 supported.";
+      }
+    }
+  }
+}

@@ -96,6 +96,46 @@ def main():
 	name = result.xpath('data/modules-state/module/name')
 	assert(len(name)==1)
 
+	namespace = result.xpath('data/modules-state/module/namespace')
+	assert(len(namespace)==1)
+	assert(namespace[0].text=="http://yuma123.org/ns/test-yang-library")
+
+	conformance_type = result.xpath('data/modules-state/module/conformance-type')
+	assert(len(conformance_type)==1)
+	assert(conformance_type[0].text=="implement")
+
+	feature = result.xpath('data/modules-state/module/feature')
+	assert(len(feature)==1)
+	assert(feature[0].text=="foo")
+
+	deviation = result.xpath('data/modules-state/module/deviation/name')
+	assert(len(deviation)==1)
+	assert(deviation[0].text=="test-yang-library-deviation")
+
+	get_rpc = """
+<get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+ <filter type="subtree">
+  <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library">
+   <module><name>test-yang-library-import</name></module>
+  </modules-state>
+ </filter>
+</get>
+"""
+	print("get ...")
+	result = conn.rpc(get_rpc)
+
+	print lxml.etree.tostring(result)
+	name = result.xpath('data/modules-state/module/name')
+	assert(len(name)==1)
+
+	namespace = result.xpath('data/modules-state/module/namespace')
+	assert(len(namespace)==1)
+	assert(namespace[0].text=="http://yuma123.org/ns/test-yang-library-import")
+
+	conformance_type = result.xpath('data/modules-state/module/conformance-type')
+	assert(len(conformance_type)==1)
+	#assert(conformance_type[0].text=="import")
+
         return(0)
 
 sys.exit(main())

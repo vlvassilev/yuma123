@@ -7,7 +7,10 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   killall -KILL confd || true
   echo "Starting confd: $RUN_WITH_CONFD"
   source $RUN_WITH_CONFD/confdrc
-  confdc -c test-yang-library.yang --yangpath . -o test-yang-library.fxs
+  confdc -c test-yang-library.yang -F test-yang-library:foo --deviation test-yang-library-deviation.yang --yangpath . -o test-yang-library.fxs
+  # imported not implemented - how ?
+  confdc -c test-yang-library-import.yang --yangpath . -o test-yang-library-import.fxs
+  confdc -c test-yang-library-deviation.yang --yangpath . -o test-yang-library-deviation.fxs
   NCPORT=2022
   NCUSER=admin
   NCPASSWORD=admin
@@ -17,7 +20,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=./test-yang-library.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=./test-yang-library.yang --module=./test-yang-library-deviation.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 sleep 3

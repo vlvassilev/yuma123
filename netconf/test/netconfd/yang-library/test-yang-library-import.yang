@@ -1,0 +1,26 @@
+module test-yang-library-import {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-yang-library-import";
+  prefix tyli;
+
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the yang-library test.";
+
+  revision 2017-08-03 {
+    description
+      "Initial version";
+  }
+
+  typedef my-imported-typedef {
+    type uint32;
+  }
+
+  container foobar {
+    presence "Data object in modules reported as imported but not implemented should not be accessible.";
+  }
+}

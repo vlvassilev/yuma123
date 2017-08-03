@@ -49,21 +49,30 @@ def main():
 
 	time.sleep(1)
 
-        result = yangcli(conn, '''xget /modules-state/module[name='test-yang-library'] ''')
+	result = yangcli(conn, '''xget /modules-state/module[name='test-yang-library'] ''')
 	name = result.xpath('./data/modules-state/module/name')
 	assert(len(name)==1)
+	conformance_type = result.xpath('./data/modules-state/module/conformance-type')
+	assert(len(conformance_type)==1)
+	assert(conformance_type[0].text=="implement")
 
-	ok = yangcli(conn, '''delete /test-yang-library''').xpath('./ok')
+	result = yangcli(conn, '''xget /modules-state/module[name='test-yang-library-import'] ''')
+	name = result.xpath('./data/modules-state/module/name')
+	assert(len(name)==1)
+	conformance_type = result.xpath('./data/modules-state/module/conformance-type')
+	assert(len(conformance_type)==1)
+	#assert(conformance_type[0].text=="import")
+
+	ok = yangcli(conn, '''delete /foo''').xpath('./ok')
 
 	ok = yangcli(conn, '''commit''').xpath('./ok')
 	#assert(len(ok)==1)
 
-	ok = yangcli(conn, '''create /test-yang-library''').xpath('./ok')
+	ok = yangcli(conn, '''create /foo''').xpath('./ok')
 	assert(len(ok)==1)
 
 	ok = yangcli(conn, '''commit''').xpath('./ok')
 	assert(len(ok)==1)
-
 
 	return(0)
 sys.exit(main())

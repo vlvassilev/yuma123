@@ -4,19 +4,42 @@ module test-yang-library {
   namespace "http://yuma123.org/ns/test-yang-library";
   prefix tyl;
 
+  import test-yang-library-import {
+    prefix tyli;
+  }
+
   organization
     "yuma123.org";
 
   description
     "Part of the yang-library test.";
 
+  revision 2017-08-03 {
+    description
+      "Upgraded the model to cover conformance-type, features and deviations.";
+  }
+
   revision 2017-07-26 {
     description
       "Initial version";
   }
 
-  container test-yang-library {
+  feature foo;
+  feature bar;
+
+  container foo {
+    if-feature foo;
     presence "Dummy container for testing namespace resolution works and the client
               retrieved all modules reported in the yang-library capabilities list.";
+    leaf foo {
+      type uint32;
+    }
+  }
+  container bar {
+    if-feature bar;
+    presence "bar.";
+    leaf bar {
+      type tyli:my-imported-typedef;
+    }
   }
 }

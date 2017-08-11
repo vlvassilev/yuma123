@@ -3569,66 +3569,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION add_config_from_content_node
-* 
-* Add the config node content for the edit-config operation
-* Build the <config> nodfe top-down, by recursing bottom-up
-* from the node to be edited.
-*
-* INPUTS:
-*   server_cb == server control block to use
-*   rpc == RPC method in progress
-*   config_content == the node associated with the target
-*             to be used as content nested within the 
-*             <config> element
-*   curobj == the current object node for config_content, going
-*                 up the chain to the root object.
-*                 First call should pass config_content->obj
-*   config == the starting <config> node to add the data into
-*   curtop == address of stable storage for current add-to node
-*            This pointer MUST be set to NULL upon first fn call
-* OUTPUTS:
-*    config node is filled in with child nodes
-*
-* RETURNS:
-*    status; config_content is NOT freed if returning an error
-*********************************************************************/
-static status_t
-    add_config_from_content_node (server_cb_t *server_cb,
-                                  obj_template_t *rpc,
-                                  val_value_t *config_content,
-                                  obj_template_t *curobj,
-                                  val_value_t *config,
-                                  val_value_t **curtop)
-{
-    obj_template_t  *parent;
-    status_t         res;
-
-    /* get to the root of the object chain */
-    parent = obj_get_parent(curobj);
-    if (parent && !obj_is_root(parent)) {
-        res = add_config_from_content_node(server_cb, rpc, config_content,
-                                           parent, config, curtop);
-        if (res != NO_ERR) {
-            return res;
-        }
-    }
-
-    /* set the current target, working down the stack
-     * on the way back from the initial dive
-     */
-    if (!*curtop) {
-        /* first time through to this point */
-        *curtop = config;
-    }
-
-    res = add_content(server_cb, rpc, config_content, curobj, TRUE, curtop);
-    return res;
-
-}  /* add_config_from_content_node */
-
-
-/********************************************************************
 * FUNCTION complete_path_content
 * 
 * Use the valroot and content pointer to work up the already
@@ -3794,8 +3734,7 @@ static status_t
 *
 * INPUTS:
 *   server_cb == server control block to use
-*   valroot == value tree root if used
-*              (via get_content_from_choice)
+*   valroot == value tree root
 *   config_content == the node associated with the target
 *             to be used as content nested within the 
 *             <config> element
@@ -3805,9 +3744,6 @@ static status_t
 * OUTPUTS:
 *    server_cb->state may be changed or other action taken
 *
-*    !!! valroot is consumed id non-NULL
-*    !!! config_content is consumed -- freed or transfered to a PDU
-*    !!! that will be freed later
 *
 * RETURNS:
 *    status
@@ -3832,25 +3768,16 @@ static status_t
     res = NO_ERR;
     dofill = TRUE;
 
+    assert(valroot);
+    assert(config_content);
+
     if (LOGDEBUG) {
         log_debug("\nSending <edit-config> request");
-    }
-
-    /* either going to free valroot or config_content */
-    if (valroot == NULL || valroot == config_content) {
-        freeroot = FALSE;
-    } else {
-        freeroot = TRUE;
     }
 
     /* make sure there is an edit target on this server */
     if (!server_cb->default_target) {
         log_error("\nError: no <edit-config> target available on server");
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
         return ERR_NCX_OPERATION_FAILED;
     }
 
@@ -3858,67 +3785,34 @@ static status_t
     rpc = ncx_find_object(get_netconf_mod(server_cb), 
                           NCX_EL_EDIT_CONFIG);
     if (!rpc) {
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* get the 'input' section container */
     input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!input) {
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* construct a method + parameter tree */
     reqdata = xml_val_new_struct(obj_get_name(rpc), obj_get_nsid(rpc));
-    if (!reqdata) {
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
-        log_error("\nError allocating a new RPC request");
-        return ERR_INTERNAL_MEM;
-    }
+    assert(reqdata);
 
     /* set the edit-config/input/target node to the default_target */
     child = obj_find_child(input, 
                            NC_MODULE,
                            NCX_EL_TARGET);
+    assert(child);
+
     parm = val_new_value();
-    if (!parm) {
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
-        val_free_value(reqdata);
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_init_from_template(parm, child);
-        val_add_child(parm, reqdata);
-    }
+    assert(parm);
+
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
 
     target = xml_val_new_flag(server_cb->default_target, obj_get_nsid(child));
-    if (!target) {
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
-        val_free_value(reqdata);
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(target, parm);
-    }
+    assert(target);
+    val_add_child(target, parm);
 
     /* set the edit-config/input/default-operation node */
     if (!(def_editop == OP_DEFOP_NOT_USED ||
@@ -3927,17 +3821,8 @@ static status_t
         res = NO_ERR;
         defopstr = op_defop_name(def_editop);
         parm = val_make_simval_obj(child, defopstr, &res);
-        if (!parm) {
-            if (freeroot) {
-                val_free_value(valroot);
-            } else {
-                val_free_value(config_content);
-            }
-            val_free_value(reqdata);
-            return res;
-        } else {
-            val_add_child(parm, reqdata);
-        }
+        assert(parm);
+        val_add_child(parm, reqdata);
     }
 
     /* set the test-option to the user-configured or default value */
@@ -3950,17 +3835,8 @@ static status_t
         parm = val_make_simval_obj(child,
                                    op_testop_name(server_cb->testoption),
                                    &res);
-        if (!parm) {
-            if (freeroot) {
-                val_free_value(valroot);
-            } else {
-                val_free_value(config_content);
-            }
-            val_free_value(reqdata);
-            return res;
-        } else {
-            val_add_child(parm, reqdata);
-        }
+        assert(parm);
+        val_add_child(parm, reqdata);
     }
 
     /* set the error-option to the user-configured or default value */
@@ -3973,60 +3849,26 @@ static status_t
         parm = val_make_simval_obj(child,
                                    op_errop_name(server_cb->erroption),
                                    &res);
-        if (!parm) {
-            if (freeroot) {
-                val_free_value(valroot);
-            } else {
-                val_free_value(config_content);
-            }
-            val_free_value(reqdata);
-            return ERR_INTERNAL_MEM;
-        } else {
-            val_add_child(parm, reqdata);
-        }
+        assert(parm);
+        val_add_child(parm, reqdata);
     }
 
     /* create the <config> node */
     child = obj_find_child(input, NC_MODULE, NCX_EL_CONFIG);
     parm = val_new_value();
-    if (!parm) {
-        if (freeroot) {
-            val_free_value(valroot);
-        } else {
-            val_free_value(config_content);
-        }
-        val_free_value(reqdata);
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_init_from_template(parm, child);
-        val_add_child(parm, reqdata);
-    }
-
+    assert(parm);
+    val_init_from_template(parm, child);
+    val_add_child(parm, reqdata);
 
     /* set the edit-config/input/config node to the
      * config_content, but after filling in any
      * missing nodes from the root to the target
      */
-    if (valroot) {
-        val_add_child(valroot, parm);
-        res = complete_path_content(server_cb, rpc, valroot, config_content,
-                                    dofill, TRUE);
-        if (res != NO_ERR) {
-            val_free_value(valroot);
-            val_free_value(reqdata);
-            return res;
-        }
-    } else {
-        /* !!! use the parm as-is, even if a container !!! */
-        dummy_parm = NULL;
-        res = add_config_from_content_node(server_cb, rpc, config_content,
-                                           config_content->obj, parm, 
-                                           &dummy_parm);
-        if (res != NO_ERR) {
-            val_free_value(config_content);
-            val_free_value(reqdata);
-            return res;
-        }
+    val_add_child(val_clone(valroot), parm);
+    res = complete_path_content(server_cb, rpc, valroot, config_content,
+                                dofill, TRUE);
+    if (res != NO_ERR) {
+        return res;
     }
 
     /* now that all the content is gathered the OBJ_TYP_CHOICE
@@ -5293,6 +5135,7 @@ static status_t
 
     /* construct an edit-config PDU with default parameters */
     res = edit_config_to_server_reqdata(server_cb, valroot, content, def_editop, reqdata);
+    val_free_value(valroot);
     if (res != NO_ERR) {
         log_error("\nError: send %s operation failed (%s)",
                   op_editop_name(editop),
@@ -5458,6 +5301,7 @@ static status_t
             log_error("\nError: send create operation failed (%s)",
                       get_error_string(res));
         }
+        val_free_value(valroot);
         valroot = NULL;
         content = NULL;
     }

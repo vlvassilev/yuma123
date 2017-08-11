@@ -1,0 +1,27 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {sleep 1}
+    timeout {exit 1}
+}
+
+send "create /interfaces/interface\n"
+
+expect {
+    "Enter string value for leaf <name>" {sleep 1}
+    timeout {exit 1}
+}
+
+send "?c\n"
+
+expect {
+    "create command canceled" {sleep 1}
+    timeout {exit 1}
+}
+
+send "quit\n"
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

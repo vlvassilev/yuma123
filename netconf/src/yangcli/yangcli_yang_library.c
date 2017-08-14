@@ -91,7 +91,7 @@ status_t make_get_yang_library_modules_state_reqdata(server_cb_t *server_cb,
 
     res = NO_ERR;
 
-    res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
+    res = ncxmod_load_module (NCXMOD_NETCONF, NULL, NULL, &ietf_netconf_mod);
     assert(res==NO_ERR);
 
     rpc_obj = ncx_find_rpc(ietf_netconf_mod, "get");

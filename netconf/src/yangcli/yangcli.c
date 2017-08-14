@@ -2633,6 +2633,7 @@ void
     ncxmod_search_result_t *searchresult, *libresult;
     status_t                res;
     boolean                 retrieval_supported;
+    val_value_t             *module_set_id_val;
     val_value_t             *module_val;
 
     mscb = (mgr_scb_t *)scb->mgrcb;
@@ -2647,11 +2648,18 @@ void
                        get_error_string(res));
             return;
         } else if (res == NO_ERR && server_cb->command_mode == CMD_MODE_YANG_LIBRARY) {
-            log_info("\n\nStarted yang library module set retrieval ...\n");
+            log_info("\n\nStarted yang library module set retrieval ... ");
             return;
         } else {
-            log_info("\n\nRetrived yang library module set.\n");
+            log_info("\n\nRetrived yang library module set. ");
         }
+    }
+
+    if(cap_std_set(&mscb->caplist, CAP_STDID_YANG_LIBRARY)) {
+        assert(mscb->modules_state_val);
+        module_set_id_val = val_find_child(mscb->modules_state_val, "ietf-yang-library", "module-set-id");
+        assert(module_set_id);
+        log_info("Current yang library module-set-id: %s.\n", VAL_STRING(module_set_id_val));
     }
 
     retrieval_supported = cap_set(&mscb->caplist,

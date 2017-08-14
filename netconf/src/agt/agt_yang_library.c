@@ -36,6 +36,7 @@ date         init     comment
 #include <errno.h>
 #include <sys/utsname.h>
 #include <assert.h>
+#include <openssl/sha.h>
 
 #include "procdefs.h"
 #include "agt.h"
@@ -108,6 +109,7 @@ static status_t
     ncx_module_t *mod;
     obj_template_t *module_obj;
     obj_template_t *deviation_obj;
+    val_value_t *module_set_id_val;
     val_value_t *module_val;
     val_value_t *deviation_val;
     val_value_t *childval;
@@ -232,7 +234,29 @@ static status_t
 
     }
 
-    return NO_ERR;
+    /* module-set-id */
+    {
+        unsigned int i;
+        char* modules_state_str;
+        unsigned char hash[SHA_DIGEST_LENGTH];
+        unsigned char hash_str[SHA_DIGEST_LENGTH*2+1];
+        res=val_make_serialized_string(dst_val, NCX_DISPLAY_MODE_XML, (xmlChar **)&modules_state_str);
+        assert(res==NO_ERR);
+        SHA1(modules_state_str, strlen(modules_state_str), hash);
+        free(modules_state_str);
+        for(i=0;i<SHA_DIGEST_LENGTH;i++) {
+            sprintf(hash_str + (i*2), "%02x", hash[i]);
+        }
+        hash_str[SHA_DIGEST_LENGTH*2]=0;
+        module_set_id_val = agt_make_leaf(ietf_yang_library_modules_state_obj,
+                                            "module-set-id",
+                                            hash_str,
+                                            &res);
+        assert(res==NO_ERR);
+        val_add_child(module_set_id_val, dst_val);
+
+        return NO_ERR;
+    }
 }
 
 /************* E X T E R N A L    F U N C T I O N S ***************/

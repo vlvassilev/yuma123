@@ -28,6 +28,7 @@ date         init     comment
 *********************************************************************/
 #include  <stdio.h>
 #include  <stdlib.h>
+#include  <assert.h>
 
 #include "procdefs.h"
 #include "agt.h"
@@ -444,6 +445,27 @@ cap_list_t *
 val_value_t * 
     agt_cap_get_capsval (void)
 {
+    /* update the module-set-id in ietf-yang-library */
+    cfg_template_t        *runningcfg;
+    val_value_t           *modules_state_val;
+    val_value_t           *module_set_id_val;
+    status_t               res;
+
+    /* get the running config */
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if(runningcfg) {
+        modules_state_val = val_find_child(runningcfg->root, "ietf-yang-library", "modules-state");
+        if(modules_state_val) {
+            if (val_is_virtual(modules_state_val)) {
+                modules_state_val = val_get_virtual_value(NULL, modules_state_val, &res);
+                assert(modules_state_val && res==NO_ERR);
+            }
+            module_set_id_val = val_find_child(modules_state_val, "ietf-yang-library", "module-set-id");
+            assert(module_set_id_val);
+            res = cap_update_yang_library_val(agt_caps, "2016-06-21", VAL_STRING(module_set_id_val));
+            assert(res==NO_ERR);
+        }
+    }
     return agt_caps;
 } /* agt_cap_get_capsval */
 

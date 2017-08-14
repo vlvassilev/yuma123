@@ -1520,6 +1520,42 @@ status_t
 
 }  /* cap_add_yang_library_val */
 
+/********************************************************************
+* FUNCTION cap_update_yang_library_val
+*
+* Update the :yang-library:1.0 capability
+* value struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap
+*    revision == the basic-mode with-default style
+*    module_set_id == the module_set_id hash
+*
+* OUTPUTS:
+*    status
+*********************************************************************/
+status_t
+    cap_update_yang_library_val (val_value_t *caplist,
+                        const xmlChar *revision,
+                        const xmlChar *module_set_id)
+{
+    char* prefix = "urn:ietf:params:netconf:capability:yang-library:1.0";
+    val_value_t* childval;
+    for (childval = val_get_first_child(caplist);
+        childval != NULL;
+        childval = val_get_next_child(childval)) {
+        if(strlen(VAL_STRING(childval))<prefix) {
+            continue;
+        }
+        if(0==memcmp(prefix,VAL_STRING(childval),strlen(prefix))) {
+            val_remove_child(childval);
+            val_free_value(childval);
+        }
+    }
+
+    return cap_add_yang_library_val (caplist, revision, module_set_id);
+}  /* cap_update_yang_library_val */
+
 
 /********************************************************************
 * FUNCTION cap_add_ent

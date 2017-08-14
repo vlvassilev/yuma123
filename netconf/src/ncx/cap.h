@@ -423,6 +423,25 @@ extern status_t
 			const xmlChar *revision,
 			const xmlChar *module_set_id);
 
+/********************************************************************
+* FUNCTION cap_update_yang_library_val
+*
+* Update the :yang-library:1.0 capability to the list
+* value struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap
+*    revision == the basic-mode with-default style
+*    module_set_id == the module_set_id hash
+*
+* OUTPUTS:
+*    status
+*********************************************************************/
+extern status_t
+    cap_update_yang_library (val_value_t *caplist,
+			const xmlChar *revision,
+			const xmlChar *module_set_id);
+
 
 /********************************************************************
 * FUNCTION cap_add_ent

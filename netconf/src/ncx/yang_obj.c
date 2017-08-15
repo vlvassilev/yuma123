@@ -351,6 +351,34 @@ static status_t
     }
 }
 
+/*
+ * Adds deviation module name to targets module devmodlist
+ *
+ * \param target_mod module defining the target of the deviation
+ * \param deviation_mod module defining the deviation
+ ***************************************************************/
+
+static void
+    devmodlist_update(ncx_module_t * target_mod, ncx_module_t * deviation_mod)
+{
+    status_t res;
+    ncx_lmem_t *listmember;
+
+    /* skip if reference already present */
+    for (listmember = ncx_first_lmem(&target_mod->devmodlist);
+         listmember != NULL;
+         listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+
+        if(0==strcmp(listmember->val.str, deviation_mod->name)) {
+            return;
+        }
+    }
+
+    res = ncx_set_list(NCX_BT_STRING,
+                       deviation_mod->name,
+                       &target_mod->devmodlist);
+    assert(res == NO_ERR);
+}
 
 /*************    P A R S E   F U N C T I O N S    *************/
 
@@ -4288,6 +4316,11 @@ static status_t apply_object_deviations( yang_pcb_t *pcb,
         YANG_OBJ_DEBUG3( "\nRechecking %s:%s after applying deviation(s)",
                          obj_get_mod_name(targobj), obj_get_name(targobj) );
         res = resolve_datadef(pcb, tkc, mod, targobj, TRUE );
+    }
+
+    if(res == NO_ERR) {
+        /* add mod to the devmodlist que of the target if not present yet */
+        devmodlist_update(obj_get_mod(targobj), mod);
     }
 
     return res;
@@ -8584,13 +8617,7 @@ static status_t
 
     /* check if any devmodlist entry needed */
     if (anydone) {
-        res = ncx_set_list(NCX_BT_STRING,
-                           savedev->devmodule,
-                           &mod->devmodlist);
-        if (res != NO_ERR) {
-            log_error("\nError: set list failed (%s), cannot add deviation",
-                      get_error_string(res));
-        }
+        devmodlist_update(mod, obj_get_mod(deviation->targobj));
     }
 
     /* restore the savedev structure */

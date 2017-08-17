@@ -3864,12 +3864,12 @@ static status_t
      * config_content, but after filling in any
      * missing nodes from the root to the target
      */
-    val_add_child(val_clone(valroot), parm);
     res = complete_path_content(server_cb, rpc, valroot, config_content,
                                 dofill, TRUE);
     if (res != NO_ERR) {
         return res;
     }
+    val_add_child(val_clone(valroot), parm);
 
     /* now that all the content is gathered the OBJ_TYP_CHOICE
      * and OBJ_TYP_CASE place-holder nodes can be deleted

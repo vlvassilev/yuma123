@@ -340,6 +340,80 @@ static status_t
                                     int word_end,
                                     int cmdlen);
 
+
+/********************************************************************
+ * FUNCTION xpath_path_completion_common
+ *
+ * check and if obj is valid completion and register it with cpl_add_completion
+ *
+ * INPUTS:
+ *    obj == object template to check
+ *    cpl == word completion struct to fill in
+ *    line == line passed to callback
+ *    word_start == start position within line of the
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    cmdlen == command length
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+
+static int xpath_path_completion_common(obj_template_t *rpc, obj_template_t * obj,
+                                    WordCompletion *cpl,
+                                    const char *line,
+                                    int word_start,
+                                    int word_end,
+                                    int cmdlen)
+{
+    int retval = 0;
+    xmlChar         *pathname;
+    do {
+        /* check if there is a partial command name */
+        if (cmdlen > 0 &&
+            strncmp((const char *)obj_get_name(obj),
+                    &line[word_start],
+                    cmdlen)) {
+            /* command start is not the same so skip it */
+            continue;
+        }
+
+        if( !obj_is_data_db(obj)) {
+            /* object is either rpc or notification*/
+            continue;
+        }
+
+        if(!obj_get_config_flag(obj)) {
+            const xmlChar* rpc_name;
+            rpc_name = obj_get_name(rpc);
+            if(0==strcmp((const char*)rpc_name, "create")) continue;
+            if(0==strcmp((const char*)rpc_name, "replace")) continue;
+            if(0==strcmp((const char*)rpc_name, "delete")) continue;
+        }
+
+        if(obj->objtype==OBJ_TYP_CONTAINER || obj->objtype==OBJ_TYP_LIST) {
+            pathname = malloc(strlen(obj_get_name(obj))+2);
+            assert(pathname);
+            strcpy(pathname, obj_get_name(obj));
+            pathname[strlen(obj_get_name(obj))] ='/';
+            pathname[strlen(obj_get_name(obj))+1] =0;
+        } else {
+            pathname = malloc(strlen(obj_get_name(obj))+1);
+            assert(pathname);
+            strcpy(pathname, obj_get_name(obj));
+            pathname[strlen(obj_get_name(obj))] =0;
+        }
+        retval = cpl_add_completion(cpl, line, word_start, word_end,
+                                    (const char *)&pathname[cmdlen], "", "");
+        free(pathname);
+    } while(0);
+
+    return retval;
+}
+
 /********************************************************************
  * FUNCTION fill_xpath_children_completion
  * 
@@ -368,8 +442,7 @@ static status_t
                                     int word_end,
                                     int cmdlen)
 {
-    const xmlChar         *pathname;
-    int                    retval;
+    int retval;
     int word_iter = word_start + 1;
     // line[word_start] == '/'
     word_start ++;
@@ -408,31 +481,8 @@ static status_t
     }
     obj_template_t * childObj = obj_first_child_deep(parentObj);
     for(;childObj!=NULL; childObj = obj_next_child_deep(childObj)) {
-        pathname = obj_get_name(childObj);
-        /* check if there is a partial command name */
-        if (cmdlen > 0 &&
-            strncmp((const char *)pathname,
-                    &line[word_start],
-                    cmdlen)) {
-            /* command start is not the same so skip it */
-            continue;
-        }
 
-        if( !obj_is_data_db(childObj)) {
-            /* object is either rpc or notification*/
-            continue;
-        }
-
-        if(!obj_get_config_flag(childObj)) {
-            const xmlChar* rpc_name;
-            rpc_name = obj_get_name(rpc);
-            if(0==strcmp((const char*)rpc_name, "create")) continue;
-            if(0==strcmp((const char*)rpc_name, "replace")) continue;
-            if(0==strcmp((const char*)rpc_name, "delete")) continue;
-        }
-
-        retval = cpl_add_completion(cpl, line, word_start, word_end,
-                                    (const char *)&pathname[cmdlen], "", "");
+        retval = xpath_path_completion_common(rpc, childObj, cpl, line, word_start, word_end, cmdlen);
         if (retval != 0) {
             return ERR_NCX_OPERATION_FAILED;
         }
@@ -678,38 +728,12 @@ static status_t
         int word_end,
         int cmdlen)
 {
+    int retval;
     obj_template_t * modObj = ncx_get_first_object(mod);
-    for (; modObj != NULL; 
+    for (; modObj != NULL;
          modObj = ncx_get_next_object(mod, modObj)) {
 
-        if (!obj_is_data_db(modObj)) {
-            /* object is either rpc or notification*/
-            continue;
-        }
-
-        const xmlChar *pathname = obj_get_name(modObj);
-        /* check if there is a partial command name */
-        if (cmdlen > 0 && strncmp((const char *)pathname, 
-                                  &line[word_start], cmdlen)) {
-            continue;
-        }
-
-        if(!obj_get_config_flag(modObj)) {
-            const xmlChar* rpc_name;
-            rpc_name = obj_get_name(rpc);
-            if(0==strcmp((const char*)rpc_name, "create")) continue;
-            if(0==strcmp((const char*)rpc_name, "replace")) continue;
-            if(0==strcmp((const char*)rpc_name, "delete")) continue;
-        }
-
-#ifdef DEBUG_TRACE
-        log_debug2("\nFilling from module %s, object %s", 
-                   mod->name, pathname);
-#endif
-
-        int retval = cpl_add_completion(cpl, line, word_start, word_end,
-                                        (const char *)&pathname[cmdlen],
-                                        "", "");
+        retval = xpath_path_completion_common(rpc, modObj, cpl, line, word_start, word_end, cmdlen);
         if (retval != 0) {
             return ERR_NCX_OPERATION_FAILED;
         }

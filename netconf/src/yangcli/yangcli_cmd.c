@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2017, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -44,6 +45,7 @@ date         init     comment
 #include <ctype.h>
 
 #include "libtecla.h"
+#include "yangcli_wordexp.h"
 
 #include "procdefs.h"
 #include "cli.h"
@@ -210,7 +212,7 @@ static val_value_t*
 * INPUTS:
 *   server_cb == server control block to use
 *   rpc == RPC to parse CLI for
-*   line == input line to parse, starting with the parms to parse
+*   args_in == input line to parse, starting with the parms to parse
 *   res == pointer to status output
 *
 * OUTPUTS: 
@@ -228,64 +230,41 @@ val_value_t* parse_rpc_cli ( server_cb_t *server_cb,
     obj_template_t   *obj;
     char             *myargv[2];
     val_value_t      *retval = NULL;
-    xmlChar          *args;
 
-    args = strdup(args_in);
+    if(!args_in) {
+        return NULL;
+    }
 
     /* construct an argv array, convert the CLI into a parmset */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    if (obj) {
-        /* check if this is the special command form
-         *  foo-command @parms.xml
-         */
-        if (args) {
-            *res = NO_ERR;
-            retval = check_external_rpc_input(rpc, args, res);
-            if (*res != ERR_NCX_SKIPPED) {
-                return retval;
-            }
-            if (retval) {
-                val_free_value(retval);
-                retval = NULL;
-            }
-        }
-
-        myargv[0] = (char*)xml_strdup( obj_get_name(rpc) );
-        if ( myargv[0] ) {
-            char* secondary_args = args;
-            int secondary_args_flag = 0;
-            while(strlen(secondary_args)>=strlen("--")) {
-                if(memcmp(secondary_args, "--", strlen("--"))==0) {
-                    secondary_args[0]=0;
-                    secondary_args_flag = 1;
-                    break;
-                }
-                secondary_args++;
-            }
-
-            myargv[1] = (char*)xml_strdup( args );
-            if(secondary_args_flag) secondary_args[0] = '-';
-
-            if ( myargv[1] ) {
-                retval = cli_parse( server_cb->runstack_context, 2, myargv, obj,
-                                    VALONLY, SCRIPTMODE, get_autocomp(), 
-                                    CLI_MODE_COMMAND, res );
-                m__free( myargv[1] );
-            } else {
-                *res = ERR_INTERNAL_MEM;
-            }
-            m__free( myargv[0] );
-            if(*res==NO_ERR && secondary_args_flag) {
-                secondary_args[0] = '-';
-                myargv[0] = (char*)xml_strdup( secondary_args + strlen("--") );
-            }
-        } else {
-            *res = ERR_INTERNAL_MEM;
-        }
-    } else {
-        *res = SET_ERROR(ERR_INTERNAL_VAL);
+    if (!obj) {
+        return NULL;
     }
-    free(args);
+
+    /* check if this is the special command form
+     *  foo-command @parms.xml
+     */
+     if (args_in) {
+        *res = NO_ERR;
+        retval = check_external_rpc_input(rpc, args_in, res);
+        if (*res != ERR_NCX_SKIPPED) {
+            return retval;
+        }
+        assert (retval==NULL);
+    }
+
+
+    myargv[0] = strdup(obj_get_name(rpc));
+    assert(myargv[0]);
+
+    myargv[1] = strdup(args_in);
+    assert(myargv[1]);
+
+    retval = cli_parse( server_cb->runstack_context, 2, myargv, obj,
+                                VALONLY, SCRIPTMODE, get_autocomp(),
+                                CLI_MODE_COMMAND, res );
+    free(myargv[0]);
+    free(myargv[1]);
     return retval;
 }  /* parse_rpc_cli */
 
@@ -4978,6 +4957,25 @@ static status_t
 } /* add_insert_attrs */
 
 
+/* the function returns TRUE is there is an instance of -- parameter. The offset of the first '--' is returned. e.g. "create /a -- foo=1" wil return 10 */
+static boolean detect_secondary_args_offset(const char* line, unsigned int* secondary_args_offset)
+{
+    unsigned i;
+    boolean secondary_args_flag=FALSE;
+    yangcli_wordexp_t p;
+    yangcli_wordexp(line, &p, 0);
+    for (i = 0; i < p.we_wordc; i++) {
+        if(0==strcmp("--",p.we_wordv[i])) {
+            secondary_args_flag=TRUE;
+            *secondary_args_offset=p.we_word_line_offset[i];
+            break;
+        }
+    }
+    yangcli_wordfree(&p);
+    return secondary_args_flag;
+}
+
+
 /********************************************************************
  * FUNCTION do_edit
  * 
@@ -5014,9 +5012,10 @@ static status_t
     boolean                getoptional, dofill;
     boolean                isdelete, topcontainer, doattr;
     op_defop_t             def_editop;
-    char                   *secondary_args;
-    char                   *secondary_args_buf;
-    int                    secondary_args_flag;
+    boolean                secondary_args_flag;
+    unsigned int           secondary_args_offset;
+    char                   *primary_args;
+    const char             *secondary_args;
 
     /* init locals */
     res = NO_ERR;
@@ -5033,8 +5032,24 @@ static status_t
         isdelete = FALSE;
     }
 
+    secondary_args_flag = detect_secondary_args_offset(line, &secondary_args_offset);
+
+    if(secondary_args_flag) {
+        assert(secondary_args_offset>len);
+        primary_args = malloc(secondary_args_offset-len+1);
+        assert(primary_args);
+        memcpy(primary_args,&line[len],secondary_args_offset-len);
+        primary_args[secondary_args_offset-len]=0;
+
+        secondary_args = line + secondary_args_offset + strlen("--");
+    } else {
+        primary_args = strdup(&line[len]);
+        assert(primary_args);
+        secondary_args=NULL;
+    }
     /* get the command line parameters for this command */
-    valset = get_valset(server_cb, rpc, &line[len], &res);
+    valset = get_valset(server_cb, rpc, primary_args, &res);
+    free(primary_args);
     if (!valset || res != NO_ERR) {
         if (valset) {
             val_free_value(valset);
@@ -5064,25 +5079,11 @@ static status_t
         dofill = FALSE;
     }
 
-    secondary_args_buf = strdup(line);
-    secondary_args = secondary_args_buf;
-    secondary_args_flag = 0;
-    while(strlen(secondary_args)>=strlen("--")) {
-        if(memcmp(secondary_args, "--", strlen("--"))==0) {
-            secondary_args+=strlen("--");
-            secondary_args_flag = 1;
-            break;
-        }
-        secondary_args++;
-    }
     /* get the contents specified in the 'from' choice */
     content = get_content_from_choice(server_cb, rpc, valset, getoptional,
                                       isdelete, dofill,
                                       TRUE, /* iswrite */
-                                      &res, &valroot, secondary_args_flag?secondary_args:NULL);
-    free(secondary_args_buf);
-    secondary_args=NULL;
-
+                                      &res, &valroot, secondary_args);
     if (content == NULL) {
         if (res != NO_ERR) {
             if (LOGDEBUG2) {

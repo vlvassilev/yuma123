@@ -1344,13 +1344,17 @@ static status_t
     *expectparm=TRUE;
 
     yangcli_wordexp(line, &p, 0);
-
+    //yangcli_wordexp_dump(&p);
     for (i = 0; i < p.we_wordc; i++) {
         if(p.we_word_line_offset[i]+strlen(p.we_wordv[i])==word_end) {
             /*cursor at the end of a parameter[=value] - completion possible*/
             break;
         } else if((p.we_word_line_offset[i]<=word_end) && (p.we_word_line_offset[i]+strlen(p.we_wordv[i])>word_end)) {
             /*cursor in the middle of parameter[=value] - completion not possible*/
+            *emptyexit=TRUE;
+            return NO_ERR;
+        } else if(0==strcmp("--",p.we_wordv[i])) {
+            /* no completion currently supported for secondary arguments e.g. create /interfaces/interface -- loopback=...*/
             *emptyexit=TRUE;
             return NO_ERR;
         }

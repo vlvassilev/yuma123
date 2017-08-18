@@ -18,8 +18,8 @@ int yangcli_wordexp (const char* words, yangcli_wordexp_t* pwordexp, int flags)
     unsigned int i;
     unsigned int len;
     unsigned char quoted;
-    pwordexp->we_wordv=(char**)malloc(1024*sizeof(char*));
-    pwordexp->we_word_line_offset=(int*)malloc(1024*sizeof(int));
+    pwordexp->we_wordv=(char**)malloc(YANGCLI_WORDEXP_MAXPARAMS_NUM*sizeof(char*));
+    pwordexp->we_word_line_offset=(int*)malloc(YANGCLI_WORDEXP_MAXPARAMS_NUM*sizeof(int));
 
     pwordexp->we_wordc=0;
     
@@ -58,4 +58,12 @@ void yangcli_wordfree (yangcli_wordexp_t * pwordexp)
 {
     free(pwordexp->we_word_line_offset);
     free(pwordexp->we_wordv);
+}
+
+void yangcli_wordexp_dump(yangcli_wordexp_t * pwordexp)
+{
+    int i;
+    for(i=0;i<pwordexp->we_wordc;i++) {
+        printf("[%d] %s\n",i,pwordexp->we_wordv[i]);
+    }
 }

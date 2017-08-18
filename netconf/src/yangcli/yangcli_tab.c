@@ -462,6 +462,11 @@ static status_t
                 obj_find_child(parentObj,
                                NULL/*obj_get_mod_name(parentObj)*/,
                                (const xmlChar *)childName);
+            if(childObj==NULL) {
+            	/* no completion possible - the text before / or [ does not resolve to valid obj */
+            	return NO_ERR;
+            }
+
             cmdlen = word_end - word_iter;
 
             /* put the children path with topObj into the recursive

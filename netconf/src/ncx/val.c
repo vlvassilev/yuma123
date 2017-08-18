@@ -1197,6 +1197,8 @@ static val_value_t *
     uint32       deftimeout;
     boolean      disable_cache;
 
+    *res = NO_ERR;
+
     if (!val->getcb) {
         *res = ERR_NCX_OPERATION_FAILED;
         return NULL;

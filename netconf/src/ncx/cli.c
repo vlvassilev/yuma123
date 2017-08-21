@@ -639,6 +639,78 @@ static char *
 
 } /* copy_argv_to_buffer */
 
+/********************************************************************
+* FUNCTION try_parse_parmname_from_cli
+*
+*  Attempts to find child object from parent obj and instance identifier
+*  in a private case a simple parameter name string.
+*  Optionally autocompletion can be attempted.
+*
+* INPUTS:
+*   obj == parent container
+*   autocomp == attempt to autocomplete parameter identifiers
+*   parmname == start of the parameter identifier, not necessary 0 terminated
+*
+* OUTPUTS:
+*   len_out == length of detected parameter identifier
+*   chobj_out == obj template of the detected parameter
+*
+* RETURNS:
+*   NO_ERR, ERR_NCX_AMBIGUOUS_CMD, other
+*********************************************************************/
+static status_t try_parse_parmname_from_cli(obj_template_t* obj, boolean autocomp, const char* parmname, unsigned int* len_out, obj_template_t** chobj_out)
+{
+    status_t res;
+    unsigned int parmnamelen, copylen, matchcount;
+    boolean gotmatch;
+    const char* str;
+    unsigned int len;
+    obj_template_t* chobj;
+
+    res=NO_ERR;
+    len = 0;
+    chobj=NULL;
+    gotmatch=FALSE;
+
+    /* check the parmname string for a terminating char */
+    parmnamelen = 0;
+    if (ncx_valid_fname_ch(*parmname)) {
+        str = &parmname[1];
+        while (*str && ncx_valid_name_ch(*str)) {
+            str++;
+        }
+        parmnamelen = (uint32)(str - parmname);
+        len = parmnamelen;
+
+        /* check if this parameter name is in the parmset def */
+        chobj = obj_find_child_str(obj, NULL,
+                                   (const xmlChar *)parmname,
+                                   parmnamelen);
+
+        /* check if parm was found, try partial name if not */
+        if (!chobj && autocomp) {
+            matchcount = 0;
+            chobj = obj_match_child_str(obj, NULL,
+                                        (const xmlChar *)parmname,
+                                        parmnamelen,
+                                        &matchcount);
+            if (chobj) {
+                if (matchcount > 1) {
+                    res = ERR_NCX_AMBIGUOUS_CMD;
+                }
+            } else {
+                len = 0;
+            }
+        }
+
+    }  /* else it could be a default-parm value */
+
+    *chobj_out = chobj;
+    *len_out = len;
+
+    return res;
+
+} /* try_parse_parmname_from_cli */
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
@@ -1128,7 +1200,7 @@ val_value_t *
     char           *parmname, *parmval;
     char           *str = NULL, *buff, testch;
     int32           buffpos, bufflen;
-    uint32          parmnamelen, copylen, matchcount;
+    uint32          parmnamelen;
     ncx_btype_t     btyp;
     status_t        res;
     xmlChar         errbuff[ERRLEN+1], savechar;
@@ -1294,46 +1366,17 @@ val_value_t *
          * check for the end of the parm name, wsp or equal sign
          * get the parm template, and get ready to parse it
          */
+
         if (res == NO_ERR) {
-            /* check the parmname string for a terminating char */
-            parmname = &buff[buffpos];
-            parmnamelen = 0;
 
-            if (ncx_valid_fname_ch(*parmname)) {
-                str = &parmname[1];
-                while (*str && ncx_valid_name_ch(*str)) {
-                    str++;
-                }
-                parmnamelen = (uint32)(str - parmname);
-                copylen = parmnamelen;
-
-                /* check if this parameter name is in the parmset def */
-                chobj = obj_find_child_str(obj, NULL, 
-                                           (const xmlChar *)parmname,
-                                           parmnamelen);
-
-                /* check if parm was found, try partial name if not */
-                if (!chobj && autocomp) {
-                    matchcount = 0;
-                    chobj = obj_match_child_str(obj, NULL,
-                                                (const xmlChar *)parmname,
-                                                parmnamelen,
-                                                &matchcount);
-                    if (chobj) {
-                        gotmatch = TRUE;
-                        if (matchcount > 1) {
-                            res = ERR_NCX_AMBIGUOUS_CMD;
-                        }
-                    } else {
-                        copylen = 0;
-                    }
-                }
-
-                /* advance the buffer pointer */
-                buffpos += copylen;
-
-            }  /* else it could be a default-parm value */
-
+            res = try_parse_parmname_from_cli(obj, autocomp, &buff[buffpos], &parmnamelen, &chobj);
+            if(res==NO_ERR && chobj!=NULL) {
+                gotmatch=TRUE;
+                buffpos += parmnamelen;
+            }
+            if(res==ERR_NCX_AMBIGUOUS_CMD) {
+                gotmatch=TRUE;
+            }
 
             if (res != NO_ERR) {
                 if (res == ERR_NCX_INVALID_VALUE) {

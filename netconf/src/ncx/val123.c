@@ -3,6 +3,8 @@
 #include "val.h"
 #include "val_util.h"
 #include "val_get_leafref_targval.h"
+#include "cli.h"
+#include "val123.h"
 
 
 val_value_t* val123_deref(val_value_t* leafref_val)
@@ -237,3 +239,287 @@ bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
 
     return FALSE;
 }
+
+/********************************************************************
+* FUNCTION cli123_parse_value_instance
+*
+* Create a val_value_t struct for the specified parm value,
+* and insert it into the parent container value
+*
+* ONLY CALLED FROM CLI PARSING FUNCTIONS IN ncxcli.c
+* ALLOWS SCRIPT EXTENSIONS TO BE PRESENT
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   val == parent value struct to adjust
+*   parm == obj_template_t descriptor for the missing parm
+*   instance_id_str == instance identifier string of the parameter value
+*        e.g foo or foo[name='bar']/foo etc.
+*   strval == string representation of the parm value
+*             (may be NULL if parm btype is NCX_BT_EMPTY
+*   script == TRUE if CLI script mode
+*          == FALSE if CLI plain mode
+*
+* OUTPUTS:
+*   A new val_value_t will be inserted in the val->v.childQ or of a child
+*   sub-container or list value as required to fill in the parm.
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t cli123_parse_value_instance(runstack_context_t *rcxt, val_value_t *parent_val, obj_template_t *obj, const xmlChar * instance_id_str, const xmlChar *strval, boolean script)
+{
+    if(obj_is_cli(obj) || (parent_val->obj->objtype!=OBJ_TYP_CONTAINER && parent_val->obj->objtype!=OBJ_TYP_LIST) ||  parent_val->obj==obj123_get_first_data_parent(obj)) {
+        return cli_parse_parm(rcxt, parent_val, obj, strval, script);
+    } else {
+        status_t res;
+        val_value_t* val;
+        val_value_t* top_val;
+        val_value_t* bottom_val;
+        res = val123_create_descendant_value_chain(parent_val->obj, instance_id_str, strval, &top_val, &bottom_val);
+        if(res!=NO_ERR) {
+            return res;
+        }
+
+        res = val123_merge_cplx(parent_val, top_val);
+        val_free_value(top_val);
+        return res;
+    }
+}  /* cli123_parse_value_instance */
+
+status_t val123_create_descendant_value_chain(obj_template_t* obj, const xmlChar* instance_id_str, const xmlChar* strval, val_value_t** top_val, val_value_t** bottom_val)
+{
+    status_t res;
+    const xmlChar* ptr;
+    unsigned int len;
+    obj_template_t* chobj;
+    val_value_t* chval;
+    val_value_t* prev_val;
+
+    *top_val = val_new_value();
+    val_init_from_template(*top_val, obj);
+    *bottom_val = *top_val;
+    prev_val = *top_val;
+
+    ptr = instance_id_str;
+    do {
+        res = cli123_parse_next_child_obj_from_path(prev_val->obj, FALSE/*autocomp*/, ptr, &len, &chobj);
+        if(res!=NO_ERR) {
+            break;
+        }
+        ptr+=len;
+
+        chval = val_new_value();
+        assert(chval);
+        val_init_from_template(chval, chobj);
+        val_add_child(chval,prev_val);
+        *bottom_val = chval;
+
+        if(chobj->objtype==OBJ_TYP_LIST) {
+            while(*ptr=='[') {
+                /* parse and create key values specified as predicates */
+                val_value_t* key_val;
+                ptr+=1;
+                res = cli123_parse_parm_assignment(chobj, FALSE/*autocomp*/, ptr, &len, &key_val);
+                if(res!=NO_ERR) {
+                    break;
+                }
+                val_add_child(key_val,chval);
+                ptr+=len;
+                if(*ptr!=']') {
+                    res = ERR_NCX_WRONG_TKVAL;
+                    break;
+                }
+                ptr+=1;
+            }
+            /* TODO - Verify all keys are present */
+        }
+
+        if(res == NO_ERR) {
+            if(*ptr=='\0') {
+                if(chobj->objtype!=OBJ_TYP_LIST && chobj->objtype!=OBJ_TYP_CONTAINER) {
+                    res = val_set_simval_obj(chval,chval->obj,strval);
+                }
+                break;
+            } else if(*ptr=='/') {
+                ptr++;
+            } else {
+                printf("Unexpected character %c in instance-identifier at offset %d: %s\n",*ptr,(unsigned int)(ptr-instance_id_str),instance_id_str);
+                res = ERR_NCX_WRONG_TKVAL;
+            }
+        }
+        prev_val = chval;
+    } while(res==NO_ERR);
+
+    if(res!=NO_ERR) {
+        val_free_value(*top_val);
+        *top_val=NULL;
+        *bottom_val=NULL;
+    }
+
+    return res;
+}
+
+status_t val123_merge_cplx(val_value_t* dst, val_value_t* src)
+{
+    val_value_t* chval;
+    val_value_t* match_val;
+    for (chval = val_get_first_child(src);
+         chval != NULL;
+         chval = val_get_next_child(chval)) {
+
+        if(obj_is_key(chval->obj)) {
+            continue;
+        }
+
+        match_val = val123_find_match(dst, chval);
+        if(match_val==NULL) {
+            val_add_child(val_clone(chval),dst);
+        } else {
+            val123_merge_cplx(match_val, chval);
+        }
+    }
+    return NO_ERR;
+}
+
+obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
+{
+    obj_template_t* parent_obj;
+    do {
+        parent_obj = obj_get_parent(obj);
+        if(parent_obj->objtype==OBJ_TYP_CONTAINER || parent_obj->objtype==OBJ_TYP_LIST) {
+            break;
+        }
+        obj = parent_obj;
+    } while(parent_obj);
+    return parent_obj;
+}
+
+status_t cli123_parse_value_string(char* cli_str, unsigned int* len, char** valstr)
+{
+    *valstr=NULL;
+    return NO_ERR;
+}
+
+/********************************************************************
+* FUNCTION cli123_parse_parm_assignment
+*
+*  Parses cli parameter assignment tuple e.g. foo="bar" and creates value
+*
+* INPUTS:
+*   obj == parent container
+*   autocomp == attempt to autocomplete parameter identifiers
+*   cli_str == start of the parameter identifier, not necessary 0 terminated
+*
+* OUTPUTS:
+*   len_out == length of detected parameter identifier
+*   chval_out == allocated val for the parameter[=value] expression
+*
+* RETURNS:
+*   NO_ERR, ERR_NCX_AMBIGUOUS_CMD, other
+*********************************************************************/
+status_t cli123_parse_parm_assignment(obj_template_t* obj, boolean autocomp, const char* cli_str, unsigned int* len_out, val_value_t** chval_out)
+{
+    status_t res;
+    obj_template_t* chobj;
+    val_value_t* chval;
+    const char* ptr;
+    unsigned int len;
+    char* valstr;
+
+    ptr = cli_str;
+
+    res = cli123_parse_next_child_obj_from_path(obj, autocomp, ptr, &len, &chobj);
+    if(res!=NO_ERR) {
+        return res;
+    }
+    ptr+=len;
+    if(*ptr!='=') {
+        return ERR_NCX_WRONG_TKVAL;
+    }
+    ptr++;
+    res = cli123_parse_value_string(ptr, &len, &valstr);
+    ptr+=len;
+    chval=val_new_value();
+    assert(chval);
+    res = val_set_simval_obj(chval,chobj,valstr);
+
+    *len_out = cli_str-ptr;
+    *chval_out = chval;
+    return res;
+
+} /* cli123_parse_parm_assignment */
+
+/********************************************************************
+* FUNCTION cli123_parse_next_child_obj_from_path
+*
+*  Attempts to find child object from parent obj and instance identifier
+*  in a private case a simple parameter name string.
+*  Optionally autocompletion can be attempted.
+*
+* INPUTS:
+*   obj == parent container
+*   autocomp == attempt to autocomplete parameter identifiers
+*   parmname == start of the parameter identifier, not necessary 0 terminated
+*
+* OUTPUTS:
+*   len_out == length of detected parameter identifier
+*   chobj_out == obj template of the detected parameter
+*
+* RETURNS:
+*   NO_ERR, ERR_NCX_AMBIGUOUS_CMD, other
+*********************************************************************/
+status_t cli123_parse_next_child_obj_from_path(obj_template_t* obj, boolean autocomp, const char* parmname, unsigned int* len_out, obj_template_t** chobj_out)
+{
+    status_t res;
+    unsigned int parmnamelen, copylen, matchcount;
+    boolean gotmatch;
+    const char* str;
+    unsigned int len;
+    obj_template_t* chobj;
+
+    res=NO_ERR;
+    len = 0;
+    chobj=NULL;
+    gotmatch=FALSE;
+
+    /* check the parmname string for a terminating char */
+    parmnamelen = 0;
+
+    if (ncx_valid_fname_ch(*parmname)) {
+        str = &parmname[1];
+        while (*str && ncx_valid_name_ch(*str)) {
+            str++;
+        }
+        parmnamelen = (uint32)(str - parmname);
+        len = parmnamelen;
+
+        /* check if this parameter name is in the parmset def */
+        chobj = obj_find_child_str(obj, NULL,
+                                   (const xmlChar *)parmname,
+                                   parmnamelen);
+
+        /* check if parm was found, try partial name if not */
+        if (!chobj && autocomp) {
+            matchcount = 0;
+            chobj = obj_match_child_str(obj, NULL,
+                                        (const xmlChar *)parmname,
+                                        parmnamelen,
+                                        &matchcount);
+            if (chobj) {
+                if (matchcount > 1) {
+                    res = ERR_NCX_AMBIGUOUS_CMD;
+                }
+            } else {
+                len = 0;
+            }
+        }
+
+    }  /* else it could be a default-parm value */
+
+    *chobj_out = chobj;
+    *len_out = len;
+
+    return res;
+
+} /* cli123_parse_next_child_obj_from_path */

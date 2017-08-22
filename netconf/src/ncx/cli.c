@@ -41,6 +41,7 @@ date         init     comment
 #include <string.h>
 #include <ctype.h>
 #include <xmlstring.h>
+#include <assert.h>
 
 #include  "procdefs.h"
 #include "cfg.h"
@@ -56,6 +57,7 @@ date         init     comment
 #include "var.h"
 #include "xml_util.h"
 #include "yangconst.h"
+#include "val123.h"
 
 
 /********************************************************************
@@ -638,79 +640,6 @@ static char *
     return buff;
 
 } /* copy_argv_to_buffer */
-
-/********************************************************************
-* FUNCTION try_parse_parmname_from_cli
-*
-*  Attempts to find child object from parent obj and instance identifier
-*  in a private case a simple parameter name string.
-*  Optionally autocompletion can be attempted.
-*
-* INPUTS:
-*   obj == parent container
-*   autocomp == attempt to autocomplete parameter identifiers
-*   parmname == start of the parameter identifier, not necessary 0 terminated
-*
-* OUTPUTS:
-*   len_out == length of detected parameter identifier
-*   chobj_out == obj template of the detected parameter
-*
-* RETURNS:
-*   NO_ERR, ERR_NCX_AMBIGUOUS_CMD, other
-*********************************************************************/
-static status_t try_parse_parmname_from_cli(obj_template_t* obj, boolean autocomp, const char* parmname, unsigned int* len_out, obj_template_t** chobj_out)
-{
-    status_t res;
-    unsigned int parmnamelen, copylen, matchcount;
-    boolean gotmatch;
-    const char* str;
-    unsigned int len;
-    obj_template_t* chobj;
-
-    res=NO_ERR;
-    len = 0;
-    chobj=NULL;
-    gotmatch=FALSE;
-
-    /* check the parmname string for a terminating char */
-    parmnamelen = 0;
-    if (ncx_valid_fname_ch(*parmname)) {
-        str = &parmname[1];
-        while (*str && ncx_valid_name_ch(*str)) {
-            str++;
-        }
-        parmnamelen = (uint32)(str - parmname);
-        len = parmnamelen;
-
-        /* check if this parameter name is in the parmset def */
-        chobj = obj_find_child_str(obj, NULL,
-                                   (const xmlChar *)parmname,
-                                   parmnamelen);
-
-        /* check if parm was found, try partial name if not */
-        if (!chobj && autocomp) {
-            matchcount = 0;
-            chobj = obj_match_child_str(obj, NULL,
-                                        (const xmlChar *)parmname,
-                                        parmnamelen,
-                                        &matchcount);
-            if (chobj) {
-                if (matchcount > 1) {
-                    res = ERR_NCX_AMBIGUOUS_CMD;
-                }
-            } else {
-                len = 0;
-            }
-        }
-
-    }  /* else it could be a default-parm value */
-
-    *chobj_out = chobj;
-    *len_out = len;
-
-    return res;
-
-} /* try_parse_parmname_from_cli */
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
@@ -1368,12 +1297,32 @@ val_value_t *
          */
 
         if (res == NO_ERR) {
+            unsigned int offset=0;
+            unsigned int len;
+            obj_template_t* base_obj = obj;
 
-            res = try_parse_parmname_from_cli(obj, autocomp, &buff[buffpos], &parmnamelen, &chobj);
+            do {
+                res = cli123_parse_next_child_obj_from_path(base_obj, autocomp, &buff[buffpos+offset], &len, &chobj);
+
+                if(res==NO_ERR && chobj!=NULL) {
+                    offset += len;
+                    if((chobj->objtype==OBJ_TYP_CONTAINER || chobj->objtype==OBJ_TYP_LIST) && buff[buffpos+offset]=='/') {
+                        /* instance-identifier to parameter in subcontainer e.g. foo/bar[name='123']/leaf=123*/
+                        base_obj=chobj;
+                        offset++;
+                        continue;
+                    }
+                }
+                parmname=&buff[buffpos];
+                parmnamelen=offset;
+                buffpos += offset;
+                break;
+            } while(1);
+
             if(res==NO_ERR && chobj!=NULL) {
                 gotmatch=TRUE;
-                buffpos += parmnamelen;
             }
+
             if(res==ERR_NCX_AMBIGUOUS_CMD) {
                 gotmatch=TRUE;
             }
@@ -1610,8 +1559,11 @@ val_value_t *
 
         /* create a new val_value struct and set the value */
         if (res == NO_ERR) {
-            res = parse_cli_parm(rcxt, val, chobj, 
-                                 (const xmlChar *)parmval, script);
+            char* instance_id_str;
+            instance_id_str = strndup(parmname, parmnamelen);
+            assert(instance_id_str);
+            res = cli123_parse_value_instance(rcxt, val, chobj, instance_id_str, (const xmlChar *)parmval, script);
+            free(instance_id_str);
         } else if (res == ERR_NCX_EMPTY_VAL &&
                    gotmatch && !gotdashes) {
             /* matched parm did not work out so
@@ -1622,8 +1574,7 @@ val_value_t *
             if (chobj) {
                 savechar = parmname[parmnamelen];
                 parmname[parmnamelen] = 0;
-                res = parse_cli_parm(rcxt, val, chobj, 
-                                     (const xmlChar *)parmname, script);
+                res = cli123_parse_value_instance(rcxt, val, chobj, obj_get_name(chobj)/*instance_id_str*/, (const xmlChar *)parmname, script);
                 parmname[parmnamelen] = savechar;
             }
         }

@@ -9489,7 +9489,7 @@ xpath_result_t *
 
     assert( pcb && "pcb is NULL" );
     assert( val && "val is NULL" );
-    assert( docroot && "docroot is NULL" );
+    //assert( docroot && "docroot is NULL" );
     assert( res && "res is NULL" );
 
     if (pcb->tkc) {

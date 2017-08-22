@@ -946,7 +946,11 @@ static status_t
 
     *targval=NULL;
 
-    for(root_val=startval;!obj_is_root(root_val->obj);root_val=root_val->parent);
+    for(root_val=startval;!obj_is_root(root_val->obj) && root_val->parent!=NULL;root_val=root_val->parent);
+
+    if(!obj_is_root(root_val->obj)) {
+        root_val = NULL; /* the chain ends before root - only relevant targets can be resolved */
+    }
 
     xpathpcb = xpath_new_pcb(target, NULL);
 

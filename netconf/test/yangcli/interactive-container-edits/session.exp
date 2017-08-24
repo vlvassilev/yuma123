@@ -26,13 +26,13 @@ expect {
     timeout {exit 1}
 }
 
-send " /interf\t\t"
+send " /interf\t"
 expect {
     "aces" {sleep 1}
     timeout {exit 1}
 }
 
-send "/interf\t\t"
+send "interf\t"
 expect {
     "ace" {sleep 1}
     timeout {exit 1}

@@ -1,0 +1,40 @@
+module test-non-interactive-container-edits {
+
+  namespace "http://yuma123.org/ns/test-non-interactive-container-edits";
+  prefix tnice;
+  
+  import ietf-interfaces { prefix if; }
+
+  organization  "yuma123.org";
+  
+  description "Model for testing yangcli non-interactive container edits. e.g.
+      create /interfaces/interface -- name=eth1 type=ethernetCsmacd a/foo=hello b[key1='one'][key2='two']/bar=world";
+  
+  revision 2017-08-24 {
+    description
+      "1.st version";
+  }
+
+  augment "/if:interfaces/if:interface" {
+    container a {
+        leaf foo {
+            type string;
+        }
+    }
+    list b {
+        key "key1 key2";
+        leaf key1 {
+            type string;
+        }
+        leaf key2 {
+            type string;
+        }
+        leaf bar {      
+            type string;
+        }
+    }
+
+  }
+}
+
+

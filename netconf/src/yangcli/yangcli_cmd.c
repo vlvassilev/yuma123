@@ -4363,8 +4363,16 @@ static val_value_t *
             *retres = ERR_NCX_MISSING_PARM;
             return NULL;
         }
-
-        res = val123_new_value_from_instance_id(/*parent_obj*/NULL, target, TRUE, /*childval*/valroot, &targobj, &targval);
+        if(strlen(target)>1 && target[strlen(target)-1]=='/') {
+            /* tolerate paths with trailing forward slash e.g. create /interfaces/interface/ */
+            char* t;
+            t = strdup(target);
+            t[strlen(target)-1]=0;
+            res = val123_new_value_from_instance_id(/*parent_obj*/NULL, t, TRUE, /*childval*/valroot, &targobj, &targval);
+            free(t);
+        } else {
+            res = val123_new_value_from_instance_id(/*parent_obj*/NULL, target, TRUE, /*childval*/valroot, &targobj, &targval);
+        }
         if(res==NO_ERR) {
             targobj=targval->obj;
             if(iswrite && !obj_is_config(targobj)) {

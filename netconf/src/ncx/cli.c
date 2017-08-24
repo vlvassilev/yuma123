@@ -1304,15 +1304,41 @@ val_value_t *
             do {
                 res = cli123_parse_next_child_obj_from_path(base_obj, autocomp, &buff[buffpos+offset], &len, &chobj);
 
-                if(res==NO_ERR && chobj!=NULL) {
-                    offset += len;
-                    if((chobj->objtype==OBJ_TYP_CONTAINER || chobj->objtype==OBJ_TYP_LIST) && buff[buffpos+offset]=='/') {
-                        /* instance-identifier to parameter in subcontainer e.g. foo/bar[name='123']/leaf=123*/
-                        base_obj=chobj;
+                if(res!=NO_ERR || chobj==NULL) {
+                    break;
+                }
+                offset += len;
+                if(chobj->objtype==OBJ_TYP_LIST && buff[buffpos+offset]=='[') {
+                    while (buff[buffpos+offset]=='[') {
+                        /* key predicates e.g. /a/b[c=1][d=2] */
+                        val_value_t* predicate_val;
+                        unsigned int predicate_len;
                         offset++;
-                        continue;
+                        res = cli123_parse_parm_assignment(chobj, autocomp, &buff[buffpos+offset], &predicate_len, &predicate_val);
+                        if(res != NO_ERR) {
+                            break;
+                        }
+                        val_free_value(predicate_val);
+                        offset += predicate_len;
+                        if(buff[buffpos+offset]!=']') {
+                            res = ERR_NCX_INVALID_VALUE;
+                            break;
+                        }
+                        offset++;
                     }
                 }
+
+                if(res!=NO_ERR) {
+                    break;
+                }
+
+                if((chobj->objtype==OBJ_TYP_CONTAINER || chobj->objtype==OBJ_TYP_LIST) && buff[buffpos+offset]=='/') {
+                    /* instance-identifier to parameter in subcontainer e.g. foo/bar[name='123']/leaf=123*/
+                    base_obj=chobj;
+                    offset++;
+                    continue;
+                }
+
                 parmname=&buff[buffpos];
                 parmnamelen=offset;
                 buffpos += offset;

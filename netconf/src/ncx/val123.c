@@ -427,7 +427,29 @@ obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
 
 status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char** valstr)
 {
+    char* ptr = cli_str;
     *valstr=NULL;
+    if(*ptr == '\'') {
+        do {
+            ptr++;
+        } while(*ptr!='\'' && *ptr!=' ');
+
+        if(*ptr=='\'') {
+            char* buf;
+            unsigned int len_wo_quotes;
+            len_wo_quotes=ptr-cli_str-1;
+            buf=(char*)malloc(len_wo_quotes+1);
+            memcpy(buf,cli_str+1,len_wo_quotes);
+            buf[len_wo_quotes]=0;
+            *len = ptr-cli_str+1;
+            *valstr=buf;
+        } else {
+            assert(0);
+        }
+    } else {
+        /*TODO*/
+        assert(0);
+    }
     return NO_ERR;
 }
 
@@ -457,6 +479,8 @@ status_t cli123_parse_parm_assignment(obj_template_t* obj, boolean autocomp, con
     unsigned int len;
     char* valstr;
 
+    *len_out = NULL;
+    *chval_out = NULL;
     ptr = cli_str;
 
     res = cli123_parse_next_child_obj_from_path(obj, autocomp, ptr, &len, &chobj);
@@ -469,13 +493,19 @@ status_t cli123_parse_parm_assignment(obj_template_t* obj, boolean autocomp, con
     }
     ptr++;
     res = cli123_parse_value_string(ptr, &len, &valstr);
+    if(res!=NO_ERR) {
+        return res;
+    }
     ptr+=len;
     chval=val_new_value();
     assert(chval);
     res = val_set_simval_obj(chval,chobj,valstr);
+    free(valstr);
 
-    *len_out = cli_str-ptr;
-    *chval_out = chval;
+    if(res==NO_ERR) {
+        *len_out = ptr-cli_str;
+        *chval_out = chval;
+    }
     return res;
 
 } /* cli123_parse_parm_assignment */

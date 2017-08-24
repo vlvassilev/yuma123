@@ -69,6 +69,7 @@ date         init     comment
 #include "runstack.h"
 #include "status.h"
 #include "val.h"
+#include "val123.h"
 #include "val_util.h"
 #include "var.h"
 #include "xmlns.h"
@@ -3217,7 +3218,10 @@ static status_t
      * if target == /foo/bar/baz then
      * valroot --> /foo and targobj --> /foo/bar/baz
      */
-    valroot = get_instanceid_parm(target, TRUE, TRUE, &targobj, &targval, &res);
+    res = val123_new_value_from_instance_id(/*parent_obj*/NULL, target, TRUE, /*childval*/&valroot, &targobj, &targval);
+    if(res==NO_ERR) {
+        targobj=targval->obj;
+    }
     if (res != NO_ERR) {
         if (valroot) {
             val_free_value(valroot);
@@ -4192,6 +4196,8 @@ static status_t get_to_server_reqdata(server_cb_t *server_cb,
  *    retres == address of return status
  *    valroot == address of return value root pointer
  *               used when the content is from the CLI XPath
+ *    secondary_args == secondary command line arguments e.g. relevant params
+ *                      when filling container specified after -- empty parameter.
  *
  * OUTPUTS:
  *    *valroot ==  pointer to malloced value tree content root. 
@@ -4230,7 +4236,7 @@ static val_value_t *
                              boolean iswrite,
                              status_t *retres,
                              val_value_t **valroot,
-                             char* secondary_args)
+                             const char* secondary_args)
 {
     val_value_t           *parm, *curparm = NULL, *newparm = NULL;
     const val_value_t     *userval = NULL;
@@ -4358,8 +4364,13 @@ static val_value_t *
             return NULL;
         }
 
-        *valroot = get_instanceid_parm(target, TRUE, iswrite, &targobj,
-                                       &targval, &res);
+        res = val123_new_value_from_instance_id(/*parent_obj*/NULL, target, TRUE, /*childval*/valroot, &targobj, &targval);
+        if(res==NO_ERR) {
+            targobj=targval->obj;
+            if(iswrite && !obj_is_config(targobj)) {
+                res = ERR_NCX_ACCESS_READ_ONLY;
+            }
+        }
         if (res != NO_ERR) {
             log_error("\nError: invalid target parameter (%s)",
                       get_error_string(res));
@@ -4576,7 +4587,10 @@ static val_value_t *
                         argv[1] = secondary_args;
                         curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &status);
                         free(argv[0]);
-                        res = val_replace(curparm, mytarg);
+
+                        /*TODO check for conflicting keys*/
+
+                        res = val123_merge_cplx(mytarg, curparm);
                     }
                     res = fill_valset(server_cb, rpc, mytarg, curparm, 
                                       iswrite, isdelete);

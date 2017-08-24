@@ -5,6 +5,7 @@
 #include "val_get_leafref_targval.h"
 #include "cli.h"
 #include "val123.h"
+#include "xpath_yang.h"
 
 
 val_value_t* val123_deref(val_value_t* leafref_val)
@@ -269,93 +270,117 @@ bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
 *********************************************************************/
 status_t cli123_parse_value_instance(runstack_context_t *rcxt, val_value_t *parent_val, obj_template_t *obj, const xmlChar * instance_id_str, const xmlChar *strval, boolean script)
 {
+    val_value_t* temp_parent_val;
     if(obj_is_cli(obj) || (parent_val->obj->objtype!=OBJ_TYP_CONTAINER && parent_val->obj->objtype!=OBJ_TYP_LIST) ||  parent_val->obj==obj123_get_first_data_parent(obj)) {
         return cli_parse_parm(rcxt, parent_val, obj, strval, script);
     } else {
         status_t res;
         val_value_t* val;
-        val_value_t* top_val;
-        val_value_t* bottom_val;
-        res = val123_create_descendant_value_chain(parent_val->obj, instance_id_str, strval, &top_val, &bottom_val);
+        val_value_t* childval;
+        obj_template_t* targobj;
+        val_value_t* targval;
+        res = val123_new_value_from_instance_id(parent_val->obj, instance_id_str, FALSE, &childval, &targobj, &targval);
         if(res!=NO_ERR) {
             return res;
         }
+        if(targobj->objtype!=OBJ_TYP_LIST && targobj->objtype!=OBJ_TYP_CONTAINER) {
+            res = val_set_simval_obj(targval,targobj,strval);
+            if(res!=NO_ERR) {
+                val_free_value(childval);
+                return res;
+            }
+        }
+        temp_parent_val = val_new_value();
+        assert(temp_parent_val);
+        val_init_from_template(temp_parent_val, parent_val->obj);
+        val_add_child(childval,temp_parent_val);
 
-        res = val123_merge_cplx(parent_val, top_val);
-        val_free_value(top_val);
+        res = val123_merge_cplx(parent_val, temp_parent_val);
+        val_free_value(temp_parent_val);
         return res;
     }
 }  /* cli123_parse_value_instance */
 
-status_t val123_create_descendant_value_chain(obj_template_t* obj, const xmlChar* instance_id_str, const xmlChar* strval, val_value_t** top_val, val_value_t** bottom_val)
+/********************************************************************
+ * FUNCTION val123_new_value_from_instance_id
+ *
+ * Validate an instance identifier parameter
+ * Return the target object
+ * Return a value struct from root/parent containing
+ * all the predicate assignments in the stance identifier
+ *
+ * INPUTS:
+ *    parent_obj == template of the context/parent node in case of
+ *                  relative instance identifier, NULL in case of
+ *                  absolute e.g. /.../...
+ *    instance_id_str == XPath expression for the instance-identifier
+ *    schemainst == TRUE if ncx:schema-instance string
+ *                  FALSE if instance-identifier
+ *
+ * OUTPUTS:
+ *    childval == address of return pointer to child of parent_obj value
+ *               (first/top node) in the chain leading to targval
+ *    targobj == address of return pointer to target obj template
+ *               node. Only useful if targval is a simple type leaf that
+ *               the user must initialize with value.
+ *    targval == address of return pointer to target value
+ *               node within the value subtree returned
+ *
+ * RETURNS:
+ *   If NO_ERR:
+ *     malloced value node chain with keys representing the instance-identifier
+ *     from childval to the targval
+ *********************************************************************/
+status_t val123_new_value_from_instance_id(obj_template_t* parent_obj, const xmlChar* instance_id_str, boolean schemainst, val_value_t** childval, obj_template_t** targobj, val_value_t** targval)
 {
-    status_t res;
-    const xmlChar* ptr;
-    unsigned int len;
-    obj_template_t* chobj;
-    val_value_t* chval;
-    val_value_t* prev_val;
+    xpath_pcb_t           *xpathpcb;
+    status_t               res;
 
-    *top_val = val_new_value();
-    val_init_from_template(*top_val, obj);
-    *bottom_val = *top_val;
-    prev_val = *top_val;
+    *targobj = NULL;
+    *childval = NULL;
+    *targval = NULL;
 
-    ptr = instance_id_str;
-    do {
-        res = cli123_parse_next_child_obj_from_path(prev_val->obj, FALSE/*autocomp*/, ptr, &len, &chobj);
-        if(res!=NO_ERR) {
-            break;
-        }
-        ptr+=len;
+    /* get a parser block for the instance-id */
+    xpathpcb = xpath_new_pcb(instance_id_str, NULL);
+    assert(xpathpcb);
 
-        chval = val_new_value();
-        assert(chval);
-        val_init_from_template(chval, chobj);
-        val_add_child(chval,prev_val);
-        *bottom_val = chval;
-
-        if(chobj->objtype==OBJ_TYP_LIST) {
-            while(*ptr=='[') {
-                /* parse and create key values specified as predicates */
-                val_value_t* key_val;
-                ptr+=1;
-                res = cli123_parse_parm_assignment(chobj, FALSE/*autocomp*/, ptr, &len, &key_val);
-                if(res!=NO_ERR) {
-                    break;
-                }
-                val_add_child(key_val,chval);
-                ptr+=len;
-                if(*ptr!=']') {
-                    res = ERR_NCX_WRONG_TKVAL;
-                    break;
-                }
-                ptr+=1;
-            }
-            /* TODO - Verify all keys are present */
-        }
-
-        if(res == NO_ERR) {
-            if(*ptr=='\0') {
-                if(chobj->objtype!=OBJ_TYP_LIST && chobj->objtype!=OBJ_TYP_CONTAINER) {
-                    res = val_set_simval_obj(chval,chval->obj,strval);
-                }
-                break;
-            } else if(*ptr=='/') {
-                ptr++;
-            } else {
-                printf("Unexpected character %c in instance-identifier at offset %d: %s\n",*ptr,(unsigned int)(ptr-instance_id_str),instance_id_str);
-                res = ERR_NCX_WRONG_TKVAL;
-            }
-        }
-        prev_val = chval;
-    } while(res==NO_ERR);
-
-    if(res!=NO_ERR) {
-        val_free_value(*top_val);
-        *top_val=NULL;
-        *bottom_val=NULL;
+    /* initial parse into a token chain
+     * this is only for parsing leafref paths!
+     */
+    res = xpath_yang_parse_path(NULL,
+                                NULL,
+                                schemainst?XP_SRC_SCHEMA_INSTANCEID :
+                                XP_SRC_INSTANCEID,
+                                xpathpcb);
+    if (res != NO_ERR) {
+        log_error("\nError: parse XPath target '%s' failed",
+                  xpathpcb->exprstr);
+        xpath_free_pcb(xpathpcb);
+        return res;
     }
+
+    /* validate against the object tree */
+    res = xpath_yang_validate_path(parent_obj?obj_get_mod(parent_obj):NULL,
+                                   parent_obj?parent_obj:ncx_get_gen_root(),
+                                   xpathpcb,
+                                   schemainst,
+                                   targobj);
+    if (res != NO_ERR) {
+        log_error("\nError: validate XPath target '%s' failed",
+                  xpathpcb->exprstr);
+        xpath_free_pcb(xpathpcb);
+        return res;
+    }
+
+    /* have a valid target object, so follow the
+     * parser chain and build a value subtree
+     * from the XPath expression
+     */
+    *childval = xpath_yang_make_instanceid_val(xpathpcb,
+                                            &res,
+                                            targval);
+
+    xpath_free_pcb(xpathpcb);
 
     return res;
 }
@@ -368,15 +393,20 @@ status_t val123_merge_cplx(val_value_t* dst, val_value_t* src)
          chval != NULL;
          chval = val_get_next_child(chval)) {
 
+#if 0
         if(obj_is_key(chval->obj)) {
             continue;
         }
-
+#endif
         match_val = val123_find_match(dst, chval);
         if(match_val==NULL) {
             val_add_child(val_clone(chval),dst);
         } else {
-            val123_merge_cplx(match_val, chval);
+            if(typ_is_simple(match_val->btyp)) {
+                val_merge(match_val, chval);
+            } else {
+                val123_merge_cplx(match_val, chval);
+            }
         }
     }
     return NO_ERR;
@@ -395,7 +425,7 @@ obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
     return parent_obj;
 }
 
-status_t cli123_parse_value_string(char* cli_str, unsigned int* len, char** valstr)
+status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char** valstr)
 {
     *valstr=NULL;
     return NO_ERR;

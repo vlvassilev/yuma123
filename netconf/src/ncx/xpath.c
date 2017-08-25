@@ -948,11 +948,12 @@ static status_t
 
     for(root_val=startval;!obj_is_root(root_val->obj) && root_val->parent!=NULL;root_val=root_val->parent);
 
-    if(!obj_is_root(root_val->obj)) {
-        root_val = NULL; /* the chain ends before root - only relevant targets can be resolved */
-    }
-
     xpathpcb = xpath_new_pcb(target, NULL);
+
+    if(!obj_is_root(root_val->obj)) {
+        root_val = NULL; /* the chain ends before root - only relative targets can be resolved */
+        xpathpcb->tkerr.mod = mod;
+    }
 
     result =
             xpath1_eval_expr(xpathpcb, startval, root_val, FALSE /* logerrors */, FALSE /* non-configonly */, &res);

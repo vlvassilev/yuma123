@@ -28,7 +28,9 @@ else
   SERVER_PID=$!
 fi
 sleep 3
-expect session.exp
-#kill -KILL $SERVER_PID
+expect session.create.exp
+expect session.replace.exp
+expect session.delete.exp
+kill -KILL $SERVER_PID
 cat tmp/server.log
 sleep 1

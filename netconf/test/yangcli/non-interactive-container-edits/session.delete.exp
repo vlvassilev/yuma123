@@ -1,0 +1,66 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /interfaces/interface\[name='eth1'\]/a/foo\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /interfaces/interface\[name='eth1'\]/b\[key1='one'\]\[key2='two'\]/bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /interfaces/interface\[name='eth1'\]/b\[key1='one'\]\[key2='two'\]/bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "error-message 'data missing'" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /interfaces/interface\[name='eth1'\]\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

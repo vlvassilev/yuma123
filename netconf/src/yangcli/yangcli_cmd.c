@@ -4374,7 +4374,6 @@ static val_value_t *
             res = val123_new_value_from_instance_id(/*parent_obj*/NULL, target, TRUE, /*childval*/valroot, &targobj, &targval);
         }
         if(res==NO_ERR) {
-            targobj=targval->obj;
             if(iswrite && !obj_is_config(targobj)) {
                 res = ERR_NCX_ACCESS_READ_ONLY;
             }

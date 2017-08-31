@@ -28,6 +28,7 @@ else
   SERVER_PID=$!
 fi
 sleep 3
+expect session.create-unknown-parm.exp
 expect session.create.exp
 expect session.replace.exp
 expect session.delete.exp

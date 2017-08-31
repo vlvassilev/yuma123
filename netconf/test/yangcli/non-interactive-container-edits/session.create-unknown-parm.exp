@@ -1,0 +1,21 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /interfaces/interface\[name='eth1'\] -- typee=ethernetCsmacd\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "Error: Unknown parameter (typee=ethernetCsmacd)" {send " "}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

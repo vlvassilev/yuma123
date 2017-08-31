@@ -1,0 +1,12 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "Error: memory leak" {exit 1}
+    timeout {exit 1}
+    eof {exit 0}
+}

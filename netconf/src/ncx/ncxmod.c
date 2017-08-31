@@ -5036,7 +5036,7 @@ ncxmod_temp_progcb_t *
     ncxmod_temp_progcb_t *progcb = NULL;
     xmlChar               datebuff[TSTAMP_MIN_SIZE];
     xmlChar               numbuff[NCX_MAX_NUMLEN];
-    int                   randnum, retcode;
+    int                   retcode;
     uint32                fixedlen, numlen;
 
     if (res == NULL) {
@@ -5051,13 +5051,7 @@ ncxmod_temp_progcb_t *
     fixedlen = xml_strlen(ncxmod_yumadir_path) +
         xml_strlen(NCXMOD_TEMP_DIR);
 
-    /* get positive 5 digit random number (0 -- 64k) */
-    randnum = rand();
-    if (randnum < 0) {
-        randnum *= -1;
-    }
-    randnum &= 0xffff;
-    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%d", randnum);
+    snprintf((char *)numbuff, NCX_MAX_NUMLEN, "%u", (unsigned int) getpid());
     numlen = xml_strlen(numbuff);
 
     /* get a buffer for the constructed directory name */
@@ -5068,7 +5062,7 @@ ncxmod_temp_progcb_t *
     }
 
     /* construct the entire dir name string generate the default directory name
-     * based on the current time + random number */
+     * based on the current time + pid number */
     p = buffer;
     p += xml_strcpy(p, ncxmod_yumadir_path);
     p += xml_strcpy(p, NCXMOD_TEMP_DIR);

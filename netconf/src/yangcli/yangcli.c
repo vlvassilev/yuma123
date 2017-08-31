@@ -504,6 +504,8 @@ void
         runstack_free_context(server_cb->runstack_context);
     }
 
+    ncxmod_free_program_tempdir(server_cb->temp_progcb);
+
     m__free(server_cb);
 
 }  /* free_server_cb */
@@ -2193,7 +2195,7 @@ status_t
     if (parm && parm->res == NO_ERR) {
         keep_session_model_copies_after_compilation = VAL_BOOL(parm);
     } else {
-        keep_session_model_copies_after_compilation = TRUE;
+        keep_session_model_copies_after_compilation = FALSE;
     }
 
     /* get the autouservars parameter */

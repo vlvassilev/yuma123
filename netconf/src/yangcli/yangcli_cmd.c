@@ -4585,22 +4585,24 @@ static val_value_t *
                         val_change_nsid(curparm, val_get_nsid(mytarg));
                         res = val_replace(curparm, mytarg);
                     } /* else should not happen */
-                } else if (!get_batchmode()){
+                } else {
                     /* secondary_args = "mtu=1500"; */
                     if(secondary_args) {
-                        status_t status;
                         char* argv[2];
                         argv[0] = strdup(obj_get_name(mytarg->obj));
                         argv[1] = secondary_args;
-                        curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &status);
+                        curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &res);
                         free(argv[0]);
 
                         /*TODO check for conflicting keys*/
-
-                        res = val123_merge_cplx(mytarg, curparm);
+                        if(res == NO_ERR) {
+                            res = val123_merge_cplx(mytarg, curparm);
+                        }
                     }
-                    res = fill_valset(server_cb, rpc, mytarg, curparm, 
-                                      iswrite, isdelete);
+                    if (res==NO_ERR && !get_batchmode() && !secondary_args) {
+                        res = fill_valset(server_cb, rpc, mytarg, curparm,
+                                          iswrite, isdelete);
+                    }
                 }
             }
         }

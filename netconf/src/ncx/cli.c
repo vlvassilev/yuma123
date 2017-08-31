@@ -1612,6 +1612,9 @@ val_value_t *
             if (parmname != NULL) {
                 xml_strncpy(errbuff, (const xmlChar *)parmname, 
                             min(parmnamelen, ERRLEN));
+            } else {
+                xml_strncpy(errbuff, (const xmlChar *)&buff[buffpos],
+                            min(strlen(&buff[buffpos]), ERRLEN));
             }
             switch (res) {
             case ERR_NCX_UNKNOWN_PARM:

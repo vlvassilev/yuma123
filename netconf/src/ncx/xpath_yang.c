@@ -2419,6 +2419,10 @@ val_value_t *
                 res = SET_ERROR(ERR_INTERNAL_VAL);
             }
         }
+
+        if(curtop->obj->objtype == OBJ_TYP_LIST) {
+            res = val_gen_index_chain(curtop->obj, curtop);
+        }
     }
 
 

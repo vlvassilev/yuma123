@@ -23,6 +23,7 @@
 /* YANG database access headers */
 #include "ncx.h"
 #include "val.h"
+#include "val123.h"
 #include "val_util.h"
 #include "val_set_cplxval_obj.h"
 #include "xml_rd.h"
@@ -183,20 +184,25 @@ uint64_t get_counter(val_value_t* counter_abs_val, val_value_t* root_base_val)
 {
     val_value_t* name_val;
     val_value_t* base_val;
-    char xpath_str[1024];
+    char* xpath_str;
     status_t res;
+    int ret;
     uint64_t counter;
     counter=VAL_UINT64(counter_abs_val);
     if(root_base_val==NULL) {
         return counter;
     }
     name_val = val_find_child(counter_abs_val->parent->parent,"ietf-interfaces","name");
-    sprintf(xpath_str,"/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
+    ret = snprintf(xpath_str, 0,"/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
+    xpath_str=(char*)malloc(ret);
+    assert(xpath_str);
+    snprintf(xpath_str, ret, "/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
     res = xpath_find_val_target(root_base_val, NULL/*mod*/, xpath_str , &base_val);
     assert(res==NO_ERR);
     if(base_val) {
         counter -= VAL_UINT64(base_val);
     }
+    free(xpath_str);
     return counter;
 }
 
@@ -218,8 +224,14 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
     obj_template_t* statistic_obj;
     val_value_t* interfaces_state_val;
     val_value_t* interface_val;
+    val_value_t* interfaces_state_select_val;
+    boolean      xpath_filtered=FALSE;
 
     ts_cur=time(NULL);
+
+    if(r->args && strlen(r->args)>strlen("xpath=") && 0==memcmp(r->args,"xpath=",strlen("xpath="))) {
+        xpath_filtered=TRUE;
+    }
 
     interfaces_state_val = val_find_child(root_val,
                                     "ietf-interfaces",
@@ -252,13 +264,11 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         root_prev_val = NULL;
     }
 
-
-
     ap_rprintf(r, "<html><head>\
 <meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">\
 </head><body><table cellspacing=\"0\" width=\"620\">\
- <tbody><tr><td><h1>Statistics</h1></td><td width=\"60\"><form action=\"ietf-interfaces-state.html\"><input value=\"Refresh\" type=\"submit\"></form>\
-   </td><td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html\"><input value=\"Clear Counters\" type=\"submit\"><input name=\"clear\" value=\"1\" type=\"hidden\"></form>\
+ <tbody><tr><td><h1>Statistics</h1></td>\
+   <td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html\"><input value=\"Clear Counters\" type=\"submit\"><input name=\"clear\" value=\"1\" type=\"hidden\"></form>\
    </td></tr></tbody></table>", timestamp_string);
 
     ap_rprintf(r, "<html><head>\
@@ -299,6 +309,17 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         if(btyp!=NCX_BT_UINT32 && btyp!=NCX_BT_UINT64) {
             continue;
         }
+
+        /* check if objects with no data should be skipped */
+        if(xpath_filtered) {
+            interfaces_state_select_val = val123_select_obj(interfaces_state_val, statistic_obj);
+            if(interfaces_state_select_val==NULL) {
+                continue;
+            } else {
+                val_free_value(interfaces_state_select_val);
+            }
+        }
+
         if(0==strcmp(obj_get_name(statistic_obj),"in-octets") || 0==strcmp(obj_get_name(statistic_obj),"out-octets")) {
             colspan=3;
         } else {
@@ -320,6 +341,17 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         if(btyp!=NCX_BT_UINT32 && btyp!=NCX_BT_UINT64) {
             continue;
         }
+
+        /* check if objects with no data should be skipped */
+        if(xpath_filtered) {
+            interfaces_state_select_val = val123_select_obj(interfaces_state_val, statistic_obj);
+            if(interfaces_state_select_val==NULL) {
+                continue;
+            } else {
+                val_free_value(interfaces_state_select_val);
+            }
+        }
+
         ap_rprintf(r, "<td width=\"70\"><b>abs</b></th>");
         ap_rprintf(r, "<td width=\"70\"><b>rate</b></td>");
         if(0==strcmp(obj_get_name(statistic_obj),"in-octets") || 0==strcmp(obj_get_name(statistic_obj),"out-octets")) {
@@ -355,6 +387,17 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
             if(btyp!=NCX_BT_UINT32 && btyp!=NCX_BT_UINT64) {
                 continue;
             }
+
+            /* check if objects with no data should be skipped */
+            if(xpath_filtered) {
+                interfaces_state_select_val = val123_select_obj(interfaces_state_val, statistic_obj);
+                if(interfaces_state_select_val==NULL) {
+                    continue;
+                } else {
+                    val_free_value(interfaces_state_select_val);
+                }
+            }
+
             if(speed_val) {
                 speed_in_bytes=VAL_UINT64(speed_val)/8;
             } else {
@@ -683,7 +726,14 @@ static int ietf_interfaces_state_report(request_rec *r)
     val_init_from_template(filter_val, filter_obj);
     
     type_meta_val = val_make_string(0, "type","xpath");
-    select_meta_val = val_make_string(0, "select", "/interfaces-state");
+    if(r->args && strlen(r->args)>strlen("xpath=") && 0==memcmp(r->args,"xpath=",strlen("xpath="))) {
+        char* xpath_buf = strdup(r->args+strlen("xpath="));
+        ap_unescape_url(xpath_buf);
+        select_meta_val = val_make_string(0, "select", xpath_buf);
+        free(xpath_buf);
+    } else {
+        select_meta_val = val_make_string(0, "select", "/interfaces-state");
+    }
 
     val_add_meta(select_meta_val, filter_val);
     val_add_meta(type_meta_val, filter_val);

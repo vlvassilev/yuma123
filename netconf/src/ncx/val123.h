@@ -18,3 +18,4 @@ status_t cli123_parse_next_child_obj_from_path(obj_template_t* obj, boolean auto
 status_t cli123_parse_parm_assignment(obj_template_t* obj, boolean autocomp, const char* cli_str, unsigned int* len_out, val_value_t** chval_out);
 status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char** valstr);
 status_t val123_merge_cplx(val_value_t* dst, val_value_t* src);
+val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_obj);

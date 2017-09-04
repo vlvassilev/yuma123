@@ -69,7 +69,7 @@ static status_t val123_clone_instance_ex(val_value_t* clone_root_val, val_value_
     if(obj_is_root(original_val->obj) || (original_val->parent==NULL)) {
         return ERR_NCX_INVALID_VALUE;
     }
-    if(obj_is_root(original_val->parent->obj)) {
+    if(original_val->parent->obj==clone_root_val->obj) {
         clone_parent_val = clone_root_val;
     } else {
         res = val123_clone_instance_ex(clone_root_val, original_val->parent, &clone_parent_val, TRUE);
@@ -313,7 +313,6 @@ status_t cli123_parse_value_instance(runstack_context_t *rcxt, val_value_t *pare
         assert(temp_parent_val);
         val_init_from_template(temp_parent_val, parent_val->obj);
         val_add_child(childval,temp_parent_val);
-
         res = val123_merge_cplx(parent_val, temp_parent_val);
         val_free_value(temp_parent_val);
         return res;
@@ -498,7 +497,7 @@ status_t cli123_parse_parm_assignment(obj_template_t* obj, boolean autocomp, con
     unsigned int len;
     char* valstr;
 
-    *len_out = NULL;
+    *len_out = 0;
     *chval_out = NULL;
     ptr = cli_str;
 
@@ -602,3 +601,42 @@ status_t cli123_parse_next_child_obj_from_path(obj_template_t* obj, boolean auto
     return res;
 
 } /* cli123_parse_next_child_obj_from_path */
+
+
+/********************************************************************
+* FUNCTION val123_select_obj
+*
+*  Finds all child values of the specified object template. Returns
+*  value of the original parent_val obj template with all descendant
+*  node instances of matching obj template. e.g. selecting all in-octets
+*  in /interfaces-state
+*
+* INPUTS:
+*   parent_val == top level node to search in
+*   child_obj  == obj template instances to select
+*
+* RETURNS:
+*   NULL in case there were no matches, allocated value of identical
+*   parent_val->obj containing all selected matches.
+*********************************************************************/
+val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_obj)
+{
+    status_t res;
+    val_value_t* match_val;
+    val_value_t* parent_select_val;
+    val_value_t* clone_val;
+
+    match_val = val123_get_first_obj_instance(parent_val, child_obj);
+
+    if(match_val==NULL) {
+        return NULL;
+    }
+    parent_select_val = val_new_value();
+    val_init_from_template(parent_select_val, parent_val->obj);
+    while(match_val) {
+        res = val123_clone_instance(parent_select_val, match_val, &clone_val);
+        assert(res==NO_ERR);
+        match_val = val123_get_next_obj_instance(parent_val, match_val);
+    }
+    return parent_select_val;
+} /* val123_select_obj */

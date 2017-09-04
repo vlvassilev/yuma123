@@ -194,9 +194,9 @@ uint64_t get_counter(val_value_t* counter_abs_val, val_value_t* root_base_val)
     }
     name_val = val_find_child(counter_abs_val->parent->parent,"ietf-interfaces","name");
     ret = snprintf(xpath_str, 0,"/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
-    xpath_str=(char*)malloc(ret);
+    xpath_str=(char*)malloc(ret+1);
     assert(xpath_str);
-    snprintf(xpath_str, ret, "/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
+    sprintf(xpath_str, "/interfaces-state/interface[name='%s']/statistics/%s", VAL_STRING(name_val), obj_get_name(counter_abs_val->obj));
     res = xpath_find_val_target(root_base_val, NULL/*mod*/, xpath_str , &base_val);
     assert(res==NO_ERR);
     if(base_val) {

@@ -1,4 +1,4 @@
-module vlans {
+module example-vlans {
 
     namespace "http://example.com/ns/vlans";
 

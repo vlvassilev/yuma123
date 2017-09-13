@@ -1,7 +1,7 @@
 spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
 
 expect {
-    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /interfaces/interface  -- name=eth1 type=ethernetCsmacd a/foo=hello b\[key1='one'\]\[key2='two'\]/bar=world\n"}
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /interfaces/interface  -- name=eth1 type=ethernetCsmacd a/foo=hello b\[key1='one'\]\[key2='two'\]/bar=world b\[key1='A'\]\[key2='B'\]/bar=WORLD\n"}
     timeout {exit 1}
 }
 
@@ -32,6 +32,16 @@ expect {
 
 expect {
     "world" {send " "}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "xget /interfaces/interface\[name='eth1'\]/b\[key1='A'\]\[key2='B'\]/bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "WORLD" {send " "}
     timeout {exit 1}
 }
 

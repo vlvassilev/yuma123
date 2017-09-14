@@ -1540,19 +1540,23 @@ status_t
                         const xmlChar *module_set_id)
 {
     char* prefix = "urn:ietf:params:netconf:capability:yang-library:1.0";
+    int prefixlen = strlen(prefix);
     val_value_t* childval;
     for (childval = val_get_first_child(caplist);
         childval != NULL;
         childval = val_get_next_child(childval)) {
-        if(strlen(VAL_STRING(childval))<prefix) {
+        if(strlen(VAL_STRING(childval))<prefixlen) {
             continue;
         }
         if(0==memcmp(prefix,VAL_STRING(childval),strlen(prefix))) {
-            val_remove_child(childval);
-            val_free_value(childval);
+            break;
         }
     }
-
+    if(childval)
+    {
+        val_remove_child(childval);
+        val_free_value(childval);
+    }
     return cap_add_yang_library_val (caplist, revision, module_set_id);
 }  /* cap_update_yang_library_val */
 

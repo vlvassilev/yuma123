@@ -61,6 +61,7 @@ date         init     comment
 #include "agt_time_filter.h"
 #include "agt_timer.h"
 #include "agt_util.h"
+#include "agt_yang_library.h"
 
 #include "log.h"
 #include "ncx.h"

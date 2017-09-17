@@ -6,7 +6,13 @@ apt-get -y install git devscripts
 
 #getting/building/installing
 cd ~
-git clone https://git.code.sf.net/p/yuma123/git yuma123_2.10
+
+if [ -d yuma123-git ] ; then
+ git clone yuma123-git yuma123_2.10
+else
+ git clone https://git.code.sf.net/p/yuma123/git yuma123_2.10
+fi
+
 cd yuma123_2.10
 mk-build-deps  -i -t 'apt-get -y'                                 
 git clean -f

@@ -9,7 +9,7 @@ ietf-interfaces.c
 
 #Standalone mode. Depends on installed libyuma-dev
 libietf_interfaces_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
-libietf_interfaces_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
+libietf_interfaces_la_LDFLAGS = -module -lyumaagt -lyumancx
 
 yang_DATA = \
 interfaces-notifications.yang

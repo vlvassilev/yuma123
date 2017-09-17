@@ -9,6 +9,6 @@ ietf-system.c
 
 #Standalone mode. Depends on installed libyuma-dev
 libietf_system_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
-libietf_system_la_LDFLAGS = -module -lyumaagt -lyumancx -lxml2 -lz -ldl
+libietf_system_la_LDFLAGS = -module -lyumaagt -lyumancx
 
 #yang_DATA = ietf-system.yang

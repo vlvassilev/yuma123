@@ -16,4 +16,4 @@ $(top_srcdir)/netconf/src/mgr/mgr_xml.c
 
 
 libyumamgr_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump -I${includedir}/libxml2 -I${includedir}/libxml2/libxml
-libyumamgr_la_LDFLAGS = -version-info 2:0:0 $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lz  -ldl -lrt -lssh2 -lncurses
+libyumamgr_la_LDFLAGS = -version-info 2:0:0 $(top_builddir)/netconf/src/ncx/libyumancx.la -lxml2 -lrt -lssh2

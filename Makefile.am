@@ -1,8 +1,7 @@
 SUBDIRS=\
-libtecla \
+netconf/src/ncx \
 netconf/src/mgr \
 netconf/src/agt \
-netconf/src/ncx \
 netconf/src/netconfd \
 netconf/src/subsys \
 netconf/src/yangcli \

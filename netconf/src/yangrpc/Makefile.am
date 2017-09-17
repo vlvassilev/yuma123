@@ -22,4 +22,14 @@ $(top_srcdir)/netconf/src/yangcli/yangcli_globals.c
 
 
 libyangrpc_la_CPPFLAGS = -DSKIP_MAIN -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I${includedir}/libxml2 -I${includedir}/libxml2/libxml -I$(top_srcdir)/netconf/src/yangrpc -I$(top_srcdir)/netconf/src/yangcli -I$(top_srcdir)/libtecla
-libyangrpc_la_LDFLAGS = -version-info 2:0:0 -lncurses $(top_builddir)/libtecla/libtecla.la $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/ncx/libyumancx.la
+libyangrpc_la_LDFLAGS = -version-info 2:0:0 $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/ncx/libyumancx.la
+
+if WITH_TECLA
+    libyangrpc_la_CPPFLAGS += -I $(top_srcdir)/libtecla
+    libyangrpc_la_LDFLAGS += $(top_builddir)/libtecla/libtecla.la
+else
+    libyangrpc_la_SOURCES += $(top_srcdir)/netconf/src/yangcli/tecla2readline/tecla2readline.c
+    libyangrpc_la_CPPFLAGS += -I $(top_srcdir)/libtecla
+    libyangrpc_la_LDFLAGS += -lreadline
+endif
+

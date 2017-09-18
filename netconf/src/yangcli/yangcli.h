@@ -857,6 +857,8 @@ extern status_t
     process_cli_input (server_cb_t *server_cb,
                        int argc,
                        char *argv[]);
+extern void
+    update_server_cb_vars (server_cb_t *server_cb);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

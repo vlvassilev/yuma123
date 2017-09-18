@@ -54,6 +54,8 @@ date         init     comment
 #include "log.h"
 #include "ncxmod.h"
 #include "ncxtypes.h"
+#include "ncx_feature.h"
+#include "ncx_list.h"
 #include "rpc.h"
 #include "rpc_err.h"
 #include "ses.h"

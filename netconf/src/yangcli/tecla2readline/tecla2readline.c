@@ -35,7 +35,7 @@ char* my_line = NULL;
 void process_line(char *line)
 {
     if( line == NULL ) {
-        fprintf(stderr, "ENOTY LINE!\n", line);
+        fprintf(stderr, "ENOTY LINE!\n");
     }
     my_line = line;
     /* done here in order to prevent readline printing newline and prompt */

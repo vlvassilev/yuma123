@@ -68,6 +68,7 @@ date         init     comment
 #include "yangcli_autoload.h"
 #include "yangcli_cmd.h"
 #include "yangcli_util.h"
+#include "yangcli_yang_library.h"
 
 #ifdef DEBUG
 #define YANGCLI_AUTOLOAD_DEBUG 1

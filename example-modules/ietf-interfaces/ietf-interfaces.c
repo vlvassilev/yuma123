@@ -165,6 +165,7 @@ static status_t
     FILE* f;
     char cmd_buf[NCX_MAX_LINELEN];
     char status_buf[NCX_MAX_LINELEN];
+    char* fgets_ret;
 
     interface_val = vir_val->parent;
     assert(interface_val);
@@ -180,7 +181,8 @@ static status_t
     if (f == NULL) {
         return errno_to_status();
     }
-    fgets((char *)status_buf, NCX_MAX_LINELEN, f);
+    fgets_ret = fgets((char *)status_buf, NCX_MAX_LINELEN, f);
+    assert(fgets_ret!=NULL);
     fclose(f);
     strtok(status_buf,"\n");
     /* check if we have corresponding entry in the oper-status enum */

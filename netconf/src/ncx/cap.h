@@ -419,7 +419,7 @@ extern status_t
 *    status
 *********************************************************************/
 extern status_t
-    cap_add_yang_library (val_value_t *caplist,
+    cap_add_yang_library_val (val_value_t *caplist,
 			const xmlChar *revision,
 			const xmlChar *module_set_id);
 

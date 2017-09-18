@@ -4,7 +4,7 @@
  */
 
 #define __USE_XOPEN 1
-//#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 
 
@@ -111,8 +112,10 @@ static status_t
                 }
             }
             fprintf(stderr, "system-restart: Rebooting system ...");
-            system("reboot");
-            return status;
+            status = system("reboot");
+            if(status!=0) {
+                return ERR_NCX_OPERATION_FAILED;
+            }
         }
     }
     return NO_ERR;

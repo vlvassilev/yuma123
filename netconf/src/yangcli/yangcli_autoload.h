@@ -175,6 +175,36 @@ extern status_t
     autoload_compile_modules (server_cb_t *server_cb,
                               ses_cb_t *scb);
 
+/********************************************************************
+* FUNCTION make_get_schema_reqdata
+*
+* Allocate and initialize reqdata value for <get-schema>
+*
+* format will be hard-wired to yang
+*
+* INPUTS:
+*   server_cb == server control block to use
+*   scb == session control block to use
+*   module == module to get
+*   revision == revision to get
+*
+* OUTPUTS:
+*    out_rpc == obj_template_t** of the get-schema RPC
+*    out_reqdata == val_value_t** of the get-schema data value
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t make_get_schema_reqdata(server_cb_t *server_cb,
+                              ses_cb_t *scb,
+                              const xmlChar *module,
+                              const xmlChar *revision,
+                              obj_template_t** out_rpc,
+                              val_value_t** out_reqdata);
+
+
+status_t get_schema_reply_to_temp_filcb(server_cb_t * server_cb, mgr_scb_t *mscb, const xmlChar* module, const xmlChar* revision, val_value_t* reply);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

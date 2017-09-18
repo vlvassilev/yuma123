@@ -56,6 +56,7 @@ date         init     comment
 #include "tk.h"
 #include "typ.h"
 #include "val.h"
+#include "val_util.h"
 #include "xmlns.h"
 #include "xpath.h"
 #include "xpath_yang.h"

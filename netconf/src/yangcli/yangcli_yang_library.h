@@ -35,6 +35,19 @@ extern status_t
                                val_value_t *reply,
                                boolean anyerrors);
 
+status_t make_get_yang_library_modules_state_reqdata(server_cb_t *server_cb,
+                              ses_cb_t *scb,
+                              obj_template_t** out_rpc,
+                              val_value_t** out_reqdata);
+
+status_t get_yang_library_modules_state_reply_to_searchresult_entries(server_cb_t * server_cb,
+                              ses_cb_t *scb,
+                              val_value_t* reply);
+
+status_t get_yang_library_modules_state_reply_to_searchresult_entries(server_cb_t * server_cb,
+                              ses_cb_t *scb,
+                              val_value_t* reply);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

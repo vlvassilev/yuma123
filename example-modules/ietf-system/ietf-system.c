@@ -82,7 +82,11 @@ static status_t
     assert(ptr!=NULL);
     ts.tv_sec=mktime(&tm);
     ts.tv_nsec=0;
-    TIMESPEC_TO_TIMEVAL(ts, tv);
+
+    //TIMESPEC_TO_TIMEVAL(ts, tv);
+    tv.tv_sec = ts.tv_sec;
+    tv.tv_usec = ts.tv_nsec / 1000;
+
     ret=clock_settime(CLOCK_REALTIME, &ts);
     assert(ret==0);
     ret=settimeofday (&tv, NULL);

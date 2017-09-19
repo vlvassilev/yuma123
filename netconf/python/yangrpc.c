@@ -87,7 +87,7 @@ py_yangrpc_parse_cli(PyObject *self, PyObject *args)
         return (NULL);
     }
 
-    yangrpc_cb_ptr = (val_value_t*)PyCapsule_GetPointer(py_yangrpc_cb_ptr, "yangrpc_cb_ptr_t");
+    yangrpc_cb_ptr = (yangrpc_cb_ptr_t *)PyCapsule_GetPointer(py_yangrpc_cb_ptr, "yangrpc_cb_ptr_t");
 
     res = yangrpc_parse_cli(yangrpc_cb_ptr, cmd, &rpc_val);
 

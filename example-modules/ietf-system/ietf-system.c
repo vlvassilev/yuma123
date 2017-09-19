@@ -3,6 +3,7 @@
     namespace urn:ietf:params:xml:ns:yang:ietf-system
  */
 
+#define _BSD_SOURCE
 #define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,7 +63,8 @@ static status_t
         xml_node_t *methnode)
 {
     val_value_t* current_datetime_val;
-    struct timespec tp;
+    struct timespec ts;
+    struct timeval tv;
     struct tm tm;
     char* ptr;
     int ret;
@@ -74,14 +76,16 @@ static status_t
     assert(current_datetime_val!=NULL);
 
     memset(&tm, 0, sizeof(struct tm));
-    memset(&tp, 0, sizeof(struct timespec));
+    memset(&ts, 0, sizeof(struct timespec));
+    memset(&tv, 0, sizeof(struct timeval));
     ptr=strptime(VAL_STRING(current_datetime_val), "%Y-%m-%dT%H:%M:%S", &tm);
     assert(ptr!=NULL);
-    tp.tv_sec=mktime(&tm);
-    tp.tv_nsec=0;
-
-    ret=clock_settime(CLOCK_REALTIME, &tp);
-    ret=settimeofday (&tp, NULL);
+    ts.tv_sec=mktime(&tm);
+    ts.tv_nsec=0;
+    TIMESPEC_TO_TIMEVAL(ts, tv);
+    ret=clock_settime(CLOCK_REALTIME, &ts);
+    assert(ret==0);
+    ret=settimeofday (&tv, NULL);
     assert(ret==0);
     ret=system("hwclock --systohc");
     assert(ret==0);

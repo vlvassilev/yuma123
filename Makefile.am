@@ -13,11 +13,11 @@ netconf/src/yangrpc/example \
 netconf/man
 
 #netconf/src/yangdiff \
-#netconf/src/yangdump \
-#netconf/test
+#netconf/src/yangdump
 
-#netconf/src/yangrpc/yanghttpd
-
+if WITH_TECLA
+    SUBDIRS+=libtecla
+endif
 
 platform_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/platform/procdefs.h

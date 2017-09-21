@@ -445,7 +445,7 @@ obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
 
 status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char** valstr)
 {
-    char* ptr = cli_str;
+    const char* ptr = cli_str;
     *valstr=NULL;
     if(*ptr == '\'') {
         do {

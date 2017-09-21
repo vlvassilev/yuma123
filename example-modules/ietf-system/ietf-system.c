@@ -3,7 +3,7 @@
     namespace urn:ietf:params:xml:ns:yang:ietf-system
  */
 
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 #define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 AC_INIT([yuma123], [2.10], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE([foreign subdir-objects])
+AM_INIT_AUTOMAKE([foreign])
 LT_INIT([disable-static])
 
 AC_PROG_CC

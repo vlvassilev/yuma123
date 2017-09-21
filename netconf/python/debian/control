@@ -2,14 +2,14 @@ Source: yuma123-python
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, python2.7-dev, libyuma-dev (>=2.9), libyangrpc-dev (>=2.9)
-Standards-Version: 3.9.8
+Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, autotools-dev, python-all-dev, libyuma-dev (>=2.10), libyangrpc-dev (>=2.10)
+Standards-Version: 4.0.0
 Homepage: https://sourceforge.net/projects/yuma123
 
 Package: python-yuma
 Section: python
 Architecture: any
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, python-lxml, libyuma2 (>=2.9), libyangrpc2 (>=2.9)
+Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, python-lxml, libyuma2 (>=2.10), libyangrpc2 (>=2.10)
 Provides: libyuma-python, ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description:  Netconf/YANG Python support

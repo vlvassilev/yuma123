@@ -4590,7 +4590,7 @@ static val_value_t *
                     if(secondary_args) {
                         char* argv[2];
                         argv[0] = strdup(obj_get_name(mytarg->obj));
-                        argv[1] = secondary_args;
+                        argv[1] = (char*)secondary_args;
                         curparm = cli_parse(server_cb->runstack_context, /*argc=*/2, argv, mytarg->obj, /*valonly=*/true, /*script=*/true, /*autocomp=*/true, /*mode=*/CLI_MODE_COMMAND, &res);
                         free(argv[0]);
 

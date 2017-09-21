@@ -170,7 +170,7 @@ yuma_val_make_serialized_string(PyObject *self, PyObject *args)
         return (NULL);
     }
     val = (val_value_t*)PyCapsule_GetPointer(py_val, "val_value_t_ptr");
-    res=val_make_serialized_string(val, mode, &str);
+    res=val_make_serialized_string(val, mode, (xmlChar **)&str);
 
     py_retval = PyTuple_New(2);
     PyTuple_SetItem(py_retval, 0, Py_BuildValue("i", (int)res));

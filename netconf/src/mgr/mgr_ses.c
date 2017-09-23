@@ -949,25 +949,29 @@ status_t
                                  NULL,
                                  "dump-session");
             if(val!=NULL) {
-                str=malloc(strlen("out")+strlen(VAL_STRING(val)));
+                str=malloc(strlen("out")+strlen(VAL_STRING(val))+1);
                 sprintf(str,"%sout",VAL_STRING(val));
                 scb->dump_output_data=fopen(str,"w");
                 assert(scb->dump_output_data!=NULL);
+                free(str);
 
-                str=malloc(strlen("out.ts")+strlen(VAL_STRING(val)));
+                str=malloc(strlen("out.ts")+strlen(VAL_STRING(val))+1);
                 sprintf(str,"%sout.ts",VAL_STRING(val));
                 scb->dump_output_timestamps=fopen(str,"w");
                 assert(scb->dump_output_timestamps!=NULL);
+                free(str);
 
-                str=malloc(strlen("in")+strlen(VAL_STRING(val)));
+                str=malloc(strlen("in")+strlen(VAL_STRING(val))+1);
                 sprintf(str,"%sin",VAL_STRING(val));
                 scb->dump_input_data=fopen(str,"w");
                 assert(scb->dump_input_data!=NULL);
+                free(str);
 
-                str=malloc(strlen("in.ts")+strlen(VAL_STRING(val)));
+                str=malloc(strlen("in.ts")+strlen(VAL_STRING(val))+1);
                 sprintf(str,"%sin.ts",VAL_STRING(val));
                 scb->dump_input_timestamps=fopen(str,"w");
                 assert(scb->dump_input_timestamps!=NULL);
+                free(str);
             }
         }
     }

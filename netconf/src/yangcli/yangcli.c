@@ -4077,12 +4077,6 @@ static void
         free_server_cb(server_cb);
     }
 
-    /* clean and reset all module static vars */
-    if (cur_server_cb) {
-        cur_server_cb->state = MGR_IO_ST_NONE;
-        cur_server_cb->mysid = 0;
-    }
-
     if (mgr_cli_valset) {
         val_free_value(mgr_cli_valset);
         mgr_cli_valset = NULL;

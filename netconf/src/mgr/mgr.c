@@ -336,6 +336,11 @@ void
         mscb->target = NULL;
     }
 
+    if (mscb->modules_state_val) {
+        val_free_value(mscb->modules_state_val);
+        mscb->modules_state_val = NULL;
+    }
+
     if (mscb->channel) {
         libssh2_channel_free(mscb->channel);
         mscb->channel = NULL;

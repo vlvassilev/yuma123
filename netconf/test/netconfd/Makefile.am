@@ -5,7 +5,6 @@ test-multiple-edit-callbacks \
 test-netconf-notifications \
 test-rollback-on-error \
 test-validate-config-only \
-test-ietf-netmod-sub-intf-vlan-model \
 test-identityref-typedef \
 test-xpath-current \
 test-xpath-re-match \
@@ -14,8 +13,8 @@ test-xpath-derived-from \
 test-xpath-derived-from-or-self \
 test-xpath-enum-value \
 test-xpath-bit-is-set \
-test-yang-library
-
+test-yang-library \
+test-memory-leak
 
 SUBDIRS= \
 multiple-edit-callbacks \

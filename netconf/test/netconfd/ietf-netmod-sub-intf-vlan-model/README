@@ -1,5 +1,0 @@
-PURPOSE:
- Validate the models part of draft-ietf-netmod-sub-intf-vlan-model load and the YANG 1.1 statements used there are correctly supported.
-
-OPERATION:
- Creates and delete sub interfaces. Create VLAN bridge with sub-interfaces.

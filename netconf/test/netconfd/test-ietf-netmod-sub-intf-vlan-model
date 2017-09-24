@@ -1,3 +1,0 @@
-#!/bin/bash -e
-cd ietf-netmod-sub-intf-vlan-model
-./run.sh

@@ -265,6 +265,126 @@ static boolean
 
 }  /* read_session */
 
+/********************************************************************
+ * FUNCTION io_process
+ *
+ * mini server loop while waiting for KBD input
+ *
+ * INPUTS:
+ *    cursid == current session ID to check
+ *    wantdata == address of return wantdata flag
+ *    anystdout == address of return anystdout flag
+ *
+ * OUTPUTS:
+ *   *wantdata == TRUE if the agent has sent a keepalive
+ *                and is expecting a request
+ *             == FALSE if no keepalive received this time
+ *  *anystdout  == TRUE if maybe STDOUT was written
+ *                 FALSE if definately no STDOUT written
+ *
+ * RETURNS:
+ *   TRUE if session alive or not confirmed
+ *   FALSE if cursid confirmed dropped
+ *********************************************************************/
+static boolean
+    io_process (ses_id_t  cursid,
+                            boolean *wantdata,
+                            boolean *anystdout)
+{
+    struct timeval  timeout;
+    int             i, ret;
+    boolean         done, retval, anyread;
+
+#ifdef DEBUG
+    if (wantdata == NULL || anystdout == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
+    }
+#endif
+
+    /* !!! the client keepalive polling is not implemented !!!! */
+    *wantdata = FALSE;
+    *anystdout = FALSE;
+
+    write_sessions();
+
+    /* setup select parameters */
+    anyread = FALSE;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 100;
+    read_fd_set = active_fd_set;
+
+    if (!any_fd_set(&read_fd_set, maxrdnum)) {
+        return TRUE;
+    }
+
+    /* go through the file descriptor numbers and
+     * service the corresponding libssh2 channels with input buffers pending
+     */
+    for (i = 0; i <= maxrdnum; i++) {
+        /* check read input from agent */
+        if (FD_ISSET(i, &read_fd_set)) {
+            ret = read_session(i,0);
+            if(ret!=0) {
+                /* drain the ready queue before accepting new input */
+                while (mgr_ses_process_first_ready());
+                write_sessions();
+            }
+        }
+    }
+
+    /* Block until input arrives on one or more active sockets.
+     * or the short timer expires
+     */
+    ret = select(maxrdnum+1,
+                 &read_fd_set,
+                 &write_fd_set,
+                 NULL,
+                 &timeout);
+    if (ret > 0) {
+        /* normal return with some bytes */
+        anyread = TRUE;
+    } else if (ret < 0) {
+        /* some error, don't care about EAGAIN here */
+        return TRUE;
+    } else {
+        /* == 0: timeout */
+        return TRUE;
+    }
+
+    retval = TRUE;
+
+    /* loop: go through the file descriptor numbers and
+     * service all the sockets with input pending
+     */
+    if (anyread) {
+        for (i = 0; i <= maxrdnum; i++) {
+            /* check read input from agent */
+            if (FD_ISSET(i, &read_fd_set)) {
+                retval = read_session(i, cursid);
+            }
+        }
+    }
+
+    /* drain the ready queue before accepting new input */
+    if (anyread) {
+        done = FALSE;
+        while (!done) {
+            if (!mgr_ses_process_first_ready()) {
+                /* did not write to any session */
+                anyread = FALSE;
+                done = TRUE;
+            } else if (mgr_shutdown_requested()) {
+                done = TRUE;
+            }
+        }
+        write_sessions();
+    }
+
+    *anystdout = anyread;
+    return retval;
+
+}  /* io_process */
 
 /**************   E X T E R N A L    F U N C T I O N S  *************/
 
@@ -355,7 +475,6 @@ void
 
 } /* mgr_io_deactivate_session */
 
-
 /********************************************************************
  * FUNCTION mgr_io_run
  * 
@@ -407,8 +526,6 @@ status_t
                 continue;
             }
 
-            write_sessions();
-
             switch (state) {
             case MGR_IO_ST_INIT:
             case MGR_IO_ST_IDLE:
@@ -441,58 +558,16 @@ status_t
             if (done2) {
                 continue;
             }
-
-            /* setup select parameters */
-            read_fd_set = active_fd_set;
-            timeout.tv_sec = 0;
-            timeout.tv_usec = 100;
-
-            /* check if there are no sessions active to wait for,
-             * so just go back to the STDIN handler
-             */
-            if (!any_fd_set(&read_fd_set, maxrdnum)) {
-                continue;
+            {
+            boolean wantdata = FALSE;
+            boolean anystdout = FALSE;
+            boolean retval;
+            retval = io_process(0, &wantdata, &anystdout);
+            if(!retval) {
+                done = TRUE;
             }
-
-#ifdef MGR_IO_DEBUG
-            if (LOGDEBUG4) {
-                log_debug4("\nmgr_io: enter select (%u:%u)",
-                           timeout.tv_sec,
-                           timeout.tv_usec);
             }
-#endif
-
-            /* Block until input arrives on one or more active sockets. 
-             * or the timer expires
-             */
-            ret = select(maxrdnum+1, 
-                         &read_fd_set, 
-                         &write_fd_set, 
-                         NULL, 
-                         &timeout);
-
-#ifdef MGR_IO_DEBUG
-            if (LOGDEBUG4) {
-                log_debug4("\nmgr_io: exit select (%u:%u)",
-                           timeout.tv_sec,
-                           timeout.tv_usec);
-            }
-#endif
-
-            if (ret > 0) {
-                /* normal return with some bytes */
-                done2 = TRUE;
-            } else if (ret < 0) {
-                if (!(errno == EINTR || errno==EAGAIN)) {
-                    done2 = TRUE;
-                }  /* else go again in the inner loop */
-            } else {
-                /* should only happen if a timeout occurred */
-                if (mgr_shutdown_requested()) {
-                    done2 = TRUE; 
-                }
-            }
-        }  /* end inner loop */
+        }
 
         /* check exit program */
         if (mgr_shutdown_requested()) {
@@ -509,28 +584,6 @@ status_t
             continue;
         }
      
-        /* 2nd loop: go through the file descriptor numbers and
-         * service all the sockets with input pending 
-         */
-        for (i = 0; i <= maxrdnum; i++) {
-            /* check read input from agent */
-            if (FD_ISSET(i, &read_fd_set)) {
-                (void)read_session(i, 0);
-            }
-        }
-
-        /* drain the ready queue before accepting new input */
-        if (!done) {
-            done2 = FALSE;
-            while (!done2) {
-                if (!mgr_ses_process_first_ready()) {
-                    done2 = TRUE;
-                } else if (mgr_shutdown_requested()) {
-                    done = done2 = TRUE;
-                }
-            }
-            write_sessions();
-        }
     }  /* end outer loop */
 
     /* all open client sockets will be closed as the sessions are
@@ -539,7 +592,6 @@ status_t
     return NO_ERR;
 
 }  /* mgr_io_run */
-
 
 /********************************************************************
  * FUNCTION mgr_io_process_timeout
@@ -567,88 +619,10 @@ boolean
                             boolean *wantdata,
                             boolean *anystdout)
 {
-    struct timeval  timeout;
-    int             i, ret;
-    boolean         done, retval, anyread;
-
-#ifdef DEBUG
-    if (wantdata == NULL || anystdout == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return TRUE;
-    }
-#endif
-
-    /* !!! the client keepalive polling is not implemented !!!! */
-    *wantdata = FALSE;
-    *anystdout = FALSE;
-
-    write_sessions();
-
-    /* setup select parameters */
-    anyread = FALSE;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 100;
-    read_fd_set = active_fd_set;
-
-    if (!any_fd_set(&read_fd_set, maxrdnum)) {
-        return TRUE;
-    }
-
-    /* Block until input arrives on one or more active sockets. 
-     * or the short timer expires
-     */
-    ret = select(maxrdnum+1, 
-                 &read_fd_set, 
-                 &write_fd_set, 
-                 NULL, 
-                 &timeout);
-    if (ret > 0) {
-        /* normal return with some bytes */
-        anyread = TRUE;
-    } else if (ret < 0) {
-        /* some error, don't care about EAGAIN here */
-        return TRUE;
-    } else {
-        /* == 0: timeout */
-        return TRUE;
-    }
-
-    retval = TRUE;
-
-    /* loop: go through the file descriptor numbers and
-     * service all the sockets with input pending 
-     */
-    if (anyread) {
-        for (i = 0; i <= maxrdnum; i++) {
-            
-            /* check read input from agent */
-            if (FD_ISSET(i, &read_fd_set)) {
-                retval = read_session(i, cursid);
-            }
-        }
-    }
-
-    /* drain the ready queue before accepting new input */
-    if (anyread) {
-        done = FALSE;
-        while (!done) {
-            if (!mgr_ses_process_first_ready()) {
-                /* did not write to any session */
-                anyread = FALSE;  
-                done = TRUE;
-            } else if (mgr_shutdown_requested()) {
-                done = TRUE;
-            }
-        }
-        write_sessions();
-    }
-
-    *anystdout = anyread;
-    return retval;
-
-}  /* mgr_io_process_timeout */
-
-
+    return io_process(cursid,
+                            wantdata,
+                            anystdout);
+} /* mgr_io_process_timeout */
 /* END mgr_io.c */
 
 

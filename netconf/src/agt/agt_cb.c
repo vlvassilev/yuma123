@@ -733,12 +733,12 @@ void
         for (cbset_node = (agt_cb_fnset_node_t*)dlq_firstEntry(&obj->cbsetQ);
              cbset_node!=NULL;
              cbset_node = (agt_cb_fnset_node_t*)dlq_nextEntry(cbset_node)) {
-             if(cbset_node->fnset_ptr->cbfn[AGT_CB_VALIDATE] == cbfn) {
-                 break;
-             }
-        }
-        if(cbset_node!=NULL) {
-            dlq_remove(cbset_node);
+
+            if(cbset_node->fnset_ptr == &callback->cbset) {
+                dlq_remove(cbset_node);
+                free(cbset_node);
+                break;
+            }
         }
     }
 

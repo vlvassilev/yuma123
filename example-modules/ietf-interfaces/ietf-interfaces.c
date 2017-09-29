@@ -97,8 +97,6 @@ void oper_status_update(val_value_t* cur_val)
         assert(res==NO_ERR);
     }
 
-    prev_val = val_clone(prev_val);
-
     if(0!=strcmp(VAL_STRING(cur_val),VAL_STRING(prev_val))) {
         obj_template_t* last_change_obj;
         val_value_t* last_change_val;
@@ -130,7 +128,6 @@ void oper_status_update(val_value_t* cur_val)
         my_send_link_state_notification(VAL_STRING(cur_val), VAL_STRING(name_val));
 
     }
-    val_free_value(prev_val);
 }
 
 static status_t

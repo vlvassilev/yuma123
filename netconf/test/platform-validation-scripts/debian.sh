@@ -49,7 +49,7 @@ echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/t
 /etc/init.d/ssh restart
 
 cd ~/yuma123_2.10/netconf/test/netconfd
-apt-get -y install python-ncclient
+apt-get -y install python-ncclient valgrind
 
 autoreconf -i -f
 ./configure --prefix=/usr

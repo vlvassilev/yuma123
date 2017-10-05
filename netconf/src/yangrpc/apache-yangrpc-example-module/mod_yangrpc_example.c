@@ -810,7 +810,7 @@ static int example_handler(request_rec *r)
 
     if(svr_cfg->yangrpc_cb_ptr == NULL) {
         int res;
-        res = yangrpc_init(init_arg);
+        res = yangrpc_init(init_args);
         assert(res==NO_ERR);
 
         res = yangrpc_connect(server_address, server_port, username, password, public_key_path, private_key_path, NULL /*extra_args*/, &svr_cfg->yangrpc_cb_ptr);

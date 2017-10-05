@@ -36,6 +36,7 @@ static char* username;
 static char* password;
 static char* private_key_path;
 static char* public_key_path;
+static char* init_args;
 
 
 /* Define prototypes of our functions in this module */
@@ -91,6 +92,12 @@ const char* public_key_path_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
     return NULL;
 }
 
+const char* init_args_cmd_func(cmd_parms* cmd, void* cfg, const char* arg)
+{
+    init_args=strdup(arg);
+    return NULL;
+}
+
 static const command_rec my_cmds[] = {
     AP_INIT_TAKE1("ServerAddress", server_address_cmd_func, NULL/*my_ptr*/, OR_ALL, "Server address e.g. 127.0.0.1 or myserver.org"),
     AP_INIT_TAKE1("ServerPort", server_port_cmd_func, NULL/*my_ptr*/, OR_ALL, "Server port e.g. 830"),
@@ -98,6 +105,7 @@ static const command_rec my_cmds[] = {
     AP_INIT_TAKE1("Password", password_cmd_func, NULL/*my_ptr*/, OR_ALL, "Password e.g. mypass"),
     AP_INIT_TAKE1("PrivateKeyPath", private_key_path_cmd_func, NULL/*my_ptr*/, OR_ALL, "Private key path e.g. /root/.ssh/id_rsa"),
     AP_INIT_TAKE1("PublicKeyPath", public_key_path_cmd_func, NULL/*my_ptr*/, OR_ALL, "Public key path e.g. /root/.ssh/id_rsa.pub"),
+    AP_INIT_TAKE1("InitArgs", init_args_cmd_func, NULL/*my_ptr*/, OR_ALL, "Init args e.g. --log-level=debug4"),
     /* more directives as applicable */
     { NULL }
 };
@@ -152,6 +160,7 @@ static int example_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *p
     password = strdup("mysecretpass");
     private_key_path = strdup("/var/www/.ssh/id_rsa");
     public_key_path = strdup("/var/www/.ssh/id_rsa.pub");
+    init_args = "--keep-session-model-copies-after-compilation=false";
     return OK;
 }
 /* register_hooks: Adds a hook to the httpd process */
@@ -801,8 +810,7 @@ static int example_handler(request_rec *r)
 
     if(svr_cfg->yangrpc_cb_ptr == NULL) {
         int res;
-        char* arg = "--keep-session-model-copies-after-compilation=false";
-        res = yangrpc_init(arg);
+        res = yangrpc_init(init_arg);
         assert(res==NO_ERR);
 
         res = yangrpc_connect(server_address, server_port, username, password, public_key_path, private_key_path, NULL /*extra_args*/, &svr_cfg->yangrpc_cb_ptr);

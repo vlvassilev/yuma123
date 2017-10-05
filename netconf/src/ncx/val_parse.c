@@ -33,6 +33,7 @@ date         init     comment
 #include <memory.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include <xmlstring.h>
 #include <xmlreader.h>
@@ -1915,6 +1916,14 @@ static status_t
     status_t     res, res2, res3;
     boolean      nserr;
 
+    if (LOGDEBUG3) {
+        log_debug3("%s: %s:%s btyp:%s",
+                   __FUNCTION__,
+                   obj_get_mod_prefix(obj),
+                   obj_get_name(obj),
+                   tk_get_btype_sym(obj_get_basetype(obj)));
+    }
+
     btyp = obj_get_basetype(obj);
 
     /* get the attribute values from the start node */
@@ -2020,8 +2029,18 @@ static status_t
         return res2;
     }
 
-    retval->res = res3;
-    return res3;
+    /* Reporting errors only once */
+    if(res3!=NO_ERR) {
+        if(retval->res == NO_ERR) {
+            SET_ERROR(res3);
+            retval->res = res3;
+        } else {
+            assert(retval->res == res3);
+        }
+    } else {
+        assert(retval->res == NO_ERR);
+    }
+    return retval->res;
 
 } /* parse_btype */
 

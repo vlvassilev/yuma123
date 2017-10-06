@@ -1,8 +1,16 @@
 spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
 
 expect {
-    "notification:1.0" {send " "}
-    timeout {send_user "\nError: Your server does not advertise the notification:1.0 capability\n"; exit 1}
+    "Server Protocol Capabilities" {send " "}
+    timeout {send_user "\nError: Timeout waiting for Server Protocol Capabilities\n"; exit 1}
+}
+expect {
+    -re "(interleave:1.0)|(notification:1.0)" {send " "}
+    timeout {send_user "\nError: Your server does not advertise the interleave:1.0 or notification:1.0 capability\n"; exit 1}
+}
+expect {
+    -re "(interleave:1.0)|(notification:1.0)" {send " "}
+    timeout {send_user "\nError: Your server does not advertise the interleave:1.0 or notification:1.0 capability\n"; exit 1}
 }
 
 expect {

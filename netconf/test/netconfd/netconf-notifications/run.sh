@@ -1,13 +1,28 @@
 #!/bin/bash -e
 rm -rf tmp || true
 mkdir tmp
-cp startup-cfg.xml tmp
-rm /tmp/ncxserver.sock || true
-/usr/sbin/netconfd --startup=tmp/startup-cfg.xml --superuser=$USER 1>tmp/netconfd.stdout 2>tmp/netconfd.stderr &
+if [ "$RUN_WITH_CONFD" != "" ] ; then
+  cd tmp
+  killall -KILL confd || true
+  echo "Starting confd: $RUN_WITH_CONFD"
+  source $RUN_WITH_CONFD/confdrc
+  confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces.yang --yangpath /usr/share/yuma/modules/ietf -o ietf-interfaces.fxs
+  confdc -c /usr/share/yuma/modules/ietf/iana-if-type.yang --yangpath /usr/share/yuma/modules/ietf -o iana_if_type.fxs
+  NCPORT=2022
+  NCUSER=admin
+  NCPASSWORD=admin
+  confd --verbose --foreground --addloadpath ${RUN_WITH_CONFD}/src/confd --addloadpath ${RUN_WITH_CONFD}/src/confd --addloadpath ${RUN_WITH_CONFD}/src/confd/yang --addloadpath ${RUN_WITH_CONFD}/src/confd/aaa --addloadpath . 2>&1 1>server.log &
+  SERVER_PID=$!
+  cd ..
+else
+  killall -KILL netconfd || true
+  rm /tmp/ncxserver.sock || true
+  /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  SERVER_PID=$!
+fi
 
-NETCONFD_PID=$!
 sleep 3
 python session.litenc.py
-kill $NETCONFD_PID
-cat tmp/netconfd.stdout
+#kill $SERVER_PID
+cat tmp/server.log
 sleep 1

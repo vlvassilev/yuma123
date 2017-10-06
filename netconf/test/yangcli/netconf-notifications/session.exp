@@ -1,0 +1,91 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "notification:1.0" {send " "}
+    timeout {send_user "\nError: Your server does not advertise the notification:1.0 capability\n"; exit 1}
+}
+
+expect {
+    "notifications@2008-07-14" {send " "}
+    timeout {expect "yangcli $env(NCUSER)@$env(NCSERVER)>" ; send "mgrload notifications\n"}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "help create-subscription\n"}
+    timeout {send_user "\nError: Did not get prompt 1\n"; exit 1}
+}
+
+expect {
+    "The command to create a notification subscription." {send " "}
+    timeout {send_user "\nError: Did not get help for create-subscription\n"; exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create-subscription\n"}
+    timeout {send_user "\nError: Did not get prompt 1\n"; exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /interfaces/interface\[name=\'foo\'\]\n"}
+    timeout {send_user "\nError: Did not get prompt 2\n"; exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /interfaces/interface  -- name=foo type=ethernetCsmacd\n"}
+    timeout {send_user "\nError: Did not get prompt 3\n"; exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {send_user "\nError: Did not get prompt 4\n"; exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {send_user "\nError: create commit failed\n"; exit 1}
+}
+
+expect {
+    "Incoming notification:" {send " "}
+    timeout {send_user "\nError: No Incoming notification\n"; exit 1}
+}
+
+expect {
+    "netconf-config-change" {send "xget /interfaces/interface\[name=\'foo\'\]\n"}
+    timeout {send_user "\nError: No netconf-config-change\n"; exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /interfaces/interface\[name=\'foo\'\]\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "Incoming notification:" {send " "}
+    timeout {send_user "\nError: No Incoming notification\n"; exit 1}
+}
+
+expect {
+    "netconf-config-change" {send "quit\n"}
+    timeout {send_user "\nError: No netconf-config-change\n"; exit 1}
+}
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

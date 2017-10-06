@@ -33,7 +33,6 @@ date         init     comment
 #include <memory.h>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
 
 #include <xmlstring.h>
 #include <xmlreader.h>
@@ -2022,23 +2021,29 @@ static status_t
     }
 
     if (res != NO_ERR) {
-        retval->res = res;
-        return res;
+        res3 = res;
     } else if (res2 != NO_ERR) {
-        retval->res = res2;
-        return res2;
+        res3 = res2;
     }
 
     /* Reporting errors only once */
     if(res3!=NO_ERR) {
         if(retval->res == NO_ERR) {
-            SET_ERROR(res3);
+            if (LOGDEBUG3) {
+                SET_ERROR(res3);
+            }
             retval->res = res3;
         } else {
-            assert(retval->res == res3);
+            if (LOGDEBUG3) {
+                log_debug3("%s: %s:%s btyp:%s overwriting retval->res=%s with res=%s",
+                   __FUNCTION__,
+                   obj_get_mod_prefix(obj),
+                   obj_get_name(obj),
+                   tk_get_btype_sym(obj_get_basetype(obj)),
+                   get_error_string(retval->res),
+                   get_error_string(res3));
+            }
         }
-    } else {
-        assert(retval->res == NO_ERR);
     }
     return retval->res;
 

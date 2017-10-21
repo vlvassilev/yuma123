@@ -1,0 +1,138 @@
+ module composite-match {
+    yang-version 1.1;
+
+    namespace "http://example.com/ns/composite-match";
+
+    prefix "cm";
+
+    import ietf-interfaces {
+      prefix if;
+    }
+    import ietf-yang-types {prefix yang;}
+    import ietf-inet-types {prefix inet;}
+    import ieee802-dot1q-types {prefix dot1q-types;}
+
+    import ietf-interfaces-common {
+        prefix if-cmn;
+    }
+    import ietf-flexible-encapsulation {
+      prefix flex;
+    }
+
+
+    organization  "example.com";
+
+    description 
+      "Model for defining sub-interface with composite ingress filter.";
+
+    revision 2017-05-26 {
+        description
+            "Initial version.";
+    }
+
+    identity match-field {
+        description "Base identity for matching fields";
+    }
+
+    identity eth-dst {
+        base match-field;
+    }
+    identity eth-src {
+        base match-field;
+    }
+    identity eth-type {
+        base match-field;
+    }
+    identity vlan-vid {
+        base match-field;
+    }
+    identity vlan-pcp {
+        base match-field;
+    }
+    /* and so on ... */
+
+    grouping match-entries-grouping {
+        container match {
+            list match-field {
+                key match-type;
+                uses match-entry-fields-grouping;
+                uses match-entry-value-grouping;
+            }
+        }
+    }
+
+    grouping match-entry-fields-grouping {
+        leaf match-type {
+            type identityref {
+                base match-field;
+            }
+        }
+    }
+
+    grouping match-entry-value-grouping {
+        choice match-entry-value {
+            case eth-src-case {
+                container eth-src {
+                    leaf mac-address {
+                        type yang:mac-address;
+                    }
+                    leaf mask {
+                        type binary;
+                    }
+                }
+            }
+            case eth-dst-case {
+                container eth-dst {
+                    leaf mac-address {
+                        type yang:mac-address;
+                    }
+                    leaf mask {
+                        type binary;
+                    }
+                }
+            }
+            case eth-type-case {
+                container eth-type {
+                    leaf eth-type {
+                        type dot1q-types:ether-type;
+                    }
+                }
+            }
+            case vlan-vid-case {
+                container vlan-vid {
+                    leaf vlan-vid {
+                        type uint16;
+                    }
+                    leaf cfi-bit {
+                        type boolean;
+                    }
+                    leaf mask {
+                        type binary;
+                    }
+                }
+            }
+            case vlan-pcp-case {
+                container vlan-pcp {
+                    leaf vlan-pcp {
+                        type uint8;
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/if:interfaces/if:interface/if-cmn:encapsulation/" +
+          "if-cmn:encaps-type/flex:flexible/flex:flexible/flex:match/flex:match-type" {
+        case composite-match {
+            description "List of match filters logically OR-ed to specify sub-interface ingress traffic from the parent interface ingress traffic.";
+            list composite-match {
+                key id;
+                leaf id {
+                    type string;
+                }
+                uses match-entries-grouping;
+            }
+        }
+
+    }
+}

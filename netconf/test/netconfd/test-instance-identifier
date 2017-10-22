@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd instance-identifier
+./run.sh

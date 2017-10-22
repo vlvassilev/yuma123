@@ -1,0 +1,33 @@
+module test-instance-identifier {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-instance-identifier";
+  prefix tii;
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the instance-identifier test.";
+
+  revision 2017-10-21 {
+    description
+      "Initial version";
+  }
+  container top {
+    list list {
+      key "idx";
+
+      leaf idx {
+          type uint32;
+      }
+    }
+    list id-list {
+      key "id";
+
+      leaf id {
+          type instance-identifier;
+      }
+    }
+  }
+}

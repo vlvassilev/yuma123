@@ -6,6 +6,7 @@ test-netconf-notifications \
 test-rollback-on-error \
 test-validate-config-only \
 test-identityref-typedef \
+test-instance-identifier \
 test-xpath-current \
 test-xpath-re-match \
 test-xpath-deref \

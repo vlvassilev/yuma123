@@ -1,4 +1,6 @@
-TESTS=test-copy-config \
+TESTS=\
+test-yang-validation \
+test-copy-config \
 test-deviation-add-must \
 test-edit-config \
 test-multiple-edit-callbacks \

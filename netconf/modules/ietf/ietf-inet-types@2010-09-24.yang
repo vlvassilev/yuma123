@@ -26,8 +26,6 @@ module ietf-inet-types {
     Copyright (c) 2010 IETF Trust and the persons identified as
     authors of the code.  All rights reserved.
 
-
-
     Redistribution and use in source and binary forms, with or without
     modification, is permitted pursuant to, and subject to the license
     terms contained in, the Simplified BSD License set forth in Section
@@ -216,10 +214,6 @@ module ietf-inet-types {
       mixed, shortened, and shortened-mixed notation.  The IPv6
       address may include a zone index, separated by a % sign.
 
-
-
-
-
       The zone index is used to disambiguate identical address
       values.  For link-local addresses, the zone index will
       typically be the interface index number or the name of an
@@ -265,8 +259,6 @@ module ietf-inet-types {
      "The ipv4-prefix type represents an IPv4 address prefix.
       The prefix length is given by the number following the
       slash character and must be less than or equal to 32.
-
-
 
       A prefix length value of n corresponds to an IP address
       mask that has n contiguous 1-bits from the most
@@ -314,7 +306,6 @@ module ietf-inet-types {
     reference
      "RFC 4291: IP Version 6 Addressing Architecture";
   }
-
 
   /*** collection of domain name and URI types ***/
 

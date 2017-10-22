@@ -201,9 +201,6 @@ module ietf-yang-types {
                 Data Types";
   }
 
-
-
-
   /*** collection of identifier related types ***/
 
   typedef object-identifier {
@@ -245,12 +242,6 @@ module ietf-yang-types {
       Registration Authorities: General procedures and top
       arcs of the ASN.1 Object Identifier tree";
   }
-
-
-
-
-
-
 
   typedef object-identifier-128 {
     type object-identifier {
@@ -297,8 +288,6 @@ module ietf-yang-types {
       convention of the SMIv2 since RFC 3339 uses a different
       separator between full-date and full-time and provides
       higher resolution of time-secfrac.
-
-
 
       The canonical format for date-and-time values with a known time
       zone uses a numeric time zone offset that is calculated using

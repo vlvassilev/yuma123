@@ -18,6 +18,7 @@ test-xpath-enum-value \
 test-xpath-bit-is-set \
 test-yang-library \
 test-ietf-netmod-sub-intf-vlan-model \
+test-ietf-routing \
 test-memory-leak
 
 SUBDIRS= \

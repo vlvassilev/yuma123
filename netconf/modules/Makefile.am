@@ -17,7 +17,12 @@ $(top_srcdir)/netconf/modules/ietf/ietf-yang-types.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-inet-types.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-yang-smiv2.yang
+$(top_srcdir)/netconf/modules/ietf/ietf-yang-smiv2.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ip@2014-06-16.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ipv6-router-advertisements@2016-11-04.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ipv6-unicast-routing@2016-11-04.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang
 
 ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang \

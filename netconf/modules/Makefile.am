@@ -27,7 +27,9 @@ $(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang
 ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-direct-must-augment-extension@2015-06-12.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network@2016-11-30.yang  \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology@2016-11-30.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology@2016-11-30.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733@2016-10-05.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms@2016-10-27.yang
 
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \

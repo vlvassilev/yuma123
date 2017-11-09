@@ -1,6 +1,6 @@
 #!/bin/bash -e
-#rm -rf tmp || true
-#mkdir tmp
+rm -rf tmp || true
+mkdir tmp
 if [ "$RUN_WITH_CONFD" != "" ] ; then
   killall -KILL confd || true
   echo "Starting confd: $RUN_WITH_CONFD"

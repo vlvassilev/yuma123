@@ -3,6 +3,7 @@ test-yang-validation \
 test-copy-config \
 test-deviation-add-must \
 test-edit-config \
+test-lock \
 test-multiple-edit-callbacks \
 test-netconf-notifications \
 test-rollback-on-error \

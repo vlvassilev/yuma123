@@ -19,13 +19,13 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=$USER &
   SERVER_PID=$!
 fi
 
 sleep 4
 python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
-#python session.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+python session.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 kill -KILL $SERVER_PID
-cat tmp/server.log
 sleep 1
+

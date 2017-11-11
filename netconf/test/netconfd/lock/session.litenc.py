@@ -70,7 +70,7 @@ def unlock(conn):
 	else:
 		return False
 
-def commit():
+def commit(conn):
 	commit_rpc = """
 <commit/>
 """
@@ -238,7 +238,7 @@ def main():
 	step_4(conn_1,conn_2)
 	step_5(conn_1,conn_2)
 	step_6(conn_1,conn_2)
-	step_7(conn_1,conn_2)
+	#step_7(conn_1,conn_2)
 	step_8(conn_1,conn_2)
 	step_9(conn_1,conn_2)
 	step_10(conn_1,conn_2)

@@ -23,6 +23,7 @@ AC_CONFIG_FILES([
         Makefile
 	multiple-edit-callbacks/Makefile
         rollback-on-error/Makefile
+        ietf-routing/Makefile
 ])
 
 AC_OUTPUT

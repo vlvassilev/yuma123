@@ -6,13 +6,46 @@ sys.path.append("../../litenc")
 import litenc
 import litenc_lxml
 import lxml
+from lxml import etree
+from StringIO import StringIO
 import argparse
+
+# Hmm .. ?!
+def yang_data_equal(e1, e2):
+	if e1.tag != e2.tag:
+		assert(False)
+		return False
+	if e1.text==None and "" != e2.text.strip():
+		assert(False)
+		return False
+	if e2.text==None and "" != e1.text.strip():
+		assert(False)
+		return False
+	if e1.text!=None and e2.text!=None and e1.text.strip() != e2.text.strip():
+		assert(False)
+		return False
+	#if e1.tail != e2.tail:
+		assert(False)
+		return False
+	if e1.attrib != e2.attrib:
+		assert(False)
+		print("diff attrib")
+		return False
+	if len(e1) != len(e2):
+		print e1
+		print len(e1)
+		print e2
+		print len(e2)
+		assert(False)
+		return False
+	return all(yang_data_equal(c1, c2) for c1, c2 in zip(e1, e2))
 
 def main():
 	print("""
-#Description: Usecase fo ietf-routing module.
+#Description: Testcase for RFC8022 ietf-routing module.
 #Procedure:
-#1 - Create interface "eth0" of type=ethernetCsmacd with static ip=10.0.0.2/24 and static default route for destination-prefix=0.0.0.0/0 and next-hop=10.0.0.1.
+#1 - <edit-config> configuration as in RFC8022 Appendix D.
+#2 - <get> the /interfaces /interfaces-state /routing /routing-state and verify data is same as in RFC8022 Appendix D.
 """)
 
 	parser = argparse.ArgumentParser()
@@ -68,48 +101,135 @@ def main():
 
 	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
 
-
 	print("Connected ...")
 
-	commit_rpc = """
-<commit/>
+	get_yang_library_rpc = """
+<get>
+  <filter type="subtree">
+    <modules-state xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-library"/>
+  </filter>
+</get>
 """
-	print("commit ...")
-	result = conn.rpc(commit_rpc)
+
+	print("<get> - /ietf-yang-library:modules-state ...")
+	result = conn.rpc(get_yang_library_rpc, strip_ns=False)
+	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+        namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
+	data = result.xpath('./nc:data', namespaces=namespaces)
+	assert(len(data)==1)
 
 	edit_config_rpc = """
 <edit-config>
-   <target>
-     <candidate/>
-   </target>
-   <default-operation>merge</default-operation>
-   <test-option>set</test-option>
-<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-    <interface>
-      <name>ge0</name>
-      <type
-        xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
-    </interface>
-  </interfaces>
-</config>
+    <target>
+      <candidate/>
+    </target>
+    <default-operation>merge</default-operation>
+    <test-option>set</test-option>
+    <config>
+      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="replace">
+        <interface>
+          <name>eth0</name>
+          <description>Uplink to ISP.</description>
+          <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+          <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+            <address>
+              <ip>192.0.2.1</ip>
+              <prefix-length>24</prefix-length>
+            </address>
+          </ipv4>
+        </interface>
+      </interfaces>
+    </config>
 </edit-config>
 """
-	print("edit-config - create vlan ...")
+
+	print("<edit-config> - load example config to 'candidate' ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
-	ok = result.xpath('ok')
-	print result
-	print ok
-	print lxml.etree.tostring(result)
+	ok = result.xpath('./ok')
 	assert(len(ok)==1)
 
-	commit_rpc = """
-<commit/>
-"""
-	print("commit ...")
+	commit_rpc = '<commit/>'
+
+	print("<commit> - commit example config ...")
 	result = conn.rpc(commit_rpc)
 	print lxml.etree.tostring(result)
+	ok = result.xpath('./ok')
 	assert(len(ok)==1)
+
+
+
+	get_example_data_rpc = """
+<get>
+  <filter type="subtree">
+    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
+    <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
+    <routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>
+    <routing-state xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>
+  </filter>
+</get>
+"""
+
+	print("<get> - example data ...")
+	result = conn.rpc(get_example_data_rpc, strip_ns=False)
+	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+        namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
+	data = result.xpath('./nc:data', namespaces=namespaces)
+	assert(len(data)==1)
+
+	expected="""
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+      <interface>
+        <name>eth0</name>
+        <description>Uplink to ISP.</description>
+        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+        <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+          <address>
+            <ip>192.0.2.1</ip>
+            <prefix-length>24</prefix-length>
+          </address>
+        </ipv4>
+      </interface>
+    </interfaces>
+    <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+      <interface>
+        <name>eth0</name>
+        <description>Uplink to ISP.</description>
+        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+        <phys-address>00:0C:42:E5:B1:E9</phys-address>
+        <oper-status>up</oper-status>
+	<statistics>
+          <discontinuity-time>2015-10-24T17:11:27+02:00</discontinuity-time>
+        </statistics>
+        <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+          <address>
+            <ip>192.0.2.1</ip>
+            <prefix-length>24</prefix-length>
+          </address>
+        </ipv4>
+      </interface>
+    </interfaces-state>
+</data>
+"""
+
+	data_expected=etree.parse(StringIO(lxml.etree.tostring(lxml.etree.fromstring(expected), pretty_print=True)))
+	data_received=etree.parse(StringIO(lxml.etree.tostring(data[0], pretty_print=True)))
+
+	a = StringIO();
+	b = StringIO();
+	data_expected.write_c14n(a)
+	data_received.write_c14n(b)
+
+	if yang_data_equal(lxml.etree.fromstring(a.getvalue()), lxml.etree.fromstring(b.getvalue())):
+		print "Bingo!"
+		return 0
+	else:
+		print "Expected (A) different from received (B):"
+		print "A:"
+		print a.getvalue()
+		print "B:"
+		print b.getvalue()
+		return 1
 
 sys.exit(main())

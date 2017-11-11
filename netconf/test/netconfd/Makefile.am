@@ -24,4 +24,5 @@ test-memory-leak
 
 SUBDIRS= \
 multiple-edit-callbacks \
-rollback-on-error
+rollback-on-error \
+ietf-routing

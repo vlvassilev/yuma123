@@ -4,6 +4,7 @@ import time
 import sys, os
 import argparse
 from yangcli import yangcli
+import lxml
 from lxml import etree
 import yangrpc
 
@@ -21,6 +22,7 @@ def main():
 #Description: Usecase fo ietf-routing module.
 #Procedure:
 #1 - Create interface "eth0" of type=ethernetCsmacd with static ip=10.0.0.2/24 and static default route for destination-prefix=0.0.0.0/0 and next-hop=10.0.0.1.
+#2 - Validate <get> returns identical result as the example in RFC8022 Appendix D.
 """)
 
 	parser = argparse.ArgumentParser()
@@ -58,16 +60,26 @@ def main():
 
 	time.sleep(1)
 
+	result = yangcli(conn, "delete /interfaces")
+	result = yangcli(conn, "commit")
+	ok = result.xpath('./ok')
+	assert(len(ok)==1)
+
         yangcli_script='''
 create /interfaces/interface -- name=eth0 type=ethernetCsmacd description="Uplink to ISP."
 create /interfaces/interface[name='eth0']/ipv4/address -- ip=192.0.2.1 prefix-length=24
-create /interfaces/interface[name='eth0']/ipv4/forwarding value=enabled
-
-create /routes/control-plane-protocols/control-plane-protocol -- name=st0 type=static
-create /routes/control-plane-protocols/control-plane-protocol[name='st0']/static-routes/ipv4/route -- destination-prefix=0.0.0.0/0 next-hop/next-hop-address=192.0.2.2
 commit
 '''
+
+#create /interfaces/interface[name='eth0']/ipv4/forwarding value=true
+#create /routes/control-plane-protocols/control-plane-protocol -- name=st0 type=static
+#create /routes/control-plane-protocols/control-plane-protocol[name='st0']/static-routes/ipv4/route -- destination-prefix=0.0.0.0/0 next-hop/next-hop-address=192.0.2.2
+#commit
+#'''
 	yangcli_ok_script(conn, yangcli_script)
+
+	result = yangcli(conn, "xget /interfaces")
+	print lxml.etree.tostring(result)
 
 	return(0)
 sys.exit(main())

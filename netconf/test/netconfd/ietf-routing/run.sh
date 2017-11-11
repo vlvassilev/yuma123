@@ -20,13 +20,13 @@ else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
   /usr/sbin/netconfd --module=iana-if-type --modpath=../../../modules/ietf --module=../../../modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang --no-startup --validate-config-only --superuser=$USER
-  /usr/sbin/netconfd --module=iana-if-type --modpath=../../../modules/ietf --module=../../../modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=iana-if-type --modpath=../../../modules/ietf --module=ietf-ip --module=../../../modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang --module=test-ietf-routing --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 
 sleep 3
 python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
-python session.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
-kill -KILL $SERVER_PID
+#python session.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+#kill -KILL $SERVER_PID
 cat tmp/server.log
 sleep 1

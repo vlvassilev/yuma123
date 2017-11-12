@@ -7410,6 +7410,7 @@ static status_t
         return NO_ERR;
     }
 
+#if 0
     if (obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
         if (LOGDEBUG) {
             log_debug("\nSkip expand of obsolete uses '%s' "
@@ -7420,6 +7421,7 @@ static status_t
         }
         return NO_ERR;
     }
+#endif
 
     YANG_OBJ_DEBUG_USES4(
         "\nexpand_uses: uses '%s' in mod '%s' on line %u",
@@ -7659,6 +7661,7 @@ static status_t
         return NO_ERR;
     }
 
+#if 0
     if (obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
         if (LOGDEBUG) {
             log_debug("\nSkip expand of obsolete augment '%s' "
@@ -7669,7 +7672,7 @@ static status_t
         }
         return NO_ERR;
     }
-
+#endif
     obj_template_t *targobj = NULL, *testobj = NULL;
     dlq_hdr_t *augQ = &aug->datadefQ;
 #ifdef ENABLE_DIRECT_MUST_AUGMENT_EX
@@ -7993,8 +7996,8 @@ static status_t
          chobj != NULL;
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-        if (!obj_has_name(chobj) ||
-            obj_get_status(chobj) == NCX_STATUS_OBSOLETE) {
+        if (!obj_has_name(chobj) /*||
+            obj_get_status(chobj) == NCX_STATUS_OBSOLETE*/) {
             continue;
         }
 
@@ -8058,11 +8061,12 @@ static status_t
          */
         return NO_ERR;
     }
-
+#if 0
     if (obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
         /* already reported in expand_augment */
         return NO_ERR;
     }
+#endif
 
     if (aug->targobj == NULL) {
         return ERR_NCX_OPERATION_FAILED;
@@ -10871,8 +10875,8 @@ status_t
          testobj != NULL;
          testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-        if (obj_has_name(testobj) && 
-            obj_get_status(testobj) != NCX_STATUS_OBSOLETE) {
+        if (obj_has_name(testobj) /*&& 
+            obj_get_status(testobj) != NCX_STATUS_OBSOLETE*/) {
 
             if (obj_is_leafy(testobj) &&
                 obj_get_default(testobj) != NULL) {
@@ -10942,7 +10946,7 @@ status_t
         case OBJ_TYP_LEAF_LIST:
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
                 YANG_OBJ_DEBUG4( 
-                    "\ncheck_leafref_loop: mod %s, object %s, on line %u",
+                    "\n%s: mod %s, object %s, on line %u", __FUNCTION__,
                     mod->name, obj_get_name(testobj), testobj->tkerr.linenum);
                 
                 if (testobj->objtype == OBJ_TYP_LEAF) {

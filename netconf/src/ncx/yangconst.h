@@ -184,6 +184,7 @@ static inline boolean terminate_parse( status_t res )
 	if ( terminate_parse( res ) ) { \
 	    return res; \
 	} else { \
+            assert(res==NO_ERR); \
 	    retres = res; \
 	} \
     }

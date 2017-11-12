@@ -11693,23 +11693,12 @@ void
          childobj = nextobj) {
 
         nextobj = (obj_template_t *)dlq_nextEntry(childobj);
-        if (obj_has_name(childobj) &&
-            obj_get_status(childobj) == NCX_STATUS_OBSOLETE) {
-            if (LOGDEBUG) {
-                ncx_module_t  *testmod = obj_get_mod(childobj);
-                log_debug("\nDeleting obsolete node '%s' "
-                          "from %smodule '%s'",
-                          obj_get_name(childobj),
-                          (testmod && !testmod->ismod) ? "sub" : "",
-                          (testmod) ? testmod->name : EMPTY_STRING);
-            }
-            dlq_remove(childobj);
-            obj_free_template(childobj);
-        } else {
-            childdatadefQ = obj_get_datadefQ(childobj);
-            if (childdatadefQ != NULL) {
-                obj_delete_obsolete(childdatadefQ);
-            }
+
+
+        childdatadefQ = obj_get_datadefQ(childobj);
+
+        if (childdatadefQ != NULL) {
+            obj_delete_obsolete(childdatadefQ);
         }
     }
 

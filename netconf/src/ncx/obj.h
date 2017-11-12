@@ -178,6 +178,7 @@ extern "C" {
  */
 typedef enum obj_type_t_ {
     OBJ_TYP_NONE,
+    OBJ_TYP_ANYDATA,
     OBJ_TYP_ANYXML,
     OBJ_TYP_CONTAINER,
     OBJ_TYP_LEAF,

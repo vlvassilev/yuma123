@@ -26,6 +26,7 @@
 
       enum constant          has value node
       ----------------------------------------
+      OBJ_TYP_ANYDATA           Y (1)
       OBJ_TYP_ANYXML            Y (1)
       OBJ_TYP_CONTAINER         Y
       OBJ_TYP_LEAF              Y
@@ -40,8 +41,9 @@
       OBJ_TYP_RPCIO             Y (2)
       OBJ_TYP_NOTIF             N
 
-   (1) ANYXML is not stored in the value tree as type anyxml.
-       It is converted as follows:
+   (1) ANYXML and ANYDATA are not stored in the value tree as type
+       anyxml/anydata.
+       They are converted as follows:
            Complex Node -> NCX_BT_CONTAINER
            Simple Node  -> NCX_BT_STRING
            Empty Node   -> NCX_BT_EMPTY
@@ -51,7 +53,7 @@
        It is not found under the <config> element.
 
    These objects are grouped as follows:
-      * concrete data node objects (anyxml, container - list)
+      * concrete data node objects (anyxml, anydata, container - list)
       * meta grouping constructs (choice, case) 
         and (uses, refine, augment)
       * RPC method objects (rpc, input, output)
@@ -559,9 +561,8 @@ static status_t
 
 }  /* consume_semi_lbrace */
 
-
 /********************************************************************
-* FUNCTION consume_anyxml
+* FUNCTION consume_any
 * 
 * Parse the next N tokens as an anyxml-stmt
 * Create and fill in an obj_template_t struct
@@ -577,16 +578,18 @@ static status_t
 *   que == Q to hold the obj_template_t that gets created
 *   parent == parent object or NULL if top-level anyxml-stmt
 *   grp == parent grp_template_t or NULL if not child of grp
+*   any_typ == either OBJ_TYP_ANYXML or OBJ_TYP_ANYDATA
 *   
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_anyxml (tk_chain_t *tkc,
+    consume_any(tk_chain_t *tkc,
                     ncx_module_t *mod,
                     dlq_hdr_t  *que,
                     obj_template_t *parent,
-                    grp_template_t *grp)
+                    grp_template_t *grp,
+                    obj_type_t any_typ)
 {
     obj_template_t  *obj = NULL;
     obj_leaf_t      *leaf = NULL;
@@ -598,8 +601,10 @@ static status_t
     boolean          desc = FALSE, ref = FALSE;
     status_t         res = NO_ERR, retres = NO_ERR;
 
+    assert(any_typ == OBJ_TYP_ANYXML || any_typ == OBJ_TYP_ANYDATA);
+
     /* Get a new obj_template_t to fill in */
-    obj = obj_new_template(OBJ_TYP_ANYXML);
+    obj = obj_new_template(any_typ);
     if (!obj) {
         res = ERR_INTERNAL_MEM;
         ncx_print_errormsg(tkc, mod, res);
@@ -738,8 +743,69 @@ static status_t
 
     return retres;
 
-}  /* consume_anyxml */
+}  /* consume_any */
 
+/********************************************************************
+* FUNCTION consume_anydata
+* 
+* Parse the next N tokens as an anydata-stmt
+* Create and fill in an obj_template_t struct
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'anydata' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   que == Q to hold the obj_template_t that gets created
+*   parent == parent object or NULL if top-level anydata-stmt
+*   grp == parent grp_template_t or NULL if not child of grp
+*   
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_anydata (tk_chain_t *tkc,
+                    ncx_module_t *mod,
+                    dlq_hdr_t  *que,
+                    obj_template_t *parent,
+                    grp_template_t *grp)
+{
+    return consume_any(tkc, mod, que, parent, grp, OBJ_TYP_ANYDATA);
+}  /* consume_anydata */
+
+/********************************************************************
+* FUNCTION consume_anyxml
+* 
+* Parse the next N tokens as an anydata-stmt
+* Create and fill in an obj_template_t struct
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'anydata' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   que == Q to hold the obj_template_t that gets created
+*   parent == parent object or NULL if top-level anydata-stmt
+*   grp == parent grp_template_t or NULL if not child of grp
+*   
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    consume_anyxml (tk_chain_t *tkc,
+                    ncx_module_t *mod,
+                    dlq_hdr_t  *que,
+                    obj_template_t *parent,
+                    grp_template_t *grp)
+{
+    return consume_any(tkc, mod, que, parent, grp, OBJ_TYP_ANYXML);
+}  /* consume_anyxml */
 
 /********************************************************************
 * FUNCTION consume_container
@@ -2071,6 +2137,7 @@ static status_t
                                obj, 
                                TRUE);
         } else if (!xml_strcmp(val, YANG_K_ANYXML) ||
+                   !xml_strcmp(val, YANG_K_ANYDATA) ||
                    !xml_strcmp(val, YANG_K_CONTAINER) ||
                    !xml_strcmp(val, YANG_K_LEAF) ||
                    !xml_strcmp(val, YANG_K_LEAF_LIST) ||
@@ -2786,6 +2853,8 @@ static status_t
         /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_ANYXML)) {
             res = consume_anyxml(tkc, mod, que, parent, NULL);
+        } else if (!xml_strcmp(val, YANG_K_ANYDATA)) {
+            res = consume_anydata(tkc, mod, que, parent, NULL);
         } else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
             res = consume_container(pcb,
                                     tkc, 
@@ -3080,6 +3149,12 @@ static status_t
         /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_ANYXML)) {
             res = consume_anyxml(tkc, 
+                                 mod, 
+                                 que,
+                                 parent, 
+                                 NULL);
+        } else if (!xml_strcmp(val, YANG_K_ANYDATA)) {
+            res = consume_anydata(tkc, 
                                  mod, 
                                  que,
                                  parent, 
@@ -3808,6 +3883,7 @@ static status_t apply_object_deviate_type( obj_template_t *targobj,
 
     switch (targobj->objtype) {
         case OBJ_TYP_ANYXML:
+        case OBJ_TYP_ANYDATA:
         case OBJ_TYP_LEAF:
             typ_free_typdef(targobj->def.leaf->typdef);
             targobj->def.leaf->typdef = devi->typdef;
@@ -6715,6 +6791,7 @@ static status_t
         def = TRUE;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         mand = TRUE;
         break;
     case OBJ_TYP_LEAF_LIST:
@@ -6868,6 +6945,7 @@ static status_t
         def = TRUE;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         mand = TRUE;
         break;
     case OBJ_TYP_LEAF_LIST:
@@ -7772,6 +7850,7 @@ static status_t
     case OBJ_TYP_LEAF_LIST:
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         log_error("\nError: cannot augment anyxml node '%s'",
                   obj_get_name(targobj));
         retres = set_tkc_error( tkc, mod, &obj->tkerr, 
@@ -8350,6 +8429,7 @@ static status_t
             case OBJ_TYP_CHOICE:
             case OBJ_TYP_LEAF:
             case OBJ_TYP_ANYXML:
+            case OBJ_TYP_ANYDATA:
                 break;
             default:
                 log_error("\nError: target '%s' is a '%s': "
@@ -8398,6 +8478,7 @@ static status_t
             switch (targobj->objtype) {
             case OBJ_TYP_CONTAINER:
             case OBJ_TYP_ANYXML:
+            case OBJ_TYP_ANYDATA:
             case OBJ_TYP_LEAF:
             case OBJ_TYP_LEAF_LIST:
             case OBJ_TYP_LIST:
@@ -8830,6 +8911,7 @@ static status_t
         break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         res = resolve_leaf(pcb, tkc, mod, testobj->def.leaf, testobj,  redo);
         break;
     case OBJ_TYP_LEAF_LIST:
@@ -8974,7 +9056,7 @@ static status_t
     boolean          errdone;
     status_t         res;
 
-    expstr = "anyxml, container, leaf, leaf-list, list, choice, uses,"
+    expstr = "anyxml, anydata, container, leaf, leaf-list, list, choice, uses,"
         "or augment keyword";
     errdone = TRUE;
     res = NO_ERR;
@@ -8989,6 +9071,8 @@ static status_t
         /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_ANYXML)) {
             res = consume_anyxml(tkc, mod, que, parent, grp);
+        } else if (!xml_strcmp(val, YANG_K_ANYDATA)) {
+            res = consume_anydata(tkc, mod, que, parent, grp);
         } else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
             res = consume_container(pcb, tkc, mod, que, parent, grp);
         } else if (!xml_strcmp(val, YANG_K_LEAF)) {
@@ -9499,6 +9583,7 @@ static status_t
             break;
 
         case OBJ_TYP_ANYXML:
+        case OBJ_TYP_ANYDATA:
             break;
         case OBJ_TYP_LEAF:
         case OBJ_TYP_LEAF_LIST:
@@ -10127,6 +10212,7 @@ status_t
             CHK_EXIT(res, retres);
             break;
         case OBJ_TYP_ANYXML:
+        case OBJ_TYP_ANYDATA:
         case OBJ_TYP_LEAF:
         case OBJ_TYP_LEAF_LIST:
             break;
@@ -10535,6 +10621,7 @@ status_t
             break;
         case OBJ_TYP_LEAF:
         case OBJ_TYP_ANYXML:
+        case OBJ_TYP_ANYDATA:
             res = resolve_leaf_final(tkc, mod, testobj, ingrouping);
             break;
         case OBJ_TYP_LEAF_LIST:

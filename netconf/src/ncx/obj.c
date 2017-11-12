@@ -2211,6 +2211,7 @@ static boolean
 {
     switch (obj->objtype) {
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
@@ -3880,6 +3881,7 @@ obj_template_t* obj_new_template( obj_type_t objtype )
 
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         obj->def.leaf = new_leaf(TRUE);
         break;
 
@@ -3974,6 +3976,7 @@ void obj_free_template( obj_template_t *obj )
 
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         free_leaf(obj->def.leaf, obj->flags);
         break;
 
@@ -6023,6 +6026,7 @@ typ_template_t *
         que = obj->def.container->typedefQ;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
         break;
@@ -6096,6 +6100,7 @@ typ_template_t *
         que = obj->def.container->typedefQ;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
         break;
@@ -6186,6 +6191,7 @@ grp_template_t *
         que = obj->def.container->groupingQ;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
         break;
@@ -6259,6 +6265,7 @@ grp_template_t *
         que = obj->def.container->groupingQ;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
         break;
@@ -6536,6 +6543,7 @@ obj_template_t *
         }
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         newobj->def.leaf = 
             clone_leaf(srcobj->def.leaf,
@@ -7962,6 +7970,7 @@ const xmlChar *
     case OBJ_TYP_CONTAINER:
         return obj->def.container->name;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return obj->def.leaf->name;
     case OBJ_TYP_LEAF_LIST:
@@ -8028,6 +8037,7 @@ status_t
         namevar = &obj->def.container->name;
         break;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         namevar = &obj->def.leaf->name;
         break;
@@ -8110,6 +8120,7 @@ boolean
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
@@ -8194,6 +8205,7 @@ ncx_status_t
     case OBJ_TYP_CONTAINER:
         return obj->def.container->status;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return obj->def.leaf->status;
     case OBJ_TYP_LEAF_LIST:
@@ -8252,6 +8264,7 @@ const xmlChar *
     case OBJ_TYP_CONTAINER:
         return obj->def.container->descr;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return obj->def.leaf->descr;
     case OBJ_TYP_LEAF_LIST:
@@ -8358,6 +8371,7 @@ const void *
     case OBJ_TYP_CONTAINER:
         return &obj->def.container->descr;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return &obj->def.leaf->descr;
     case OBJ_TYP_LEAF_LIST:
@@ -8415,6 +8429,7 @@ const xmlChar *
     case OBJ_TYP_CONTAINER:
         return obj->def.container->ref;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return obj->def.leaf->ref;
     case OBJ_TYP_LEAF_LIST:
@@ -8472,6 +8487,7 @@ const void *
     case OBJ_TYP_CONTAINER:
         return &obj->def.container->ref;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return &obj->def.leaf->ref;
     case OBJ_TYP_LEAF_LIST:
@@ -8671,6 +8687,7 @@ dlq_hdr_t *
     case OBJ_TYP_CONTAINER:
         return &obj->def.container->mustQ;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
         return &obj->def.leaf->mustQ;
     case OBJ_TYP_LEAF_LIST:
@@ -8713,6 +8730,8 @@ const xmlChar *
         return YANG_K_CONTAINER;
     case OBJ_TYP_ANYXML:
         return YANG_K_ANYXML;
+    case OBJ_TYP_ANYDATA:
+        return YANG_K_ANYDATA;
     case OBJ_TYP_LEAF:
         return YANG_K_LEAF;
     case OBJ_TYP_LEAF_LIST:
@@ -8771,6 +8790,7 @@ dlq_hdr_t *
     case OBJ_TYP_CONTAINER:
         return obj->def.container->datadefQ;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_REFINE:
@@ -8825,6 +8845,7 @@ const dlq_hdr_t *
     case OBJ_TYP_CONTAINER:
         return obj->def.container->datadefQ;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_REFINE:
@@ -9060,7 +9081,8 @@ typ_def_t *
     obj_get_typdef (obj_template_t  *obj)
 {
     if (obj->objtype == OBJ_TYP_LEAF ||
-        obj->objtype == OBJ_TYP_ANYXML) {
+        obj->objtype == OBJ_TYP_ANYXML ||
+        obj->objtype == OBJ_TYP_ANYDATA) {
         return obj->def.leaf->typdef;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
         return obj->def.leaflist->typdef;
@@ -9088,7 +9110,8 @@ const typ_def_t *
     obj_get_ctypdef (const obj_template_t  *obj)
 {
     if (obj->objtype == OBJ_TYP_LEAF ||
-        obj->objtype == OBJ_TYP_ANYXML) {
+        obj->objtype == OBJ_TYP_ANYXML ||
+        obj->objtype == OBJ_TYP_ANYDATA) {
         return obj->def.leaf->typdef;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
         return obj->def.leaflist->typdef;
@@ -9134,6 +9157,7 @@ ncx_btype_t
     case OBJ_TYP_NOTIF:
         return NCX_BT_CONTAINER;
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         return NCX_BT_ANY;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -9418,6 +9442,7 @@ ncx_iqual_t
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
@@ -9873,6 +9898,7 @@ obj_template_t *
     case OBJ_TYP_REFINE:
     case OBJ_TYP_RPC:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
         return NULL;
     case OBJ_TYP_RPCIO:
         if (obj->def.rpcio->defaultparm != NULL) {
@@ -9923,6 +9949,7 @@ boolean
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
@@ -10016,6 +10043,7 @@ boolean
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
@@ -10221,6 +10249,7 @@ boolean obj_is_mandatory (obj_template_t *obj)
         } 
         /* else fall through */
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_CHOICE:
         return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
     case OBJ_TYP_LEAF_LIST:
@@ -10281,6 +10310,7 @@ boolean obj_is_mandatory_when_ex (obj_template_t *obj, boolean config_only)
         } 
         /* else fall through */
     case OBJ_TYP_ANYXML:
+    case OBJ_TYP_ANYDATA:
     case OBJ_TYP_CHOICE:
         if (obj_has_when_stmts(obj)) {
             return FALSE;
@@ -10986,6 +11016,7 @@ boolean obj_ok_for_cli (obj_template_t *obj)
 
         switch (chobj->objtype) {
         case OBJ_TYP_ANYXML:
+        case OBJ_TYP_ANYDATA:
             return TRUE;   /**** was FALSE ****/
         case OBJ_TYP_LEAF:
         case OBJ_TYP_LEAF_LIST:
@@ -10998,6 +11029,7 @@ boolean obj_ok_for_cli (obj_template_t *obj)
                     for ( ; caschild ; caschild = obj_next_child(caschild)) {
                         switch (caschild->objtype) {
                         case OBJ_TYP_ANYXML:
+                        case OBJ_TYP_ANYDATA:
                             return FALSE;
                         case OBJ_TYP_LEAF:
                         case OBJ_TYP_LEAF_LIST:

@@ -398,6 +398,7 @@ extern "C" {
 #define NCX_EL_ADDRESS         (const xmlChar *)"address"
 #define NCX_EL_ALT_NAME        (const xmlChar *)"alt-name"
 #define NCX_EL_ANY             (const xmlChar *)"any"
+#define NCX_EL_ANYDATA          (const xmlChar *)"anydata"
 #define NCX_EL_ANYXML          (const xmlChar *)"anyxml"
 #define NCX_EL_APPINFO         (const xmlChar *)"appinfo"
 #define NCX_EL_APPLICATION     (const xmlChar *)"application"

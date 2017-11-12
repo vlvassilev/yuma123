@@ -17,7 +17,7 @@
 
     Current NCX base type   YANG builtin type
 
-    NCX_BT_ANY              anyxml
+    NCX_BT_ANY              anyxml,anydata
     NCX_BT_BITS             bits
     NCX_BT_ENUM             enumeration
     NCX_BT_EMPTY            empty

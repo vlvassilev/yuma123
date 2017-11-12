@@ -71,6 +71,7 @@ extern "C" {
 #define YANG_K_AFTER             (const xmlChar *)"after"
 #define YANG_K_ARGUMENT          (const xmlChar *)"argument"
 #define YANG_K_AUGMENT           (const xmlChar *)"augment"
+#define YANG_K_ANYDATA           (const xmlChar *)"anydata"
 #define YANG_K_ANYXML            (const xmlChar *)"anyxml"
 #define YANG_K_BASE              (const xmlChar *)"base"
 #define YANG_K_BEFORE            (const xmlChar *)"before"

@@ -117,7 +117,7 @@ def main():
         namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
-
+	#Copied from draft-ietf-netmod-rfc7223bis-00
 	edit_config_rpc = """
 <edit-config>
     <target>
@@ -126,6 +126,39 @@ def main():
     <default-operation>merge</default-operation>
     <test-option>set</test-option>
     <config>
+      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+           xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type"
+           xmlns:vlan="http://example.com/vlan"
+           nc:operation="replace">
+         <interface>
+           <name>eth0</name>
+           <type>ianaift:ethernetCsmacd</type>
+           <enabled>false</enabled>
+         </interface>
+
+         <interface>
+           <name>eth1</name>
+           <type>ianaift:ethernetCsmacd</type>
+           <enabled>true</enabled>
+           <vlan:vlan-tagging>true</vlan:vlan-tagging>
+         </interface>
+
+         <interface>
+           <name>eth1.10</name>
+           <type>ianaift:l2vlan</type>
+           <enabled>true</enabled>
+           <vlan:base-interface>eth1</vlan:base-interface>
+           <vlan:vlan-id>10</vlan:vlan-id>
+         </interface>
+
+         <interface>
+           <name>lo1</name>
+           <type>ianaift:softwareLoopback</type>
+           <enabled>true</enabled>
+         </interface>
+
+       </interfaces>
+
       <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="replace">
         <interface>
           <name>eth0</name>
@@ -158,16 +191,19 @@ def main():
 	assert(len(ok)==1)
 
 
-
+	#TODO - request <get-data> example in draft-ietf-netconf-nmda-netconf-01
 	get_example_data_rpc = """
-<get>
-  <filter type="subtree">
+<get-data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-datastores">
+  <datastore ??>
+    ??or:origin
+  </datastore>
+  <subtree-filter>
     <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
-    <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
     <routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>
-    <routing-state xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>
-  </filter>
-</get>
+  </subtree-filter>
+  <origin>or:operational</origin>
+  <with-origin/>
+</get-data>
 """
 
 	print("<get> - example data ...")
@@ -176,43 +212,96 @@ def main():
         namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
-
+        #Copy from draft-netconf-nmda-netconf-01
 	expected="""
-<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-      <interface>
-        <name>eth0</name>
-        <description>Uplink to ISP.</description>
-        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
-        <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
-          <address>
-            <ip>192.0.2.1</ip>
-            <prefix-length>24</prefix-length>
-          </address>
-        </ipv4>
-      </interface>
-    </interfaces>
-    <interfaces-state xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
-      <interface>
-        <name>eth0</name>
-        <description>Uplink to ISP.</description>
-        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
-        <phys-address>00:0C:42:E5:B1:E9</phys-address>
-        <oper-status>up</oper-status>
-	<statistics>
-          <discontinuity-time>2015-10-24T17:11:27+02:00</discontinuity-time>
-        </statistics>
-        <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
-          <address>
-            <ip>192.0.2.1</ip>
-            <prefix-length>24</prefix-length>
-          </address>
-        </ipv4>
-      </interface>
-    </interfaces-state>
+<data>
+  <interfaces
+      xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"
+      xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type"
+      xmlns:vlan="http://example.com/vlan"
+      xmlns:or="urn:ietf:params:xml:ns:yang:ietf-origin">
+    <interface or:origin="or:intended">
+      <name>eth0</name>
+      <type>ianaift:ethernetCsmacd</type>
+      <enabled>false</enabled>
+      <admin-status>down</admin-status>
+      <oper-status>down</oper-status>
+      <if-index>2</if-index>
+      <phys-address>00:01:02:03:04:05</phys-address>
+      <statistics>
+        <discontinuity-time>
+          2013-04-01T03:00:00+00:00
+        </discontinuity-time>
+        <!-- counters now shown here -->
+      </statistics>
+    </interface>
+
+    <interface or:origin="or:intended">
+      <name>eth1</name>
+      <type>ianaift:ethernetCsmacd</type>
+      <enabled>true</enabled>
+      <admin-status>up</admin-status>
+      <oper-status>up</oper-status>
+      <if-index>7</if-index>
+      <phys-address>00:01:02:03:04:06</phys-address>
+      <higher-layer-if>eth1.10</higher-layer-if>
+      <statistics>
+        <discontinuity-time>
+          2013-04-01T03:00:00+00:00
+        </discontinuity-time>
+       <!-- counters now shown here -->
+     </statistics>
+      <vlan:vlan-tagging>true</vlan:vlan-tagging>
+    </interface>
+    <interface or:origin="or:intended">
+      <name>eth1.10</name>
+      <type>ianaift:l2vlan</type>
+      <enabled>true</enabled>
+      <admin-status>up</admin-status>
+      <oper-status>up</oper-status>
+      <if-index>9</if-index>
+      <lower-layer-if>eth1</lower-layer-if>
+      <statistics>
+       <discontinuity-time>
+         2013-04-01T03:00:00+00:00
+        </discontinuity-time>
+        <!-- counters now shown here -->
+      </statistics>
+      <vlan:base-interface>eth1</vlan:base-interface>
+     <vlan:vlan-id>10</vlan:vlan-id>
+    </interface>
+    <!-- This interface is not configured -->
+    <interface or:origin="or:system">
+      <name>eth2</name>
+      <type>ianaift:ethernetCsmacd</type>
+      <admin-status>down</admin-status>
+      <oper-status>down</oper-status>
+      <if-index>8</if-index>
+      <phys-address>00:01:02:03:04:07</phys-address>
+      <statistics>
+        <discontinuity-time>
+          2013-04-01T03:00:00+00:00
+        </discontinuity-time>
+        <!-- counters now shown here -->
+      </statistics>
+     </interface>
+     <interface or:origin="or:intended">
+      <name>lo1</name>
+      <type>ianaift:softwareLoopback</type>
+      <enabled>true</enabled>
+      <admin-status>up</admin-status>
+      <oper-status>up</oper-status>
+      <if-index>1</if-index>
+      <statistics>
+        <discontinuity-time>
+          2013-04-01T03:00:00+00:00
+        </discontinuity-time>
+        <!-- counters now shown here -->
+      </statistics>
+    </interface>
+  </interfaces>
 </data>
 """
-
 	data_expected=etree.parse(StringIO(lxml.etree.tostring(lxml.etree.fromstring(expected), pretty_print=True)))
 	data_received=etree.parse(StringIO(lxml.etree.tostring(data[0], pretty_print=True)))
 

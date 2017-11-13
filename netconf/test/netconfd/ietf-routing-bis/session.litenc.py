@@ -156,22 +156,7 @@ def main():
            <type>ianaift:softwareLoopback</type>
            <enabled>true</enabled>
          </interface>
-
        </interfaces>
-
-      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="replace">
-        <interface>
-          <name>eth0</name>
-          <description>Uplink to ISP.</description>
-          <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
-          <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
-            <address>
-              <ip>192.0.2.1</ip>
-              <prefix-length>24</prefix-length>
-            </address>
-          </ipv4>
-        </interface>
-      </interfaces>
     </config>
 </edit-config>
 """
@@ -194,14 +179,11 @@ def main():
 	#TODO - request <get-data> example in draft-ietf-netconf-nmda-netconf-01
 	get_example_data_rpc = """
 <get-data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-datastores">
-  <datastore ??>
-    ??or:origin
-  </datastore>
+  <datastore xmlns:ds="urn:ietf:params:xml:ns:yang:ietf-datastores">ds:operational</datastore>
   <subtree-filter>
     <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
     <routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"/>
   </subtree-filter>
-  <origin>or:operational</origin>
   <with-origin/>
 </get-data>
 """

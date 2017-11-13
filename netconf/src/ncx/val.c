@@ -2546,6 +2546,7 @@ status_t
         if (mod) {
             prefixnsid = mod->nsid;
             identity = ncx_find_identity(mod, qname, FALSE);
+
         } else {
             identity = NULL;
             /* check all session modules first */
@@ -2567,10 +2568,11 @@ status_t
                     prefixnsid = mod->nsid;                 
                 }
             }
-            if (!identity) {
-                res = ERR_NCX_INVALID_VALUE;
-            }
         }
+    }
+
+    if (!identity) {
+        res = ERR_NCX_INVALID_VALUE;
     }
 
     if (id) {

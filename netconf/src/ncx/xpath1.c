@@ -352,6 +352,28 @@ static void
 
 }  /* invalid_instanceid_error */
 
+/********************************************************************
+* FUNCTION invalid_identityid_error
+*
+* Generate a invalid identity identifier error
+*
+* INPUTS:
+*    pcb == parser control block to use
+*********************************************************************/
+static void
+    invalid_identityid_error (xpath_pcb_t *pcb, const xmlChar* qname)
+{
+    if (pcb->logerrors) {
+        log_error("\nError: XPath expression '%s' with invalid instance-identifier '%s'",
+                  pcb->exprstr,
+                  qname);
+        ncx_print_errormsg(pcb->tkc,
+                           pcb->tkerr.mod,
+                           /*ERR_NCX_INVALID_IDENTITYID*/ERR_NCX_INVALID_XPATH_EXPR);
+    }
+
+}  /* invalid_identityid_error */
+
 
 /********************************************************************
 * FUNCTION check_instanceid_expr
@@ -4637,6 +4659,7 @@ static xpath_result_t *
                     &name,
                     &identity_base);
     if(*res != NO_ERR) {
+        invalid_identityid_error(pcb,qname);
         return NULL;
     }
 

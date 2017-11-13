@@ -22,7 +22,7 @@ def main():
 #Description: Usecase fo ietf-routing module.
 #Procedure:
 #1 - Create interface "eth0" of type=ethernetCsmacd with static ip=10.0.0.2/24 and static default route for destination-prefix=0.0.0.0/0 and next-hop=10.0.0.1.
-#2 - Validate <get> returns identical result as the example in RFC8022 Appendix D.
+#2 - Validate <get-data> returns identical result as the example in RFC8022 Appendix D.
 """)
 
 	parser = argparse.ArgumentParser()
@@ -78,7 +78,7 @@ commit
 #'''
 	yangcli_ok_script(conn, yangcli_script)
 
-	result = yangcli(conn, "xget /interfaces")
+	result = yangcli(conn, "get-data with-origin datastore=operational xpath-filter="/" )
 	print lxml.etree.tostring(result)
 
 	return(0)

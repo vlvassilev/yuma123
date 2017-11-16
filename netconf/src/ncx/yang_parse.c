@@ -1200,6 +1200,8 @@ static status_t
 {
     const xmlChar *val;
     const char    *expstr;
+    xmlChar       *str;
+
     tk_type_t      tktyp;
     status_t       res, retres;
     boolean        done, ver;
@@ -1256,7 +1258,7 @@ static status_t
             ver = TRUE;
 
             /* get the version number */
-            res = ncx_consume_token(tkc, mod, TK_TT_STRING);
+            res = yang_consume_string(tkc, mod, &str);
             if (res != NO_ERR) {
                 retres = res;
                 if (NEED_EXIT(res)) {

@@ -90,5 +90,10 @@ def main():
 	assert(len(types)==1)
 	assert(types[0].text=='ianaift:other')
 
+	result = yangcli(conn, "delete /interfaces").xpath('./ok')
+	assert(len(ok)==1)
+	result = yangcli(conn, "commit").xpath('./ok')
+	assert(len(ok)==1)
+
 	return(0)
 sys.exit(main())

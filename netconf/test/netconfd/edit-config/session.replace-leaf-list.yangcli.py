@@ -9,10 +9,11 @@ import yangrpc
 
 def main():
 	print("""
-#Description: Demonstrate that leaf-list values can be replaced.
+#Description: Demonstrate that leaf-list values can be replaced. Although the operation result is identical to either create or none.
 #Procedure:
-#1 - Create /system/dns-resolver/search entry with value "foo". Verify commit succeeds.
-#2 - Replace type for entry "foo" with "bar". Read back the value after commit.
+#1 - Create /system/dns-resolver/search entry with value 'foo'. Verify commit succeeds.
+#2 - Create entry 'foo'.
+#3 - Replace entry 'bar'. Read back the value after commit. Validate both 'foo' and 'bar' are present,
 """)
 
 	parser = argparse.ArgumentParser()
@@ -81,8 +82,12 @@ def main():
 	for search in searches:
 		print search.text
 
-	assert(len(searches)==1)
-	assert(searches[0].text=='bar')
+	assert(len(searches)==2)
+
+	result = yangcli(conn, "delete /system").xpath('./ok')
+	assert(len(ok)==1)
+	result = yangcli(conn, "commit").xpath('./ok')
+	assert(len(ok)==1)
 
 	return(0)
 sys.exit(main())

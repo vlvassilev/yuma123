@@ -148,7 +148,6 @@ date         init     comment
 #include "yang_obj.h"
 #include "yang_typ.h"
 
-
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *

@@ -364,7 +364,7 @@ static void
     invalid_identityid_error (xpath_pcb_t *pcb, const xmlChar* qname)
 {
     if (pcb->logerrors) {
-        log_error("\nError: XPath expression '%s' with invalid instance-identifier '%s'",
+        log_error("\nError: XPath expression '%s' with invalid identity param '%s'",
                   pcb->exprstr,
                   qname);
         ncx_print_errormsg(pcb->tkc,

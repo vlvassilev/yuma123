@@ -45,7 +45,7 @@ def main():
 #Description: Testcase for RFC8022 ietf-routing module.
 #Procedure:
 #1 - <edit-config> configuration as in RFC8022 Appendix D.
-#2 - <get> the /interfaces /interfaces-state /routing /routing-state and verify data is same as in RFC8022 Appendix D.
+#2 - <get-data> the /interfaces /routing and verify data is same as in RFC8022 Appendix D.
 """)
 
 	parser = argparse.ArgumentParser()

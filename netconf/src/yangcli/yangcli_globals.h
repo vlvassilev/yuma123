@@ -16,3 +16,4 @@ extern val_value_t   *mgr_cli_valset;
  */
 extern dlq_hdr_t      modlibQ;
 
+extern ncxmod_temp_progcb_t *yangcli_progcb;

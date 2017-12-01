@@ -89,6 +89,7 @@ val_value_t   *mgr_cli_valset;
  */
 dlq_hdr_t      modlibQ;
 
+ncxmod_temp_progcb_t *yangcli_progcb=NULL;
 
 #if 0
 /* true if running a script from the invocation and exiting */

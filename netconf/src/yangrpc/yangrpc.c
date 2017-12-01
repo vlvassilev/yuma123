@@ -560,11 +560,14 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     int                   ret;
     yangcli_wordexp_t     p;
 
+    ncx_clear_temp_modQ();
+
     dlq_createSQue(&savedevQ);
 
     /* create a default server control block */
     server_cb = new_server_cb(YANGCLI_DEF_SERVER, FALSE);
     if (server_cb==NULL) {
+        log_error("\n new_server_cb failed (%s)", get_error_string(res));
         return ERR_INTERNAL_PTR;
     }
     argv = mandatory_argv;
@@ -614,6 +617,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
         ret = yangcli_wordexp(extra_args, &p, 0);
         if(ret!=0) {
             perror(extra_args);
+            log_error("\n yangcli_wordexp failed (%s)", get_error_string(ERR_CMDLINE_OPT_UNKNOWN));
             return ERR_CMDLINE_OPT_UNKNOWN;
         }
         extra_argc = p.we_wordc;
@@ -630,6 +634,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);
     if (res != NO_ERR) {
+        log_error("\n process_cli_input failed (%s)", get_error_string(res));
         return res;
     }
 
@@ -642,6 +647,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     if (TRUE/*autoload*/) {
         res = load_core_schema();
         if (res != NO_ERR) {
+            log_error("\n load_core_schema failed (%s)", get_error_string(res));
             return res;
         }
     }
@@ -697,18 +703,21 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     /* discard any deviations loaded from the CLI or conf file */
     ncx_clean_save_deviationsQ(&savedevQ);
     if (res != NO_ERR) {
+        log_error("\n ncx_clean_save_deviationsQ failed (%s)", get_error_string(res));
         return res;
     }
 
     /* load the system (read-only) variables */
     res = init_system_vars(server_cb);
     if (res != NO_ERR) {
+        log_error("\n init_system_vars failed (%s)", get_error_string(res));
         return res;
     }
 
     /* load the system config variables */
     res = init_config_vars(server_cb);
     if (res != NO_ERR) {
+        log_error("\n init_config_vars failed (%s)", get_error_string(res));
         return res;
     }
 
@@ -723,6 +732,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
         res = ncxmod_find_all_modules(&modlibQ);
         log_set_debug_level(dbglevel);
         if (res != NO_ERR) {
+            log_error("\n ncxmod_find_all_modules failed (%s)", get_error_string(res));
             return res;
         }
     }
@@ -787,6 +797,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
         while(1) {
             res = ses_accept_input(scb);
             if(res!=NO_ERR) {
+                log_error("\n ses_accept failed (%s)", get_error_string(res));
                 return res;
             }
             if(mgr_ses_process_first_ready()) {
@@ -901,9 +912,20 @@ status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line,
     boolean                shut = FALSE;
     ncx_node_t             dtyp;
     char* line;
+    ses_cb_t* scb;
+    mgr_scb_t* mscb;
 
     server_cb_t* server_cb;
     server_cb = (server_cb_t*)yangrpc_cb_ptr;
+
+    scb = mgr_ses_get_scb(server_cb->mysid);
+    if (!scb) {
+        res = SET_ERROR(ERR_INTERNAL_PTR);
+        return res;
+    }
+    mscb = (mgr_scb_t *)scb->mgrcb;
+    ncx_set_temp_modQ(&mscb->temp_modQ);
+
 
     line = strdup(original_line);
 #ifdef DEBUG
@@ -1057,6 +1079,7 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
 {
     status_t res;
     ses_cb_t* scb;
+    mgr_scb_t* mscb;
     mgr_rpc_req_t         *req;
     server_cb_t* server_cb;
     server_cb = (server_cb_t*)yangrpc_cb_ptr;
@@ -1066,6 +1089,9 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
         res = SET_ERROR(ERR_INTERNAL_PTR);
         return res;
     }
+    mscb = (mgr_scb_t *)scb->mgrcb;
+    ncx_set_temp_modQ(&mscb->temp_modQ);
+
     req = mgr_rpc_new_request(scb);
     if (!req) {
         res = ERR_INTERNAL_MEM;

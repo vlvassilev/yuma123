@@ -504,8 +504,6 @@ void
         runstack_free_context(server_cb->runstack_context);
     }
 
-    ncxmod_free_program_tempdir(server_cb->temp_progcb);
-
     m__free(server_cb);
 
 }  /* free_server_cb */
@@ -558,7 +556,14 @@ server_cb_t *
 
 
     /* create the program instance temporary directory */
-    server_cb->temp_progcb = ncxmod_new_program_tempdir(&res);
+    if(yangcli_progcb==NULL) {
+        server_cb->temp_progcb = ncxmod_new_program_tempdir(&res);
+        if(res==NO_ERR && server_cb->temp_progcb!=NULL) {
+            yangcli_progcb=server_cb->temp_progcb;
+        }
+    } else {
+        server_cb->temp_progcb=yangcli_progcb;
+    }
     if (server_cb->temp_progcb == NULL || res != NO_ERR) {
         return NULL;
     }
@@ -2465,6 +2470,15 @@ status_t
 
     log_debug2("\nyangcli: Loading NCX yangcli-cli Parmset");
 
+    /* load in the NETCONF data types and RPC methods */
+    res = ncxmod_load_module(NCXMOD_NETCONF,
+                             NULL,
+                             NULL,
+                             &netconf_mod);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* load in the server boot parameter definition file */
     res = ncxmod_load_module(YANGCLI_MOD, 
                              NULL, 
@@ -2482,14 +2496,6 @@ status_t
         return res;
     }
 
-    /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_NETCONF, 
-                             NULL, 
-                             NULL,
-                             &netconf_mod);
-    if (res != NO_ERR) {
-        return res;
-    }
 
     /* load the netconf-state module to use
      * the <get-schema> operation 
@@ -4112,6 +4118,10 @@ static void
 
     /* cleanup the module library search results */
     ncxmod_clean_search_result_queue(&modlibQ);
+
+    if(yangcli_progcb!=NULL) {
+        ncxmod_free_program_tempdir(yangcli_progcb);
+    }
 
     free_aliases();
 

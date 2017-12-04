@@ -560,12 +560,11 @@ server_cb_t *
         server_cb->temp_progcb = ncxmod_new_program_tempdir(&res);
         if(res==NO_ERR && server_cb->temp_progcb!=NULL) {
             yangcli_progcb=server_cb->temp_progcb;
+        } else {
+            return NULL;
         }
     } else {
         server_cb->temp_progcb=yangcli_progcb;
-    }
-    if (server_cb->temp_progcb == NULL || res != NO_ERR) {
-        return NULL;
     }
 
     /* the name is not used yet; needed when multiple

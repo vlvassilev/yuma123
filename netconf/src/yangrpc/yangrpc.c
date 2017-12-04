@@ -388,17 +388,6 @@ status_t yangrpc_init(char* args)
         return ERR_NCX_DEF_NOT_FOUND;
     }
 
-    /* treat the connect-to-server parmset special
-     * it is saved for auto-start plus restart parameters
-     * Setup an empty parmset to hold the connect parameters
-     */
-    connect_valset = val_new_value();
-    if (connect_valset==NULL) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_init_from_template(connect_valset, obj);
-    }
-
 #if 0
     /* set the CLI handler */
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
@@ -559,8 +548,21 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     uint32                modlen;
     int                   ret;
     yangcli_wordexp_t     p;
+    obj_template_t       *obj;
 
     ncx_clear_temp_modQ();
+    ncx_clear_session_modQ();
+
+    /* new connect_valset */
+    if(connect_valset!=NULL) {
+        val_free_value(connect_valset);
+        connect_valset=NULL;
+    }
+    connect_valset = val_new_value();
+    assert(connect_valset);
+    obj = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
+    assert(obj!=NULL);
+    val_init_from_template(connect_valset, obj);
 
     dlq_createSQue(&savedevQ);
 
@@ -925,6 +927,7 @@ status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line,
     }
     mscb = (mgr_scb_t *)scb->mgrcb;
     ncx_set_temp_modQ(&mscb->temp_modQ);
+    ncx_set_session_modQ(&mscb->temp_modQ);
 
 
     line = strdup(original_line);
@@ -1091,6 +1094,7 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
     }
     mscb = (mgr_scb_t *)scb->mgrcb;
     ncx_set_temp_modQ(&mscb->temp_modQ);
+    ncx_set_session_modQ(&mscb->temp_modQ);
 
     req = mgr_rpc_new_request(scb);
     if (!req) {
@@ -1127,4 +1131,5 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
 
 void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)
 {
+    log_info("Closing session\n");
 }

@@ -1,0 +1,27 @@
+module test-multi-instance {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-multi-instance";
+  prefix tmi;
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-curent test.";
+
+  revision 2017-12-01 {
+    description
+      "Initial version";
+  }
+
+  augment "/if:interfaces/if:interface" {
+    leaf foo {
+      type string;
+    }
+  }
+}

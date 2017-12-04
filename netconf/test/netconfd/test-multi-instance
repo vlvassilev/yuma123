@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd multi-instance
+./run.sh

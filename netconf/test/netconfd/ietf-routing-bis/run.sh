@@ -4,12 +4,12 @@
 #mkdir tmp
 cd tmp
 #wget https://tools.ietf.org/id/draft-ietf-netmod-rfc8022bis-01.txt
-wget https://tools.ietf.org/id/draft-ietf-netconf-nmda-netconf-01.txt
-wget https://www.ietf.org/id/draft-ietf-netmod-revised-datastores-06.txt
+#wget https://tools.ietf.org/id/draft-ietf-netconf-nmda-netconf-01.txt
+#wget https://www.ietf.org/id/draft-ietf-netmod-revised-datastores-06.txt
 #wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
-sh rfcstrip  draft-ietf-netmod-rfc8022bis-01.txt
-sh rfcstrip  draft-ietf-netconf-nmda-netconf-01.txt
-sh rfcstrip  draft-ietf-netmod-revised-datastores-06.txt
+#sh rfcstrip  draft-ietf-netmod-rfc8022bis-01.txt
+#sh rfcstrip  draft-ietf-netconf-nmda-netconf-01.txt
+#sh rfcstrip  draft-ietf-netmod-revised-datastores-06.txt
 
 #pyang --ietf -f tree --path ../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-ipv4-unicast-routing@2017-10-14.yang
 #pyang --ietf -f tree --path ../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-ipv6-unicast-routing@2017-10-14.yang
@@ -42,6 +42,7 @@ else
   /usr/sbin/netconfd --module=iana-if-type --module=../../../../modules/ietf-draft/ietf-ip@2017-08-21.yang --modpath=.:../../../../modules/ietf:../../../../modules/ietf-draft --module=ietf-ipv4-unicast-routing@2017-10-14 --module=ietf-netconf-datastores --module=ietf-origin  --module=ietf-datastores --no-startup --validate-config-only --superuser=$USER
   /usr/sbin/netconfd --module=iana-if-type --module=../../../../modules/ietf-draft/ietf-ip@2017-08-21.yang --modpath=.:../../../../modules/ietf:../../../../modules/ietf-draft --module=ietf-ipv4-unicast-routing@2017-10-14 --module=test-ietf-routing-bis --module=ietf-netconf-datastores --module=ietf-origin  --module=ietf-datastores --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
    SERVER_PID=$!
+  cd ..
 fi
 
 sleep 3

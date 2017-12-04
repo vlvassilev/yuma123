@@ -7,8 +7,8 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   source $RUN_WITH_CONFD/confdrc
   cp *.yang tmp
   cd tmp
-  confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces.yang --yangpath /usr/share/yuma/modules/ietf
-  confdc -c /usr/share/yuma/modules/ietf/iana-if-type.yang --yangpath /usr/share/yuma/modules/ietf
+  confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf
+  confdc -c /usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf
   confdc -c ietf-interfaces-common@2017-07-03.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
   confdc -c ietf-interfaces-ethernet-like@2017-07-03.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
   confdc -c ietf-flexible-encapsulation@2017-07-04.yang --yangpath /usr/share/yuma/modules/ietf --yangpath ..
@@ -27,8 +27,8 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=./ietf-interfaces-common@2017-07-03.yang --module=./ietf-interfaces-ethernet-like@2017-07-03.yang --module=./ietf-flexible-encapsulation@2017-07-04.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --module=./example-vlans.yang --module=./composite-match.yang --modpath=./:/usr/share/yuma/modules/ --no-startup --validate-config-only --superuser=$USER
-  /usr/sbin/netconfd --module=./ietf-interfaces-common@2017-07-03.yang --module=./ietf-interfaces-ethernet-like@2017-07-03.yang --module=./ietf-flexible-encapsulation@2017-07-04.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --module=./example-vlans.yang --module=./composite-match.yang --modpath=./:/usr/share/yuma/modules/ --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=./ietf-interfaces-common@2017-07-03.yang --module=./ietf-interfaces-ethernet-like@2017-07-03.yang --module=./ietf-flexible-encapsulation@2017-07-04.yang --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --module=./example-vlans.yang --module=./composite-match.yang --modpath=./:/usr/share/yuma/modules/ --no-startup --validate-config-only --superuser=$USER
+  /usr/sbin/netconfd --module=./ietf-interfaces-common@2017-07-03.yang --module=./ietf-interfaces-ethernet-like@2017-07-03.yang --module=./ietf-flexible-encapsulation@2017-07-04.yang --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --module=./example-vlans.yang --module=./composite-match.yang --modpath=./:/usr/share/yuma/modules/ --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 

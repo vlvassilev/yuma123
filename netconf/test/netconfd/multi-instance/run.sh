@@ -2,8 +2,8 @@
 rm -rf tmp || true
 mkdir tmp
 if [ "$RUN_WITH_CONFD" != "" ] ; then
-  #not implemented for confd
-  exit 1
+  #not implemented for confd - SKIP
+  exit 77
   killall -KILL confd || true
   echo "Starting confd: $RUN_WITH_CONFD"
   source $RUN_WITH_CONFD/confdrc

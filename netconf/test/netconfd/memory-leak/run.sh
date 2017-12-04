@@ -16,7 +16,7 @@ mkdir tmp
 killall -KILL netconfd || true
 rm /tmp/ncxserver.sock || true
 #/usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
-valgrind --log-fd=1 --num-callers=100 --leak-check=full  -- /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces.yang --module=/usr/share/yuma/modules/ietf/iana-if-type.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+valgrind --log-fd=1 --num-callers=100 --leak-check=full  -- /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
 #--log-file=tmp/valgrind.log
 SERVER_PID=$!
 sleep 20

@@ -13,14 +13,15 @@ mkdir tmp
 OKS=0
 FAILS=0
 
-for module in `ls ../../../modules/ietf` ; do
+for dst in ietf ietf-draft ; do
+for module in `ls ../../../modules/${dst}` ; do
   echo $module
-  is_submodule="`head -n 1 ../../../modules/ietf/${module} | grep submodule`" || true
+  is_submodule="`head -n 1 ../../../modules/${dst}/${module} | grep submodule`" || true
   if [ "${is_submodule}" != "" ] ; then
     echo "Skip submodule: ${module}"
     continue
   fi
-  cmd="/usr/sbin/netconfd --validate-config-only --startup-error=stop --module=../../../modules/ietf/${module} --no-startup --modpath=../../../modules"
+  cmd="/usr/sbin/netconfd --validate-config-only --startup-error=stop --module=../../../modules/${dst}/${module} --no-startup --modpath=../../../modules"
   echo $cmd
   $cmd
   ret=$?
@@ -31,6 +32,7 @@ for module in `ls ../../../modules/ietf` ; do
     FAILS=$((${FAILS}+1))
     echo FAIL: $module
   fi
+done
 done
   echo OKS=$OKS
   echo FAILS=$FAILS

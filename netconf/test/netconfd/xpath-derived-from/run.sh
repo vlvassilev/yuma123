@@ -7,7 +7,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   killall -KILL confd || true
   echo "Starting confd: $RUN_WITH_CONFD"
   source $RUN_WITH_CONFD/confdrc
-  confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces.yang --yangpath /usr/share/yuma/modules/ietf -o ietf-interfaces.fxs
+  confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf -o ietf-interfaces.fxs
   confdc -c test-xpath-derived-from.yang --yangpath /usr/share/yuma/modules/ietf -o test-xpath-derived-from.fxs
   NCPORT=2022
   NCUSER=admin

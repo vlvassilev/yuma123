@@ -36,8 +36,6 @@ module ietf-netconf-notifications {
       without modification, is permitted pursuant to, and subject
       to the license terms contained in, the Simplified BSD License
 
-
-
       set forth in Section 4.c of the IETF Trust's Legal Provisions
       Relating to IETF Documents
       (http://trustee.ietf.org/license-info).
@@ -47,7 +45,7 @@ module ietf-netconf-notifications {
 
    revision "2012-02-06" {
      description
-       "Initial version. Errata 3957 added.";
+       "Initial version.";
      reference
        "RFC 6470: NETCONF Base Notifications";
    }
@@ -80,13 +78,6 @@ module ietf-netconf-notifications {
     }
   }
 
-
-
-
-
-
-
-
    grouping changed-by-parms {
     description
       "Common parameters to identify the source
@@ -117,7 +108,6 @@ module ietf-netconf-notifications {
     } // container changed-by-parms
   }
 
-
   notification netconf-config-change {
     description
       "Generated when the NETCONF server detects that the
@@ -131,10 +121,6 @@ module ietf-netconf-notifications {
        boot process for the device.";
 
     uses changed-by-parms;
-
-
-
-
 
     leaf datastore {
       type enumeration {
@@ -180,11 +166,6 @@ module ietf-netconf-notifications {
     } // list edit
   } // notification netconf-config-change
 
-
-
-
-
-
   notification netconf-capability-change {
     description
       "Generated when the NETCONF server detects that
@@ -220,7 +201,6 @@ module ietf-netconf-notifications {
     }
   } // notification netconf-capability-change
 
-
   notification netconf-session-start {
     description
       "Generated when a NETCONF server detects that a
@@ -230,9 +210,6 @@ module ietf-netconf-notifications {
        the session.";
     uses common-session-parms;
   } // notification netconf-session-start
-
-
-
 
   notification netconf-session-end {
     description
@@ -281,8 +258,6 @@ module ietf-netconf-notifications {
              messages.";
         }
 
-
-
         enum "bad-hello" {
           description
             "The client's <hello> message was invalid.";
@@ -298,7 +273,6 @@ module ietf-netconf-notifications {
     }
   } // notification netconf-session-end
 
-
   notification netconf-confirmed-commit {
     description
       "Generated when a NETCONF server detects that a
@@ -309,7 +283,7 @@ module ietf-netconf-notifications {
       "RFC 6241, Section 8.4";
 
     uses common-session-parms {
-      when "confirm-event != 'timeout'";
+      when "../confirm-event != 'timeout'";
     }
 
     leaf confirm-event {
@@ -331,7 +305,6 @@ module ietf-netconf-notifications {
              The common session parameters will not be present
              in this sub-mode.";
         }
-
         enum "extend" {
           description
             "The confirmed-commit timeout has been extended,

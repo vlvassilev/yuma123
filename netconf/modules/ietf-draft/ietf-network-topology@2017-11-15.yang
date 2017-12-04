@@ -1,13 +1,23 @@
 module ietf-network-topology {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-network-topology";
-  prefix lnk;
+  prefix nt;
 
   import ietf-inet-types {
     prefix inet;
+    reference
+      "RFC 6991";
   }
   import ietf-network {
-    prefix nd;
+    prefix nw;
+    reference
+      "draft-ietf-i2rs-yang-network-topo-18
+      NOTE TO RFC EDITOR:
+      (1) Please replace above reference to
+      draft-ietf-i2rs-yang-network-topo-18 with RFC
+      number when published (i.e. RFC xxxx).
+      (2) Please replace the date in the revision statement with the
+       date of publication when published.";
   }
 
   organization
@@ -17,20 +27,14 @@ module ietf-network-topology {
     "WG Web:    <http://tools.ietf.org/wg/i2rs/>
      WG List:   <mailto:i2rs@ietf.org>
 
-     WG Chair:  Susan Hares
-                <mailto:shares@ndzh.com>
-
-     WG Chair:  Russ White
-                <mailto:russ@riw.us>
-
      Editor:    Alexander Clemm
-                <mailto:alex@sympotech.com>
+                <mailto:ludwig@clemm.org>
 
      Editor:    Jan Medved
                 <mailto:jmedved@cisco.com>
 
      Editor:    Robert Varga
-                <mailto:robert.varga@pantheon.sk>
+                <mailto:robert.varga@pantheon.tech>
 
      Editor:    Nitin Bahadur
                 <mailto:nitin_bahadur@yahoo.com>
@@ -39,14 +43,14 @@ module ietf-network-topology {
                 <mailto:hari@packetdesign.com>
 
      Editor:    Xufeng Liu
-                <mailto:xliu@kuatrotech.com>";
+                <mailto:Xufeng_Liu@jabil.com>";
 
   description
     "This module defines a common base model for network topology,
-     augmenting the base network model with links to connect nodes,
-     as well as termination points to terminate links on nodes.
+     augmenting the base network data model with links to connect
+     nodes, as well as termination points to terminate links on nodes.
 
-     Copyright (c) 2016 IETF Trust and the persons identified as
+     Copyright (c) 2017 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -57,21 +61,21 @@ module ietf-network-topology {
      (http://trustee.ietf.org/license-info).
 
      This version of this YANG module is part of
-     draft-ietf-i2rs-yang-network-topo-09;
+     draft-ietf-i2rs-yang-network-topo-18;
      see the RFC itself for full legal notices.
 
      NOTE TO RFC EDITOR: Please replace above reference to
-     draft-ietf-i2rs-yang-network-topo-09 with RFC
+     draft-ietf-i2rs-yang-network-topo-18 with RFC
      number when published (i.e. RFC xxxx).";
 
-  revision 2016-11-30 {
+  revision 2017-11-15 {
     description
       "Initial revision.
        NOTE TO RFC EDITOR: Please replace the following reference
-       to draft-ietf-i2rs-yang-network-topo-09 with
+       to draft-ietf-i2rs-yang-network-topo-18 with
        RFC number when published (i.e. RFC xxxx).";
     reference
-      "draft-ietf-i2rs-yang-network-topo-09";
+      "draft-ietf-i2rs-yang-network-topo-18";
   }
 
   typedef link-id {
@@ -82,7 +86,7 @@ module ietf-network-topology {
        will be up to the implementation.
        The identifier SHOULD be chosen such that the same link in a
        real network topology will always be identified through the
-       same identifier, even if the model is instantiated in
+       same identifier, even if the data model is instantiated in
            separate datastores. An implementation MAY choose to capture
        semantics in the identifier, for example to indicate the type
        of link and/or the type of topology that the link is a part
@@ -97,20 +101,22 @@ module ietf-network-topology {
        will be up to the implementation.
        The identifier SHOULD be chosen such that the same termination
        point in a real network topology will always be identified
-       through the same identifier, even if the model is instantiated
-       in separate datastores. An implementation MAY choose to
-       capture semantics in the identifier, for example to indicate
-       the type of termination point and/or the type of node
+       through the same identifier, even if the data model is
+       instantiated in separate datastores. An implementation MAY
+       choose to capture semantics in the identifier, for example to
+       indicate the type of termination point and/or the type of node
        that contains the termination point.";
   }
 
   grouping link-ref {
     description
-      "References a link in a specific network.";
+      "This grouping can be used to reference a link in a specific
+       network.  While it is not used in this module, it is defined
+       here for the convenience of augmenting modules.";
     leaf link-ref {
       type leafref {
-        path "/nd:networks/nd:network[nd:network-id=current()/../"+
-          "network-ref]/lnk:link/lnk:link-id";
+        path "/nw:networks/nw:network[nw:network-id=current()/../"+
+          "network-ref]/nt:link/nt:link-id";
         require-instance false;
       }
       description
@@ -118,17 +124,19 @@ module ietf-network-topology {
          (This type should not be used for relative references.
          In such a case, a relative path should be used instead.)";
     }
-    uses nd:network-ref;
+    uses nw:network-ref;
   }
 
   grouping tp-ref {
     description
-      "References a termination point in a specific node.";
+      "This grouping can be used to references a termination point
+       in a specific node.  While it is not used in this module, it
+       is defined here for the convenience of augmenting modules.";
     leaf tp-ref {
       type leafref {
-        path "/nd:networks/nd:network[nd:network-id=current()/../"+
-          "network-ref]/nd:node[nd:node-id=current()/../"+
-          "node-ref]/lnk:termination-point/lnk:tp-id";
+        path "/nw:networks/nw:network[nw:network-id=current()/../"+
+          "network-ref]/nw:node[nw:node-id=current()/../"+
+          "node-ref]/nt:termination-point/nt:tp-id";
         require-instance false;
       }
       description
@@ -136,12 +144,12 @@ module ietf-network-topology {
          (This type should not be used for relative references.
          In such a case, a relative path should be used instead.)";
     }
-    uses nd:node-ref;
+    uses nw:node-ref;
   }
 
-  augment "/nd:networks/nd:network" {
+  augment "/nw:networks/nw:network" {
     description
-      "Add links to the network model.";
+      "Add links to the network data model.";
     list link {
       key "link-id";
       description
@@ -154,17 +162,20 @@ module ietf-network-topology {
          Therefore, in order to ensure that we would always know
          to distinguish between links, every link is identified by
          a dedicated link identifier.  Note that a link models a
-         point-to-point link, not a multipoint link.
-         Layering dependencies on links in underlay topologies are
-         not represented, as the layering information of nodes and of
-         termination points is sufficient.";
+         point-to-point link, not a multipoint link.";
+      leaf link-id {
+        type link-id;
+        description
+          "The identifier of a link in the topology.
+           A link is specific to a topology to which it belongs.";
+      }
       container source {
         description
           "This container holds the logical source of a particular
            link.";
         leaf source-node {
           type leafref {
-            path "../../../nd:node/nd:node-id";
+            path "../../../nw:node/nw:node-id";
             require-instance false;
           }
           description
@@ -172,7 +183,7 @@ module ietf-network-topology {
         }
         leaf source-tp {
           type leafref {
-            path "../../../nd:node[nd:node-id=current()/../"+
+            path "../../../nw:node[nw:node-id=current()/../"+
               "source-node]/termination-point/tp-id";
             require-instance false;
           }
@@ -187,7 +198,7 @@ module ietf-network-topology {
            particular link.";
         leaf dest-node {
           type leafref {
-            path "../../../nd:node/nd:node-id";
+            path "../../../nw:node/nw:node-id";
           require-instance false;
           }
           description
@@ -196,7 +207,7 @@ module ietf-network-topology {
         }
         leaf dest-tp {
           type leafref {
-            path "../../../nd:node[nd:node-id=current()/../"+
+            path "../../../nw:node[nw:node-id=current()/../"+
               "dest-node]/termination-point/tp-id";
             require-instance false;
           }
@@ -205,12 +216,6 @@ module ietf-network-topology {
              terminates the link.";
         }
       }
-      leaf link-id {
-        type link-id;
-        description
-          "The identifier of a link in the topology.
-           A link is specific to a topology to which it belongs.";
-      }
       list supporting-link {
         key "network-ref link-ref";
         description
@@ -218,7 +223,7 @@ module ietf-network-topology {
            is dependent on.";
         leaf network-ref {
           type leafref {
-            path "../../../nd:supporting-network/nd:network-ref";
+            path "../../../nw:supporting-network/nw:network-ref";
           require-instance false;
           }
           description
@@ -227,7 +232,7 @@ module ietf-network-topology {
         }
         leaf link-ref {
           type leafref {
-            path "/nd:networks/nd:network[nd:network-id=current()/"+
+            path "/nw:networks/nw:network[nw:network-id=current()/"+
               "../network-ref]/link/link-id";
             require-instance false;
           }
@@ -240,7 +245,7 @@ module ietf-network-topology {
       }
     }
   }
-  augment "/nd:networks/nd:network/nd:node" {
+  augment "/nw:networks/nw:network/nw:node" {
     description
       "Augment termination points which terminate links.
        Termination points can ultimately be mapped to interfaces.";
@@ -270,7 +275,7 @@ module ietf-network-topology {
            implementing system.";
         leaf network-ref {
           type leafref {
-            path "../../../nd:supporting-node/nd:network-ref";
+            path "../../../nw:supporting-node/nw:network-ref";
           require-instance false;
           }
           description
@@ -279,7 +284,7 @@ module ietf-network-topology {
         }
         leaf node-ref {
           type leafref {
-            path "../../../nd:supporting-node/nd:node-ref";
+            path "../../../nw:supporting-node/nw:node-ref";
           require-instance false;
           }
           description
@@ -288,8 +293,8 @@ module ietf-network-topology {
         }
         leaf tp-ref {
           type leafref {
-            path "/nd:networks/nd:network[nd:network-id=current()/"+
-              "../network-ref]/nd:node[nd:node-id=current()/../"+
+            path "/nw:networks/nw:network[nw:network-id=current()/"+
+              "../network-ref]/nw:node[nw:node-id=current()/../"+
               "node-ref]/termination-point/tp-id";
             require-instance false;
           }

@@ -230,8 +230,6 @@ module ietf-interfaces {
            IF-MIB.ifAdminStatus to 'up' or 'down' after an ifEntry
            has been initialized, as described in RFC 2863.
 
-
-
            Changes in this leaf in the 'running' datastore are
            reflected in ifAdminStatus, but if ifAdminStatus is
            changed over SNMP, this leaf is not affected.";
@@ -275,10 +273,6 @@ module ietf-interfaces {
 
     list interface {
       key "name";
-
-
-
-
 
       description
         "The list of interfaces on the device.
@@ -325,8 +319,6 @@ module ietf-interfaces {
             description
               "Not ready to pass packets and not in some test mode.";
           }
-
-
 
           enum testing {
             value 3;
@@ -423,7 +415,6 @@ module ietf-interfaces {
            contains a Media Access Control (MAC) address.  The
            interface's media-specific modules must define the bit
 
-
            and byte ordering and the format of the value of this
            object.  For interfaces that do not have such an address
            (e.g., a serial line), this node is not present.";
@@ -463,14 +454,6 @@ module ietf-interfaces {
           "RFC 2863: The Interfaces Group MIB -
                      ifSpeed, ifHighSpeed";
       }
-
-
-
-
-
-
-
-
 
       container statistics {
         description
@@ -516,9 +499,6 @@ module ietf-interfaces {
           reference
             "RFC 2863: The Interfaces Group MIB - ifHCInUcastPkts";
         }
-
-
-
 
         leaf in-broadcast-pkts {
           type yang:counter64;
@@ -567,7 +547,6 @@ module ietf-interfaces {
              other times as indicated by the value of
              'discontinuity-time'.";
 
-
           reference
             "RFC 2863: The Interfaces Group MIB - ifInDiscards";
         }
@@ -611,10 +590,6 @@ module ietf-interfaces {
           reference
             "RFC 2863: The Interfaces Group MIB - ifInUnknownProtos";
         }
-
-
-
-
 
         leaf out-octets {
           type yang:counter64;
@@ -663,7 +638,6 @@ module ietf-interfaces {
                        ifHCOutBroadcastPkts";
         }
 
-
         leaf out-multicast-pkts {
           type yang:counter64;
           description
@@ -708,9 +682,6 @@ module ietf-interfaces {
              For character-oriented or fixed-length interfaces, the
              number of outbound transmission units that could not be
              transmitted because of errors.
-
-
-
 
              Discontinuities in the value of this counter can occur
              at re-initialization of the management system, and at

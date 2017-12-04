@@ -21,12 +21,6 @@ module ietf-system {
   organization
     "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
 
-
-
-
-
-
-
   contact
     "WG Web:   <http://tools.ietf.org/wg/netmod/>
      WG List:  <mailto:netmod@ietf.org>
@@ -72,9 +66,6 @@ module ietf-system {
       "RFC 7317: A YANG Data Model for System Management";
   }
 
-
-
-
  /*
   * Typedefs
   */
@@ -116,12 +107,6 @@ module ietf-system {
       "Indicates that the device supports configuration of
        local user authentication.";
   }
-
-
-
-
-
-
 
   feature radius-authentication {
     if-feature radius;
@@ -170,7 +155,6 @@ module ietf-system {
        any port other than the default port.";
   }
 
-
   /*
    * Identities
    */
@@ -211,13 +195,6 @@ module ietf-system {
     reference
       "RFC 2865: Remote Authentication Dial In User Service (RADIUS)";
   }
-
-
-
-
-
-
-
 
   identity radius-chap {
     base radius-authentication-type;
@@ -505,8 +482,6 @@ module ietf-system {
       }
     }
 
-
-
     container radius {
       if-feature radius;
 
@@ -551,9 +526,6 @@ module ietf-system {
                 description
                   "The address of the RADIUS server.";
               }
-
-
-
 
               leaf authentication-port {
                 type inet:port-number;
@@ -600,8 +572,6 @@ module ietf-system {
              response from each RADIUS server before trying with a
              different server.";
         }
-
-
 
         leaf attempts {
           type uint8 {
@@ -687,17 +657,6 @@ module ietf-system {
              description
                "An arbitrary name for the SSH key.";
            }
-
-
-
-
-
-
-
-
-
-
-
 
            leaf algorithm {
              type string;
@@ -793,7 +752,6 @@ module ietf-system {
         description
           "The current system date and time.";
       }
-
 
       leaf boot-datetime {
         type yang:date-and-time;

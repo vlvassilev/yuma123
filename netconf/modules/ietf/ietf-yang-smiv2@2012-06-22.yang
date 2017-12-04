@@ -74,10 +74,6 @@ module ietf-yang-smiv2 {
      "RFC 2579: Textual Conventions for SMIv2";
   }
 
-
-
-
-
   extension max-access {
     argument "access";
     description
@@ -122,9 +118,6 @@ module ietf-yang-smiv2 {
     reference
      "RFC 2578: Structure of Management Information Version 2 (SMIv2)";
   }
-
-
-
 
   extension oid {
     argument "value";

@@ -44,7 +44,6 @@ module ietf-netconf-with-defaults {
 
      This version of this YANG module is part of RFC 6243; see
      the RFC itself for full legal notices.";
-
    revision 2011-06-01 {
      description
        "Initial version.";
@@ -93,7 +92,6 @@ module ietf-netconf-with-defaults {
      description
        "Contains the <with-defaults> parameter for control
         of defaults in NETCONF retrieval operations.";
-
      leaf with-defaults {
        description
          "The explicit defaults processing mode requested.";

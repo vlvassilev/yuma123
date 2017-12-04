@@ -110,13 +110,6 @@ module iana-crypt-hash {
     reference "FIPS.180-4.2012: Secure Hash Standard (SHS)";
   }
 
-
-
-
-
-
-
-
   feature crypt-hash-sha-512 {
     description
       "Indicates that the device supports the SHA-512

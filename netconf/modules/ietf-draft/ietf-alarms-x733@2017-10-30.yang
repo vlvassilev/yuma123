@@ -1,5 +1,4 @@
 module ietf-alarms-x733 {
-
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-alarms-x733";
   prefix x733;
@@ -9,11 +8,11 @@ module ietf-alarms-x733 {
   }
 
   organization
-    "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+    "IETF CCAMP Working Group";
 
   contact
-    "WG Web:   <http://tools.ietf.org/wg/netmod/>
-     WG List:  <mailto:netmod@ietf.org>
+    "WG Web:   <http://tools.ietf.org/wg/ccamp>
+     WG List:  <mailto:ccamp@ietf.org>
 
      Editor:   Stefan Vallin
                <mailto:stefan@wallan.se>
@@ -23,7 +22,7 @@ module ietf-alarms-x733 {
 
   description
     "This module augments the ietf-alarms module with X.733 mapping
-      information.  The following structures are augemented with
+      information.  The following structures are augmented with
       event type and probable cause:
 
       1) alarm inventory: all possible alarms.
@@ -40,7 +39,7 @@ module ietf-alarms-x733 {
        - Open Systems Interconnection
        - System Management: Alarm Reporting Function";
 
-  revision 2016-10-05 {
+  revision 2017-10-30 {
     description
       "Initial revision.";
     reference
@@ -224,7 +223,7 @@ module ietf-alarms-x733 {
   }
 
   /*
-   * Add X.733 parameters to the alarm defintions, alarms,
+   * Add X.733 parameters to the alarm definitions, alarms,
    * and notification.
    */
 
@@ -234,13 +233,11 @@ module ietf-alarms-x733 {
 
     uses x733-alarm-definition-parameters;
   }
-
   augment "/al:alarms/al:control" {
     description
       "Add X.733 mapping capabilities. ";
     list x733-mapping {
       if-feature configure-x733-mapping;
-
       key "alarm-type-id alarm-type-qualifier-match";
       description
         "This list allows a management application to control the

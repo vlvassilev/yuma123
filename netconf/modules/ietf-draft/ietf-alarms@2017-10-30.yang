@@ -1,4 +1,4 @@
-  module ietf-alarms {
+module ietf-alarms {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-alarms";
   prefix al;
@@ -8,11 +8,11 @@
   }
 
   organization
-    "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+    "IETF CCAMP Working Group";
 
   contact
-    "WG Web:   <http://tools.ietf.org/wg/netmod/>
-     WG List:  <mailto:netmod@ietf.org>
+    "WG Web:   <http://tools.ietf.org/wg/ccamp>
+     WG List:  <mailto:ccamp@ietf.org>
 
      Editor:   Stefan Vallin
                <mailto:stefan@wallan.se>
@@ -55,6 +55,7 @@
 
      is an alarm of type 'link-alarm' on the resource
      'GigabitEthernet0/25'.
+
      Alarm types are identified using YANG identities and an optional
      string-based qualifier.  The string-based qualifier allows for
      dynamic extension of the statically defined alarm types.  Alarm
@@ -90,7 +91,7 @@
      Administrative actions like removing closed alarms older than a
      given time is supported.";
 
-  revision 2016-10-27 {
+  revision 2017-10-30 {
     description
       "Initial revision.";
     reference
@@ -294,6 +295,7 @@
            state by the server as the last entry in the
            operator-state-change list.";
       }
+
     }
     description
       "Operator states on an alarm.  The 'closed' state indicates
@@ -416,8 +418,8 @@
          to other resources that might be impacted, these resources
          can be listed in this leaf-list.  In this way the system can
          create one alarm instead of several.  For example, if an
-         interface has an alarm, the 'impacted-resource' can reference
-         the aggregated port channels.";
+         interface has an alarm, the 'impacted-resource' can
+         reference the aggregated port channels.";
     }
     leaf-list root-cause-resource {
       type resource;
@@ -429,7 +431,10 @@
          create one alarm instead of several.  An example might be a
          logging system (alarm resource) that fails, the alarm can
          reference the file-system in the 'root-cause-resource'
-         leaf-list.";
+         leaf-list. Note that the intended use is not to also send an
+         an alarm with the root-cause-resource as alarming resource.
+         The root-cause-resource leaf list is a hint and should not
+         also generate an alarm for the same problem.";
     }
   }
 
@@ -532,6 +537,7 @@
       mandatory true;
       description
         "The last severity of the alarm.
+
          If an alarm was raised with severity 'warning', but later
          changed to 'major', this leaf will show 'major'.";
      }
@@ -571,7 +577,6 @@
       uses alarm-state-change-parameters;
     }
   }
-
 
   /*
    * The /alarms data tree
@@ -669,12 +674,11 @@
       config false;
       description
         "This list contains all possible alarm types for the system.
-         If the system knows for wich resources a a specific alarm
+         If the system knows for which resources a a specific alarm
          type can appear, this is also identified in the inventory.
          The list also tells if each alarm type has a corresponding
          clear state.  The inventory shall only contain concrete
          alarm types.
-
          The alarm inventory MUST be updated by the system when new
          alarms can appear.  This can be the case when installing new
          software modules or inserting new card types.  A
@@ -721,6 +725,19 @@
              to missing instrumentation or that there is no logical
              corresponding clear state.";
         }
+        leaf-list severity-levels {
+          type severity;
+          description
+            "This leaf-list indicates the possible severity levels of
+             this alarm type. Note well that 'clear' is not part of
+             the severity type. In general, the severity level should
+             be defined by the instrumentation based on dynamic state
+             and not defined statically by the alarm type in order to
+             provide relevant severity level based on dynamic state
+             and context. However most alarm types have a defined set
+             of possible severity levels and this should be provided
+             here.";
+        }
         leaf description {
           type string;
           mandatory true;
@@ -755,35 +772,35 @@
           type yang:gauge32;
           description
             "For this severity level, the number of alarms that are
-          cleared.";
+             cleared.";
         }
         leaf cleared-not-closed {
           if-feature operator-actions;
           type yang:gauge32;
           description
             "For this severity level, the number of alarms that are
-           cleared but not closed.";
+             cleared but not closed.";
         }
         leaf cleared-closed {
           if-feature operator-actions;
           type yang:gauge32;
           description
             "For this severity level, the number of alarms that are
-           cleared and closed.";
+             cleared and closed.";
         }
         leaf not-cleared-closed {
           if-feature operator-actions;
           type yang:gauge32;
           description
             "For this severity level, the number of alarms that are
-           not cleared but closed.";
+             not cleared but closed.";
         }
         leaf not-cleared-not-closed {
           if-feature operator-actions;
           type yang:gauge32;
           description
             "For this severity level, the number of alarms that are
-           not cleared and not closed.";
+             not cleared and not closed.";
         }
       }
       leaf shelves-active {
@@ -1174,5 +1191,3 @@
     uses operator-parameters;
   }
 }
-
-

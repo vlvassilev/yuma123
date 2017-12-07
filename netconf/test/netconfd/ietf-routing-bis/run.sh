@@ -39,8 +39,8 @@ else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
 
-  /usr/sbin/netconfd --module=iana-if-type --module=../../../../modules/ietf-draft/ietf-ip@2017-08-21.yang --modpath=.:../../../../modules/ietf:../../../../modules/ietf-draft --module=ietf-ipv4-unicast-routing@2017-10-14 --module=ietf-netconf-datastores --module=ietf-origin  --module=ietf-datastores --no-startup --validate-config-only --superuser=$USER
-  /usr/sbin/netconfd --module=iana-if-type --module=../../../../modules/ietf-draft/ietf-ip@2017-08-21.yang --modpath=.:../../../../modules/ietf:../../../../modules/ietf-draft --module=ietf-ipv4-unicast-routing@2017-10-14 --module=test-ietf-routing-bis --module=ietf-netconf-datastores --module=ietf-origin  --module=ietf-datastores --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=iana-if-type --module=ietf-ip --module=ietf-routing --module=ietf-ipv4-unicast-routing --no-startup --validate-config-only --superuser=$USER
+  /usr/sbin/netconfd --module=iana-if-type --module=ietf-ip --module=ietf-routing --module=ietf-ipv4-unicast-routing --module=test-ietf-routing-bis --no-startup --superuser=$USER 2>&1 1>server.log &
    SERVER_PID=$!
   cd ..
 fi

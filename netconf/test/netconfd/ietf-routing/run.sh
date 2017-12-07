@@ -19,8 +19,8 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=iana-if-type --modpath=../../../modules/ietf --module=../../../modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang --no-startup --validate-config-only --superuser=$USER
-  /usr/sbin/netconfd --module=iana-if-type --modpath=../../../modules/ietf --module=ietf-ip --module=../../../modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang --module=test-ietf-routing --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=iana-if-type --module=ietf-ip --module=ietf-ipv4-unicast-routing@2016-11-04 --no-startup --validate-config-only --superuser=$USER
+  /usr/sbin/netconfd --module=iana-if-type --module=ietf-ip --module=ietf-ipv4-unicast-routing@2016-11-04 --module=test-ietf-routing --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 

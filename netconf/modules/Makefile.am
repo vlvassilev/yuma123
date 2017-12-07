@@ -18,24 +18,32 @@ $(top_srcdir)/netconf/modules/ietf/ietf-ipv6-router-advertisements@2016-11-04.ya
 $(top_srcdir)/netconf/modules/ietf/ietf-ipv6-unicast-routing@2016-11-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang
 
+#$(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang
+#$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang
+
+
 ietf_patched_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf@2011-06-01.yang  \
-$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.yang
+$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.yang \
+$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-datastores@2017-08-24.yang
 
 ietf_draft_yang_DATA = \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-network@2017-11-15.yang  \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology@2017-11-15.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733@2017-10-30.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms@2017-10-30.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network.yang  \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-origin.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-datastores.yang
+
+#$(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-datastores.yang
+
 
 ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \
 $(top_srcdir)/netconf/modules/ietf-derived/notifications.yang
 
 ietf_expired_yang_DATA = \
-$(top_srcdir)/netconf/modules/ietf-expired/ietf-direct-must-augment-extension@2015-06-12.yang \
-$(top_srcdir)/netconf/modules/ietf-expired/ietf-inet-types@2010-09-24.yang \
-$(top_srcdir)/netconf/modules/ietf-expired/ietf-yang-types@2010-09-24.yang
+$(top_srcdir)/netconf/modules/ietf-expired/ietf-direct-must-augment-extension@2015-06-12.yang
 
 netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \

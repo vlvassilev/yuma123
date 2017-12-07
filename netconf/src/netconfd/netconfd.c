@@ -80,6 +80,12 @@ static status_t load_base_schema (void)
         return res;
     }
 
+    /* load in the NMDA NETCONF data types and RPC methods */
+    res = ncxmod_load_module( "ietf-netconf-datastores", NULL, NULL, NULL );
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* load in the server boot parameter definition file */
     res = ncxmod_load_module( NCXMOD_NETCONFD_EX, NULL, NULL, NULL );
     if (res != NO_ERR) {

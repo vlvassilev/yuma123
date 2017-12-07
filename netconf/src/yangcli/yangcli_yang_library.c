@@ -102,7 +102,7 @@ status_t make_get_yang_library_modules_state_reqdata(server_cb_t *server_cb,
     assert(filter_obj!=NULL);
 
 
-    res = ncxmod_load_module ("ietf-yang-library", NULL, NULL, &ietf_yang_library_mod);
+    res = ncxmod_load_module ("ietf-yang-library", "2016-06-21", NULL, &ietf_yang_library_mod);
     assert(res==NO_ERR);
 
     modules_state_obj = ncx_find_object(ietf_yang_library_mod, "modules-state");

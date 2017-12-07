@@ -285,7 +285,7 @@ status_t
 
     /* load the module */
     res = ncxmod_load_module("ietf-yang-library", 
-                             NULL, 
+                             "2016-06-21",
                              &agt_profile->agt_savedevQ,
                              &ietf_yang_library_mod);
     assert(res == NO_ERR);

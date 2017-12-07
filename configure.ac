@@ -21,6 +21,15 @@ AC_SUBST(ietf_yangdir)
 ietf_draft_yangdir="$prefix/share/yuma/modules/ietf-draft"
 AC_SUBST(ietf_draft_yangdir)
 
+ietf_patched_yangdir="$prefix/share/yuma/modules/ietf-patched"
+AC_SUBST(ietf_patched_yangdir)
+
+ietf_derived_yangdir="$prefix/share/yuma/modules/ietf-derived"
+AC_SUBST(ietf_derived_yangdir)
+
+ietf_expired_yangdir="$prefix/share/yuma/modules/ietf-expired"
+AC_SUBST(ietf_expired_yangdir)
+
 netconfcentral_yangdir="$prefix/share/yuma/modules/netconfcentral"
 AC_SUBST(netconfcentral_yangdir)
 

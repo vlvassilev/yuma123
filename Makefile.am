@@ -122,7 +122,8 @@ $(top_srcdir)/netconf/src/agt/agt_top.h \
 $(top_srcdir)/netconf/src/agt/agt_cli.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_complete.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_validate.h \
-$(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.h
+$(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.h \
+$(top_srcdir)/netconf/src/agt/agt_nmda.h
 
 mgr_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/mgr/mgr.h \

@@ -430,6 +430,7 @@ status_t val123_merge_cplx(val_value_t* dst, val_value_t* src)
     return NO_ERR;
 }
 
+
 obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
 {
     obj_template_t* parent_obj;
@@ -640,3 +641,33 @@ val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_ob
     }
     return parent_select_val;
 } /* val123_select_obj */
+
+void val123_devirtualize(val_value_t* val)
+{
+    status_t res;
+    val_value_t* child_val;
+    if(val_is_virtual(val)) {
+        val_value_t* real_val;
+        val_value_t* copy_val;
+
+        real_val = val_get_virtual_value(NULL, val, &res);
+        copy_val = val_clone(real_val); /* needed since val_replace starts by destroying the val->virtualval of the destination */
+        val_replace(copy_val, val);
+        val_free_value(copy_val);
+    }
+
+    for(child_val = val_get_first_child(val);
+        child_val != NULL;
+        child_val = val_get_next_child(child_val)) {
+        val123_devirtualize(child_val);
+    }
+}
+
+val_value_t* val123_clone_real(val_value_t* val)
+{
+    val_value_t* val_cloned;
+    val_cloned = val_clone(val);
+    assert(val_cloned);
+    val123_devirtualize(val_cloned);
+    return val_cloned;
+}

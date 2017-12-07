@@ -21,23 +21,24 @@
 #include "rpc.h"
 #include "val.h"
 #include "val123.h"
+#include "agt_nmda.h"
 
 /* module static variables */
 static ncx_module_t *ietf_interfaces_mod;
 static ncx_module_t *ietf_ip_mod;
 static ncx_module_t *ietf_routing_mod;
-static obj_template_t* interfaces_state_obj;
+static obj_template_t* interfaces_obj;
 
-/* Registered callback functions: get_interfaces_state */
+/* Registered callback functions: get_system_cfg_interfaces */
 
 static status_t
-    get_interfaces_state(ses_cb_t *scb,
+    get_system_cfg_interfaces(ses_cb_t *scb,
                          getcb_mode_t cbmode,
                          val_value_t *vir_val,
                          val_value_t *dst_val)
 {
     status_t res = NO_ERR;
-    res = val_set_cplxval_obj(dst_val,dst_val->obj,"<interfaces-state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\
+    res = val_set_cplxval_obj(dst_val,dst_val->obj,"<interfaces xmlns=\"urn:ietf:params:xml:ns:yang:ietf-interfaces\">\
       <interface>\
         <name>eth0</name>\
         <description>Uplink to ISP.</description>\
@@ -54,7 +55,7 @@ static status_t
           </address>\
         </ipv4>\
       </interface>\
-    </interfaces-state>");
+    </interfaces>");
 
     assert(res == NO_ERR);
     return res;
@@ -81,39 +82,37 @@ status_t
         return res;
     }
 
-    interfaces_state_obj = ncx_find_object(
+    interfaces_obj = ncx_find_object(
         ietf_interfaces_mod,
-        "interfaces-state");
-    assert(interfaces_state_obj != NULL);
+        "interfaces");
+    assert(interfaces_obj != NULL);
     return res;
 }
 
 status_t y_test_ietf_routing_bis_init2(void)
 {
     status_t res;
-    cfg_template_t* runningcfg;
-    val_value_t* interfaces_state_val;
+    val_value_t* root_system_val;
+    val_value_t* interfaces_val;
 
     res = NO_ERR;
 
-    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    if (!runningcfg || !runningcfg->root) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    root_system_val = agt_nmda_get_root_system();
+    assert(root_system_val);
 
-    interfaces_state_val = val_find_child(runningcfg->root,
+    interfaces_val = val_find_child(root_system_val,
                                           "ietf-interfaces",
-                                          "interfaces-state");
-    assert(interfaces_state_val==NULL);
+                                          "interfaces");
+    assert(interfaces_val==NULL);
 
-    interfaces_state_val = val_new_value();
-    assert(interfaces_state_val);
+    interfaces_val = val_new_value();
+    assert(interfaces_val);
 
-    val_init_virtual(interfaces_state_val,
-                     get_interfaces_state,
-                     interfaces_state_obj);
+    val_init_virtual(interfaces_val,
+                     get_system_cfg_interfaces,
+                     interfaces_obj);
 
-    val_add_child(interfaces_state_val, runningcfg->root);
+    val_add_child(interfaces_val, root_system_val);
 
     return NO_ERR;
 }

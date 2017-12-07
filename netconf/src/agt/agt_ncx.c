@@ -38,6 +38,7 @@ date         init     comment
 #include "agt_cfg.h"
 #include "agt_cli.h"
 #include "agt_ncx.h"
+#include "agt_nmda.h"
 #include "agt_rpc.h"
 #include "agt_rpcerr.h"
 #include "agt_ses.h"
@@ -354,6 +355,122 @@ static status_t
     return NO_ERR;
 
 } /* get_validate */
+
+/********************************************************************
+* FUNCTION get_data_validate
+*
+* get_data : validate params callback
+*
+* INPUTS:
+*    see agt/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    get_data_validate(ses_cb_t *scb,
+                  rpc_msg_t *msg,
+                  xml_node_t *methnode)
+{
+    cfg_template_t     *source;
+    val_value_t        *testval;
+    status_t            res, res2;
+    boolean             empty_callback = FALSE;
+    static cfg_template_t *operational_cfg=NULL;
+
+
+    if(operational_cfg==NULL) {
+        operational_cfg = cfg_new_template("operational", 1000 /*dummy cfg_id*/);
+        assert(operational_cfg);
+        operational_cfg->root = agt_nmda_get_root_operational();
+
+    }
+    /* TODO set to the configuration datastore selected with datastore if not operational*/
+    source = operational_cfg;
+
+#if 0
+    /* check if the <running> config is ready to read */
+    source = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (!source) {
+        res = ERR_NCX_OPERATION_FAILED;
+    } else {
+        res = cfg_ok_to_read(source);
+    }
+    if (res != NO_ERR) {
+        agt_record_error(scb,
+                         &msg->mhdr,
+                         NCX_LAYER_OPERATION,
+                         res,
+                         methnode,
+                         NCX_NT_NONE,
+                         NULL,
+                         NCX_NT_NONE,
+                         NULL);
+        return res;
+    }
+
+    /* check if the optional filter parameter is ok */
+    res = agt_validate_filter(scb, msg);
+
+    /* check the with-defaults parameter */
+    res2 = agt_set_with_defaults(scb, msg, methnode);
+
+    if (res != NO_ERR) {
+        return res;   /* error already recorded */
+    }
+
+    if (res2 != NO_ERR) {
+        return res2;   /* error already recorded */
+    }
+
+    testval = val_find_child(msg->rpc_input,
+                             y_yuma_time_filter_M_yuma_time_filter,
+                             IF_MODIFIED_SINCE);
+    if (testval != NULL && testval->res == NO_ERR) {
+        boolean isneg = FALSE;
+        xmlChar *utcstr;
+        int ret;
+        utcstr = tstamp_convert_to_utctime(VAL_STR(testval), &isneg, &res);
+        if (res != NO_ERR || isneg) {
+            if (utcstr) {
+                m__free(utcstr);
+            }
+            if (isneg) {
+                res = ERR_NCX_INVALID_VALUE;
+            }
+
+            agt_record_error(scb,
+                             &msg->mhdr,
+                             NCX_LAYER_OPERATION,
+                             res,
+                             methnode,
+                             NCX_NT_VAL,
+                             testval,
+                             NCX_NT_VAL,
+                             testval);
+            return res;
+        }
+        ret = xml_strcmp(source->last_ch_time, utcstr);
+        if (ret <= 0) {
+            empty_callback = TRUE;
+        }
+        m__free(utcstr);
+    }
+#endif
+    /* cache the 2 parameters and the data output callback function
+     * There is no invoke function -- it is handled automatically
+     * by the agt_rpc module
+     */
+    msg->rpc_user1 = source;
+    msg->rpc_data_type = RPC_DATA_STD;
+    if (empty_callback) {
+        msg->rpc_datacb = agt_output_empty;
+    } else {
+        msg->rpc_datacb = agt_output_filter;
+    }
+
+    return NO_ERR;
+
+} /* get_data_validate */
 
 
 /********************************************************************
@@ -3161,6 +3278,15 @@ static status_t
                                   op_method_name(OP_GET),
                                   AGT_RPC_PH_VALIDATE,
                                   get_validate);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* get-data */
+    res = agt_rpc_register_method("ietf-netconf-datastores"/*NC_MODULE*/,
+                                  "get-data"/*op_method_name(OP_GET)*/,
+                                  AGT_RPC_PH_VALIDATE,
+                                  get_data_validate);
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }

@@ -48,6 +48,7 @@ date         init     comment
 #include "agt_hello.h"
 #include "agt_if.h"
 #include "agt_ncx.h"
+#include "agt_nmda.h"
 #include "agt_not.h"
 #include "agt_not_queue_notification_cb.h"
 #include "agt_plock.h"
@@ -704,6 +705,12 @@ status_t
         return res;
     }
 
+    /* load the nmda module */
+    res = agt_nmda_init();
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* load the system module */
     res = agt_sys_init();
     if (res != NO_ERR) {
@@ -916,6 +923,12 @@ status_t
 
     /* load any yang library module non-config data */
     res = agt_yang_library_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* load any nmda module non-config data */
+    res = agt_nmda_init2();
     if (res != NO_ERR) {
         return res;
     }
@@ -1161,6 +1174,7 @@ void
         agt_ncx_cleanup();
         agt_hello_cleanup();
         agt_cli_cleanup();
+        agt_nmda_cleanup();
         agt_yang_library_cleanup();
         agt_sys_cleanup();
         agt_state_cleanup();

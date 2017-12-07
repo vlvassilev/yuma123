@@ -11,6 +11,7 @@ $(top_srcdir)/netconf/src/agt/agt_hello.c \
 $(top_srcdir)/netconf/src/agt/agt_if.c \
 $(top_srcdir)/netconf/src/agt/agt_ncx.c \
 $(top_srcdir)/netconf/src/agt/agt_ncxserver.c \
+$(top_srcdir)/netconf/src/agt/agt_nmda.c \
 $(top_srcdir)/netconf/src/agt/agt_not.c \
 $(top_srcdir)/netconf/src/agt/agt_plock.c \
 $(top_srcdir)/netconf/src/agt/agt_proc.c \

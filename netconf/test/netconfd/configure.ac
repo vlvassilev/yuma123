@@ -25,6 +25,7 @@ AC_CONFIG_FILES([
         rollback-on-error/Makefile
         ietf-routing/Makefile
         ietf-routing-bis/Makefile
+        ietf-interfaces-bis/Makefile
 ])
 
 AC_OUTPUT

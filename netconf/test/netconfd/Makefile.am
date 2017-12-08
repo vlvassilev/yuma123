@@ -21,10 +21,13 @@ test-yang-library \
 test-ietf-netmod-sub-intf-vlan-model \
 test-ietf-routing \
 test-ietf-routing-bis \
+test-ietf-interfaces-bis \
 test-multi-instance \
 test-memory-leak
 
 SUBDIRS= \
 multiple-edit-callbacks \
 rollback-on-error \
-ietf-routing
+ietf-routing \
+ietf-routing-bis \
+ietf-interfaces-bis

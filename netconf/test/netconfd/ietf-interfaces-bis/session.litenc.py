@@ -7,11 +7,52 @@ import litenc
 import litenc_lxml
 import lxml
 from lxml import etree
+#from litenc import strip_namespaces
 from StringIO import StringIO
 import argparse
+from operator import attrgetter
+
+def get_interface_name(interface):
+	print("calling get_interface_name")
+	print(interface.tag)
+
+	name=interface.xpath('./name')
+	assert(len(name)==1)
+	print(name[0].text)
+	return name[0].text
+
+def strip_namespaces(tree):
+	xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="xml" indent="no"/>
+
+    <xsl:template match="/|comment()|processing-instruction()">
+        <xsl:copy>
+          <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}">
+          <xsl:apply-templates select="@*|node()"/>
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+          <xsl:value-of select="."/>
+        </xsl:attribute>
+    </xsl:template>
+    </xsl:stylesheet>
+    '''
+	xslt_doc = lxml.etree.fromstring(xslt)
+	transform = lxml.etree.XSLT(xslt_doc)
+	tree = transform(tree)
+	return tree
 
 # Hmm .. ?!
 def yang_data_equal(e1, e2):
+	print e1.tag
+	print e2.tag
 	if e1.tag != e2.tag:
 		assert(False)
 		return False
@@ -28,6 +69,8 @@ def yang_data_equal(e1, e2):
 		assert(False)
 		return False
 	if e1.attrib != e2.attrib:
+		print (e1.attrib)
+		print (e2.attrib)
 		assert(False)
 		print("diff attrib")
 		return False
@@ -38,7 +81,17 @@ def yang_data_equal(e1, e2):
 		print len(e2)
 		assert(False)
 		return False
-	return all(yang_data_equal(c1, c2) for c1, c2 in zip(e1, e2))
+	for node in e1.findall("*"):  # searching top-level nodes only: node1, node2 ...
+		node[:] = sorted(node, key=attrgetter("tag"))
+	for node in e2.findall("*"):  # searching top-level nodes only: node1, node2 ...
+		node[:] = sorted(node, key=attrgetter("tag"))
+	for c1,c2 in zip(e1,e2):
+		print c1
+		print c2
+		print("---")
+		yang_data_equal(c1, c2)
+	return 1
+	#return all(yang_data_equal(c1, c2) for c1, c2 in sorted(zip(e1, e2)))
 
 def main():
 	print("""
@@ -194,7 +247,7 @@ def main():
 	assert(len(data)==1)
         #Copy from draft-netconf-nmda-netconf-01
 	expected="""
-<data>
+<data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-datastores" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
   <interfaces
       xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"
       xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type"
@@ -282,23 +335,41 @@ def main():
   </interfaces>
 </data>
 """
-	data_expected=etree.parse(StringIO(lxml.etree.tostring(lxml.etree.fromstring(expected), pretty_print=True)))
-	data_received=etree.parse(StringIO(lxml.etree.tostring(data[0], pretty_print=True)))
 
+	expected = lxml.etree.fromstring(expected)
+
+        #strip comments
+	comments = expected.xpath('//comment()')
+	for c in comments:
+		p = c.getparent()
+		p.remove(c)
+
+        #strip namespaces
+	data1 = expected.xpath('.',namespaces=namespaces)
+	data_expected=strip_namespaces(data1[0])
+	data_received=strip_namespaces(data[0])
+
+	#sort schema lists by key in alphabetical key order - hardcoded /interfaces/interface[name]
+	for node in data_expected.findall("./interfaces"):
+		node[:] = sorted(node, key=lambda child: get_interface_name(child))
+	for node in data_received.findall("./interfaces"):
+		node[:] = sorted(node, key=lambda child: get_interface_name(child))
+
+	#sort attributes
 	a = StringIO();
 	b = StringIO();
 	data_expected.write_c14n(a)
 	data_received.write_c14n(b)
 
+	print("Expected:")
+	print(a.getvalue())
+	print("Received:")
+	print(b.getvalue())
 	if yang_data_equal(lxml.etree.fromstring(a.getvalue()), lxml.etree.fromstring(b.getvalue())):
 		print "Bingo!"
 		return 0
 	else:
-		print "Expected (A) different from received (B):"
-		print "A:"
-		print a.getvalue()
-		print "B:"
-		print b.getvalue()
+		print "Error: YANG data not equal!"
 		return 1
 
 sys.exit(main())

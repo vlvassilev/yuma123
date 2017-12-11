@@ -43,7 +43,7 @@ static status_t
            xmlns:ianaift=\"urn:ietf:params:xml:ns:yang:iana-if-type\"\
            xmlns:vlan=\"http://example.com/vlan\"\
            xmlns:or=\"urn:ietf:params:xml:ns:yang:ietf-origin\">\
-         <interface or:origin=\"or:intended\">\
+         <interface>\
            <name>eth0</name>\
            <type>ianaift:ethernetCsmacd</type>\
            <enabled>false</enabled>\
@@ -58,7 +58,7 @@ static status_t
              <!-- counters now shown here -->\
            </statistics>\
          </interface>\
-         <interface or:origin=\"or:intended\">\
+         <interface>\
            <name>eth1</name>\
            <type>ianaift:ethernetCsmacd</type>\
            <enabled>true</enabled>\
@@ -75,7 +75,7 @@ static status_t
            </statistics>\
            <vlan:vlan-tagging>true</vlan:vlan-tagging>\
          </interface>\
-         <interface or:origin=\"or:intended\">\
+         <interface>\
            <name>eth1.10</name>\
            <type>ianaift:l2vlan</type>\
            <enabled>true</enabled>\
@@ -93,7 +93,7 @@ static status_t
            <vlan:vlan-id>10</vlan:vlan-id>\
          </interface>\
          <!-- This interface is not configured -->\
-         <interface or:origin=\"or:system\">\
+         <interface>\
            <name>eth2</name>\
            <type>ianaift:ethernetCsmacd</type>\
            <admin-status>down</admin-status>\
@@ -107,7 +107,7 @@ static status_t
              <!-- counters now shown here -->\
            </statistics>\
          </interface>\
-         <interface or:origin=\"or:intended\">\
+         <interface>\
            <name>lo1</name>\
            <type>ianaift:softwareLoopback</type>\
            <enabled>true</enabled>\

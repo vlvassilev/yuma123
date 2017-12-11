@@ -407,6 +407,7 @@ static status_t
                          NULL);
         return res;
     }
+#endif
 
     /* check if the optional filter parameter is ok */
     res = agt_validate_filter(scb, msg);
@@ -422,6 +423,7 @@ static status_t
         return res2;   /* error already recorded */
     }
 
+#if 0
     testval = val_find_child(msg->rpc_input,
                              y_yuma_time_filter_M_yuma_time_filter,
                              IF_MODIFIED_SINCE);

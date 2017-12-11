@@ -655,12 +655,11 @@ void val123_devirtualize(val_value_t* val)
         val_replace(copy_val, val);
         val_free_value(copy_val);
     }
-
     for(child_val = val_get_first_child(val);
         child_val != NULL;
         child_val = val_get_next_child(child_val)) {
         val123_devirtualize(child_val);
-    }
+   }
 }
 
 val_value_t* val123_clone_real(val_value_t* val)

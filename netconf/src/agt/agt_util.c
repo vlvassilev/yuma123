@@ -275,7 +275,12 @@ static op_filtertyp_t get_filter_type( val_value_t* filter )
 static status_t validate_xpath_filter( ses_cb_t* scb, rpc_msg_t* msg, 
                                        val_value_t* filter )
 {
-    val_value_t *sel = val_find_meta(filter, 0, NCX_EL_SELECT);
+    val_value_t *sel;
+    if(0==strcmp(filter->name,"xpath-filter")) {
+        sel = filter;
+    } else {
+        sel = val_find_meta(filter, 0, NCX_EL_SELECT);
+    }
     status_t res = NO_ERR;
 
     if (!sel || !sel->xpathpcb) {
@@ -1175,12 +1180,30 @@ void
 status_t agt_validate_filter ( ses_cb_t *scb,
                                rpc_msg_t *msg )
 {
+    val_value_t *filter=NULL;
     assert( scb && "scb is NULL" );
     assert( msg && "msg is NULL" );
 
-    /* filter parm is optional */
-    val_value_t *filter = val_find_child( msg->rpc_input, NC_MODULE, 
-                                          NCX_EL_FILTER );
+    if(0!=strcmp(obj_get_name(msg->rpc_method),"get-data")) {
+        /* filter parm is optional */
+        filter = val_find_child( msg->rpc_input, NC_MODULE,
+                                              NCX_EL_FILTER );
+    } else {
+        /* filter parm is optional */
+        val_value_t *xpath_filter;
+        val_value_t *subtree_filter;
+
+        xpath_filter = val_find_child( msg->rpc_input, "ietf-netconf-datastores",
+                                              "xpath-filter");
+        subtree_filter = val_find_child( msg->rpc_input, "ietf-netconf-datastores",
+                                              "subtree-filter");
+        if(xpath_filter) {
+            filter = xpath_filter;
+        } else if(subtree_filter) {
+            filter = subtree_filter;
+        }
+
+    }
     if (!filter) {
         msg->rpc_filter.op_filtyp = OP_FILTER_NONE;
         msg->rpc_filter.op_filter = NULL;
@@ -1212,22 +1235,32 @@ status_t agt_validate_filter_ex( ses_cb_t *scb, rpc_msg_t *msg,
     }
 
     status_t res = NO_ERR;
-    op_filtertyp_t  filtyp = get_filter_type( filter );;
+    if(0==strcmp(filter->name,NCX_EL_FILTER)) {
+        op_filtertyp_t  filtyp = get_filter_type( filter );;
 
-    /* check if the select attribute is needed */
-    switch (filtyp) {
-    case OP_FILTER_SUBTREE:
-        res = validate_subtree_filter( msg, filter );
-        break;
+        /* check if the select attribute is needed */
+        switch (filtyp) {
+        case OP_FILTER_SUBTREE:
+            res = validate_subtree_filter( msg, filter );
+            break;
 
-    case OP_FILTER_XPATH:
-        res = validate_xpath_filter( scb, msg, filter );
-        break;
+        case OP_FILTER_XPATH:
+            res = validate_xpath_filter( scb, msg, filter );
+            break;
 
-    default:
-        res = ERR_NCX_INVALID_VALUE;
-        agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL,
-                          NCX_NT_NONE, NULL, NCX_NT_VAL, filter );
+        default:
+            res = ERR_NCX_INVALID_VALUE;
+            agt_record_error( scb, &msg->mhdr, NCX_LAYER_OPERATION, res, NULL,
+                              NCX_NT_NONE, NULL, NCX_NT_VAL, filter );
+        }
+    } else {
+        if(0==strcmp(filter->name,"subtree-filter")) {
+            res = validate_subtree_filter( msg, filter);
+        } else if(0==strcmp(filter->name,"xpath-filter")) {
+            res = validate_xpath_filter( scb, msg, filter);
+        } else {
+            assert(0);
+        }
     }
 
     if ( NO_ERR == res && LOGDEBUG3 ) {
@@ -1366,12 +1399,20 @@ status_t
 {
     cfg_template_t  *source;
     ncx_filptr_t    *top;
-    boolean          getop;
+    boolean          getop=FALSE;
+    boolean          rpc_is_get=FALSE;
+    boolean          rpc_is_get_data=FALSE;
     status_t         res;
 
-    getop = !xml_strcmp(obj_get_name(msg->rpc_method), 
+    rpc_is_get = !xml_strcmp(obj_get_name(msg->rpc_method),
                         NCX_EL_GET);
-    if (getop) {
+    rpc_is_get_data = !xml_strcmp(obj_get_name(msg->rpc_method),
+                        "get-data");
+    if(rpc_is_get || rpc_is_get_data) {
+        getop = TRUE;
+    }
+
+    if (rpc_is_get) {
         source = cfg_get_config_id(NCX_CFGID_RUNNING);
     } else {
         source = (cfg_template_t *)msg->rpc_user1;

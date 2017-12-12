@@ -22,6 +22,7 @@ test-ietf-netmod-sub-intf-vlan-model \
 test-ietf-routing \
 test-ietf-routing-bis \
 test-ietf-interfaces-bis \
+test-ietf-ip-bis \
 test-multi-instance \
 test-memory-leak
 
@@ -30,4 +31,6 @@ multiple-edit-callbacks \
 rollback-on-error \
 ietf-routing \
 ietf-routing-bis \
-ietf-interfaces-bis
+ietf-interfaces-bis \
+ietf-ip-bis
+

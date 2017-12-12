@@ -195,6 +195,7 @@ def main():
              </address>
            </ipv4>
            <ipv6 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+             <mtu>1280</mtu>
              <address>
                <ip>2001:db8::10</ip>
                <prefix-length>32</prefix-length>
@@ -242,7 +243,6 @@ def main():
 #removed  <forwarding>false</forwarding> if this is the default value then enabled should also be present
 #removed  <mtu>1500</mtu> since it is not in the configuration
 #add or:origin="or:learned" to the ipv4 neighbor
-#removed   <mtu>1280</mtu> from ipv6 since it is not in the configuration
 #removed   <forwarding>false</forwarding> from ipv6 since it is not in the configuration
 
 	expected="""
@@ -269,6 +269,7 @@ def main():
              </neighbor>
            </ipv4>
            <ipv6 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+             <mtu>1280</mtu>
              <address>
                <ip>2001:db8::10</ip>
                <prefix-length>32</prefix-length>

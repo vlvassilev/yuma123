@@ -47,6 +47,7 @@
 
 static val_value_t* root_operational_val=NULL;
 static val_value_t* root_system_val=NULL;
+static val_value_t* root_learned_val=NULL;
 ncx_module_t* ietf_origin_mod;
 
 #if 0
@@ -106,6 +107,7 @@ static status_t
     /* Add all children from running,system and learned with keys as real values non-keys as virtual */
     running_val = val123_find_match(root_val, vir_val);
     system_val = val123_find_match(root_system_val, vir_val);
+    learned_val = val123_find_match(root_learned_val, vir_val);
 
 
     cur_origin=agt_nmda_operational_check_origin(dst_val);
@@ -117,6 +119,9 @@ static status_t
     }
     if(system_val) {
         operational_merge_cplx(dst_val, system_val, "or:system");
+    }
+    if(learned_val) {
+        operational_merge_cplx(dst_val, learned_val, "or:learned");
     }
 
     assert(res == NO_ERR);
@@ -132,12 +137,12 @@ static void add_origin(val_value_t* val, char* origin_id)
     val_add_meta(origin_val, val);
 }
 
-/* 'or:intended' has always higher priority then 'or:system' */
-static void operational_resolve_origin_meta(val_value_t* operational_val, val_value_t* running_val, val_value_t* system_val, boolean is_parent_origin_intended)
+/* the origin meta for configuration store value b is added to the nodes existing only in b to operational */
+static void operational_resolve_origin_meta(val_value_t* operational_val, val_value_t* a_val, val_value_t* b_val, char* origin_b_str)
 {
     val_value_t* chval;
-    val_value_t* running_child_val;
-    val_value_t* system_child_val;
+    val_value_t* child_a_val;
+    val_value_t* child_b_val;
 
     assert(obj_is_config(operational_val->obj));
 
@@ -154,37 +159,19 @@ static void operational_resolve_origin_meta(val_value_t* operational_val, val_va
             continue;
         }
 #endif
-        running_child_val = val123_find_match(running_val, chval);
-        system_child_val = val123_find_match(system_val, chval);
+        child_b_val = val123_find_match(b_val, chval);
+        if(child_b_val==NULL) {
+            continue;
+        }
+        child_a_val = val123_find_match(a_val, chval);
 
-        assert(running_child_val || system_child_val);
 
-        if(typ_is_simple(chval->btyp)) {
-            if(is_parent_origin_intended) {
-                if(running_child_val) {
-                    continue;
-                } else {
-                    add_origin(chval,"or:system");
-                }
-            } else {
-                if(running_child_val) {
-                    add_origin(chval,"or:intended");
-                } else {
-                    add_origin(chval,"or:system");
-                }
-            }
-        } else {
-            if(obj_is_np_container(chval->obj)) {
-                operational_resolve_origin_meta(chval, running_child_val, system_child_val, is_parent_origin_intended);
-
-            } else {
-                if(running_child_val) {
-                    add_origin(chval,"or:intended");
-                    operational_resolve_origin_meta(chval, running_child_val, system_child_val, TRUE);
-                } else {
-                    add_origin(chval,"or:system");
-                }
-            }
+        if(child_a_val==NULL && !obj_is_np_container(chval->obj)) {
+                add_origin(chval,origin_b_str);
+                continue;
+        }
+        if(!typ_is_simple(chval->btyp)) {
+            operational_resolve_origin_meta(chval, child_a_val, child_b_val, origin_b_str);
         }
     }
     return NO_ERR;
@@ -201,7 +188,11 @@ static status_t
     status_t res = NO_ERR;
     val_value_t* running_real_clone_val;
     val_value_t* system_real_clone_val;
+    val_value_t* learned_real_clone_val;
+    val_value_t* oper_w_running_clone_val;
+    val_value_t* oper_w_system_clone_val;
     cfg_template_t        *runningcfg;
+
 
     /* get the running config */
     runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
@@ -210,11 +201,27 @@ static status_t
     running_real_clone_val = val123_clone_real(runningcfg->root);
     assert(running_real_clone_val);
     val123_merge_cplx(dst_val, running_real_clone_val);
+
+    oper_w_running_clone_val = val_clone(dst_val);
+    assert(oper_w_running_clone_val);
+
     system_real_clone_val = val123_clone_real(root_system_val);
     assert(system_real_clone_val);
     val123_merge_cplx(dst_val, system_real_clone_val);
 
-    operational_resolve_origin_meta(dst_val, running_real_clone_val, system_real_clone_val, FALSE);
+    oper_w_system_clone_val = val_clone(dst_val);
+    assert(oper_w_system_clone_val);
+
+    learned_real_clone_val = val123_clone_real(root_learned_val);
+    assert(learned_real_clone_val);
+    val123_merge_cplx(dst_val, learned_real_clone_val);
+
+    operational_resolve_origin_meta(dst_val, NULL, running_real_clone_val, "or:intended");
+    operational_resolve_origin_meta(dst_val, oper_w_running_clone_val, system_real_clone_val, "or:system");
+    operational_resolve_origin_meta(dst_val, oper_w_system_clone_val, learned_real_clone_val, "or:learned");
+
+    val_free_value(oper_w_running_clone_val);
+    val_free_value(oper_w_system_clone_val);
 
     assert(res == NO_ERR);
     return res;
@@ -228,6 +235,10 @@ val_value_t* agt_nmda_get_root_operational(void)
 val_value_t* agt_nmda_get_root_system(void)
 {
     return root_system_val;
+}
+val_value_t* agt_nmda_get_root_learned(void)
+{
+    return root_learned_val;
 }
 
 
@@ -275,6 +286,11 @@ status_t
     root_system_val = val_new_value();
     assert(root_system_val);
     val_init_from_template(root_system_val,root_obj);
+
+    /*init root_learned_val */
+    root_learned_val = val_new_value();
+    assert(root_learned_val);
+    val_init_from_template(root_learned_val,root_obj);
 
     return NO_ERR;
 

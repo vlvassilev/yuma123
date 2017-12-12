@@ -2,6 +2,7 @@
 #include "val.h"
 val_value_t* agt_nmda_get_root_operational(void);
 val_value_t* agt_nmda_get_root_system(void);
+val_value_t* agt_nmda_get_root_learned(void);
 
 
 /* module initialization and cleanup */

@@ -7,27 +7,67 @@ import litenc
 import litenc_lxml
 import lxml
 from lxml import etree
+#from litenc import strip_namespaces
 from StringIO import StringIO
 import argparse
+from operator import attrgetter
+
+def json2xml(json_config):
+	#TODO
+	return ""
+def strip_namespaces(tree):
+	xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="xml" indent="no"/>
+
+    <xsl:template match="/|comment()|processing-instruction()">
+        <xsl:copy>
+          <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}">
+          <xsl:apply-templates select="@*|node()"/>
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+          <xsl:value-of select="."/>
+        </xsl:attribute>
+    </xsl:template>
+    </xsl:stylesheet>
+    '''
+	xslt_doc = lxml.etree.fromstring(xslt)
+	transform = lxml.etree.XSLT(xslt_doc)
+	tree = transform(tree)
+	return tree
 
 # Hmm .. ?!
 def yang_data_equal(e1, e2):
+	print e1.tag
+	print e2.tag
 	if e1.tag != e2.tag:
 		assert(False)
 		return False
-	if e1.text==None and "" != e2.text.strip():
-		assert(False)
-		return False
-	if e2.text==None and "" != e1.text.strip():
-		assert(False)
-		return False
-	if e1.text!=None and e2.text!=None and e1.text.strip() != e2.text.strip():
-		assert(False)
-		return False
-	#if e1.tail != e2.tail:
-		assert(False)
-		return False
+	if e1.text==None and e2.text==None:
+		print("empty container")
+	else:
+		if e1.text==None and "" != e2.text.strip():
+			assert(False)
+			return False
+		if e2.text==None and "" != e1.text.strip():
+			assert(False)
+			return False
+		if e1.text!=None and e2.text!=None and e1.text.strip() != e2.text.strip():
+			assert(False)
+			return False
+		#if e1.tail != e2.tail:
+			assert(False)
+			return False
 	if e1.attrib != e2.attrib:
+		print (e1.attrib)
+		print (e2.attrib)
 		assert(False)
 		print("diff attrib")
 		return False
@@ -38,14 +78,24 @@ def yang_data_equal(e1, e2):
 		print len(e2)
 		assert(False)
 		return False
-	return all(yang_data_equal(c1, c2) for c1, c2 in zip(e1, e2))
+	for node in e1.findall("*"):  # searching top-level nodes only: node1, node2 ...
+		node[:] = sorted(node, key=attrgetter("tag"))
+	for node in e2.findall("*"):  # searching top-level nodes only: node1, node2 ...
+		node[:] = sorted(node, key=attrgetter("tag"))
+	for c1,c2 in zip(e1,e2):
+		print c1
+		print c2
+		print("---")
+		yang_data_equal(c1, c2)
+	return 1
+	#return all(yang_data_equal(c1, c2) for c1, c2 in sorted(zip(e1, e2)))
 
 def main():
 	print("""
-#Description: Testcase for RFC8022 ietf-routing module.
+#Description: Testcase for draft-ietf-netmod-rfc8022bis-04 ietf-routing module.
 #Procedure:
-#1 - <edit-config> configuration as in RFC8022 Appendix D.
-#2 - <get-data> the /interfaces /routing and verify data is same as in RFC8022 Appendix D.
+#1 - <edit-config> configuration as in rfc8022bis Appendix D.
+#2 - <get-data> the /interfaces and /routing containers and verify data is same as in rfc8022bis Appendix E.
 """)
 
 	parser = argparse.ArgumentParser()
@@ -117,7 +167,218 @@ def main():
         namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
-	#Copied from draft-ietf-netmod-rfc7223bis-00
+	#Copied from draft-ietf-netmod-rfc8022bis-00 Appendix E.
+	json_config = """
+   {
+     "ietf-interfaces:interfaces": {
+       "interface": [
+         {
+           "name": "eth0",
+           "type": "iana-if-type:ethernetCsmacd",
+           "description": "Uplink to ISP.",
+           "phys-address": "00:0C:42:E5:B1:E9",
+           "oper-status": "up",
+           "statistics": {
+             "discontinuity-time": "2015-10-24T17:11:27+02:00"
+           },
+           "ietf-ip:ipv4": {
+             "forwarding": true,
+             "mtu": 1500,
+             "address": [
+               {
+                 "ip": "192.0.2.1",
+                 "prefix-length": 24
+               }
+             ],
+           },
+           "ietf-ip:ipv6": {
+             "forwarding": true,
+             "mtu": 1500,
+             "address": [
+               {
+                 "ip": "2001:0db8:0:1::1",
+                 "prefix-length": 64
+               }
+             ],
+             "autoconf": {
+               "create-global-addresses": false
+             }
+             "ietf-ipv6-unicast-routing:
+                ipv6-router-advertisements": {
+               "send-advertisements": false
+             }
+           }
+         },
+         {
+           "name": "eth1",
+           "type": "iana-if-type:ethernetCsmacd",
+           "description": "Interface to the internal network.",
+           "phys-address": "00:0C:42:E5:B1:EA",
+           "oper-status": "up",
+           "statistics": {
+             "discontinuity-time": "2015-10-24T17:11:29+02:00"
+           },
+           "ietf-ip:ipv4": {
+             "forwarding": true,
+             "mtu": 1500,
+             "address": [
+               {
+                 "ip": "198.51.100.1",
+                 "prefix-length": 24
+               }
+             ],
+           },
+           "ietf-ip:ipv6": {
+             "forwarding": true,
+             "mtu": 1500,
+             "address": [
+               {
+                 "ip": "2001:0db8:0:2::1",
+                 "prefix-length": 64
+               }
+             ],
+             "autoconf": {
+               "create-global-addresses": false
+             },
+             "ietf-ipv6-unicast-routing:
+                ipv6-router-advertisements": {
+               "send-advertisements": true,
+               "prefix-list": {
+                 "prefix": [
+                   {
+                     "prefix-spec": "2001:db8:0:2::/64"
+                   }
+                 ]
+               }
+             }
+           }
+         }
+       ]
+     },
+
+     "ietf-routing:routing": {
+       "router-id": "192.0.2.1",
+       "control-plane-protocols": {
+         "control-plane-protocol": [
+           {
+             "type": "ietf-routing:static",
+             "name": "st0",
+             "description":
+               "Static routing is used for the internal network.",
+             "static-routes": {
+               "ietf-ipv4-unicast-routing:ipv4": {
+                 "route": [
+                   {
+                     "destination-prefix": "0.0.0.0/0",
+                     "next-hop": {
+                       "next-hop-address": "192.0.2.2"
+                     }
+                   }
+                 ]
+               },
+               "ietf-ipv6-unicast-routing:ipv6": {
+                 "route": [
+                   {
+                     "destination-prefix": "::/0",
+                     "next-hop": {
+                       "next-hop-address": "2001:db8:0:1::2"
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ]
+       }
+       "ribs": {
+         "rib": [
+           {
+             "name": "ipv4-master",
+             "address-family":
+               "ietf-ipv4-unicast-routing:ipv4-unicast",
+             "default-rib": true,
+             "routes": {
+               "route": [
+                 {
+                   "ietf-ipv4-unicast-routing:destination-prefix":
+                     "192.0.2.1/24",
+                   "next-hop": {
+                     "outgoing-interface": "eth0"
+                   },
+                   "route-preference": 0,
+                   "source-protocol": "ietf-routing:direct",
+                   "last-updated": "2015-10-24T17:11:27+02:00"
+                 },
+                 {
+                   "ietf-ipv4-unicast-routing:destination-prefix":
+                     "198.51.100.0/24",
+                   "next-hop": {
+                     "outgoing-interface": "eth1"
+                   },
+                   "source-protocol": "ietf-routing:direct",
+                   "route-preference": 0,
+                   "last-updated": "2015-10-24T17:11:27+02:00"
+                 },
+                 {
+                   "ietf-ipv4-unicast-routing:destination-prefix":
+                     "0.0.0.0/0",
+                   "source-protocol": "ietf-routing:static",
+                   "route-preference": 5,
+                   "next-hop": {
+                     "ietf-ipv4-unicast-routing:next-hop-address":
+                       "192.0.2.2"
+                   },
+                   "last-updated": "2015-10-24T18:02:45+02:00"
+                 }
+               ]
+             }
+           },
+           {
+             "name": "ipv6-master",
+             "address-family":
+               "ietf-ipv6-unicast-routing:ipv6-unicast",
+             "default-rib": true,
+             "routes": {
+               "route": [
+                 {
+                   "ietf-ipv6-unicast-routing:destination-prefix":
+                     "2001:db8:0:1::/64",
+                   "next-hop": {
+                     "outgoing-interface": "eth0"
+                   },
+                   "source-protocol": "ietf-routing:direct",
+                   "route-preference": 0,
+                   "last-updated": "2015-10-24T17:11:27+02:00"
+                 },
+                 {
+                   "ietf-ipv6-unicast-routing:destination-prefix":
+                     "2001:db8:0:2::/64",
+                   "next-hop": {
+                     "outgoing-interface": "eth1"
+                   },
+                   "source-protocol": "ietf-routing:direct",
+                   "route-preference": 0,
+                   "last-updated": "2015-10-24T17:11:27+02:00"
+                 },
+                 {
+                   "ietf-ipv6-unicast-routing:destination-prefix":
+                     "::/0",
+                   "next-hop": {
+                     "ietf-ipv6-unicast-routing:next-hop-address":
+                       "2001:db8:0:1::2"
+                   },
+                   "source-protocol": "ietf-routing:static",
+                   "route-preference": 5,
+                   "last-updated": "2015-10-24T18:02:45+02:00"
+                 }
+               ]
+             }
+           }
+         ]
+       }
+     },
+   }
+"""
 	edit_config_rpc = """
 <edit-config>
     <target>
@@ -126,42 +387,12 @@ def main():
     <default-operation>merge</default-operation>
     <test-option>set</test-option>
     <config>
-      <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-           xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type"
-           xmlns:vlan="http://example.com/vlan"
-           nc:operation="replace">
-         <interface>
-           <name>eth0</name>
-           <type>ianaift:ethernetCsmacd</type>
-           <enabled>false</enabled>
-         </interface>
-
-         <interface>
-           <name>eth1</name>
-           <type>ianaift:ethernetCsmacd</type>
-           <enabled>true</enabled>
-           <vlan:vlan-tagging>true</vlan:vlan-tagging>
-         </interface>
-
-         <interface>
-           <name>eth1.10</name>
-           <type>ianaift:l2vlan</type>
-           <enabled>true</enabled>
-           <vlan:base-interface>eth1</vlan:base-interface>
-           <vlan:vlan-id>10</vlan:vlan-id>
-         </interface>
-
-         <interface>
-           <name>lo1</name>
-           <type>ianaift:softwareLoopback</type>
-           <enabled>true</enabled>
-         </interface>
-       </interfaces>
+    %(xml_config)
     </config>
 </edit-config>
-"""
+""" % {'xml_config':json2xml(json_config)}
 
-	print("<edit-config> - load example config to 'candidate' ...")
+	print("<edit-config> - load Appendix D. example config to 'candidate' ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
 	ok = result.xpath('./ok')
@@ -176,7 +407,6 @@ def main():
 	assert(len(ok)==1)
 
 
-	#TODO - request <get-data> example in draft-ietf-netconf-nmda-netconf-01
 	get_example_data_rpc = """
 <get-data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-datastores">
   <datastore xmlns:ds="urn:ietf:params:xml:ns:yang:ietf-datastores">ds:operational</datastore>
@@ -188,119 +418,171 @@ def main():
 </get-data>
 """
 
-	print("<get> - example data ...")
+	print("<get-data> - Appendix E. data ...")
 	result = conn.rpc(get_example_data_rpc, strip_ns=False)
 	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
-        namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
-	data = result.xpath('./nc:data', namespaces=namespaces)
+        namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
+	data = result.xpath('./ncds:data', namespaces=namespaces)
 	assert(len(data)==1)
-        #Copy from draft-netconf-nmda-netconf-01
-	expected="""
-<data>
-  <interfaces
-      xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"
-      xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type"
-      xmlns:vlan="http://example.com/vlan"
-      xmlns:or="urn:ietf:params:xml:ns:yang:ietf-origin">
-    <interface or:origin="or:intended">
-      <name>eth0</name>
-      <type>ianaift:ethernetCsmacd</type>
-      <enabled>false</enabled>
-      <admin-status>down</admin-status>
-      <oper-status>down</oper-status>
-      <if-index>2</if-index>
-      <phys-address>00:01:02:03:04:05</phys-address>
-      <statistics>
-        <discontinuity-time>
-          2013-04-01T03:00:00+00:00
-        </discontinuity-time>
-        <!-- counters now shown here -->
-      </statistics>
-    </interface>
 
-    <interface or:origin="or:intended">
-      <name>eth1</name>
-      <type>ianaift:ethernetCsmacd</type>
-      <enabled>true</enabled>
-      <admin-status>up</admin-status>
-      <oper-status>up</oper-status>
-      <if-index>7</if-index>
-      <phys-address>00:01:02:03:04:06</phys-address>
-      <higher-layer-if>eth1.10</higher-layer-if>
-      <statistics>
-        <discontinuity-time>
-          2013-04-01T03:00:00+00:00
-        </discontinuity-time>
-       <!-- counters now shown here -->
-     </statistics>
-      <vlan:vlan-tagging>true</vlan:vlan-tagging>
-    </interface>
-    <interface or:origin="or:intended">
-      <name>eth1.10</name>
-      <type>ianaift:l2vlan</type>
-      <enabled>true</enabled>
-      <admin-status>up</admin-status>
-      <oper-status>up</oper-status>
-      <if-index>9</if-index>
-      <lower-layer-if>eth1</lower-layer-if>
-      <statistics>
-       <discontinuity-time>
-         2013-04-01T03:00:00+00:00
-        </discontinuity-time>
-        <!-- counters now shown here -->
-      </statistics>
-      <vlan:base-interface>eth1</vlan:base-interface>
-     <vlan:vlan-id>10</vlan:vlan-id>
-    </interface>
-    <!-- This interface is not configured -->
-    <interface or:origin="or:system">
-      <name>eth2</name>
-      <type>ianaift:ethernetCsmacd</type>
-      <admin-status>down</admin-status>
-      <oper-status>down</oper-status>
-      <if-index>8</if-index>
-      <phys-address>00:01:02:03:04:07</phys-address>
-      <statistics>
-        <discontinuity-time>
-          2013-04-01T03:00:00+00:00
-        </discontinuity-time>
-        <!-- counters now shown here -->
-      </statistics>
-     </interface>
-     <interface or:origin="or:intended">
-      <name>lo1</name>
-      <type>ianaift:softwareLoopback</type>
-      <enabled>true</enabled>
-      <admin-status>up</admin-status>
-      <oper-status>up</oper-status>
-      <if-index>1</if-index>
-      <statistics>
-        <discontinuity-time>
-          2013-04-01T03:00:00+00:00
-        </discontinuity-time>
-        <!-- counters now shown here -->
-      </statistics>
-    </interface>
-  </interfaces>
+	expected="""
+<data xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-datastores" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+      <routing
+        xmlns="urn:ietf:params:xml:ns:yang:ietf-routing"
+        xmlns:or="urn:ietf:params:xml:ns:yang:ietf-origin">
+
+        <router-id or:origin="or:intended">192.0.2.1</router-id>
+        <control-plane-protocols or:origin="or:intended">
+          <control-plane-protocl>
+            <type>ietf-routing:static</type>
+            <name></name>
+            <static-routes>
+              <ietf-ipv4-unicast-routing:ipv4>
+                <route>
+                  <destination-prefix>0.0.0.0/0</destination-prefix>
+                  <next-hop>
+                    <next-hop-address>192.0.2.2</next-hop-address>
+                  </next-hop>
+                </route>
+              </ietf-ipv4-unicast-routing:ipv4>
+              <ietf-ipv6-unicast-routing:ipv6>
+                <route>
+                  <destination-prefix>::/0</destination-prefix>
+                  <next-hop>
+                    <next-hop-address>2001:db8:0:1::2</next-hop-address>
+                  </next-hop>
+                </route>
+              </ietf-ipv6-unicast-routing:ipv6>
+            </static-routes>
+          </control-plane-protocl>
+        </control-plane-protocols>
+
+        <ribs>
+          <rib or:origin="or:intended">
+            <name>ipv4-master</name>
+            <address-family>
+              ietf-ipv4-unicast-routing:ipv4-unicast
+            </address-family>
+            <default-rib>true</default-rib>
+            <routes>
+              <route>
+                <ietf-ipv4-unicast-routing:destination-prefix>
+                  192.0.2.1/24
+                </ietf-ipv4-unicast-routing:destination-prefix>
+                <next-hop>
+                  <outgoing-interface>eth0</outgoing-interface>
+
+                </next-hop>
+                <route-preference>0</route-preference>
+                <source-protocol>ietf-routing:direct</source-protocol>
+                <last-updated>2015-10-24T17:11:27+02:00</last-updated>
+              </route>
+              <route>
+                <ietf-ipv4-unicast-routing:destination-prefix>
+                  98.51.100.0/24
+                </ietf-ipv4-unicast-routing:destination-prefix>
+                <next-hop>
+                  <outgoing-interface>eth1</outgoing-interface>
+                </next-hop>
+                <route-preference>0</route-preference>
+                <source-protocol>ietf-routing:direct</source-protocol>
+                <last-updated>2015-10-24T17:11:27+02:00</last-updated>
+              </route>
+              <route>
+                <ietf-ipv4-unicast-routing:destination-prefix>0.0.0.0/0
+                </ietf-ipv4-unicast-routing:destination-prefix>
+                <next-hop>
+                  <ietf-ipv4-unicast-routing:next-hop-address>192.0.2.2
+                  </ietf-ipv4-unicast-routing:next-hop-address>
+                </next-hop>
+                <route-preference>5</route-preference>
+                <source-protocol>ietf-routing:static</source-protocol>
+                <last-updated>2015-10-24T18:02:45+02:00</last-updated>
+              </route>
+            </routes>
+          </rib>
+          <rib or:origin="or:intended">
+            <name>ipv6-master</name>
+            <address-family>
+              ietf-ipv6-unicast-routing:ipv6-unicast
+            </address-family>
+            <default-rib>true</default-rib>
+            <routes>
+              <route>
+                <ietf-ipv6-unicast-routing:destination-prefix>
+                  2001:db8:0:1::/64
+                </ietf-ipv6-unicast-routing:destination-prefix>
+                <next-hop>
+                  <outgoing-interface>eth0</outgoing-interface>
+                </next-hop>
+                <route-preference>0</route-preference>
+                <source-protocol>ietf-routing:direct</source-protocol>
+                <last-updated>2015-10-24T17:11:27+02:00</last-updated>
+              </route>
+              <route>
+                <ietf-ipv6-unicast-routing:destination-prefix>
+                  2001:db8:0:2::/64
+                </ietf-ipv6-unicast-routing:destination-prefix>
+                <next-hop>
+                  <outgoing-interface>eth1</outgoing-interface>
+                </next-hop>
+                <route-preference>0</route-preference>
+                <source-protocol>ietf-routing:direct</source-protocol>
+                <last-updated>2015-10-24T17:11:27+02:00</last-updated>
+              </route>
+              <route>
+                <ietf-ipv6-unicast-routing:destination-prefix>::/0
+                </ietf-ipv6-unicast-routing:destination-prefix>
+                <next-hop>
+                  <ietf-ipv6-unicast-routing:next-hop-address>
+                    2001:db8:0:1::2
+                  </ietf-ipv6-unicast-routing:next-hop-address>
+                </next-hop>
+                <route-preference>5</route-preference>
+                <source-protocol>ietf-routing:static</source-protocol>
+                <last-updated>2015-10-24T18:02:45+02:00</last-updated>
+              </route>
+            </routes>
+          </rib>
+        </ribs>
+      </routing>
 </data>
 """
-	data_expected=etree.parse(StringIO(lxml.etree.tostring(lxml.etree.fromstring(expected), pretty_print=True)))
-	data_received=etree.parse(StringIO(lxml.etree.tostring(data[0], pretty_print=True)))
 
+	expected = lxml.etree.fromstring(expected)
+
+        #strip comments
+	comments = expected.xpath('//comment()')
+	for c in comments:
+		p = c.getparent()
+		p.remove(c)
+
+        #strip namespaces
+	data1 = expected.xpath('.',namespaces=namespaces)
+	data_expected=strip_namespaces(data1[0])
+	data_received=strip_namespaces(data[0])
+
+	#sort schema lists by key in alphabetical key order - hardcoded /interfaces/interface[name]
+	for node in data_expected.findall("./interfaces"):
+		node[:] = sorted(node, key=lambda child: get_interface_name(child))
+	for node in data_received.findall("./interfaces"):
+		node[:] = sorted(node, key=lambda child: get_interface_name(child))
+
+	#sort attributes
 	a = StringIO();
 	b = StringIO();
 	data_expected.write_c14n(a)
 	data_received.write_c14n(b)
 
+	print("Expected:")
+	print(a.getvalue())
+	print("Received:")
+	print(b.getvalue())
 	if yang_data_equal(lxml.etree.fromstring(a.getvalue()), lxml.etree.fromstring(b.getvalue())):
 		print "Bingo!"
 		return 0
 	else:
-		print "Expected (A) different from received (B):"
-		print "A:"
-		print a.getvalue()
-		print "B:"
-		print b.getvalue()
+		print "Error: YANG data not equal!"
 		return 1
 
 sys.exit(main())

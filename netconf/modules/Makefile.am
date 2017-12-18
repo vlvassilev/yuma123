@@ -28,6 +28,8 @@ $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-datastores@2017-08-24.yang
 
 ietf_draft_yang_DATA = \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-interfaces.yang  \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-ip.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \

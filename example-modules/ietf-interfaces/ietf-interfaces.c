@@ -13,6 +13,7 @@
 #include "agt_timer.h"
 #include "agt_util.h"
 #include "agt_not.h"
+#include "agt_nmda.h"
 #include "agt_rpc.h"
 #include "dlq.h"
 #include "ncx.h"
@@ -25,7 +26,7 @@
 
 /* module static variables */
 static ncx_module_t *ietf_interfaces_mod;
-static obj_template_t* interfaces_state_obj;
+static obj_template_t* interfaces_obj;
 
 static val_value_t* root_prev_val=NULL;
 
@@ -124,7 +125,7 @@ void oper_status_update(val_value_t* cur_val)
         /* notify */
         name_val=val_find_child(cur_val->parent,"ietf-interfaces","name");
         assert(name_val);
-        printf("Notification /interfaces-state/interface[name=%s]: oper-status changes from %s to %s at %s\n", VAL_STRING(name_val), VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
+        printf("Notification /interfaces/interface[name=%s]: oper-status changes from %s to %s at %s\n", VAL_STRING(name_val), VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
         my_send_link_state_notification(VAL_STRING(cur_val), VAL_STRING(name_val));
 
     }
@@ -220,7 +221,7 @@ Inter-|   Receive                                                |  Transmit
  */
  
 static status_t
-    add_interfaces_state_entry(char* buf, val_value_t* interfaces_state_val)
+    add_system_interface_entry(char* buf, val_value_t* interfaces_val)
 {
     /*objs*/
     obj_template_t* interface_obj;
@@ -291,8 +292,8 @@ static status_t
     	str++;
     }
 
-    /* /interfaces-state/interface */
-    interface_obj = obj_find_child(interfaces_state_val->obj,
+    /* /interfaces/interface */
+    interface_obj = obj_find_child(interfaces_val->obj,
                                    "ietf-interfaces",
                                    "interface");
     assert(interface_obj != NULL);
@@ -304,9 +305,9 @@ static status_t
 
     val_init_from_template(interface_val, interface_obj);
 
-    val_add_child(interface_val, interfaces_state_val);
+    val_add_child(interface_val, interfaces_val);
 
-    /* /interfaces-state/interface/name */
+    /* /interfaces/interface/name */
     name_obj = obj_find_child(interface_obj,
                               "ietf-interfaces",
                               "name");
@@ -327,7 +328,7 @@ static status_t
     res = val_gen_index_chain(interface_obj, interface_val);
     assert(res == NO_ERR);
 
-    /* /interfaces-state/interface/oper-state */
+    /* /interfaces/interface/oper-state */
     oper_status_obj = obj_find_child(interface_obj,
                          "ietf-interfaces",
                          "oper-status");
@@ -341,7 +342,7 @@ static status_t
 
     val_add_child(oper_status_val, interface_val);
 
-    /* /interfaces-state/interface/oper-state */
+    /* /interfaces/interface/oper-state */
     last_change_obj = obj_find_child(interface_obj,
                          "ietf-interfaces",
                          "last-change");
@@ -355,7 +356,7 @@ static status_t
 
     val_add_child(last_change_val, interface_val);
 
-    /* /interfaces-state/interface/statistics */
+    /* /interfaces/interface/statistics */
     statistics_obj = obj_find_child(interface_obj,
                          "ietf-interfaces",
                          "statistics");
@@ -402,10 +403,10 @@ static status_t
     return res;
 }
 
-/* Registered callback functions: get_interfaces_state */
+/* Registered callback functions: get_system_interfaces */
 
 static status_t
-    get_interfaces_state(ses_cb_t *scb,
+    get_system_interfaces(ses_cb_t *scb,
                          getcb_mode_t cbmode,
                          val_value_t *vir_val,
                          val_value_t *dst_val)
@@ -447,7 +448,7 @@ static status_t
             continue;
         }
 
-        res = add_interfaces_state_entry(buf, dst_val);
+        res = add_system_interface_entry(buf, dst_val);
         if (res != NO_ERR) {
              done = TRUE;
         }
@@ -468,29 +469,23 @@ int
      * without this link-up and link-down notifications will be
      * generated only when someone reads oper-state
      */
-    cfg_template_t* runningcfg;
-    val_value_t* interfaces_state_val;
+    val_value_t* root_system_val;
+    val_value_t* interfaces_val;
     xmlChar* dummy_serialized_data_str;
     status_t res;
 
-    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    assert(runningcfg && runningcfg->root);
+    res = NO_ERR;
 
-    interfaces_state_val = val_find_child(runningcfg->root,
-                                          "ietf-interfaces",
-                                          "interfaces-state");
-    assert(interfaces_state_val);
-    res = val_make_serialized_string (interfaces_state_val, NCX_DISPLAY_MODE_JSON, &dummy_serialized_data_str);
+    root_system_val = agt_nmda_get_root_system();
+    assert(root_system_val);
+
+    interfaces_val = val_find_child(root_system_val,
+                                    "ietf-interfaces",
+                                    "interfaces");
+    assert(interfaces_val);
+    res = val_make_serialized_string (interfaces_val, NCX_DISPLAY_MODE_JSON, &dummy_serialized_data_str);
     free(dummy_serialized_data_str);
 
-#if 0 /*for simulation*/
-    {
-        static unsigned int counter=0;
-        my_send_link_state_notification((counter%2)?"up":"down", "eth0");
-        my_send_link_state_notification((counter%2)?"up":"down", "eth1");
-        counter++;
-    }
-#endif
     return 0;
 
 }
@@ -516,10 +511,12 @@ status_t
         return res;
     }
 
-    interfaces_state_obj = ncx_find_object(
+    assert(0!=strcmp(ietf_interfaces_mod->version,"2014-05-08"));
+
+    interfaces_obj = ncx_find_object(
         ietf_interfaces_mod,
-        "interfaces-state");
-    if (interfaces_state_obj == NULL) {
+        "interfaces");
+    if(interfaces_obj == NULL) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
     
@@ -529,42 +526,41 @@ status_t
 status_t y_ietf_interfaces_init2(void)
 {
     status_t res;
-    cfg_template_t* runningcfg;
-    val_value_t* interfaces_state_val;
+    val_value_t* interfaces_val;
     uint32 timer_id;
+    val_value_t* root_system_val;
+    xmlChar* dummy_serialized_data_str;
 
     res = NO_ERR;
 
-    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    if (!runningcfg || !runningcfg->root) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    root_system_val = agt_nmda_get_root_system();
+    assert(root_system_val);
 
-    interfaces_state_val = val_find_child(runningcfg->root,
-                                          "ietf-interfaces",
-                                          "interfaces-state");
+    interfaces_val = val_find_child(root_system_val,
+                                    "ietf-interfaces",
+                                    "interfaces");
     /* Can not coexist with other implementation
      * of ietf-interfaces.
      */
-    if(interfaces_state_val!=NULL) {
-        log_error("\nError: /interfaces-state already present!");
+    if(interfaces_val!=NULL) {
+        log_error("\nError: /interfaces already present!");
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    interfaces_state_val = val_new_value();
-    if (interfaces_state_val == NULL) {
+    interfaces_val = val_new_value();
+    if (interfaces_val == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    val_init_virtual(interfaces_state_val,
-                     get_interfaces_state,
-                     interfaces_state_obj);
+    val_init_virtual(interfaces_val,
+                     get_system_interfaces,
+                     interfaces_obj);
 
-    val_add_child(interfaces_state_val, runningcfg->root);
+    val_add_child(interfaces_val, root_system_val);
 
     /* init a root value to store copies of prev state data values */
     root_prev_val = val_new_value();
-    val_init_from_template(root_prev_val, runningcfg->root->obj);
+    val_init_from_template(root_prev_val, root_system_val->obj);
 
     res = agt_timer_create(1/* 1 sec period */,
                            TRUE/*periodic*/,

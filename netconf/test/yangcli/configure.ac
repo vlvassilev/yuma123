@@ -1,4 +1,4 @@
-AC_INIT([yangcli-test-suite], [2.10], [vladimir@transpacket.com])
+AC_INIT([yangcli-test-suite], [2.11], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 

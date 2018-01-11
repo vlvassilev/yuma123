@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-ietf-alarms], [2.10], [vladimir@transpacket.com])
+AC_INIT([yuma123-netconfd-module-ietf-alarms], [2.11], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 

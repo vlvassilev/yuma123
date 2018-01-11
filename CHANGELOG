@@ -1,3 +1,9 @@
+yuma123 (2.11) UNRELEASED; urgency=medium
+
+  * Preliminary NMDA support draft-ietf-netmod-revised-datastores-09
+
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 11 Jan 2018 13:26:33 +0100
+
 yuma123 (2.10) stable; urgency=medium
 
   * ncx

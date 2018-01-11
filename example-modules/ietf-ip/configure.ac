@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-yuma-arp], [2.11], [vladimir@transpacket.com])
+AC_INIT([yuma123-netconfd-module-ietf-ip], [2.11], [vladimir@transpacket.com])
 
 AC_CANONICAL_SYSTEM
 
@@ -13,8 +13,8 @@ AC_PROG_LIBTOOL
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 
-netconfcentral_yangdir="$prefix/share/yuma/modules/netconfcentral"
-AC_SUBST(netconfcentral_yangdir)
+yangdir="$prefix/share/yuma/modules"
+AC_SUBST(yangdir)
 
 ncx_netconf_includedir="$includedir/yuma/ncx"
 AC_SUBST(ncx_netconf_includedir)

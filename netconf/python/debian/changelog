@@ -1,5 +1,5 @@
-yuma123-python (2.10-0) stable; urgency=medium
+yuma123-python (2.11-0) UNRELEASED; urgency=medium
 
   * Unofficial package
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Fri, 29 Sep 2017 13:53:28 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 11 Jan 2018 13:26:33 +0100

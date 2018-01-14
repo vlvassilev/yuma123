@@ -1,17 +1,17 @@
 module yangdump {
 
     yang-version 1;
-    namespace "http://netconfcentral.org/ns/yangdump";
+    namespace "http://yuma123.org/ns/yangdump";
     prefix "yd";
 
     import yuma-ncx { prefix ncx; }
 
     import yuma-app-common { prefix ncxapp; }
 
-    organization "Netconf Central";
+    organization "Yuma123";
 
     contact
-        "Andy Bierman <andy at netconfcentral.org>";
+        "Vladimir Vassilev <vladimir at transpacket.com>";
 
     description 
        "yangdump provides validation and translation of YANG data 
@@ -138,6 +138,12 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
+    revision 2018-01-12 {
+        description
+          "Added 'tree' to FormatType enumeration. Changed namespace
+           from Netconf central to Yuma123 and updated contact details.";
+    }
+
     revision 2012-10-05 {
         description
           "Add uses for YumaHomeParm";
@@ -245,6 +251,10 @@ module yangdump {
            enum tg2 {
               description 
                  "Convert YANG to Turbogears 2 Source code files.";
+           }
+           enum tree {
+              description 
+                 "Convert YANG to YANG tree format.";
            }
         }
     }

@@ -2446,6 +2446,7 @@ static void
                          &identity->appinfoQ, 
                          indent);
 
+#if 0
     /* base sub-clause */
     if (identity->base) {
         ses_putstr_indent(scb, YANG_K_BASE, indent);
@@ -2456,7 +2457,7 @@ static void
                           identity->basename);
         ses_putchar(scb, ';');
     }
-
+#endif
     /* status field */
     write_cyang_status(scb, identity->status, indent);
 

@@ -62,6 +62,7 @@ date         init     comment
 #include "yangdump_util.h"
 #include "yangstats.h"
 #include "yangyin.h"
+#include "yangtree.h"
 #include "ydump.h"
 
 
@@ -1320,6 +1321,7 @@ static boolean
     case NCX_CVTTYP_YANG:
     case NCX_CVTTYP_COPY:
     case NCX_CVTTYP_YIN:
+    case NCX_CVTTYP_TREE:
         return TRUE;
     case NCX_CVTTYP_SQL:
     case NCX_CVTTYP_SQLDB:
@@ -1439,7 +1441,9 @@ static status_t
     } else if (pcb && pcb->top) {
         if (LOGINFO) {
             /* generate banner everytime yangdump runs */
-            print_score_banner(pcb);
+            if(cp->format!=NCX_CVTTYP_TREE) {
+                print_score_banner(pcb);
+            }
             bannerdone = TRUE;            
         } else {
             if (!(cp->format == NCX_CVTTYP_XSD ||
@@ -1451,7 +1455,8 @@ static status_t
                   cp->format == NCX_CVTTYP_UH ||
                   cp->format == NCX_CVTTYP_YC ||
                   cp->format == NCX_CVTTYP_YH ||
-                  cp->format == NCX_CVTTYP_TG2)) {
+                  cp->format == NCX_CVTTYP_TG2 ||
+                  cp->format == NCX_CVTTYP_TREE)) {
                 print_score_banner(pcb);
                 bannerdone = TRUE;
             }
@@ -1521,7 +1526,8 @@ static status_t
     if (cp->format == NCX_CVTTYP_XSD ||
         cp->format == NCX_CVTTYP_SQLDB ||
         cp->format == NCX_CVTTYP_TG2 ||
-        cp->format == NCX_CVTTYP_HTML) {
+        cp->format == NCX_CVTTYP_HTML ||
+        cp->format == NCX_CVTTYP_TREE) {
 
         if (!pcb->top->ismod) {
             /* need to load the entire module now,
@@ -1761,6 +1767,21 @@ static status_t
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
                 res = tg2_convert_module_model(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        case NCX_CVTTYP_TREE:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       TREE conversion of "
+                          "'%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = yangtree_convert_module(pcb, cp, scb);
                 if (res != NO_ERR) {
                     pr_err(res);
                 }
@@ -2011,7 +2032,9 @@ status_t
 
     if (LOGINFO) {
         /* generate banner everytime yangdump runs */
-        write_banner();
+        if(cvtparms->format!=NCX_CVTTYP_TREE) {
+            write_banner();
+        }
     } else {
         if (!(cvtparms->format == NCX_CVTTYP_XSD ||
               cvtparms->format == NCX_CVTTYP_HTML ||

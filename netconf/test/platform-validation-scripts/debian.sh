@@ -74,4 +74,12 @@ make
 make install
 make check
 
+cd ~/yuma123_${ver}/netconf/test/yangdump
+
+autoreconf -i -f
+./configure --prefix=/usr
+make
+make install
+make check
+
 echo "Success!"

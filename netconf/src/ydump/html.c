@@ -877,6 +877,7 @@ static void
     write_kw(scb, YANG_K_BASE);
     ses_putchar(scb, ' ');
 
+#if 0
     /* get filename if identity-stmt found */
     if (identity->base) {
         linenum = identity->base->tkerr.linenum;
@@ -895,7 +896,7 @@ static void
             linenum);
     ses_putstr(scb, (const xmlChar *)"</span>");
     ses_putchar(scb, ';');
-
+#endif
 }  /* write_identity_base */
 
 
@@ -3277,6 +3278,7 @@ static void
                    &identity->appinfoQ, 
                    indent);
 
+#if 0
     /* optional base sub-clause */
     if (identity->base) {
         write_identity_base(scb, 
@@ -3285,7 +3287,7 @@ static void
                             identity, 
                             indent);
     }
-
+#endif
     /* status field */
     write_status(scb, identity->status, indent);
 

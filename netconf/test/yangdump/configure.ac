@@ -21,7 +21,6 @@ AC_SUBST(CFLAGS)
 
 AC_CONFIG_FILES([
         Makefile
-	yangtree/Makefile
 ])
 
 AC_OUTPUT

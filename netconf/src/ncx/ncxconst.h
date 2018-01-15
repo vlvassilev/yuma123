@@ -668,6 +668,7 @@ extern "C" {
 #define NCX_EL_TEXT            (const xmlChar *)"text"
 #define NCX_EL_TG2             (const xmlChar *)"tg2"
 #define NCX_EL_TIMEOUT         (const xmlChar *)"timeout"
+#define NCX_EL_TREE            (const xmlChar *)"tree"
 #define NCX_EL_TXT             (const xmlChar *)"txt"
 #define NCX_EL_TRANSPORT       (const xmlChar *)"transport"
 #define NCX_EL_TRIM            (const xmlChar *)"trim"

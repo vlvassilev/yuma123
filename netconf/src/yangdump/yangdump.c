@@ -105,7 +105,9 @@ int
          * have output to STDOUT
          */
         if (res == NO_ERR) {
-            log_warn("\n");   /*** producing extra blank lines ***/
+            if(mycvtparms.format!=NCX_CVTTYP_TREE) {
+                log_warn("\n");   /*** producing extra blank lines ***/
+            }
         }
 
         print_errors();

@@ -9980,8 +9980,11 @@ boolean
             /* should not happen */
             return FALSE;
         }
-    case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
+        if(obj->def.augment->targobj) {
+            return obj_get_config_flag_deep(obj->def.augment->targobj);
+        }
+    case OBJ_TYP_USES:
     case OBJ_TYP_REFINE:
         /* no real setting -- not applicable */
         return FALSE;

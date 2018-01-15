@@ -51,63 +51,91 @@
 #include "yangdump.h"
 #include "yangdump_util.h"
 
-unsigned int get_data_obj_type_offset_max(const obj_template_t *obj)
+boolean is_last_non_uses(obj_template_t* obj)
+{
+    obj_template_t* prev_obj=obj;
+    obj_template_t* next_obj;
+
+    while(next_obj=dlq_nextEntry(prev_obj)) {
+        if(next_obj->objtype!=OBJ_TYP_USES) {
+            return FALSE;
+        }
+        prev_obj = next_obj;
+    }
+    return TRUE;
+}
+
+boolean is_last_data(obj_template_t* obj)
+{
+    obj_template_t* prev_obj=obj;
+    obj_template_t* next_obj;
+
+    while(next_obj=dlq_nextEntry(prev_obj)) {
+        if(next_obj->objtype==OBJ_TYP_CONTAINER || next_obj->objtype==OBJ_TYP_LEAF || next_obj->objtype==OBJ_TYP_LIST) {
+            return FALSE;
+        }
+        prev_obj = next_obj;
+    }
+    return TRUE;
+}
+
+boolean is_last_rpc(obj_template_t* obj)
+{
+    obj_template_t* prev_obj=obj;
+    obj_template_t* next_obj;
+
+    while(next_obj=dlq_nextEntry(prev_obj)) {
+        if(next_obj->objtype==OBJ_TYP_RPC) {
+            return FALSE;
+        }
+        prev_obj = next_obj;
+    }
+    return TRUE;
+}
+
+boolean is_last_notification(obj_template_t* obj)
+{
+    obj_template_t* prev_obj=obj;
+    obj_template_t* next_obj;
+
+    while(next_obj=dlq_nextEntry(prev_obj)) {
+        if(next_obj->objtype==OBJ_TYP_NOTIF) {
+            return FALSE;
+        }
+        prev_obj = next_obj;
+    }
+    return TRUE;
+}
+
+unsigned int get_child_name_width_max(const obj_template_t *obj, boolean from_top)
 {
     obj_template_t* chobj;
     dlq_hdr_t* childdatadefQ;
-    unsigned int j;
-    unsigned int type_offset;
-    unsigned int type_offset_max;
-    char* child_line_prefix;
+    unsigned int len_max;
 
     childdatadefQ = obj_get_datadefQ(obj);
     assert(childdatadefQ);
-    type_offset_max=0;
+    len_max=0;
+    if(!from_top && (obj->objtype == OBJ_TYP_CHOICE || obj->objtype == OBJ_TYP_CASE)) {
+        return get_child_name_width_max(obj->parent, FALSE);
+    }
     for (chobj = (obj_template_t *)dlq_firstEntry(childdatadefQ);
          chobj != NULL;
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
-        unsigned int type_offset_cur;
-        /*<status>*/
-        type_offset_cur=strlen("+--");
-        /*<flags>*/
-        if(chobj->objtype!=OBJ_TYP_CASE /*why pyang prints this for choice?!*/) {
-            type_offset_cur+=snprintf(NULL,0,"%s ", obj_get_config_flag(chobj)?"rw":"ro");
-        }
-        /*<name>*/
-        if(chobj->objtype==OBJ_TYP_CHOICE) {
-            type_offset_cur+=snprintf(NULL,0,"(%s)", obj_get_name(chobj));
-        } else if(chobj->objtype==OBJ_TYP_CASE) {
-            type_offset_cur+=snprintf(NULL,0,":(%s)", obj_get_name(chobj));
+        unsigned int len;
+        if(chobj->objtype == OBJ_TYP_USES) {
+            continue;
+        } else if(chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE) {
+            len = get_child_name_width_max(chobj, TRUE);
         } else {
-            type_offset_cur+=snprintf(NULL,0,"%s", obj_get_name(chobj));
+            len = strlen(obj_get_name(chobj));
         }
-        /*<opts>*/
-        if((chobj->objtype == OBJ_TYP_LEAF || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_ANYDATA || chobj->objtype == OBJ_TYP_ANYXML) && !obj_is_mandatory(chobj)) {
-            /* ?  for an optional leaf, choice, anydata or anyxml */
-            type_offset_cur+=strlen("?");
-        } else if((chobj->objtype == OBJ_TYP_CONTAINER) && !obj_is_np_container(chobj)) {
-            /* !  for a presence container */
-            type_offset_cur+=strlen("!");
-        } else if((chobj->objtype == OBJ_TYP_LEAF_LIST)) {
-            /* *  for a leaf-list or list */
-            type_offset_cur+=strlen("?");
-        } else if(chobj->objtype == OBJ_TYP_LIST) {
-            /* [<keys>] for a list's keys */
-            obj_key_t *key;
-            type_offset_cur+=strlen("* [");
-            for (key = obj_first_key(chobj);
-                 key != NULL;
-                 key = obj_next_key(key)) {
-                type_offset_cur+=snprintf(NULL,0,"%s%s",obj_get_name(key->keyobj),obj_next_key(key)?" ":"");
-            }
-            type_offset_cur+=strlen("]");
-
-        }
-        if((chobj->objtype == OBJ_TYP_LEAF || chobj->objtype == OBJ_TYP_LEAF_LIST) && (type_offset_max<type_offset_cur)) {
-            type_offset_max=type_offset_cur;
+        if(len_max<len) {
+            len_max=len;
         }
     }
-    return type_offset_max;
+
+    return len_max;
 }
 
 void print_data_obj(const obj_template_t *obj, char* line_prefix)
@@ -115,7 +143,7 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
     obj_template_t* chobj;
     dlq_hdr_t* childdatadefQ;
     int j;
-    unsigned int type_offset;
+    unsigned int name_width_max;
     char* child_line_prefix;
 
     childdatadefQ = obj_get_datadefQ(obj);
@@ -123,57 +151,60 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
         return;
     }
 
-    type_offset = get_data_obj_type_offset_max(obj);
+    name_width_max = get_child_name_width_max(obj, FALSE);
 
     for (chobj = (obj_template_t *)dlq_firstEntry(childdatadefQ);
          chobj != NULL;
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
-        unsigned int type_offset_cur=0;
+        unsigned int name_width_cur=0;
 
+        if(chobj->objtype==OBJ_TYP_USES) {
+            continue;
+        }
 
         printf(line_prefix);
         /*<status>*/
-        type_offset_cur+=printf("+--");
+        printf("+--");
         /*<flags>*/
         if(chobj->objtype!=OBJ_TYP_CASE /*why pyang prints this for choice?!*/) {
-            type_offset_cur+=printf("%s ", obj_get_config_flag(chobj)?"rw":"ro");
+            printf("%s ", obj_get_config_flag(chobj)?"rw":"ro");
         }
         /*<name>*/
         if(chobj->objtype==OBJ_TYP_CHOICE) {
-            type_offset_cur+=printf("(%s)", obj_get_name(chobj));
+            name_width_cur+=printf("(%s)", obj_get_name(chobj));
         } else if(chobj->objtype==OBJ_TYP_CASE) {
-            type_offset_cur+=printf(":(%s)", obj_get_name(chobj));
+            name_width_cur+=printf(":(%s)", obj_get_name(chobj));
         } else {
-            type_offset_cur+=printf("%s", obj_get_name(chobj));
+            name_width_cur+=printf("%s", obj_get_name(chobj));
         }
  
         /*<opts>*/
         if((chobj->objtype == OBJ_TYP_LEAF || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_ANYDATA || chobj->objtype == OBJ_TYP_ANYXML) && !obj_is_mandatory(chobj)) {
             /* ?  for an optional leaf, choice, anydata or anyxml */
-            type_offset_cur+=printf("?");
+            name_width_cur+=printf("?");
         } else if((chobj->objtype == OBJ_TYP_CONTAINER) && !obj_is_np_container(chobj)) {
             /* !  for a presence container */
-            type_offset_cur+=printf("!");
+            name_width_cur+=printf("!");
         } else if((chobj->objtype == OBJ_TYP_LEAF_LIST)) {
             /* *  for a leaf-list or list */
-            type_offset_cur+=printf("*");
+            name_width_cur+=printf("*");
         } else if(chobj->objtype == OBJ_TYP_LIST) {
             /* [<keys>] for a list's keys */
             obj_key_t *key;
-            type_offset_cur+=printf("* [");
+            printf("* [");
             for (key = obj_first_key(chobj);
                  key != NULL;
                  key = obj_next_key(key)) {
-                type_offset_cur+=printf("%s%s",obj_get_name(key->keyobj),obj_next_key(key)?" ":"");
+                printf("%s%s",obj_get_name(key->keyobj),obj_next_key(key)?" ":"");
             }
-            type_offset_cur+=printf("]");
+            printf("]");
         }
         /* /  for a top-level data node in a mounted module */
         /* @  for a top-level data node in a parent referenced module */
 
-        if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE) {
+        if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE || chobj->objtype == OBJ_TYP_RPCIO) {
             child_line_prefix=malloc(strlen(line_prefix)+3+1);
-            if(dlq_nextEntry(chobj)) {
+            if(!is_last_non_uses(chobj)) {
                 sprintf(child_line_prefix, "%s|  ",line_prefix);
             } else {
                 sprintf(child_line_prefix, "%s   ",line_prefix);
@@ -182,8 +213,8 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
             free(child_line_prefix);
             continue;
         }
-        /*type alignment*/
-        for(j=0;j<((int)type_offset-(int)type_offset_cur);j++) {
+        /*type alignment - line += "%s %-*s   %s" % (flags, width+1, name, t)*/
+        for(j=0;j<(int)name_width_max+1-(int)name_width_cur;j++) {
             printf(" ");
         }
         printf("  ");
@@ -196,7 +227,11 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
                 if(typdef->prefix) {
                     printf(" %s:%s", typdef->prefix, typdef->typenamestr);
                 } else {
-                    printf(" %s", typdef->typenamestr);
+                    if(0==strcmp("leafref",typdef->typenamestr)) {
+                        printf("-> %s", typdef->def.simple.xleafref->exprstr);
+                    } else {
+                        printf(" %s", typdef->typenamestr);
+                    }
                 }
             }
         }
@@ -222,7 +257,6 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
 
 void print_data(const ncx_module_t    *mod)
 {
-    const yang_node_t     *node;
     obj_template_t* obj;
     if (dlq_empty(&mod->datadefQ)) {
         return NO_ERR;
@@ -238,7 +272,7 @@ void print_data(const ncx_module_t    *mod)
         printf("\n    +--");
         printf("%s ", obj_get_config_flag(obj)?"rw":"ro");
         printf("%s", obj_get_name(obj));
-        if(dlq_nextEntry(obj)) {
+        if(!is_last_data(obj)) {
             print_data_obj(obj, "\n    |  ");
         } else {
             print_data_obj(obj, "\n       ");
@@ -248,7 +282,6 @@ void print_data(const ncx_module_t    *mod)
 
 void print_augmentations(const ncx_module_t    *mod)
 {
-    const yang_node_t     *node;
     obj_template_t* obj;
     if (dlq_empty(&mod->datadefQ)) {
         return NO_ERR;
@@ -261,11 +294,67 @@ void print_augmentations(const ncx_module_t    *mod)
         if (obj->objtype!=OBJ_TYP_AUGMENT) {
             continue;
         }
-
         printf("\n  augment %s:", obj->def.augment->target);
         print_data_obj(obj, "\n    ");
     }
 }
+
+void print_rpcs(const ncx_module_t    *mod)
+{
+    obj_template_t* obj;
+    unsigned int cnt=0;
+    if (dlq_empty(&mod->datadefQ)) {
+        return NO_ERR;
+    }
+
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+        if (obj->objtype!=OBJ_TYP_RPC) {
+            continue;
+        }
+        if(cnt==0) {
+            printf("\n  rpcs:");
+        }
+        printf("\n    +---x %s", obj_get_name(obj));
+        if(!is_last_rpc(obj)) {
+            print_data_obj(obj, "\n    |  ");
+        } else {
+            print_data_obj(obj, "\n       ");
+        }
+        cnt++;
+    }
+}
+
+void print_notifications(const ncx_module_t    *mod)
+{
+    obj_template_t* obj;
+    unsigned int cnt=0;
+    if (dlq_empty(&mod->datadefQ)) {
+        return NO_ERR;
+    }
+
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+        if (obj->objtype!=OBJ_TYP_NOTIF) {
+            continue;
+        }
+        if(cnt==0) {
+            printf("\n  notifications:");
+        }
+        printf("\n    +---n %s", obj_get_name(obj));
+        if(!is_last_notification(obj)) {
+            print_data_obj(obj, "\n    |  ");
+        } else {
+            print_data_obj(obj, "\n       ");
+        }
+        cnt++;
+    }
+}
+
 #if 0
         if (obj->objtype == OBJ_TYP_NOTIF) {
             return TRUE;
@@ -301,14 +390,17 @@ status_t
         return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
     //ses_putstr(scb, "module: ");
+    if (dlq_empty(&mod->datadefQ)) {
+        return NO_ERR;
+    }
     printf("module: %s", mod->name);
 
     /*draft-ietf-netmod-yang-tree-diagrams-04 sec.2*/
     print_data(mod);
     print_augmentations(mod);
+    print_rpcs(mod);
+    print_notifications(mod);
 #if 0
-    print_rpcs();
-    print_notifications();
     print_groupings();
     print_yangdata();
 #endif

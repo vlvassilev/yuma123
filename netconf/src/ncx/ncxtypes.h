@@ -705,7 +705,8 @@ typedef enum ncx_cvttyp_t_ {
     NCX_CVTTYP_YH,
     NCX_CVTTYP_YC,
     NCX_CVTTYP_UH,
-    NCX_CVTTYP_UC
+    NCX_CVTTYP_UC,
+    NCX_CVTTYP_TREE
 } ncx_cvttyp_t;
 
 

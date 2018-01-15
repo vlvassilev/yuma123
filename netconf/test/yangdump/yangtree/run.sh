@@ -24,10 +24,10 @@ for module in `ls ../../../modules/${dst}` ; do
   pyang_cmd="pyang -f tree --path /usr/share/yuma/modules/:/usr/share/yuma/modules/yang:/usr/share/yuma/modules/ietf:/usr/share/yuma/modules/netconfcentral:/usr/share/yuma/modules/yuma123 ../../../modules/${dst}/${module}"
   yangdump_cmd="yangdump --format=tree --modpath=/usr/share/yuma/modules/:/usr/share/yuma/modules/yang:/usr/share/yuma/modules/ietf:/usr/share/yuma/modules/netconfcentral:/usr/share/yuma/modules/yuma123 ../../../modules/${dst}/${module}"
   echo $pyang_cmd
-  $pyang_cmd | tee > tmp/pyang/${dst}/${module}.tree
+  $pyang_cmd | grep -v '^$' | tee > tmp/pyang/${dst}/${module}.tree
   pyang_ret=$?
   echo $yangdump_cmd
-  $yangdump_cmd | tee > tmp/yangdump/${dst}/${module}.tree
+  $yangdump_cmd | grep -v '^$' | tee > tmp/yangdump/${dst}/${module}.tree
   yangdump_ret=$?
   echo $yangdump_ret
   echo $pyang_ret

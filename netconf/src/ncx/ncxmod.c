@@ -1021,7 +1021,7 @@ static status_t
 
                     /* check if the file extension is really
                      *.yang or .yin
-                     * TBD: search the entire dir for the 
+                     * search the entire dir for the 
                      * highest valued date string
                      * if the revision == NULL
                      */
@@ -1031,7 +1031,17 @@ static status_t
                         !xml_strcmp((const xmlChar *)
                                     &ep->d_name[modnamelen+12], 
                                     YIN_SUFFIX)) {
-                        dirdone = TRUE;
+                        if(revision != NULL) {
+                            /*keep going on in case there is a newer revision*/
+                            dirdone = TRUE;
+                        } else {
+                            if(*done==TRUE) {
+                                if(0<xml_strcmp(&buff[pathlen],(const xmlChar *)ep->d_name)) {
+                                    /*skip older revisions then the one already stored*/
+                                    continue;
+                                }
+                            }
+                        }
                         *done = TRUE;
                         if ((pathlen + dentlen) >= bufflen) {
                             res = ERR_BUFF_OVFL;

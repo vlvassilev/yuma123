@@ -30,8 +30,7 @@ module ietf-datastores {
     "This YANG module defines two sets of identities for datastores.
      The first identifies the datastores themselves, the second
      identifies datastore properties.
-
-     Copyright (c) 2017 IETF Trust and the persons identified as
+     Copyright (c) 2018 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -45,7 +44,7 @@ module ietf-datastores {
      (http://www.rfc-editor.org/info/rfcxxxx); see the RFC itself
      for full legal notices.";
 
-  revision 2017-08-17 {
+  revision 2018-01-11 {
     description
       "Initial revision.";
     reference
@@ -79,7 +78,6 @@ module ietf-datastores {
     description
       "The candidate configuration datastore.";
   }
-
   identity startup {
     base conventional;
     description

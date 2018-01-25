@@ -1,4 +1,5 @@
 TESTS=\
+test-netconf-1dot1 \
 test-yang-validation \
 test-copy-config \
 test-deviation-add-must \

@@ -71,7 +71,7 @@ def step_2(conn_raw):
 	try:
 		rx_data = conn_raw.chan.recv(1000000)
 	except socket.timeout:
-		printf("Timeout!")
+		print("Timeout!")
 		assert(0)
 
 	print(rx_data)

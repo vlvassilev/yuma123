@@ -318,6 +318,8 @@ typedef struct ses_cb_t_ {
     ses_stats_t      stats;           /* per-session statistics */
     void            *mgrcb;    /* if manager session, mgr_scb_t */
 
+    uint32           indefer_len; /* pending defered input data */
+
     /* base:1.1 chunk state handling;
      * need to store number part of incoming chunk markers
      * in the scb in case they are split across buffers

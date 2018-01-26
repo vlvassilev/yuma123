@@ -449,6 +449,8 @@ status_t
                      * Need to have the xmlreader for this session
                      */
                     scb = def_reg_find_scb(i);
+
+ses_accept_defered_input:
                     if (scb != NULL) {
                         res = ses_accept_input(scb);
                         if (res != NO_ERR) {
@@ -494,6 +496,15 @@ status_t
                 } else {
                     send_some_notifications();
                 }
+            }
+            if(scb && scb->indefer_len>0) {
+                /*
+                 * input defered until previous message
+                 * is processed e.g. <rpc> trailing <hello>
+                 */
+                log_debug3("\nagt_ncxserver: goto deferred trailing input processing.");
+
+                goto ses_accept_defered_input;
             }
         }
     }  /* end select loop */

@@ -286,14 +286,18 @@ static status_t
                      * error out if a 3rd real message <rpc> is found
                      */
                     if (scb->protocol == NCX_PROTO_NONE &&
-                        ncx_protocol_enabled(NCX_PROTO_NETCONF11) &&
-                        dlq_count(&scb->msgQ) >= 4) {
-                        /* do not continue processing readbuff */
-                        log_error("\nses: Message could not "
-                                  "be deferred for s:%d because "
-                                  "protocol framing not set",
+                        ncx_protocol_enabled(NCX_PROTO_NETCONF11)) {
+
+                        assert(dlq_count(&scb->msgQ) == 1);
+                        scb->indefer_len=len-count;
+                        memmove(scb->readbuff,&scb->readbuff[count], len-count);
+                        count=len;
+
+                        log_debug3("\nses: Deferring trailing input data on ses:%d (%d of %d bytes)"
+                                  "until the preceding message is handled.",
+                                  scb->indefer_len,
+                                  len,
                                   scb->sid);
-                        return ERR_NCX_OPERATION_FAILED; 
                     }
                 }  /* else still more chars in EOM string to match */
             } else {
@@ -1821,7 +1825,7 @@ status_t
         /* loop until 1 buffer is read OK or retry count hit */
         readtries = 0;
         readdone = FALSE;
-        while (!readdone && res == NO_ERR) {
+        while (0==scb->indefer_len && !readdone && res == NO_ERR) {
             /* check read retry count */
             if (readtries++ == MAX_READ_TRIES) {
                 readdone = TRUE;
@@ -1875,8 +1879,10 @@ status_t
             return res;
         }
 
-        /* read was done if we reach here */
-        if (ret == 0) {
+        if(scb->indefer_len>0) {
+            ret = scb->indefer_len;
+            scb->indefer_len=0;
+        } else if (ret == 0) {
             /* session closed by remote peer */
             if (LOGINFO) {
                 log_info("\nses: session %d shut by remote peer", 
@@ -1884,6 +1890,7 @@ status_t
             }
             return ERR_NCX_SESSION_CLOSED;
         } else {
+            /* read was done if we reach here */
             if (LOGDEBUG2) {
                 log_debug2("\nses read OK (%d) on session %d", 
                            ret, 
@@ -1908,30 +1915,30 @@ status_t
                 }
                 ret--;
             }
-
-            /* pass the read buffer in 1 of these functions
-             * to handle the buffer framing
-             */
-            if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
-                res = accept_buffer_ssh_v11(scb, ret);
-            } else {
-                res = accept_buffer_ssh_v10(scb, ret);
-            }
-
-            if (res != NO_ERR || 
-                ((uint32)ret < scb->readbuffsize) || 
-                scb->rdfn == NULL) {
-#ifdef SES_DEBUG_TRACE
-                if (LOGDEBUG3) {
-                    log_debug3("\nses: bail exit %u:%u (%s)", 
-                               ret, 
-                               scb->readbuffsize,
-                               get_error_string(res));
-                }
-#endif
-                done = TRUE;
-            } /* else the SSH2 channel probably has more bytes to read */
         }
+        /* pass the read buffer in 1 of these functions
+         * to handle the buffer framing
+         */
+        if (ses_get_protocol(scb) == NCX_PROTO_NETCONF11) {
+            res = accept_buffer_ssh_v11(scb, ret);
+        } else {
+            res = accept_buffer_ssh_v10(scb, ret);
+        }
+
+        if (res != NO_ERR ||
+            ((uint32)ret < scb->readbuffsize) ||
+            scb->rdfn == NULL ||
+            scb->indefer_len) {
+#ifdef SES_DEBUG_TRACE
+            if (LOGDEBUG3) {
+                log_debug3("\nses: bail exit %u:%u (%s)",
+                           ret,
+                           scb->readbuffsize,
+                           get_error_string(res));
+            }
+#endif
+            done = TRUE;
+        } /* else the SSH2 channel probably has more bytes to read */
     }
     return res;
 

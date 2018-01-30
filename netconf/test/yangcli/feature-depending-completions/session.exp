@@ -1,0 +1,11 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /interfaces/interface/link-up-down-trap-\t\t"}
+    timeout {exit 1}
+}
+
+expect {
+    "enable" {sleep 1}
+    timeout {exit 1}
+}

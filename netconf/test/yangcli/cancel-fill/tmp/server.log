@@ -2,11 +2,11 @@ Starting netconfd...
 Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.
 Copyright (c) 2013-2017, Vladimir Vassilev, All Rights Reserved.
 
-Warning: SIL code for module '/usr/share/yuma/modules/ietf/ietf-interfaces.yang' not found
-Warning: SIL code for module '/usr/share/yuma/modules/ietf/iana-if-type.yang' not found
+Warning: SIL code for module '/usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang' not found
+Warning: SIL code for module '/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang' not found
 agt: Startup configuration skipped due to no-startup CLI option
 
-Running netconfd server (2.10-0)
+Running netconfd server (2.11-0)
 
 New session 1 created OK
 Session 1 for vladimir@127.0.0.1 now active (base:1.1)

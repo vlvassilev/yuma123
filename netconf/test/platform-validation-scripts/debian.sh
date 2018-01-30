@@ -14,19 +14,18 @@ else
 fi
 
 cd yuma123-git
-dpkg_version=`dpkg-parsechangelog --show-field Version`
+dpkg_ver=`dpkg-parsechangelog --show-field Version`
 #deb package version e.g. 2.10-0
 echo "dpkg_ver=${dpkg_ver}"
 #strip the deb package revision e.g. 2.10-0 -> 2.10
 ver=`echo ${dpkg_ver} | sed 's/-[^-]*//'`
 
-rm -rf yuma123_${ver}
-cd yuma123_${ver}
 mk-build-deps  -i -t 'apt-get -y'
 git clean -f
 
 cd ..
-tar -czvf yuma123_${ver}.orig.tar.gz --exclude .git yuma123_${ver}
+ln -s yuma123-git yuma123_${ver}
+tar -czvf yuma123_${ver}.orig.tar.gz --exclude .git yuma123-git
 cd yuma123_${ver}
 debuild -us -uc
 dpkg -i ../*.deb

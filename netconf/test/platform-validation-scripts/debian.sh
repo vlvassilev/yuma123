@@ -49,9 +49,12 @@ dpkg -i ../python-yuma*.deb
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 ssh-keyscan -t rsa -H localhost >> ~/.ssh/known_hosts
-
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "Port 22" >> /etc/ssh/sshd_config
 echo "Port 830" >> /etc/ssh/sshd_config
 echo "Port 1830" >> /etc/ssh/sshd_config
+echo "Port 2830" >> /etc/ssh/sshd_config
+echo "Port 3830" >> /etc/ssh/sshd_config
 echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock --ncxserver-sockname=1830@/tmp/ncxserver.1830.sock"' >> /etc/ssh/sshd_config
 /etc/init.d/ssh restart
 

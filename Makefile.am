@@ -10,11 +10,11 @@ netconf/modules \
 example-modules/helloworld \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
-netconf/man
+netconf/man \
+netconf/src/yangdump
+
 
 #netconf/src/yangdiff \
-#netconf/src/yangdump
-
 if WITH_TECLA
     SUBDIRS+=libtecla
 endif

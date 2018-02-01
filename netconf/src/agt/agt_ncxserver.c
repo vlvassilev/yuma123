@@ -370,7 +370,7 @@ status_t
         /* Service all the sockets with input and/or output pending */
         done2 = FALSE;
         for (i = 0; i < max(maxrdnum+1, maxwrnum+1) && !done2; i++) {
-
+            scb=NULL;
             /* check write output to client sessions */
             if (!stream_output && FD_ISSET(i, &write_fd_set)) {
                 /* try to send 1 packet worth of buffers for a session */

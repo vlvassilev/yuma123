@@ -930,7 +930,8 @@ static void write_check_val ( ses_cb_t *scb,
         write_slist_bits_val( scb, out, indent );
         break;
 
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_CHOICE:

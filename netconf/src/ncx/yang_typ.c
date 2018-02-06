@@ -17,7 +17,8 @@
 
     Current NCX base type   YANG builtin type
 
-    NCX_BT_ANY              anyxml,anydata
+    NCX_BT_ANYDATA          anydata
+    NCX_BT_ANYDATA          anyxml
     NCX_BT_BITS             bits
     NCX_BT_ENUM             enumeration
     NCX_BT_EMPTY            empty
@@ -3948,7 +3949,8 @@ static status_t
         res = finish_unknown_type(tkc, mod, typdef);
         CHK_EXIT(res, retres);
         break;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         extonly = TRUE;
         break;
     case NCX_BT_BITS:

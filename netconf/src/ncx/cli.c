@@ -243,9 +243,9 @@ static status_t
         } else {
             /* get the base type value */
             btyp = obj_get_basetype(obj);
-            if (btyp == NCX_BT_ANY || typ_is_simple(btyp)) {
+            if (btyp == NCX_BT_ANYDATA || btyp == NCX_BT_ANYXML || typ_is_simple(btyp)) {
                 typdef = obj_get_typdef(obj);
-                if (btyp != NCX_BT_ANY) {
+                if (btyp != NCX_BT_ANYDATA && btyp != NCX_BT_ANYXML) {
                     res = val_simval_ok(typdef, strval);
                 }
                 if (res == NO_ERR) {

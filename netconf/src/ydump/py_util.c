@@ -118,7 +118,8 @@ const xmlChar *
     switch (btyp) {
     case NCX_BT_NONE:
         return NCX_EL_NONE;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         return SA_PICKLE_TYPE;
     case NCX_BT_BITS:
     case NCX_BT_ENUM:

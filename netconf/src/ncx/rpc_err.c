@@ -480,7 +480,8 @@ void
         m__free(errinfo->dval);
     }
     switch (errinfo->val_btype) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:

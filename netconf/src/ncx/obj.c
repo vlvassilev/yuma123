@@ -9157,8 +9157,9 @@ ncx_btype_t
     case OBJ_TYP_NOTIF:
         return NCX_BT_CONTAINER;
     case OBJ_TYP_ANYXML:
+        return NCX_BT_ANYXML;
     case OBJ_TYP_ANYDATA:
-        return NCX_BT_ANY;
+        return NCX_BT_ANYDATA;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_BT_NONE;

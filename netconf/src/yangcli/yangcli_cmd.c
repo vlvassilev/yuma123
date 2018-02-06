@@ -797,7 +797,8 @@ static status_t
     }
 
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
         iscomplex = TRUE;
         break;
@@ -878,8 +879,8 @@ static status_t
             }
         }
 
-        set_completion_state_curparm(&server_cb->completion_state,
-                                     parm);
+        set_completion_state(&server_cb->completion_state,
+                                     rpc, parm, CMD_STATE_GETVAL);
 
         /* get a line of input from the user
          * but don't echo if this is a password parm

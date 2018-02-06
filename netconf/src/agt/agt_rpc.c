@@ -225,7 +225,8 @@ static void
                 SET_ERROR(res);
             }
             break;
-        case NCX_BT_ANY:
+        case NCX_BT_ANYDATA:
+        case NCX_BT_ANYXML:
         case NCX_BT_BITS:
         case NCX_BT_ENUM:
         case NCX_BT_EMPTY:

@@ -141,7 +141,8 @@ typedef enum ncx_data_class_t_ {
  */
 typedef enum ncx_btype_t_ {
     NCX_BT_NONE,
-    NCX_BT_ANY,
+    NCX_BT_ANYDATA,
+    NCX_BT_ANYXML,
     NCX_BT_BITS,
     NCX_BT_ENUM,
     NCX_BT_EMPTY,
@@ -174,7 +175,7 @@ typedef enum ncx_btype_t_ {
 } ncx_btype_t;
 
 
-#define NCX_FIRST_DATATYPE NCX_BT_ANY
+#define NCX_FIRST_DATATYPE NCX_BT_ANYDATA
 #define NCX_LAST_DATATYPE  NCX_BT_LIST
 #define NCX_NUM_BASETYPES  (NCX_LAST_DATATYPE-NCX_FIRST_DATATYPE+1)
 

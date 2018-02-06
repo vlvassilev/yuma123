@@ -1181,7 +1181,8 @@ static status_t
         break;
     case NCX_CL_COMPLEX:
         switch (typ_get_basetype(typdef)) {
-        case NCX_BT_ANY:
+        case NCX_BT_ANYDATA:
+        case NCX_BT_ANYXML:
             empty = TRUE;
             simtop = FALSE;
             break;
@@ -1199,7 +1200,8 @@ static status_t
         } else {
             empty = TRUE;
             switch (typ_get_basetype(typdef)) {
-            case NCX_BT_ANY:
+            case NCX_BT_ANYDATA:
+            case NCX_BT_ANYXML:
                 simtop = FALSE;
                 break;
             default:

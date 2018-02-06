@@ -627,7 +627,8 @@ static status_t
     if (leaf->typdef) {
         typ_free_typdef(leaf->typdef);
     }
-    leaf->typdef = typ_get_basetype_typdef(NCX_BT_ANY);
+
+    leaf->typdef = typ_get_basetype_typdef(any_typ==OBJ_TYP_ANYDATA?NCX_BT_ANYDATA:NCX_BT_ANYXML);
 
     /* Get the mandatory anyxml name */
     res = yang_consume_id_string(tkc, mod, &leaf->name);

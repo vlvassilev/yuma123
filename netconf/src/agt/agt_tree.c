@@ -14,7 +14,7 @@
   NETCONF Subtree Filtering Implementation for NCX
         
   Step 1) val_parse_nc will parse the entire subtree filter 
-          as type NCX_BT_ANY
+          as type NCX_BT_ANYDATA or NCX_BT_ANYXML
 
        A filter is parsed as type 'any' as follows:
 

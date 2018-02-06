@@ -4628,7 +4628,8 @@ ncx_tclass_t
     switch (btyp) {
     case NCX_BT_NONE:
         return NCX_CL_NONE;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_BOOLEAN:
     case NCX_BT_BITS:
     case NCX_BT_ENUM:

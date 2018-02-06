@@ -70,7 +70,7 @@ extern "C" {
 * and is converted by val_parse as follows:
 *
 *   Subtree Filter:
-*     NCX_BT_ANY -- start type
+*     NCX_BT_ANYXML  -- start type
 *   changed to real types during parsing
 *     NCX_BT_CONTAINER   -->  container node
 *     NCX_BT_EMPTY    -->  select node

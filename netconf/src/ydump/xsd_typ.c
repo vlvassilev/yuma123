@@ -1657,7 +1657,8 @@ status_t
         isext = hasnodes;
         break;
     case NCX_BT_UNION:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_EMPTY:
     case NCX_BT_SLIST:
     case NCX_BT_CONTAINER:

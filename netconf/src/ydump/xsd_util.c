@@ -1078,7 +1078,8 @@ static status_t
     case NCX_CL_COMPLEX:
         btyp = typ_get_basetype(typdef);
         switch (btyp) {
-        case NCX_BT_ANY:
+        case NCX_BT_ANYDATA:
+        case NCX_BT_ANYXML:
             typ_id = xmlns_xs_id();
             name = xsd_typename(btyp);            
             break;
@@ -1544,7 +1545,8 @@ const xmlChar *
     xsd_typename (ncx_btype_t btyp)
 {
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         return XSD_ANY_TYPE;
     case NCX_BT_BITS:
     case NCX_BT_ENUM:
@@ -3404,7 +3406,8 @@ status_t
     case NCX_CL_COMPLEX:
         btyp = typ_get_basetype(typdef);
         switch (btyp) {
-        case NCX_BT_ANY:
+        case NCX_BT_ANYDATA:
+        case NCX_BT_ANYXML:
             break;
         default:
             res = SET_ERROR(ERR_INTERNAL_VAL);

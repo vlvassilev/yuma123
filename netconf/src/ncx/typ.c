@@ -3051,7 +3051,8 @@ boolean
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
     case NCX_BT_LIST:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         return TRUE;
     default:
         return FALSE;
@@ -3097,7 +3098,8 @@ boolean
     typ_is_simple (ncx_btype_t btyp)
 {
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         return FALSE;
     case NCX_BT_BITS:
     case NCX_BT_ENUM:
@@ -3151,7 +3153,8 @@ boolean
     typ_is_xsd_simple (ncx_btype_t btyp)
 {
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_EMPTY:
         return FALSE;
     case NCX_BT_BITS:
@@ -4424,7 +4427,8 @@ boolean
     case NCX_BT_UNION:
         return TRUE;
     case NCX_BT_EMPTY:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -4536,7 +4540,8 @@ boolean
         return TRUE;
     case NCX_BT_EMPTY:
     case NCX_BT_LEAFREF:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -4637,7 +4642,8 @@ boolean
     case NCX_BT_LEAFREF:
     case NCX_BT_EMPTY:
         return FALSE;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_NONE:
         return FALSE;
     default:

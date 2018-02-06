@@ -525,7 +525,8 @@ static void
         ncx_clean_list(&val->v.list);
         break;
     case NCX_BT_LIST:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -1464,7 +1465,8 @@ static val_value_t *
     case NCX_BT_SLIST:
         *res = ncx_copy_list(&val->v.list, &copy->v.list);
         break;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_LIST:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
@@ -2928,7 +2930,8 @@ status_t
     case NCX_BT_NONE:
         res = ERR_NCX_DEF_NOT_FOUND;
         break;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         res = ERR_NCX_INVALID_VALUE;
         break;
     case NCX_BT_ENUM:
@@ -4059,7 +4062,8 @@ void
     case NCX_BT_NONE:
         SET_ERROR(ERR_INTERNAL_VAL);
         break;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         (*dumpfn)("(any)");
         break;
     case NCX_BT_ENUM:
@@ -4711,7 +4715,8 @@ status_t
 #endif
         }
         break;
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         val->btyp = NCX_BT_STRING;
         val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
         if (valstr) {
@@ -5071,7 +5076,8 @@ status_t
                 ncx_free_list(list_copy);
             }
             break;
-        case NCX_BT_ANY:
+        case NCX_BT_ANYDATA:
+        case NCX_BT_ANYXML:
         case NCX_BT_CONTAINER:
         case NCX_BT_LIST:
         case NCX_BT_CHOICE:
@@ -7602,7 +7608,8 @@ int32
         if (ret) {
             break;
         } /* else drop though and check values */
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -7855,7 +7862,8 @@ int32
         if (ret) {
             break;
         } /* else drop though and check values */
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -8205,7 +8213,8 @@ status_t
         *len = mylen;
         break;
     case NCX_BT_LIST:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -8828,7 +8837,8 @@ boolean
     case NCX_BT_BITS:
         /* these are printed 1 per line right now */
         return TRUE; 
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
     case NCX_BT_CHOICE:
@@ -9219,7 +9229,8 @@ boolean
         val_free_value(testval);
         break;
     case NCX_BT_LIST:
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
@@ -10323,7 +10334,7 @@ status_t
             xpath_free_pcb(val->xpathpcb);
             val->xpathpcb = NULL;
         }
-    } else if (val->btyp == NCX_BT_ANY) {
+    } else if (val->btyp == NCX_BT_ANYDATA || val->btyp == NCX_BT_ANYXML) {
         /* !!! this should not happen if agt/mgr_val_parse used
          * !!! parse_any will set the val->btyp to container
          */

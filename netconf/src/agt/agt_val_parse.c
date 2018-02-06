@@ -2599,8 +2599,8 @@ static status_t
     retval->editop = OP_EDITOP_NONE;
     retval->nsid = startnode->nsid;
 
-    /* check namespace errors except if the type is ANY */
-    nserr = (btyp != NCX_BT_ANY);
+    /* check namespace errors except if the type is ANY* */
+    nserr = (btyp != NCX_BT_ANYDATA && btyp != NCX_BT_ANYXML);
 
     if (retval->obj == NULL) {
         /* in case the parse_metadata_nc function
@@ -2616,7 +2616,8 @@ static status_t
      * to record as many errors as possible
      */
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         res = parse_any_nc(scb, msg, startnode, parentdc, retval);
         break;
     case NCX_BT_ENUM:

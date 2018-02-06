@@ -182,8 +182,8 @@ static tk_ent_t tlist [] = {
  */
 static tk_btyp_t blist [] = {
     { NCX_BT_NONE, 4, (const xmlChar *)"NONE", 0 },
-    { NCX_BT_ANY, 7, NCX_EL_ANYDATA, 0 },   /* anydata */
-    { NCX_BT_ANY, 6, NCX_EL_ANYXML, 0 },   /* anyxml */
+    { NCX_BT_ANYDATA, 7, NCX_EL_ANYDATA, 0 },   /* anydata */
+    { NCX_BT_ANYXML, 6, NCX_EL_ANYXML, 0 },   /* anyxml */
     { NCX_BT_BITS, 4, NCX_EL_BITS, FL_YANG },
     { NCX_BT_ENUM, 11, NCX_EL_ENUMERATION, FL_YANG },
     { NCX_BT_EMPTY, 5, NCX_EL_EMPTY, FL_YANG },

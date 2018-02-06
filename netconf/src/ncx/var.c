@@ -1988,10 +1988,10 @@ val_value_t *
                               useval->name, 
                               strval);
     } else if (obj->objtype == OBJ_TYP_ANYXML) {
-        /* convert the NCX_BT_ANY value to an NCX_BT_STRING
+        /* convert the NCX_BT_ANY* value to an NCX_BT_STRING
          * by reinitializing the template
          */
-        if (useval->btyp == NCX_BT_ANY) {
+        if (useval->btyp == NCX_BT_ANYDATA || useval->btyp == NCX_BT_ANYXML) {
             memset(&useval->v.childQ, 0x0, sizeof(dlq_hdr_t));
             useval->btyp = NCX_BT_STRING;
         }

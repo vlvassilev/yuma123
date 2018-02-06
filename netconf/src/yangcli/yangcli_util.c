@@ -887,33 +887,6 @@ void
 
 }  /* set_completion_state */
 
-
-/********************************************************************
- * FUNCTION set_completion_state_curparm
- * 
- * set the current parameter in the completion_state struct
- *
- * INPUTS:
- *    completion_state == record to set
- *    parm == parameter being filled in
- *********************************************************************/
-void
-    set_completion_state_curparm (completion_state_t *completion_state,
-                                  obj_template_t *parm)
-{
-#ifdef DEBUG
-    if (!completion_state) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    completion_state->cmdcurparm = parm;
-
-}  /* set_completion_state_curparm */
-
-
-
 /********************************************************************
 * FUNCTION xpath_getvar_fn
  *

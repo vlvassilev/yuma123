@@ -1928,8 +1928,8 @@ static status_t
     /* get the attribute values from the start node */
     retval->nsid = startnode->nsid;
 
-    /* check namespace errors except if the type is ANY */
-    nserr = (btyp != NCX_BT_ANY);
+    /* check namespace errors except if the type is ANY* */
+    nserr = (btyp != NCX_BT_ANYDATA && btyp != NCX_BT_ANYXML);
 
     /* parse the attributes, if any; do not quick exit on this error */
     res2 = parse_metadata(obj, startnode, nserr, retval);
@@ -1938,7 +1938,8 @@ static status_t
      * to record as many errors as possible
      */
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         res = parse_any(scb, startnode, retval);
         break;
     case NCX_BT_ENUM:
@@ -2088,8 +2089,8 @@ static status_t
     /* get the attribute values from the start node */
     retval->nsid = startnode->nsid;
 
-    /* check namespace errors except if the type is ANY */
-    nserr = (btyp != NCX_BT_ANY);
+    /* check namespace errors except if the type is ANY* */
+    nserr = (btyp != NCX_BT_ANYDATA && btyp != NCX_BT_ANYXML);
 
     /* parse the attributes, if any; do not quick exit on this error */
     res2 = parse_metadata(obj, startnode, nserr, retval);
@@ -2098,7 +2099,8 @@ static status_t
      * to record as many errors as possible
      */
     switch (btyp) {
-    case NCX_BT_ANY:
+    case NCX_BT_ANYDATA:
+    case NCX_BT_ANYXML:
         res = parse_any(scb, startnode, retval);
         break;
     case NCX_BT_ENUM:

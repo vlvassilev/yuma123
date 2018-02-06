@@ -417,21 +417,6 @@ extern void
 			  obj_template_t *parm,
 			  command_state_t  cmdstate);
 
-
-/********************************************************************
- * FUNCTION set_completion_state_curparm
- * 
- * set the current parameter in the completion_state struct
- *
- * INPUTS:
- *    completion_state == record to set
- *    parm == parameter being filled in
- *********************************************************************/
-extern void
-    set_completion_state_curparm (completion_state_t *completion_state,
-				  obj_template_t *parm);
-
-
 /********************************************************************
 * FUNCTION xpath_getvar_fn
  *

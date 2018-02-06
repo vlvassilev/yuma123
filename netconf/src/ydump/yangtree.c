@@ -162,7 +162,7 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
             continue;
         }
 
-        printf(line_prefix);
+        printf("%s",line_prefix);
         /*<status>*/
         printf("+--");
         /*<flags>*/

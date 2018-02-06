@@ -10,7 +10,7 @@ Index: yuma123_2.10/Makefile.am
 +example-modules/ietf-system \
  netconf/src/yangrpc \
  netconf/src/yangrpc/example \
- netconf/man
+ netconf/man \
 Index: yuma123_2.10/configure.ac
 ===================================================================
 --- yuma123_2.10.orig/configure.ac

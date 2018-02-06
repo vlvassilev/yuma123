@@ -14,7 +14,8 @@ netconf/man \
 netconf/src/yangdump
 
 
-#netconf/src/yangdiff \
+#netconf/src/yangdiff
+
 if WITH_TECLA
     SUBDIRS+=libtecla
 endif

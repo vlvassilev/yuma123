@@ -55,7 +55,10 @@ echo "Port 830" >> /etc/ssh/sshd_config
 echo "Port 1830" >> /etc/ssh/sshd_config
 echo "Port 2830" >> /etc/ssh/sshd_config
 echo "Port 3830" >> /etc/ssh/sshd_config
-echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock --ncxserver-sockname=1830@/tmp/ncxserver.1830.sock"' >> /etc/ssh/sshd_config
+echo "Port 4830" >> /etc/ssh/sshd_config
+echo "Port 5830" >> /etc/ssh/sshd_config
+echo "Port 6830" >> /etc/ssh/sshd_config
+echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock --ncxserver-sockname=1830@/tmp/ncxserver.1830.sock --ncxserver-sockname=2830@/tmp/ncxserver.2830.sock --ncxserver-sockname=3830@/tmp/ncxserver.3830.sock --ncxserver-sockname=4830@/tmp/ncxserver.4830.sock --ncxserver-sockname=5830@/tmp/ncxserver.5830.sock --ncxserver-sockname=6830@/tmp/ncxserver.6830.sock"' >> /etc/ssh/sshd_config
 /etc/init.d/ssh restart
 
 cd ~/yuma123_${ver}/netconf/test/netconfd

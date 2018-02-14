@@ -6,10 +6,9 @@ cd tmp
 wget https://tools.ietf.org/id/draft-ietf-netmod-rfc7223bis-00.txt
 wget https://tools.ietf.org/id/draft-ietf-netmod-rfc7277bis-00.txt
 wget https://tools.ietf.org/id/draft-ietf-netmod-rfc8022bis-05.txt
-wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
-sh rfcstrip draft-ietf-netmod-rfc7223bis-00.txt
-sh rfcstrip draft-ietf-netmod-rfc7277bis-00.txt
-sh rfcstrip draft-ietf-netmod-rfc8022bis-05.txt
+rfcstrip draft-ietf-netmod-rfc7223bis-00.txt
+rfcstrip draft-ietf-netmod-rfc7277bis-00.txt
+rfcstrip draft-ietf-netmod-rfc8022bis-05.txt
 pyang --ietf -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-interfaces@2017-08-17.yang
 pyang -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ex-ethernet-bonding.yang
 pyang -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ex-ethernet.yang

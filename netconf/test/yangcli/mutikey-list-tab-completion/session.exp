@@ -1,0 +1,32 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "xget /modules-sta\t"}
+    timeout {exit 1}
+}
+
+expect {
+    "te/"  {send "module\[nam\t"}
+    timeout {exit 1}
+}
+
+expect {
+    "e"  {send "=ietf-yang-library\]\[rev\t"}
+    timeout {exit 1}
+}
+
+expect {
+    "ision"  {send "=2016-06-21\]\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

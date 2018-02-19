@@ -87,4 +87,22 @@ make
 make install
 make check || true
 
+cd ~/yuma123-git/netconf/src/yangrpc/libapache2-mod-yangrpc-example/
+dpkg_ver=`dpkg-parsechangelog --show-field Version`
+#deb package version e.g. 2.10-0
+echo "dpkg_ver=${dpkg_ver}"
+#strip the deb package revision e.g. 2.10-0 -> 2.10
+ver=`echo ${dpkg_ver} | sed 's/-[^-]*//'`
+
+mk-build-deps  -i -t 'apt-get -y'
+git clean -f
+
+cd ..
+ln -s libapache2-mod-yangrpc-example libapache2-mod-yangrpc-example_${ver}
+tar -czvf libapache2-mod-yangrpc-example_${ver}.orig.tar.gz --exclude .git libapache2-mod-yangrpc-example
+cd libapache2-mod-yangrpc-example_${ver}
+debuild -us -uc
+apt-get install apache2
+dpkg -i ../*.deb
+
 echo "Success!"

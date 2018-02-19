@@ -74,4 +74,11 @@ make
 make install
 make check || true
 
+cd ~/yuma123-git/netconf/src/yangrpc/libapache2-mod-yangrpc-example/
+
+autoreconf -i -f
+./configure --prefix=/usr
+make
+make install
+
 echo "Success!"

@@ -22,6 +22,7 @@
 
 /* YANG database access headers */
 #include "ncx.h"
+#include "obj.h"
 #include "val.h"
 #include "val123.h"
 #include "val_util.h"
@@ -278,7 +279,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
 </head><body><table cellspacing=\"0\" width=\"620\">\
  <tbody><tr><td><h1>Statistics</h1></td>\
    <td align=\"right\" width=\"100\"><form action=\"ietf-interfaces-state.html\"><input value=\"Clear Counters\" type=\"submit\"><input name=\"clear\" value=\"1\" type=\"hidden\"></form>\
-   </td></tr></tbody></table>", timestamp_string);
+   </td></tr></tbody></table>");
 
     ap_rprintf(r, "<html><head>\
 <meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">\
@@ -298,7 +299,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
     strftime(timestamp_string, sizeof(timestamp_string), "%Y-%m-%dT%H:%M:%S%z", time_info);
     ap_rprintf(r, "<tr><td>Toc:</td><td width=\"60\" align=\"right\">%s</td></tr>", timestamp_string);
 
-    ap_rprintf(r, "<tr><td>Interval (sec):</td><td width=\"60\" align=\"right\">%u</td></tr>", ts_cur-ts_prev);
+    ap_rprintf(r, "<tr><td>Interval (sec):</td><td width=\"60\" align=\"right\">%lu</td></tr>", ts_cur-ts_prev);
     }
 
     ap_rprintf(r, "</tbody></table>");
@@ -334,7 +335,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         } else {
             colspan=2;
         }
-        ap_rprintf(r, "<th title=\"%s\" width=\"70\" colspan=\"%d\"><b>%s</b></th>", obj_get_description(statistic_obj)?obj_get_description(statistic_obj):"", colspan, obj_get_name(statistic_obj));
+        ap_rprintf(r, "<th title=\"%s\" width=\"70\" colspan=\"%d\"><b>%s</b></th>", obj_get_description(statistic_obj)?(char*)obj_get_description(statistic_obj):"", colspan, obj_get_name(statistic_obj));
     }
     ap_rprintf(r, "</tr>");
 
@@ -364,7 +365,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
         ap_rprintf(r, "<td width=\"70\"><b>abs</b></th>");
         ap_rprintf(r, "<td width=\"70\"><b>rate</b></td>");
         if(0==strcmp(obj_get_name(statistic_obj),"in-octets") || 0==strcmp(obj_get_name(statistic_obj),"out-octets")) {
-            ap_rprintf(r, "<td width=\"70\"><b>%</b></td>");
+            ap_rprintf(r, "<td width=\"70\"><b>%%</b></td>");
         }
     }
     ap_rprintf(r, "</tr>");
@@ -422,8 +423,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 char buf[20+1];
                 //counter = VAL_UINT64(val);
                 counter=get_counter(val,root_epoch_val);
-                sprintf(buf,"%lld",counter);
-                ap_rprintf(r, buf);
+                ap_rprintf(r,"%ld",counter);
             }
             ap_rprintf(r, "</td>");
 
@@ -431,13 +431,11 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
             ap_rprintf(r, "<td align=\"right\">");
             if(val!=NULL && root_prev_val!=NULL && (ts_cur-ts_prev)!=0) {
                 uint64_t counter;
-                char buf[20+1];
                 //counter = VAL_UINT64(val);
                 counter=get_counter(val,root_prev_val);
                 rate=counter/(ts_cur-ts_prev);
-                sprintf(buf,"%lld",rate);
                 if(root_prev_val!=NULL) {
-                    ap_rprintf(r, buf);
+                    ap_rprintf(r,"%ld",rate);
                 }
             }
             ap_rprintf(r, "</td>");
@@ -450,13 +448,11 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
             ap_rprintf(r, "<td align=\"right\">");
             if(val!=NULL && root_prev_val!=NULL && (ts_cur-ts_prev)!=0) {
                 uint64_t counter;
-                char buf[20+1];
                 //counter = VAL_UINT64(val);
                 counter=get_counter(val,root_prev_val);
                 rate=counter/(ts_cur-ts_prev);
-                sprintf(buf,"%lld %",100*rate/speed_in_bytes);
                 if(root_prev_val!=NULL) {
-                    ap_rprintf(r, buf);
+                    ap_rprintf(r, "%ld %%",100*rate/speed_in_bytes);
                 }
             }
             ap_rprintf(r, "</td>");

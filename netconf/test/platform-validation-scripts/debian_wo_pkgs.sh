@@ -75,6 +75,7 @@ make install
 make check || true
 
 cd ~/yuma123-git/netconf/src/yangrpc/libapache2-mod-yangrpc-example/
+apt-get -y install apache2-dev apache2
 
 autoreconf -i -f
 ./configure --prefix=/usr

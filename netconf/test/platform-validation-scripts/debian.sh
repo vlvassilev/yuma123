@@ -102,7 +102,7 @@ ln -s libapache2-mod-yangrpc-example libapache2-mod-yangrpc-example_${ver}
 tar -czvf libapache2-mod-yangrpc-example_${ver}.orig.tar.gz --exclude .git libapache2-mod-yangrpc-example
 cd libapache2-mod-yangrpc-example_${ver}
 debuild -us -uc
-apt-get install apache2
+apt-get -y install apache2
 dpkg -i ../*.deb
 
 echo "Success!"

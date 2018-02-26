@@ -1,0 +1,21 @@
+module main-module {
+
+    namespace "get-schema-test:test-module";
+    prefix "mm";
+
+    include sub-module;
+
+    revision 2017-12-07 {
+        description "Initial revision.";
+    }
+
+    typedef AA {
+      type string {
+        pattern ".*";
+      }
+    }
+
+    leaf t22 { type boolean; }
+    leaf t23 { type string; config false; }
+
+}

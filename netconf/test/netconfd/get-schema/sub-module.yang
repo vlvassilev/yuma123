@@ -1,0 +1,30 @@
+submodule sub-module {
+
+    belongs-to main-module { prefix mm; }
+
+    revision 2017-12-07 {
+        description "Initial revision.";
+    }
+
+    typedef X { type int32 { range 1..10; } }
+
+    typedef XX { type int32 { range min..10; } }
+
+    list a.sub { 
+       key "a b c";
+
+       leaf a { type int32; }
+       leaf b { type int16; }
+       leaf c { type int64; }
+       choice d {
+         case e {
+           leaf f { type empty; }
+           leaf g { type int32; mandatory true; }
+           leaf h { type int32; config false; }
+         }
+         leaf i { type leafref { path ../a; } }
+         leaf j { type mm:X; }
+       }
+    }
+
+}

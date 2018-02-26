@@ -1,0 +1,5 @@
+PURPOSE:
+ Verify get-schema works for a submodule.
+
+OPERATION:
+ loaded modules and submodules should be represented to netconf-state/schema list and they should be also retrieved by get-schema rpc.

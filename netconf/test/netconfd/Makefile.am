@@ -25,6 +25,7 @@ test-ietf-routing-bis \
 test-ietf-interfaces-bis \
 test-ietf-ip-bis \
 test-multi-instance \
+test-get-schema \
 test-memory-leak
 
 SUBDIRS= \

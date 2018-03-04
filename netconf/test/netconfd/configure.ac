@@ -27,6 +27,7 @@ AC_CONFIG_FILES([
         ietf-routing-bis/Makefile
         ietf-interfaces-bis/Makefile
         ietf-ip-bis/Makefile
+        agt-commit-complete/Makefile
 ])
 
 AC_OUTPUT

@@ -1,0 +1,10 @@
+FILES:
+ * run.sh - shell script executing the testcase
+ * session.py - python script connecting to the started netconfd server
+ * test-agt-commit-complete.c - SIL module test implementation (loads ietf-system.yang)
+
+PURPOSE:
+ Verify agt_commit_complete callbacks are correctly called.
+
+OPERATION:
+ Initiates commit and logs the commit complete callbacks.

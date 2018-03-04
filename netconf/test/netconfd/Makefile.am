@@ -26,6 +26,7 @@ test-ietf-interfaces-bis \
 test-ietf-ip-bis \
 test-multi-instance \
 test-get-schema \
+test-agt-commit-complete \
 test-memory-leak
 
 SUBDIRS= \
@@ -34,5 +35,6 @@ rollback-on-error \
 ietf-routing \
 ietf-routing-bis \
 ietf-interfaces-bis \
-ietf-ip-bis
+ietf-ip-bis \
+agt-commit-complete
 

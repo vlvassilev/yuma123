@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
+    <hostname>ok1</hostname>
+    <location>ok2</location>
+  </system>
+</config>

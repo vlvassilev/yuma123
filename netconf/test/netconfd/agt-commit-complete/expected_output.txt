@@ -1,0 +1,2 @@
+#0: location=None -> location=ok2, hostname=None -> hostname=ok1
+#1: location=ok2 -> location=ok4, hostname=ok1 -> hostname=ok3

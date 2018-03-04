@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd agt-commit-complete
+./run.sh

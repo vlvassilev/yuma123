@@ -423,7 +423,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 char buf[20+1];
                 //counter = VAL_UINT64(val);
                 counter=get_counter(val,root_epoch_val);
-                ap_rprintf(r,"%ld",counter);
+                ap_rprintf(r,"%llu",counter);
             }
             ap_rprintf(r, "</td>");
 
@@ -435,7 +435,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 counter=get_counter(val,root_prev_val);
                 rate=counter/(ts_cur-ts_prev);
                 if(root_prev_val!=NULL) {
-                    ap_rprintf(r,"%ld",rate);
+                    ap_rprintf(r,"%llu",rate);
                 }
             }
             ap_rprintf(r, "</td>");
@@ -452,7 +452,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 counter=get_counter(val,root_prev_val);
                 rate=counter/(ts_cur-ts_prev);
                 if(root_prev_val!=NULL) {
-                    ap_rprintf(r, "%ld %%",100*rate/speed_in_bytes);
+                    ap_rprintf(r, "%llu %%",100*rate/speed_in_bytes);
                 }
             }
             ap_rprintf(r, "</td>");

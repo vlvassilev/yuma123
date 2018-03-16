@@ -863,6 +863,41 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION is_later_revision
+*
+* Check if modpath_a is a more recent revision then modpath_b
+* INPUTS:
+*    modpath_a == modpath e.g. .../...@<YYYY-MM-DD>....
+*    modpath_b == modpath e.g. .../...@<YYYY-MM-DD>....
+*
+* RETURNS:
+*    TRUE if modpath_a has no revision in the name or is newer
+*    FALSE if modpath_a is older
+*********************************************************************/
+static boolean is_later_revision(xmlChar* modpath_a, xmlChar* modpath_b)
+{
+    char* a;
+    char* b;
+    //printf("is a=%s later revision then b=%s\n", modpath_a, modpath_b);
+    a=strchr(modpath_a,'@');
+    b=strchr(modpath_b,'@');
+
+    if(a==NULL) {
+        /* modpath without version suffix is always latest */
+        return TRUE;
+    } else if(b==NULL) {
+        /* modpath without version suffix is always latest */
+        return FALSE;
+    } else {
+        if(0<xml_strcmp(a,b)) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+}
+
+/********************************************************************
 * FUNCTION search_subdirs
 *
 * Search any subdirs for the specified module name,
@@ -911,6 +946,8 @@ static status_t
     uint32         pathlen, modnamelen, revisionlen, dentlen;
     boolean        dirdone;
     status_t       res;
+    boolean        done_subdir;
+    xmlChar*       best_match=NULL;
 
     /* init locals and return done flag */
     *done = FALSE;
@@ -969,6 +1006,7 @@ static status_t
          * but do not have a 'stat' function for partial filenames
          * so just going through the directory block in order
          */
+        //ep->d_type=DT_UNKNOWN; /*simulate filesystem with no d_type*/
         if (ep->d_type == DT_DIR || ep->d_type == DT_UNKNOWN) {
             if (*ep->d_name != '.' && strcmp(ep->d_name, "CVS")) {
                 if ((pathlen + dentlen) >= bufflen) {
@@ -978,9 +1016,11 @@ static status_t
                 } else {
                     xml_strcpy(&buff[pathlen], 
                                (const xmlChar *)ep->d_name);
+                    done_subdir = FALSE;
                     res = search_subdirs(buff, bufflen, modname, revision, 
-                                         done);
-                    if (*done) {
+                                         &done_subdir);
+                    if (done_subdir) {
+                        *done = TRUE;
                         dirdone = TRUE;
                     } else {
                         /* erase the directory name and keep trying */
@@ -1031,17 +1071,6 @@ static status_t
                         !xml_strcmp((const xmlChar *)
                                     &ep->d_name[modnamelen+12], 
                                     YIN_SUFFIX)) {
-                        if(revision != NULL) {
-                            /*keep going on in case there is a newer revision*/
-                            dirdone = TRUE;
-                        } else {
-                            if(*done==TRUE) {
-                                if(0<xml_strcmp(&buff[pathlen],(const xmlChar *)ep->d_name)) {
-                                    /*skip older revisions then the one already stored*/
-                                    continue;
-                                }
-                            }
-                        }
                         *done = TRUE;
                         if ((pathlen + dentlen) >= bufflen) {
                             res = ERR_BUFF_OVFL;
@@ -1054,6 +1083,28 @@ static status_t
                 }
             }
         }
+
+        if(*done==TRUE) {
+            if(revision != NULL) {
+                /*strict revision no need to keep going on checking if there is newer revision*/
+                dirdone = TRUE;
+            } else {
+                if(best_match==NULL) {
+                    best_match=strdup(buff);
+                } else {
+                    if(is_later_revision(buff,best_match)) {
+                        free(best_match);
+                        best_match=strdup(buff);
+                    }
+                }
+                *done=FALSE;
+            }
+        }
+    }
+    if(best_match) {
+        *done=TRUE;
+        xml_strcpy(buff,best_match);
+        free(best_match);
     }
 
     (void)closedir(dp);
@@ -1061,7 +1112,6 @@ static status_t
     return res;
 
 }  /* search_subdirs */
-
 
 /********************************************************************
 * FUNCTION list_subdirs

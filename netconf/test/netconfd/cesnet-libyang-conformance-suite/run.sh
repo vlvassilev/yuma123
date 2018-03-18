@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ "$RUN_WITH_CONFD" != "" ] ; then
-    # skipped test return value
-    exit 77
-fi
-
 rm -rf tmp || true
 mkdir tmp
 
@@ -27,8 +22,20 @@ test()
         fi
         MODULE=${1}/mod$(($index+1)).yang
         echo "Testing EXPECTED=$EXPECTED $MODULE ..."
-        /usr/sbin/netconfd --validate-config-only --startup-error=stop --no-startup --modpath=${LIB_YANG_PATH}/tests/conformance/${1}/ --module=${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang 1>tmp/${1}_mod$(($index+1)).yang.stdout 2>tmp/${1}_mod$(($index+1)).yang.stderr
-        RES=$?
+        if [ "$RUN_WITH_CONFD" != "" ] ; then
+            cd tmp
+            killall -KILL confd || true
+            echo "Starting confd: $RUN_WITH_CONFD"
+            source $RUN_WITH_CONFD/confdrc
+            confdc -c ../${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang --yangpath ../${LIB_YANG_PATH}/tests/conformance/${1}/ -o mod$(($index+1)).fxs
+            RES=$?
+            cd ..
+        else
+
+            echo "/usr/sbin/netconfd --validate-config-only --startup-error=stop --no-startup --modpath=${LIB_YANG_PATH}/tests/conformance/${1}/ --module=${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang 1>tmp/${1}_mod$(($index+1)).yang.stdout 2>tmp/${1}_mod$(($index+1)).yang.stderr"
+            /usr/sbin/netconfd --validate-config-only --startup-error=stop --no-startup --modpath=${LIB_YANG_PATH}/tests/conformance/${1}/ --module=${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang 1>tmp/${1}_mod$(($index+1)).yang.stdout 2>tmp/${1}_mod$(($index+1)).yang.stderr
+            RES=$?
+        fi
         echo "RES="$RES
         if [ "$RES" != "0" ] ; then
             if [ "$EXPECTED" == "OK" ] ; then

@@ -27,7 +27,7 @@ test-ietf-ip-bis \
 test-multi-instance \
 test-get-schema \
 test-agt-commit-complete \
-test-libyang-conformance-suite \
+test-cesnet-libyang-conformance-suite \
 test-memory-leak
 
 SUBDIRS= \

@@ -20,16 +20,16 @@ test()
     for index in ${!schema_load_fail[*]}
     do
         #printf "%4d: %s\n" $index ${schema_load_fail[$index]}
-        if [ ${schema_load_fail[$index]} == "1" ] ; then
+        if [ ${schema_load_fail[$index]} == "0" ] ; then
             EXPECTED="OK"
         else
             EXPECTED="FAIL"
         fi
         MODULE=${1}/mod$(($index+1)).yang
-        #echo "Testing EXPECTED=$EXPECTED $MODULE ..."
-        /usr/sbin/netconfd --validate-config-only --startup-error=stop --no-startup --module= ${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang 1>tmp/${1}_mod$(($index+1)).yang.stdout 2>tmp/${1}_mod$(($index+1)).yang.stderr
+        echo "Testing EXPECTED=$EXPECTED $MODULE ..."
+        /usr/sbin/netconfd --validate-config-only --startup-error=stop --no-startup --modpath=${LIB_YANG_PATH}/tests/conformance/${1}/ --module=${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang 1>tmp/${1}_mod$(($index+1)).yang.stdout 2>tmp/${1}_mod$(($index+1)).yang.stderr
         RES=$?
-        #echo "RES="$RES
+        echo "RES="$RES
         if [ "$RES" != "0" ] ; then
             if [ "$EXPECTED" == "OK" ] ; then
                 echo "FAIL: ${MODULE}"

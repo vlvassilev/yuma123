@@ -174,7 +174,7 @@ static void operational_resolve_origin_meta(val_value_t* operational_val, val_va
             operational_resolve_origin_meta(chval, child_a_val, child_b_val, origin_b_str);
         }
     }
-    return NO_ERR;
+    return;
 }
 
 

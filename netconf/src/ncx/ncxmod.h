@@ -148,7 +148,7 @@ extern "C" {
 #define NCXMOD_INSTALL   "YUMA_INSTALL"
 
 /* !! should import this from make !! */
-#ifdef FREEBSD
+#ifdef __FreeBSD__
 #define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/local/share/yuma"
 #else
 #define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yuma"

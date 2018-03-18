@@ -259,7 +259,7 @@ void print_data(const ncx_module_t    *mod)
 {
     obj_template_t* obj;
     if (dlq_empty(&mod->datadefQ)) {
-        return NO_ERR;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
@@ -284,7 +284,7 @@ void print_augmentations(const ncx_module_t    *mod)
 {
     obj_template_t* obj;
     if (dlq_empty(&mod->datadefQ)) {
-        return NO_ERR;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
@@ -304,7 +304,7 @@ void print_rpcs(const ncx_module_t    *mod)
     obj_template_t* obj;
     unsigned int cnt=0;
     if (dlq_empty(&mod->datadefQ)) {
-        return NO_ERR;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
@@ -332,7 +332,7 @@ void print_notifications(const ncx_module_t    *mod)
     obj_template_t* obj;
     unsigned int cnt=0;
     if (dlq_empty(&mod->datadefQ)) {
-        return NO_ERR;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);

@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+mkdir tmp || true
 cd tmp
 wget https://nexus.opendaylight.org/content/groups/public/org/opendaylight/integration/distribution-karaf/0.6.3-Carbon/distribution-karaf-0.6.3-Carbon.tar.gz
 tar -xzvf distribution-karaf-0.6.3-Carbon.tar.gz
@@ -23,6 +24,6 @@ rm /tmp/ncxserver.${NCPORT1}.sock || true
 SERVER1_PID=$!
 
 #configure topology - TODO
+python session.litenc.py --server=localhost --port=1830 --user=admin --password=admin
 yangcli --server=localhost --user=admin --ncport=1830 --run-command="xget /" --batch-mode --password=admin
-
 #test - TODO

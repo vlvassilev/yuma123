@@ -1,0 +1,17 @@
+This is a module that allows external programs to handle:
+ - transactional configuration changes
+ - status container read requests
+
+Instead of a custom callback a general interface based on external command invocation is implemented.
+
+Configuration transactions:
+
+ program-cfg --before=<transaction_id_before>.xml --before=<transaction_id_after>.xml
+
+Operational data read transaction:
+
+ program-stat --instance-id=/interface-state/interface[name='ge0']
+
+The registration schema points for the program-stat are specified in a text file. program-stat-cb.txt
+
+The two programs and the text file can be specified as environment variables.

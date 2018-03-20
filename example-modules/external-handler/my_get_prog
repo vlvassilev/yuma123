@@ -1,0 +1,3 @@
+#!/bin/sh
+echo my_get_prog  $@ >&2
+echo '<oper-status xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">up</oper-status>'

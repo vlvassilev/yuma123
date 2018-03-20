@@ -3,7 +3,10 @@ This is a module that allows external programs to handle:
  - status container read requests
 
 Usage:
- export COMMIT_PROG=./my_commit_prog.py ; export GET_PROG=./my_get_prog.py ; export GET_CB_SCHEMA_MAP=./my_get_schema_map.txt ;  /usr/sbin/netconfd --module=external-handler --no-startup --superuser=${USER}
+ export COMMIT_PROG=./my_commit_prog.py
+ export GET_PROG=./my_get_prog
+ export GET_CB_SCHEMA_MAP=my_get_cb_schema_map.txt
+ netconfd --module=external-handler --no-startup --superuser=${USER}
 
 Instead of a custom callback a general interface based on external command invocation is implemented.
 
@@ -13,12 +16,15 @@ Configuration transactions:
 
 Operational data read transaction:
 
- get-prog --instance-id=/interface-state/interface[name='ge0']
+ get-prog --instance-identifier=/interface-state/interface[name='ge0']
 
-The registration schema points for the program-stat are specified in a text file. program-stat-cb.txt:
+The registration schema points for the program-stat are specified in a text file.
+Each line is an unique absolute-schema-nodeid.
+
+get-cb-schema-map.txt:
 
  ...
- /interfaces-state/interface
+ /interfaces-state/interface/oper-status
  ...
 
 The two programs and the text file are specified as environment variables.

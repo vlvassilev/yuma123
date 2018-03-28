@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd unversioned-module-imports
+./run.sh

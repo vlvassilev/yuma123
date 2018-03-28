@@ -1,0 +1,6 @@
+This testcase validates that when modules of differing versions
+are reported yangcli downloads and uses the ones implemented on
+the server side. The testcase has server-modules and client-modules
+directories with different incompatible definitions. The testcase
+validates that the client side modules are not loaded and the
+server side modules are in fact the ones in use.

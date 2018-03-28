@@ -1,0 +1,20 @@
+module test-unversioned-module-imports-top {
+
+  namespace "http://yuma123.org/ns/test-unversioned-module-imports";
+  prefix tumit;
+
+  organization  "yuma123.org";
+  
+  description "Model for testing yangcli unversioned module imports resolution";
+  
+  revision 2018-03-27 {
+    description
+      "1.st version";
+  }
+
+  container top {
+      leaf foo {
+          type string;
+      }
+  }
+}

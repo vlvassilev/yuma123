@@ -1,0 +1,46 @@
+spawn yangcli --modpath=. --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /top/bar value=\"hello\"\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "Error" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /top/bar2 value=\"hello\"\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "Error" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /top/foo value=\"hello\"\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /top/foo2 value=\"hello\"\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}

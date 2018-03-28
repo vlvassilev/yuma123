@@ -1,0 +1,22 @@
+module test-unversioned-module-imports-augment {
+
+  namespace "http://yuma123.org/ns/test-unversioned-module-imports-augmentation";
+  prefix tumia;
+
+  import test-unversioned-module-imports-top { prefix tumit; }
+
+  organization  "yuma123.org";
+  
+  description "Model for testing yangcli unversioned module imports resolution. Augment part.";
+  
+  revision 2018-03-27 {
+    description
+      "1.st version";
+  }
+
+  augment /tumit:top {
+      leaf foo2 {
+          type string;
+      }
+  }
+}

@@ -1,0 +1,23 @@
+module mod1 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/sec7_1_5/mod1";
+  prefix m1;
+
+  import ietf-interfaces {
+    prefix if;
+    revision-date "2014-05-08";
+    reference "RFC 7223";
+    description "All 4 sub-statements of the import statement.";
+  }
+
+  organization
+    "yuma123.org";
+
+  description 'sec7_1_5 The "import" Statement';
+
+  revision 2017-07-15 {
+    description
+      "Initial version";
+  }
+}

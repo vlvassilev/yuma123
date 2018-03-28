@@ -727,6 +727,8 @@ typedef struct ncx_import_t_ {
     xmlChar            *module;
     xmlChar            *prefix;
     xmlChar            *revision;
+    xmlChar            *description;
+    xmlChar            *reference;
     ncx_module_t       *mod;                   /* back-ptr */
     boolean             used;
     boolean             usexsd;        /* FALSE if duplicate */

@@ -1337,7 +1337,7 @@ static status_t
     yang_import_ptr_t  *impptr;
     ncx_module_t       *testmod;
     tk_type_t           tktyp;
-    boolean             done, pfixdone, revdone;
+    boolean             done, pfixdone, revdone, description_done, reference_done;
     status_t            res, retres;
     ncx_error_t         tkerr;
 
@@ -1346,6 +1346,8 @@ static status_t
     done = FALSE;
     pfixdone = FALSE;
     revdone = FALSE;
+    description_done = FALSE;
+    reference_done = FALSE;
     retres = NO_ERR;
     memset(&tkerr, 0x0, sizeof(tkerr));
 
@@ -1446,6 +1448,32 @@ static status_t
                                          mod, 
                                          &imp->prefix,
                                          &pfixdone, 
+                                         &imp->appinfoQ);
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    ncx_free_import(imp);
+                    return res;
+                }
+            }
+        } else if ((mod->langver != NCX_YANG_VERSION10) && !xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_strclause(tkc,
+                                         mod,
+                                         &imp->description,
+                                         &description_done,
+                                         &imp->appinfoQ);
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    ncx_free_import(imp);
+                    return res;
+                }
+            }
+        } else if ((mod->langver != NCX_YANG_VERSION10) && !xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_strclause(tkc,
+                                         mod,
+                                         &imp->reference,
+                                         &reference_done,
                                          &imp->appinfoQ);
             if (res != NO_ERR) {
                 retres = res;

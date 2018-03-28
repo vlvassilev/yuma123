@@ -28,6 +28,7 @@ test-multi-instance \
 test-get-schema \
 test-agt-commit-complete \
 test-cesnet-libyang-conformance-suite \
+test-yang-conformance \
 test-memory-leak
 
 SUBDIRS= \

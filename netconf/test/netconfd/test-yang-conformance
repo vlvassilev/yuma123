@@ -1,0 +1,4 @@
+#!/bin/bash -e
+cd test-yang-conformance
+./run.sh
+

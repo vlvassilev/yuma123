@@ -2896,6 +2896,14 @@ void
         m__free(import->revision);
     }
 
+    if (import->description) {
+        m__free(import->description);
+    }
+
+    if (import->reference) {
+        m__free(import->reference);
+    }
+
     /* YANG only */
     ncx_clean_appinfoQ(&import->appinfoQ);
 

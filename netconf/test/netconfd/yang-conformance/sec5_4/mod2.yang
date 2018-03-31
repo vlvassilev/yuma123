@@ -1,0 +1,28 @@
+module mod2 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/sec5_4/mod2";
+  prefix m2;
+
+  import mod1 {
+    prefix mod1-import;
+  }
+
+  organization
+    "yuma123.org";
+
+  description 'sec5_4 Resolving Grouping, Type, and Identity Names';
+
+  revision 2017-07-31 {
+    description
+      "Initial version";
+  }
+  container refs {
+    list ref {
+      key entry;
+      leaf entry {
+        type mod1-import:entry-ref;
+      }
+    }
+  }
+}

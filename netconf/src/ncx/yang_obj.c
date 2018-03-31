@@ -9608,26 +9608,19 @@ static status_t
                 if (!pcbclone) {
                     res = ERR_INTERNAL_MEM;
                 } else {
-                    tkc->curerr = &pcb->tkerr;
-                    res = xpath_yang_parse_path(tkc, 
-                                                mod,
-                                                XP_SRC_LEAFREF,
-                                                pcbclone);
-                    if (res == NO_ERR) {
-                        leafobj = NULL;
-                        res = xpath_yang_validate_path(mod, 
-                                                       testobj, 
-                                                       pcbclone, 
-                                                       FALSE,
-                                                       &leafobj);
-                        if (res == NO_ERR && leafobj) {
-                            typ_set_xref_typdef(typdef, 
-                                                obj_get_typdef(leafobj));
-                            if (testobj->objtype == OBJ_TYP_LEAF) {
-                                testobj->def.leaf->leafrefobj = leafobj;
-                            } else {
-                                testobj->def.leaflist->leafrefobj = leafobj;
-                            }
+                    leafobj = NULL;
+                    res = xpath_yang_validate_path(mod,
+                                                   testobj,
+                                                   pcbclone,
+                                                   FALSE,
+                                                   &leafobj);
+                    if (res == NO_ERR && leafobj) {
+                        typ_set_xref_typdef(typdef,
+                                            obj_get_typdef(leafobj));
+                        if (testobj->objtype == OBJ_TYP_LEAF) {
+                            testobj->def.leaf->leafrefobj = leafobj;
+                        } else {
+                            testobj->def.leaflist->leafrefobj = leafobj;
                         }
                     }
                     xpath_free_pcb(pcbclone);

@@ -21,6 +21,13 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2018-04-01 {
+      description
+        "Added model-spec choice allowing alternatives
+         to be augmented supplementing the discrete cli parameters
+         --module, --feature-enable etc.";
+    }
+
     revision 2017-07-25 {
         description
           "Changed --startup-error default value to 'stop'.
@@ -137,8 +144,6 @@ module netconfd {
       uses ncxapp:ConfigParm;
 
       uses ncxapp:YumaHomeParm;
-
-      uses ncxapp:CommonFeatureParms;
 
       uses ncxapp:HomeParm;
 
@@ -322,9 +327,13 @@ module netconfd {
          type inet:port-number;
       }
 
-      uses ncxapp:ModuleParm;
-
-      uses ncxapp:DeviationParm;
+      choice model-spec {
+          case cli {
+              uses ncxapp:ModuleParm;
+              uses ncxapp:DeviationParm;
+              uses ncxapp:CommonFeatureParms;
+          }
+      }
 
       uses ncxapp:DatapathParm;
 

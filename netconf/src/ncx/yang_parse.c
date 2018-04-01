@@ -3273,6 +3273,13 @@ static status_t
     res = consume_revision_stmts(tkc, mod, pcb);
     CHK_EXIT(res, retres);
 
+#if 1
+    /*Workaround: Handle different order e.g. 'description' after 'revision'*/
+    /* Get the meta statements (organization, etc.) */
+    res = consume_meta_stmts(tkc, mod);
+    CHK_EXIT(res, retres);
+#endif
+
     /* make sure there is at least name and prefix to continue
      * do not continue if requested version does not match
      */

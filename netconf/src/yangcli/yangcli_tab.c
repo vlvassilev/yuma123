@@ -613,15 +613,16 @@ static obj_template_t *
                               int word_start,
                               int cmdlen)
 {
-    obj_template_t *modObj = ncx_get_first_object(mod);
+    obj_template_t *modObj;
+    assert(cmdlen>0);
+    modObj = ncx_get_first_object(mod);
     for(; modObj!=NULL; 
         modObj = ncx_get_next_object(mod, modObj)) {
         const xmlChar *pathname = obj_get_name(modObj);
         /* check if there is a partial command name */
-        if (cmdlen > 0 && !strncmp((const char *)pathname,
+        if (strlen(pathname)==cmdlen && !strncmp((const char *)pathname,
                                    &line[word_start],
                                    cmdlen)) {
-            // The object is the one looking for
             return modObj;
         }
     }

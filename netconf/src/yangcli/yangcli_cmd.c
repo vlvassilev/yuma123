@@ -3816,11 +3816,13 @@ static status_t
          */
         child = obj_find_child(input, NC_MODULE, NCX_EL_TEST_OPTION);
         res = NO_ERR;
-        parm = val_make_simval_obj(child,
-                                   op_testop_name(server_cb->testoption),
-                                   &res);
-        assert(parm);
-        val_add_child(parm, reqdata);
+        if(child!=NULL /*if-feature dependency on the validate server capability*/) {
+            parm = val_make_simval_obj(child,
+                                       op_testop_name(server_cb->testoption),
+                                       &res);
+            assert(parm);
+            val_add_child(parm, reqdata);
+        }
     }
 
     /* set the error-option to the user-configured or default value */

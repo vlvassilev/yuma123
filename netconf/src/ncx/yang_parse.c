@@ -2230,6 +2230,8 @@ static status_t
 *   tkc == token chain
 *   mod   == module struct that will get the ncx_import_t 
 *   pcb == parser control block
+* OUTPUTS:
+*   consumed == some statements were consumed if TRUE
 *
 * RETURNS:
 *   status of the operation
@@ -2237,7 +2239,8 @@ static status_t
 static status_t 
     consume_linkage_stmts (tk_chain_t *tkc,
                            ncx_module_t  *mod,
-                           yang_pcb_t *pcb)
+                           yang_pcb_t *pcb,
+                           boolean *consumed)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -2245,6 +2248,7 @@ static status_t
     status_t       res, retres;
     boolean        done;
 
+    *consumed = FALSE;
     expstr = "import or include keyword";
     res = NO_ERR;
     retres = NO_ERR;
@@ -2295,9 +2299,11 @@ static status_t
         if (!xml_strcmp(val, YANG_K_IMPORT)) {
             res = consume_import(tkc, mod, pcb);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!xml_strcmp(val, YANG_K_INCLUDE)) {
             res = consume_include(tkc, mod, pcb);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!yang_top_keyword(val)) {
             retres = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -2328,13 +2334,16 @@ static status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
+* OUTPUTS:
+*   consumed == some statements were consumed if TRUE
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
     consume_meta_stmts (tk_chain_t  *tkc,
-                        ncx_module_t *mod)
+                        ncx_module_t *mod,
+                        boolean *consumed)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -2342,6 +2351,7 @@ static status_t
     status_t       res, retres;
     boolean        done, org, contact, descr, ref;
 
+    *consumed = FALSE;
     expstr = "meta-statement";
     done = FALSE;
     org = FALSE;
@@ -2396,6 +2406,7 @@ static status_t
                                          &org, 
                                          &mod->appinfoQ);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!xml_strcmp(val, YANG_K_CONTACT)) {
             res = yang_consume_descr(tkc, 
                                      mod, 
@@ -2403,6 +2414,7 @@ static status_t
                                      &contact, 
                                      &mod->appinfoQ);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
             res = yang_consume_descr(tkc, 
                                      mod, 
@@ -2410,6 +2422,7 @@ static status_t
                                      &descr, 
                                      &mod->appinfoQ);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
             res = yang_consume_descr(tkc, 
                                      mod, 
@@ -2417,6 +2430,7 @@ static status_t
                                      &ref, 
                                      &mod->appinfoQ);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!yang_top_keyword(val)) {
             retres = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -2540,7 +2554,8 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_revision (tk_chain_t *tkc,
-                      ncx_module_t  *mod)
+                      ncx_module_t  *mod
+)
 {
     ncx_revhist_t *rev, *testrev;
     const xmlChar *val;
@@ -2722,6 +2737,8 @@ static status_t
 *   tkc == token chain
 *   mod == module struct that will get the ncx_revhist_t entries
 *   pcb == parser control block to use to check rev-date
+* OUTPUTS:
+*   consumed == consumed statement if TRUE
 *
 * RETURNS:
 *   status of the operation
@@ -2729,7 +2746,8 @@ static status_t
 static status_t 
     consume_revision_stmts (tk_chain_t *tkc,
                             ncx_module_t  *mod,
-                            yang_pcb_t *pcb)
+                            yang_pcb_t *pcb,
+                            boolean *consumed)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -2739,6 +2757,7 @@ static status_t
     boolean        done;
     int            ret;
 
+    *consumed = FALSE;
     expstr = "description keyword";
     res = NO_ERR;
     retres = NO_ERR;
@@ -2784,6 +2803,7 @@ static status_t
         if (!xml_strcmp(val, YANG_K_REVISION)) {
             res = consume_revision(tkc, mod);
             CHK_EXIT(res, retres);
+            *consumed = TRUE;
         } else if (!yang_top_keyword(val)) {
             retres = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -3253,8 +3273,19 @@ static status_t
         CHK_EXIT(res, retres);
     }
 
+/* loop until no more pre-body stmts left
+ * since the canonical order is not mandatory
+ */
+while(!done) {
+
+    boolean consumed_linkage_stmts = FALSE;
+    boolean consumed_meta_stmts = FALSE;
+    boolean consumed_revision_stmts = FALSE;
+
+    done = TRUE;
+
     /* Get the linkage statements (imports, include) */
-    res = consume_linkage_stmts(tkc, mod, pcb);
+    res = consume_linkage_stmts(tkc, mod, pcb, &consumed_linkage_stmts);
     CHK_EXIT(res, retres);
 
     if (!pcb->keepmode && retres != NO_ERR) {
@@ -3266,19 +3297,12 @@ static status_t
     }
 
     /* Get the meta statements (organization, etc.) */
-    res = consume_meta_stmts(tkc, mod);
+    res = consume_meta_stmts(tkc, mod, &consumed_meta_stmts);
     CHK_EXIT(res, retres);
 
     /* Get the revision statements */
-    res = consume_revision_stmts(tkc, mod, pcb);
+    res = consume_revision_stmts(tkc, mod, pcb, &consumed_revision_stmts);
     CHK_EXIT(res, retres);
-
-#if 1
-    /*Workaround: Handle different order e.g. 'description' after 'revision'*/
-    /* Get the meta statements (organization, etc.) */
-    res = consume_meta_stmts(tkc, mod);
-    CHK_EXIT(res, retres);
-#endif
 
     /* make sure there is at least name and prefix to continue
      * do not continue if requested version does not match
@@ -3328,6 +3352,10 @@ static status_t
             ;
         }
     }
+    if(consumed_linkage_stmts || consumed_meta_stmts || consumed_revision_stmts) {
+        done=FALSE;
+    }
+}
 
     /* Get the definition statements */
     res = consume_body_stmts(pcb, tkc, mod);

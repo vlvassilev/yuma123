@@ -86,6 +86,30 @@ expect {
     "RPC OK Reply" {sleep 1}
     timeout {exit 1}
 }
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "get-config\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "1\: case candidate\:" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "Enter choice number" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER):get-config>" {send "2\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "foo" {sleep 1}
+    timeout {exit 1}
+}
 
 send "delete /interfaces/interface\[n\t"
 

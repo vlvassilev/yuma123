@@ -10230,13 +10230,13 @@ boolean obj_is_mandatory (obj_template_t *obj)
 {
     assert(obj && "obj is NULL" );
     switch (obj->objtype) {
+    case OBJ_TYP_CASE:
+        return FALSE;
     case OBJ_TYP_CONTAINER:
         if (obj->def.container->presence) {
             return FALSE;
         }
         /* else drop through and check children */
-    case OBJ_TYP_CASE:
-        return FALSE;
     case OBJ_TYP_RPCIO:
         {
             obj_template_t *chobj = obj_first_child(obj);

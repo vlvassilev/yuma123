@@ -5247,7 +5247,7 @@ static status_t
             obj->parent->objtype <= OBJ_TYP_CASE) {
             ingrp1 = ingrp2 = FALSE;
             conf = obj_get_config_flag_check(obj, &ingrp1);
-            parentconf = obj_get_config_flag_check(obj->parent, &ingrp2);
+            parentconf = obj_get_config_flag_deep(obj->parent);
             if ((!parentconf && conf) && (!ingrp1 && !ingrp2))  {
                 if (obj_is_data(obj)) {
                     log_error("\nError: Node '%s' is marked as configuration, "

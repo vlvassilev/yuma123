@@ -35,7 +35,7 @@ date	     init     comment
 
 #include <time.h>
 //#include <sys/time.h>
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include "libtecla.h"
 #include "ncxconst.h"
 #include "ncxmod.h"

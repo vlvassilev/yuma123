@@ -33,7 +33,7 @@ date	     init     comment
 */
 
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_help
 #include "help.h"

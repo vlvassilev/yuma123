@@ -32,7 +32,7 @@ date	     init     comment
 17-feb-10    abb      Begun; split out from ncx.c
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

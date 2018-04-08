@@ -35,8 +35,8 @@ date         init     comment
 #include <errno.h>
 #include <assert.h>
 
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #include "procdefs.h"
 #include "dlq.h"

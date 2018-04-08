@@ -33,7 +33,7 @@ date         init     comment
 #include  <memory.h>
 #include  <assert.h>
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include  "procdefs.h"
 #include "def_reg.h"

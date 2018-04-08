@@ -26,7 +26,7 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"

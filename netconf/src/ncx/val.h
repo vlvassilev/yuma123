@@ -89,7 +89,7 @@ date	     init     comment
 
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include <time.h>
 
 #include "dlq.h"

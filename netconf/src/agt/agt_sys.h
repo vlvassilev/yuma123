@@ -30,7 +30,7 @@ date             init     comment
 04-jun-09    abb      Begun.
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "dlq.h"
 #include "ncxtypes.h"

@@ -37,7 +37,7 @@ date             init     comment
 #include <time.h>
 
 /* used by the agent for the xmlTextReader interface */
-#include <xmlreader.h>
+#include <libxml/xmlreader.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

@@ -28,7 +28,7 @@ date	     init     comment
 24-oct-11    mp       First draft.
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "status.h"

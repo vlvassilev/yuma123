@@ -25,7 +25,7 @@
 
  */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

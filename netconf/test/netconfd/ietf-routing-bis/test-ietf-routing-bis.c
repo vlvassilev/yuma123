@@ -2,7 +2,7 @@
     module test-ietf-routing-bis
  */
  
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>

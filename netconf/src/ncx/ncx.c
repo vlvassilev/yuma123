@@ -43,8 +43,8 @@ date         init     comment
 #include <unistd.h>
 #include <errno.h>
 
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #include "procdefs.h"
 

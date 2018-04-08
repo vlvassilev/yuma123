@@ -30,7 +30,7 @@ date             init     comment
 24-feb-09    abb      Begun.
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_agt_not
 #include "agt_not.h"

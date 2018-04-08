@@ -38,7 +38,7 @@ date         init     comment
 #include <ctype.h>
 #include <assert.h>
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include  "procdefs.h"
 #include "dlq.h"

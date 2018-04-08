@@ -33,8 +33,8 @@ date         init     comment
 #include <memory.h>
 #include <ctype.h>
 
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #ifndef _H_procdefs
 #include "procdefs.h"

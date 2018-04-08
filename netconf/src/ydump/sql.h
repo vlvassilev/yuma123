@@ -32,7 +32,7 @@ date	     init     comment
 
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"

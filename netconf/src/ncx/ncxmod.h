@@ -42,7 +42,7 @@ date	     init     comment
 06-oct-09   abb       Change YANG_ env vars to YUMA_ 
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_cap
 #include "cap.h"

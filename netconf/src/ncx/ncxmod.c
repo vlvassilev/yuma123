@@ -35,8 +35,8 @@ date         init     comment
 #include <pwd.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #include "procdefs.h"
 #include "help.h"

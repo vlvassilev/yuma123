@@ -70,7 +70,7 @@ date	     init     comment
 extern "C" {
 #endif
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_procdefs
 #include "procdefs.h"

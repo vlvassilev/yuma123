@@ -32,8 +32,8 @@ date         init     comment
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"

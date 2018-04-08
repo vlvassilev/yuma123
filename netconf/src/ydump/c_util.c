@@ -31,7 +31,7 @@ date         init     comment
 #include <string.h>
 #include <unistd.h>
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "c_util.h"

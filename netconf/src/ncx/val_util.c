@@ -35,7 +35,7 @@ date         init     comment
 #include <string.h>
 #include <ctype.h>
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "cfg.h"

@@ -1,0 +1,67 @@
+module mod1 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/sec7_13_3/mod1";
+  prefix m1;
+
+  organization
+    "yuma123.org";
+
+  description 'sec7_13_3 The "uses" Statement - XML Encoding Rules';
+
+  revision 2018-04-13 {
+    description
+      "Initial version";
+  }
+
+  typedef foo-ref {
+      type leafref {
+        path "/top1/list/foo";
+      }
+  }
+  typedef bar-ref {
+      type leafref {
+        path "/top1/list[foo=current()/../foo]/bar";
+      }
+  }
+
+  grouping foo-bar-ref-typedef {
+    leaf foo {
+      type foo-ref;
+    }
+    leaf bar {
+      type bar-ref;
+    }
+  }
+
+  grouping foo-bar-ref-inline {
+    leaf foo {
+      type leafref {
+        path "/m1:top1/m1:list/m1:foo";
+      }
+    }
+    leaf bar {
+      type leafref {
+        path "/m1:top1/m1:list[m1:foo=current()/../foo]/m1:bar";
+      }
+    }
+  }
+
+  container top1 {
+    list list {
+      key "foo bar";
+      leaf foo {
+        type string;
+      }
+      leaf bar {
+        type string;
+      }
+    }
+    container inline {
+      uses foo-bar-ref-inline;
+    }
+    container typedef {
+      uses foo-bar-ref-typedef;
+    }
+  }
+}

@@ -56,6 +56,7 @@ date         init     comment
 #include "tk.h"
 #include "typ.h"
 #include "val.h"
+#include "val123.h"
 #include "val_util.h"
 #include "xmlns.h"
 #include "xpath.h"
@@ -216,7 +217,7 @@ static ncx_module_t* select_target_module( xpath_pcb_t* pcb,
     *res = NO_ERR;
     ncx_module_t* targmod = NULL;
 
-    if( pcb->source == XP_SRC_XML || !pcb->tkerr.mod ) {
+    if( pcb->source == XP_SRC_XML) {
         if (nsid) {
             dlq_hdr_t *temp_modQ = ncx_get_temp_modQ();
             if (nsid == xmlns_nc_id() || !temp_modQ ) {
@@ -240,13 +241,45 @@ static ncx_module_t* select_target_module( xpath_pcb_t* pcb,
                            pcb->exprstr);
         }
     } else {
-        *res = xpath_get_curmod_from_prefix( prefix, pcb->tkerr.mod, &targmod);
+        ncx_module_t* imports_mod;
+        if(pcb->obj && NULL!=obj123_get_top_uses(pcb->obj)) {
+            /*
+             * it is obj from expanded groupings in uses and belongs
+             * to the same module as the top uses in the
+             * chain of ancestor nodes.
+             */
+            obj_template_t* top_uses_obj;
+            boolean inline_type;
+            typ_def_t* named_typdef;
+            typ_def_t* first_named_typdef;
+
+            if(pcb->obj->objtype==OBJ_TYP_LEAF && pcb->obj->def.leaf->typdef->tclass==NCX_CL_NAMED) {
+                named_typdef = pcb->obj->def.leaf->typdef;
+            } else if (pcb->obj->objtype==OBJ_TYP_LEAF_LIST && pcb->obj->def.leaflist->typdef->tclass==NCX_CL_NAMED) {
+                named_typdef = pcb->obj->def.leaflist->typdef;
+            } else {
+                named_typdef=NULL;
+            }
+            if(named_typdef) {
+                first_named_typdef=typ123_get_first_named_typdef(named_typdef);
+                imports_mod = first_named_typdef->tkerr.mod;
+            } else {
+                top_uses_obj = obj123_get_top_uses(pcb->obj);
+                imports_mod = top_uses_obj->mod;
+            }
+        } else {
+            imports_mod = pcb->tkerr.mod;
+        }
+        *res = xpath_get_curmod_from_prefix( prefix, imports_mod, &targmod);
+        if(*res!=NO_ERR) {
+            *res = xpath_get_curmod_from_prefix( prefix, pcb->obj->mod, &targmod);
+        }
         if (*res != NO_ERR) {
             if ( !prefix && laxnamespaces) {
                 *res = NO_ERR;
             } else {
-                pcb_log_error( pcb, "\nError: Module for prefix '%s' not found",
-                               (prefix) ? prefix : EMPTY_STRING );
+                pcb_log_error( pcb, "\nError: Module for prefix '%s' not found in %s should check %s",
+                               (prefix) ? prefix : EMPTY_STRING , pcb->tkerr.mod->name, pcb->obj?pcb->obj->mod->name:" pcb->obj is NULL");
             }
         }
     }
@@ -605,6 +638,7 @@ static const xmlChar* parse_node_identifier_tk_tt_period( xpath_pcb_t* pcb,
  * retrieve the associated node name for the current tk_tt_string
  * pcb token.
  *
+ *
  * \param pcb the parser control block in progress|
  * \param prefix the prefix
  * \param nsid the nsid
@@ -617,10 +651,13 @@ static const xmlChar* parse_node_identifier_tk_tt_string( xpath_pcb_t* pcb,
                                             status_t* res )
 {
     /* pfix:identifier */
-    *prefix = TK_CUR_MOD(pcb->tkc);
 
     if (pcb->source != XP_SRC_XML) {
-        if (pcb->tkerr.mod) {
+        if(pcb->obj && pcb->tkc->cur->mod==NULL) {
+            *prefix = pcb->obj->mod->prefix;
+            *nsid = pcb->obj->mod->nsid;
+        } else if (pcb->tkerr.mod) {
+            *prefix = TK_CUR_MOD(pcb->tkc);
             if ( xml_strcmp(pcb->tkerr.mod->prefix, *prefix)) {
                 ncx_import_t* import = ncx_find_pre_import( pcb->tkerr.mod, 
                                                             *prefix);
@@ -638,6 +675,7 @@ static const xmlChar* parse_node_identifier_tk_tt_string( xpath_pcb_t* pcb,
                 }
             }
         } else {
+            *prefix = TK_CUR_MOD(pcb->tkc);
             *nsid = xmlns_find_ns_by_prefix(*prefix);
             if ( *nsid == XMLNS_NULL_NS_ID ) {
                 *res = pcb_log_error_msg( pcb, pcb->tkerr.mod, 
@@ -647,6 +685,7 @@ static const xmlChar* parse_node_identifier_tk_tt_string( xpath_pcb_t* pcb,
             }
         }
     } else {
+        *prefix = TK_CUR_MOD(pcb->tkc);
         *res = xml_get_namespace_id( pcb->reader, *prefix, 
                                      TK_CUR_MODLEN(pcb->tkc), nsid);
         if ( *res != NO_ERR ) {
@@ -1684,12 +1723,13 @@ status_t
             return res;
         }
     }
-
+#if 1
     /* the module that contains the leafref is the one
      * that will always be used to resolve prefixes
      * within the XPath expression
      */
     pcb->tkerr.mod = mod;
+#endif
     pcb->source = source;
     if (source == XP_SRC_INSTANCEID) {
         pcb->flags |= XP_FL_INSTANCEID;

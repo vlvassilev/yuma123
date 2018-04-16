@@ -138,6 +138,7 @@ date         init     comment
 #include "obj.h"
 #include "status.h"
 #include "typ.h"
+#include "val123.h"
 #include "xml_util.h"
 #include "xpath.h"
 #include "xpath1.h"
@@ -7596,6 +7597,7 @@ static status_t
                             ((obj->parent) ? 
                             obj_get_name(obj->parent) : NCX_EL_NONE),
                             obj->tkerr.linenum);
+
                 }
             }
         }
@@ -9516,7 +9518,23 @@ static status_t
          * not augmentee)
          */
 
-        is_targetmod = (testobj->tkerr.mod == mod);
+        if(testobj->tkerr.mod == mod) {
+            is_targetmod = TRUE;
+        } else {
+            /* handle case of used groupings from external modules */
+            obj_template_t *top_uses_obj;
+            top_uses_obj=obj123_get_top_uses(testobj);
+
+            if(top_uses_obj==NULL || top_uses_obj->tkerr.mod!=mod) {
+                is_targetmod=FALSE;
+            } else {
+                is_targetmod=TRUE;
+            }
+        }
+
+        if(is_targetmod==FALSE) {
+            assert(0);
+        }
 
         if (LOGDEBUG4) {
             if (!obj_has_name(testobj)) {

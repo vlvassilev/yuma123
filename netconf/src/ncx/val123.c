@@ -670,3 +670,57 @@ val_value_t* val123_clone_real(val_value_t* val)
     val123_devirtualize(val_cloned);
     return val_cloned;
 }
+
+/********************************************************************
+* FUNCTION obj123_get_top_uses
+*
+*  Checks the ancestor nodes of obj and returns the uses
+*  node where the ancestor closes to root was instantiated
+*  or NULL if the obj node or any of its ancestors is not
+*  instantiated through uses.
+*
+* INPUTS:
+*   obj  == obj template of node
+*
+* RETURNS:
+*   pointer to obj_template_t of uses node or NULL
+*********************************************************************/
+obj_template_t* obj123_get_top_uses(obj_template_t* obj)
+{
+    obj_template_t* top_uses_obj=NULL;
+    for(;obj->parent!=NULL;obj=obj->parent) {
+        if(obj->usesobj!=NULL) {
+            top_uses_obj=obj->usesobj;
+        }
+    }
+    return top_uses_obj;
+}
+
+/********************************************************************
+* FUNCTION typ123_get_first_named_typdef
+*
+*  Follows a chain of named typdefs and returns pointer to
+*  the first (base) typ_def_t node of type class NCX_CL_NAMED.
+*
+*
+* INPUTS:
+*   typdef  == pointer to typ_def_t named type
+*
+* RETURNS:
+*   pointer to typ_def_t node first in chain of names type leading
+*   to typdef or NULL if the typdef class was not named or the chain did not lead to simple type.
+*********************************************************************/
+typ_def_t* typ123_get_first_named_typdef(typ_def_t* typdef)
+{
+    typ_def_t* parent=NULL;
+    typ_def_t* child = typdef;
+
+    while(child->tclass==NCX_CL_NAMED) {
+        parent=typ_get_parent_typdef(child);
+        if(parent==NULL || parent->tclass!=NCX_CL_NAMED) {
+            return child;
+        }
+        child = parent;
+    }
+    return NULL;
+}

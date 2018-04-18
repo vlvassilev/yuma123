@@ -6,4 +6,5 @@ test-memory-leak \
 test-netconf-notifications \
 test-feature-depending-completion \
 test-mutikey-list-tab-completion \
-test-unversioned-module-imports
+test-unversioned-module-imports \
+test-identical-node-names

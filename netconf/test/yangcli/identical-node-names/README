@@ -1,0 +1,6 @@
+When 2 modules define child nodes with identical names at the same
+parent yangcli should not accept unprefixed name but return error
+and report that the module name should be used as prefix to
+resolve the correct target.
+An exception to this rule should be made when the node
+is part of a case and nodes part of that case are already used.

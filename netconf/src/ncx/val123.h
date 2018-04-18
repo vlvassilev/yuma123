@@ -23,3 +23,4 @@ void val123_devirtualize(val_value_t* val);
 val_value_t* val123_clone_real(val_value_t* val);
 obj_template_t* obj123_get_top_uses(obj_template_t* obj);
 typ_def_t* typ123_get_first_named_typdef(typ_def_t* typdef);
+unsigned int ncx123_find_all_objects_que(dlq_hdr_t *modQ, const xmlChar *objname, obj_template_t **matched_objs, unsigned int matched_objs_limit);

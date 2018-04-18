@@ -1,0 +1,34 @@
+module mod2 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test/yangcli/identical-node-names/mod2";
+  prefix m2;
+
+  import mod1 {
+    prefix m1;
+  }
+
+  organization
+    "yuma123.org";
+
+  description
+    'Validation of handling of siblings with
+     identical names but different module namespace.';
+
+  revision 2018-04-16 {
+    description
+      "Initial version";
+  }
+
+  container bar {
+    presence "/mod2:bar is present";
+  }
+
+  augment /m1:foo/m1:choice1 {
+    case case2 {
+      leaf bar {
+        type string;
+      }
+    }
+  }
+}

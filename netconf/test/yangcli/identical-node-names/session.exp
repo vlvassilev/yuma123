@@ -1,0 +1,82 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "Error: Multiple object matches for node 'bar' in expr '/bar': mod1:bar, mod2:bar" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /m1:bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /m2:bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /mod1:bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "delete /mod2:bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

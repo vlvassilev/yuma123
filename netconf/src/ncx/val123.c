@@ -724,3 +724,42 @@ typ_def_t* typ123_get_first_named_typdef(typ_def_t* typdef)
     }
     return NULL;
 }
+
+/**
+ * \fn ncx123_find_all_objects_que
+ * \brief Find all obj_template_t in in any module that
+ * matches the object name string
+ * \param modQ Q of modules to check
+ * \param objname object name to match
+ * \return pointer to struct if present, NULL otherwise
+ */
+unsigned int
+    ncx123_find_all_objects_que (dlq_hdr_t *modQ,
+                             const xmlChar *objname,
+                             obj_template_t **matched_objs,
+                             unsigned int matched_objs_limit)
+{
+    assert ( modQ && " param modQ is NULL" );
+    assert ( objname && " param objname is NULL" );
+
+    obj_template_t *obj = NULL;
+    ncx_module_t   *mod;
+    unsigned int matched_cnt=0;
+
+    for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
+         mod != NULL;
+         mod = (ncx_module_t *)dlq_nextEntry(mod)) {
+
+        obj = obj_find_template_top(mod,
+                                    ncx_get_modname(mod),
+                                    objname);
+        if (obj) {
+            if(matched_objs!=NULL && (matched_objs_limit>matched_cnt)) {
+                matched_objs[matched_cnt]=obj;
+            }
+            matched_cnt++;
+        }
+    }
+    return matched_cnt;
+
+}   /* ncx123_find_all_objects_que */

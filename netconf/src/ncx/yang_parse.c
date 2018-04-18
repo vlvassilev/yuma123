@@ -3276,6 +3276,7 @@ static status_t
 /* loop until no more pre-body stmts left
  * since the canonical order is not mandatory
  */
+done=FALSE;
 while(!done) {
 
     boolean consumed_linkage_stmts = FALSE;
@@ -3352,7 +3353,7 @@ while(!done) {
             ;
         }
     }
-    if(consumed_linkage_stmts || consumed_meta_stmts || consumed_revision_stmts) {
+    if(/*consumed_linkage_stmts || */ consumed_meta_stmts || consumed_revision_stmts) {
         done=FALSE;
     }
 }

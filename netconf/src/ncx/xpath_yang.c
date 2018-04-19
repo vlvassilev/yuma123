@@ -276,19 +276,25 @@ static ncx_module_t* select_target_module( xpath_pcb_t* pcb,
                 imports_mod = first_named_typdef->tkerr.mod;
             } else {
                 top_uses_obj = obj123_get_top_uses(pcb->obj);
-                imports_mod = top_uses_obj->mod;
+                imports_mod = top_uses_obj->tkerr.mod;
             }
         } else {
             imports_mod = pcb->tkerr.mod;
             assert(pcb->obj==NULL || pcb->obj->mod==NULL || pcb->obj->mod==pcb->tkerr.mod);
         }
         if (imports_mod==NULL) {
-            /* brute force since not context module is available */
-            targmod=find_module(nsid);
-            if(targmod==NULL) {
-                *res = ERR_NCX_UNKNOWN_NAMESPACE;
-                pcb_log_error( pcb, "\nError: unknown namespace in expr '%s'",
-                               pcb->exprstr);
+            if(nsid) {
+                /* brute force since not context module is available */
+                targmod=find_module(nsid);
+                if(targmod==NULL) {
+                    *res = ERR_NCX_UNKNOWN_NAMESPACE;
+                    pcb_log_error( pcb, "\nError: unknown namespace in expr '%s'",
+                                   pcb->exprstr);
+                }
+            } else {
+                /* target module can't be determined from the provided input */
+                *res = NO_ERR;
+                targmod=NULL;
             }
             return targmod;
         } else {
@@ -360,8 +366,8 @@ static obj_template_t* ensure_found_object_is_rpc( obj_template_t* foundobj )
 }
 
 /********************************************************************
- * Utility function for finding a top level object if the prefix or
- * nsid is not specified.
+ * Utility function for finding all object matches even in cases where
+ * neither the prefix nor the nsid are specified.
  *
  * \param pcb the parser control block in progress
  * \param prefix the prefix value used if any
@@ -372,7 +378,7 @@ static obj_template_t* ensure_found_object_is_rpc( obj_template_t* foundobj )
  * \param matched_objs_limit max count of matched objs, when 0 only count
  * \return the number of matching objects found
  ********************************************************************/
-static unsigned int find_top_level_object_matches( xpath_pcb_t* pcb,
+static unsigned int find_all_object_matches( xpath_pcb_t* pcb,
                                        const xmlChar* prefix,
                                        xmlns_id_t nsid, 
                                        const xmlChar* nodename,
@@ -391,17 +397,22 @@ static unsigned int find_top_level_object_matches( xpath_pcb_t* pcb,
     }
 
 
-    if (obj_is_root(pcb->targobj)) {
-        if(nsid==0) {
+    if (nsid==0 && prefix==NULL && pcb->targobj) {
+        if(obj_is_root(pcb->targobj)) {
             dlq_hdr_t *temp_modQ = ncx_get_temp_modQ();
-            matched_cnt=ncx123_find_all_objects_que(temp_modQ,
+            matched_cnt=ncx123_find_all_homonym_top_objs(temp_modQ,
                              nodename,
                              matched_objs,
                              matched_objs_limit);
-            return matched_cnt;
         } else {
-            foundobj = find_object_from_root( nodename, nsid );
+            matched_cnt=obj123_find_all_homonym_child_objs(pcb->targobj,
+                             nodename,
+                             matched_objs,
+                             matched_objs_limit);
         }
+        return matched_cnt;
+    } else if(obj_is_root(pcb->targobj)) {
+        foundobj = find_object_from_root( nodename, nsid );
     } else if ( obj_get_nsid(pcb->targobj) == xmlns_nc_id() && 
                 ( !xml_strcmp(obj_get_name(pcb->targobj), NCX_EL_RPC)) ) { 
         /* find an RPC method with the nodename */
@@ -564,7 +575,7 @@ static status_t set_next_objnode( xpath_pcb_t *pcb,
         unsigned int matched_cnt;
         obj_template_t** matched_objs;
 
-        matched_cnt = find_top_level_object_matches( pcb, prefix, nsid, nodename, NULL, 0);
+        matched_cnt = find_all_object_matches( pcb, prefix, nsid, nodename, NULL, 0);
         if ( matched_cnt==0 ) {
             return pcb_log_error_msg(pcb, pcb->tkerr.mod, ERR_NCX_DEF_NOT_FOUND,
                       "\nError: No object match for node '%s' in expr '%s'", 
@@ -572,7 +583,7 @@ static status_t set_next_objnode( xpath_pcb_t *pcb,
         }
 
         matched_objs=(obj_template_t**)malloc(sizeof(obj_template_t*)*matched_cnt);
-        matched_cnt = find_top_level_object_matches( pcb, prefix, nsid, nodename, matched_objs, matched_cnt);
+        matched_cnt = find_all_object_matches( pcb, prefix, nsid, nodename, matched_objs, matched_cnt);
 
         if(matched_cnt>1) {
             char* matched_objs_str;
@@ -765,6 +776,8 @@ static const xmlChar* parse_node_identifier_tk_tt_string( xpath_pcb_t* pcb,
                         *nsid = testmod->nsid;
                     }
                 }
+            } else {
+                *nsid = pcb->tkerr.mod->nsid;
             }
         } else {
             *nsid = xmlns_find_ns_by_module(TK_CUR_MOD(pcb->tkc));

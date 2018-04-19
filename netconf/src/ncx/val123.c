@@ -726,15 +726,15 @@ typ_def_t* typ123_get_first_named_typdef(typ_def_t* typdef)
 }
 
 /**
- * \fn ncx123_find_all_objects_que
- * \brief Find all obj_template_t in in any module that
+ * \fn ncx123_find_all_matching_name_top_objs
+ * \brief Find all top obj_template_t in in any module that
  * matches the object name string
  * \param modQ Q of modules to check
  * \param objname object name to match
  * \return pointer to struct if present, NULL otherwise
  */
 unsigned int
-    ncx123_find_all_objects_que (dlq_hdr_t *modQ,
+    ncx123_find_all_homonym_top_objs(dlq_hdr_t *modQ,
                              const xmlChar *objname,
                              obj_template_t **matched_objs,
                              unsigned int matched_objs_limit)
@@ -762,4 +762,38 @@ unsigned int
     }
     return matched_cnt;
 
-}   /* ncx123_find_all_objects_que */
+}   /* ncx123_find_all_homonym_top_objs */
+
+/**
+ * \fn obj123_find_all_homonym_child_objs
+ * \brief Find all top obj_template_t in in any module that
+ * matches the object name string
+ * \param modQ Q of modules to check
+ * \param objname object name to match
+ * \return pointer to struct if present, NULL otherwise
+ */
+unsigned int
+    obj123_find_all_homonym_child_objs (obj_template_t *parent,
+                             const xmlChar *objname,
+                             obj_template_t **matched_objs,
+                             unsigned int matched_objs_limit)
+{
+    assert ( parent && " param parent is NULL" );
+    assert ( objname && " param objname is NULL" );
+
+    obj_template_t *obj;
+    unsigned int matched_cnt=0;
+
+    for( obj = obj_first_child_deep(parent);
+         obj != NULL;
+         obj = obj_next_child_deep(obj)) {
+        if (0==strcmp(objname,obj_get_name(obj))) {
+            if(matched_objs!=NULL && (matched_objs_limit>matched_cnt)) {
+                matched_objs[matched_cnt]=obj;
+            }
+            matched_cnt++;
+        }
+    }
+    return matched_cnt;
+
+}   /* obj123_find_all_homonym_child_objs */

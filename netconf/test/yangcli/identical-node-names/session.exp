@@ -11,7 +11,7 @@ expect {
 }
 
 expect {
-    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /foo/m1:bar value=\'hello\'\n"}
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /foo -- m1:bar=hello\n"}
     timeout {exit 1}
 }
 
@@ -21,10 +21,29 @@ expect {
 }
 
 expect {
-    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /foo/mod2:bar value=\'hello\'\n"}
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "merge /foo -- mod2:bar=hello\n"}
     timeout {exit 1}
 }
 
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "discard-changes\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /foo/m2:bar value=\'hello\'\n"}
+    timeout {exit 1}
+}
 
 expect {
     "RPC OK Reply" {sleep 1}

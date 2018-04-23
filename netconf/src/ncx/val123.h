@@ -33,3 +33,8 @@ unsigned int
                              const xmlChar *objname,
                              obj_template_t **matched_objs,
                              unsigned int matched_objs_limit);
+
+ncx_module_t*
+    obj123_find_child_mod_from_name(obj_template_t *parent, const char* modname);
+ncx_module_t*
+    obj123_find_child_mod_from_prefix(obj_template_t *parent, const char* modprefix);

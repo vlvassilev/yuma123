@@ -552,37 +552,59 @@ status_t cli123_parse_next_child_obj_from_path(obj_template_t* obj, boolean auto
 {
     status_t res;
     unsigned int parmnamelen, copylen, matchcount;
-    boolean gotmatch;
     const char* str;
     unsigned int len;
     obj_template_t* chobj;
+    char* modname_or_prefix=NULL;
+    char* modname=NULL;
+    char* name;
 
     res=NO_ERR;
     len = 0;
     chobj=NULL;
-    gotmatch=FALSE;
 
     /* check the parmname string for a terminating char */
     parmnamelen = 0;
 
     if (ncx_valid_fname_ch(*parmname)) {
         str = &parmname[1];
-        while (*str && ncx_valid_name_ch(*str)) {
+        name=parmname;
+        while (*str && (ncx_valid_name_ch(*str) || *str==':')) {
+            if(*str==':') {
+                modname_or_prefix=malloc(str-parmname);
+                memcpy(modname_or_prefix,parmname,str-parmname);
+                modname_or_prefix[str-parmname]=0;
+                name=str+1;
+            }
             str++;
         }
-        parmnamelen = (uint32)(str - parmname);
-        len = parmnamelen;
+        parmnamelen = (uint32)(str - name);
+        len = (uint32)(str - parmname);
+
+        /* is prefix or modname */
+        if(modname_or_prefix) {
+            ncx_module_t* mod;
+            modname=modname_or_prefix;
+            mod = obj123_find_child_mod_from_name(obj,modname_or_prefix);
+            if(mod==NULL) {
+                /* try to match prefix */
+                mod = obj123_find_child_mod_from_prefix(obj,modname_or_prefix);
+                if(mod!=NULL) {
+                    modname=mod->name;
+                }
+            }
+        }
 
         /* check if this parameter name is in the parmset def */
-        chobj = obj_find_child_str(obj, NULL,
+        chobj = obj_find_child_str(obj, modname,
                                    (const xmlChar *)parmname,
                                    parmnamelen);
 
         /* check if parm was found, try partial name if not */
         if (!chobj && autocomp) {
             matchcount = 0;
-            chobj = obj_match_child_str(obj, NULL,
-                                        (const xmlChar *)parmname,
+            chobj = obj_match_child_str(obj, modname,
+                                        (const xmlChar *)name,
                                         parmnamelen,
                                         &matchcount);
             if (chobj) {
@@ -596,6 +618,9 @@ status_t cli123_parse_next_child_obj_from_path(obj_template_t* obj, boolean auto
 
     }  /* else it could be a default-parm value */
 
+    if(modname_or_prefix!=NULL) {
+        free(modname_or_prefix);
+    }
     *chobj_out = chobj;
     *len_out = len;
 
@@ -797,3 +822,72 @@ unsigned int
     return matched_cnt;
 
 }   /* obj123_find_all_homonym_child_objs */
+
+
+/********************************************************************
+* FUNCTION obj123_find_child_mod_from_name
+*
+*  Looks for a child from a module with specified name
+*  and returns pointer to the module.
+*
+*
+* INPUTS:
+*   parent  == parent obj
+*   modname == name of the module to look for
+*
+* RETURNS:
+*   pointer to the module or NULL if no child
+*   from module with the specified name was found.
+*********************************************************************/
+ncx_module_t*
+    obj123_find_child_mod_from_name(obj_template_t *parent, const char* modname)
+{
+    assert ( parent && " param parent is NULL" );
+    assert ( modname && " param modname is NULL" );
+
+    obj_template_t *obj;
+
+    for( obj = obj_first_child_deep(parent);
+         obj != NULL;
+         obj = obj_next_child_deep(obj)) {
+        if (0==strcmp(modname,obj_get_mod_name(obj))) {
+            return obj_get_mod(obj);
+        }
+    }
+    return NULL;
+
+}   /* obj123_find_child_mod_from_name */
+
+/********************************************************************
+* FUNCTION obj123_find_child_mod_from_prefix
+*
+*  Looks for a child from a module with specified prefix
+*  and returns pointer to the module.
+*
+*
+* INPUTS:
+*   parent  == parent obj
+*   modprefix == prefix of the module to look for
+*
+* RETURNS:
+*   pointer to the module or NULL if no child
+*   from module with the specified prefix was found.
+*********************************************************************/
+ncx_module_t*
+    obj123_find_child_mod_from_prefix(obj_template_t *parent, const char* modprefix)
+{
+    assert ( parent && " param parent is NULL" );
+    assert ( modprefix && " param modprefix is NULL" );
+
+    obj_template_t *obj;
+
+    for( obj = obj_first_child_deep(parent);
+         obj != NULL;
+         obj = obj_next_child_deep(obj)) {
+        if (0==strcmp(modprefix,obj_get_mod_prefix(obj))) {
+            return obj_get_mod(obj);
+        }
+    }
+    return NULL;
+
+}   /* obj123_find_child_mod_from_prefix */

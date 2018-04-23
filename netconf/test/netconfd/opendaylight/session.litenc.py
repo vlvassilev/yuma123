@@ -73,14 +73,108 @@ def main():
 
 	get_rpc = """
 <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
- <filter type="xpath" select="/">
- </filter>
 </get>
 """
 	print("get / ...")
 	result = conn.rpc(get_rpc)
 
 	print lxml.etree.tostring(result)
+
+	delete_config_rpc = """
+  <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <target>
+      <candidate/>
+    </target>
+    <default-operation>merge</default-operation>
+    <config>
+      <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+        <module
+          xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+          nc:operation="delete">
+          <type
+            xmlns:sal-netconf="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">sal-netconf:sal-netconf-connector</type>
+          <name>left</name>
+        </module>
+      </modules>
+    </config>
+  </edit-config>
+"""
+	print("delete-config ...")
+	result = conn.rpc(delete_config_rpc)
+
+	commit_rpc = """
+<commit/>
+"""
+	print("commit ...")
+	result = conn.rpc(commit_rpc)
+	print lxml.etree.tostring(result)
+	ok = result.xpath('ok')
+	assert(len(ok)==1)
+
+	edit_config_rpc = """
+  <edit-config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <target>
+      <candidate/>
+    </target>
+    <default-operation>merge</default-operation>
+    <config>
+      <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+        <module
+          xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+          nc:operation="merge">
+          <type
+            xmlns:sal-netconf="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">sal-netconf:sal-netconf-connector</type>
+          <name>left</name>
+          <address xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">127.0.0.1</address>
+          <port xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">3830</port>
+          <tcp-only xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">false</tcp-only>
+          <username xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">demo</username>
+          <password xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">demo</password>
+  <event-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-event-executor</type>
+    <name>global-event-executor</name>
+  </event-executor>
+  <binding-registry xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</type>
+    <name>binding-osgi-broker</name>
+  </binding-registry>
+  <dom-registry xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</type>
+    <name>dom-broker</name>
+  </dom-registry>
+  <client-dispatcher xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf">prefix:netconf-client-dispatcher</type>
+    <name>global-netconf-dispatcher</name>
+  </client-dispatcher>
+  <processing-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadpool</type>
+    <name>global-netconf-processing-executor</name>
+  </processing-executor>
+  <keepalive-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:scheduled-threadpool</type>
+    <name>global-netconf-ssh-scheduled-executor</name>
+  </keepalive-executor>
+        </module>
+      </modules>
+    </config>
+  </edit-config>
+"""
+
+
+	print("edit-config ...")
+	result = conn.rpc(edit_config_rpc)
+	print lxml.etree.tostring(result)
+	ok = result.xpath('ok')
+	assert(len(ok)==1)
+
+	commit_rpc = """
+<commit/>
+"""
+	print("commit ...")
+	result = conn.rpc(commit_rpc)
+	print lxml.etree.tostring(result)
+	ok = result.xpath('ok')
+	assert(len(ok)==1)
 
         return(0)
 

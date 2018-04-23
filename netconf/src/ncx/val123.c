@@ -51,7 +51,7 @@ val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* need
         res = val_gen_instance_id(NULL, needle_root_val, NCX_IFMT_XPATH1, (xmlChar **) &root_pathbuff);
         assert(res==NO_ERR);
         assert(strlen(pathbuff)>strlen(root_pathbuff));
-        res = xpath_find_val_target(haystack_root_val, obj_get_mod(haystack_root_val->obj)/*mod*/, pathbuff+strlen(root_pathbuff)+1, &val);
+        res = xpath_find_val_target(haystack_root_val, obj_get_mod(needle_val->obj), pathbuff+strlen(root_pathbuff)+1, &val);
         free(root_pathbuff);
     }
     free(pathbuff);

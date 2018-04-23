@@ -14,16 +14,20 @@ cd ../../
 
 #start netconfd nodes - avoid 1830 used by the opendaylight NETCONF server.
 killall -KILL netconfd || true
-NCPORT0=2830
-NCPORT1=3830
+NCPORT0=3830
+NCPORT1=4830
 rm /tmp/ncxserver.${NCPORT0}.sock || true
-/usr/sbin/netconfd --modpath=.:/usr/share/yuma/modules/ --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=$USER --ncxserver-sockname=/tmp/ncxserver.${NCPORT0}.sock --port=${NCPORT0} &
+/usr/sbin/netconfd --modpath=/usr/share/yuma/modules/ietf-draft:/usr/share/yuma/modules/ietf --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=demo --ncxserver-sockname=/tmp/ncxserver.${NCPORT0}.sock --port=${NCPORT0} &
 SERVER0_PID=$!
 rm /tmp/ncxserver.${NCPORT1}.sock || true
-/usr/sbin/netconfd --modpath=.:/usr/share/yuma/modules/ --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=$USER --ncxserver-sockname=/tmp/ncxserver.${NCPORT1}.sock --port=${NCPORT1} &
+/usr/sbin/netconfd --modpath=/usr/share/yuma/modules/ietf-draft:/usr/share/yuma/modules/ietf --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=demo --ncxserver-sockname=/tmp/ncxserver.${NCPORT1}.sock --port=${NCPORT1} &
 SERVER1_PID=$!
 
 #configure topology - TODO
 python session.litenc.py --server=localhost --port=1830 --user=admin --password=admin
-yangcli --server=localhost --user=admin --ncport=1830 --run-command="xget /" --batch-mode --password=admin
+python session.yangcli.py --server=localhost --port=1830 --user=admin --password=admin
+yangcli --server=localhost --user=admin --ncport=1830 --run-command="get" --batch-mode --password=admin
 #test - TODO
+
+kill -KILL $SERVER0_PID
+kill -KILL $SERVER1_PID

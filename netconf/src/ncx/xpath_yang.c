@@ -1551,7 +1551,9 @@ static status_t
     status_t     res;
 
     res = NO_ERR;
-
+    if(pcb->obj && pcb->targobj==NULL) {
+        pcb->targobj=pcb->obj;
+    }
     /* check the next token;
      * it may be the start of a '../' pair or a
      * descendant-path (node-identifier)

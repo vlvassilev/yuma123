@@ -2337,6 +2337,16 @@ status_t
         }
     }
 
+    /* get the --use-agent parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USE_AGENT);
+    if (parm && parm->res == NO_ERR) {
+        /* save to the connect_valset parmset */
+        res = add_clone_parm(parm, connect_valset);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
     /* get the --transport parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_TRANSPORT);
     if (parm && parm->res == NO_ERR) {

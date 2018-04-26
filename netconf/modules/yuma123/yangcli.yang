@@ -52,6 +52,11 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2018-04-21 {
+        description
+          "Added use-agent leaf to ssh configuration.";
+    }
+
     revision 2017-03-26 {
         description
           "Changed namespace in order to edit the original
@@ -507,6 +512,15 @@ module yangcli {
              or not done, then password authentication will
              be attempted.";
           default "$HOME/.ssh/id_rsa";
+        }
+
+        leaf use-agent {
+          description
+            "When true, attempt to hand off authentication
+             tasks to an SSH agent.  Requires the server to
+             support public key authentication.";
+          type boolean;
+          default false;
         }
 
         uses ncxapp:ProtocolsParm;

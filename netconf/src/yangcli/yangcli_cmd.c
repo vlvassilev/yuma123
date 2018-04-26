@@ -2051,6 +2051,7 @@ void
     uint16                  port;
     boolean                 startedsession, tcp, portbydefault;
     boolean                 tcp_direct_enable;
+    boolean                 ssh_use_agent;
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
@@ -2167,6 +2168,15 @@ void
             port = SES_DEF_TCP_PORT;
         }
     }
+
+    ssh_use_agent = FALSE;
+    val = val_find_child(server_cb->connect_valset,
+                         YANGCLI_MOD, YANGCLI_USE_AGENT);
+    if (val != NULL &&
+        val->res == NO_ERR &&
+        VAL_BOOL(val)) {
+        ssh_use_agent = TRUE;
+    }
         
     log_info("\nyangcli: Starting NETCONF session for %s on %s",
              username, 
@@ -2182,6 +2192,7 @@ void
                               password, 
                               publickey,
                               privatekey,
+                              ssh_use_agent,
                               server, 
                               port,
                               (tcp) ? ((tcp_direct_enable) ? SES_TRANSPORT_TCP_DIRECT : SES_TRANSPORT_TCP)

@@ -123,6 +123,7 @@ extern void
 *   password == user password
 *   pubkeyfile == filespec for client public key
 *   privkeyfile == filespec for client private key
+*   ssh_use_agent == TRUE if the agent to be used for authentication
 *   target == ASCII IP address or DNS hostname of target
 *   port == NETCONF port number to use, or 0 to use defaults
 *   transport == enum for the transport to use (SSH or TCP)
@@ -146,6 +147,7 @@ extern status_t
                          const xmlChar *password,
                          const char *pubkeyfile,
                          const char *privkeyfile,
+                         boolean ssh_use_agent,
                          const xmlChar *target,
                          uint16 port,
                          ses_transport_t transport,

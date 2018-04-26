@@ -220,7 +220,8 @@ static status_t
                 const char *user,
                 const char *password,
                 const char *pubkeyfile,
-                const char *privkeyfile)
+                const char *privkeyfile,
+                boolean ssh_use_agent)
                 
 {
     mgr_scb_t  *mscb;
@@ -228,10 +229,12 @@ static status_t
     char       *userauthlist;
     int         ret;
     boolean     authdone;
+    char       *pkstr; /* pointer to string "publickey" in userauthlist */
 
     authdone = FALSE;
     mscb = mgr_ses_get_mscb(scb);
 
+    mscb->agent = NULL;
     mscb->session = libssh2_session_init();
     if (!mscb->session) {
         if (LOGINFO) {
@@ -302,8 +305,65 @@ static status_t
                    userauthlist);
     }
 
-    if (!authdone) {
-        if (strstr(userauthlist, "publickey") != NULL &&
+    pkstr = strstr(userauthlist, "publickey");
+    if (!authdone &&
+        pkstr != NULL) {
+        if (ssh_use_agent) {
+            int rc;
+            struct libssh2_agent_publickey *identity;
+            struct libssh2_agent_publickey *prev_identity = NULL;
+
+            mscb->agent = libssh2_agent_init(mscb->session);
+            if (mscb->agent == NULL) {
+                log_info("\nmgr_ses: SSH2 failure initializing agent support");
+                goto agent_done;
+            }
+
+            if (libssh2_agent_connect(mscb->agent)) {
+                log_info("\nmgr_ses: SSH2 failure connecting to ssh agent");
+                libssh2_agent_free(mscb->agent);
+                mscb->agent = NULL;
+                goto agent_done;
+            }
+
+            if (libssh2_agent_list_identities(mscb->agent)) {
+                log_info("\nmgr_ses: SSH2 failure requesting identities to ssh agent");
+                libssh2_agent_disconnect(mscb->agent);
+                libssh2_agent_free(mscb->agent);
+                mscb->agent = NULL;
+                goto agent_done;
+            }
+
+            while (1) {
+                rc = libssh2_agent_get_identity(mscb->agent, &identity,
+                                                prev_identity);
+                if (rc == 1)
+                    break;
+                if (rc < 0) {
+                    log_info("\nmgr_ses: SSH2 failure obtaining identity from ssh agent");
+                    rc = 1;
+                    break;
+                }
+                if (libssh2_agent_userauth(mscb->agent, user, identity)) {
+                    log_info("\nmgr_ses: SSH2 authentication with username %s and "
+                           "public key %s failed!",
+                           user, identity->comment);
+                } else {
+                    log_info("\nmgr_ses: SSH2 authentication with username %s and "
+                           "public key %s succeeded!",
+                           user, identity->comment);
+                    authdone = TRUE;
+                    break;
+                }
+                prev_identity = identity;
+            }
+
+agent_done:
+            if (!authdone)
+                log_info("\nmgr_ses: SSH2 trying next authentication method");
+
+        }
+        if (!authdone &&
             pubkeyfile != NULL &&
             privkeyfile != NULL) {
             boolean keyauthdone = FALSE;
@@ -778,6 +838,7 @@ status_t
                          const xmlChar *password,
                          const char *pubkeyfile,
                          const char *privkeyfile,
+                         boolean ssh_use_agent,
                          const xmlChar *target,
                          uint16 port,
                          ses_transport_t transport,
@@ -898,7 +959,8 @@ status_t
                          (const char *)user,
                          (const char *)password,
                          pubkeyfile,
-                         privkeyfile);
+                         privkeyfile,
+                         ssh_use_agent);
     }
 
     if (res != NO_ERR) {

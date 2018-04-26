@@ -341,6 +341,12 @@ void
         mscb->modules_state_val = NULL;
     }
 
+    if (mscb->agent) {
+        libssh2_agent_disconnect(mscb->agent);
+        libssh2_agent_free(mscb->agent);
+        mscb->agent = NULL;
+    }
+
     if (mscb->channel) {
         libssh2_channel_free(mscb->channel);
         mscb->channel = NULL;

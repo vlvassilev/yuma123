@@ -12,46 +12,46 @@ AC_PROG_LIBTOOL
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 
-yangdir="$prefix/share/yuma/modules"
+yangdir=${datarootdir}/yuma/modules
 AC_SUBST(yangdir)
 
-ietf_yangdir="$prefix/share/yuma/modules/ietf"
+ietf_yangdir=${datarootdir}/yuma/modules/ietf
 AC_SUBST(ietf_yangdir)
 
-ietf_draft_yangdir="$prefix/share/yuma/modules/ietf-draft"
+ietf_draft_yangdir=${datarootdir}/yuma/modules/ietf-draft
 AC_SUBST(ietf_draft_yangdir)
 
-ietf_patched_yangdir="$prefix/share/yuma/modules/ietf-patched"
+ietf_patched_yangdir=${datarootdir}/yuma/modules/ietf-patched
 AC_SUBST(ietf_patched_yangdir)
 
-ietf_derived_yangdir="$prefix/share/yuma/modules/ietf-derived"
+ietf_derived_yangdir=${datarootdir}/yuma/modules/ietf-derived
 AC_SUBST(ietf_derived_yangdir)
 
-ietf_expired_yangdir="$prefix/share/yuma/modules/ietf-expired"
+ietf_expired_yangdir=${datarootdir}/yuma/modules/ietf-expired
 AC_SUBST(ietf_expired_yangdir)
 
-netconfcentral_yangdir="$prefix/share/yuma/modules/netconfcentral"
+netconfcentral_yangdir=${datarootdir}/yuma/modules/netconfcentral
 AC_SUBST(netconfcentral_yangdir)
 
-yuma123_yangdir="$prefix/share/yuma/modules/yuma123"
+yuma123_yangdir=${datarootdir}/yuma/modules/yuma123
 AC_SUBST(yuma123_yangdir)
 
-yang_yangdir="$prefix/share/yuma/modules/yang"
+yang_yangdir=${datarootdir}/yuma/modules/yang
 AC_SUBST(yang_yangdir)
 
-ncx_netconf_includedir="$prefix/include/yuma/ncx"
+ncx_netconf_includedir=${includedir}/yuma/ncx
 AC_SUBST(ncx_netconf_includedir)
 
-agt_netconf_includedir="$prefix/include/yuma/agt"
+agt_netconf_includedir=${includedir}/yuma/agt
 AC_SUBST(agt_netconf_includedir)
 
-mgr_netconf_includedir="$prefix/include/yuma/mgr"
+mgr_netconf_includedir=${includedir}/yuma/mgr
 AC_SUBST(mgr_netconf_includedir)
 
-yangrpc_netconf_includedir="$prefix/include/yuma/yangrpc"
+yangrpc_netconf_includedir=${includedir}/yuma/yangrpc
 AC_SUBST(yangrpc_netconf_includedir)
 
-platform_netconf_includedir="$prefix/include/yuma/platform"
+platform_netconf_includedir=${includedir}/yuma/platform
 AC_SUBST(platform_netconf_includedir)
 
 apachemoduledir="$libdir/apache2/modules"

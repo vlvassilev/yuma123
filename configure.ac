@@ -74,6 +74,7 @@ AC_ARG_WITH(tecla,
 	[TECLA="1"],[])
 AM_CONDITIONAL([WITH_TECLA], [test "x$TECLA" = x1])
 
+AM_PATH_XML2
 
 AC_CONFIG_FILES([
         Makefile \

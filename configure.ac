@@ -8,6 +8,9 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_AS
 AC_PROG_LIBTOOL
+AC_SEARCH_LIBS([dlopen], [dl dld], [], [
+  AC_MSG_ERROR([unable to find the dlopen() function])
+])
 
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)

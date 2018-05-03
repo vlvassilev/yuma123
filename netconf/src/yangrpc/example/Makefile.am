@@ -3,7 +3,7 @@ yangrpc_example_SOURCES = \
 $(top_srcdir)/netconf/src/yangrpc/example/yangrpc-example.c
 
 yangrpc_example_CPPFLAGS = -I $(top_srcdir)/libtecla -I $(top_srcdir)/netconf/src/yangcli/ -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump $(XML_CPPFLAGS) -I$(top_srcdir)/netconf/src/yangrpc
-yangrpc_example_LDFLAGS = $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la $(top_builddir)/netconf/src/yangrpc/libyangrpc.la $(XML_LIB) -lz  -ldl -lssh2 -lncurses
+yangrpc_example_LDFLAGS = $(top_builddir)/netconf/src/mgr/libyumamgr.la $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la $(top_builddir)/netconf/src/yangrpc/libyangrpc.la $(XML_LIB) -lz  $(LIBS) -lssh2 -lncurses
 
 bin_PROGRAMS += yangrpc-parse-example
 yangrpc_parse_example_SOURCES = \

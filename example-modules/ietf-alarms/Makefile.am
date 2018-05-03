@@ -4,7 +4,7 @@ libietf_alarms_la_SOURCES = \
 ietf-alarms.c
 
 libietf_alarms_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/mgr -I${includedir}/yuma/ncx -I${includedir}/yuma/platform $(XML_CPPFLAGS)
-libietf_alarms_la_LDFLAGS = -module -lyumaagt -lyumancx $(XML_LIBS) -lz -ldl
+libietf_alarms_la_LDFLAGS = -module -lyumaagt -lyumancx $(XML_LIBS) -lz $(LIBS)
 
 #ietf_draft_yang_DATA = \
 #ietf-alarms@2016-10-27.yang \

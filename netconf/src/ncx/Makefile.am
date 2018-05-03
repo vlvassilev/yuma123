@@ -69,4 +69,4 @@ libyumancx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf
 libyumancx_la_CPPFLAGS += -DSYSCONFDIR=\"@sysconfdir@\"
 libyumancx_la_CPPFLAGS += -DNETCONFMODULEDIR=\"@netconfmoduledir@\"
 libyumancx_la_CPPFLAGS += -DYUMA_DATAROOTDIR=\"@yuma_datarootdir@\"
-libyumancx_la_LDFLAGS = -version-info 2:0:0 $(XML_LIBS) -ldl -lrt
+libyumancx_la_LDFLAGS = -version-info 2:0:0 $(XML_LIBS) $(LIBS) -lrt

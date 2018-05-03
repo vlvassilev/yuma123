@@ -1,5 +1,8 @@
 netconfmodule_LTLIBRARIES = libtoaster.la
 
+noinst_HEADERS=\
+$(top_srcdir)/libtoaster/src/toaster.h
+
 libtoaster_la_SOURCES = \
 $(top_srcdir)/libtoaster/src/toaster.c
 

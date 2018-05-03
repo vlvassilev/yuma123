@@ -1,5 +1,25 @@
 noinst_LTLIBRARIES = libtecla.la
 
+noinst_HEADERS= \
+$(top_srcdir)/libtecla/chrqueue.h \
+$(top_srcdir)/libtecla/cplfile.h \
+$(top_srcdir)/libtecla/cplmatch.h \
+$(top_srcdir)/libtecla/direader.h \
+$(top_srcdir)/libtecla/errmsg.h \
+$(top_srcdir)/libtecla/expand.h \
+$(top_srcdir)/libtecla/freelist.h \
+$(top_srcdir)/libtecla/getline.h \
+$(top_srcdir)/libtecla/hash.h \
+$(top_srcdir)/libtecla/history.h \
+$(top_srcdir)/libtecla/homedir.h \
+$(top_srcdir)/libtecla/ioutil.h \
+$(top_srcdir)/libtecla/keytab.h \
+$(top_srcdir)/libtecla/libtecla.h \
+$(top_srcdir)/libtecla/pathutil.h \
+$(top_srcdir)/libtecla/stringrp.h \
+$(top_srcdir)/libtecla/strngmem.h
+
+
 libtecla_la_SOURCES = \
 $(top_srcdir)/libtecla/chrqueue.c \
 $(top_srcdir)/libtecla/cplfile.c \

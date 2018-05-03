@@ -1,4 +1,4 @@
-ietf_yang_DATA = \
+dist_ietf_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf/ietf-system@2014-08-06.yang \
 $(top_srcdir)/netconf/modules/ietf/iana-crypt-hash@2014-08-06.yang \
 $(top_srcdir)/netconf/modules/ietf/iana-if-type@2014-05-08.yang \
@@ -22,12 +22,12 @@ $(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang
 #$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang
 
 
-ietf_patched_yang_DATA = \
+dist_ietf_patched_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf@2011-06-01.yang  \
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.yang \
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-datastores@2017-08-24.yang
 
-ietf_draft_yang_DATA = \
+dist_ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-interfaces.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-ip.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network.yang  \
@@ -40,14 +40,14 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-datastores.yang
 #$(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-datastores.yang
 
 
-ietf_derived_yang_DATA = \
+dist_ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \
 $(top_srcdir)/netconf/modules/ietf-derived/notifications.yang
 
-ietf_expired_yang_DATA = \
+dist_ietf_expired_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-expired/ietf-direct-must-augment-extension@2015-06-12.yang
 
-netconfcentral_yang_DATA = \
+dist_netconfcentral_yang_DATA = \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-types.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-xsd.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-ncx.yang \
@@ -57,7 +57,7 @@ $(top_srcdir)/netconf/modules/netconfcentral/yuma-app-common.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/yuma-mysession.yang \
 $(top_srcdir)/netconf/modules/netconfcentral/toaster.yang
 
-yuma123_yang_DATA = \
+dist_yuma123_yang_DATA = \
 $(top_srcdir)/netconf/modules/yuma123/netconfd.yang \
 $(top_srcdir)/netconf/modules/yuma123/yangcli.yang \
 $(top_srcdir)/netconf/modules/yuma123/yangcli-ex.yang \

@@ -1,4 +1,22 @@
 bin_PROGRAMS = yangcli
+noinst_HEADERS= \
+$(top_srcdir)/netconf/src/yangcli/yangcli_alias.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_autoload.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_autolock.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_cmd.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_cond.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_eval.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_globals.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_list.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_save.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_show.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_tab.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_timer.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_uservars.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_util.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_wordexp.h \
+$(top_srcdir)/netconf/src/yangcli/yangcli_yang_library.h
 
 yangcli_SOURCES = \
 $(top_srcdir)/netconf/src/yangcli/yangcli_autoload.c \

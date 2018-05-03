@@ -12,6 +12,9 @@ AC_PROG_LIBTOOL
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 
+yuma_datarootdir=${datarootdir}/yuma
+AC_SUBST(yuma_datarootdir)
+
 yangdir=${datarootdir}/yuma/modules
 AC_SUBST(yangdir)
 

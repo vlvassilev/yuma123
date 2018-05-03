@@ -66,4 +66,7 @@ $(top_srcdir)/netconf/src/ncx/uptime.c \
 $(top_srcdir)/netconf/src/ncx/val123.c
 
 libyumancx_la_CPPFLAGS = -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump $(XML_CPPFLAGS) -DNCXMOD_SIL_INSTALL_PATH=\"${netconfmoduledir}\"
+libyumancx_la_CPPFLAGS += -DSYSCONFDIR=\"@sysconfdir@\"
+libyumancx_la_CPPFLAGS += -DNETCONFMODULEDIR=\"@netconfmoduledir@\"
+libyumancx_la_CPPFLAGS += -DYUMA_DATAROOTDIR=\"@yuma_datarootdir@\"
 libyumancx_la_LDFLAGS = -version-info 2:0:0 $(XML_LIBS) -ldl -lrt

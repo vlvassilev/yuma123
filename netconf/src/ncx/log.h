@@ -31,7 +31,7 @@ date	     init     comment
 */
 
 #include <stdio.h>
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "status.h"

@@ -4,7 +4,7 @@
 #include <memory.h>
 #include <string.h>
 #include <ctype.h>
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "b64.h"

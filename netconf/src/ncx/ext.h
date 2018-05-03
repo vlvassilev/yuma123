@@ -32,8 +32,8 @@ date	     init     comment
 
 */
 
-#include <xmlstring.h>
-#include <xmlregexp.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlregexp.h>
 
 #ifndef _H_ncxconst
 #include "ncxconst.h"

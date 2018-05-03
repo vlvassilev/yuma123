@@ -71,7 +71,7 @@ date         init     comment
 #include <assert.h>
 #include <ctype.h>
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "def_reg.h"

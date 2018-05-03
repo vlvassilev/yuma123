@@ -21,7 +21,7 @@
 
  */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "dlq.h"
 #include "ncxtypes.h"

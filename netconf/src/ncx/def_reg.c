@@ -51,8 +51,8 @@ date         init     comment
 #include  <stdlib.h>
 #include  <memory.h>
 
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"

@@ -32,7 +32,7 @@ date	     init     comment
 09-mar-09    abb      Add more support for yangcli
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

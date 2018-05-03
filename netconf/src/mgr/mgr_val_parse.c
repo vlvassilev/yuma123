@@ -34,8 +34,8 @@ date         init     comment
 #include <string.h>
 #include <math.h>
 
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 
 #include "procdefs.h"

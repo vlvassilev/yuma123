@@ -17,7 +17,7 @@
 #include <sys/wait.h>
 
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"

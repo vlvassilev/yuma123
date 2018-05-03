@@ -42,7 +42,7 @@ date	     init     comment
 06-oct-09   abb       Change YANG_ env vars to YUMA_ 
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_cap
 #include "cap.h"
@@ -147,21 +147,11 @@ extern "C" {
  */
 #define NCXMOD_INSTALL   "YUMA_INSTALL"
 
-/* !! should import this from make !! */
-#ifdef __FreeBSD__
-#define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/local/share/yuma"
-#else
-#define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yuma"
-#endif
+#define NCXMOD_DEFAULT_INSTALL (const xmlChar *)YUMA_DATAROOTDIR
 
-/* !! should import this from make !! */
-#define NCXMOD_DEFAULT_YUMALIB64 (const xmlChar *)"/usr/lib64/yuma"
+#define NCXMOD_DEFAULT_YUMALIB (const xmlChar *)NETCONFMODULEDIR
 
-#define NCXMOD_DEFAULT_YUMALIB (const xmlChar *)"/usr/lib/yuma"
-
-
-/* !! should import this from make !! */
-#define NCXMOD_ETC_DATA (const xmlChar *)"/etc/yuma"
+#define NCXMOD_ETC_DATA (const xmlChar *)SYSCONFDIR"/yuma"
 
 
 /* NCX Environment Variable for MODULE search path */

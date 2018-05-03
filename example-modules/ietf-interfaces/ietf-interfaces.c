@@ -3,7 +3,7 @@
     namespace urn:ietf:params:xml:ns:yang:ietf-interfaces
  */
  
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>

@@ -31,7 +31,7 @@ date             init     comment
 01-may-05    abb      Begun.
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 
 #ifndef _H_dlq

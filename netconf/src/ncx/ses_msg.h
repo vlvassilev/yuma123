@@ -30,8 +30,8 @@ date             init     comment
 20-jan-07    abb      Begun.
 */
 
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #ifndef _H_dlq
 #include  "dlq.h"

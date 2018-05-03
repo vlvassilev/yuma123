@@ -23,7 +23,7 @@
 
  */
 
-//#include <xmlstring.h>
+//#include <libxml/xmlstring.h>
 
 #if !defined(CYGWIN) && !defined(MACOSX)
 #define BUILD_ARP 1

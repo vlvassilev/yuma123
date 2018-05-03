@@ -30,7 +30,7 @@ date         init     comment
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"

@@ -34,7 +34,7 @@ date	     init     comment
 11-feb-07    abb      Move some common fns back to ncx/top.h
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_ses
 #include "ses.h"

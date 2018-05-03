@@ -31,8 +31,8 @@ date	     init     comment
 */
 
 /* From /usr/include/libxml2/libxml/ */
-#include <xmlreader.h>
-#include <xmlstring.h>
+#include <libxml/xmlreader.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_xml_util
 #include "xml_util.h"

@@ -1,4 +1,4 @@
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include <string.h>
 #include <assert.h>
 #include "procdefs.h"

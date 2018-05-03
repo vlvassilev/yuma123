@@ -16,6 +16,8 @@ AC_SUBST(pythondir)
 CFLAGS="$CFLAGS -g -fPIC -DDEBUG=1 -DLINUX=1 -DGCC=1"
 AC_SUBST(CFLAGS)
 
+AM_PATH_XML2
+
 AC_CONFIG_FILES([
         Makefile
 ])

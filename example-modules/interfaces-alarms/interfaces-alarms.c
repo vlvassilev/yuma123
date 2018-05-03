@@ -3,7 +3,7 @@
     namespace http://yuma123.org/ns/interfaces-alarms
  */
  
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"

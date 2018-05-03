@@ -35,8 +35,8 @@ date         init     comment
 #include <pwd.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <xmlstring.h>
-#include <xmlreader.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlreader.h>
 
 #include "procdefs.h"
 #include "help.h"
@@ -3574,8 +3574,7 @@ xmlChar *
 *  2) $YUMA_RUNPATH environment variable
 *  3) $YUMA_INSTALL/lib
 *  4) $YUMA_INSTALL/lib/yuma
-*  5) /usr/lib64/yuma directory (LIB64 only)
-*  5 or 6) /usr/lib/yuma directory
+*  5) /usr/lib[64]/yuma directory
 *
 * INPUTS:
 *   fname == SIL file name with extension
@@ -3671,18 +3670,7 @@ xmlChar *
         }
     }
 
-#ifdef LIB64
-    /* 5) /usr/lib64/yuma directory */
-    if (test_file(buff, 
-                  bufflen, 
-                  NCXMOD_DEFAULT_YUMALIB64,
-                  NULL,
-                  fname)) {
-        return buff;
-    }
-#endif
-
-    /* 5 or 6) /usr/lib/yuma directory */
+    /* 5 /usr/lib[64]/yuma directory */
     if (test_file(buff, 
                   bufflen, 
                   NCXMOD_DEFAULT_YUMALIB,

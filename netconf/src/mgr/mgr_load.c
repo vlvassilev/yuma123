@@ -28,7 +28,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #include "procdefs.h"
 #include "log.h"

@@ -32,7 +32,7 @@ date	     init     comment
 16-jan-07    abb      Moved from ncxdump/xml_val_util.h
 */
 
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 
 #ifndef _H_status
 #include "status.h"

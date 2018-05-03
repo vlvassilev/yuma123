@@ -33,8 +33,8 @@ date	     init     comment
 10-nov-07    abb      Split out from ncxconst.h
 */
 
-#include <xmlstring.h>
-#include <xmlregexp.h>
+#include <libxml/xmlstring.h>
+#include <libxml/xmlregexp.h>
 
 #ifndef _H_dlq
 #include "dlq.h"

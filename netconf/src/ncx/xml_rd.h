@@ -12,7 +12,7 @@
 */
 
 #include <stdio.h>
-#include <xmlstring.h>
+#include <libxml/xmlstring.h>
 #include "cfg.h"
 #include "dlq.h"
 #include "ncxtypes.h"

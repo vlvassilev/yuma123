@@ -102,6 +102,7 @@ AC_CONFIG_FILES([
         netconf/src/yangdump/Makefile
         netconf/src/yangdiff/Makefile
         netconf/man/Makefile
+        rpm/yuma123.spec
 ])
 # Test framework
 #        netconf/test/Makefile

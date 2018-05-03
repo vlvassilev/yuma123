@@ -152,4 +152,5 @@ $(top_srcdir)/netconf/src/yangrpc/yangrpc.h
 EXTRA_DIST= \
 netconf/src/yangdiff \
 example-modules/ietf-interfaces \
-example-modules/ietf-system
+example-modules/ietf-system \
+rpm

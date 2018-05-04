@@ -10,6 +10,15 @@ AC_PROG_CXX
 AM_PROG_AS
 AC_PROG_LIBTOOL
 
+AC_ARG_ENABLE([standalone],
+[  --enable-standalone    Turn on standalone build],
+[case "${enableval}" in
+  yes) standalone=true ;;
+  no)  standalone=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-standalone]) ;;
+esac],[standalone=true])
+AM_CONDITIONAL([STANDALONE], [test x$standalone = xtrue])
+
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 

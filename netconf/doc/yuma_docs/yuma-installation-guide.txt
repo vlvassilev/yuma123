@@ -201,9 +201,9 @@ package. It is called '''libreadline-dev '''on Debian systems.
  ~> cd yuma123
 
 = Building and Installation =
-You can either use the Debian/Ubuntu package management tools or
-directly the Autotools build scripts if the platform you have is not
-Debian based or you need more flexibility.
+You can use the Debian/Ubuntu package management tools, RPM or
+directly use the Autotools build scripts if the platform you have employs
+neither package manager or you need more flexibility.
 == Alternative 1:  Debian/Ubuntu *.deb package build and installation
 steps ==
 Check if you have any unmet dependencies:
@@ -224,6 +224,19 @@ Assuming you have no unresolved dependencies:
  yuma123> ./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
  yuma123> make
  yuma123> sudo make install
+
+== Alternative 3: RedHat RPM build and installation ==
+Generate the RPM spec file
+ yuma123> autoreconf -i -f && ./configure
+Install build dependencies
+ yuma123> yum-builddep rpm/yuma123.spec
+Create the distribution tar file
+ yuma123> make dist
+Build the RPMs
+ yuma123> rpmbuild -tb yuma123-2.11*gz
+Install
+ yuma123> cd ~/rpmbuild/RPMS/x86_64/
+ yuma123> sudo yum localinstall yuma123-2.11-1.el7.x86_64.rpm yuma123-libyuma2-2.11-1.el7.x86_64.rpm yuma123-netconfd-2.11-1.el7.x86_64.rpm
 
 = Installed Files =
 * '''/usr/bin''' directory contains the following programs:

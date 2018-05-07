@@ -79,6 +79,7 @@ AC_ARG_WITH(tecla,
         [Use tecla instead of readline for interctive commandline yangcli input])],
 	[TECLA="1"],[])
 AM_CONDITIONAL([WITH_TECLA], [test "x$TECLA" = x1])
+AM_CONDITIONAL([STANDALONE], [test x$standalone = xtrue])
 
 AM_PATH_XML2
 
@@ -94,11 +95,14 @@ AC_CONFIG_FILES([
         netconf/src/subsys/Makefile
         libtoaster/src/Makefile
         example-modules/helloworld/Makefile
+        example-modules/ietf-interfaces/Makefile
+        example-modules/ietf-system/Makefile
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangdump/Makefile
         netconf/src/yangdiff/Makefile
         netconf/man/Makefile
+        rpm/yuma123.spec
 ])
 # Test framework
 #        netconf/test/Makefile

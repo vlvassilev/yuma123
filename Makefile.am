@@ -8,6 +8,8 @@ netconf/src/yangcli \
 libtoaster/src \
 netconf/modules \
 example-modules/helloworld \
+example-modules/ietf-interfaces \
+example-modules/ietf-system \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
 netconf/man \
@@ -90,7 +92,9 @@ $(top_srcdir)/netconf/src/ncx/cfg.h \
 $(top_srcdir)/netconf/src/ncx/help.h \
 $(top_srcdir)/netconf/src/ncx/yang_parse.h \
 $(top_srcdir)/netconf/src/ncx/libncx.h \
-$(top_srcdir)/netconf/src/ncx/val123.h
+$(top_srcdir)/netconf/src/ncx/val123.h \
+$(top_srcdir)/netconf/src/ncx/val_parse.h \
+$(top_srcdir)/netconf/src/ncx/uptime.h
 
 agt_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/agt/agt_val_parse.h \
@@ -124,7 +128,9 @@ $(top_srcdir)/netconf/src/agt/agt_cli.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_complete.h \
 $(top_srcdir)/netconf/src/agt/agt_commit_validate.h \
 $(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.h \
-$(top_srcdir)/netconf/src/agt/agt_nmda.h
+$(top_srcdir)/netconf/src/agt/agt_nmda.h \
+$(top_srcdir)/netconf/src/agt/agt_cfg.h \
+$(top_srcdir)/netconf/src/agt/agt_yang_library.h
 
 mgr_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/mgr/mgr.h \
@@ -132,8 +138,19 @@ $(top_srcdir)/netconf/src/mgr/mgr_hello.h \
 $(top_srcdir)/netconf/src/mgr/mgr_io.h \
 $(top_srcdir)/netconf/src/mgr/mgr_not.h \
 $(top_srcdir)/netconf/src/mgr/mgr_rpc.h \
-$(top_srcdir)/netconf/src/mgr/mgr_ses.h
+$(top_srcdir)/netconf/src/mgr/mgr_ses.h \
+$(top_srcdir)/netconf/src/mgr/mgr_val_parse.h \
+$(top_srcdir)/netconf/src/mgr/mgr_xml.h \
+$(top_srcdir)/netconf/src/mgr/mgr_cap.h \
+$(top_srcdir)/netconf/src/mgr/mgr_signal.h \
+$(top_srcdir)/netconf/src/mgr/mgr_load.h \
+$(top_srcdir)/netconf/src/mgr/mgr_top.h
 
 yangrpc_netconf_include_HEADERS= \
 $(top_srcdir)/netconf/src/yangrpc/yangrpc.h
 
+EXTRA_DIST= \
+netconf/src/yangdiff \
+example-modules/ietf-interfaces \
+example-modules/ietf-system \
+rpm

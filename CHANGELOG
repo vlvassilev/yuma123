@@ -1,10 +1,14 @@
 yuma123 (2.11) UNRELEASED; urgency=medium
 
+  * Expected release date: 2018-05-14
   * Preliminary NMDA support draft-ietf-netmod-revised-datastores-09
+  * RPM build scripts
+  * yangcli
+    - Added --use-agent parameter enabling use of ssh-agent for authentication
   * yangdump
     - YANG tree format support draft-ietf-netmod-yang-tree-diagrams-04
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 15 Jan 2018 19:47:56 +0100
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 07 May 2018 10:35:14 +0200
 
 yuma123 (2.10) stable; urgency=medium
 

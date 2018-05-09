@@ -4438,14 +4438,18 @@ const xmlChar *
     }
 
     if (!user) {
-        return (const xmlChar *)ncxmod_home;
-    }
+        uid_t self = geteuid();
 
-    strncpy(buff, (const char *)user, userlen);
-    buff[userlen] = 0;
-    pw = getpwnam(buff);
-    if (!pw) {
-        return NULL;
+        pw = getpwuid(self);
+        if (!pw)
+            return (const xmlChar *)ncxmod_home;
+    } else {
+        strncpy(buff, (const char *)user, userlen);
+        buff[userlen] = 0;
+        pw = getpwnam(buff);
+        if (!pw) {
+            return NULL;
+        }
     }
 
     return (const xmlChar *)pw->pw_dir;

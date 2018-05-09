@@ -306,9 +306,11 @@ static status_t
     }
 
     pkstr = strstr(userauthlist, "publickey");
-    if (!authdone &&
-        pkstr != NULL) {
-        if (ssh_use_agent) {
+    if (1) {
+        if (!authdone &&
+            pkstr != NULL &&
+            ssh_use_agent) {
+
             int rc;
             struct libssh2_agent_publickey *identity;
             struct libssh2_agent_publickey *prev_identity = NULL;
@@ -364,6 +366,7 @@ agent_done:
 
         }
         if (!authdone &&
+            pkstr != NULL &&
             pubkeyfile != NULL &&
             privkeyfile != NULL) {
             boolean keyauthdone = FALSE;

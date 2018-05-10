@@ -4458,6 +4458,43 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncxmod_get_envvar_cached
+*
+* Get the specified shell environment variable OR the value that was
+* provided on the commandline, if present.
+*
+* INPUTS:
+*    name == name of the environment variable (may not be zero-terminiated)
+*    namelen == length of name string
+*
+* RETURNS:
+*    const pointer to the requested value if found, NULL otherwise
+*********************************************************************/
+static const xmlChar *
+    ncxmod_get_envvar_cached (const xmlChar *name,
+                              uint32 namelen)
+{
+#ifdef DEBUG
+    if (!name) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (strncmp(name, NCXMOD_HOME, namelen) == 0)
+        return ncxmod_yuma_home;
+    if (strncmp(name, NCXMOD_MODPATH, namelen) == 0)
+        return ncxmod_yumadir_path;
+    if (strncmp(name, NCXMOD_DATAPATH, namelen) == 0)
+        return ncxmod_data_path;
+    if (strncmp(name, NCXMOD_RUNPATH, namelen) == 0)
+        return ncxmod_run_path;
+
+    return NULL;
+}
+
+
+/********************************************************************
 * FUNCTION ncxmod_get_envvar
 *
 * Get the specified shell environment variable
@@ -4474,6 +4511,7 @@ const xmlChar *
                        uint32 namelen)
 {
     char            buff[NCX_MAX_USERNAME_LEN+1];
+    const xmlChar  *cached;
 
 #ifdef DEBUG
     if (!name) {
@@ -4487,6 +4525,13 @@ const xmlChar *
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
+
+    /* some commandline parameters take precendence over environment
+     * variables
+     */
+    cached = ncxmod_get_envvar_cached(name, namelen);
+    if (cached)
+        return cached;
 
     strncpy(buff, (const char *)name, namelen);
     buff[namelen] = 0;

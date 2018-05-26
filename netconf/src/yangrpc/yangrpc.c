@@ -567,7 +567,7 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
     dlq_createSQue(&savedevQ);
 
     /* create a default server control block */
-    server_cb = new_server_cb(YANGCLI_DEF_SERVER, FALSE);
+    server_cb = new_server_cb(YANGCLI_DEF_SERVER);
     if (server_cb==NULL) {
         log_error("\n new_server_cb failed (%s)", get_error_string(res));
         return ERR_INTERNAL_PTR;

@@ -808,6 +808,20 @@ extern void
     free_server_cb (server_cb_t *server_cb);
 
 /********************************************************************
+* FUNCTION enable_server_cb_interactive_mode
+*
+*  Add/Initialize interactive context properties.
+*
+* INPUTS:
+*    server_cb == server_cb struct
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    enable_server_cb_interactive_mode (server_cb_t* server_cb);
+
+/********************************************************************
 * FUNCTION new_server_cb
 * 
 *  Malloc and init a new server control block
@@ -819,7 +833,7 @@ extern void
 *   malloced server_cb struct or NULL of malloc failed
 *********************************************************************/
 extern server_cb_t *
-    new_server_cb (const xmlChar *name, boolean interactive);
+    new_server_cb (const xmlChar *name);
 
 /********************************************************************
  * FUNCTION init_config_vars

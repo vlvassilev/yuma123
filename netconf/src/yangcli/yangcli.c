@@ -508,6 +508,60 @@ void
 
 }  /* free_server_cb */
 
+/********************************************************************
+* FUNCTION enable_server_cb_interactive_mode
+*
+*  Add/Initialize interactive context properties.
+*
+* INPUTS:
+*    server_cb == server_cb struct
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    enable_server_cb_interactive_mode (server_cb_t* server_cb)
+{
+    int retval;
+    /* get a tecla CLI control block */
+    server_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
+    if (server_cb->cli_gl == NULL) {
+        log_error("\nError: cannot allocate a new GL");
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* setup CLI tab line completion */
+    retval = gl_customize_completion(server_cb->cli_gl,
+                                     &server_cb->completion_state,
+                                     yangcli_tab_callback);
+    if (retval != 0) {
+        log_error("\nError: cannot set GL tab completion");
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* setup the inactivity timeout callback function */
+    retval = gl_inactivity_timeout(server_cb->cli_gl,
+                                   get_line_timeout,
+                                   server_cb,
+                                   1,
+                                   0);
+    if (retval != 0) {
+        log_error("\nError: cannot set GL inactivity timeout");
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* setup the history buffer if needed */
+    if (server_cb->history_auto) {
+        retval = gl_load_history(server_cb->cli_gl,
+                                 (const char *)server_cb->history_filename,
+                                 "#");   /* comment prefix */
+        if (retval) {
+            log_error("\nError: cannot load command line history buffer");
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
+    return NO_ERR;
+}
 
 /********************************************************************
 * FUNCTION new_server_cb
@@ -521,10 +575,9 @@ void
 *   malloced server_cb struct or NULL of malloc failed
 *********************************************************************/
 server_cb_t *
-    new_server_cb (const xmlChar *name, boolean interactive)
+    new_server_cb (const xmlChar *name)
 {
     server_cb_t  *server_cb;
-    int          retval;
     status_t     res;
 
     server_cb = m__getObj(server_cb_t);
@@ -577,49 +630,6 @@ server_cb_t *
         return NULL;
     }
 
-    if(interactive) {
-        /* get a tecla CLI control block */
-        server_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
-        if (server_cb->cli_gl == NULL) {
-            log_error("\nError: cannot allocate a new GL");
-            free_server_cb(server_cb);
-            return NULL;
-        }
-
-        /* setup CLI tab line completion */
-        retval = gl_customize_completion(server_cb->cli_gl,
-                                         &server_cb->completion_state,
-                                         yangcli_tab_callback);
-        if (retval != 0) {
-            log_error("\nError: cannot set GL tab completion");
-            free_server_cb(server_cb);
-            return NULL;
-        }
-
-        /* setup the inactivity timeout callback function */
-        retval = gl_inactivity_timeout(server_cb->cli_gl,
-                                       get_line_timeout,
-                                       server_cb,
-                                       1,
-                                       0);
-        if (retval != 0) {
-            log_error("\nError: cannot set GL inactivity timeout");
-            free_server_cb(server_cb);
-            return NULL;
-        }
-
-        /* setup the history buffer if needed */
-        if (server_cb->history_auto) {
-            retval = gl_load_history(server_cb->cli_gl,
-                                     (const char *)server_cb->history_filename,
-                                     "#");   /* comment prefix */
-            if (retval) {
-                log_error("\nError: cannot load command line history buffer");
-                free_server_cb(server_cb);
-                return NULL;
-            }
-        }
-    }
 
     /* set up lock control blocks for get-locks */
     server_cb->locks_active = FALSE;
@@ -3871,7 +3881,7 @@ static status_t
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
 
     /* create a default server control block */
-    server_cb = new_server_cb(YANGCLI_DEF_SERVER, TRUE);
+    server_cb = new_server_cb(YANGCLI_DEF_SERVER);
     if (server_cb==NULL) {
         return ERR_INTERNAL_MEM;
     }
@@ -3883,6 +3893,13 @@ static status_t
     res = process_cli_input(server_cb, argc, argv);
     if (res != NO_ERR) {
         return res;
+    }
+
+    if(!batchmode) {
+        res = enable_server_cb_interactive_mode(server_cb);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* check print version */

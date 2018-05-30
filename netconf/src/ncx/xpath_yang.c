@@ -273,7 +273,7 @@ static ncx_module_t* select_target_module( xpath_pcb_t* pcb,
             }
             if(named_typdef) {
                 first_named_typdef=typ123_get_first_named_typdef(named_typdef);
-                imports_mod = first_named_typdef->tkerr.mod;
+                imports_mod = first_named_typdef->def.named.typ->tkerr.mod;
             } else {
                 top_uses_obj = obj123_get_top_uses(pcb->obj);
                 imports_mod = top_uses_obj->tkerr.mod;

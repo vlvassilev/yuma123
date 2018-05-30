@@ -151,6 +151,9 @@ $(top_srcdir)/netconf/src/yangrpc/yangrpc.h
 
 EXTRA_DIST= \
 netconf/src/yangdiff \
+netconf/perl/yangcli \
+netconf/perl/yangrpc \
+netconf/perl/yuma \
 example-modules/ietf-interfaces \
 example-modules/ietf-system \
 rpm

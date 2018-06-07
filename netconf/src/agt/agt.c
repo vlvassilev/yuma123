@@ -1128,6 +1128,14 @@ status_t
         cfg_set_state(NCX_CFGID_STARTUP, CFG_ST_READY);
     }
 
+    /* Now that the SIL callbacks have been run for the COMMIT
+     * phase and the running configuration has been marked "ready",
+     * invoke the user commit-complete functions.
+     */
+    res = agt_commit_complete();
+    if (res != NO_ERR)
+        return res;
+
     /* data modules can be accessed now, and still added
      * and deleted dynamically as well
      *

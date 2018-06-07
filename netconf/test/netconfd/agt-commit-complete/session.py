@@ -10,8 +10,6 @@ if(conn==None):
     sys.exit(1)
 
 
-result=yangcli(conn, "commit")
-assert(result.xpath('./ok'))
 yangcli(conn, "replace /system/hostname value='ok3'")
 yangcli(conn, "replace /system/location value='ok4'")
 result=yangcli(conn, "commit")

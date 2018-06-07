@@ -64,8 +64,12 @@ echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/t
 cd ~/yuma123_${ver}/netconf/test/netconfd
 apt-get -y install python-ncclient valgrind
 
+multiarch=$(dpkg-architecture -q DEB_BUILD_MULTIARCH)
+prefix="/usr"
+CONFIGURE_FLAGS="--prefix=/${prefix} --libdir=${prefix}/lib/${multiarch} --libexecdir=${prefix}/lib/${multiarch}"
+
 autoreconf -i -f
-./configure --prefix=/usr
+./configure ${CONFIGURE_FLAGS}
 make
 make install
 make check || true
@@ -74,7 +78,7 @@ cd ~/yuma123_${ver}/netconf/test/yangcli
 apt-get -y install expect
 
 autoreconf -i -f
-./configure --prefix=/usr
+./configure ${CONFIGURE_FLAGS}
 make
 make install
 make check || true
@@ -82,7 +86,7 @@ make check || true
 cd ~/yuma123_${ver}/netconf/test/yangdump
 
 autoreconf -i -f
-./configure --prefix=/usr
+./configure ${CONFIGURE_FLAGS}
 make
 make install
 make check || true

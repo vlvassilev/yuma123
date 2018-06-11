@@ -3690,6 +3690,17 @@ xmlChar *
     }
 #endif
 
+    /* 8) try /usr/lib/yuma */
+    if (!ncxmod_run_path) {
+        if (test_pathlist("/usr/lib/yuma",
+                          buff,
+                          bufflen,
+                          fname,
+                          NULL)) {
+            return buff;
+        }
+    }
+
     if (generrors) {
         log_error("\nError: SIL file (%s) not found.\n", fname);
     }

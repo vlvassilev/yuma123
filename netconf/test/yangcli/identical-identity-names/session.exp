@@ -1,0 +1,44 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /mycontainer/myleaf value=\'myidentity\'\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "Error: Multiple matches for identity 'myidentity': mod1:myidentity, mod2:myidentity" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "create /mycontainer/myleaf value=\'mod1:myidentity\'\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "RPC OK Reply" {sleep 1}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    eof {exit 0}
+    timeout {exit 1}
+}

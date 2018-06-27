@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd identical-identity-names
+./run.sh

@@ -1,0 +1,4 @@
+When 2 modules define identities with identical names
+yangcli should not accept unprefixed name but return error
+and report that the module name should be used as prefix to
+resolve the correct identity.

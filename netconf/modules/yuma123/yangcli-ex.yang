@@ -5,6 +5,7 @@ module yangcli-ex {
   prefix "yangcli-ex";
 
   import yangcli { prefix yc; }
+  import yuma-ncx { prefix ncx; }
 
   organization
     "Yuma123";
@@ -15,20 +16,9 @@ module yangcli-ex {
   description
     "This module contains extra parameters for yangcli";
 
-  revision 2017-08-31 {
+  revision 2018-06-28 {
     description
-      "Changed the default value of
-       keep-session-model-copies-after-compilation to false.";
-  }
-
-  revision 2016-08-10 {
-    description
-      "Added dump-session parameter.";
-  }
-
-  revision 2016-03-28 {
-    description
-      "Initial revision.";
+      "Added clear-counters RPC.";
   }
 
   grouping ConnectParmsEx {
@@ -72,5 +62,35 @@ module yangcli-ex {
       "Adds extra parameters to connect.";
 
     uses ConnectParmsEx;
+  }
+
+  rpc clear-counters {
+    description 
+      "Convenience function that allows the user to 'clear' all counters under the
+       specified target path. The function performs <get> with the specified target
+       and updates a copy of all the yang:counter32 and yang:counter64 values in a
+       tree that is later used to subtract the stored values from the data returned
+       with xget.
+        
+         * Example:
+           yangcli>  clear-counters /interfaces-state/interface/statistics
+           yangcli>  xget /interfaces-state/interface/statistics
+       ";
+    input {
+      ncx:default-parm select;
+      leaf select {
+        description
+          "The XPath expression to use in the retrieval
+           operation.  The string may only contain
+           single quotes, which are required for
+           string literals.  The entire string
+           will be inserted into a double-quoted
+           string, within the get-config PDU.
+           Character entities will be inserted as
+           needed to maintain well-formed XML.";
+           type string { length "1..max"; }
+           ncx:xpath;
+      }
+    }
   }
 }

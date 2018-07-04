@@ -2,12 +2,6 @@
 #include <string.h>
 #include <assert.h>
 #include "procdefs.h"
-#include "agt.h"
-#include "agt_cb.h"
-#include "agt_timer.h"
-#include "agt_util.h"
-#include "agt_rpc.h"
-#include "agt_commit_complete.h"
 #include "dlq.h"
 #include "ncx.h"
 #include "ncxmod.h"

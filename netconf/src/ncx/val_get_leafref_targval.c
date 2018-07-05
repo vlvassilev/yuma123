@@ -40,11 +40,11 @@ val_value_t* val_get_leafref_targval(val_value_t *leafref_val, val_value_t *root
         val = resnode->node.valptr;
         target_str = val_make_sprintf_string(val);
         if(0==strcmp(target_str,VAL_STRING(leafref_val))) {
-            free(target_str);
+            m__free(target_str);
             target_val = val;
             break;
         }
-        free(target_str);
+        m__free(target_str);
     }
     free(result);
     return target_val;

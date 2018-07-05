@@ -731,7 +731,7 @@ static status_t
         val_str = val_make_sprintf_string(val);
         assert(val_str);
         sprinted_cnt=snprintf((char *)buff, buff?(*len-total):0, "[.='%s']", val_str);
-        free(val_str);
+        m__free(val_str);
         if(buff) {
             buff+=sprinted_cnt;
         }

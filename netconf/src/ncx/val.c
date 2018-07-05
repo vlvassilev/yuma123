@@ -8123,13 +8123,16 @@ status_t
 * INPUTS:
 *    val == value to print
 *
+* OUTPUTS:
+*    str == pointer to m__getMem() allocated buffer with string
+*    represetation of the 'val' value node.  This value is unchanged
+*    on error.
+*
 * RETURNS:
-*   malloced buffer with string represetation of the
-*     'val' value node
-*   NULL if some error
+*    status
 *********************************************************************/
-xmlChar *
-    val_make_sprintf_string (const val_value_t *val)
+status_t
+    val_make_sprintf_string (const val_value_t *val, xmlChar **str)
 {
     xmlChar   *buff;
     uint32     len;
@@ -8138,19 +8141,20 @@ xmlChar *
     len = 0;
     res = val_sprintf_simval_nc(NULL, val, &len);
     if (res != NO_ERR) {
-        return NULL;
+        return res;
     }
     buff = m__getMem(len+1);
     if (buff == NULL) {
-        return NULL;
+        return ERR_INTERNAL_MEM;
     }
     res = val_sprintf_simval_nc(buff, val, &len);
     if (res != NO_ERR) {
         m__free(buff);
-        return NULL;
+        return res;
     }
 
-    return buff;
+    *str = buff;
+    return NO_ERR;
 
 }  /* val_make_sprintf_string */
 

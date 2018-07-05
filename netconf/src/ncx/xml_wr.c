@@ -648,10 +648,11 @@ static void write_binary_val( ses_cb_t *scb,
                               const val_value_t* out,
                               int32 indent )
 {
-    xmlChar* binStr = val_make_sprintf_string( out );
-    if ( !binStr )
+    xmlChar* binStr;
+    status_t res = val_make_sprintf_string( out, &binStr );
+    if ( res != NO_ERR )
     {
-        SET_ERROR(ERR_INTERNAL_MEM);
+        SET_ERROR(res);
         return;
     }
 

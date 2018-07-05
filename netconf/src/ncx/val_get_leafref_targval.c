@@ -35,11 +35,12 @@ val_value_t* val_get_leafref_targval(val_value_t *leafref_val, val_value_t *root
     for (resnode = (xpath_resnode_t *)dlq_firstEntry(&result->r.nodeQ);
          resnode != NULL;
          resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
-        char* target_str;
+        xmlChar* target_str;
         val_value_t* val;
         val = resnode->node.valptr;
-        target_str = val_make_sprintf_string(val);
-        if(0==strcmp(target_str,VAL_STRING(leafref_val))) {
+        res = val_make_sprintf_string(val, &target_str);
+        assert(res == NO_ERR);
+        if(0==xmlStrcmp(target_str,VAL_STRING(leafref_val))) {
             m__free(target_str);
             target_val = val;
             break;

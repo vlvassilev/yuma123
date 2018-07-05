@@ -73,15 +73,15 @@ static status_t
     write_json_string_value (ses_cb_t *scb,
                              val_value_t *val)
 {
-    xmlChar *valstr = val_make_sprintf_string(val);
-    if (valstr) {
+    xmlChar *valstr = NULL;
+    status_t err = val_make_sprintf_string(val, &valstr);
+    if (err == NO_ERR) {
         ses_putchar(scb, '"');
         ses_putjstr(scb, valstr, -1);
         ses_putchar(scb, '"');
         m__free(valstr);
-        return NO_ERR;
     }
-    return ERR_INTERNAL_MEM;
+    return err;
 
 } /* write_json_string_value */
 

@@ -324,10 +324,8 @@ status_t
              *   <data> contains multiple elements
              */
             if (typ_is_simple(resultval->btyp)) {
-                resultstr = val_make_sprintf_string(resultval);
-                if (resultstr == NULL) {
-                    res = ERR_INTERNAL_MEM;
-                } else {
+                res = val_make_sprintf_string(resultval, &resultstr);
+                if (res == NO_ERR) {
                     val_free_value(resultval);
                     resultval = NULL;
                 }
@@ -342,10 +340,8 @@ status_t
                         res = SET_ERROR(ERR_INTERNAL_VAL);
                     } else if (typ_is_simple(childval->btyp)) {
                         /* convert the simple val to a string */
-                        resultstr = val_make_sprintf_string(childval);
-                        if (resultstr == NULL) {
-                            res = ERR_INTERNAL_MEM;
-                        } else {
+                        res = val_make_sprintf_string(childval, &resultstr);
+                        if (res == NO_ERR) {
                             val_free_value(resultval);
                             resultval = NULL;
                         }

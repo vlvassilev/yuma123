@@ -727,8 +727,9 @@ static status_t
     } else if (val->obj->objtype == OBJ_TYP_LEAF_LIST) {
         /* leaf-list e.g. /ex:system/ex:services/ex:ssh/ex:cipher[.='blowfish-cbc'] */
         int sprinted_cnt;
-        xmlChar *val_str;
-        val_str = val_make_sprintf_string(val);
+        xmlChar *val_str = NULL;
+
+        res = val_make_sprintf_string(val, &val_str);
         assert(val_str);
         sprinted_cnt=snprintf((char *)buff, buff?(*len-total):0, "[.='%s']", val_str);
         m__free(val_str);

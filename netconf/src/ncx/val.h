@@ -2669,13 +2669,17 @@ extern status_t
 * INPUTS:
 *    val == value to print
 *
+* OUTPUTS:
+*    str == pointer to m__getMem() allocated buffer with string
+*    represetation of the 'val' value node.  This value is unchanged
+*    on error.
+*
 * RETURNS:
-*   malloced buffer with string represetation of the
-*      'val' value node
-*   NULL if some error
+*    status
 *********************************************************************/
-extern xmlChar *
-    val_make_sprintf_string (const val_value_t *val);
+status_t
+    val_make_sprintf_string (const val_value_t *val, xmlChar **str);
+
 
 
 /********************************************************************

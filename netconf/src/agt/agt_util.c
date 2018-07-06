@@ -915,9 +915,21 @@ void
                                               (val_value_t *)error_path, 
                                               NCX_IFMT_XPATH1, 
                                               FALSE, &pathbuff);
+                /* Since we're generating the error-path, ignore
+                 * data validation failures resulting from formatting
+                 * the instance string.  These will mask the error
+                 * being reported here.
+                 */
                 if (res2 != NO_ERR) {
-                    log_error("\nError: Generate instance id failed (%s)",
-                              get_error_string(res2));
+                    if (pathbuff == NULL || res2 == ERR_INTERNAL_MEM) {
+                        log_error("\nError: Generate instance id failed (%s)",
+                                  get_error_string(res2));
+                        if (pathbuff)
+                            m__free(pathbuff);
+                    } else if (LOGDEBUG3) {
+                        log_debug3("\n%s using instance id in spite of error (%s)",
+                                   __func__, get_error_string(res2));
+                    }
                 }
                 break;
             case NCX_NT_OBJ:

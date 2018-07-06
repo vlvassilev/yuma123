@@ -730,13 +730,20 @@ static status_t
         xmlChar *val_str = NULL;
 
         res = val_make_sprintf_string(val, &val_str);
-        assert(val_str);
-        sprinted_cnt=snprintf((char *)buff, buff?(*len-total):0, "[.='%s']", val_str);
-        m__free(val_str);
-        if(buff) {
-            buff+=sprinted_cnt;
+        if (res == NO_ERR) {
+            assert(val_str);
+            sprinted_cnt=snprintf((char *)buff, buff?(*len-total):0, "[.='%s']", val_str);
+            m__free(val_str);
+            if(buff) {
+                buff+=sprinted_cnt;
+            }
+            total += sprinted_cnt;
         }
-        total += sprinted_cnt;
+        /* else the value was not able to be converted to a string representation
+         * for some reason.  This can happen when formatting a node path while
+         * reporting an error condition.  Leave off the leaf-list element and
+         * keep going and pass along the error to the calling function.
+         */
     } else if (val->parent && val->obj->objtype == OBJ_TYP_LIST) {
         /* instance-identifier for a list entry without keys */
         int sprinted_cnt;
@@ -1729,9 +1736,13 @@ status_t
     uint32    len = 0, len2 = 0;
     status_t  res;
 
-    /* figure out the length of the parmset instance ID */
+    /* figure out the length of the parmset instance ID.  It's possible
+     * for get_instance_string() to fill in a partial value when we are
+     * reporting on errors in user-supplied data, so make sure the length
+     * is still zero before giving up.
+     */
     res = get_instance_string(mhdr, format, val, stop_at_root, NULL, &len);
-    if (res != NO_ERR) {
+    if (len == 0 && res != NO_ERR) {
         return res;
     }
 
@@ -1760,7 +1771,7 @@ status_t
         /* get the instance ID string for real this time */
         res = get_instance_string(mhdr, format, val, stop_at_root, 
                                   *buff, &len2);
-        if (res != NO_ERR) {
+        if (len == 0 && res != NO_ERR) {
             m__free(*buff);
             *buff = NULL;
         }

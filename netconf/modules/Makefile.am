@@ -35,7 +35,10 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-origin.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-datastores.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-datastores.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-flows.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang
 
 #$(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-datastores.yang
 

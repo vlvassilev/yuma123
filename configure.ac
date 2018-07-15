@@ -97,6 +97,7 @@ AC_CONFIG_FILES([
         example-modules/helloworld/Makefile
         example-modules/ietf-interfaces/Makefile
         example-modules/ietf-system/Makefile
+        example-modules/ietf-bridge/Makefile
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangdump/Makefile

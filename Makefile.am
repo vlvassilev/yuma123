@@ -10,6 +10,7 @@ netconf/modules \
 example-modules/helloworld \
 example-modules/ietf-interfaces \
 example-modules/ietf-system \
+example-modules/ietf-system \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
 netconf/man \

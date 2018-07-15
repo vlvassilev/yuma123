@@ -1,0 +1,32 @@
+==Standalone project for netconfd module implementing ietf-network-bridge*.yang==
+Dependency: installed netconfd run-time binaries and development shared libraries and headers.
+
+===Build and install===
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+
+Dry run:
+
+ /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang \
+                    --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang \
+                    --module=/usr/share/yuma/modules/ietf-draft/ietf-network-bridge.yang \
+                    --module=/usr/share/yuma/modules/ietf-draft/ietf-network-bridge-flows.yang \
+                    --module=/usr/share/yuma/modules/ietf-draft/ietf-network-bridge-scheduler.yang \
+                    --module=/usr/share/yuma/modules/examples/example-bridge.yang \
+                    --startup=./example-bridge-cfg.xml --log-level=debug4 --superuser=${USER}
+
+with SIL implementation loded run:
+
+  /usr/sbin/netconfd --module=ietf-network-bridge --startup=./example-bridge-cfg.xml --log-level=debug4 --superuser=${USER}
+
+===Functionality===
+yangcli root@localhost> delete /flows
+yangcli root@localhost> commit
+yangcli root@localhost> create /flows/flow[id='best-effort-to-host2'] -- \
+   match/ethernet-match/ethernet-destination\
+   /address=00:01:02:03:00:02 \
+       actions/action[order='0']/output-action/out-port=p2
+yangcli root@localhost> merge /flows/flow[id='best-effort-to-host2'] -- \
+       traffic-class=best-effort

@@ -42,6 +42,9 @@ AC_SUBST(netconfcentral_yangdir)
 yuma123_yangdir=${datarootdir}/yuma/modules/yuma123
 AC_SUBST(yuma123_yangdir)
 
+examplesyangdir="$prefix/share/yuma/modules/examples"
+AC_SUBST(examplesyangdir)
+
 yang_yangdir=${datarootdir}/yuma/modules/yang
 AC_SUBST(yang_yangdir)
 
@@ -97,7 +100,7 @@ AC_CONFIG_FILES([
         example-modules/helloworld/Makefile
         example-modules/ietf-interfaces/Makefile
         example-modules/ietf-system/Makefile
-        example-modules/ietf-bridge/Makefile
+        example-modules/ietf-network-bridge/Makefile
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangdump/Makefile

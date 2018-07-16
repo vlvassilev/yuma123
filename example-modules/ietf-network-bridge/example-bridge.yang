@@ -15,9 +15,11 @@ module example-bridge {
   description
     "Example of bridge.";
 
-  revision 2018-07-15 {
+  revision 2018-07-17 {
     description
-      "Initial.";
+      "For the sake of portability commented out
+       double bases for identities since
+       this is not supported by ODL Berillium.";
   }
 
   identity video0 {
@@ -48,17 +50,17 @@ module example-bridge {
 
   identity pri0 {
     base sched:shared-queue-aggregator-input;
-    base strict-priority-aggregator;
+    //base strict-priority-aggregator;
   }
 
   identity pri1 {
     base sched:shared-queue-aggregator-input;
-    base strict-priority-aggregator;
+    //base strict-priority-aggregator;
   }
 
   identity pri2 {
     base sched:shared-queue-aggregator-input;
-    base strict-priority-aggregator;
+    //base strict-priority-aggregator;
   }
 
   //Cyclic timeslot schedule aggregator with 2 timeslots:
@@ -68,12 +70,12 @@ module example-bridge {
 
   identity timeslot0 {
     base sched:shared-queue-aggregator-input;
-    base cyclic-timeslot-schedule-aggregator;
+   // base cyclic-timeslot-schedule-aggregator;
   }
 
   identity timeslot1 {
     base sched:shared-queue-aggregator-input;
-    base cyclic-timeslot-schedule-aggregator;
+    //base cyclic-timeslot-schedule-aggregator;
   }
 
   augment "/netbr:bridge/sched:scheduler-classes/sched:scheduler-class"

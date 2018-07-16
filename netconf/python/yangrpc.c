@@ -66,7 +66,7 @@ py_yangrpc_exec(PyObject *self, PyObject *args)
 
     py_retval = PyTuple_New(2);
     PyTuple_SetItem(py_retval, 0, Py_BuildValue("i", (int)res));
-    PyTuple_SetItem(py_retval, 1, Py_BuildValue("O", PyCapsule_New(reply_val, "val_value_t_ptr", NULL)));
+    PyTuple_SetItem(py_retval, 1, reply_val?Py_BuildValue("O", PyCapsule_New(reply_val, "val_value_t_ptr", NULL)):Py_None);
     return py_retval;
 }
 
@@ -93,8 +93,30 @@ py_yangrpc_parse_cli(PyObject *self, PyObject *args)
 
     py_retval = PyTuple_New(2);
     PyTuple_SetItem(py_retval, 0, Py_BuildValue("i", (int)res));
-    PyTuple_SetItem(py_retval, 1, Py_BuildValue("O", PyCapsule_New(rpc_val, "val_value_t_ptr", NULL)));
+    PyTuple_SetItem(py_retval, 1, rpc_val?Py_BuildValue("O", PyCapsule_New(rpc_val, "val_value_t_ptr", NULL)):Py_None);
     return py_retval;
+}
+
+static PyObject *
+py_yangrpc_close(PyObject *self, PyObject *args)
+{
+    PyObject *py_retval;
+
+    PyObject *py_yangrpc_cb_ptr;
+
+    int res;
+    yangrpc_cb_ptr_t yangrpc_cb_ptr;
+    val_value_t  *rpc_val;
+    val_value_t  *reply_val;
+
+    if (!PyArg_ParseTuple(args, (char *) "O:yangrpc_yangrpc_close", &py_yangrpc_cb_ptr)) {
+        return (NULL);
+    }
+    yangrpc_cb_ptr = (yangrpc_cb_ptr_t *)PyCapsule_GetPointer(py_yangrpc_cb_ptr, "yangrpc_cb_ptr_t");
+
+    yangrpc_close(yangrpc_cb_ptr);
+
+    Py_RETURN_NONE;
 }
 
 /*  define functions in module */
@@ -103,6 +125,7 @@ static PyMethodDef yang_rpc_methods[] =
      {"connect", py_yangrpc_connect, METH_VARARGS, "connects to client"},
      {"rpc", py_yangrpc_exec, METH_VARARGS, "executes rpc by sending the rpc data contents and blocking until reply is received"},
      {"parse_cli", py_yangrpc_parse_cli, METH_VARARGS, "converts cli string to rpc data contents"},
+     {"close", py_yangrpc_close, METH_VARARGS, "close session"},
      {NULL, NULL, 0, NULL}
 };
 

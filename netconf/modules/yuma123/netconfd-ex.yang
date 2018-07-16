@@ -20,33 +20,9 @@ module netconfd-ex {
   description
     "This module contains extra parameters for netconfd";
 
-  revision 2018-04-01 {
+  revision 2018-07-17 {
     description
-      "Added --yang-library-spec=<my-yang-library-spec.xml> option
-       as alternative to --module, --feature-enable etc. for
-       paremeters specifying the model context.";
-  }
-
-  revision 2017-05-09 {
-    description
-      "Added validate-config-only CLI parameter.";
-  }
-
-  revision 2016-08-08 {
-    description
-      "Fixed spelling errors.";
-  }
-
-  revision 2016-08-02 {
-    description
-      "Restored max-sessions";
-  }
-
-  revision 2016-07-31 {
-    description
-      "Initial revision. Integrates all yuma123 introduced changes
-       to netconfd.yang as augments and restored it to the original
-       netconfcentral 2012-10-05 version";
+      "Added with-nmda parameter.";
   }
 
   augment "/netconfd:netconfd/netconfd:model-spec" {
@@ -125,5 +101,11 @@ module netconfd-ex {
           of netconfd as command line configuration validator.";
        type empty;
      }
+     leaf with-nmda {
+       description
+          "If set to 'true', then NMDA is enabled.";
+       type boolean;
+       default false;
+    }
   }
 }

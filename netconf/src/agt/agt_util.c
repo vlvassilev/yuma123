@@ -1513,11 +1513,11 @@ status_t
     }
     memset(buffer, 0x0, NCX_MAX_LINELEN+1);
 
-    findmod = (ncx_module_t *)msg->rpc_user1;
+    //findmod = (ncx_module_t *)msg->rpc_user1;
     /*** ignoring the format for now; assume YANG ***/
 
     res = NO_ERR;
-    fil = fopen((const char *)findmod->source, "r");
+    fil = fopen((const char *)msg->rpc_user1, "r");
     if (fil) {
         ses_putstr(scb, (const xmlChar *)"\n");
         done = FALSE;

@@ -1521,14 +1521,6 @@ boolean
     val_value_t* val;
     val_value_t* clivalset;
 
-    if (!xml_strcmp(modname, NCXMOD_NETCONF)) {
-        return FALSE;
-    }
-
-    if (!xml_strcmp(modname, NCXMOD_IETF_NETCONF)) {
-        return FALSE;
-    }
-
     if (!xml_strcmp(modname, NCX_EL_XSD)) {
         return FALSE;
     }

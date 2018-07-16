@@ -234,6 +234,33 @@ static status_t
 
         val_add_child(module_val, dst_val);
 
+        if(0==strcmp(ncx_get_modname(mod), NCXMOD_NETCONF)) {
+            /* ietf-netconf is overloaded internally */
+            val_value_t* newval;
+            val_value_t* curval;
+
+            /* name */
+            newval = agt_make_leaf(module_obj,
+                                 "name",
+                                 NCXMOD_IETF_NETCONF,
+                                 &res);
+            assert(res==NO_ERR && newval);
+            curval = val_find_child(module_val, "ietf-yang-library", "name");
+            assert(curval);
+            val_swap_child(newval,curval);
+            val_free_value(curval);
+
+            /* revision */
+            newval = agt_make_leaf(module_obj,
+                                 "revision",
+                                 NCXMOD_IETF_NETCONF_REVISION,
+                                 &res);
+            assert(res==NO_ERR && newval);
+            curval = val_find_child(module_val, "ietf-yang-library", "revision");
+            assert(curval);
+            val_swap_child(newval,curval);
+            val_free_value(curval);
+        }
     }
 
     /* module-set-id */

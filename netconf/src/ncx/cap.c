@@ -50,6 +50,7 @@ date         init     comment
 #include  "dlq.h"
 #include  "log.h"
 #include  "ncx.h"
+#include  "ncxmod.h"
 #include  "ncx_feature.h"
 #include  "ncx_list.h"
 #include  "ncxconst.h"
@@ -1636,6 +1637,20 @@ status_t
     str = make_mod_urn(mod);
     if (!str) {
         return ERR_INTERNAL_MEM;
+    }
+
+    if(0==strcmp(mod->name, NCXMOD_NETCONF)) {
+        /* ietf-netconf is overloaded internally */
+        char* newstr;
+        char* features_str;
+        char* pre_features_str = "urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&revision=2011-06-01&";
+        features_str = strstr(str, "features=");
+        assert(features_str);
+        newstr = malloc(strlen(pre_features_str)+strlen(features_str)+1);
+        assert(newstr);
+        sprintf(newstr,"%s%s",pre_features_str, features_str);
+        free(str);
+        str = newstr;
     }
 
     /* make the capability element */

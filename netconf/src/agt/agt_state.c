@@ -1184,6 +1184,16 @@ static status_t get_schema_validate( ses_cb_t *scb,
         /* send NULL instead of empty string */
         version = NULL;
     }
+    if(0==strcmp(identifier,NCXMOD_IETF_NETCONF) &&
+       (version==NULL || 0==strcmp(version,NCXMOD_IETF_NETCONF_REVISION)) &&
+       modformat==NCX_MODFORMAT_YANG || modformat==NCX_MODFORMAT_NONE) {
+
+        msg->rpc_user1 = (void *)"/usr/share/yuma/modules/ietf-patched/ietf-netconf@2011-06-01.yang"/*ietf_netconf_mod->source*/;
+        msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
+        msg->rpc_data_type = RPC_DATA_STD;
+        msg->rpc_datacb = agt_output_schema;
+        return NO_ERR;
+    }
 
     /* client must specify a revision if the server has more than 1 */
     if (version == NULL) {
@@ -1209,6 +1219,7 @@ static status_t get_schema_validate( ses_cb_t *scb,
      */
     if (res == NO_ERR) {
         findmod = ncx_find_module(identifier, version);
+
         if (findmod == NULL) {
             val_value_t *errval = validentifier;
 
@@ -1263,7 +1274,7 @@ static status_t get_schema_validate( ses_cb_t *scb,
          * setup the automatic output using the callback
          * function in agt_util.c
          */
-        msg->rpc_user1 = (void *)findmod;
+        msg->rpc_user1 = (void *)findmod->source;
         msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
         msg->rpc_data_type = RPC_DATA_STD;
         msg->rpc_datacb = agt_output_schema;
@@ -1625,6 +1636,35 @@ status_t agt_state_add_module_schema (ncx_module_t *mod)
     }
 
     val_add_child(schema, myschemasval);
+
+    if(0==strcmp(ncx_get_modname(mod), NCXMOD_NETCONF)) {
+        /* ietf-netconf is overloaded internally */
+        val_value_t* newval;
+        val_value_t* curval;
+
+        /* identifier */
+        newval = agt_make_leaf(schema->obj,
+                               "identifier",
+                               NCXMOD_IETF_NETCONF,
+                               &res);
+        assert(res==NO_ERR && newval);
+        curval = val_find_child(schema, AGT_STATE_MODULE, "identifier");
+        assert(curval);
+        val_swap_child(newval,curval);
+        val_free_value(curval);
+
+        /* version */
+        newval = agt_make_leaf(schema->obj,
+                               "version",
+                               NCXMOD_IETF_NETCONF_REVISION,
+                               &res);
+        assert(res==NO_ERR && newval);
+        curval = val_find_child(schema, AGT_STATE_MODULE, "version");
+        assert(curval);
+        val_swap_child(newval,curval);
+        val_free_value(curval);
+    }
+
     return res;
 
 }  /* agt_state_add_module_schema */

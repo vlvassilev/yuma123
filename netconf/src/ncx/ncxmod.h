@@ -110,6 +110,7 @@ extern "C" {
 #define NCXMOD_YUMA_NETCONF   (const xmlChar *)"yuma123-netconf"
 
 #define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
+#define NCXMOD_IETF_NETCONF_REVISION   (const xmlChar *)"2011-06-01"
 
 #define NCXMOD_IETF_NETCONF_ACM  (const xmlChar *)"ietf-netconf-acm"
 

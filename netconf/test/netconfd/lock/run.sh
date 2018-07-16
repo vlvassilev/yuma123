@@ -6,9 +6,9 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   echo "Starting confd: $RUN_WITH_CONFD"
   source $RUN_WITH_CONFD/confdrc
   cd tmp
-  for module in ietf-interfaces iana-if-type ; do
-    cp ../../../../modules/ietf/${module}.yang .
-    confdc -c ${module}.yang --yangpath ../../../../
+  for module in ietf-interfaces@2014-05-08.yang  iana-if-type@2014-05-08.yang ; do
+    cp ../../../../modules/ietf/${module} .
+    confdc -c ${module} --yangpath ../../../../
   done
   NCPORT=2022
   NCUSER=admin
@@ -19,7 +19,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
 else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=iana-if-type --module=ietf-interfaces --no-startup --superuser=$USER &
+  /usr/sbin/netconfd --module=../../../modules/ietf/iana-if-type@2014-05-08.yang --module=../../../modules/ietf/ietf-interfaces@2014-05-08.yang --no-startup --superuser=$USER &
   SERVER_PID=$!
 fi
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2012 - 2018, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -294,12 +295,11 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION try_module
+* FUNCTION make_module_filespec
 *
 * For YANG and YIN Modules Only!!!
 *
 * Construct a filespec out of a path name and a module name
-* and try to load the filespec as a YANG module
 *
 * Used in several different modes:
 * Buffer mode:
@@ -341,25 +341,21 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    try_module (xmlChar *buff, 
+    make_module_filespec (xmlChar *buff,
                 uint32 bufflen,
                 const xmlChar *path, 
                 const xmlChar *path2,
                 const xmlChar *modname,
                 const xmlChar *revision,
                 ncxmod_mode_t mode,
-                boolean usebuff,
-                boolean *done,
-                yang_pcb_t *pcb,
-                yang_parsetype_t ptyp)
+                boolean usebuff)
 {
     xmlChar       *p;
     const xmlChar *suffix;
     uint32         total, modlen, pathlen;
-    status_t       res;
+    status_t       res=NO_ERR;
     boolean        isyang;
     
-    *done = FALSE;
     total = 0;
 
     switch (mode) {
@@ -380,8 +376,7 @@ static status_t
         isyang = FALSE;
         break;
     default:
-        *done = TRUE;
-        return SET_ERROR(ERR_INTERNAL_VAL);
+        assert(0);
     }
     
     if (usebuff) {
@@ -395,7 +390,6 @@ static status_t
                 ((revision) ? xml_strlen(revision) + 1 : 0) +
                 xml_strlen(suffix) + 1;
             if (total >= bufflen) {
-                *done = TRUE;
                 log_error("\nncxmod: Filename too long error. Max: %d Got %u\n",
                           bufflen,
                           total);
@@ -416,7 +410,6 @@ static status_t
     } else {
         res = prep_dirpath(buff, bufflen, path, path2, &total);
         if (res != NO_ERR) {
-            *done = TRUE;
             return res;
         }
 
@@ -456,6 +449,78 @@ static status_t
             }
         }
     }
+    return res;
+}  /* make_module_filespec */
+
+
+/********************************************************************
+* FUNCTION try_module
+*
+* For YANG and YIN Modules Only!!!
+* Construct a filespec with make_module_filespec
+* and try to load the filespec as a YANG module
+*
+* INPUTS:
+*    buff == buffer to use for filespec construction
+*    bufflen == length of buffer
+*    path == first piece of path string (may be NULL)
+*    path2 == optional 2nd piece of path string (may be NULL)
+*    modname == module name without file suffix (may be NULL)
+*    revision == revision date string (may be NULL)
+*    mode == suffix mode
+*           == NCXMOD_MODE_YANG if YANG module and suffix is .yang
+*           == NCXMOD_MODE_FILEYANG if YANG filespec
+*           == NCXMOD_MODE_YIN if YIN module and suffix is .yin
+*           == NCXMOD_MODE_FILEYIN if YIN filespec
+*    usebuff == use buffer as-is, unless modname is present
+*    done == address of return done flag
+*    pcb == YANG parser control block (NULL if not used)
+*    ptyp == YANG parser source type (YANG_PT_TOP if YANG top module)
+*
+* OUTPUTS:
+*    *done == TRUE if module loaded and status==NO_ERR
+*             or status != NO_ERR and fatal error occurred
+*             The YANG pcb will also be updated
+*
+*          == FALSE if file-not-found-error or some non-fatal
+*             error so the search should continue if possible
+*
+*    buff contains the full filespec of the found file
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    try_module (xmlChar *buff,
+                uint32 bufflen,
+                const xmlChar *path,
+                const xmlChar *path2,
+                const xmlChar *modname,
+                const xmlChar *revision,
+                ncxmod_mode_t mode,
+                boolean usebuff,
+                boolean *done,
+                yang_pcb_t *pcb,
+                yang_parsetype_t ptyp)
+{
+    status_t       res;
+    boolean        isyang;
+
+    *done = FALSE;
+    res = make_module_filespec (buff, bufflen, path, path2, modname, revision, mode, usebuff);
+    assert(res==NO_ERR);
+    switch (mode) {
+    case NCXMOD_MODE_YANG:
+    case NCXMOD_MODE_FILEYANG:
+        isyang = TRUE;
+        break;
+    case NCXMOD_MODE_YIN:
+    case NCXMOD_MODE_FILEYIN:
+        isyang = FALSE;
+        break;
+    default:
+        assert(0);
+    }
 
     /* attempt to load this filespec as a YANG module */
     res = yang_parse_from_filespec(buff, pcb, ptyp, isyang);
@@ -471,11 +536,8 @@ static status_t
         /* NO_ERR or some other error */
         *done = TRUE;
     }
-
     return res;
-
-}  /* try_module */
-
+} /* try_module */
 
 /********************************************************************
 * FUNCTION test_file
@@ -678,6 +740,7 @@ static boolean
                 return TRUE;
             } else {
                 /* should really be an error */
+                assert(0);
                 return FALSE;
             }
         }
@@ -1444,8 +1507,6 @@ static status_t
 *   bufflen == size of 'buff' in bytes
 *   modname == module name to find (no file suffix)
 *   revision == module revision date (may be NULL)
-*   pcb == parser control block in progress
-*   ptyp == parser source type
 *   usepath == TRUE if path should be used directly
 *              FALSE if the path should be appended with the 'modules' dir
 *   done == address of return done flag
@@ -1463,8 +1524,6 @@ static status_t
                        uint32 bufflen,
                        const xmlChar *modname,
                        const xmlChar *revision,
-                       yang_pcb_t *pcb,
-                       yang_parsetype_t ptyp,
                        boolean usepath,
                        boolean *done)
 {
@@ -1495,27 +1554,7 @@ static status_t
 
         /* try YANG or YIN file */
         res = search_subdirs(buff, bufflen, modname, revision, done);
-        if (*done && res == NO_ERR) {
-
-            res = try_module(buff, 
-                             bufflen, 
-                             NULL, 
-                             NULL,
-                             NULL, 
-                             NULL,
-                             yang_fileext_is_yang(buff) ? 
-                             NCXMOD_MODE_FILEYANG : 
-                             NCXMOD_MODE_FILEYIN,
-                             TRUE, 
-                             done, 
-                             pcb, 
-                             ptyp);
-            if (res != NO_ERR) {
-                res2 = add_failed(modname, 
-                                  revision,
-                                  pcb, 
-                                  res);
-            }
+        if (*done ) {
         }
         return (res != NO_ERR) ? res : res2;
     }
@@ -1523,38 +1562,31 @@ static status_t
     /* else subdir searches not allowed
      * check for YANG file in the current path
      */
-    res = try_module(buff,
-                     bufflen, 
+    res = make_module_filespec(buff,
+                     bufflen,
                      path,
                      path2,
                      modname,
                      revision,
                      NCXMOD_MODE_YANG,
-                     FALSE, 
-                     done,
-                     pcb,
-                     ptyp);
+                     FALSE);
+    if(ncxmod_test_filespec(buff)) {
+        *done=TRUE;
+    }
 
     if (!*done && res == NO_ERR) {
         /* check for YIN file in the current path */
-        res = try_module(buff,
-                         bufflen, 
+        res = make_module_filespec(buff,
+                         bufflen,
                          path,
                          path2,
                          modname,
                          revision,
                          NCXMOD_MODE_YIN,
-                         FALSE, 
-                         done,
-                         pcb,
-                         ptyp);
-    }
-
-    if (*done && res != NO_ERR) {
-        res2 = add_failed(modname,
-                          revision,
-                          pcb,
-                          res);
+                         FALSE);
+        if(ncxmod_test_filespec(buff)) {
+            *done=TRUE;
+        }
     }
     return (res != NO_ERR) ? res : res2;
 
@@ -1575,11 +1607,10 @@ static status_t
 *   bufflen == size of 'buff' in bytes
 *   modname == module name to find (no file suffix)
 *   revision == module revision date (may be NULL)
-*   pcb == parser control block in progress
-*   ptyp == parser source type
 *   done == address of return done flag
 *
 * OUTPUTS:
+*   buff == buffer containing the filespec
 *   *done == TRUE if file found or fatal error
 *    file completely processed in try_module if file found
 *
@@ -1592,8 +1623,6 @@ static status_t
                            uint32 bufflen,
                            const xmlChar *modname,
                            const xmlChar *revision,
-                           yang_pcb_t *pcb,
-                           yang_parsetype_t ptyp,
                            boolean *done)
 {
     const xmlChar  *str, *p;
@@ -1631,8 +1660,6 @@ static status_t
                                 bufflen,
                                 modname, 
                                 revision,
-                                pcb,
-                                ptyp,
                                 TRUE,
                                 done);
         if (*done) {
@@ -1943,11 +1970,11 @@ static status_t
                  ncx_module_t **retmod)
 {
     ncxmod_mode_t   mode = NCXMOD_MODE_NONE;
-    xmlChar        *buff;
     uint32          modlen;
-    uint32          bufflen = 0;
     status_t        res = NO_ERR;
     boolean         done = FALSE;
+    xmlChar*        file_path;
+    unsigned int    file_path_len;
 
     if ( !modname || !pcb )
     {
@@ -2030,90 +2057,19 @@ static status_t
         }
     }
 
-    /* get a temp buffer to construct filespecs */
-    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
-    buff = m__getMem(bufflen);
-    if (!buff) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        *buff = 0;
+    file_path=ncxmod123_find_module_filespec(modname, revision);
+    if(file_path==NULL) {
+        return ERR_NCX_MOD_NOT_FOUND;
     }
 
-    /* 2) try alt_path variable if set; used by yangdiff */
-    if ( ncxmod_alt_path) {
-        res = check_module_path( ncxmod_alt_path, buff, bufflen, modname, 
-                                 revision, pcb, ptyp, TRUE, &done );
-    }
-
-    if (ncx_get_cwd_subdirs()) {
-        /* CHECK THE CURRENT DIR AND ANY SUBDIRS
-         * 3) try cur working directory and subdirs if the subdirs parameter
-         *    is true
-         * check before the modpath, which can cause the wrong version to be 
-         * picked, depending * on the CWD used by the application.  */
-        if (!done) {
-            res = check_module_pathlist( (const xmlChar *)".", buff, bufflen,
-                                         modname, revision, pcb, ptyp, &done );
+    file_path_len = xml_strlen(file_path);
+    /* find the start of the file name extension, expecting .yang or .yin */
+    mode = determine_mode( file_path, file_path_len );
+    if ( NCXMOD_MODE_FILEYANG == mode || NCXMOD_MODE_FILEYIN == mode ) {
+        res = try_module_filespec( mode, file_path, file_path_len, pcb, ptyp, retmod );
+        if (res != NO_ERR) {
+            ( void ) add_failed(modname, revision, pcb, res);
         }
-    } else {
-        /* CHECK THE CURRENT DIR BUT NOT ANY SUBDIRS
-         * 3a) try as module in current dir, YANG format */
-        if (!done) {
-            res = try_module( buff, bufflen, NULL, NULL, modname, revision, 
-                              NCXMOD_MODE_YANG, FALSE, &done, pcb, ptyp );
-        }
-
-        /* 3b) try as module in current dir, YIN format  */
-        if (!done) {
-            res = try_module( buff, bufflen, NULL, NULL, modname, revision,
-                              NCXMOD_MODE_YIN, FALSE, &done, pcb, ptyp);
-        }
-    }
-
-    /* 4) try YUMA_MODPATH environment variable if set */
-    if (!done && ncxmod_mod_path) {
-        res = check_module_pathlist( ncxmod_mod_path, buff, bufflen, modname, 
-                                     revision, pcb, ptyp, &done );
-    }
-
-    /* 5) HOME/modules directory */
-    if (!done && ncxmod_home) {
-        res = check_module_path( ncxmod_home, buff, bufflen, modname,
-                                 revision, pcb, ptyp, FALSE, &done );
-    }
-
-    /* 6) YUMA_HOME/modules directory */
-    if (!done && ncxmod_yuma_home) {
-        res = check_module_path( ncxmod_yuma_home, buff, bufflen, modname, 
-                                 revision, pcb, ptyp, FALSE, &done );
-    }
-
-    /* 7) YUMA_INSTALL/modules directory or default install path
-     *    If this envvar is set then the default install path will not
-     *    be tried
-     */
-    if (!done) {
-        if (ncxmod_env_install) {
-            res = check_module_path( ncxmod_env_install, buff, bufflen, modname,
-                                     revision, pcb, ptyp, FALSE, &done );
-        } else {
-            res = check_module_path( NCXMOD_DEFAULT_INSTALL, buff, bufflen, 
-                                     modname, revision, pcb, ptyp, FALSE, 
-                                     &done );
-        }
-    }
-
-    if (res != NO_ERR || !done) {
-        if (!done) {
-            res = ERR_NCX_MOD_NOT_FOUND;
-        }
-
-        ( void ) add_failed(modname, revision, pcb, res);
-    }
-
-    m__free(buff);
-
-    if (done) {
         if ( ( res == NO_ERR || ptyp == YANG_PT_INCLUDE ) && retmod ) {
             if (pcb->retmod != NULL) {
                 *retmod = pcb->retmod;
@@ -2128,10 +2084,127 @@ static status_t
             ncx_free_module(pcb->retmod);
             pcb->retmod = NULL;
         } /* else pcb->top will get deleted in yang_free_pcb */
+
+    } else {
+        assert(0);
+    }
+    free(file_path);
+    return res;
+
+} /* load_module */
+
+/********************************************************************
+* FUNCTION ncxmod123_find_module_filespec
+*
+* Determine the location of the specified module
+*
+* Module Search order:
+*   1) current directory
+*   2) YUMA_MODPATH environment var (or set by modpath CLI var)
+*   3) HOME/modules directory
+*   4) YUMA_HOME/modules directory
+*   5) YUMA_INSTALL/modules directory OR
+*   6) default install module location, which is '/usr/share/yuma/modules'
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
+**
+* RETURNS:
+*   NULL if no match was found or pointer to allocated string
+*   containing the path
+*
+*********************************************************************/
+xmlChar* ncxmod123_find_module_filespec(const xmlChar *modname, const xmlChar *revision)
+{
+    xmlChar        *buff;
+    uint32          bufflen = 0;
+    boolean         done = FALSE;
+    status_t        res;
+
+    /* get a temp buffer to construct filespecs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = malloc(bufflen);
+    assert(buff);
+    *buff = 0;
+
+    /* 1) try alt_path variable if set; used by yangdiff */
+    if ( ncxmod_alt_path) {
+        res = check_module_path( ncxmod_alt_path, buff, bufflen, modname,
+                                 revision, TRUE, &done );
     }
 
-    return res;
-}  /* load_module */
+    if (ncx_get_cwd_subdirs()) {
+        /* CHECK THE CURRENT DIR AND ANY SUBDIRS
+         * 3) try cur working directory and subdirs if the subdirs parameter
+         *    is true
+         * check before the modpath, which can cause the wrong version to be 
+         * picked, depending * on the CWD used by the application.  */
+        if (!done) {
+            res = check_module_pathlist( (const xmlChar *)".", buff, bufflen,
+                                         modname, revision, &done );
+        }
+    } else {
+        /* CHECK THE CURRENT DIR BUT NOT ANY SUBDIRS
+         * 2a) try as module in current dir, YANG format */
+        if (!done) {
+            res = make_module_filespec( buff, bufflen, NULL, NULL, modname, revision,
+                              NCXMOD_MODE_YANG, FALSE);
+            if(ncxmod_test_filespec(buff)) {
+                done=TRUE;
+            }
+        }
+
+        /* 2b) try as module in current dir, YIN format  */
+        if (!done) {
+            res = make_module_filespec( buff, bufflen, NULL, NULL, modname, revision,
+                              NCXMOD_MODE_YIN, FALSE);
+            if(ncxmod_test_filespec(buff)) {
+                done=TRUE;
+            }
+        }
+    }
+
+    /* 3) try YUMA_MODPATH environment variable if set */
+    if (!done && ncxmod_mod_path) {
+        res = check_module_pathlist( ncxmod_mod_path, buff, bufflen, modname, 
+                                     revision, &done );
+    }
+
+    /* 4) HOME/modules directory */
+    if (!done && ncxmod_home) {
+        res = check_module_path( ncxmod_home, buff, bufflen, modname,
+                                 revision, FALSE, &done );
+    }
+
+    /* 5) YUMA_HOME/modules directory */
+    if (!done && ncxmod_yuma_home) {
+        res = check_module_path( ncxmod_yuma_home, buff, bufflen, modname, 
+                                 revision, FALSE, &done );
+    }
+
+    /* 6) YUMA_INSTALL/modules directory or default install path
+     *    If this envvar is set then the default install path will not
+     *    be tried
+     */
+    if (!done) {
+        if (ncxmod_env_install) {
+            res = check_module_path( ncxmod_env_install, buff, bufflen, modname,
+                                     revision, FALSE, &done );
+        } else {
+            res = check_module_path( NCXMOD_DEFAULT_INSTALL, buff, bufflen,
+                                     modname, revision, FALSE, 
+                                     &done );
+        }
+    }
+
+    if(done) {
+        return buff;
+    } else {
+        free(buff);
+        return NULL;
+    }
+} /* ncxmod123_find_module_filespec */
 
 
 /********************************************************************
@@ -3469,6 +3542,7 @@ xmlChar *
 {
     xmlChar  *buff;
     uint32    flen, bufflen;
+    int ret;
 
 #ifdef DEBUG
     if (!fname || !res) {
@@ -3496,15 +3570,6 @@ xmlChar *
     if (!buff) {
         *res = ERR_INTERNAL_MEM;
         return NULL;
-    }
-
-    /* 1) try the YUMA_DATAPATH environment variable
-     * only if it is not an absolute path string
-     */
-    if (ncxmod_data_path && (*fname != NCXMOD_PSCHAR)) {
-        if (test_pathlist(ncxmod_data_path, buff, bufflen, fname, NULL)) {
-            return buff;
-        }
     }
 
     /* 2) current directory or absolute path */

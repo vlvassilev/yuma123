@@ -1330,6 +1330,31 @@ extern boolean
 extern uint32
     ncxmod_get_pathlen_from_filespec (const xmlChar *filespec);
 
+/********************************************************************
+* FUNCTION ncxmod123_find_module_filespec
+*
+* Determine the location of the specified module
+*
+* Module Search order:
+*   1) current directory
+*   2) YUMA_MODPATH environment var (or set by modpath CLI var)
+*   3) HOME/modules directory
+*   4) YUMA_HOME/modules directory
+*   5) YUMA_INSTALL/modules directory OR
+*   6) default install module location, which is '/usr/share/yuma/modules'
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
+**
+* RETURNS:
+*   NULL if no match was found or pointer to allocated string
+*   containing the path
+*
+*********************************************************************/
+extern xmlChar*
+    ncxmod123_find_module_filespec(const xmlChar *modname, const xmlChar *revision);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

@@ -1187,8 +1187,12 @@ static status_t get_schema_validate( ses_cb_t *scb,
     if(0==strcmp(identifier,NCXMOD_IETF_NETCONF) &&
        (version==NULL || 0==strcmp(version,NCXMOD_IETF_NETCONF_REVISION)) &&
        modformat==NCX_MODFORMAT_YANG || modformat==NCX_MODFORMAT_NONE) {
-
-        msg->rpc_user1 = (void *)"/usr/share/yuma/modules/ietf-patched/ietf-netconf@2011-06-01.yang"/*ietf_netconf_mod->source*/;
+        static char* mod_path=NULL;
+        if(mod_path==NULL) {
+            mod_path=ncxmod123_find_module_filespec(identifier, version);
+            assert(mod_path!=NULL);
+        }
+        msg->rpc_user1 = mod_path;
         msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
         msg->rpc_data_type = RPC_DATA_STD;
         msg->rpc_datacb = agt_output_schema;

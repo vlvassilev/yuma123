@@ -385,7 +385,7 @@ status_t
 
     clivalset = agt_cli_get_valset();
     val = val_find_child(clivalset, NCXMOD_NETCONFD_EX, NCX_EL_WITH_NMDA);
-    if(!VAL_BOOL(val)) {
+    if((val==NULL) || (!VAL_BOOL(val))) {
       return NO_ERR;
     }
 
@@ -455,7 +455,7 @@ status_t
 
     clivalset = agt_cli_get_valset();
     val = val_find_child(clivalset, NCXMOD_NETCONFD_EX, NCX_EL_WITH_NMDA);
-    if(!VAL_BOOL(val)) {
+    if((val==NULL) || (!VAL_BOOL(val))) {
       return NO_ERR;
     }
 
@@ -482,7 +482,7 @@ void
 
     clivalset = agt_cli_get_valset();
     val = val_find_child(clivalset, NCXMOD_NETCONFD_EX, NCX_EL_WITH_NMDA);
-    if(!VAL_BOOL(val)) {
+    if((val==NULL) || (!VAL_BOOL(val))) {
       return NO_ERR;
     }
 

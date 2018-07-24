@@ -6,7 +6,7 @@ $(top_srcdir)/netconf/modules/ietf/ietf-interfaces@2014-05-08.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-ip@2014-06-16.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-monitoring@2010-10-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-with-defaults@2011-06-01.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-netconf-acm@2012-02-22.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-netconf-acm@2018-02-26.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-notifications@2012-02-06.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-library@2016-06-21.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-metadata@2016-08-05.yang \

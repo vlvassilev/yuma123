@@ -27,6 +27,12 @@ test()
         if [ "$RUN_WITH_PYANG" != "" ] ; then
             pyang --path ${LIB_YANG_PATH}/tests/conformance/${1}/ ${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang
             RES=$?
+        elif [ "$RUN_WITH_YANGDUMP" != "" ] ; then
+            yangdump --modpath=${LIB_YANG_PATH}/tests/conformance/${1}/ ${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang
+            RES=$?
+        elif [ "$RUN_WITH_YANGLINT" != "" ] ; then
+            yanglint --path=${LIB_YANG_PATH}/tests/conformance/${1}/ ${LIB_YANG_PATH}/tests/conformance/${1}/mod$(($index+1)).yang
+            RES=$?
         elif [ "$RUN_WITH_CONFD" != "" ] ; then
             cd tmp
             killall -KILL confd || true

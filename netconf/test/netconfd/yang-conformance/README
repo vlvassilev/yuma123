@@ -1,0 +1,24 @@
+=Conformance test suite for RFC 7950: "The YANG 1.1 Data Modeling Language"=
+
+==FILES==
+testspec.txt  - specification of the expected results 1-FAIL, 0-PASS
+check-yang-conformance.sh - script running the test suite
+
+==USAGE==
+ #Run with netconfd
+ ./check-yang-conformance.sh .. testspec.txt
+
+ #Run with pyang
+ export RUN_WITH_PYANG=1
+ ./check-yang-conformance.sh .. testspec.txt
+ export RUN_WITH_PYANG=
+
+ #Run with yanglint
+ export RUN_WITH_YANGLINT=1
+ ./check-yang-conformance.sh .. testspec.txt
+ export RUN_WITH_YANGLINT=
+
+ #Run with confd
+ export RUN_WITH_CONFD=~/confd/root
+ ./check-yang-conformance.sh .. testspec.txt
+  export RUN_WITH_CONFD=

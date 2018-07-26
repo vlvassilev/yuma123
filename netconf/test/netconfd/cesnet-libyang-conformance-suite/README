@@ -1,0 +1,4 @@
+=Conformance test suite for RFC6020 "YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)"=
+
+==FILES==
+testspec.txt  - specification of the expected results 1-FAIL, 0-PASS

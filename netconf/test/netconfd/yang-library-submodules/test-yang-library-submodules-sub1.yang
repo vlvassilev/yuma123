@@ -1,0 +1,15 @@
+submodule test-yang-library-submodules-sub1 {
+
+  belongs-to test-yang-library-submodules {
+    prefix tyls;
+  }
+  revision 2018-07-27 {
+    description
+      "Initial version.";
+  }
+  grouping grouping-bar {
+    leaf bar {
+      type string;
+    }
+  }
+}

@@ -19,6 +19,7 @@ test-xpath-derived-from-or-self \
 test-xpath-enum-value \
 test-xpath-bit-is-set \
 test-yang-library \
+test-yang-library-submodules \
 test-ietf-netmod-sub-intf-vlan-model \
 test-ietf-routing \
 test-ietf-routing-bis \

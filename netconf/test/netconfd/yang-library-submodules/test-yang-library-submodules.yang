@@ -1,0 +1,21 @@
+module test-yang-library-submodules {
+
+  namespace "http://yuma123.org/ns/test-yang-library-submodules";
+  prefix tyls;
+
+  include test-yang-library-submodules-sub1;
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the yang-library-submodules test.";
+
+  revision 2018-07-27 {
+    description
+      "Initial version.";
+  }
+  container top {
+    uses tyls:grouping-bar;
+  }
+}

@@ -3344,6 +3344,7 @@ status_t
 {
     yang_node_t     *node;
     const xmlChar   *savedrev;
+    const ncx_module_t *savedparentparm;
     status_t         res;
 
 #ifdef DEBUG
@@ -3365,11 +3366,13 @@ status_t
 
     savedrev = pcb->revision;
     pcb->revision = revision;
+    savedparentparm = pcb->parentparm;
     pcb->parentparm = parent;
 
     res = try_load_module(pcb, ptyp, modname, revision, retmod);
 
     pcb->revision = savedrev;
+    pcb->parentparm = savedparentparm;
 
     return res;
 

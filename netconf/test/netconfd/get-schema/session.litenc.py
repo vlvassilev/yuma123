@@ -49,38 +49,24 @@ def main():
 	ret = conn_raw.connect(server=server, port=port, user=user, password=password)
 	if ret != 0:
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
-		return(-1)  
+		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
 	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
-<hello>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
  <capabilities>
-  <capability>urn:ietf:params:netconf:base:1.0</capability>\
- </capabilities>\
+  <capability>urn:ietf:params:netconf:base:1.0</capability>
+ </capabilities>
 </hello>
 """)
 	if ret != 0:
 		print("[FAILED] Sending <hello>")
 		return(-1)
-	(ret, reply_xml)=conn_raw.receive()
-	if ret != 0:
-		print("[FAILED] Receiving <hello>")
-		return(-1)
 
-	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	# receive <hello>
+	result=conn.receive()
 
-	print("")
-	print("Connected ...")
-	print("")
-	time.sleep(3)
-	get_all_rpc = """
-<get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-<filter type="xpath" select="/"/>
-</get>
-"""
-	print("<get> /")
-	result = conn.rpc(get_all_rpc)
-	print result
+
 
 	get_rpc = """
 <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">

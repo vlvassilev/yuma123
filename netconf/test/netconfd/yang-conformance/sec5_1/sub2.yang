@@ -1,0 +1,21 @@
+submodule sub2 {
+  yang-version 1.1;
+  belongs-to mod2 {
+    prefix m2;
+  }
+  container s2 {
+    presence true;
+  }
+  grouping s2 {
+    leaf s2 {
+      type string;
+    }
+  }
+  augment "/m2:m2" {
+    container s2 {
+      uses m2;
+      uses s2;
+      uses s3;
+    }
+  }
+}

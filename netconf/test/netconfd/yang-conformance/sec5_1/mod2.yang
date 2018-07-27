@@ -1,0 +1,13 @@
+module mod2 {
+  yang-version 1.1;
+  prefix m2;
+  namespace "http://yuma123.org/ns/sec5_1/mod2";
+  include sub2;
+  include sub3;
+
+  container m2 {
+    presence true;
+    uses s2;
+    uses s3;
+  }
+}

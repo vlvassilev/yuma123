@@ -89,24 +89,18 @@ def main():
 		print "[OK] Retrieving a (sub)module"
 
 		get_schema = """
-<rpc message-id="1"
-  xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">
-    <identifier>%(identifier)s</identifier>
-  </get-schema>
-</rpc>
+<get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">
+  <identifier>%(identifier)s</identifier>
+</get-schema>
 """
 		print("")
 		print("get-schema")
 
 		print(get_schema%{'identifier':identifier})
-		ret = conn_raw.send(get_schema%{'identifier':identifier})
-		if ret != 0:
-			print("[FAILED] Sending <get-schema>")
-			return(-1)
-		(ret, reply_xml)=conn_raw.receive()
-		if ret != 0:
-			print("[FAILED] Receiving <get-schema>")
-			return(-1)
-		print "[OK] Receiving <get-schema> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+		result = conn.rpc(get_schema%{'identifier':identifier})
+		print lxml.etree.tostring(result)
+		rpc_error = result.xpath('rpc-error')
+		assert(len(rpc_error)==0)
+		print "[OK] Retrieving a (sub)module"
+
 sys.exit(main())

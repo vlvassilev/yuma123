@@ -43,7 +43,7 @@ test_schema()
         elif [ "$RUN_WITH_CONFD" != "" ] ; then
             killall -KILL confd || true
             source $RUN_WITH_CONFD/confdrc
-            confdc -c ../${1}/mod$(($index+1)).yang --yangpath ${1}/ -o mod$(($index+1)).fxs  1>&2
+            confdc -c ${1}/mod$(($index+1)).yang --yangpath ${1}/ -o mod$(($index+1)).fxs  1>&2
             RES=$?
         else
             /usr/sbin/netconfd --validate-config-only --startup-error=stop --no-startup --modpath=${1}/ --module=${1}/mod$(($index+1)).yang  1>&2

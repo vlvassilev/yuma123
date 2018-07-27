@@ -1,7 +1,8 @@
 #!/bin/bash
-LIB_YANG_PATH=../../../../../libyang/tests/conformance/
+LIB_YANG_PATH=../../../../../libyang
 
 rm -rf tmp
 mkdir tmp
 cd tmp
-../check-yang-conformance.sh ../${LIB_YANG_PATH} ../testspec.txt
+../genspec.sh ../${LIB_YANG_PATH}/tests/conformance | sort > ../testspec.txt
+../check-yang-conformance.sh ../${LIB_YANG_PATH}/tests/conformance ../testspec.txt

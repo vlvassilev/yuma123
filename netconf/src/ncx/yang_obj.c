@@ -9518,7 +9518,7 @@ static status_t
          * not augmentee)
          */
 
-        if(testobj->tkerr.mod == mod) {
+        if((testobj->tkerr.mod == mod) || (testobj->tkerr.mod == mod->parent)) {
             is_targetmod = TRUE;
         } else {
             /* handle case of used groupings from external modules */

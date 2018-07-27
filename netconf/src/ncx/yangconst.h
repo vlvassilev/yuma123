@@ -175,10 +175,15 @@ extern "C" {
  */
 static inline boolean terminate_parse( status_t res )
 {
+    boolean terminate;
+    terminate = ( res != NO_ERR && ( res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF ));
+#if 0
     if(res!=NO_ERR) {
-        printf("%s %d\n",__FUNCTION__, res);
+        fprintf(stderr, "%s ? res=%d (%s) - %s\n",__FUNCTION__, res,
+                get_error_string(res),
+                terminate?"terminate":"continue");
     }
-    return ( res != NO_ERR && ( res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF ));
+#endif
 }
 
 /* used in parser routines to decide if processing can continue

@@ -111,12 +111,15 @@ static status_t
     ncx_module_t *mod;
     obj_template_t *module_obj;
     obj_template_t *deviation_obj;
+    obj_template_t *submodule_obj;
     val_value_t *module_set_id_val;
     val_value_t *module_val;
     val_value_t *deviation_val;
+    val_value_t *submodule_val;
     val_value_t *childval;
     ncx_feature_t *feature;
-    ncx_lmem_t           *listmember;
+    ncx_lmem_t    *listmember;
+    ncx_include_t *inc;
 
     module_obj = obj_find_child(ietf_yang_library_modules_state_obj, "ietf-yang-library", "module");
     assert(module_obj);
@@ -229,6 +232,39 @@ static status_t
             val_add_child(deviation_val, module_val);
         }
 
+        /* submodule */
+        submodule_obj = obj_find_child(module_obj, "ietf-yang-library", "submodule");
+        assert(submodule_obj);
+        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+            submodule_val = val_new_value();
+            assert(submodule_val);
+            val_init_from_template(submodule_val, submodule_obj);
+
+            /* name */
+            childval = agt_make_leaf(submodule_obj,
+                                 "name",
+                                 inc->submodule,
+                                 &res);
+            assert(res==NO_ERR && childval);
+
+            val_add_child(childval, submodule_val);
+
+            /* revision */
+            childval = agt_make_leaf(submodule_obj,
+                                 "revision",
+                                 inc->revision?inc->revision:"",
+                                 &res);
+            assert(res==NO_ERR && childval);
+            val_add_child(childval, submodule_val);
+
+            val_add_child(submodule_val, module_val);
+            res = val_gen_index_chain(submodule_obj, submodule_val);
+            assert(res == NO_ERR);
+        }
+        /* submodule - ends */
         res = val_gen_index_chain(module_obj, module_val);
         assert(res == NO_ERR);
 

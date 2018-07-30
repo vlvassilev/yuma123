@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./update-module-repository.sh
+#./update-module-repository.sh
 
 if [ "$RUN_WITH_CONFD" != "" ] ; then
     # skipped test return value
@@ -15,15 +15,16 @@ FAILS=0
 
 for dst in ietf ietf-draft ; do
 for module in `ls ../../../modules/${dst}` ; do
-  echo $module
+  echo $module >&2
+
   is_submodule="`head -n 1 ../../../modules/${dst}/${module} | grep submodule`" || true
   if [ "${is_submodule}" != "" ] ; then
     echo "Skip submodule: ${module}"
     continue
   fi
   cmd="/usr/sbin/netconfd --validate-config-only --startup-error=stop --module=../../../modules/${dst}/${module} --no-startup --modpath=../../../modules"
-  echo $cmd
-  $cmd
+  echo $cmd  >&2
+  $cmd  >&2
   ret=$?
   if [ "${ret}" = "0" ] ; then
     OKS=$((${OKS}+1))

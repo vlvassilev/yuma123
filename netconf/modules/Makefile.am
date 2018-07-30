@@ -16,7 +16,10 @@ $(top_srcdir)/netconf/modules/ietf/ietf-yang-smiv2@2012-06-22.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-ipv4-unicast-routing@2016-11-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-ipv6-router-advertisements@2016-11-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-ipv6-unicast-routing@2016-11-04.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang
+$(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-hardware@2018-03-13.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-hardware-state@2018-03-13.yang \
+$(top_srcdir)/netconf/modules/ietf/iana-hardware@2018-03-13.yang
 
 #$(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang
 #$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang

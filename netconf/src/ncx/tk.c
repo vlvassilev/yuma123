@@ -1307,7 +1307,6 @@ static status_t
         linelen = (uint32)(str-tkc->bptr);
         
         if (*str) {
-            tkc->bptr = str+1;
             tkc->linepos = linelen+1;
             done = TRUE;   /* stopped on a single quote */
         }
@@ -1315,6 +1314,7 @@ static status_t
         if (linelen + total < NCX_MAX_Q_STRLEN) {
             outstr += xml_strncpy(outstr, tkc->bptr, linelen);
             total += linelen;
+            tkc->bptr = str+1;
         } else {
             m__free(tempbuff);
             return ERR_NCX_LEN_EXCEEDED;

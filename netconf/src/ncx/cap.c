@@ -1122,10 +1122,12 @@ status_t
         parmname = xmlns_get_module(foundnsid);
         if (cap->cap_module != NULL && xml_strcmp(parmname, cap->cap_module)) {
             if (usewarning) {
-                log_warn("\nWarning: capability base URI mismatch, "
-                         "got '%s' not '%s''", 
-                         cap->cap_module,  
-                         parmname);
+                if(!(0==strcmp(cap->cap_module, NCXMOD_IETF_NETCONF) && 0==strcmp(parmname,NCXMOD_NETCONF))) {
+                    log_warn("\nWarning: capability base URI mismatch, "
+                             "got '%s' not '%s''",
+                             cap->cap_module,
+                             parmname);
+                }
             }
         }
     }

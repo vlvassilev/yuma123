@@ -5,11 +5,59 @@ test_data()
     #TODO
     declare -a schema_load_fail=("${!2}")
     declare -a data_file_load_fail=("${!3}")
+
+    for index in ${!schema_load_fail[*]}
+    do
+        #printf "%4d: %s\n" $index ${schema_load_fail[$index]}
+        if [ ${schema_load_fail[$index]} == "0" ] ; then
+            MODULE_ARGS=${MODULE_ARGS}" --module="${1}/mod$(($index+1)).yang
+        fi
+    done
+
     for index in ${!data_file_load_fail[*]}
     do
-        echo -n ",1"
+        if [ ${data_file_load_fail[$index]} == "0" ] ; then
+            EXPECTED="OK"
+        else
+            EXPECTED="FAIL"
+        fi
+        DATA_FILE=${1}/data$(($index+1)).xml
+        echo "Testing EXPECTED=$EXPECTED $DATA_FILE ..." >&2
+        echo '<?xml version="1.0" encoding="UTF-8"?>' >test-cfg.xml
+        echo '<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">' >>test-cfg.xml
+        cat ${DATA_FILE} >> test-cfg.xml
+        echo '</config>' >> test-cfg.xml
+        /usr/sbin/netconfd --validate-config-only --startup-error=stop --modpath=${1}/ ${MODULE_ARGS} --startup=test-cfg.xml 1>&2
+        RES=$?
+
+        echo "RES="$RES >&2
+        if [ "$RES" != "0" ] ; then
+            if [ "$EXPECTED" == "OK" ] ; then
+                echo "FAIL: ${DATA_FILE}" >&2
+                FAIL=$(($FAIL+1))
+                echo -n ",1"
+
+            else
+                echo "OK:   ${DATA_FILE}" >&2
+                OK=$(($OK+1))
+                echo -n ",0"
+
+            fi
+        else
+            if [ "$EXPECTED" != "OK" ] ; then
+                echo "FAIL: ${DATA_FILE}" >&2
+                FAIL=$(($FAIL+1))
+                echo -n ",1"
+            else
+                echo "OK:   ${DATA_FILE}" >&2
+                OK=$(($OK+1))
+                echo -n ",0"
+            fi
+        fi
     done
-    return ${#data_file_load_fail[@]}
+    echo "OKs=$OK" >&2
+    echo "FAILs=$FAIL" >&2
+    return $FAIL
 }
 test_schema()
 {

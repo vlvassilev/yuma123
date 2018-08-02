@@ -30,6 +30,7 @@ test-get-schema \
 test-agt-commit-complete \
 test-cesnet-libyang-conformance-suite \
 test-yang-conformance \
+test-yang-1dot1-conformance \
 test-memory-leak
 
 SUBDIRS= \

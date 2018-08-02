@@ -1,0 +1,13 @@
+module mod1 {
+  prefix m1;
+  namespace "http://yuma123.org/ns/sec9_12/mod1";
+
+  container m1 {
+    leaf u1 {
+      type union {
+          type uint32;
+          type string {length 0;}
+      }
+    }
+  }
+}

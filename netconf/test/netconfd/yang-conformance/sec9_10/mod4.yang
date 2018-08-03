@@ -1,0 +1,22 @@
+module mod4 {
+  prefix m4;
+  namespace "http://yuma123.org/ns/sec9_10/mod4";
+
+  identity foo;
+  identity bar;
+  identity foo-based {
+    base foo;
+  }
+  identity bar-based {
+    base bar;
+  }
+
+  container m4 {
+    leaf i4 {
+      type identityref {
+        base "foo";
+      }
+      default "foo-based";
+    }
+  }
+}

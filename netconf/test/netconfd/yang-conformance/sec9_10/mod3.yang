@@ -1,0 +1,22 @@
+module mod3 {
+  prefix m3;
+  namespace "http://yuma123.org/ns/sec9_10/mod3";
+
+  identity foo;
+  identity bar;
+  identity foo-based {
+    base foo;
+  }
+  identity bar-based {
+    base bar;
+  }
+
+  container m3 {
+    leaf i3 {
+      type identityref {
+        base "foo";
+      }
+      default "foo";
+    }
+  }
+}

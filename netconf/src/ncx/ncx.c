@@ -1308,7 +1308,6 @@ ncx_module_t *
 
 }   /* ncx_find_module */
 
-
 // ----------------------------------------------------------------------------!
 
 /**
@@ -1326,6 +1325,8 @@ ncx_module_t *
 {
     ncx_module_t  *mod;
     int32          retval;
+    ncx_include_t  *inc;
+
 
     assert ( modQ && " param modQ is NULL" );
     assert ( modname && " param modname is NULL" );
@@ -1351,6 +1352,30 @@ ncx_module_t *
             }
         } else if (retval < 0) {
             return NULL;
+        }
+
+        /* check for submodule match */
+        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+            ncx_module_t  *submod = inc->submod;
+
+            retval = xml_strcmp(modname, submod->name);
+            if (retval == 0) {
+                if (!revision || !submod->version) {
+                    if (submod->defaultrev) {
+                        return submod;
+                    }
+                } else {
+                    retval = yang_compare_revision_dates(revision,
+                                                         submod->version);
+                    if (retval == 0) {
+                        return submod;
+                    } else if (retval > 0) {
+                        return NULL;
+                    }
+                }
+            }
         }
     }
     return NULL;

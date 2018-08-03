@@ -2662,6 +2662,7 @@ void
     boolean                 retrieval_supported;
     val_value_t             *module_set_id_val;
     val_value_t             *module_val;
+    val_value_t             *submodule_val;
 
     mscb = (mgr_scb_t *)scb->mgrcb;
 
@@ -2708,9 +2709,11 @@ void
         /* yang-library supported */
         cap=NULL;
         module_val = val_find_child(mscb->modules_state_val, "ietf-yang-library", "module");
+        submodule_val=NULL;
     } else {
         cap = cap_first_modcap(&mscb->caplist);
         module_val=NULL;
+        submodule_val=NULL;
     }
 
     do {
@@ -2722,18 +2725,29 @@ void
         libresult = NULL;
 
         if(module_val) {
+           val_value_t* parent_val;
            val_value_t* val;
-           val = val_find_child(module_val, "ietf-yang-library", "name");
+           if(!submodule_val) {
+               parent_val=module_val;
+           } else {
+               parent_val=submodule_val;
+           }
+
+           val = val_find_child(parent_val, "ietf-yang-library", "name");
            assert(val);
            module = VAL_STRING(val);
 
-           val = val_find_child(module_val, "ietf-yang-library", "revision");
+           val = val_find_child(parent_val, "ietf-yang-library", "revision");
            assert(val);
            revision = VAL_STRING(val);
+           if(*revision==0) {
+               revision=NULL;
+           }
 
            val = val_find_child(module_val, "ietf-yang-library", "namespace");
            assert(val);
            namespacestr = VAL_STRING(val);
+
         } else {
             if(cap==NULL) {
                 break;
@@ -2818,6 +2832,7 @@ void
 
                     searchresult->cap = cap;
                     searchresult->module_val = module_val;
+                    searchresult->submodule_val = submodule_val;
 
                     if (searchresult->res != NO_ERR) {
                         if (LOGDEBUG2) {
@@ -2950,6 +2965,7 @@ void
             } else {
                 searchresult->cap = cap;
                 searchresult->module_val = module_val;
+                searchresult->submodule_val = submodule_val;
                 searchresult->capmatch = TRUE;
                 dlq_enque(searchresult, &server_cb->searchresultQ);
             }
@@ -2959,7 +2975,17 @@ void
         if(cap) {
             cap = cap_next_modcap(cap);
         } else {
-            module_val = val_find_next_child(mscb->modules_state_val, "ietf-yang-library", "module", module_val);
+            if(!submodule_val) {
+                /*submodules?*/
+               submodule_val = val_find_child(module_val, "ietf-yang-library", "submodule");
+            } else {
+                /*more submodules?*/
+                submodule_val = val_find_next_child(module_val, "ietf-yang-library", "submodule", submodule_val);
+            }
+            if(!submodule_val) {
+                /*next module*/
+                module_val = val_find_next_child(mscb->modules_state_val, "ietf-yang-library", "module", module_val);
+            }
         }
     } while(cap || module_val);
 

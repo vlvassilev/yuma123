@@ -400,7 +400,7 @@ static ncxmod_temp_filcb_t *
     /* construct a file name for the target file */
     p = filebuffer;
     p += xml_strcpy(p, module);
-    if (revision) {
+    if (revision && *revision!=0) {
         *p++ = '@';
         p += xml_strcpy(p, revision);
     }

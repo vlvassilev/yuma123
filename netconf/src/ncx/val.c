@@ -4118,6 +4118,7 @@ void
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:
+    case NCX_BT_UNION:
         /* leafref is not dumped in canonical form */
         if (VAL_STR(val)) {
             quotes = val_need_quotes(VAL_STR(val));

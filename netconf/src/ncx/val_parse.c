@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -8,7 +9,7 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-/*  FILE: mgr_val_parse.c
+/*  FILE: val_parse.c
 
                 
 *********************************************************************
@@ -1223,19 +1224,14 @@ static status_t
  *
  * <foo>fred</foo>
  * <foo>11</foo>
+ * <foo/>
+ * <foo></foo>
  *
  * INPUTS:
- *     scb == session control block
- *            Input is read from scb->reader.
- *     obj == object template for this string type
- *     startnode == top node of the parameter to be parsed
- *            Parser function will attempt to consume all the
- *            nodes until the matching endnode is reached
- *     retval ==  val_value_t that should get the results of the parsing
+ *   see parse_btype parameter list
  *     
  * OUTPUTS:
  *    *retval will be filled in
- *    msg->errQ may be appended with new errors or warnings
  *
  * RETURNS:
  *   status
@@ -1250,6 +1246,8 @@ static status_t
     xml_node_t           valnode, endnode;
     status_t             res, res2;
     boolean              stopnow;
+    boolean              empty;
+
 
     /* init local vars */
     xml_init_node(&valnode);
@@ -1262,15 +1260,49 @@ static status_t
 
     /* make sure the startnode is correct */
     res = xml_node_match(startnode, 
-                         obj_get_nsid(obj), 
+                         obj_get_nsid(obj),
                          NULL, 
                          XML_NT_START); 
-    if (res == NO_ERR) {
-        /* get the next node which should be a string node */
-        res = get_xml_node(scb, &valnode);
+    if (res != NO_ERR) {
+        res = xml_node_match(startnode,
+                             obj_get_nsid(obj),
+                             NULL,
+                             XML_NT_EMPTY);
+        if (res == NO_ERR) {
+            empty = TRUE;
+        }
     }
 
-    if (res == NO_ERR) {
+    /* get the value string node */
+    if (res == NO_ERR && !empty) {
+        /* get the next node which should be a string node */
+        res = get_xml_node(scb, &valnode);
+        if (res == NO_ERR && valnode.nodetyp == XML_NT_END) {
+
+            res = xml_endnode_match(startnode, &valnode);
+            if(res==NO_ERR) {
+                empty = TRUE;
+                xml_clean_node(&valnode);
+            }
+        }
+    }
+
+
+    if (empty && res==NO_ERR) {
+        /* check the empty string */
+        res = val_union_ok_errinfo(obj_get_typdef(obj),
+                                   EMPTY_STRING,
+                                   retval,
+                                   &errinfo);
+        if(res==NO_ERR) {
+            retval->v.str = xml_strdup(EMPTY_STRING);
+            if (!retval->v.str) {
+                res = ERR_INTERNAL_MEM;
+            }
+        }
+    }
+
+    if(res == NO_ERR && !empty) {
 #ifdef MGR_VAL_PARSE_DEBUG
         if (LOGDEBUG4) {
             log_debug4("\nparse_union: expecting string or number node.");
@@ -1280,21 +1312,10 @@ static status_t
 
         /* validate the node type and union node content */
         switch (valnode.nodetyp) {
-        case XML_NT_START:
-            res = ERR_NCX_WRONG_NODETYP_CPX;
-            stopnow = TRUE;
-            break;
         case XML_NT_STRING:
             /* get the non-whitespace string here */
             res = val_union_ok_errinfo(obj_get_typdef(obj), 
                                        valnode.simval, 
-                                       retval, 
-                                       &errinfo);
-            break;
-        case XML_NT_END:
-            stopnow = TRUE;
-            res = val_union_ok_errinfo(obj_get_typdef(obj), 
-                                       EMPTY_STRING, 
                                        retval, 
                                        &errinfo);
             break;

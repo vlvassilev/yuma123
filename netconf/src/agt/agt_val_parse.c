@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -1706,9 +1707,13 @@ static status_t
  *
  * <foo>fred</foo>
  * <foo>11</foo>
+ * <foo/>
+ * <foo></foo>
  *
  * INPUTS:
  *   see parse_btype_nc parameter list
+ * OUTPUTS:
+ *    *retval will be filled in
  * RETURNS:
  *   status
  *********************************************************************/
@@ -1756,17 +1761,49 @@ static status_t
             res = ERR_NCX_WRONG_NODETYP;
         }
     } else {
-        res = xml_node_match(startnode, 
-                             obj_get_nsid(obj), 
-                             NULL, 
-                             XML_NT_START); 
+        res = xml_node_match(startnode,
+                             obj_get_nsid(obj),
+                             NULL,
+                             XML_NT_START);
+        if (res != NO_ERR) {
+            res = xml_node_match(startnode,
+                                 obj_get_nsid(obj),
+                                 NULL,
+                                 XML_NT_EMPTY);
+            if (res == NO_ERR) {
+                empty = TRUE;
+            }
+        }
     }
 
+    /* get the value string node */
     if (res == NO_ERR && !empty) {
         /* get the next node which should be a string node */
         res = get_xml_node(scb, msg, &valnode, TRUE);
-        if (res != NO_ERR) {
+        if (res == NO_ERR && valnode.nodetyp == XML_NT_END) {
+            res = xml_endnode_match(startnode, &valnode);
+            if(res==NO_ERR) {
+                empty = TRUE;
+                xml_clean_node(&valnode);
+            }
+        } else if (res != NO_ERR) {
             errdone = TRUE;
+        }
+    }
+
+    if (empty && res==NO_ERR) {
+        /* check the empty string */
+        res = val_union_ok_errinfo(obj_get_typdef(obj),
+                                   EMPTY_STRING,
+                                   retval,
+                                   &errinfo);
+        if(res==NO_ERR) {
+            retval->v.str = xml_strdup(EMPTY_STRING);
+            if (!retval->v.str) {
+                res = ERR_INTERNAL_MEM;
+            }
+        } else {
+            badval = EMPTY_STRING;
         }
     }
 
@@ -1778,11 +1815,6 @@ static status_t
 
         /* validate the node type and union node content */
         switch (valnode.nodetyp) {
-        case XML_NT_START:
-            res = ERR_NCX_WRONG_NODETYP_CPX;
-            errnode = &valnode;
-            stopnow = TRUE;
-            break;
         case XML_NT_STRING:
             /* get the non-whitespace string here */
             res = val_union_ok_errinfo(obj_get_typdef(obj), 
@@ -1791,16 +1823,6 @@ static status_t
                                        &errinfo);
             if (res != NO_ERR) {
                 badval = valnode.simval;
-            }
-            break;
-        case XML_NT_END:
-            stopnow = TRUE;
-            res = val_union_ok_errinfo(obj_get_typdef(obj), 
-                                       EMPTY_STRING, 
-                                       retval, 
-                                       &errinfo);
-            if (res != NO_ERR) {
-                badval = EMPTY_STRING;
             }
             break;
         default:

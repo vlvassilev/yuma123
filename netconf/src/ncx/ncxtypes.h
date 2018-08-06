@@ -587,48 +587,6 @@ typedef struct ncx_filptr_t_ {
     dlq_hdr_t             childQ;  /* Q of ncx_filptr_t */
 } ncx_filptr_t;
 
-/* back pointer to a YANG identity
- * used to create an inline tree of valid values
- * for an identity used as a base
- *
- * This inline Q record will be linked in to the
- * childQ of the base identity when the identity
- * containing this struct is using it as a base
- *
- * This thread is only used for client help,
- * to easily list all the QName values that are permitted
- * for a identityref leaf
- */
-typedef struct ncx_idlink_t_ {
-    dlq_hdr_t  qhdr;
-    struct ncx_identity_t_ *identity;
-    boolean    inq;
-} ncx_idlink_t;
-
-/* YANG identity entry */
-typedef struct ncx_identity_t_ {
-    dlq_hdr_t             qhdr;
-    dlq_hdr_t             baseQ;
-    xmlChar              *name;
-    xmlChar              *descr;
-    xmlChar              *ref;
-    ncx_status_t          status;
-    dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
-    status_t              res;     /* may be stored with errors */
-    boolean               isroot;    /* empty baseQ not an error */
-    dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
-    ncx_error_t           tkerr;
-    boolean               seen;                  /* for yangcli */
-} ncx_identity_t;
-
-typedef struct ncx_identity_base_t_ {
-    dlq_hdr_t             qhdr;
-    xmlChar              *prefix;
-    xmlChar              *name;
-    ncx_identity_t       *identity;
-    ncx_idlink_t          idlink;
-} ncx_identity_base_t;
-
 /* representation of one module or submodule during and after parsing */
 typedef struct ncx_module_t_ {
     dlq_hdr_t         qhdr;
@@ -687,6 +645,49 @@ typedef struct ncx_module_t_ {
    boolean implemented;
 
 } ncx_module_t;
+
+/* back pointer to a YANG identity
+ * used to create an inline tree of valid values
+ * for an identity used as a base
+ *
+ * This inline Q record will be linked in to the
+ * childQ of the base identity when the identity
+ * containing this struct is using it as a base
+ *
+ * This thread is only used for client help,
+ * to easily list all the QName values that are permitted
+ * for a identityref leaf
+ */
+typedef struct ncx_idlink_t_ {
+    dlq_hdr_t  qhdr;
+    struct ncx_identity_t_ *identity;
+    boolean    inq;
+} ncx_idlink_t;
+
+/* YANG identity entry */
+typedef struct ncx_identity_t_ {
+    dlq_hdr_t             qhdr;
+    dlq_hdr_t             baseQ;
+    ncx_module_t         *mod;
+    xmlChar              *name;
+    xmlChar              *descr;
+    xmlChar              *ref;
+    ncx_status_t          status;
+    dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
+    status_t              res;     /* may be stored with errors */
+    boolean               isroot;    /* empty baseQ not an error */
+    dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
+    ncx_error_t           tkerr;
+    boolean               seen;                  /* for yangcli */
+} ncx_identity_t;
+
+typedef struct ncx_identity_base_t_ {
+    dlq_hdr_t             qhdr;
+    xmlChar              *prefix;
+    xmlChar              *name;
+    ncx_identity_t       *identity;
+    ncx_idlink_t          idlink;
+} ncx_identity_base_t;
 
 
 /* enumeration for different NCX module conversion output types */

@@ -856,6 +856,7 @@ static status_t
                   mod,
                   TK_CUR_LNUM(tkc),
                   TK_CUR_LPOS(tkc));
+    identity->mod=mod;
     identity->isroot = TRUE;
 
     /* Get the mandatory identity name */

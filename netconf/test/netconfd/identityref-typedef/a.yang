@@ -10,23 +10,26 @@ module a {
     description 
       "Testing identityref typedef type defined in imported module.";
 
-    revision 2017-05-29 {
+    revision 2018-08-06 {
         description
-            "Initial version.";
+            "Corrected example to actually define identities
+             based on twa baseless (abstract) identities.";
     }
-    identity my-base-identity {
-      description
-          "Intended base identity.";
+    identity foo;
+
+    identity bar;
+
+    identity foo-based {
+        base "foo";
     }
 
-    identity other-base-identity {
-      description
-          "Not the intended base identity.";
+    identity bar-based {
+        base "bar";
     }
 
     typedef my-identityref-typedef-type {
         type identityref {
-            base "my-base-identity";
+            base "foo";
         }
     }
 

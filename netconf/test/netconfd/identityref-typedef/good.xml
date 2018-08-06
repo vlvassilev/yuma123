@@ -2,6 +2,6 @@
 <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
   <b xmlns="http://example.com/ns/identityref-typedef-b">
     <my-identityref-typedef-type-leaf
-      xmlns:a="http://example.com/ns/identityref-typedef-a">a:my-base-identity</my-identityref-typedef-type-leaf>
+      xmlns:a="http://example.com/ns/identityref-typedef-a">a:foo</my-identityref-typedef-type-leaf>
   </b>
 </config>

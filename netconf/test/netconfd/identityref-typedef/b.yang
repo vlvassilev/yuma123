@@ -14,9 +14,10 @@ module b {
     description 
       "Testing identityref typedef type defined in imported module.";
 
-    revision 2017-05-29 {
+    revision 2018-08-06 {
         description
-            "Initial version.";
+            "Corrected example to actually define identities
+             based on twa baseless (abstract) identities.";
     }
     container b {
         leaf my-identityref-typedef-type-leaf {

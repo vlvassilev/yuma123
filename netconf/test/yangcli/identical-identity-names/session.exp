@@ -6,7 +6,7 @@ expect {
 }
 
 expect {
-    "Error: Multiple matches for identity 'myidentity': mod1:myidentity, mod2:myidentity" {sleep 1}
+    "Error: Multiple identities match identityref value \'myidentity\': \'mod1:myidentity\', \'mod2:myidentity\'" {sleep 1}
     timeout {exit 1}
 }
 
@@ -19,10 +19,7 @@ expect {
     "RPC OK Reply" {sleep 1}
     timeout {exit 1}
 }
-expect {
-    "RPC OK Reply" {sleep 1}
-    timeout {exit 1}
-}
+
 expect {
     "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
     timeout {exit 1}

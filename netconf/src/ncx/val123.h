@@ -28,11 +28,22 @@ unsigned int
                              const xmlChar *objname,
                              obj_template_t **matched_objs,
                              unsigned int matched_objs_limit);
+unsigned int ncx123_find_matching_identities(const ncx_module_t* mod,
+                 const xmlChar * qname,
+                 const typ_idref_t *idref,
+                 ncx_identity_t **ids,
+                 unsigned int matched_ids_limit);
+status_t
+    val123_parse_idref_ex (const ncx_module_t *mod,
+                     const xmlChar *qname,
+                     const typ_idref_t *idref,
+                     ncx_identity_t **id);
 unsigned int
     obj123_find_all_homonym_child_objs (obj_template_t *parent,
                              const xmlChar *objname,
                              obj_template_t **matched_objs,
                              unsigned int matched_objs_limit);
+
 
 ncx_module_t*
     obj123_find_child_mod_from_name(obj_template_t *parent, const char* modname);

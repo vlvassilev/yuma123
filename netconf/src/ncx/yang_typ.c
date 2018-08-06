@@ -86,6 +86,7 @@ date         init     comment
 #include "status.h"
 #include "typ.h"
 #include "xml_util.h"
+#include "val123.h"
 #include "xpath.h"
 #include "xpath_yang.h"
 #include "yangconst.h"
@@ -2993,12 +2994,8 @@ static status_t
 
     *hasdefval = FALSE;
     if (defval != NULL) {
-        *hasdefval = TRUE;        
-        if (btyp == NCX_BT_IDREF) {
-            res = val_parse_idref(mod, defval, NULL, NULL, NULL);
-        } else {
-            res = val_simval_ok(typdef, defval);
-        }
+        *hasdefval = TRUE;
+        res = val_simval_ok(typdef, defval);
         if (res != NO_ERR) {
             if (!badvalok) {
                 if (obj) {
@@ -3024,15 +3021,7 @@ static status_t
         typdefval = typ_get_defval(typdef->def.named.typ);
         if (typdefval) {
             *hasdefval = TRUE;
-            if (btyp == NCX_BT_IDREF) {
-                res = val_parse_idref(mod, 
-                                      typdefval, 
-                                      NULL, 
-                                      NULL, 
-                                      NULL);
-            } else {
-                res = val_simval_ok(typdef, typdefval);
-            }
+            res = val_simval_ok(typdef, typdefval);
             if (res != NO_ERR) {
                 if (!badvalok) {
                     if (obj) {
@@ -3094,11 +3083,7 @@ static status_t
     status_t     res = ERR_NCX_SKIPPED;
 
     if (defval != NULL) {
-        if (btyp == NCX_BT_IDREF) {
-            res = val_parse_idref(mod, defval, NULL, NULL, NULL);
-        } else {
-            res = val_simval_ok(typdef, defval);
-        }
+        res = val_simval_ok_max(typdef, defval, NULL, mod, TRUE);
         if (res != NO_ERR) {
             if (!badvalok) {
                 if (obj) {
@@ -3463,27 +3448,6 @@ static status_t
         res = validate_range_chain(tkc, mod, typdef, errname);
     }
 
-    /* check default value if any defined */
-    if ((res == NO_ERR) &&
-        (btyp != NCX_BT_NONE) && 
-        (btyp != NCX_BT_UNION) && typ_ok(typdef)) {
-
-        if (btyp == NCX_BT_LEAFREF || typ_is_xpath_string(typdef)) {
-            if (LOGDEBUG4) {
-                log_debug4("\nyang_typ: postponing default check "
-                           "for type '%s'", 
-                           (errname) ? errname : 
-                           (typdef->typenamestr) ? 
-                           typdef->typenamestr : NCX_EL_NONE);
-            }
-        } else {
-            if (defval) {
-                res = check_defval(tkc, mod, typdef, obj, btyp, FALSE, 
-                                   defval, name);
-            }
-        }
-    }
-
     /* check built-in type specific details */
     if (res == NO_ERR) {
         switch (btyp) {
@@ -3597,6 +3561,27 @@ static status_t
                       errtyp->tkerr.linenum);
             tkc->curerr = &typdef->tkerr;
             ncx_print_errormsg(tkc, mod, res);
+        }
+    }
+
+    /* check default value if any defined */
+    if ((res == NO_ERR) &&
+        (btyp != NCX_BT_NONE) &&
+        (btyp != NCX_BT_UNION) && typ_ok(typdef)) {
+
+        if (btyp == NCX_BT_LEAFREF || typ_is_xpath_string(typdef)) {
+            if (LOGDEBUG4) {
+                log_debug4("\nyang_typ: postponing default check "
+                           "for type '%s'",
+                           (errname) ? errname :
+                           (typdef->typenamestr) ?
+                           typdef->typenamestr : NCX_EL_NONE);
+            }
+        } else {
+            if (defval) {
+                res = check_defval(tkc, mod, typdef, obj, btyp, FALSE,
+                                   defval, name);
+            }
         }
     }
 

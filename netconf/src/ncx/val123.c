@@ -236,6 +236,128 @@ bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_
     return FALSE;
 }
 
+/********************************************************************
+* FUNCTION ncx123_find_matching_identities
+*
+* Find identities that match module context, qname and idref type.
+* 2 of the 3 match tuple members (mod and idref) can be omitted when
+* their value is a NULL pointer.
+*
+* INPUTS:
+*   mod == ncx_module_t ptr to use or NULL for search without module
+*            context
+*   qname == modprefix:base-identity-name if mod!=NULL or
+*            modulename:base-identity-name if mod==NULL or
+*            modprefix:base-identity-name if mod==NULL
+*            base-identity-name if no ':' character is present in qname
+*   idref == typ_idref_t pointer specifying required base identities
+*            dependency rules or NULL
+*
+* OUTPUTS:
+*   ids == NULL or pointer to preallocated array with space to store
+*            matched_ids_limit ncx_identity_t pointers.
+*   matched_ids_limit == when ids!=NULL indicates the size of the ids array
+*
+* RETURNS:
+*   count of matched identities
+*********************************************************************/
+unsigned int ncx123_find_matching_identities(const ncx_module_t* mod,
+                 const xmlChar * qname,
+                 const typ_idref_t *idref,
+                 ncx_identity_t **ids,
+                 unsigned int matched_ids_limit)
+{
+    const xmlChar  *str;
+    xmlChar        *qname_mod_id_buf;
+    unsigned int   qname_mod_id_len;
+    unsigned int   matched_ids;
+    const ncx_module_t*  testmod;
+    ncx_identity_t *identity;
+    ncx_identity_t *idref_base=NULL;
+    assert(qname);
+
+    if(idref) {
+        idref_base = idref->base;
+    }
+
+    /* find the local-name in the prefix:local-name combo */
+    str = qname;
+    while (*str && *str != ':') {
+        str++;
+    }
+    if (*str == ':') {
+        str++;
+        qname_mod_id_len=str-qname-1;
+        qname_mod_id_buf=malloc(qname_mod_id_len+1);
+        memcpy(qname_mod_id_buf,qname,qname_mod_id_len);
+        qname_mod_id_buf[qname_mod_id_len]=0;
+    } else {
+        str = qname;
+        qname_mod_id_buf=NULL;
+        qname_mod_id_len=0;
+    }
+    matched_ids=0;
+    if (mod) {
+        if(qname_mod_id_buf!=NULL && 0!=strcmp(qname_mod_id_buf,mod->prefix)) {
+            /*imported identity*/
+            ncx_import_t * import;
+            import = ncx_find_pre_import(mod, qname_mod_id_buf);
+            if(import) {
+                testmod = ncx_find_module(import->module, import->revision);
+                if (testmod) {
+                    identity = ncx_find_identity(testmod, str, FALSE);
+                }
+            }
+        } else {
+            identity = ncx_find_identity(mod, str, FALSE);
+        }
+        if(identity && (idref_base==NULL || ncx123_identity_is_derived_from(identity, idref_base))) {
+            if(matched_ids_limit>matched_ids) {
+                ids[matched_ids]=identity;
+            }
+            matched_ids++;
+        }
+    } else {
+        for (testmod = ncx_get_first_module();
+             testmod != NULL;
+             testmod =  ncx_get_next_module(testmod)) {
+
+            if(qname_mod_id_buf && !(0==strcmp(testmod->prefix,qname_mod_id_buf) || 0==strcmp(testmod->name,qname_mod_id_buf))) {
+                continue;
+            }
+
+            identity = ncx_find_identity(testmod, str, FALSE);
+            if(identity && (idref_base==NULL || ncx123_identity_is_derived_from(identity, idref_base))) {
+                if(matched_ids_limit>matched_ids) {
+                    ids[matched_ids]=identity;
+                }
+                matched_ids++;
+            }
+        }
+
+        /* yangcli needs this .. to be fixed */
+        for (testmod = ncx_get_first_session_module();
+             testmod != NULL;
+             testmod = ncx_get_next_session_module(testmod)) {
+            if(qname_mod_id_buf && !(0==strcmp(testmod->prefix,qname_mod_id_buf) || 0==strcmp(testmod->name,qname_mod_id_buf))) {
+                continue;
+            }
+
+            identity = ncx_find_identity(testmod, str, FALSE);
+            if(identity && (idref_base==NULL || ncx123_identity_is_derived_from(identity, idref_base))) {
+                if(matched_ids_limit>matched_ids) {
+                    ids[matched_ids]=identity;
+                }
+                matched_ids++;
+            }
+        }
+    }
+    if(qname_mod_id_buf) {
+        free(qname_mod_id_buf);
+    }
+    return matched_ids;
+}
+
 bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
 {
     ncx_lmem_t         *listmem;
@@ -557,7 +679,7 @@ status_t cli123_parse_next_child_obj_from_path(obj_template_t* obj, boolean auto
     obj_template_t* chobj;
     char* modname_or_prefix=NULL;
     char* modname=NULL;
-    char* name;
+    const char* name;
 
     res=NO_ERR;
     len = 0;

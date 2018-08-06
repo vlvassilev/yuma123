@@ -2332,7 +2332,7 @@ status_t
     const typ_idref_t     *idref;
     const xmlChar         *str, *modname;
     ncx_module_t          *mod;
-    const ncx_identity_t  *identity;
+    ncx_identity_t        *identity;
     boolean                found;
 
 #ifdef DEBUG
@@ -2377,38 +2377,34 @@ status_t
          * the identity-stmt with this name
          */
         identity = ncx_find_identity(mod, str, FALSE);
+        if(identity) {
+            /* got some identity match; make sure this identity
+             * has an ancestor node that is derived
+             * form the base specified in the typdef
+             */
+
+            if(ncx123_identity_is_derived_from(identity, idref->base)) {
+                found = TRUE;
+            }
+        }
     } else {
         /* no default namespace, so be liberal and
-         * try to find any matching value
+         * try to find any matching identity from the idref
+         * valid values.
          */
-        identity = NULL;
-        for (mod = ncx_get_first_module();
-             mod != NULL && identity == NULL;
-             mod = ncx_get_next_module(mod)) {
-            identity = ncx_find_identity(mod, str, FALSE); 
+        unsigned int matched_cnt;
+        matched_cnt = ncx123_find_matching_identities(NULL, qname, idref, &identity, 1);
+        if ( matched_cnt==1 ) {
+            found = TRUE;
         }
-    }
-
-    if (!identity) {
-        return ERR_NCX_INVALID_VALUE;
-    }
-
-    /* got some identity match; make sure this identity
-     * has an ancestor-or-self node that is the same base
-     * as the base specified in the typdef
-     */
-
-    if(identity == idref->base) {
-        found = TRUE;
-    }
-
-    if(ncx123_identity_is_derived_from(identity, idref->base)) {
-        found = TRUE;
+        if ( matched_cnt>1 ) {
+            log_warn("\nWarning: val_idref_ok found %u matches\n",matched_cnt);
+        }
     }
 
     if (found) {
         if (name) {
-            *name = str;
+            *name = identity->name;
         }
         if (id) {
             *id = identity;
@@ -2420,7 +2416,60 @@ status_t
 
 } /* val_idref_ok */
 
+/********************************************************************
+* FUNCTION val123_parse_idref_ex
+*
+* Parse a CLI BASED identityref QName into its various parts
+*
+* INPUTS:
+*    idref == typ_idref_t ptr of the target identityref type
+*    mod == module containing the default-stmt (or NULL if N/A)
+*    qname == QName or local-name string to parse
+*    nsid == address of return namespace ID of the module
+*            indicated by the prefix. If mod==NULL then
+*            a prefix MUST be present
+*    name == address of return local name part of QName
+*    id == address of return identity, if found
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *nsid == namespace ID for the prefix part of the QName
+*     *name == pointer into the qname string at the start of
+*              the local name part
+*     *id == pointer to ncx_identity_t found (if any, not an error)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val123_parse_idref_ex (const ncx_module_t *mod,
+                     const xmlChar *qname,
+                     const typ_idref_t *idref,
+                     ncx_identity_t **id)
+{
+    status_t res;
+    unsigned int matched_cnt;
+    matched_cnt = ncx123_find_matching_identities(mod,qname,idref,id,1);
 
+    if(matched_cnt==0) {
+        res=ERR_NCX_INVALID_VALUE;
+    } else if(matched_cnt==1) {
+        res=NO_ERR;
+    } else {
+        unsigned int i;
+        ncx_identity_t **identity_array;
+        identity_array=malloc(matched_cnt*sizeof(ncx_identity_t *));
+        ncx123_find_matching_identities(mod,qname,idref,identity_array,matched_cnt);
+        log_error("\nError: Multiple identities match identityref value '%s': '%s:%s'",qname, identity_array[0]->mod->name,identity_array[0]->name);
+        for(i=1;i<matched_cnt;i++) {
+           log_error(", '%s:%s'", identity_array[i]->mod->name,identity_array[i]->name);
+        }
+        free(identity_array);
+        res=ERR_NCX_MULTIPLE_MATCHES;
+    }
+    return res;
+
+}  /* val123_parse_idref_ex */
 /********************************************************************
 * FUNCTION val_parse_idref
 * 
@@ -2452,142 +2501,14 @@ status_t
                      const xmlChar **name,
                      const ncx_identity_t **id)
 {
-    const xmlChar         *str, *modname;
-    ncx_module_t          *impmod;
-    const ncx_identity_t  *identity;
-    const ncx_import_t    *import;
-    xmlChar               *prefixbuff;
-    status_t               res;
-    uint32                 prefixlen;
-    xmlns_id_t             prefixnsid;
-
-#ifdef DEBUG
-    if (!qname) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
+    status_t res;
+    res = val123_parse_idref_ex (mod, qname, NULL/*idref*/, id);
+    if(res==NO_ERR) {
+        *name = (*id)->name;
+        *nsid = (*id)->mod->nsid;
     }
-#endif
-    
-    res = NO_ERR;
-    impmod = NULL;
-    identity = NULL;
-    prefixnsid = 0;
-
-    if (nsid) {
-        *nsid = 0;
-    }
-    if (name) {
-        *name = NULL;
-    }
-
-    /* find the local-name in the prefix:local-name combo */
-    str = qname;
-    while (*str && *str != ':') {
-        str++;
-    }
-
-    /* figure out the prefix namespace ID */
-    if (*str == ':') {
-        /* prefix found */
-        prefixnsid = 0;
-        prefixlen = (uint32)(str++ - qname);
-        prefixbuff = m__getMem(prefixlen+1);
-        if (!prefixbuff) {
-            return ERR_INTERNAL_MEM;
-        } else {
-            xml_strncpy(prefixbuff, qname, prefixlen);
-        }
-
-        if (mod) {
-            if (xml_strcmp(mod->prefix, prefixbuff)) {
-                import = ncx_find_pre_import(mod, prefixbuff);
-                if (import) {
-                    impmod = ncx_find_module(import->module,
-                                             import->revision);
-                    if (impmod) {
-                        prefixnsid = impmod->nsid;
-                        identity = ncx_find_identity(impmod, str, FALSE);
-                    } else {
-                        res = ERR_NCX_MOD_NOT_FOUND;
-                    }
-                } else {
-                    res = ERR_NCX_IMP_NOT_FOUND;
-                }
-            } else {
-                prefixnsid = mod->nsid;
-                identity = ncx_find_identity(mod, str, FALSE);
-            }
-        } else {
-            /* look up the default prefix for a module */
-            prefixnsid = xmlns_find_ns_by_prefix(prefixbuff);
-            if (prefixnsid) {
-                modname = xmlns_get_module(prefixnsid);
-                if (modname) {
-                    impmod = ncx_find_module(modname, NULL);
-                    if (impmod) {
-                        prefixnsid = impmod->nsid;
-                        identity = ncx_find_identity(impmod, str, FALSE);
-                    } else {
-                        res = ERR_NCX_MOD_NOT_FOUND;
-                    }
-                } else {
-                    res = ERR_NCX_MOD_NOT_FOUND;
-                }
-            } else {
-                res = ERR_NCX_PREFIX_NOT_FOUND;
-            }
-        }
-        m__free(prefixbuff);
-        if (name) {
-            *name = str;
-        }
-    } else {
-        /* no prefix entered */
-        if (name) {
-            *name = qname;
-        }
-        if (mod) {
-            prefixnsid = mod->nsid;
-            identity = ncx_find_identity(mod, qname, FALSE);
-
-        } else {
-            identity = NULL;
-            /* check all session modules first */
-            for (mod = ncx_get_first_session_module();
-                 mod != NULL && identity == NULL;
-                 mod = ncx_get_next_session_module(mod)) {
-                identity = ncx_find_identity(mod, qname, FALSE);
-                if (identity) {
-                    prefixnsid = mod->nsid;                 
-                }
-            }
-
-            /* check all normal modules last */
-            for (mod = ncx_get_first_module();
-                 mod != NULL && identity == NULL;
-                 mod = ncx_get_next_module(mod)) {
-                identity = ncx_find_identity(mod, qname, FALSE);
-                if (identity) {
-                    prefixnsid = mod->nsid;                 
-                }
-            }
-        }
-    }
-
-    if (!identity) {
-        res = ERR_NCX_INVALID_VALUE;
-    }
-
-    if (id) {
-        *id = identity;
-    }
-    if (nsid) {
-        *nsid = prefixnsid;
-    }
-
     return res;
-
-}  /* val_parse_idref */
-
+}
 
 /********************************************************************
 * FUNCTION val_range_ok
@@ -3011,12 +2932,12 @@ status_t
         }
         break;
     case NCX_BT_IDREF:
-        identity = NULL;
-        res = val_parse_idref(mod, simval, &nsid, &name, &identity);
-        if (res == NO_ERR) {
-            if (identity == NULL) {
-                res = val_idref_ok(typdef, simval, nsid, &name, &identity);
-            }
+        {
+            const typ_idref_t     *idref;
+            idref = typ_get_cidref(typdef);
+            assert(idref);
+            identity = NULL;
+            res = val123_parse_idref_ex(mod, simval, idref, &identity);
         }
         break;
     case NCX_BT_BITS:
@@ -4811,26 +4732,25 @@ status_t
         }
         break;
     case NCX_BT_IDREF:
-        res = val_parse_idref(NULL, 
-                              valstr, 
-                              &qname_nsid, 
-                              &localname, 
-                              &identity);
-        if (res == NO_ERR) {
-            res = val_idref_ok(typdef, 
-                               valstr, 
-                               qname_nsid, 
-                               &localname, 
-                               &identity);
+        {
+            const typ_idref_t *idref;
+            idref = typ_get_cidref(typdef);
+            assert(idref);
+            res=val123_parse_idref_ex (NULL/*mod*/,
+                         valstr,
+                         idref,
+                         &identity);
+
             if (res == NO_ERR) {
-                val->v.idref.nsid = qname_nsid;
                 val->v.idref.identity = identity;
-                val->v.idref.name = xml_strdup(localname);
+                val->v.idref.nsid = identity->mod->nsid;
+                val->v.idref.name = xml_strdup(identity->name);
                 if (!val->v.idref.name) {
                     res = ERR_INTERNAL_MEM;
                 }
             }
         }
+
         break;
     case NCX_BT_ENUM:
         res = ncx_set_enum(valstr, &val->v.enu);

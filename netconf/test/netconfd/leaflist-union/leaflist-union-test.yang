@@ -1,0 +1,24 @@
+module leaflist-union-test {
+
+        namespace "http://yuma123.org/ns/test-leaflist-union-test";
+        prefix "llut";
+	import ietf-inet-types { prefix inet; }
+        organization  "yuma123.org";
+        description
+          "Model used for regression test";
+
+        revision 2018-06-11 {
+                description
+                  "Initial revision";
+                reference
+                  "RFC ...";
+        }
+
+	container test {
+		leaf-list address {
+			type inet:ip-address;
+			description
+			 "An IP address";
+		}
+	}
+}

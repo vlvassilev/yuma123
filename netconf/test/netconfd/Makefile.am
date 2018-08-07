@@ -2,6 +2,7 @@ TESTS=\
 test-perf \
 test-anyxml \
 test-val123-api \
+test-leaflist-union \
 test-netconf-1dot1 \
 test-yang-validation \
 test-copy-config \

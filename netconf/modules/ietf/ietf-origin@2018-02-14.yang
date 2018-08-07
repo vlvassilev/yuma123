@@ -31,7 +31,7 @@ module ietf-origin {
                <rwilton@cisco.com>";
 
   description
-    "This YANG module defines an 'origin' metadata annotation, and a
+    "This YANG module defines an 'origin' metadata annotation and a
      set of identities for the origin value.
 
      Copyright (c) 2018 IETF Trust and the persons identified as
@@ -42,17 +42,17 @@ module ietf-origin {
      the license terms contained in, the Simplified BSD License set
      forth in Section 4.c of the IETF Trust's Legal Provisions
      Relating to IETF Documents
-     (http://trustee.ietf.org/license-info).
+     (https://trustee.ietf.org/license-info).
 
-     This version of this YANG module is part of RFC XXXX
-     (http://www.rfc-editor.org/info/rfcxxxx); see the RFC itself
+     This version of this YANG module is part of RFC 8342
+     (https://www.rfc-editor.org/info/rfc8342); see the RFC itself
      for full legal notices.";
 
-  revision 2018-01-11 {
+  revision 2018-02-14 {
     description
       "Initial revision.";
     reference
-      "RFC XXXX: Network Management Datastore Architecture";
+      "RFC 8342: Network Management Datastore Architecture (NMDA)";
   }
 
   /*
@@ -68,7 +68,7 @@ module ietf-origin {
     base origin;
     description
       "Denotes configuration from the intended configuration
-       datastore";
+       datastore.";
   }
 
   identity dynamic {
@@ -84,7 +84,7 @@ module ietf-origin {
       "Denotes configuration originated by the system itself.
 
        Examples of system configuration include applied configuration
-       for an always existing loopback interface, or interface
+       for an always-existing loopback interface, or interface
        configuration that is auto-created due to the hardware
        currently present in the device.";
   }
@@ -105,9 +105,9 @@ module ietf-origin {
   identity default {
     base origin;
     description
-      "Denotes configuration that does not have an configured or
-       learned value, but has a default value in use.  Covers both
-       values defined in a 'default' statement, and values defined
+      "Denotes configuration that does not have a configured or
+       learned value but has a default value in use.  Covers both
+       values defined in a 'default' statement and values defined
        via an explanation in a 'description' statement.";
   }
 
@@ -140,8 +140,8 @@ module ietf-origin {
       "The 'origin' annotation can be present on any configuration
        data node in the operational state datastore.  It specifies
        from where the node originated.  If not specified for a given
-       configuration data node then the origin is the same as the
+       configuration data node, then the origin is the same as the
        origin of its parent node in the data tree.  The origin for
-       any top level configuration data nodes must be specified.";
+       any top-level configuration data nodes must be specified.";
   }
 }

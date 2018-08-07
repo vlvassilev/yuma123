@@ -19,7 +19,10 @@ $(top_srcdir)/netconf/modules/ietf/ietf-ipv6-unicast-routing@2016-11-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-routing@2016-11-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-hardware@2018-03-13.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-hardware-state@2018-03-13.yang \
-$(top_srcdir)/netconf/modules/ietf/iana-hardware@2018-03-13.yang
+$(top_srcdir)/netconf/modules/ietf/iana-hardware@2018-03-13.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-origin@2018-02-14.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-datastores@2018-02-14.yang
+
 
 #$(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang
 #$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang
@@ -37,8 +40,6 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-network.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-origin.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-datastores.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-flows.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang
@@ -71,3 +72,4 @@ $(top_srcdir)/netconf/modules/yuma123/netconfd-ex.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-netconf.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-netconf-types.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-system.yang
+

@@ -1255,6 +1255,7 @@ static status_t
     res2 = NO_ERR;
     errinfo = NULL;
     stopnow = FALSE;
+    empty = FALSE;
 
     val_init_from_template(retval, obj);
 

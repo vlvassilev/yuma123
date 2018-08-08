@@ -16,9 +16,9 @@ module yangcli-ex {
   description
     "This module contains extra parameters for yangcli";
 
-  revision 2018-06-28 {
+  revision 2018-08-08 {
     description
-      "Added clear-counters RPC.";
+      "Reduced descripiton statement line length.";
   }
 
   grouping ConnectParmsEx {
@@ -66,11 +66,12 @@ module yangcli-ex {
 
   rpc clear-counters {
     description 
-      "Convenience function that allows the user to 'clear' all counters under the
-       specified target path. The function performs <get> with the specified target
-       and updates a copy of all the yang:counter32 and yang:counter64 values in a
-       tree that is later used to subtract the stored values from the data returned
-       with xget.
+      "Convenience function that allows the user to 'clear' all counters
+       under the specified target path. The function performs <get>
+       with the specified target and updates a copy of all the
+       yang:counter32 and yang:counter64 values in a tree that is later
+       used to subtract the stored values from the data returned with
+       xget.
         
          * Example:
            yangcli>  clear-counters /interfaces-state/interface/statistics

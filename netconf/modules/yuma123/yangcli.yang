@@ -52,6 +52,12 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2018-08-08 {
+        description
+          "Replaced double with single quotes
+           for description stmt with fwd slash.";
+    }
+
     revision 2018-04-21 {
         description
           "Added use-agent leaf to ssh configuration.";
@@ -1193,14 +1199,14 @@ module yangcli {
 
     rpc fill {
       description 
-       "Fill a value for reuse in a NETCONF PDU or other operation.
+       'Fill a value for reuse in a NETCONF PDU or other operation.
   
         Used in an assignment statement to create a variable
         for later use:
 
             $foo = fill --target=/t:foo-con/bar-list \
                         --optional \
-                        --current-value=$bar    ";
+                        --current-value=$bar';
        input {
          ncx:default-parm  target;
          uses FillParms;

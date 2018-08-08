@@ -1705,7 +1705,7 @@ static status_t
 
     ingrp = FALSE;
     if (!list->keystr && obj_get_config_flag_check(obj, &ingrp)) {
-        if (!ingrp) {
+        if (!ingrp && !obj_in_notif(obj) && !obj_in_rpc(obj)) {
             log_error("\nError: No key present for list '%s' on line %u",
                       list->name, 
                       obj->tkerr.linenum);

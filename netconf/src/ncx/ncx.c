@@ -1209,6 +1209,7 @@ void
     xmlCleanupParser();
     status_cleanup();
 
+#ifdef NCX_DEBUG_MEMORY
     if (malloc_cnt > free_cnt) {
         log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
                   malloc_cnt, 
@@ -1218,6 +1219,7 @@ void
                   malloc_cnt, 
                   free_cnt);
     }
+#endif
 
     log_close();
 

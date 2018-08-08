@@ -1,0 +1,14 @@
+module mod2 {
+  prefix m2;
+  namespace "http://yuma123.org/ns/sec7_8_2/mod2";
+
+  rpc m2 {
+    input {
+      list l1 {
+        leaf foo {
+          type string;
+        }
+      }
+    }
+  }
+}

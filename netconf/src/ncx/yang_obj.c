@@ -9533,7 +9533,7 @@ static status_t
         }
 
         if(is_targetmod==FALSE) {
-            assert(0);
+            log_debug4("\nskipping %s %s", obj_get_name(testobj),obj_get_typestr(testobj));
         }
 
         if (LOGDEBUG4) {

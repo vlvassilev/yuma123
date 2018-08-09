@@ -24,6 +24,9 @@ AC_SUBST(yangdir)
 ietf_yangdir=${datarootdir}/yuma/modules/ietf
 AC_SUBST(ietf_yangdir)
 
+nmda_modules_ietf_yangdir=${datarootdir}/yuma/nmda-modules/ietf
+AC_SUBST(nmda_modules_ietf_yangdir)
+
 ietf_draft_yangdir=${datarootdir}/yuma/modules/ietf-draft
 AC_SUBST(ietf_draft_yangdir)
 

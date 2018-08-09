@@ -23,7 +23,6 @@ $(top_srcdir)/netconf/modules/ietf/iana-hardware@2018-03-13.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-origin@2018-02-14.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-datastores@2018-02-14.yang
 
-
 #$(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang
 #$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang
 
@@ -34,8 +33,6 @@ $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-datastores@2017-08-24.yang
 
 dist_ietf_draft_yang_DATA = \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-interfaces.yang  \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-ip.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network.yang  \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
@@ -73,3 +70,10 @@ $(top_srcdir)/netconf/modules/yuma123/yuma123-netconf.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-netconf-types.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-system.yang
 
+dist_nmda_modules_ietf_yang_DATA= \
+$(top_srcdir)/netconf/modules/ietf/ietf-interfaces@2018-02-20.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ip@2018-02-22.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-routing@2018-03-13.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ipv4-unicast-routing@2018-03-13.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ipv6-unicast-routing@2018-03-13.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-ipv6-router-advertisements@2018-03-13.yang

@@ -21,11 +21,11 @@ $(top_srcdir)/netconf/modules/ietf/ietf-hardware@2018-03-13.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-hardware-state@2018-03-13.yang \
 $(top_srcdir)/netconf/modules/ietf/iana-hardware@2018-03-13.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-origin@2018-02-14.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-datastores@2018-02-14.yang
-
-#$(top_srcdir)/netconf/modules/ietf/ietf-inet-types@2010-09-24.yang
-#$(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2010-09-24.yang
-
+$(top_srcdir)/netconf/modules/ietf/ietf-datastores@2018-02-14.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-network@2018-02-26.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-network-state@2018-02-26.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-network-topology@2018-02-26.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-network-topology-state@2018-02-26.yang
 
 dist_ietf_patched_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf@2011-06-01.yang  \
@@ -33,16 +33,11 @@ $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-datastores@2017-08-24.yang
 
 dist_ietf_draft_yang_DATA = \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-network.yang  \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-topology.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-flows.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang
-
-#$(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-datastores.yang
-
 
 dist_ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \

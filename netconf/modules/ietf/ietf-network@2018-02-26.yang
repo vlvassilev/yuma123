@@ -5,14 +5,15 @@ module ietf-network {
 
   import ietf-inet-types {
     prefix inet;
-    reference "RFC 6991";
+    reference
+      "RFC 6991: Common YANG Data Types";
   }
 
   organization
     "IETF I2RS (Interface to the Routing System) Working Group";
 
   contact
-    "WG Web:    <http://tools.ietf.org/wg/i2rs/>
+    "WG Web:    <https://datatracker.ietf.org/wg/i2rs/>
      WG List:   <mailto:i2rs@ietf.org>
 
      Editor:    Alexander Clemm
@@ -31,14 +32,13 @@ module ietf-network {
                 <mailto:hari@packetdesign.com>
 
      Editor:    Xufeng Liu
-                <mailto:Xufeng_Liu@jabil.com>";
-
+                <mailto:xufeng.liu.ietf@gmail.com>";
   description
     "This module defines a common base data model for a collection
-     of nodes in a network. Node definitions are further used
+     of nodes in a network.  Node definitions are further used
      in network topologies and inventories.
 
-     Copyright (c) 2017 IETF Trust and the persons identified as
+     Copyright (c) 2018 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -46,69 +46,59 @@ module ietf-network {
      to the license terms contained in, the Simplified BSD License
      set forth in Section 4.c of the IETF Trust's Legal Provisions
      Relating to IETF Documents
-     (http://trustee.ietf.org/license-info).
+     (https://trustee.ietf.org/license-info).
 
-     This version of this YANG module is part of
-     draft-ietf-i2rs-yang-network-topo-20;
-     see the RFC itself for full legal notices.
+     This version of this YANG module is part of RFC 8345;
+     see the RFC itself for full legal notices.";
 
-     NOTE TO RFC EDITOR: Please replace above reference to
-     draft-ietf-i2rs-yang-network-topo-20 with RFC
-     number when published (i.e. RFC xxxx).";
-
-  revision 2017-12-18 {
+  revision 2018-02-26 {
     description
-      "Initial revision.
-       NOTE TO RFC EDITOR:
-       (1) Please replace the following reference
-       to draft-ietf-i2rs-yang-network-topo-20 with
-       RFC number when published (i.e. RFC xxxx).
-       (2) Please replace the date in the revision statement with the
-       date of publication when published. ";
+      "Initial revision.";
     reference
-      "draft-ietf-i2rs-yang-network-topo-20";
+      "RFC 8345: A YANG Data Model for Network Topologies";
   }
 
   typedef node-id {
     type inet:uri;
     description
       "Identifier for a node.  The precise structure of the node-id
-       will be up to the implementation.  Some implementations MAY
-       for example, pick a uri that includes the network-id as
-       part of the path. The identifier SHOULD be chosen such that
-       the same node in a real network topology will always be
-       identified through the same identifier, even if the data model
-       is instantiated in separate datastores. An implementation MAY
-       choose to capture semantics in the identifier, for example to
-       indicate the type of node.";
+       will be up to the implementation.  For example, some
+       implementations MAY pick a URI that includes the network-id
+       as part of the path.  The identifier SHOULD be chosen
+       such that the same node in a real network topology will
+       always be identified through the same identifier, even if
+       the data model is instantiated in separate datastores.  An
+       implementation MAY choose to capture semantics in the
+       identifier -- for example, to indicate the type of node.";
   }
 
   typedef network-id {
     type inet:uri;
     description
       "Identifier for a network.  The precise structure of the
-      network-id will be up to an implementation.
-      The identifier SHOULD be chosen such that the same network
-      will always be identified through the same identifier,
-      even if the data model is instantiated in separate datastores.
-      An implementation MAY choose to capture semantics in the
-      identifier, for example to indicate the type of network.";
+       network-id will be up to the implementation.  The identifier
+       SHOULD be chosen such that the same network will always be
+       identified through the same identifier, even if the data model
+       is instantiated in separate datastores.  An implementation MAY
+       choose to capture semantics in the identifier -- for example,
+       to indicate the type of network.";
   }
 
   grouping network-ref {
     description
-      "Contains the information necessary to reference a network,
-       for example an underlay network.";
+      "Contains the information necessary to reference a network --
+       for example, an underlay network.";
     leaf network-ref {
       type leafref {
         path "/nw:networks/nw:network/nw:network-id";
       require-instance false;
       }
       description
-        "Used to reference a network, for example an underlay
+        "Used to reference a network -- for example, an underlay
          network.";
     }
   }
+
   grouping node-ref {
     description
       "Contains the information necessary to reference a node.";
@@ -120,23 +110,22 @@ module ietf-network {
       }
       description
         "Used to reference a node.
-         Nodes are identified relative to the network they are
-         contained in.";
+         Nodes are identified relative to the network that
+         contains them.";
     }
     uses network-ref;
   }
 
   container networks {
     description
-      "Serves as top-level container for a list of networks.";
+      "Serves as a top-level container for a list of networks.";
     list network {
       key "network-id";
       description
         "Describes a network.
          A network typically contains an inventory of nodes,
-         topological information (augmented through
-         network-topology data model), as well as layering
-         information.";
+         topological information (augmented through the
+         network-topology data model), and layering information.";
       leaf network-id {
         type network-id;
         description
@@ -162,6 +151,7 @@ module ietf-network {
             "References the underlay network.";
         }
       }
+
       list node {
         key "node-id";
         description
@@ -169,14 +159,14 @@ module ietf-network {
         leaf node-id {
           type node-id;
           description
-            "Identifies a node uniquely within the containing
+            "Uniquely identifies a node within the containing
              network.";
         }
         list supporting-node {
           key "network-ref node-ref";
           description
-            "Represents another node, in an underlay network, that
-             this node is supported by.  Used to represent layering
+            "Represents another node that is in an underlay network
+             and that supports this node.  Used to represent layering
              structure.";
           leaf network-ref {
             type leafref {
@@ -184,8 +174,8 @@ module ietf-network {
             require-instance false;
             }
             description
-              "References the underlay network that the
-               underlay node is part of.";
+              "References the underlay network of which the
+               underlay node is a part.";
           }
           leaf node-ref {
             type leafref {

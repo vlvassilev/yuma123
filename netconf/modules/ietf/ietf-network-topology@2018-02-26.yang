@@ -6,25 +6,19 @@ module ietf-network-topology {
   import ietf-inet-types {
     prefix inet;
     reference
-      "RFC 6991";
+      "RFC 6991: Common YANG Data Types";
   }
   import ietf-network {
     prefix nw;
     reference
-      "draft-ietf-i2rs-yang-network-topo-20
-      NOTE TO RFC EDITOR:
-      (1) Please replace above reference to
-      draft-ietf-i2rs-yang-network-topo-20 with RFC
-      number when published (i.e. RFC xxxx).
-      (2) Please replace the date in the revision statement with the
-       date of publication when published.";
+      "RFC 8345: A YANG Data Model for Network Topologies";
   }
 
   organization
     "IETF I2RS (Interface to the Routing System) Working Group";
 
   contact
-    "WG Web:    <http://tools.ietf.org/wg/i2rs/>
+    "WG Web:    <https://datatracker.ietf.org/wg/i2rs/>
      WG List:   <mailto:i2rs@ietf.org>
 
      Editor:    Alexander Clemm
@@ -43,14 +37,15 @@ module ietf-network-topology {
                 <mailto:hari@packetdesign.com>
 
      Editor:    Xufeng Liu
-                <mailto:Xufeng_Liu@jabil.com>";
+                <mailto:xufeng.liu.ietf@gmail.com>";
 
   description
-    "This module defines a common base model for network topology,
+    "This module defines a common base model for a network topology,
      augmenting the base network data model with links to connect
-     nodes, as well as termination points to terminate links on nodes.
+     nodes, as well as termination points to terminate links
+     on nodes.
 
-     Copyright (c) 2017 IETF Trust and the persons identified as
+     Copyright (c) 2018 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -58,61 +53,51 @@ module ietf-network-topology {
      to the license terms contained in, the Simplified BSD License
      set forth in Section 4.c of the IETF Trust's Legal Provisions
      Relating to IETF Documents
-     (http://trustee.ietf.org/license-info).
+     (https://trustee.ietf.org/license-info).
 
-     This version of this YANG module is part of
-     draft-ietf-i2rs-yang-network-topo-20;
-     see the RFC itself for full legal notices.
+     This version of this YANG module is part of RFC 8345;
+     see the RFC itself for full legal notices.";
 
-     NOTE TO RFC EDITOR: Please replace above reference to
-     draft-ietf-i2rs-yang-network-topo-20 with RFC
-     number when published (i.e. RFC xxxx).";
-
-  revision 2017-12-18 {
+  revision 2018-02-26 {
     description
-      "Initial revision.
-       NOTE TO RFC EDITOR: Please replace the following reference
-       to draft-ietf-i2rs-yang-network-topo-20 with
-       RFC number when published (i.e. RFC xxxx).";
+      "Initial revision.";
     reference
-      "draft-ietf-i2rs-yang-network-topo-20";
+      "RFC 8345: A YANG Data Model for Network Topologies";
   }
 
   typedef link-id {
     type inet:uri;
     description
-      "An identifier for a link in a topology.
-       The precise structure of the link-id
-       will be up to the implementation.
+      "An identifier for a link in a topology.  The precise
+       structure of the link-id will be up to the implementation.
        The identifier SHOULD be chosen such that the same link in a
        real network topology will always be identified through the
        same identifier, even if the data model is instantiated in
-           separate datastores. An implementation MAY choose to capture
-       semantics in the identifier, for example to indicate the type
-       of link and/or the type of topology that the link is a part
-       of.";
+       separate datastores.  An implementation MAY choose to capture
+       semantics in the identifier -- for example, to indicate the
+       type of link and/or the type of topology of which the link is
+       a part.";
   }
 
   typedef tp-id {
     type inet:uri;
     description
-      "An identifier for termination points (TPs) on a node.
-       The precise structure of the tp-id
-       will be up to the implementation.
+      "An identifier for termination points on a node.  The precise
+       structure of the tp-id will be up to the implementation.
        The identifier SHOULD be chosen such that the same termination
        point in a real network topology will always be identified
        through the same identifier, even if the data model is
-       instantiated in separate datastores. An implementation MAY
-       choose to capture semantics in the identifier, for example to
-       indicate the type of termination point and/or the type of node
-       that contains the termination point.";
+       instantiated in separate datastores.  An implementation MAY
+       choose to capture semantics in the identifier -- for example,
+       to indicate the type of termination point and/or the type of
+       node that contains the termination point.";
   }
 
   grouping link-ref {
     description
       "This grouping can be used to reference a link in a specific
-       network.  While it is not used in this module, it is defined
-       here for the convenience of augmenting modules.";
+       network.  Although it is not used in this module, it is
+       defined here for the convenience of augmenting modules.";
     leaf link-ref {
       type leafref {
         path "/nw:networks/nw:network[nw:network-id=current()/../"+
@@ -120,7 +105,7 @@ module ietf-network-topology {
         require-instance false;
       }
       description
-        "A type for an absolute reference a link instance.
+        "A type for an absolute reference to a link instance.
          (This type should not be used for relative references.
          In such a case, a relative path should be used instead.)";
     }
@@ -129,9 +114,10 @@ module ietf-network-topology {
 
   grouping tp-ref {
     description
-      "This grouping can be used to references a termination point
-       in a specific node.  While it is not used in this module, it
-       is defined here for the convenience of augmenting modules.";
+      "This grouping can be used to reference a termination point
+       in a specific node.  Although it is not used in this module,
+       it is defined here for the convenience of augmenting
+       modules.";
     leaf tp-ref {
       type leafref {
         path "/nw:networks/nw:network[nw:network-id=current()/../"+
@@ -154,15 +140,14 @@ module ietf-network-topology {
       key "link-id";
       description
         "A network link connects a local (source) node and
-         a remote (destination) node via a set of
-         the respective node's termination points.
-         It is possible to have several links between the same
-         source and destination nodes.  Likewise, a link could
-         potentially be re-homed between termination points.
-         Therefore, in order to ensure that we would always know
-         to distinguish between links, every link is identified by
-         a dedicated link identifier.  Note that a link models a
-         point-to-point link, not a multipoint link.";
+         a remote (destination) node via a set of the respective
+         node's termination points.  It is possible to have several
+         links between the same source and destination nodes.
+         Likewise, a link could potentially be re-homed between
+         termination points.  Therefore, in order to ensure that we
+         would always know to distinguish between links, every link
+         is identified by a dedicated link identifier.  Note that a
+         link models a point-to-point link, not a multipoint link.";
       leaf link-id {
         type link-id;
         description
@@ -179,7 +164,7 @@ module ietf-network-topology {
             require-instance false;
           }
           description
-            "Source node identifier, must be in same topology.";
+            "Source node identifier.  Must be in the same topology.";
         }
         leaf source-tp {
           type leafref {
@@ -188,10 +173,11 @@ module ietf-network-topology {
             require-instance false;
           }
           description
-            "Termination point within source node that terminates
-             the link.";
+            "This termination point is located within the source node
+             and terminates the link.";
         }
       }
+
       container destination {
         description
           "This container holds the logical destination of a
@@ -202,7 +188,7 @@ module ietf-network-topology {
           require-instance false;
           }
           description
-            "Destination node identifier, must be in the same
+            "Destination node identifier.  Must be in the same
              network.";
         }
         leaf dest-tp {
@@ -212,15 +198,14 @@ module ietf-network-topology {
             require-instance false;
           }
           description
-            "Termination point within destination node that
-             terminates the link.";
+            "This termination point is located within the
+             destination node and terminates the link.";
         }
       }
       list supporting-link {
         key "network-ref link-ref";
         description
-          "Identifies the link, or links, that this link
-           is dependent on.";
+          "Identifies the link or links on which this link depends.";
         leaf network-ref {
           type leafref {
             path "../../../nw:supporting-network/nw:network-ref";
@@ -230,6 +215,7 @@ module ietf-network-topology {
             "This leaf identifies in which underlay topology
              the supporting link is present.";
         }
+
         leaf link-ref {
           type leafref {
             path "/nw:networks/nw:network[nw:network-id=current()/"+
@@ -237,8 +223,8 @@ module ietf-network-topology {
             require-instance false;
           }
           description
-            "This leaf identifies a link which is a part
-             of this link's underlay. Reference loops in which
+            "This leaf identifies a link that is a part
+             of this link's underlay.  Reference loops in which
              a link identifies itself as its underlay, either
              directly or transitively, are not allowed.";
         }
@@ -247,7 +233,7 @@ module ietf-network-topology {
   }
   augment "/nw:networks/nw:network/nw:node" {
     description
-      "Augment termination points which terminate links.
+      "Augments termination points that terminate links.
        Termination points can ultimately be mapped to interfaces.";
     list termination-point {
       key "tp-id";
@@ -263,16 +249,16 @@ module ietf-network-topology {
       list supporting-termination-point {
         key "network-ref node-ref tp-ref";
         description
-          "This list identifies any termination points that
-           the termination point is dependent on, or maps onto.
+          "This list identifies any termination points on which a
+           given termination point depends or onto which it maps.
            Those termination points will themselves be contained
-           in a supporting node.
-           This dependency information can be inferred from
-           the dependencies between links.  For this reason,
-           this item is not separately configurable.  Hence no
+           in a supporting node.  This dependency information can be
+           inferred from the dependencies between links.  Therefore,
+           this item is not separately configurable.  Hence, no
            corresponding constraint needs to be articulated.
            The corresponding information is simply provided by the
            implementing system.";
+
         leaf network-ref {
           type leafref {
             path "../../../nw:supporting-node/nw:network-ref";
@@ -299,8 +285,8 @@ module ietf-network-topology {
             require-instance false;
           }
           description
-            "Reference to the underlay node, must be in a
-             different topology";
+            "Reference to the underlay node (the underlay node must
+             be in a different topology).";
         }
       }
     }

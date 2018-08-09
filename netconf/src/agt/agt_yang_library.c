@@ -151,7 +151,7 @@ static status_t
         /* revision */
         childval = agt_make_leaf(module_obj,
                              "revision",
-                             ncx_get_modversion(mod), 
+                             ncx_get_modversion(mod)?ncx_get_modversion(mod):"",
                              &res);
         assert(res==NO_ERR && childval);
         val_add_child(childval, module_val);

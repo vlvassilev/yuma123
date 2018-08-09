@@ -10,7 +10,15 @@ test_data()
     do
         #printf "%4d: %s\n" $index ${schema_load_fail[$index]}
         if [ ${schema_load_fail[$index]} == "0" ] ; then
-            MODULE_ARGS=${MODULE_ARGS}" --module="${1}/mod$(($index+1)).yang
+            if [ "$RUN_WITH_YANGLINT" != "" ] ; then
+                YANGLINT_MODULE_ARGS=${YANGLINT_MODULE_ARGS}" "${1}/mod$(($index+1)).yang
+            elif [ "$RUN_WITH_CONFD" != "" ] ; then
+                killall -KILL confd || true
+                source $RUN_WITH_CONFD/confdrc
+                confd --verbose --foreground --addloadpath ${RUN_WITH_CONFD}/src/confd --addloadpath ${RUN_WITH_CONFD}/src/confd/yang --addloadpath ${RUN_WITH_CONFD}/src/confd/aaa --addloadpath ${RUN_WITH_CONFD}/etc/confd --addloadpath . 2>&1 1>server.log &
+            else
+                MODULE_ARGS=${MODULE_ARGS}" --module="${1}/mod$(($index+1)).yang
+            fi
         fi
     done
 
@@ -23,12 +31,26 @@ test_data()
         fi
         DATA_FILE=${1}/data$(($index+1)).xml
         echo "Testing EXPECTED=$EXPECTED $DATA_FILE ..." >&2
+
         echo '<?xml version="1.0" encoding="UTF-8"?>' >test-cfg.xml
         echo '<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">' >>test-cfg.xml
         cat ${DATA_FILE} >> test-cfg.xml
         echo '</config>' >> test-cfg.xml
-        /usr/sbin/netconfd --validate-config-only --startup-error=stop --modpath=${1}/ ${MODULE_ARGS} --startup=test-cfg.xml 1>&2
-        RES=$?
+
+        if [ "$RUN_WITH_PYANG" != "" ] ; then
+            RES=1
+        elif [ "$RUN_WITH_YANGDUMP" != "" ] ; then
+            RES=1
+        elif [ "$RUN_WITH_YANGLINT" != "" ] ; then
+            yanglint --path=${1}/ ${YANGLINT_MODULE_ARGS} ${DATA_FILE} 1>&2
+            RES=$?
+        elif [ "$RUN_WITH_CONFD" != "" ] ; then
+            confd_load -l test-cfg.xml 1>&2
+            RES=$?
+        else
+          /usr/sbin/netconfd --validate-config-only --startup-error=stop --modpath=${1}/ ${MODULE_ARGS} --startup=test-cfg.xml 1>&2
+          RES=$?
+        fi
 
         echo "RES="$RES >&2
         if [ "$RES" != "0" ] ; then
@@ -141,11 +163,11 @@ do
     test_dir=${tests_base_dir}"/"${TEST_DIR_STR}
     test_schema_load_fail=(${TEST_SCHEMA_LOAD_FAIL_STR//,/ })
     test_data_file_load_fail=(${TEST_DATA_FILE_FAIL_STR//,/ })
-    if [ "$3" == "data" ] ; then
-        test_data $test_dir test_schema_load_fail[@] test_data_file_load_fail[@]
-    else
-        test_schema $test_dir test_schema_load_fail[@] test_data_file_load_fail[@]
-    fi
+
+    test_schema $test_dir test_schema_load_fail[@] test_data_file_load_fail[@]
+    echo -n " "
+    test_data $test_dir test_schema_load_fail[@] test_data_file_load_fail[@]
+
     FAILS=$?
     TOTAL_FAILS=$((${TOTAL_FAILS}+${FAILS}))
     echo

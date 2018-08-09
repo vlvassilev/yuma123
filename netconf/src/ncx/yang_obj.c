@@ -9533,7 +9533,10 @@ static status_t
         }
 
         if(is_targetmod==FALSE) {
-            log_debug4("\nskipping %s %s", obj_get_name(testobj),obj_get_typestr(testobj));
+            log_debug4("\nresolve_xpath: skipping obj %s %s not native to current module %s",
+                       obj_get_name(testobj),
+                       obj_get_typestr(testobj),
+                       mod->name);
         }
 
         if (LOGDEBUG4) {

@@ -1,7 +1,8 @@
 netconfmodule_LTLIBRARIES = libietf-interfaces.la
 
 libietf_interfaces_la_SOURCES = \
-ietf-interfaces.c
+ietf-interfaces.c \
+ietf-interfaces-w-nmda.c
 
 if STANDALONE
   # Standalone mode. Depends on installed libyuma-dev
@@ -15,4 +16,3 @@ endif
 
 yang_DATA = \
 interfaces-notifications.yang
-

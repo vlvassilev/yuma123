@@ -789,24 +789,37 @@ val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_ob
     return parent_select_val;
 } /* val123_select_obj */
 
-void val123_devirtualize(val_value_t* val)
+status_t val123_devirtualize(val_value_t* val)
 {
-    status_t res;
+    status_t res=NO_ERR;
     val_value_t* child_val;
     if(val_is_virtual(val)) {
         val_value_t* real_val;
         val_value_t* copy_val;
 
         real_val = val_get_virtual_value(NULL, val, &res);
-        copy_val = val_clone(real_val); /* needed since val_replace starts by destroying the val->virtualval of the destination */
-        val_replace(copy_val, val);
-        val_free_value(copy_val);
+        if(res==NO_ERR && real_val!=NULL) {
+            copy_val = val_clone(real_val); /* needed since val_replace starts by destroying the val->virtualval of the destination */
+            val_replace(copy_val, val);
+            val_free_value(copy_val);
+        } else if(res==ERR_NCX_SKIPPED) {
+            return res;
+        } else {
+            return SET_ERROR(res);
+        }
     }
-    for(child_val = val_get_first_child(val);
-        child_val != NULL;
-        child_val = val_get_next_child(child_val)) {
-        val123_devirtualize(child_val);
-   }
+    child_val = val_get_first_child(val);
+    while(child_val) {
+        val_value_t* next_child_val;
+        next_child_val = val_get_next_child(child_val);
+        res=val123_devirtualize(child_val);
+        if(res==ERR_NCX_SKIPPED) {
+            val_remove_child(child_val);
+            val_free_value(child_val);
+        }
+        child_val = next_child_val;
+    }
+    return res;
 }
 
 val_value_t* val123_clone_real(val_value_t* val)

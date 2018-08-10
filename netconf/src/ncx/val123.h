@@ -19,7 +19,7 @@ status_t cli123_parse_parm_assignment(obj_template_t* obj, boolean autocomp, con
 status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char** valstr);
 status_t val123_merge_cplx(val_value_t* dst, val_value_t* src);
 val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_obj);
-void val123_devirtualize(val_value_t* val);
+status_t val123_devirtualize(val_value_t* val);
 val_value_t* val123_clone_real(val_value_t* val);
 obj_template_t* obj123_get_top_uses(obj_template_t* obj);
 typ_def_t* typ123_get_first_named_typdef(typ_def_t* typdef);

@@ -45,11 +45,8 @@ AC_SUBST(netconfcentral_yangdir)
 yuma123_yangdir=${datarootdir}/yuma/modules/yuma123
 AC_SUBST(yuma123_yangdir)
 
-examplesyangdir="$prefix/share/yuma/modules/examples"
-AC_SUBST(examplesyangdir)
-
-yang_yangdir=${datarootdir}/yuma/modules/yang
-AC_SUBST(yang_yangdir)
+examples_yangdir="$prefix/share/yuma/modules/examples"
+AC_SUBST(examples_yangdir)
 
 ncx_netconf_includedir=${includedir}/yuma/ncx
 AC_SUBST(ncx_netconf_includedir)

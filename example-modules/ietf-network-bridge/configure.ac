@@ -22,8 +22,8 @@ AM_CONDITIONAL([STANDALONE], [test x$standalone = xtrue])
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 
-examplesyangdir="$prefix/share/yuma/modules/examples"
-AC_SUBST(examplesyangdir)
+examples_yangdir="$prefix/share/yuma/modules/examples"
+AC_SUBST(examples_yangdir)
 
 ncx_netconf_includedir="$includedir/yuma/ncx"
 AC_SUBST(ncx_netconf_includedir)

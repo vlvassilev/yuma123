@@ -51,6 +51,32 @@
 #include "yangdump.h"
 #include "yangdump_util.h"
 
+
+/* if the object is input it checks if the following output is empty of children or not */
+boolean is_last_non_empty_rpcio(obj_template_t* obj)
+{
+    obj_template_t* prev_obj=obj;
+    obj_template_t* next_obj;
+
+    if(obj->objtype!=OBJ_TYP_RPCIO) {
+        return FALSE;
+    }
+
+    while(next_obj=dlq_nextEntry(prev_obj)) {
+        if(next_obj->objtype==OBJ_TYP_RPCIO) {
+            dlq_hdr_t* ccq=obj_get_datadefQ(next_obj);
+            if(ccq && dlq_firstEntry(ccq)) {
+               /*do not print empty input and output*/
+               return FALSE;
+           }
+        }
+
+        prev_obj = next_obj;
+    }
+    return TRUE;
+}
+
+
 boolean is_last_non_uses(obj_template_t* obj)
 {
     obj_template_t* prev_obj=obj;
@@ -162,12 +188,31 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
             continue;
         }
 
+        if(chobj->objtype==OBJ_TYP_RPCIO) {
+           dlq_hdr_t* ccq=obj_get_datadefQ(chobj);
+           if(!ccq || !dlq_firstEntry(ccq)) {
+               /*do not print empty input and output*/
+               continue;
+           }
+        }
+
         printf("%s",line_prefix);
         /*<status>*/
         printf("+--");
         /*<flags>*/
-        if(chobj->objtype!=OBJ_TYP_CASE /*why pyang prints this for choice?!*/) {
-            printf("%s ", obj_get_config_flag(chobj)?"rw":"ro");
+        if(chobj->objtype!=OBJ_TYP_CASE) {
+            if(obj_in_rpc(chobj) || chobj->objtype==OBJ_TYP_RPCIO) {
+                obj_template_t* rpcio_obj;
+                for(rpcio_obj=chobj;rpcio_obj;rpcio_obj=rpcio_obj->parent) {
+                    if(rpcio_obj->objtype==OBJ_TYP_RPCIO) {
+                        break;
+                    }
+                }
+                assert(rpcio_obj);
+                printf("%s ", (0!=xml_strcmp(rpcio_obj->def.rpcio->name, YANG_K_INPUT))?"ro":"-w");
+            } else {
+                printf("%s ", obj_get_config_flag(chobj)?"rw":"ro");
+            }
         }
         /*<name>*/
         if(chobj->objtype==OBJ_TYP_CHOICE) {
@@ -204,7 +249,7 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
 
         if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE || chobj->objtype == OBJ_TYP_RPCIO) {
             child_line_prefix=malloc(strlen(line_prefix)+3+1);
-            if(!is_last_non_uses(chobj)) {
+            if(!is_last_non_uses(chobj) && !is_last_non_empty_rpcio(chobj)) {
                 sprintf(child_line_prefix, "%s|  ",line_prefix);
             } else {
                 sprintf(child_line_prefix, "%s   ",line_prefix);
@@ -269,13 +314,13 @@ void print_data(const ncx_module_t    *mod)
         if (!obj_has_name(obj) || obj_is_cli(obj) || obj_is_abstract(obj) || obj->objtype==OBJ_TYP_AUGMENT || obj->objtype==OBJ_TYP_RPC || obj->objtype==OBJ_TYP_NOTIF) {
             continue;
         }
-        printf("\n    +--");
+        printf("\n  +--");
         printf("%s ", obj_get_config_flag(obj)?"rw":"ro");
         printf("%s", obj_get_name(obj));
         if(!is_last_data(obj)) {
-            print_data_obj(obj, "\n    |  ");
+            print_data_obj(obj, "\n     ");
         } else {
-            print_data_obj(obj, "\n       ");
+            print_data_obj(obj, "\n     ");
         }
     }
 }

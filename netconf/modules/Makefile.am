@@ -29,12 +29,12 @@ $(top_srcdir)/netconf/modules/ietf/ietf-network-topology-state@2018-02-26.yang
 
 dist_ietf_patched_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf@2011-06-01.yang  \
-$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.yang \
-$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-datastores@2017-08-24.yang
+$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.yang
 
 dist_ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
+$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-nmda.yang
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-flows.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang

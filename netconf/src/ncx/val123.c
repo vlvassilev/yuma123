@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/*  FILE: val123.c
+
+  Support functions not part of the original libyumancx API
+
+/********************************************************************
+*                                                                   *
+*                     I N C L U D E    F I L E S                    *
+*                                                                   *
+*********************************************************************/
 #include <assert.h>
 #include "obj.h"
 #include "val.h"
@@ -8,6 +27,18 @@
 #include "xpath_yang.h"
 
 
+/********************************************************************
+* FUNCTION val123_deref
+*
+* Resolving leafref and returns its target value.
+*
+* INPUTS:
+*   leafref_val == ptr to val_value_t of type leafref
+* OUTPUTS:
+*    None
+* RETURNS:
+*   target val instance
+*********************************************************************/
 val_value_t* val123_deref(val_value_t* leafref_val)
 {
     val_value_t* val;
@@ -26,6 +57,23 @@ val_value_t* val123_deref(val_value_t* leafref_val)
     return val;
 }
 
+/********************************************************************
+* FUNCTION val123_find_match
+*
+* Function finding value with identical instance identifier
+* in another root.
+*
+* INPUTS:
+*   haystack_root_val == ptr to root val to search
+*
+*   needle_val == ptr to val to match
+*
+* OUTPUTS:
+*    None
+* RETURNS:
+*   ptr to val with matching instance identifier
+*   or NULL if value with identical instance does not exist
+*********************************************************************/
 val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* needle_val)
 {
     val_value_t* val=NULL;
@@ -58,6 +106,25 @@ val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* need
     return val;
 }
 
+/********************************************************************
+* FUNCTION val123_clone_instance_ex
+*
+* Clones a val node and adds it to another root. Adds also parent
+* container/list nodes if they are missing in the target root.
+*
+* INPUTS:
+*   root_val == root val to attach the cloned original_val
+*
+*   original_val == ptr to val to clone and attach to root_val
+*
+*   without_non_index_children == if TRUE only list key values are
+*   cloned
+*
+* OUTPUTS:
+*   clone_val == return ptr to the cloned and attached value
+* RETURNS:
+*   status_t
+*********************************************************************/
 static status_t val123_clone_instance_ex(val_value_t* clone_root_val, val_value_t* original_val, val_value_t** return_clone_val, boolean without_non_index_children)
 {
     status_t res;
@@ -98,11 +165,43 @@ static status_t val123_clone_instance_ex(val_value_t* clone_root_val, val_value_
     return NO_ERR;
 }
 
+/********************************************************************
+* FUNCTION val123_clone_instance
+*
+* Clones a val node and adds it to another root. Adds also parent
+* container/list nodes if they are missing in the target root.
+*
+* INPUTS:
+*   root_val == root val to attach the cloned original_val
+*
+*   original_val == ptr to val to clone and attach to root_val
+*
+* OUTPUTS:
+*   clone_val == return ptr to the cloned and attached value
+* RETURNS:
+*   status_t
+*********************************************************************/
 status_t val123_clone_instance(val_value_t* root_val, val_value_t* original_val, val_value_t** clone_val)
 {
     return val123_clone_instance_ex(root_val, original_val, clone_val, FALSE);
-}
+} /* val123_clone_instance */
 
+/********************************************************************
+* FUNCTION obj123_get_child_ancestor_of_descendant
+*
+* Provided top_obj is ancestor of obj this function returns a child
+* of top_obj that also is ancestor of obj.
+*
+* INPUTS:
+*   top_obj == the ancestor obj
+*
+*   obj == obj descendant of top_obj
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   obj_template_t ptr of child to top_obj or NULL
+*********************************************************************/
 obj_template_t* obj123_get_child_ancestor_of_descendant(obj_template_t* top_obj, obj_template_t* obj)
 {
     obj_template_t* child_obj = obj;
@@ -117,8 +216,23 @@ obj_template_t* obj123_get_child_ancestor_of_descendant(obj_template_t* top_obj,
         child_obj=child_obj->parent;
     }
     return NULL;
-}
+} /* obj123_get_child_ancestor_of_descendant */
 
+/********************************************************************
+* FUNCTION val123_get_first_obj_instance
+*
+* val tree is searched for the first instance of obj_template_t type.
+*
+* INPUTS:
+*   top_val == val tree to search
+*
+*   obj == obj template to search for
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   ptr to matching val or NULL if no matching val found
+*********************************************************************/
 val_value_t* val123_get_first_obj_instance(val_value_t* top_val, obj_template_t* obj)
 {
     obj_template_t* child_obj;
@@ -145,8 +259,25 @@ val_value_t* val123_get_first_obj_instance(val_value_t* top_val, obj_template_t*
         }
     };
     return result_val;
-}
+} /* val123_get_first_obj_instance */
 
+/********************************************************************
+* FUNCTION val123_get_next_obj_instance
+*
+* val tree is searched for the next instance of obj_template_t type.
+* useful in case the obj template is a child deep into list multi
+* key list.
+*
+* INPUTS:
+*   top_val == val tree to search
+*
+*   cur_val == val to continue the search from
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   ptr to matching val or NULL if no matching val found
+*********************************************************************/
 val_value_t* val123_get_next_obj_instance(val_value_t* top_val, val_value_t* cur_val)
 {
     val_value_t* next_val;
@@ -182,8 +313,23 @@ val_value_t* val123_get_next_obj_instance(val_value_t* top_val, val_value_t* cur
     }
 
     return NULL;
-}
+} /* val123_get_next_obj_instance */
 
+/********************************************************************
+* FUNCTION ncx123_identity_get_first_base
+*
+* Returns the first base of identity (in YANG 1.0 there is only
+*  1 base)
+*
+* INPUTS:
+*   identity == return the first base of this identity
+*
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   ptr to ncx_identity_t or NULL if identity is abstract
+*********************************************************************/
 ncx_identity_t* ncx123_identity_get_first_base(const ncx_identity_t* identity)
 {
     ncx_identity_base_t *base;
@@ -193,8 +339,24 @@ ncx_identity_t* ncx123_identity_get_first_base(const ncx_identity_t* identity)
     } else {
         return NULL;
     }
-}
+} /* ncx123_identity_get_first_base */
 
+/********************************************************************
+* FUNCTION ncx123_identity_get_next_base
+*
+* Returns the next base of identity
+*
+* INPUTS:
+*   identity == return the next base of this identity
+*
+*   identity_base == return the base after this base
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   ptr to ncx_identity_t or
+*   NULL if there are no more bases (always on YANG 1.0)
+*********************************************************************/
 ncx_identity_t* ncx123_identity_get_next_base(const ncx_identity_t* identity, const ncx_identity_t *identity_base)
 {
     ncx_identity_base_t *base;
@@ -214,9 +376,24 @@ ncx_identity_t* ncx123_identity_get_next_base(const ncx_identity_t* identity, co
         }
     }
     assert(NULL); /*never found identity_base in baseQ*/
-}
+} /* ncx123_identity_get_next_base */
 
-bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_identity_t *identity_base)
+/********************************************************************
+* FUNCTION ncx123_identity_is_derived_from
+*
+* Determine if identity is derived form identity_base.
+*
+* INPUTS:
+*   identity == the identity
+*
+*   identity_base == supposed base ancestor
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   TRUE if identity_base is base ancestor of identity
+*********************************************************************/
+boolean ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_identity_t *identity_base)
 {
     ncx_identity_t * b;
     assert(identity);
@@ -234,7 +411,7 @@ bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_
     }
 
     return FALSE;
-}
+} /* ncx123_identity_is_derived_from */
 
 /********************************************************************
 * FUNCTION ncx123_find_matching_identities
@@ -356,9 +533,24 @@ unsigned int ncx123_find_matching_identities(const ncx_module_t* mod,
         free(qname_mod_id_buf);
     }
     return matched_ids;
-}
+} /* ncx123_find_matching_identities */
 
-bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
+/********************************************************************
+* FUNCTION val123_bit_is_set
+*
+* Determine if bit is set.
+*
+* INPUTS:
+*   bits_val == val of btyp NCX_BT_BITS
+*
+*   bit_str == bit name to check
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   TRUE if the specified bit is set
+*********************************************************************/
+boolean val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
 {
     ncx_lmem_t         *listmem;
     assert(bits_val);
@@ -380,7 +572,7 @@ bool val123_bit_is_set(val_value_t* bits_val, const char* bit_str)
     }
 
     return FALSE;
-}
+} /* val123_bit_is_set */
 
 /********************************************************************
 * FUNCTION cli123_parse_value_instance
@@ -523,8 +715,23 @@ status_t val123_new_value_from_instance_id(obj_template_t* parent_obj, const xml
     xpath_free_pcb(xpathpcb);
 
     return res;
-}
+} /* val123_new_value_from_instance_id */
 
+/********************************************************************
+* FUNCTION val123_merge_cplx
+*
+* Merge src val tree into dst.
+*
+* INPUTS:
+*   dst == destination val to merge into
+*
+*   src == source val
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   status_t
+*********************************************************************/
 status_t val123_merge_cplx(val_value_t* dst, val_value_t* src)
 {
     val_value_t* chval;
@@ -550,9 +757,21 @@ status_t val123_merge_cplx(val_value_t* dst, val_value_t* src)
         }
     }
     return NO_ERR;
-}
+} /* val123_merge_cplx */
 
-
+/********************************************************************
+* FUNCTION obj123_get_first_data_parent
+*
+* Find the first data parent e.g. list or container
+*
+* INPUTS:
+*   obj == obj to start from
+*
+* OUTPUTS:
+*   None
+* RETURNS:
+*   obj found or NULL
+*********************************************************************/
 obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
 {
     obj_template_t* parent_obj;
@@ -564,8 +783,24 @@ obj_template_t* obj123_get_first_data_parent(obj_template_t* obj)
         obj = parent_obj;
     } while(parent_obj);
     return parent_obj;
-}
+} /* obj123_get_first_data_parent */
 
+/********************************************************************
+* FUNCTION cli123_parse_value_string
+*
+* Parses value specified as single quote string
+*
+* INPUTS:
+*   cli_str == command line string starting with '
+*
+* OUTPUTS:
+*   len == length of the string
+*
+*   valstr == allocated buffer with the value string
+*
+* RETURNS:
+*   status_t
+*********************************************************************/
 status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char** valstr)
 {
     const char* ptr = cli_str;
@@ -592,7 +827,7 @@ status_t cli123_parse_value_string(const char* cli_str, unsigned int* len, char*
         assert(0);
     }
     return NO_ERR;
-}
+} /* cli123_parse_value_string */
 
 /********************************************************************
 * FUNCTION cli123_parse_parm_assignment
@@ -789,6 +1024,20 @@ val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_ob
     return parent_select_val;
 } /* val123_select_obj */
 
+/********************************************************************
+* FUNCTION val123_devirtualize
+*
+* Resolves and replaces all virtual nodes under val with real val
+* nodes
+*
+* INPUTS:
+*   val == top val node
+*
+* OUTPUTS:
+* None
+* RETURNS:
+*   status_t
+*********************************************************************/
 status_t val123_devirtualize(val_value_t* val)
 {
     status_t res=NO_ERR;
@@ -820,8 +1069,21 @@ status_t val123_devirtualize(val_value_t* val)
         child_val = next_child_val;
     }
     return res;
-}
+} /* val123_devirtualize */
 
+/********************************************************************
+* FUNCTION val123_clone_real
+*
+* Clones val tree and devirtualizes the clone before returning
+*
+* INPUTS:
+*   val == top val node to clone
+*
+* OUTPUTS:
+* None
+* RETURNS:
+*   val ptr to a cloned devirtualized tree
+*********************************************************************/
 val_value_t* val123_clone_real(val_value_t* val)
 {
     val_value_t* val_cloned;
@@ -829,7 +1091,7 @@ val_value_t* val123_clone_real(val_value_t* val)
     assert(val_cloned);
     val123_devirtualize(val_cloned);
     return val_cloned;
-}
+} /* val123_clone_real */
 
 /********************************************************************
 * FUNCTION obj123_get_top_uses
@@ -854,7 +1116,7 @@ obj_template_t* obj123_get_top_uses(obj_template_t* obj)
         }
     }
     return top_uses_obj;
-}
+} /* obj123_get_top_uses */
 
 /********************************************************************
 * FUNCTION typ123_get_first_named_typdef
@@ -883,16 +1145,28 @@ typ_def_t* typ123_get_first_named_typdef(typ_def_t* typdef)
         child = parent;
     }
     return NULL;
-}
+} /* typ123_get_first_named_typdef */
 
-/**
- * \fn ncx123_find_all_matching_name_top_objs
- * \brief Find all top obj_template_t in in any module that
- * matches the object name string
- * \param modQ Q of modules to check
- * \param objname object name to match
- * \return pointer to struct if present, NULL otherwise
- */
+
+/********************************************************************
+* FUNCTION ncx123_find_all_homonym_top_objs
+*
+*  Find all top obj_template_t in in any module that
+*  matches the object name string
+*
+* INPUTS:
+*   modQ  == module queue
+*
+*   objname == obj name to match
+*
+* OUTPUTS:
+*   matched_objs == pointer to array for retuning matches or NULL
+*
+*   matched_objs_limit == limit of the matched_objs array
+*
+* RETURNS:
+*   count of matched objs
+*********************************************************************/
 unsigned int
     ncx123_find_all_homonym_top_objs(dlq_hdr_t *modQ,
                              const xmlChar *objname,
@@ -924,14 +1198,25 @@ unsigned int
 
 }   /* ncx123_find_all_homonym_top_objs */
 
-/**
- * \fn obj123_find_all_homonym_child_objs
- * \brief Find all top obj_template_t in in any module that
- * matches the object name string
- * \param modQ Q of modules to check
- * \param objname object name to match
- * \return pointer to struct if present, NULL otherwise
- */
+/********************************************************************
+* FUNCTION obj123_find_all_homonym_child_objs
+*
+*  Find all homonym child objs - having the same name but different
+*  mod e.g /a/foo:b and /a/bar:b
+*
+* INPUTS:
+*   parent  == parent obj
+*
+*   objname == name to match
+*
+* OUTPUTS:
+*   matched_objs == pointer to array for retuning matches or NULL
+*
+*   matched_objs_limit == limit of the matched_objs array
+*
+* RETURNS:
+*   count of matched objs
+*********************************************************************/
 unsigned int
     obj123_find_all_homonym_child_objs (obj_template_t *parent,
                              const xmlChar *objname,

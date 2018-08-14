@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/*  FILE: val123.h
+
+  Support functions not part of the original libyumancx API
+
+/********************************************************************
+*                                                                   *
+*                     I N C L U D E    F I L E S                    *
+*                                                                   *
+*********************************************************************/
 #include "val.h"
 #include "obj.h"
 #include "cli.h"
@@ -6,7 +25,7 @@ val_value_t* val123_find_match(val_value_t* haystack_root_val, val_value_t* need
 status_t val123_clone_instance(val_value_t* root_val, val_value_t* original_val, val_value_t** clone_val);
 val_value_t* val123_get_first_obj_instance(val_value_t* top_val, obj_template_t* obj);
 val_value_t* val123_get_next_obj_instance(val_value_t* top_val, val_value_t* cur_val);
-bool ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_identity_t *identity_base);
+boolean ncx123_identity_is_derived_from(const ncx_identity_t * identity, const ncx_identity_t *identity_base);
 ncx_identity_t* ncx123_identity_get_first_base(const ncx_identity_t* identity);
 ncx_identity_t* ncx123_identity_get_next_base(const ncx_identity_t* identity, const ncx_identity_t *identity_base);
 val_value_t* val123_deref(val_value_t* leafref_val);

@@ -236,7 +236,7 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
         printf("%s--",get_status_letter(chobj));
 
         /*<flags>*/
-        if(chobj->objtype!=OBJ_TYP_CASE && chobj->objtype!=OBJ_TYP_CHOICE) {
+        if(chobj->objtype!=OBJ_TYP_CASE) {
             if(obj_in_rpc(chobj) || obj_in_rpc_reply(chobj)) {
                 printf("%s ", obj_in_rpc(chobj)?"-w":"ro");
             } else if(chobj->objtype==OBJ_TYP_RPC /*should be OBJ_TYP_ACTION*/) {

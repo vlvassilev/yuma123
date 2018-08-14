@@ -20,22 +20,10 @@ module netconfd-ex {
   description
     "This module contains extra parameters for netconfd";
 
-  revision 2018-07-17 {
+  revision 2018-08-14 {
     description
-      "Added with-nmda parameter.";
-  }
-
-  augment "/netconfd:netconfd/netconfd:model-spec" {
-    case yang-library-spec {
-      leaf yang-library-spec {
-        type string;
-        description
-          "Loads all modules, features and deviations as specified in
-           a XML file containing ietf-yang-library data. Supports
-           ietf-yang-library@2016-06-21. Usage:
-           # netconfd --yang-library-spec=my-yang-library-spec.xml";
-      }
-    }
+      "Removed yet unimplemented yang-library-spec case
+       augmentation. Shall be restored when implemented.";
   }
 
   augment "/netconfd:netconfd" {

@@ -34,7 +34,7 @@ $(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.
 dist_ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
-$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-nmda.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-nmda.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-flows.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang

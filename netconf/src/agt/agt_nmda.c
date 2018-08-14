@@ -392,11 +392,11 @@ status_t
     agt_profile = agt_get_profile();
 
     /* load in the NMDA NETCONF data types and RPC methods */
-    res = ncxmod_load_module( "ietf-netconf-datastores", NULL, NULL, NULL );
+    res = ncxmod_load_module( "ietf-netconf-nmda", NULL, NULL, NULL );
     assert(res == NO_ERR);
 
     /* get-data */
-    res = agt_rpc_register_method("ietf-netconf-datastores"/*NC_MODULE*/,
+    res = agt_rpc_register_method("ietf-netconf-nmda"/*NC_MODULE*/,
                                   "get-data"/*op_method_name(OP_GET)*/,
                                   AGT_RPC_PH_VALIDATE,
                                   get_data_validate);

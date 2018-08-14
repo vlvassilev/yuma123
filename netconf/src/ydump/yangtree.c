@@ -164,6 +164,40 @@ unsigned int get_child_name_width_max(const obj_template_t *obj, boolean from_to
     return len_max;
 }
 
+char* get_status_letter(obj_template_t* obj)
+{
+    if(obj_get_status(obj) == NCX_STATUS_OBSOLETE) {
+        return "o";
+    } else if (obj_get_status(obj) == NCX_STATUS_DEPRECATED){
+        return "x";
+    } else {
+        return "+";
+    }
+}
+
+void print_feature_deps(obj_template_t* obj)
+{
+    /*<if-features>*/
+    if(!dlq_empty(&obj->iffeatureQ)){
+        ncx_iffeature_t  *iff;
+        printf(" {");
+
+        for (iff = (ncx_iffeature_t *)
+                       dlq_firstEntry(&obj->iffeatureQ);
+             iff != NULL;
+             iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+            if(iff->tkerr.mod!=obj->tkerr.mod) {
+                printf("%s:%s",iff->tkerr.mod->prefix,iff->name);
+            } else {
+                printf("%s",iff->name);
+            }
+            printf("%s",dlq_nextEntry(iff)?" ":"");
+        }
+        printf("}?");
+    }
+}
+
 void print_data_obj(const obj_template_t *obj, char* line_prefix)
 {
     obj_template_t* chobj;
@@ -182,6 +216,7 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
     for (chobj = (obj_template_t *)dlq_firstEntry(childdatadefQ);
          chobj != NULL;
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+        boolean check_for_subnodes;
         unsigned int name_width_cur=0;
 
         if(chobj->objtype==OBJ_TYP_USES) {
@@ -198,18 +233,14 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
 
         printf("%s",line_prefix);
         /*<status>*/
-        printf("+--");
+        printf("%s--",get_status_letter(chobj));
+
         /*<flags>*/
-        if(chobj->objtype!=OBJ_TYP_CASE) {
-            if(obj_in_rpc(chobj) || chobj->objtype==OBJ_TYP_RPCIO) {
-                obj_template_t* rpcio_obj;
-                for(rpcio_obj=chobj;rpcio_obj;rpcio_obj=rpcio_obj->parent) {
-                    if(rpcio_obj->objtype==OBJ_TYP_RPCIO) {
-                        break;
-                    }
-                }
-                assert(rpcio_obj);
-                printf("%s ", (0!=xml_strcmp(rpcio_obj->def.rpcio->name, YANG_K_INPUT))?"ro":"-w");
+        if(chobj->objtype!=OBJ_TYP_CASE && chobj->objtype!=OBJ_TYP_CHOICE) {
+            if(obj_in_rpc(chobj) || obj_in_rpc_reply(chobj)) {
+                printf("%s ", obj_in_rpc(chobj)?"-w":"ro");
+            } else if(chobj->objtype==OBJ_TYP_RPC /*should be OBJ_TYP_ACTION*/) {
+                printf("%s ", "-x");
             } else {
                 printf("%s ", obj_get_config_flag(chobj)?"rw":"ro");
             }
@@ -247,7 +278,45 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
         /* /  for a top-level data node in a mounted module */
         /* @  for a top-level data node in a parent referenced module */
 
-        if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE || chobj->objtype == OBJ_TYP_RPCIO) {
+        if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE || chobj->objtype == OBJ_TYP_RPCIO || chobj->objtype == OBJ_TYP_RPC /*should be OBJ_TYP_ACTION*/) {
+            check_for_subnodes=TRUE;
+        } else {
+            check_for_subnodes=FALSE;
+            /*type alignment - line += "%s %-*s   %s" % (flags, width+1, name, t)*/
+            for(j=0;j<(int)name_width_max+1-(int)name_width_cur;j++) {
+                printf(" ");
+            }
+            printf("  ");
+
+            /*<type>*/
+            {
+                typ_def_t * typdef;
+                typdef = obj_get_typdef(chobj);
+
+                if(typdef && typdef->typenamestr) {
+                    if(typdef->prefix) {
+                        printf(" %s:%s", typdef->prefix, typdef->typenamestr);
+                    } else {
+                        if(0==strcmp("leafref",typdef->typenamestr)) {
+                            printf(" -> %s", typdef->def.simple.xleafref->exprstr);
+                        } else {
+                            printf(" %s", typdef->typenamestr);
+                        }
+                    }
+                } else if(chobj->objtype==OBJ_TYP_ANYXML) {
+                    printf(" %s", "<anyxml>");
+                } else if(chobj->objtype==OBJ_TYP_ANYDATA) {
+                    printf(" %s", "<anydata>");
+                }
+            }
+        }
+//        printf(obj_get_type_name(chobj));
+//        printf(" %s",obj_get_basetype(obj));
+
+        /*<if-features>*/
+        print_feature_deps(chobj);
+
+        if(check_for_subnodes) {
             child_line_prefix=malloc(strlen(line_prefix)+3+1);
             if(!is_last_non_uses(chobj) && !is_last_non_empty_rpcio(chobj)) {
                 sprintf(child_line_prefix, "%s|  ",line_prefix);
@@ -256,46 +325,6 @@ void print_data_obj(const obj_template_t *obj, char* line_prefix)
             }
             print_data_obj(chobj, child_line_prefix);
             free(child_line_prefix);
-            continue;
-        }
-        /*type alignment - line += "%s %-*s   %s" % (flags, width+1, name, t)*/
-        for(j=0;j<(int)name_width_max+1-(int)name_width_cur;j++) {
-            printf(" ");
-        }
-        printf("  ");
-
-        /*<type>*/
-        {
-            typ_def_t * typdef;
-            typdef = obj_get_typdef(chobj);
-            if(typdef && typdef->typenamestr) {
-                if(typdef->prefix) {
-                    printf(" %s:%s", typdef->prefix, typdef->typenamestr);
-                } else {
-                    if(0==strcmp("leafref",typdef->typenamestr)) {
-                        printf("-> %s", typdef->def.simple.xleafref->exprstr);
-                    } else {
-                        printf(" %s", typdef->typenamestr);
-                    }
-                }
-            }
-        }
-//        printf(obj_get_type_name(chobj));
-//        printf(" %s",obj_get_basetype(obj));
-
-        /*<if-features>*/
-        if(!dlq_empty(&chobj->iffeatureQ)){
-            ncx_iffeature_t  *iff;
-            printf(" {");
-
-            for (iff = (ncx_iffeature_t *)
-                           dlq_firstEntry(&chobj->iffeatureQ);
-                 iff != NULL;
-                 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
-
-                printf("%s%s",iff->name,dlq_nextEntry(iff)?" ":"");
-            }
-            printf("}?");
         }
     }
 }
@@ -314,11 +343,16 @@ void print_data(const ncx_module_t    *mod)
         if (!obj_has_name(obj) || obj_is_cli(obj) || obj_is_abstract(obj) || obj->objtype==OBJ_TYP_AUGMENT || obj->objtype==OBJ_TYP_RPC || obj->objtype==OBJ_TYP_NOTIF) {
             continue;
         }
-        printf("\n  +--");
+        printf("\n  %s--",get_status_letter(obj)); // printf("\n  +--");
+
         printf("%s ", obj_get_config_flag(obj)?"rw":"ro");
         printf("%s", obj_get_name(obj));
+        if((obj->objtype == OBJ_TYP_CONTAINER) && !obj_is_np_container(obj)) {
+            /* !  for a presence container */
+            printf("!");
+        }   print_feature_deps(obj);
         if(!is_last_data(obj)) {
-            print_data_obj(obj, "\n     ");
+            print_data_obj(obj, "\n  |  ");
         } else {
             print_data_obj(obj, "\n     ");
         }
@@ -362,7 +396,10 @@ void print_rpcs(const ncx_module_t    *mod)
         if(cnt==0) {
             printf("\n  rpcs:");
         }
-        printf("\n    +---x %s", obj_get_name(obj));
+        printf("\n    %s---x %s", get_status_letter(obj), obj_get_name(obj));
+
+        print_feature_deps(obj);
+
         if(!is_last_rpc(obj)) {
             print_data_obj(obj, "\n    |  ");
         } else {
@@ -390,7 +427,10 @@ void print_notifications(const ncx_module_t    *mod)
         if(cnt==0) {
             printf("\n  notifications:");
         }
-        printf("\n    +---n %s", obj_get_name(obj));
+        printf("\n    %s---n %s", get_status_letter(obj), obj_get_name(obj));
+
+        print_feature_deps(obj);
+
         if(!is_last_notification(obj)) {
             print_data_obj(obj, "\n    |  ");
         } else {
@@ -428,6 +468,7 @@ status_t
                               ses_cb_t *scb)
 {
     const ncx_module_t    *mod;
+    ncx_include_t  *inc;
 
     /* the module should already be parsed and loaded */
     mod = pcb->top;
@@ -442,9 +483,37 @@ status_t
 
     /*draft-ietf-netmod-yang-tree-diagrams-04 sec.2*/
     print_data(mod);
+    /* check for submodule match */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+        ncx_module_t  *submod = inc->submod;
+        print_data(submod);
+    }
     print_augmentations(mod);
+    /* check for submodule match */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+        ncx_module_t  *submod = inc->submod;
+        print_augmentations(submod);
+    }
     print_rpcs(mod);
+    /* check for submodule match */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+        ncx_module_t  *submod = inc->submod;
+        print_rpcs(submod);
+    }
     print_notifications(mod);
+    /* check for submodule match */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+        ncx_module_t  *submod = inc->submod;
+        print_notifications(submod);
+    }
 #if 0
     print_groupings();
     print_yangdata();

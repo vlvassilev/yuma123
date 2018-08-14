@@ -8,6 +8,8 @@ $(top_srcdir)/netconf/modules/ietf/ietf-netconf-monitoring@2010-10-04.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-with-defaults@2011-06-01.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-acm@2018-02-14.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-netconf-notifications@2012-02-06.yang \
+$(top_srcdir)/netconf/modules/ietf/ietf-netconf@2011-06-01.yang  \
+$(top_srcdir)/netconf/modules/ietf/ietf-netconf-partial-lock@2009-10-19.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-library@2016-06-21.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-metadata@2016-08-05.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-yang-types@2013-07-15.yang \
@@ -26,10 +28,6 @@ $(top_srcdir)/netconf/modules/ietf/ietf-network@2018-02-26.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-network-state@2018-02-26.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-network-topology@2018-02-26.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-network-topology-state@2018-02-26.yang
-
-dist_ietf_patched_yang_DATA = \
-$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf@2011-06-01.yang  \
-$(top_srcdir)/netconf/modules/ietf-patched/ietf-netconf-partial-lock@2009-10-19.yang
 
 dist_ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms-x733.yang \

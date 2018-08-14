@@ -10418,6 +10418,9 @@ boolean obj_is_data (const obj_template_t *obj)
         return TRUE;  /* hack for yangdump HTML output */
     case OBJ_TYP_REFINE:
         return FALSE;
+    case OBJ_TYP_AUGMENT:
+        assert(obj->def.augment->targobj);
+        return obj_is_data(obj->def.augment->targobj);
     default:
         if (obj->parent && !obj_is_root(obj->parent)) {
             return obj_is_data(obj->parent);
@@ -10456,6 +10459,9 @@ boolean obj_is_data_db (const obj_template_t *obj)
         return FALSE;
     case OBJ_TYP_REFINE:
         return FALSE;
+    case OBJ_TYP_AUGMENT:
+        assert(obj->def.augment->targobj);
+        return obj_is_data_db(obj->def.augment->targobj);
     default:
         if (obj_is_root(obj)) {
             return TRUE;
@@ -10490,6 +10496,9 @@ boolean obj_in_rpc (const obj_template_t *obj)
             TRUE : FALSE;
     case OBJ_TYP_REFINE:
         return FALSE;
+    case OBJ_TYP_AUGMENT:
+        assert(obj->def.augment->targobj);
+        return obj_in_rpc(obj->def.augment->targobj);
     default:
         if (obj->parent && !obj_is_root(obj->parent)) {
             return obj_in_rpc(obj->parent);
@@ -10521,6 +10530,9 @@ boolean obj_in_rpc_reply (const obj_template_t *obj)
             TRUE : FALSE;
     case OBJ_TYP_REFINE:
         return FALSE;
+    case OBJ_TYP_AUGMENT:
+        assert(obj->def.augment->targobj);
+        return obj_in_rpc_reply(obj->def.augment->targobj);
     default:
         if (obj->parent && !obj_is_root(obj->parent)) {
             return obj_in_rpc_reply(obj->parent);
@@ -10554,6 +10566,9 @@ boolean obj_in_notif (const obj_template_t *obj)
         return FALSE;
     case OBJ_TYP_REFINE:
         return FALSE;
+    case OBJ_TYP_AUGMENT:
+        assert(obj->def.augment->targobj);
+        return obj_in_notif(obj->def.augment->targobj);
     default:
         if (obj->parent && !obj_is_root(obj->parent)) {
             return obj_in_notif(obj->parent);

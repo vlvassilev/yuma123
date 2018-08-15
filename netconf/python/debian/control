@@ -2,21 +2,21 @@ Source: yuma123-python
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, autotools-dev, python-all-dev, libyuma-dev (>=2.10), libyangrpc-dev (>=2.10)
+Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, autotools-dev, python-all-dev, libyuma-dev (>=2.10), libyangrpc-dev (>=2.11)
 Standards-Version: 4.0.0
 Homepage: https://sourceforge.net/projects/yuma123
 
 Package: python-yuma
 Section: python
 Architecture: any
-Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, python-lxml, libyuma2 (>=2.10), libyangrpc2 (>=2.10)
+Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}, python-lxml, libyuma2 (>=2.11), libyangrpc2 (>=2.11)
 Provides: libyuma-python, ${python:Provides}
 XB-Python-Version: ${python:Versions}
-Description:  Netconf/YANG Python support
- The Netconf protocol and YANG modeling language provide a framework
+Description:  NETCONF/YANG Python support
+ The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
  .
- The yuma123 Python support files provide the Python functions for
- integration of netconf/YANG into applications written in Python.
+ The yuma123 Python support files provide Python functions for
+ integration of NETCONF/YANG into applications written in Python.
 

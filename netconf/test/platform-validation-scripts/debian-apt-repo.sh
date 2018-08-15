@@ -3,9 +3,10 @@
 apt-get update
 apt-get -y upgrade
 
-apt-get install software-properties-common
-add-apt-repository "deb http://yuma123.org/repos/apt/debian sid main"
-wget -O - http://yuma123.org/repos/yuma123.gpg.key | sudo apt-key add -
+apt-get -y install software-properties-common
+add-apt-repository -s "deb http://yuma123.org/repos/apt/debian sid main"
+wget -O - http://yuma123.org/repos/yuma123.gpg.key | apt-key add -
+apt-get update
 
 apt-get -y install netconfd yangcli netconfd-module-ietf-interfaces netconfd-module-ietf-system
 apt-get -y install python-yuma || true
@@ -28,10 +29,14 @@ echo 'Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/t
 /etc/init.d/ssh restart
 
 
+#without dpkg-dev, apt-get source fails!
+apt-get -y install dpkg-dev
+
+apt-get -y install libyuma-dev
+apt-get -y install autoconf libtool libxml2-dev
 apt-get source yuma123
 
-
-cd ~/yuma123_*/netconf/test/netconfd
+cd ~/yuma123-*/netconf/test/netconfd
 apt-get -y install python-ncclient valgrind
 
 multiarch=$(dpkg-architecture -q DEB_BUILD_MULTIARCH)
@@ -44,7 +49,7 @@ make
 make install
 make check || true
 
-cd ~/yuma123_*/netconf/test/yangcli
+cd ~/yuma123-*/netconf/test/yangcli
 apt-get -y install expect
 
 autoreconf -i -f
@@ -53,7 +58,7 @@ make
 make install
 make check || true
 
-cd ~/yuma123_*/netconf/test/yangdump
+cd ~/yuma123-*/netconf/test/yangdump
 
 autoreconf -i -f
 ./configure ${CONFIGURE_FLAGS}

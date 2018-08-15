@@ -1,0 +1,5 @@
+The are 3 options for installing on Debian.:
+
+1. debian-wo-pkgs.sh - pulling from git and compiling using automake tools without debian packages
+2. debian.sh - pulling from git and building using the debian package development tools
+3. debian-apt-repo.sh - installing precompiled packages from the yuma123 online repository.

@@ -4,7 +4,8 @@ rm -rf tmp || true
 mkdir tmp
 cd tmp
 wget https://tools.ietf.org/id/draft-ietf-netmod-rfc7223bis-00.txt
-rfcstrip draft-ietf-netmod-rfc7223bis-00.txt
+wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
+sh ./rfcstrip draft-ietf-netmod-rfc7223bis-00.txt
 pyang --ietf -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-interfaces@2017-08-17.yang
 pyang -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ex-ethernet-bonding.yang
 pyang -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ex-ethernet.yang
@@ -38,6 +39,6 @@ fi
 sleep 3
 python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 #python session.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
-#kill -KILL $SERVER_PID
+kill -KILL $SERVER_PID
 cat tmp/server.log
 sleep 1

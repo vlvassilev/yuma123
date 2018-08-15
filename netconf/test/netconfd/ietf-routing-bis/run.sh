@@ -1,16 +1,16 @@
 #!/bin/bash -e
 
-#rm -rf tmp || true
-#mkdir tmp
+rm -rf tmp || true
+mkdir tmp
 cd tmp
-#wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
+wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
 
-#wget https://www.rfc-editor.org/rfc/rfc8343.txt
-#wget https://www.rfc-editor.org/rfc/rfc8344.txt
-#wget https://www.rfc-editor.org/rfc/rfc8349.txt
-#sh ./rfcstrip rfc8343.txt
-#sh ./rfcstrip rfc8344.txt
-#sh ./rfcstrip rfc8349.txt
+wget https://www.rfc-editor.org/rfc/rfc8343.txt
+wget https://www.rfc-editor.org/rfc/rfc8344.txt
+wget https://www.rfc-editor.org/rfc/rfc8349.txt
+sh ./rfcstrip rfc8343.txt
+sh ./rfcstrip rfc8344.txt
+sh ./rfcstrip rfc8349.txt
 
 pyang --ietf -f tree --path /usr/share/yuma/nmda-modules/ietf:/usr/share/yuma/modules/ietf ietf-interfaces@2018-02-20.yang
 pyang --ietf -f tree --path ./:../../../../modules/ietf-draft/:../../../../modules/ietf/ ietf-ip@2018-02-22.yang
@@ -44,6 +44,6 @@ cd ..
 sleep 3
 python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 #python session.yangcli.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
-#kill -KILL $SERVER_PID
+kill -KILL $SERVER_PID
 cat tmp/server.log
 sleep 1

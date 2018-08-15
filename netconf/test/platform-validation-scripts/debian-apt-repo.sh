@@ -20,7 +20,7 @@ echo "Port 22" >> /etc/ssh/sshd_config
 echo "Port 830" >> /etc/ssh/sshd_config
 echo "Port 1830" >> /etc/ssh/sshd_config
 echo "Port 2830" >> /etc/ssh/sshd_config
-recho "Port 3830" >> /etc/ssh/sshd_config
+echo "Port 3830" >> /etc/ssh/sshd_config
 echo "Port 4830" >> /etc/ssh/sshd_config
 echo "Port 5830" >> /etc/ssh/sshd_config
 echo "Port 6830" >> /etc/ssh/sshd_config

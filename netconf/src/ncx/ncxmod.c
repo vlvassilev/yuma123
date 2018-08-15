@@ -3344,7 +3344,7 @@ status_t
 {
     yang_node_t     *node;
     const xmlChar   *savedrev;
-    const ncx_module_t *savedparentparm;
+    ncx_module_t    *savedparentparm;
     status_t         res;
 
 #ifdef DEBUG

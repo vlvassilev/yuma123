@@ -852,7 +852,7 @@ extern status_t
 		     const xmlChar *qname,
 		     xmlns_id_t  *nsid,
 		     const xmlChar **name,
-		     const ncx_identity_t **id);
+		     ncx_identity_t **id);
 
 
 /********************************************************************

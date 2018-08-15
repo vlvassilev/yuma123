@@ -47,13 +47,13 @@ unsigned int
                              const xmlChar *objname,
                              obj_template_t **matched_objs,
                              unsigned int matched_objs_limit);
-unsigned int ncx123_find_matching_identities(const ncx_module_t* mod,
+unsigned int ncx123_find_matching_identities(ncx_module_t* mod,
                  const xmlChar * qname,
                  const typ_idref_t *idref,
                  ncx_identity_t **ids,
                  unsigned int matched_ids_limit);
 status_t
-    val123_parse_idref_ex (const ncx_module_t *mod,
+    val123_parse_idref_ex (ncx_module_t *mod,
                      const xmlChar *qname,
                      const typ_idref_t *idref,
                      ncx_identity_t **id);

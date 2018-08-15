@@ -2417,60 +2417,6 @@ status_t
 } /* val_idref_ok */
 
 /********************************************************************
-* FUNCTION val123_parse_idref_ex
-*
-* Parse a CLI BASED identityref QName into its various parts
-*
-* INPUTS:
-*    idref == typ_idref_t ptr of the target identityref type
-*    mod == module containing the default-stmt (or NULL if N/A)
-*    qname == QName or local-name string to parse
-*    nsid == address of return namespace ID of the module
-*            indicated by the prefix. If mod==NULL then
-*            a prefix MUST be present
-*    name == address of return local name part of QName
-*    id == address of return identity, if found
-*
-* OUTPUTS:
-*  if non-NULL:
-*     *nsid == namespace ID for the prefix part of the QName
-*     *name == pointer into the qname string at the start of
-*              the local name part
-*     *id == pointer to ncx_identity_t found (if any, not an error)
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    val123_parse_idref_ex (const ncx_module_t *mod,
-                     const xmlChar *qname,
-                     const typ_idref_t *idref,
-                     ncx_identity_t **id)
-{
-    status_t res;
-    unsigned int matched_cnt;
-    matched_cnt = ncx123_find_matching_identities(mod,qname,idref,id,1);
-
-    if(matched_cnt==0) {
-        res=ERR_NCX_INVALID_VALUE;
-    } else if(matched_cnt==1) {
-        res=NO_ERR;
-    } else {
-        unsigned int i;
-        ncx_identity_t **identity_array;
-        identity_array=malloc(matched_cnt*sizeof(ncx_identity_t *));
-        ncx123_find_matching_identities(mod,qname,idref,identity_array,matched_cnt);
-        log_error("\nError: Multiple identities match identityref value '%s': '%s:%s'",qname, identity_array[0]->mod->name,identity_array[0]->name);
-        for(i=1;i<matched_cnt;i++) {
-           log_error(", '%s:%s'", identity_array[i]->mod->name,identity_array[i]->name);
-        }
-        free(identity_array);
-        res=ERR_NCX_MULTIPLE_MATCHES;
-    }
-    return res;
-
-}  /* val123_parse_idref_ex */
-/********************************************************************
 * FUNCTION val_parse_idref
 * 
 * Parse a CLI BASED identityref QName into its various parts
@@ -2499,7 +2445,7 @@ status_t
                      const xmlChar *qname,
                      xmlns_id_t  *nsid,
                      const xmlChar **name,
-                     const ncx_identity_t **id)
+                     ncx_identity_t **id)
 {
     status_t res;
     res = val123_parse_idref_ex (mod, qname, NULL/*idref*/, id);
@@ -2819,7 +2765,7 @@ status_t
     val_value_t            *unval;
     typ_template_t         *listtyp;
     typ_def_t              *realtypdef;
-    const ncx_identity_t   *identity;
+    ncx_identity_t         *identity;
     ncx_num_t               num;
     ncx_list_t              list;
     status_t                res;
@@ -4510,7 +4456,7 @@ status_t
                         const xmlChar *valstr)
 {
     const xmlChar        *localname;
-    const ncx_identity_t *identity;
+    ncx_identity_t       *identity;
     obj_template_t       *leafobj, *objroot;
     xpath_pcb_t          *xpathpcb;
     status_t              res;

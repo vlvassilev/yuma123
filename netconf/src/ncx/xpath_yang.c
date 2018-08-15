@@ -307,7 +307,7 @@ static ncx_module_t* select_target_module( xpath_pcb_t* pcb,
             *res = NO_ERR;
         } else {
             pcb_log_error( pcb, "\nError: Module for prefix '%s' not found in %s should check %s",
-                           (prefix) ? prefix : EMPTY_STRING , pcb->tkerr.mod->name, pcb->obj?get_target_module_for_nsid(pcb->obj->nsid)->name:" pcb->obj is NULL");
+                           (prefix) ? prefix : EMPTY_STRING, pcb->tkerr.mod->name, pcb->obj?(char*)get_target_module_for_nsid(pcb->obj->nsid)->name:" pcb->obj is NULL");
         }
     }
 
@@ -2290,9 +2290,9 @@ status_t
 }  /* xpath_yang_validate_xmlkey */
 
 
-static xmlChar* get_cur_modname(xpath_pcb_t *pcb)
+static const xmlChar* get_cur_modname(xpath_pcb_t *pcb)
 {
-    xmlChar* modname=NULL;
+    const xmlChar* modname=NULL;
     if (TK_CUR_MOD(pcb->tkc)) {
         xmlns_id_t nsid=XMLNS_NULL_NS_ID;
         if(pcb->objmod==NULL) {

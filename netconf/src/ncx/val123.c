@@ -438,7 +438,7 @@ boolean ncx123_identity_is_derived_from(const ncx_identity_t * identity, const n
 * RETURNS:
 *   count of matched identities
 *********************************************************************/
-unsigned int ncx123_find_matching_identities(const ncx_module_t* mod,
+unsigned int ncx123_find_matching_identities(ncx_module_t* mod,
                  const xmlChar * qname,
                  const typ_idref_t *idref,
                  ncx_identity_t **ids,
@@ -448,7 +448,7 @@ unsigned int ncx123_find_matching_identities(const ncx_module_t* mod,
     xmlChar        *qname_mod_id_buf;
     unsigned int   qname_mod_id_len;
     unsigned int   matched_ids;
-    const ncx_module_t*  testmod;
+    ncx_module_t*  testmod;
     ncx_identity_t *identity;
     ncx_identity_t *idref_base=NULL;
     assert(qname);
@@ -1311,3 +1311,57 @@ ncx_module_t*
     return NULL;
 
 }   /* obj123_find_child_mod_from_prefix */
+/********************************************************************
+* FUNCTION val123_parse_idref_ex
+*
+* Parse a CLI BASED identityref QName into its various parts
+*
+* INPUTS:
+*    idref == typ_idref_t ptr of the target identityref type
+*    mod == module containing the default-stmt (or NULL if N/A)
+*    qname == QName or local-name string to parse
+*    nsid == address of return namespace ID of the module
+*            indicated by the prefix. If mod==NULL then
+*            a prefix MUST be present
+*    name == address of return local name part of QName
+*    id == address of return identity, if found
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *nsid == namespace ID for the prefix part of the QName
+*     *name == pointer into the qname string at the start of
+*              the local name part
+*     *id == pointer to ncx_identity_t found (if any, not an error)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val123_parse_idref_ex (ncx_module_t *mod,
+                     const xmlChar *qname,
+                     const typ_idref_t *idref,
+                     ncx_identity_t **id)
+{
+    status_t res;
+    unsigned int matched_cnt;
+    matched_cnt = ncx123_find_matching_identities(mod,qname,idref,id,1);
+
+    if(matched_cnt==0) {
+        res=ERR_NCX_INVALID_VALUE;
+    } else if(matched_cnt==1) {
+        res=NO_ERR;
+    } else {
+        unsigned int i;
+        ncx_identity_t **identity_array;
+        identity_array=malloc(matched_cnt*sizeof(ncx_identity_t *));
+        ncx123_find_matching_identities(mod,qname,idref,identity_array,matched_cnt);
+        log_error("\nError: Multiple identities match identityref value '%s': '%s:%s'",qname, identity_array[0]->mod->name,identity_array[0]->name);
+        for(i=1;i<matched_cnt;i++) {
+           log_error(", '%s:%s'", identity_array[i]->mod->name,identity_array[i]->name);
+        }
+        free(identity_array);
+        res=ERR_NCX_MULTIPLE_MATCHES;
+    }
+    return res;
+
+}  /* val123_parse_idref_ex */

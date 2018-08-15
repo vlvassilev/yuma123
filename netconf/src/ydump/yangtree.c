@@ -62,7 +62,7 @@ boolean is_last_non_empty_rpcio(obj_template_t* obj)
         return FALSE;
     }
 
-    while(next_obj=dlq_nextEntry(prev_obj)) {
+    while(next_obj=(obj_template_t *)dlq_nextEntry(prev_obj)) {
         if(next_obj->objtype==OBJ_TYP_RPCIO) {
             dlq_hdr_t* ccq=obj_get_datadefQ(next_obj);
             if(ccq && dlq_firstEntry(ccq)) {
@@ -82,7 +82,7 @@ boolean is_last_non_uses(obj_template_t* obj)
     obj_template_t* prev_obj=obj;
     obj_template_t* next_obj;
 
-    while(next_obj=dlq_nextEntry(prev_obj)) {
+    while(next_obj=(obj_template_t *)dlq_nextEntry(prev_obj)) {
         if(next_obj->objtype!=OBJ_TYP_USES) {
             return FALSE;
         }
@@ -96,7 +96,7 @@ boolean is_last_data(obj_template_t* obj)
     obj_template_t* prev_obj=obj;
     obj_template_t* next_obj;
 
-    while(next_obj=dlq_nextEntry(prev_obj)) {
+    while(next_obj=(obj_template_t *)dlq_nextEntry(prev_obj)) {
         if(next_obj->objtype==OBJ_TYP_CONTAINER || next_obj->objtype==OBJ_TYP_LEAF || next_obj->objtype==OBJ_TYP_LIST) {
             return FALSE;
         }
@@ -110,7 +110,7 @@ boolean is_last_rpc(obj_template_t* obj)
     obj_template_t* prev_obj=obj;
     obj_template_t* next_obj;
 
-    while(next_obj=dlq_nextEntry(prev_obj)) {
+    while(next_obj=(obj_template_t *)dlq_nextEntry(prev_obj)) {
         if(next_obj->objtype==OBJ_TYP_RPC) {
             return FALSE;
         }
@@ -124,7 +124,7 @@ boolean is_last_notification(obj_template_t* obj)
     obj_template_t* prev_obj=obj;
     obj_template_t* next_obj;
 
-    while(next_obj=dlq_nextEntry(prev_obj)) {
+    while(next_obj=(obj_template_t *)dlq_nextEntry(prev_obj)) {
         if(next_obj->objtype==OBJ_TYP_NOTIF) {
             return FALSE;
         }
@@ -133,7 +133,7 @@ boolean is_last_notification(obj_template_t* obj)
     return TRUE;
 }
 
-unsigned int get_child_name_width_max(const obj_template_t *obj, boolean from_top)
+unsigned int get_child_name_width_max(obj_template_t *obj, boolean from_top)
 {
     obj_template_t* chobj;
     dlq_hdr_t* childdatadefQ;
@@ -198,7 +198,7 @@ void print_feature_deps(obj_template_t* obj)
     }
 }
 
-void print_data_obj(const obj_template_t *obj, char* line_prefix)
+void print_data_obj(obj_template_t *obj, char* line_prefix)
 {
     obj_template_t* chobj;
     dlq_hdr_t* childdatadefQ;

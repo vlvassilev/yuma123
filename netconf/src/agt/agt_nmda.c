@@ -483,7 +483,13 @@ void
     clivalset = agt_cli_get_valset();
     val = val_find_child(clivalset, NCXMOD_NETCONFD_EX, NCX_EL_WITH_NMDA);
     if((val==NULL) || (!VAL_BOOL(val))) {
-      return NO_ERR;
+      return;
     }
+    val_free_value(root_operational_val);
+    val_free_value(root_system_val);
+    val_free_value(root_learned_val);
+
+    agt_rpc_unregister_method("ietf-netconf-nmda",
+                              "get-data");
 
 }  /* agt_nmda_cleanup */

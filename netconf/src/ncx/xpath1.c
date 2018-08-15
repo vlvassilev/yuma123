@@ -4641,7 +4641,7 @@ static xpath_result_t *
     xpath_result_t  *parm1, *parm2;
     const xmlChar   *qname;
 
-    const ncx_identity_t *identity_base;
+    ncx_identity_t *identity_base;
     xmlns_id_t  nsid;
     const xmlChar *name;
     xpath_resnode_t  *resnode;

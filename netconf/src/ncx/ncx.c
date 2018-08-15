@@ -3461,7 +3461,7 @@ ncx_identity_t *
  * \return pointer to found identity or NULL if not found
  */
 ncx_identity_t *
-    ncx_find_identity_que (dlq_hdr_t *identityQ,
+    ncx_find_identity_que (const dlq_hdr_t *identityQ,
                            const xmlChar *name)
 {
     assert ( identityQ && " param identityQ is NULL");

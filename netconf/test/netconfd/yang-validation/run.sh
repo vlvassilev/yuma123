@@ -11,7 +11,7 @@ FAILS=0
 modpath=/usr/share/yuma/modules
 
 for filespec in `find /usr/share/yuma/modules/ -name '*.yang' | sort` ; do
-  module=`basename $filespec`
+  module=`basename $filespec .yang`
   echo $module >&2
 
   is_submodule="`head -n 1 ${filespec} | grep submodule`" || true

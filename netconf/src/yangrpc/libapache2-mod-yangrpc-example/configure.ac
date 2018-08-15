@@ -11,7 +11,7 @@ AM_PROG_AS
 AC_PROG_LIBTOOL
 
 
-apachemodulelibdir="$libdir/apache2/modules"
+apachemodulelibdir="$prefix/lib/apache2/modules"
 AC_SUBST(apachemodulelibdir)
 
 apachemoduleconfigdir="/etc/apache2/mods-available"

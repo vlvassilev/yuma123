@@ -72,6 +72,17 @@ Description: NETCONF/YANG command line client application
  The yuma123 yangcli application allows the user to issue NETCONF requests
  to agents according to the specific YANG models of the agents.
 
+Package: yangdump
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base, libyuma2
+Description: Validate YANG modules and convert them to different formats
+ The NETCONF protocol and the YANG modeling language provide a framework
+ for the exchange of management information between agents (servers)
+ and clients.
+ .
+ The yangdump application allows the user to validate YANG models
+ and convert YANG to different formats.
+
 Package: netconfd-module-ietf-interfaces
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
@@ -123,5 +134,3 @@ Description: NETCONF/YANG development files
  libraries, and documentation needed for development of custom NETCONF/YANG
  applications.
 
-
- 

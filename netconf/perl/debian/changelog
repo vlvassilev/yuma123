@@ -1,5 +1,5 @@
-yuma123-perl (2.11-0) UNRELEASED; urgency=medium
+yuma123-perl (2.11-0) stable; urgency=medium
 
   * Unofficial package
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 11 Jan 2018 13:26:33 +0100
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Fri, 17 Aug 2018 03:02:54 +0200

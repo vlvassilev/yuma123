@@ -16,6 +16,7 @@ apt-get -y upgrade
 
 apt-get -y install software-properties-common
 add-apt-repository -s "deb http://yuma123.org/repos/apt/debian sid main"
+apt-get -y install wget gnupg
 wget -O - http://yuma123.org/repos/yuma123.gpg.key | apt-key add -
 apt-get update
 apt-get -y install netconfd yangcli

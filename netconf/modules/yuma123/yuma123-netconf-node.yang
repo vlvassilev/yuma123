@@ -1,0 +1,31 @@
+module yuma123-netconf-node {
+
+  namespace
+    "http://yuma123.org/ns/yuma123-netconf-node";
+  prefix "ncnode";
+
+  import "ietf-network" { prefix nd; }
+  import "ietf-netconf-client" { prefix ncc; }
+  organization
+    "yuma123";
+
+  contact
+    "Vladimir Vassilev <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module augments ietf-network with parameters for connecting
+     to NETCONF enabled nodes.";
+
+  revision 2018-08-27 {
+    description
+      "Initial.";
+  }
+
+  augment "/nd:networks/nd:network/nd:node" {
+    leaf netconf-server {
+      type leafref {
+        path "/ncc:netconf-client/ncc:initiate/ncc:netconf-server/ncc:name";
+      }
+    }
+  }
+}

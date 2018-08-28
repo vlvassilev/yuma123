@@ -4,7 +4,7 @@
 LIB_VERSION = 2
 
 %:
-	dh $@ --with autotools-dev,autoreconf
+	dh $@ --with autoreconf
 
 
 override_dh_auto_configure:

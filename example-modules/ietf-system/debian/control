@@ -2,8 +2,8 @@ Source: yuma123-NETCONFd-module-ietf-system
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 7), autoconf, dh-autoreconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev, libyuma-dev (>= 2.11)
-Standards-Version: 4.0.0
+Build-Depends: debhelper (>= 10), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev, libyuma-dev (>= 2.11)
+Standards-Version: 4.1.4
 Homepage: http://transpacket.com/
 
 Package: NETCONFd-module-ietf-system

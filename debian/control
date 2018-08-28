@@ -2,8 +2,8 @@ Source: yuma123
 Section: net
 Priority: extra
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 9), autoconf, dh-autoreconf, autotools-dev, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
-Standards-Version: 4.0.0
+Build-Depends: debhelper (>= 9), autoconf, dh-autoreconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev
+Standards-Version: 4.1.4
 Homepage: https://sourceforge.net/projects/yuma123
 
 Package: libyuma-base
@@ -41,7 +41,7 @@ Section: libdevel
 Architecture: any
 Provides: libyuma-dev
 Depends: ${misc:Depends}
-Description: NETCONF/YANG development files
+Description: NETCONF/YANG application development files
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
@@ -67,7 +67,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base, libyuma2
 Description: NETCONF/YANG command line client application
  The NETCONF protocol and the YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
- and clients. 
+ and clients.
  .
  The yuma123 yangcli application allows the user to issue NETCONF requests
  to agents according to the specific YANG models of the agents.
@@ -111,7 +111,7 @@ Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, libyuma-base, libyuma2
-Description: NETCONF/YANG library for simple manager clients
+Description: NETCONF/YANG library for simple client applications
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
@@ -125,7 +125,7 @@ Section: libdevel
 Architecture: any
 Provides: libyangrpc-dev
 Depends: libc6-dev, libyangrpc2 (=${binary:Version}),${misc:Depends}
-Description: NETCONF/YANG development files
+Description: NETCONF/YANG simple client applications development files
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
@@ -133,4 +133,3 @@ Description: NETCONF/YANG development files
  The yuma123 libyangrpc development files include the library headers, static
  libraries, and documentation needed for development of custom NETCONF/YANG
  applications.
-

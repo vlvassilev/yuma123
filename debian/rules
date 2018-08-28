@@ -20,6 +20,7 @@ override_dh_installdocs:
 	  -plibyuma-dev \
 	  -pnetconfd \
 	  -pyangcli \
+	  -pyangdump \
 	  -plibyangrpc$(LIB_VERSION) \
 	  -plibyangrpc-dev \
 	  -pnetconfd-module-ietf-interfaces \

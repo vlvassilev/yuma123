@@ -1,4 +1,4 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: yuma123
 Upstream-Contact: Vladimir Vassilev <vladimir@transpacket.com>
 Source: https://sourceforge.net/projects/yuma123
@@ -7,17 +7,17 @@ Files: *
 Copyright: 2008-2012 Andy Bierman <andy@yumaworks.com>
            2009-2010 Netconf Central, Inc.
            2012 YumaWorks, Inc. <support@yumaworks.com>
-           2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
-           2013-2016 Transpacket AS <support@transpacket.com>
+           2013-2018 Vladimir Vassilev <vladimir@transpacket.com>
+           2013-2018 Transpacket AS <support@transpacket.com>
 License: BSD-3-clause
 
 Files: debian/*
-Copyright: 2013-2016 Vladimir Vassilev <vladimir@transpacket.com>
+Copyright: 2013-2018 Vladimir Vassilev <vladimir@transpacket.com>
 License: BSD-3-clause
 
 Files: netconf/modules/ietf/*
-Copyright: 2011-2016 IETF Trust
-           2011-2016 Persons identified as the document authors
+Copyright: 2011-2018 IETF Trust
+           2011-2018 Persons identified as the document authors
 License: BSD-3-clause
 
 Files: libtecla/*
@@ -41,7 +41,7 @@ License: public-domain
  By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.  You may use this
  code any way you wish, private, educational, or commercial.  It's free.
 
-Files: netconf/src/agt/agt_yuma_arp.* netconf/src/agt/agt_time_filter.*
+Files: example-modules/yuma-arp/yuma-arp.* netconf/src/agt/agt_time_filter.*
 Copyright: 2008 - 2012, Andy Bierman
 License: BSD-3-clause
 Comment:

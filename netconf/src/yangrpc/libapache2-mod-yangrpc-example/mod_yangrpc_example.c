@@ -48,6 +48,13 @@ typedef struct {
     yangrpc_cb_ptr_t yangrpc_cb_ptr;
 } my_svr_cfg ;
 
+void my_ap_rprintf_uint64(request_rec * r, uint64_t u64)
+{
+    char buf[20+1];
+    sprintf(buf,"%llu",u64);
+    ap_rprintf(r, "%s", buf);
+}
+
 static void* my_create_svr_conf(apr_pool_t* pool, server_rec* svr)
 {
     my_svr_cfg* svr_cfg = (my_svr_cfg*)apr_pcalloc(pool, sizeof(my_svr_cfg));
@@ -420,10 +427,9 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
             ap_rprintf(r, "<td align=\"right\">");
             if(val!=NULL) {
                 uint64_t counter;
-                char buf[20+1];
                 //counter = VAL_UINT64(val);
                 counter=get_counter(val,root_epoch_val);
-                ap_rprintf(r,"%llu",counter);
+                my_ap_rprintf_uint64(r,counter);
             }
             ap_rprintf(r, "</td>");
 
@@ -435,7 +441,7 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 counter=get_counter(val,root_prev_val);
                 rate=counter/(ts_cur-ts_prev);
                 if(root_prev_val!=NULL) {
-                    ap_rprintf(r,"%llu",rate);
+                    my_ap_rprintf_uint64(r,rate);
                 }
             }
             ap_rprintf(r, "</td>");
@@ -452,7 +458,8 @@ void serialize_ietf_interfaces_state_val(request_rec *r, val_value_t* root_val)
                 counter=get_counter(val,root_prev_val);
                 rate=counter/(ts_cur-ts_prev);
                 if(root_prev_val!=NULL) {
-                    ap_rprintf(r, "%llu %%",100*rate/speed_in_bytes);
+                    my_ap_rprintf_uint64(r,100*rate/speed_in_bytes);
+                    ap_rprintf(r, " %%");
                 }
             }
             ap_rprintf(r, "</td>");

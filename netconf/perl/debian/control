@@ -1,6 +1,6 @@
 Source: yuma123-perl
 Section: net
-Priority: extra
+Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 10), autoconf, libyuma-dev (>=2.11), libyangrpc-dev (>=2.11)
 Standards-Version: 4.1.4

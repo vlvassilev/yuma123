@@ -1,6 +1,6 @@
 Source: yuma123-netconfd-module-ietf-interfaces
 Section: net
-Priority: extra
+Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 10), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev, libyuma-dev (>= 2.11)
 Standards-Version: 4.1.4

@@ -1,6 +1,6 @@
 Source: libapache2-mod-yangrpc-example
 Section: net
-Priority: extra
+Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
 Build-Depends: debhelper (>= 10), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libyuma-dev (>= 2.11), libyangrpc-dev (>= 2.11), apache2-dev
 Standards-Version: 4.1.4

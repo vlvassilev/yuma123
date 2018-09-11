@@ -11,14 +11,14 @@ Section: libs
 Architecture: all
 Depends: ${misc:Depends}
 Multi-Arch: foreign
-Description: Configuration script, YANG models and documentation
+Description: Configuration script, YANG modules and documentation
  The NETCONF protocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)
  and clients.
  .
  This package includes configuration scripts, documentation and YANG
- models for the NETCONF an YANG libraries, agents and
- applications. YANG models contain a formal description of the data that can be
+ modules for the NETCONF an YANG libraries, agents and
+ applications. YANG modules contain a formal description of the data that can be
  managed using NETCONF and applications.
 
 Package: libyuma2
@@ -53,7 +53,7 @@ Description: NETCONF/YANG application development files
 Package: netconfd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, debconf, lsb-base, libyuma-base, libyuma2
-Description: NETCONF (RFC-6241) agent
+Description: NETCONF (RFC6241) agent
  NETCONF provides a framework
  for the exchange of management information between agents (servers)
  and clients.
@@ -70,7 +70,7 @@ Description: NETCONF/YANG command line client application
  and clients.
  .
  The yuma123 yangcli application allows the user to issue NETCONF requests
- to agents according to the specific YANG models of the agents.
+ to agents according to the specific YANG modules of the agents.
 
 Package: yangdump
 Architecture: any
@@ -80,7 +80,7 @@ Description: Validate YANG modules and convert them to different formats
  for the exchange of management information between agents (servers)
  and clients.
  .
- The yangdump application allows the user to validate YANG models
+ The yangdump application allows the user to validate YANG modules
  and convert YANG to different formats.
 
 Package: netconfd-module-ietf-interfaces

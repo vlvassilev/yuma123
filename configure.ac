@@ -104,10 +104,13 @@ AC_CONFIG_FILES([
         netconf/src/yangrpc/Makefile
         netconf/src/yangrpc/example/Makefile
         netconf/src/yangdump/Makefile
-        netconf/src/yangdiff/Makefile
         netconf/man/Makefile
         rpm/yuma123.spec
 ])
+
+# Disabled targets
+#        netconf/src/yangdiff/Makefile
+
 # Test framework
 #        netconf/test/Makefile
 #        netconf/test/sys-test/Makefile

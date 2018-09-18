@@ -2,13 +2,13 @@ Source: libapache2-mod-yangrpc-example
 Section: net
 Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 10), autoconf, libxml2-dev, libtool, libyuma-dev (>= 2.11), libyangrpc-dev (>= 2.11), apache2-dev
+Build-Depends: debhelper (>= 10), autoconf, libxml2-dev, libtool, libyuma-dev (>= 2.12), libyangrpc-dev (>= 2.12), apache2-dev
 Standards-Version: 4.1.4
 Homepage: https://sourceforge.net/projects/yuma123
 
 Package: libapache2-mod-yangrpc-example
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyangrpc2 (>= 2.11), apache2
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyangrpc2 (>= 2.12), apache2
 Description: Example apache2 module using libyangrpc2 API to retrieve
  YANG data over NETCONF and represent it as HTML.
  .

@@ -285,6 +285,11 @@ typedef struct val_editvars_t_ {
 } val_editvars_t;
 
 
+typedef struct val_virtual_cb_node_t_ {
+    dlq_hdr_t     qhdr;
+    void*         getcb;
+} val_virt_getcb_node_t;
+
 /* one value to match one type */
 typedef struct val_value_t_ {
     dlq_hdr_t      qhdr;
@@ -398,6 +403,13 @@ typedef struct val_value_t_ {
 	xmlChar   *fname;                 /* NCX_BT_EXTERN */
 	xmlChar   *intbuff;               /* NCX_BT_INTERN */
     } v;
+
+    /* Used by Agent only:
+     * Support for virtual containers with multiple callbacks filling different
+     * subsets of the children. Usefull in case of e.g.
+     * /interfaces-state/interface/statistics being filled from different SILs
+     */
+    dlq_hdr_t        getcbQ;                      /* Q of val_value_t */
 } val_value_t;
 
 

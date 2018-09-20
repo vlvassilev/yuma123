@@ -1365,3 +1365,28 @@ status_t
     return res;
 
 }  /* val123_parse_idref_ex */
+
+/********************************************************************
+* FUNCTION val123_add_virtual_cb
+*
+* Special function to add additional callback
+* to containers that are virtual value nodes
+*
+* INPUTS:
+*   val == pointer to the preexisting virual container value
+*   cbfn == get callback function to use
+*********************************************************************/
+void
+    val123_add_virtual_cb (val_value_t *val,
+                      void  *cbfn)
+{
+    val_virt_getcb_node_t* getcb_node;
+
+    assert(val && cbfn);
+    getcb_node=malloc(sizeof(val_virt_getcb_node_t));
+    assert(getcb_node);
+    memset(getcb_node,0,sizeof(val_virt_getcb_node_t));
+    getcb_node->getcb = cbfn;
+    dlq_enque(getcb_node, &val->getcbQ);
+
+}  /* val_add_virtual_cb */

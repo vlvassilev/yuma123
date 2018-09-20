@@ -1,4 +1,5 @@
 TESTS=\
+test-val123-api \
 test-netconf-1dot1 \
 test-yang-validation \
 test-copy-config \

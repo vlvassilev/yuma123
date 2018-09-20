@@ -68,3 +68,6 @@ ncx_module_t*
     obj123_find_child_mod_from_name(obj_template_t *parent, const char* modname);
 ncx_module_t*
     obj123_find_child_mod_from_prefix(obj_template_t *parent, const char* modprefix);
+void
+    val123_add_virtual_cb (val_value_t *val,
+                      void  *cbfn);

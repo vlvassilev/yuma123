@@ -1197,6 +1197,7 @@ static val_value_t *
     double       timediff, timerval;
     uint32       deftimeout;
     boolean      disable_cache;
+    val_virt_getcb_node_t * getcb_node;
 
     *res = NO_ERR;
 
@@ -1247,8 +1248,26 @@ static val_value_t *
     }
     setup_virtual_retval(val, retval);
     (void)uptime(&val->cachetime);
-
     *res = (*getcb)(NULL, GETCB_GET_VALUE, val, retval);
+
+    if (*res != NO_ERR && ((*res != ERR_NCX_SKIPPED) || dlq_empty(&val->getcbQ))) {
+        val_free_value(retval);
+        retval = NULL;
+	return retval;
+    }
+
+    for ( getcb_node = (val_virt_getcb_node_t *)dlq_firstEntry(&val->getcbQ);
+          getcb_node != NULL;
+          getcb_node = (val_virt_getcb_node_t *)dlq_nextEntry(getcb_node)) {
+        status_t prev_res = *res;
+        getcb = (getcb_fn_t)getcb_node->getcb;
+        *res = (*getcb)(NULL, GETCB_GET_VALUE, val, retval);
+
+        if(*res==ERR_NCX_SKIPPED && prev_res==NO_ERR) {
+            *res=prev_res;
+            continue;
+        }
+    }
     if (*res != NO_ERR) {
         val_free_value(retval);
         retval = NULL;
@@ -1548,6 +1567,7 @@ val_value_t *
     (void)memset(val, 0x0, sizeof(val_value_t));
     dlq_createSQue(&val->metaQ);
     dlq_createSQue(&val->indexQ);
+    dlq_createSQue(&val->getcbQ);
 
     return val;
 

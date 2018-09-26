@@ -10,6 +10,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf -o ietf-interfaces.fxs
   confdc -c /usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf -o iana_if_type.fxs
   confdc -c test-non-interactive-container-edits.yang --yangpath /usr/share/yuma/modules/ietf -o test-non-interactive-container-edits.fxs
+  confdc -c mod2.yang --yangpath /usr/share/yuma/modules/ietf -o mod2.fxs
   export NCSERVER=localhost
   export NCPORT=2022
   export NCUSER=admin
@@ -24,7 +25,7 @@ else
   export NCUSER=${USER}
   export NCPASSWORD=""
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --module=test-non-interactive-container-edits.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --module=test-non-interactive-container-edits.yang --module=./mod2.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
   SERVER_PID=$!
 fi
 sleep 3

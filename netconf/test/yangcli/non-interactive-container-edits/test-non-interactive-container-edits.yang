@@ -4,15 +4,19 @@ module test-non-interactive-container-edits {
   prefix tnice;
   
   import ietf-interfaces { prefix if; }
+  import mod2 { prefix m2; }
 
   organization  "yuma123.org";
   
   description "Model for testing yangcli non-interactive container edits. e.g.
-      create /interfaces/interface -- name=eth1 type=ethernetCsmacd a/foo=hello b[key1='one'][key2='two']/bar=world";
+      create /interfaces/interface -- name=eth1 type=ethernetCsmacd a/foo=hello b[key1='one'][key2='two']/bar=world
+      create /interfaces/interface[name='eth1']/c -- c1/bar=world";
   
-  revision 2017-08-24 {
+  revision 2018-09-26 {
     description
-      "1.st version";
+      "Imported module to reproduce bug happening when
+       multilevel non-interactive parameter fill for parent form grouping
+       takes place.";
   }
 
   augment "/if:interfaces/if:interface" {
@@ -33,7 +37,7 @@ module test-non-interactive-container-edits {
             type string;
         }
     }
-
+    uses m2:gr0;
   }
 }
 

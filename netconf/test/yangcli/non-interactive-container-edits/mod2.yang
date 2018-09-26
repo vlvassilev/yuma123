@@ -1,0 +1,28 @@
+module mod2 {
+
+  namespace "urn:yuma123.org:non-interactive-container-edits:mod2";
+  prefix m2;
+  
+  import ietf-interfaces { prefix if; }
+
+  organization  "yuma123.org";
+  
+  description "external grouping gr0";
+  
+  revision 2018-09-25 {
+    description
+      "1.st version";
+  }
+
+  grouping gr0 {
+    container c {
+      container c1 {
+        leaf bar {
+          type string;
+        }
+      }
+    }
+  }
+}
+
+

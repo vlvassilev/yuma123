@@ -280,7 +280,7 @@ static ncx_module_t* select_target_module( xpath_pcb_t* pcb,
             }
         } else {
             imports_mod = pcb->tkerr.mod;
-            assert(pcb->obj==NULL || pcb->obj->mod==NULL || pcb->obj->mod==pcb->tkerr.mod);
+            assert(imports_mod==NULL || pcb->obj==NULL || pcb->obj->mod==NULL || pcb->obj->mod==pcb->tkerr.mod);
         }
         if (imports_mod==NULL) {
             if(nsid) {

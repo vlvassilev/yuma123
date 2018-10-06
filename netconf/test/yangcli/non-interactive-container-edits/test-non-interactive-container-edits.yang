@@ -10,13 +10,13 @@ module test-non-interactive-container-edits {
   
   description "Model for testing yangcli non-interactive container edits. e.g.
       create /interfaces/interface -- name=eth1 type=ethernetCsmacd a/foo=hello b[key1='one'][key2='two']/bar=world
-      create /interfaces/interface[name='eth1']/c -- c1/bar=world";
+      create /interfaces/interface[name='eth1']/c -- c1/bar=world
+      create /interfaces/interface -- name=eth2 type=ethernetCsmacd d b[key1='one'][key2='two']/bar=world";
   
-  revision 2018-09-26 {
+  revision 2018-10-06 {
     description
-      "Imported module to reproduce bug happening when
-       multilevel non-interactive parameter fill for parent form grouping
-       takes place.";
+      "Added presence container 'd' to expose bug entering
+       valueless containers as parameter.";
   }
 
   augment "/if:interfaces/if:interface" {
@@ -38,6 +38,10 @@ module test-non-interactive-container-edits {
         }
     }
     uses m2:gr0;
+
+    container d {
+        presence "case with presence container parameter";
+    }
   }
 }
 

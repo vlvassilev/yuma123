@@ -50,6 +50,28 @@ expect {
     timeout {exit 1}
 }
 
+# create empty presence container 'd' followed with leaf - starts
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "merge /interfaces/interface  --  name=eth2 type=ethernetCsmacd d b\[key1='one'\]\[key2='two'\]/bar=world b\[key1='A'\]\[key2='B'\]/bar=WORLD\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "commit\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "xget /interfaces/interface\[name='eth2'\]/b\[key1='A'\]\[key2='B'\]/bar\n"}
+    timeout {exit 1}
+}
+
+expect {
+    "WORLD" {send " "}
+    timeout {exit 1}
+}
+# create empty container 'a' followed with leaf - ends
+
 expect {
     "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "quit\n"}
     timeout {exit 1}

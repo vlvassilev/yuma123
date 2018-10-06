@@ -126,6 +126,10 @@ static status_t
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (obj->objtype == OBJ_TYP_CONTAINER) {
+        if(!obj_is_np_container(obj) && strval==NULL) {
+            /*presence container without strval is OK*/
+            return NO_ERR;
+        }
         /* check if the only child is an OBJ_TYP_CHOICE */
         choiceobj = obj_first_child(obj);
         if (choiceobj == NULL) {
@@ -1425,10 +1429,10 @@ val_value_t *
                 }
 
                 /* check if ended on space of EOLN */
-                if (btyp == NCX_BT_EMPTY) {
+                if (!obj_is_leafy(chobj) || btyp==NCX_BT_EMPTY) {
                     if (buff[buffpos] == '=') {
-                        log_error("\nError: cannot assign value "
-                                  "to empty leaf '%s'", 
+                        log_error("\nError: cannot assign value to "
+                                  "non-leafy obj '%s'",
                                   obj_get_name(obj));
                         res = ERR_NCX_INVALID_VALUE;
                     }
@@ -1573,7 +1577,7 @@ val_value_t *
                  * NCX_BT_EMPTY and NCX_BT_STRING 
                  * (if zero-length strings allowed)
                  */
-                if (res==NO_ERR && !parmval && btyp != NCX_BT_EMPTY) {
+                if (res==NO_ERR && !parmval && (obj_is_leafy(chobj) && btyp!=NCX_BT_EMPTY)) {
                     if (!(typ_is_string(btyp) &&
                         (val_simval_ok(obj_get_typdef(chobj),
                                        EMPTY_STRING) == NO_ERR))) {

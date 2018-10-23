@@ -7,13 +7,13 @@
 <center>NETCONF Over SSH Client</center>
 
 
-<center>Version 2.10</center>
+<center>Version yuma123-2.11</center>
 
 = Preface =
 == Legal Statements ==
-Copyright 2009 – 2012, Andy Bierman, All Rights Reserved.
+Copyright 2009 - 2012, Andy Bierman, All Rights Reserved.
 
-Copyright 2013 – 2017, Vladimir Vassilev, All Rights Reserved.
+Copyright 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
 
 == Additional Resources ==
 This document assumes you have successfully set up the software as described in the printed document:
@@ -64,8 +64,8 @@ The following section lists the resources available at this time.
 ** Offers YumaPro, a professional version of Yuma that includes concurrency, external database support, sub-agent support, multiple northbound interfaces, and more. API compatible with Yuma. Availability: September, 2012. Licensed.
 * '''Transpacket'''
 ** [http://www.transpacket.com/ http://www.transpacket.com]
-** Offers Linux based embedded operating system distribution which uses Yuma for configuration and monitoring.
-** Offers support, training, and consulting for YANG and netconf.
+** Uses Yuma for configuration and monitoring of its products.
+
 === Mailing Lists ===
 * '''NETCONF Working Group'''
 ** http://www.ietf.org/html.charters/netconf-charter.html
@@ -1014,6 +1014,10 @@ The following configuration parameters are used by '''yangcli'''. Refer to the C
 |  Controls whether RPC replies will be displayed in the log output, if log-level >= 'info'
 
 |-
+|  --echo-requests
+|  Controls whether RPC requests will be displayed in the log output, if log-level >= 'info'
+
+|-
 |  --feature-disable
 |  Leaf list of features to disable
 
@@ -1158,6 +1162,7 @@ The following configuration parameters are used by '''yangcli'''. Refer to the C
 |  Specifies the '''$YUMA_HOME''' project root to use when searching for files.
 
 |}
+
 == Invoking Commands ==
 Commands can be entered with parameters:
 
@@ -9709,8 +9714,3 @@ The following directories are searched when either the '''$YUMA_HOME''' environm
    --log=~/test.log&
 
 |}
-
-
-
-
-

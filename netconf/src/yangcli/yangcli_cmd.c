@@ -6648,8 +6648,11 @@ static status_t
             req->rpc = reqdata->obj;
             req->timeout = timeoutval;
 
-            if (LOGDEBUG2) {
-                log_debug2("\nabout to send RPC request with reqdata:");
+
+            if (server_cb->command_mode == CMD_MODE_NORMAL && LOGINFO && server_cb->echo_requests) {
+                log_info("\nRPC Request %s for session %u:\n",
+                         req->msg_id,
+                         server_cb->mysid);
                 val_dump_value_max(reqdata,
                                    0,
                                    server_cb->defindent,
@@ -6657,10 +6660,12 @@ static status_t
                                    server_cb->display_mode,
                                    FALSE,
                                    FALSE);
+                log_info("\n");
             }
 
             /* the request will be stored if this returns NO_ERR */
             res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+
 
             if (res == NO_ERR) {
                 server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
@@ -7151,12 +7156,19 @@ status_t
         }
         
         if (res == NO_ERR) {
-            if (LOGDEBUG2) {
-                log_debug2("\nabout to send <%s> RPC request with reqdata:",
-                           obj_get_name(rpc));
-                val_dump_value_max(reqdata, 0, server_cb->defindent,
-                                   DUMP_VAL_LOG, server_cb->display_mode,
-                                   FALSE, FALSE);
+
+            if (server_cb->command_mode == CMD_MODE_NORMAL && LOGINFO && server_cb->echo_requests) {
+                log_info("\nRPC Request %s for session %u:\n",
+                         req->msg_id,
+                         server_cb->mysid);
+                val_dump_value_max(reqdata,
+                                   0,
+                                   server_cb->defindent,
+                                   DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
+                log_info("\n");
             }
 
             /* the request will be stored if this returns NO_ERR */

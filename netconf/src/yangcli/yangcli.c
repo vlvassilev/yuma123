@@ -267,6 +267,9 @@ static int32            defindent;
 /* default echo-replies */
 static boolean echo_replies;
 
+/* default echo-requests */
+static boolean echo_requests;
+
 /* default time-rpcs */
 static boolean time_rpcs;
 
@@ -678,6 +681,7 @@ server_cb_t *
     server_cb->command_mode = CMD_MODE_NORMAL;
     server_cb->defindent = defindent;
     server_cb->echo_replies = echo_replies;
+    server_cb->echo_requests = echo_requests;
     server_cb->time_rpcs = time_rpcs;
     server_cb->match_names = match_names;
     server_cb->alt_names = alt_names;
@@ -721,6 +725,7 @@ void
     server_cb->withdefaults = withdefaults;
     server_cb->defindent = defindent;
     server_cb->echo_replies = echo_replies;
+    server_cb->echo_requests = echo_requests;
     server_cb->time_rpcs = time_rpcs;
     server_cb->match_names = match_names;
     server_cb->alt_names = alt_names;
@@ -917,6 +922,17 @@ static status_t
         } else if (ncx_is_false(usestr)) {
             server_cb->echo_replies = FALSE;
             echo_replies = FALSE;
+        } else {
+            log_error("\nError: value must be 'true' or 'false'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (!xml_strcmp(configval->name, YANGCLI_ECHO_REQUESTS)) {
+        if (ncx_is_true(usestr)) {
+            server_cb->echo_requests = TRUE;
+            echo_requests = TRUE;
+        } else if (ncx_is_false(usestr)) {
+            server_cb->echo_requests = FALSE;
+            echo_requests = FALSE;
         } else {
             log_error("\nError: value must be 'true' or 'false'");
             res = ERR_NCX_INVALID_VALUE;
@@ -1914,8 +1930,15 @@ status_t
     }
 
     /* $$echo-replies = boolean */
-    res = create_config_var(server_cb, YANGCLI_ECHO_REPLIES, 
+    res = create_config_var(server_cb, YANGCLI_ECHO_REPLIES,
                             (echo_replies) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* $$echo-requests = boolean */
+    res = create_config_var(server_cb, YANGCLI_ECHO_REQUESTS,
+                            (echo_requests) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
@@ -2261,6 +2284,14 @@ status_t
         echo_replies = VAL_BOOL(parm);
     } else {
         echo_replies = TRUE;
+    }
+
+    /* get the echo-requests parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_ECHO_REQUESTS);
+    if (parm && parm->res == NO_ERR) {
+        echo_requests = VAL_BOOL(parm);
+    } else {
+        echo_requests = FALSE;
     }
 
     /* get the time-rpcs parameter */
@@ -3774,6 +3805,7 @@ void yangcli_init_module_static_vars()
     defop = YANGCLI_DEF_DEFAULT_OPERATION;
     withdefaults = YANGCLI_DEF_WITH_DEFAULTS;
     echo_replies = TRUE;
+    echo_requests = TRUE;
     time_rpcs = FALSE;
     uservars_file = YANGCLI_DEF_USERVARS_FILE;
     dlq_createSQue(&modlibQ);

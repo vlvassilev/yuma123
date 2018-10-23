@@ -218,13 +218,21 @@ traffic data and timestamp information. Example:
 .fi
 
 .IP --\fBecho-replies\fP=boolean
-Allow RPC replies to be echoes to the log or STDOUT.
+Allow RPC replies to be echoed to the log or STDOUT.
 
 If true, <rpc-reply> messages containing data
 will be output to the log, if log-level is  'info' or higher.
 If false, <rpc-reply> messages containing data
 will not be output to the log, regardless of
 the value of log-level.
+
+.IP --\fBecho-replies\fP=boolean
+Allow RPC requests to be echoed to the log or STDOUT.
+
+If true, <rpc> messages will be output to the log, if
+log-level is  'info' or higher.
+If false, <rpc> messages will not be output to the log,
+regardless of the value of log-level.
 .IP --\fBfeature-disable\fP=module:feature
 Identifies a feature which should be considered disabled.
 Zero or more entries are allowed.

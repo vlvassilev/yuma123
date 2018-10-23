@@ -169,6 +169,7 @@ extern "C" {
 #define YANGCLI_DISPLAY_MODE  (const xmlChar *)"display-mode"
 #define YANGCLI_ECHO        (const xmlChar *)"echo"
 #define YANGCLI_ECHO_REPLIES (const xmlChar *)"echo-replies"
+#define YANGCLI_ECHO_REQUESTS (const xmlChar *)"echo-requests"
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
 #define YANGCLI_ERROR_OPTION (const xmlChar *)"error-option"
 #define YANGCLI_FILES       (const xmlChar *)"files"
@@ -447,6 +448,7 @@ typedef struct server_cb_t_ {
     ncx_withdefaults_t   withdefaults;
     int32                defindent;
     boolean              echo_replies;
+    boolean              echo_requests;
     boolean              time_rpcs;
     ncx_name_match_t     match_names;
     boolean              alt_names;

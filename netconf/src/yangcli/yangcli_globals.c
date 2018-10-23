@@ -228,6 +228,9 @@ static int32            defindent;
 /* default echo-replies */
 static boolean echo_replies;
 
+/* default echo-requests */
+static boolean echo_requests;
+
 /* default time-rpcs */
 static boolean time_rpcs;
 

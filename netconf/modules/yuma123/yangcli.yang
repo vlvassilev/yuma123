@@ -52,6 +52,11 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
+    revision 2018-10-23 {
+        description
+          "Added echo-requests param to complement echo-replies.";
+    }
+
     revision 2018-08-08 {
         description
           "Replaced double with single quotes
@@ -786,10 +791,10 @@ module yangcli {
 
       leaf echo-replies {
         description
-          "Allow RPC replies to be echoes to the log or STDOUT
+          "Allow RPC replies to be echoed to the log or STDOUT
 
            If 'true', <rpc-reply> messages containing data
-           will be output to the log, if log-level is 
+           will be output to the log, if log-level is
            'info' or higher.
 
            If 'false', <rpc-reply> messages containing data
@@ -800,6 +805,23 @@ module yangcli {
            this parameter.";
         type boolean;
         default true;
+      }
+
+      leaf echo-requests {
+        description
+          "Allow RPC requests to be echoed to the log or STDOUT
+
+           If 'true', <rpc> messages containing data
+           will be output to the log, if log-level is
+           'info' or higher.
+
+           If 'false', <rpc> messages will not be output
+           to the log, regardless of the value of log-level.
+
+           The $$echo-requests system variable is derived from
+           this parameter.";
+        type boolean;
+        default false;
       }
 
       leaf fixorder {

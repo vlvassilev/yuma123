@@ -33,6 +33,30 @@
 /* module static variables */
 static ncx_module_t *ietf_system_mod;
 
+static status_t
+     y_commit_post_reply (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        xml_node_t *methnode)
+{
+    printf("\n#y_commit_post_reply\n");
+    return NO_ERR;
+}
+
+static status_t
+    y_system_edit (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    if(cbtyp==AGT_CB_COMMIT) {
+        printf("\n#y_system_edit cbtyp=AGT_CB_COMMIT\n");
+    }
+    return NO_ERR;
+}
 
 void my_transaction_handler(unsigned int transaction_id, val_value_t* prev_root_config_val, val_value_t* root_val)
 {
@@ -103,6 +127,7 @@ status_t
 {
     agt_profile_t *agt_profile;
     status_t res;
+    ncx_module_t *mod;
 
     agt_profile = agt_get_profile();
 
@@ -114,10 +139,36 @@ status_t
         "ietf-system",
         NULL,
         &agt_profile->agt_savedevQ,
+        &mod);
+    assert(res==NO_ERR);
+
+    res = agt_rpc_register_method(
+       "yuma123-netconf" /*hack since it overloads the "ietf-netconf" namespace*/,
+        "commit",
+        AGT_RPC_PH_POST_REPLY,
+        y_commit_post_reply);
+    assert(res==NO_ERR);
+
+    res = agt_cb_register_callback(
+                "my-test-agt-commit-complete",
+                "/system/location",
+                NULL,
+                y_system_edit);
+    assert(res==NO_ERR);
+
+    res = agt_cb_register_callback(
+                "ietf-system",
+                "/system/hostname",
+                NULL,
+                y_system_edit);
+    assert(res==NO_ERR);
+
+    res = ncxmod_load_module(
+        "ietf-system",
+        NULL,
+        &agt_profile->agt_savedevQ,
         &ietf_system_mod);
-    if (res != NO_ERR) {
-        return res;
-    }
+    assert(res==NO_ERR);
 
     return res;
 }

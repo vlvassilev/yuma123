@@ -1,2 +1,5 @@
 #0: location=None -> location=ok2, hostname=None -> hostname=ok1
+#y_commit_post_reply
+#y_system_edit cbtyp=AGT_CB_COMMIT
 #1: location=ok2 -> location=ok4, hostname=ok1 -> hostname=ok3
+#y_commit_post_reply

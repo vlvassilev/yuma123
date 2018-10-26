@@ -1429,7 +1429,7 @@ val_value_t *
                 }
 
                 /* check if ended on space of EOLN */
-                if ((!obj_is_leafy(chobj) && (!chobj->objtype == OBJ_TYP_ANYXML)) || btyp==NCX_BT_EMPTY) {
+                if (((!obj_is_leafy(chobj)) && (chobj->objtype != OBJ_TYP_ANYXML)) || btyp==NCX_BT_EMPTY) {
                     if (buff[buffpos] == '=') {
                         log_error("\nError: cannot assign value to "
                                   "non-leafy obj '%s'",

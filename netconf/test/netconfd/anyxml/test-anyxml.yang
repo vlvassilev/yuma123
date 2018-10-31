@@ -1,0 +1,13 @@
+module test-anyxml {
+  prefix test-anyxml;
+  namespace "http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml";
+
+  rpc ping-pong {
+    input {
+      anyxml ping;
+    }
+    output {
+      anyxml pong;
+    }
+  }
+}

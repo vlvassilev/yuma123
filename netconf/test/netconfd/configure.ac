@@ -31,6 +31,7 @@ AC_CONFIG_FILES([
         ietf-ip-bis/Makefile
         agt-commit-complete/Makefile
         val123-api/Makefile
+        anyxml/Makefile
 ])
 
 AC_OUTPUT

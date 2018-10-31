@@ -1,0 +1,445 @@
+libtest_anyxml_la-test-anyxml.lo: test-anyxml.c \
+ /usr/include/stdc-predef.h /usr/include/stdio.h /usr/include/features.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include/stddef.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include/stdarg.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/sys_errlist.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
+ /usr/include/x86_64-linux-gnu/sys/types.h /usr/include/time.h \
+ /usr/include/endian.h /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap-16.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/sigset.h \
+ /usr/include/x86_64-linux-gnu/bits/time.h \
+ /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h /usr/include/alloca.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h /usr/include/string.h \
+ /usr/include/xlocale.h /usr/include/memory.h /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
+ /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/x86_64-linux-gnu/sys/utsname.h \
+ /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/assert.h \
+ /usr/include/yuma/platform/procdefs.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include-fixed/limits.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include-fixed/syslimits.h \
+ /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/include/x86_64-linux-gnu/bits/posix2_lim.h /usr/include/inttypes.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include/stdbool.h \
+ /usr/include/yuma/agt/agt.h /usr/include/yuma/ncx/help.h \
+ /usr/include/libxml2/libxml/xmlstring.h \
+ /usr/include/libxml2/libxml/xmlversion.h \
+ /usr/include/libxml2/libxml/xmlexports.h \
+ /usr/include/yuma/ncx/ncxconst.h /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_val.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
+ /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
+ /usr/include/x86_64-linux-gnu/bits/inf.h \
+ /usr/include/x86_64-linux-gnu/bits/nan.h \
+ /usr/include/x86_64-linux-gnu/bits/mathdef.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/yuma/ncx/obj.h /usr/include/libxml2/libxml/xmlregexp.h \
+ /usr/include/libxml2/libxml/tree.h \
+ /usr/include/libxml2/libxml/xmlmemory.h \
+ /usr/include/libxml2/libxml/threads.h \
+ /usr/include/libxml2/libxml/globals.h \
+ /usr/include/libxml2/libxml/parser.h /usr/include/libxml2/libxml/dict.h \
+ /usr/include/libxml2/libxml/hash.h /usr/include/libxml2/libxml/valid.h \
+ /usr/include/libxml2/libxml/xmlerror.h \
+ /usr/include/libxml2/libxml/list.h \
+ /usr/include/libxml2/libxml/xmlautomata.h \
+ /usr/include/libxml2/libxml/entities.h \
+ /usr/include/libxml2/libxml/encoding.h /usr/include/iconv.h \
+ /usr/include/unicode/ucnv.h /usr/include/unicode/ucnv_err.h \
+ /usr/include/unicode/utypes.h /usr/include/unicode/umachine.h \
+ /usr/include/unicode/ptypes.h /usr/include/unicode/platform.h \
+ /usr/include/unicode/uconfig.h /usr/include/unicode/uvernum.h \
+ /usr/include/unicode/urename.h /usr/include/unicode/uversion.h \
+ /usr/lib/gcc/x86_64-linux-gnu/6/include/float.h \
+ /usr/include/unicode/utf.h /usr/include/unicode/utf8.h \
+ /usr/include/unicode/utf16.h /usr/include/unicode/utf_old.h \
+ /usr/include/unicode/uenum.h /usr/include/unicode/localpointer.h \
+ /usr/include/libxml2/libxml/xmlIO.h /usr/include/libxml2/libxml/SAX.h \
+ /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
+ /usr/include/yuma/ncx/grp.h /usr/include/yuma/ncx/ncxtypes.h \
+ /usr/include/yuma/ncx/dlq.h /usr/include/yuma/ncx/xmlns.h \
+ /usr/include/yuma/ncx/status.h /usr/include/yuma/ncx/tk.h \
+ /usr/include/yuma/ncx/rpc.h /usr/include/yuma/ncx/op.h \
+ /usr/include/yuma/ncx/val.h /usr/include/yuma/ncx/plock_cb.h \
+ /usr/include/yuma/ncx/tstamp.h /usr/include/yuma/ncx/typ.h \
+ /usr/include/yuma/ncx/xml_util.h /usr/include/libxml2/libxml/xmlreader.h \
+ /usr/include/libxml2/libxml/relaxng.h \
+ /usr/include/libxml2/libxml/xmlschemas.h /usr/include/yuma/ncx/xml_msg.h \
+ /usr/include/yuma/ncx/log.h /usr/include/yuma/agt/agt_cli.h \
+ /usr/include/yuma/agt/agt_nmda.h /usr/include/yuma/ncx/ncxtypes.h \
+ /usr/include/yuma/ncx/val.h /usr/include/yuma/agt/agt_rpc.h \
+ /usr/include/yuma/ncx/cfg.h /usr/include/yuma/ncx/ncx.h \
+ /usr/include/yuma/ncx/yang.h /usr/include/yuma/ncx/ext.h \
+ /usr/include/yuma/ncx/plock.h /usr/include/yuma/ncx/xpath.h \
+ /usr/include/yuma/ncx/var.h /usr/include/yuma/ncx/runstack.h \
+ /usr/include/yuma/ncx/ses.h /usr/include/yuma/ncx/val_util.h \
+ /usr/include/yuma/ncx/rpc_err.h /usr/include/yuma/agt/agt_util.h \
+ /usr/include/yuma/ncx/getcb.h /usr/include/yuma/ncx/ncxmod.h \
+ /usr/include/yuma/ncx/cap.h /usr/include/yuma/ncx/ncx_feature.h \
+ /usr/include/yuma/ncx/ncx_list.h /usr/include/yuma/ncx/rpc.h \
+ /usr/include/yuma/ncx/ses.h /usr/include/yuma/ncx/ses_msg.h \
+ /usr/include/yuma/ncx/status.h /usr/include/yuma/ncx/tstamp.h \
+ /usr/include/yuma/ncx/val123.h /usr/include/yuma/ncx/cli.h \
+ /usr/include/yuma/ncx/val_util.h /usr/include/yuma/ncx/xmlns.h \
+ /usr/include/yuma/ncx/xml_util.h /usr/include/yuma/ncx/xml_wr.h \
+ /usr/include/yuma/ncx/yangconst.h
+
+/usr/include/stdc-predef.h:
+
+/usr/include/stdio.h:
+
+/usr/include/features.h:
+
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include/stddef.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/time.h:
+
+/usr/include/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap-16.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigset.h:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/string.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/memory.h:
+
+/usr/include/unistd.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/environments.h:
+
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/include/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/x86_64-linux-gnu/sys/utsname.h:
+
+/usr/include/x86_64-linux-gnu/bits/utsname.h:
+
+/usr/include/assert.h:
+
+/usr/include/yuma/platform/procdefs.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed/limits.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
+
+/usr/include/inttypes.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include/stdbool.h:
+
+/usr/include/yuma/agt/agt.h:
+
+/usr/include/yuma/ncx/help.h:
+
+/usr/include/libxml2/libxml/xmlstring.h:
+
+/usr/include/libxml2/libxml/xmlversion.h:
+
+/usr/include/libxml2/libxml/xmlexports.h:
+
+/usr/include/yuma/ncx/ncxconst.h:
+
+/usr/include/math.h:
+
+/usr/include/x86_64-linux-gnu/bits/math-vector.h:
+
+/usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_val.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_valf.h:
+
+/usr/include/x86_64-linux-gnu/bits/huge_vall.h:
+
+/usr/include/x86_64-linux-gnu/bits/inf.h:
+
+/usr/include/x86_64-linux-gnu/bits/nan.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathdef.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:
+
+/usr/include/yuma/ncx/obj.h:
+
+/usr/include/libxml2/libxml/xmlregexp.h:
+
+/usr/include/libxml2/libxml/tree.h:
+
+/usr/include/libxml2/libxml/xmlmemory.h:
+
+/usr/include/libxml2/libxml/threads.h:
+
+/usr/include/libxml2/libxml/globals.h:
+
+/usr/include/libxml2/libxml/parser.h:
+
+/usr/include/libxml2/libxml/dict.h:
+
+/usr/include/libxml2/libxml/hash.h:
+
+/usr/include/libxml2/libxml/valid.h:
+
+/usr/include/libxml2/libxml/xmlerror.h:
+
+/usr/include/libxml2/libxml/list.h:
+
+/usr/include/libxml2/libxml/xmlautomata.h:
+
+/usr/include/libxml2/libxml/entities.h:
+
+/usr/include/libxml2/libxml/encoding.h:
+
+/usr/include/iconv.h:
+
+/usr/include/unicode/ucnv.h:
+
+/usr/include/unicode/ucnv_err.h:
+
+/usr/include/unicode/utypes.h:
+
+/usr/include/unicode/umachine.h:
+
+/usr/include/unicode/ptypes.h:
+
+/usr/include/unicode/platform.h:
+
+/usr/include/unicode/uconfig.h:
+
+/usr/include/unicode/uvernum.h:
+
+/usr/include/unicode/urename.h:
+
+/usr/include/unicode/uversion.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/6/include/float.h:
+
+/usr/include/unicode/utf.h:
+
+/usr/include/unicode/utf8.h:
+
+/usr/include/unicode/utf16.h:
+
+/usr/include/unicode/utf_old.h:
+
+/usr/include/unicode/uenum.h:
+
+/usr/include/unicode/localpointer.h:
+
+/usr/include/libxml2/libxml/xmlIO.h:
+
+/usr/include/libxml2/libxml/SAX.h:
+
+/usr/include/libxml2/libxml/xlink.h:
+
+/usr/include/libxml2/libxml/SAX2.h:
+
+/usr/include/yuma/ncx/grp.h:
+
+/usr/include/yuma/ncx/ncxtypes.h:
+
+/usr/include/yuma/ncx/dlq.h:
+
+/usr/include/yuma/ncx/xmlns.h:
+
+/usr/include/yuma/ncx/status.h:
+
+/usr/include/yuma/ncx/tk.h:
+
+/usr/include/yuma/ncx/rpc.h:
+
+/usr/include/yuma/ncx/op.h:
+
+/usr/include/yuma/ncx/val.h:
+
+/usr/include/yuma/ncx/plock_cb.h:
+
+/usr/include/yuma/ncx/tstamp.h:
+
+/usr/include/yuma/ncx/typ.h:
+
+/usr/include/yuma/ncx/xml_util.h:
+
+/usr/include/libxml2/libxml/xmlreader.h:
+
+/usr/include/libxml2/libxml/relaxng.h:
+
+/usr/include/libxml2/libxml/xmlschemas.h:
+
+/usr/include/yuma/ncx/xml_msg.h:
+
+/usr/include/yuma/ncx/log.h:
+
+/usr/include/yuma/agt/agt_cli.h:
+
+/usr/include/yuma/agt/agt_nmda.h:
+
+/usr/include/yuma/ncx/ncxtypes.h:
+
+/usr/include/yuma/ncx/val.h:
+
+/usr/include/yuma/agt/agt_rpc.h:
+
+/usr/include/yuma/ncx/cfg.h:
+
+/usr/include/yuma/ncx/ncx.h:
+
+/usr/include/yuma/ncx/yang.h:
+
+/usr/include/yuma/ncx/ext.h:
+
+/usr/include/yuma/ncx/plock.h:
+
+/usr/include/yuma/ncx/xpath.h:
+
+/usr/include/yuma/ncx/var.h:
+
+/usr/include/yuma/ncx/runstack.h:
+
+/usr/include/yuma/ncx/ses.h:
+
+/usr/include/yuma/ncx/val_util.h:
+
+/usr/include/yuma/ncx/rpc_err.h:
+
+/usr/include/yuma/agt/agt_util.h:
+
+/usr/include/yuma/ncx/getcb.h:
+
+/usr/include/yuma/ncx/ncxmod.h:
+
+/usr/include/yuma/ncx/cap.h:
+
+/usr/include/yuma/ncx/ncx_feature.h:
+
+/usr/include/yuma/ncx/ncx_list.h:
+
+/usr/include/yuma/ncx/rpc.h:
+
+/usr/include/yuma/ncx/ses.h:
+
+/usr/include/yuma/ncx/ses_msg.h:
+
+/usr/include/yuma/ncx/status.h:
+
+/usr/include/yuma/ncx/tstamp.h:
+
+/usr/include/yuma/ncx/val123.h:
+
+/usr/include/yuma/ncx/cli.h:
+
+/usr/include/yuma/ncx/val_util.h:
+
+/usr/include/yuma/ncx/xmlns.h:
+
+/usr/include/yuma/ncx/xml_util.h:
+
+/usr/include/yuma/ncx/xml_wr.h:
+
+/usr/include/yuma/ncx/yangconst.h:

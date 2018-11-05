@@ -20,7 +20,7 @@ else
   SERVER_PID=$!
 fi
 sleep 3
-#python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 python session.config.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 kill -KILL $SERVER_PID
 cat tmp/server.log

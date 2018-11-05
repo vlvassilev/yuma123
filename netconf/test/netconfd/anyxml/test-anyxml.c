@@ -84,7 +84,7 @@ static status_t
         chval=val_get_next_child(chval)) {
         val_value_t        *newval;
         newval = val_clone(chval);
-	val_add_child(chval, pong_val);
+	val_add_child(newval, pong_val);
     }
 #if 0
     res = val_set_simval_obj(

@@ -11,6 +11,7 @@ example-modules/helloworld \
 example-modules/ietf-interfaces \
 example-modules/ietf-system \
 example-modules/ietf-network-bridge \
+example-modules/yangcli-to-rpc \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
 netconf/man \

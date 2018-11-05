@@ -53,7 +53,6 @@ date         init     comment
 #include "agt_not_queue_notification_cb.h"
 #include "agt_plock.h"
 #include "agt_proc.h"
-#include "agt_yangcli_to_rpc.h"
 #include "agt_rpc.h"
 #include "agt_ses.h"
 #include "agt_signal.h"
@@ -736,12 +735,6 @@ status_t
         return res;
     }
 
-    /* load the yangcli-to-rpc module */
-    res = agt_yangcli_to_rpc_init();
-    if (res != NO_ERR) {
-        return res;
-    }
-
     /* load the partial lock module */
     res = y_ietf_netconf_partial_lock_init
         (y_ietf_netconf_partial_lock_M_ietf_netconf_partial_lock,
@@ -971,11 +964,6 @@ status_t
         return res;
     }
 
-    /* load the yangcli-to-rpc function */
-    res = agt_yangcli_to_rpc_init2();
-    if (res != NO_ERR) {
-        return res;
-    }
 #if 0
     /* load the interface monitoring callback functions and data */
     res = agt_if_init2();
@@ -1194,7 +1182,6 @@ void
         agt_state_cleanup();
         agt_not_cleanup();
         agt_proc_cleanup();
-        agt_yangcli_to_rpc_cleanup();
         y_ietf_netconf_partial_lock_cleanup();
         agt_if_cleanup();
         y_yuma_time_filter_cleanup();

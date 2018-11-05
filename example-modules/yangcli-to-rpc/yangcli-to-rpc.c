@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Vladimir Vassilev, All Rights Reserved.
+ * Copyright (c) 2018 Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -101,7 +101,7 @@ static status_t
 } /* yangcli_to_rpc */
 
 /********************************************************************
-* FUNCTION agt_yangcli_to_rpc_init
+* FUNCTION y_yangcli_to_rpc_init
 *
 * INIT 1:
 *   Initialize the module data structures
@@ -112,7 +112,7 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    agt_yangcli_to_rpc_init (void)
+    y_yangcli_to_rpc_init (void)
 {
     agt_profile_t  *agt_profile;
     status_t        res;
@@ -134,11 +134,11 @@ status_t
 
     return NO_ERR;
 
-}  /* agt_yangcli_to_rpc_init */
+}  /* y_yangcli_to_rpc_init */
 
 
 /********************************************************************
-* FUNCTION agt_yangcli_to_rpc_init2
+* FUNCTION y_yangcli_to_rpc_init2
 *
 * INIT 2:
 *   Initialize the data structures
@@ -149,16 +149,16 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    agt_yangcli_to_rpc_init2 (void)
+    y_yangcli_to_rpc_init2 (void)
 {
 
     return NO_ERR;
 
-}  /* agt_yangcli_to_rpc_init2 */
+}  /* y_yangcli_to_rpc_init2 */
 
 
 /********************************************************************
-* FUNCTION agt_yangcli_to_rpc_cleanup
+* FUNCTION y_yangcli_to_rpc_cleanup
 *
 * Cleanup the module data structures
 *
@@ -168,9 +168,9 @@ status_t
 *   none
 *********************************************************************/
 void 
-    agt_yangcli_to_rpc_cleanup (void)
+    y_yangcli_to_rpc_cleanup (void)
 {
     agt_rpc_unregister_method("yuma123-yangcli-to-rpc",
                               "yangcli-to-rpc");
 
-}  /* agt_yangcli_to_rpc_cleanup */
+}  /* y_yangcli_to_rpc_cleanup */

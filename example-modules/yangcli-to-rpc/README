@@ -1,0 +1,24 @@
+==Module returning XML of RPC request specified as yangcli command==
+Dependency: installed netconfd run-time binaries and development shared libraries and headers.
+
+===Build and install===
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+
+Start:
+
+ /usr/sbin/netconfd --module=yangcli-to-rpc --no-startup --log-level=debug4 --superuser=${USER}
+
+===Functionality===
+ yangcli vladimir@localhost> yangcli-to-rpc cmd="xget /system"
+ 
+ <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <rpc xmlns="http://yuma123.org/ns/yangcli-to-rpc">
+     <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+       <filter type="xpath" select="/system"/>
+       <hello>blah</hello>
+     </get>
+   </rpc>
+ </rpc-reply>

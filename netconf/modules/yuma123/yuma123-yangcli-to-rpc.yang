@@ -1,0 +1,43 @@
+module yuma123-yangcli-to-rpc {
+
+  namespace
+    "http://yuma123.org/ns/yangcli-to-rpc";
+  prefix "ycli2rpc";
+
+  organization
+    "Yuma123";
+
+  contact
+    "Vladimir Vassilev <mailto:vladimir@transpacket.com>";
+
+  description
+    "This module defines rpc that takes yangcli command string
+     as input and returns corresponding RPC request PDU. It
+     enables clients without YANG support to map yangcli
+     commands to RPC PDUs";
+
+  revision 2018-10-30 {
+    description
+      "Initial version.";
+  }
+
+  rpc yangcli-to-rpc {
+    description 
+      "This RPC converts yangcli command line to RPC PDU.";
+
+    input {
+      leaf cmd {
+        description
+          "yangcli command line. Example:
+           create /system -- hostname=foo location=bar";
+           type string;
+      }
+    }
+    output {
+      anyxml rpc {
+        description
+          "RPC PDU.";
+      }
+    }
+  }
+}

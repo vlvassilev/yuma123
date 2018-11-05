@@ -8846,6 +8846,9 @@ boolean
     } else if (obj_is_data_db(val->obj) && 
         obj_get_config_flag(val->obj)) {
         return TRUE;
+    } else if ((val->obj==ncx_get_gen_container() || val->obj==ncx_get_gen_string() || val->obj==ncx_get_gen_empty()) && val->parent!=NULL) {
+        /* data based on generic types is config data if the parent is */
+        return val_is_config_data(val->parent);
     } else {
         return FALSE;
     }

@@ -3069,9 +3069,6 @@ status_t
 
 
     if (!val_is_config_data(val)) {
-        if(/* OBJ_TYP_ANY* */ val->obj->parent==NULL && val->parent!=NULL) {
-            return val_write_ok (val->parent,editop,sesid,checkup,lockid);
-        }
         return ERR_NCX_NO_ACCESS_MAX;
     }
 

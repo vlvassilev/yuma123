@@ -38,6 +38,7 @@
 #include "status.h"
 #include "tstamp.h"
 #include "val.h"
+#include "val_set_cplxval_obj.h"
 #include "val123.h"
 #include "val_util.h"
 #include "xmlns.h"
@@ -88,12 +89,9 @@ static status_t
 
     val_init_from_template(output_rpc_val, output_rpc_obj);
 
-
-    res = val_set_simval_obj(
-        output_rpc_val,
-        output_rpc_val->obj,
-        "<get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><filter type=\"xpath\" select=\"/system\"/></get>");
-
+    res = val_set_cplxval_obj(output_rpc_val,
+                              output_rpc_val->obj,
+                              "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><get> <filter type=\"xpath\" select=\"/system\"/></get></rpc>");
 
     dlq_enque(output_rpc_val, &msg->rpc_dataQ);
     msg->rpc_data_type = RPC_DATA_YANG;

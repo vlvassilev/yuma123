@@ -10,10 +10,10 @@ import argparse
 
 def main():
 	print("""
-#Description: Demonstrate that duplicated list entries in edit-config are detected.
+#Description: Read and edit anyxml.
 #Procedure:
-#1 - Create interface "foo" and commit. Verify commit succeeds.
-#2 - Create 2x duplicate interface "bar" and commit. Verify commit fails.
+#1 - Read /c/a and validate
+#2 - Replace /c/a read back and validate
 """)
 
 	parser = argparse.ArgumentParser()
@@ -68,6 +68,7 @@ def main():
 		return(-1)
 
 	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
+	conn=litenc_lxml.litenc_lxml(conn_raw)
 
 
 	print("Connected ...")
@@ -77,21 +78,47 @@ def main():
         "one":"urn:1",
         "two":"urn:2"}
 
-	ping_pong_rpc = """
-<ping-pong xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml"><ping><one foo="blah" xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml"><two bar="blaer" xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml">2</two><!--<tree/>--></one></ping></ping-pong>
+	edit_config_rpc = """
+<edit-config>
+    <target>
+      <candidate/>
+    </target>
+    <default-operation>merge</default-operation>
+    <test-option>set</test-option>
+    <config>
+      <c xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="replace">
+        <a>
+          <one foo="blah" xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml"><two bar="blaer" xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml">2</two><!--<tree/>--></one>
+        </a>
+      </c>
+    </config>
+</edit-config>
 """
-	print("ping-pong ...")
-	(ret, reply_xml)= conn_raw.rpc(ping_pong_rpc)
-	print (reply_xml)
+	commit_rpc = """
+<commit/>
+"""
 
-	request = lxml.etree.fromstring(ping_pong_rpc)
+	get_rpc="""
+<get>
+  <filter type="subtree">
+    <c xmlns="http://yuma123.org/ns/test/netconfd/anyxml/test-anyxml">
+      <a/>
+    </c>
+  </filter>
+</get>
+"""
 
-	reply = lxml.etree.fromstring(reply_xml)
-	one_sent = request.xpath("./test-anyxml:ping/test-anyxml:one", namespaces=namespaces)
-	one_received = reply.xpath("./test-anyxml:pong/test-anyxml:one", namespaces=namespaces)
-	print one_sent
-	print one_received
-	assert(len(one_sent)==1)
-	assert(len(one_received)==1)
+        print("<edit-config> - /c/a ...")
+        result = conn.rpc(edit_config_rpc)
+	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+        print("<commit> ...")
+        result = conn.rpc(commit_rpc)
+	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+        print("<get> - /c/a ...")
+        result = conn.rpc(get_rpc)
+
+	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
+	one = result.xpath("./nc:data/test-anyxml:c/test-anyxml:a/test-anyxml:one", namespaces=namespaces)
+	assert(len(one)==1)
 
 sys.exit(main())

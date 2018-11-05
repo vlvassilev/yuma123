@@ -6,7 +6,7 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   killall -KILL confd || true
   echo "Starting confd: $RUN_WITH_CONFD"
   source $RUN_WITH_CONFD/confdrc
-  confdc -c ../mod1.yang --yangpath ..  -o mod1.fxs
+  confdc -c ../test-anyxml.yang --yangpath ..  -o test-anyxml.fxs
   NCPORT=2022
   NCUSER=admin
   NCPASSWORD=admin
@@ -20,7 +20,8 @@ else
   SERVER_PID=$!
 fi
 sleep 3
-python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+#python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+python session.config.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 kill -KILL $SERVER_PID
 cat tmp/server.log
 sleep 1

@@ -25,6 +25,7 @@
 #include "agt_rpc.h"
 #include "agt_util.h"
 #include "cfg.h"
+#include "cli.h"
 #include "getcb.h"
 #include "log.h"
 #include "ncxmod.h"
@@ -43,9 +44,29 @@
 #include "val_util.h"
 #include "xmlns.h"
 #include "xml_util.h"
+#include "xml_val.h"
 #include "xml_wr.h"
 #include "yangconst.h"
 
+obj_template_t* find_rpc_template(char* rpc_name)
+{
+    ncx_module_t * mod;
+    obj_template_t* rpc;
+
+    /* add all modules */
+    for (mod = ncx_get_first_module();
+         mod != NULL;
+         mod = ncx_get_next_module(mod)) {
+        if(!mod->implemented) {
+            continue;
+        }
+        rpc = ncx_find_object(mod, rpc_name);
+	if(rpc!=NULL && rpc->objtype==OBJ_TYP_RPC) {
+            break;
+        }
+    }
+    return rpc;
+}
 
 /********************************************************************
 * FUNCTION yangcli_to_rpc
@@ -64,7 +85,17 @@ static status_t
     obj_template_t     *output_obj;
     obj_template_t     *output_rpc_obj;
     val_value_t        *output_rpc_val;
+    val_value_t        *reqdata;
+    val_value_t        *valset;
+    val_value_t        *chval;
+    obj_template_t     *rpc_obj;
+    obj_template_t     *input_obj;
+    val_value_t        *rpc_val;
+    char*              first_space;
+    char*              rpc_name_str;
+    unsigned int       rpc_name_len;
     status_t            res;
+    char* argv[2];
 
     cmd_val = val_find_child(msg->rpc_input,
                              "yuma123-yangcli-to-rpc",
@@ -89,13 +120,72 @@ static status_t
 
     val_init_from_template(output_rpc_val, output_rpc_obj);
 
+#if 0
     res = val_set_cplxval_obj(output_rpc_val,
                               output_rpc_val->obj,
                               "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><get> <filter type=\"xpath\" select=\"/system\"/></get></rpc>");
+#else
+
+    first_space=strchr(VAL_STRING(cmd_val), ' ');
+    if(first_space==NULL || first_space==VAL_STRING(cmd_val)) {
+        res = ERR_NCX_INVALID_VALUE;
+        return res;
+    }
+
+    rpc_name_len = first_space - (char*)VAL_STRING(cmd_val);
+    rpc_name_str=malloc(rpc_name_len+1);
+    memcpy(rpc_name_str, VAL_STRING(cmd_val), rpc_name_len);
+    rpc_name_str[rpc_name_len]=0;
+    argv[0]=rpc_name_str;
+    argv[1]=first_space+1;
+
+    rpc_obj=find_rpc_template(argv[0]);
+    if(rpc_obj==NULL) {
+        res = ERR_NCX_INVALID_VALUE;
+        free(argv[0]);
+        return res;
+    }
+
+    input_obj = obj_find_child(rpc_obj, NULL, YANG_K_INPUT);
+    assert(input_obj);
+
+    valset = cli_parse (NULL,
+               2 /*argc*/,
+               argv /*argv*/,
+               input_obj,
+               FULLTEST,
+               TRUE/*script*/,
+               TRUE,
+               CLI_MODE_PROGRAM,
+               &res);
+    free(rpc_name_str);
+    if(res!=NO_ERR) {
+        return res;
+    }
+
+    val_dump_value(valset,1);
+
+    rpc_val = xml_val_new_struct(obj_get_name(rpc_obj), obj_get_nsid(rpc_obj));
+    if(rpc_val==NULL) {
+        res = ERR_NCX_INVALID_VALUE;
+        free(rpc_name_str);
+        return res;
+    }
+
+    for(chval=val_get_first_child(valset);
+        chval!=NULL;
+        chval=val_get_next_child(chval)) {
+        val_value_t        *newval;
+        newval = val_clone(chval);
+	val_add_child(newval, rpc_val);
+    }
+    val_free_value(valset);
+    val_add_child(rpc_val, output_rpc_val);
+#endif
 
     dlq_enque(output_rpc_val, &msg->rpc_dataQ);
     msg->rpc_data_type = RPC_DATA_YANG;
-    
+
     return NO_ERR;
 
 } /* yangcli_to_rpc */

@@ -93,9 +93,9 @@ static status_t
     val_value_t        *rpc_val;
     char*              first_space;
     char*              rpc_name_str;
-    unsigned int       rpc_name_len;
-    status_t            res;
-    char* argv[2];
+    status_t           res;
+    char*              argv[2];
+    unsigned int       argc;
 
     cmd_val = val_find_child(msg->rpc_input,
                              "yuma123-yangcli-to-rpc",
@@ -127,17 +127,21 @@ static status_t
 #else
 
     first_space=strchr(VAL_STRING(cmd_val), ' ');
-    if(first_space==NULL || first_space==VAL_STRING(cmd_val)) {
-        res = ERR_NCX_INVALID_VALUE;
-        return res;
+    if(first_space==NULL || first_space==(char*)VAL_STRING(cmd_val)) {
+        rpc_name_str=strdup(VAL_STRING(cmd_val));
+        argv[0]=rpc_name_str;
+        argv[1]=NULL;
+        argc=1;
+    } else {
+        unsigned int       rpc_name_len;
+        rpc_name_len = first_space - (char*)VAL_STRING(cmd_val);
+        rpc_name_str=malloc(rpc_name_len+1);
+        memcpy(rpc_name_str, VAL_STRING(cmd_val), rpc_name_len);
+        rpc_name_str[rpc_name_len]=0;
+        argv[0]=rpc_name_str;
+        argv[1]=first_space+1;
+        argc=2;
     }
-
-    rpc_name_len = first_space - (char*)VAL_STRING(cmd_val);
-    rpc_name_str=malloc(rpc_name_len+1);
-    memcpy(rpc_name_str, VAL_STRING(cmd_val), rpc_name_len);
-    rpc_name_str[rpc_name_len]=0;
-    argv[0]=rpc_name_str;
-    argv[1]=first_space+1;
 
     rpc_obj=find_rpc_template(argv[0]);
     if(rpc_obj==NULL) {
@@ -150,8 +154,8 @@ static status_t
     assert(input_obj);
 
     valset = cli_parse (NULL,
-               2 /*argc*/,
-               argv /*argv*/,
+               argc,
+               argv,
                input_obj,
                FULLTEST,
                TRUE/*script*/,

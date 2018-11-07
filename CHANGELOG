@@ -1,8 +1,12 @@
 yuma123 (2.12) UNRELEASED; urgency=medium
 
-  * 
+  * Added val123_add_virtual_cb to support multiple calbacks "filling" common
+    virtual container.
+  * Fixed anyxml support for config=true data
+  * Improved /system-state/clock/current-datetime resolution to nanoseconds and
+    disabled value caching
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 27 Aug 2018 11:08:55 +0200
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Wed, 07 Nov 2018 21:52:48 +0100
 
 yuma123 (2.11) stable; urgency=medium
 

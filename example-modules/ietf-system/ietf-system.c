@@ -31,6 +31,8 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "rpc.h"
+#include "val.h"
+#include "val123.h"
 
 /* module static variables */
 static ncx_module_t *ietf_system_mod;
@@ -48,10 +50,13 @@ static status_t
     res = NO_ERR;
     char tstamp_buf[32];
 
-    tstamp_datetime(tstamp_buf);
+    tstamp123_datetime_nsec(tstamp_buf);
 
     /* /system-state/clock/current-datetime */
     res = val_set_simval_obj(dst_val, dst_val->obj, tstamp_buf);
+
+    /* disable cache */
+    vir_val->cachetime = 0;
 
     return res;
 }
@@ -326,6 +331,7 @@ status_t y_ietf_system_init2(void)
                      obj);
 
     val_add_child(current_datetime_val, clock_val);
+
 
     return res;
 }

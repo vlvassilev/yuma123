@@ -71,3 +71,5 @@ ncx_module_t*
 void
     val123_add_virtual_cb (val_value_t *val,
                       void  *cbfn);
+void
+    tstamp123_datetime_nsec (xmlChar *buff);

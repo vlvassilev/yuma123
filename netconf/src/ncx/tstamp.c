@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
+ * Copyright (c) 2013 - 2018, Vladimir Vassilev, All Rights Reserved.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -30,27 +31,17 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #define __USE_XOPEN 1
 #include <time.h>
 
 #include <libxml/xmlstring.h>
 
-#ifndef _H_procdefs
 #include  "procdefs.h"
-#endif
-
-#ifndef _H_status
 #include  "status.h"
-#endif
-
-#ifndef _H_tstamp
 #include  "tstamp.h"
-#endif
-
-#ifndef _H_xml_util
 #include  "xml_util.h"
-#endif
 
 
 /********************************************************************
@@ -141,6 +132,42 @@ void
     time_to_string(curtime, buff);
 
 } /* tstamp_datetime */
+
+/********************************************************************
+* FUNCTION tstamp123_datetime_nsec
+*
+* Set the current date and time in ietf-yang-types:date-and-time
+* format
+*
+* INPUTS:
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 30 CHARS 1970-01-01T00:00:00.999999999Z
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
+void
+    tstamp123_datetime_nsec (xmlChar *buff)
+{
+    int res;
+    struct timespec ts;
+    struct tm my_tm;
+    assert(buff);
+
+    res = clock_gettime(CLOCK_REALTIME, &ts);
+    assert(res==0);
+    //localtime_r(&(ts.tv_sec), &my_tm);
+    gmtime_r(&(ts.tv_sec),&my_tm);
+    (void)sprintf((char *)buff,
+                  "%04u-%02u-%02uT%02u:%02u:%02u.%09uZ",
+                  (uint32)(my_tm.tm_year+1900),
+                  (uint32)(my_tm.tm_mon+1),
+                  (uint32)my_tm.tm_mday,
+                  (uint32)my_tm.tm_hour,
+                  (uint32)my_tm.tm_min,
+                  (uint32)my_tm.tm_sec,
+                  (uint32)ts.tv_nsec);
+
+} /* tstamp123_datetime_nsec */
 
 
 /********************************************************************

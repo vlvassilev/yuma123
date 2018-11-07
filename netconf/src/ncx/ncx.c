@@ -5518,6 +5518,22 @@ void
 
 }  /* ncx_set_cur_modQ */
 
+/********************************************************************
+* FUNCTION ncx_get_cur_modQ
+*
+* Get the current module Q
+* This will be used for module searches usually in ncx_modQ
+*
+* INPUTS:
+*    que == Q of ncx_module_t to use
+*********************************************************************/
+dlq_hdr_t *
+    ncx_get_cur_modQ (void)
+{
+    return ncx_curQ;
+
+}  /* ncx_get_cur_modQ */
+
 
 /********************************************************************
 * FUNCTION ncx_reset_modQ

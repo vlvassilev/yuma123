@@ -399,8 +399,12 @@ static unsigned int find_all_object_matches( xpath_pcb_t* pcb,
 
     if (nsid==0 && prefix==NULL && pcb->targobj) {
         if(obj_is_root(pcb->targobj)) {
-            dlq_hdr_t *temp_modQ = ncx_get_temp_modQ();
-            matched_cnt=ncx123_find_all_homonym_top_objs(temp_modQ,
+            dlq_hdr_t *modQ = ncx_get_temp_modQ();
+            if(modQ==NULL) {
+                /* when not in yangcli context - TODO */
+                modQ=ncx_get_cur_modQ();
+            }
+            matched_cnt=ncx123_find_all_homonym_top_objs(modQ,
                              nodename,
                              matched_objs,
                              matched_objs_limit);

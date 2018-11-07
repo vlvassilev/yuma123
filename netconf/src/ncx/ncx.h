@@ -2131,6 +2131,18 @@ extern xmlChar *
 extern void
     ncx_set_cur_modQ (dlq_hdr_t *que);
 
+/********************************************************************
+* FUNCTION ncx_get_cur_modQ
+*
+* Get the current module Q
+* This will be used for module searches usually in ncx_modQ
+*
+* INPUTS:
+*    que == Q of ncx_module_t to use
+*********************************************************************/
+dlq_hdr_t *
+    ncx_get_cur_modQ (void);
+
 
 /********************************************************************
 * FUNCTION ncx_reset_modQ

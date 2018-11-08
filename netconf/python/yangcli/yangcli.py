@@ -3,7 +3,7 @@ import yuma
 import traceback
 from lxml import etree
 
-def yangcli(yangrpc_cb,cmd_line):
+def yangcli(yangrpc_cb,cmd_line,strip_namespaces=True):
 
 	(res, rpc_val) = yangrpc.parse_cli(yangrpc_cb, cmd_line)
 	if(res!=0):
@@ -15,7 +15,12 @@ def yangcli(yangrpc_cb,cmd_line):
 		raise NameError("Error: yangrpc failed to execute rpc!")
 		return None
 
-	(res, reply_xml_str) = yuma.val_make_serialized_string(reply_val, yuma.NCX_DISPLAY_MODE_XML_NONS)
+	if(strip_namespaces):
+		display_mode=yuma.NCX_DISPLAY_MODE_XML_NONS
+	else:
+		display_mode=yuma.NCX_DISPLAY_MODE_XML
+
+	(res, reply_xml_str) = yuma.val_make_serialized_string(reply_val, display_mode)
 	if(res!=0):
 		raise NameError("Error: yuma.val_make_serialized_string failed!")
 		return None

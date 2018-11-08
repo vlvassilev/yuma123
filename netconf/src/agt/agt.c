@@ -46,7 +46,6 @@ date         init     comment
 #include "agt_cli.h"
 #include "agt_connect.h"
 #include "agt_hello.h"
-#include "agt_if.h"
 #include "agt_ncx.h"
 #include "agt_nmda.h"
 #include "agt_not.h"
@@ -742,13 +741,6 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
-#if 0
-    /* load the NETCONF interface monitoring data model module */
-    res = agt_if_init();
-    if (res != NO_ERR) {
-        return res;
-    }
-#endif
 
     /* initialize the NCX server core callback functions.
      * the schema (yuma-netconf.yang) for these callbacks was 
@@ -964,13 +956,6 @@ status_t
         return res;
     }
 
-#if 0
-    /* load the interface monitoring callback functions and data */
-    res = agt_if_init2();
-    if (res != NO_ERR) {
-        return res;
-    }
-#endif
     /* TBD: load the time filter callbacks
      * this currently does not do anything
      */
@@ -1183,7 +1168,6 @@ void
         agt_not_cleanup();
         agt_proc_cleanup();
         y_ietf_netconf_partial_lock_cleanup();
-        agt_if_cleanup();
         y_yuma_time_filter_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();

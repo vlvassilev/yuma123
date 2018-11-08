@@ -63,6 +63,7 @@ leaf /sysConfirmedCommit/remoteHost
 leaf /sysConfirmedCommit/confirmEvent
 rpc /set-log-level
 leaf rpc/input/log-level
+rpc /disable-cache
 
 *********************************************************************
 *                                                                   *
@@ -168,6 +169,7 @@ date         init     comment
 
 #define system_N_set_log_level (const xmlChar *)"set-log-level"
 #define system_N_log_level (const xmlChar *)"log-level"
+#define system_N_disable_cache (const xmlChar *)"disable-cache"
 
 
 /********************************************************************
@@ -346,6 +348,28 @@ static status_t
     }
 
     return res;
+
+} /* set_log_level_invoke */
+
+/********************************************************************
+* FUNCTION disable_cache_invoke
+*
+* disable-cache : invoke params callback
+*
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    disable_cache_invoke (ses_cb_t *scb,
+                          rpc_msg_t *msg,
+                          xml_node_t *methnode)
+{
+    log_debug("\ndisable_cache_invoke\n");
+
+    scb->cache_timeout=0;
+    return NO_ERR;
 
 } /* set_log_level_invoke */
 
@@ -618,6 +642,15 @@ status_t
                                   system_N_set_log_level,
                                   AGT_RPC_PH_INVOKE,
                                   set_log_level_invoke);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* disable-cache RPC operation */
+    res = agt_rpc_register_method(AGT_SYS_MODULE,
+                                  system_N_disable_cache,
+                                  AGT_RPC_PH_INVOKE,
+                                  disable_cache_invoke);
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }

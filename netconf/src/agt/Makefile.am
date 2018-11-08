@@ -8,7 +8,6 @@ $(top_srcdir)/netconf/src/agt/agt_cb.c \
 $(top_srcdir)/netconf/src/agt/agt_cli.c \
 $(top_srcdir)/netconf/src/agt/agt_connect.c \
 $(top_srcdir)/netconf/src/agt/agt_hello.c \
-$(top_srcdir)/netconf/src/agt/agt_if.c \
 $(top_srcdir)/netconf/src/agt/agt_ncx.c \
 $(top_srcdir)/netconf/src/agt/agt_ncxserver.c \
 $(top_srcdir)/netconf/src/agt/agt_nmda.c \

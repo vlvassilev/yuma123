@@ -225,6 +225,8 @@ boolean             system_sorted;
 
 static FILE *tracefile;
 
+/* the variable ncx_get_vtimeout_value returns */
+static uint32 ncx_vtimeout=NCX_DEF_VTIMEOUT;
 
 /* flag to force yang_parse to reject a module that has top-level
  * mandatory data nodes; applies to server <load> operation  */
@@ -6665,10 +6667,24 @@ ncx_module_t *
 uint32
     ncx_get_vtimeout_value (void)
 {
-    /* TBD: make configurable */
-    return NCX_DEF_VTIMEOUT;
+    return ncx_vtimeout;
 
 }   /* ncx_get_vtimeout_value */
+
+/********************************************************************
+* FUNCTION ncx123_set_vtimeout_value
+*
+* Get the virtual node cache timeout value
+*
+* INPUTS:
+*   sec == number of seconds for the cache timeout; 0 == disabled
+*********************************************************************/
+void
+    ncx123_set_vtimeout_value (uint32 sec)
+{
+    ncx_vtimeout=sec;
+
+}   /* ncx123_set_vtimeout_value */
 
 
 /********************************************************************

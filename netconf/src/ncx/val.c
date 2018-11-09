@@ -1228,7 +1228,7 @@ static val_value_t *
             log_debug4("\nval: virtual val timer %e", timediff);
         }
 
-        if (disable_cache || timediff > timerval) {
+        if (disable_cache || (timediff >= timerval)) {
             if (LOGDEBUG4) {
                 log_debug4("\nval: refresh virtual val %s",
                            val->name);

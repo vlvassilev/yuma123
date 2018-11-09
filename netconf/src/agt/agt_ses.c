@@ -53,12 +53,14 @@ date         init     comment
 #include "getcb.h"
 #include "log.h"
 #include "ncxmod.h"
+#include "ncx.h"
 #include "rpc.h"
 #include "ses.h"
 #include "ses_msg.h"
 #include "status.h"
 #include "tstamp.h"
 #include "val.h"
+#include "val123.h"
 #include "xmlns.h"
 #include "xml_util.h"
 #include "uptime.h"
@@ -878,10 +880,15 @@ boolean
 
     /* process the message */
     if (res == NO_ERR) {
+        uint32 vtimeout_copy = ncx_get_vtimeout_value();
+        ncx123_set_vtimeout_value(scb->cache_timeout);
+
         /* process the message
          * the scb pointer may get deleted !!!
          */
         agt_top_dispatch_msg(&scb);
+
+        ncx123_set_vtimeout_value(vtimeout_copy);
     } else {
         if (LOGINFO) {
             log_info("\nReset xmlreader failed for session %d (%s)",

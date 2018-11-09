@@ -24,7 +24,7 @@ def main():
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
-	conn_lxml=litenc_lxml.litenc_lxml(conn)
+	conn_lxml=litenc_lxml.litenc_lxml(conn,strip_namespaces=True)
 	ret = conn.send("""
 <hello>
  <capabilities>

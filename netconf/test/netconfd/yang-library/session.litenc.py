@@ -68,7 +68,7 @@ def main():
 
 	print("#1 - Verify ietf-yang-library is listed as capability in the hello message.")
 	print lxml.etree.tostring(result)
-
+	result=litenc_lxml.strip_namespaces(result)
 	found=False
 	for capability in result.xpath("/hello/capabilities/capability"):
 		#print lxml.etree.tostring(capability)
@@ -91,6 +91,7 @@ def main():
 """
 	print("get ...")
 	result = conn.rpc(get_rpc)
+	result=litenc_lxml.strip_namespaces(result)
 
 	print lxml.etree.tostring(result)
 	name = result.xpath('data/modules-state/module/name')
@@ -123,6 +124,7 @@ def main():
 """
 	print("get ...")
 	result = conn.rpc(get_rpc)
+	result=litenc_lxml.strip_namespaces(result)
 
 	print lxml.etree.tostring(result)
 	name = result.xpath('data/modules-state/module/name')

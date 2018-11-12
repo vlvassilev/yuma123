@@ -1,0 +1,43 @@
+module yuma123-mysession-cache {
+
+  namespace
+    "http://yuma123.org/ns/yuma123-mysession-cache";
+  prefix "ymyses-cache";
+
+  import yuma-mysession { prefix myses; }
+  import ietf-netconf-acm { prefix nacm; }
+
+  organization
+    "Yuma123";
+
+  contact
+    "Vladimir Vassilev <mailto:vladimir@transpacket.com>";
+
+
+  description
+    "Augments yuma-mysession get-my-session and set-my-session RPCs
+     with cache-timeout param.";
+
+  revision 2018-11-12 {
+    description
+      "Initial version.";
+  }
+
+  grouping cache-params {
+    leaf cache-timeout {
+       description "The time it takes for cached virtual data to
+         expire and be updated. When 0 caching is disabled.";
+       type uint32;
+       units seconds;
+       nacm:default-deny-all;
+    }
+  }
+
+  augment "/myses:set-my-session/myses:input" {
+    uses cache-params;
+  }
+  augment "/myses:get-my-session/myses:output" {
+    uses cache-params;
+  }
+
+}

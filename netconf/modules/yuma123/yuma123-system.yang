@@ -31,10 +31,6 @@ module yuma123-system {
     description 
       "NETCONF Basic System Group.";
 
-    revision 2018-10-08 {
-        description 
-          "Added disable-cache RPC.";
-    }
     revision 2017-03-26 {
         description 
           "Original netconfcentral yuma-system top level /system is moved.
@@ -42,6 +38,23 @@ module yuma123-system {
            Notifications replaced with corresponding ietf-netconf-notifications
            removed.";
     }
+
+    revision 2012-10-05 {
+        description  
+          "Updated EditOperationType to edit-operation-type.
+           Converged nacm extension usage.";
+    }
+
+    revision 2012-01-15 {
+        description  
+          "Add sysNetconfServerCLI monitoring data.";
+    }
+
+    revision 2010-05-24 {
+        description  
+          "Change SessionId to standard session-id-type.";
+    }
+
     revision 2009-12-27 {
         description  
           "Initial version.";
@@ -179,17 +192,6 @@ augment "/sys:system-state" {
             }
         }
     }
-
-    rpc disable-cache {
-        nacm:default-deny-all;
-
-        description
-            "Disables the data cache for all nodes when read by the current session.
-
-             Use for precision critical sessions where increased IO load
-             is acceptable.";
-    }
-
     notification sysStartup {
        description
           "Generated when the system restarts.

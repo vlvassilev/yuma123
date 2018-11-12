@@ -61,7 +61,8 @@ $(top_srcdir)/netconf/modules/yuma123/yangcli-ex.yang \
 $(top_srcdir)/netconf/modules/yuma123/netconfd-ex.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-netconf.yang \
 $(top_srcdir)/netconf/modules/yuma123/yuma123-netconf-types.yang \
-$(top_srcdir)/netconf/modules/yuma123/yuma123-system.yang
+$(top_srcdir)/netconf/modules/yuma123/yuma123-system.yang \
+$(top_srcdir)/netconf/modules/yuma123/yuma123-mysession-cache.yang
 
 dist_nmda_modules_ietf_yang_DATA= \
 $(top_srcdir)/netconf/modules/ietf/ietf-interfaces@2018-02-20.yang \

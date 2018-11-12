@@ -77,6 +77,8 @@ date         init     comment
 
 #define AGT_SES_SET_MY_SESSION   (const xmlChar *)"set-my-session"
 
+#define AGT_SES_CACHE_MODULE (const xmlChar *)"yuma123-mysession-cache"
+
 /* number of seconds to wait between session timeout checks */
 #define AGT_SES_TIMEOUT_INTERVAL  1
 
@@ -101,6 +103,7 @@ static ses_cb_t  **agtses;
 static ses_total_stats_t *agttotals;
 
 static ncx_module_t *mysesmod;
+static ncx_module_t *mysescachemod;
 
 static time_t     last_timeout_check;
 
@@ -160,6 +163,9 @@ static status_t
                            xml_node_t *methnode)
 {
     val_value_t     *indentval, *linesizeval, *withdefval;
+    val_value_t     *cache_timeout_val;
+    obj_template_t  *output_obj;
+    obj_template_t  *cache_timeout_obj;
     xmlChar          numbuff[NCX_MAX_NUMLEN];
 
     (void)methnode;
@@ -191,9 +197,34 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
 
+    cache_timeout_val = val_new_value();
+    output_obj = obj_find_child(
+        msg->rpc_method,
+        AGT_SES_MODULE,
+        NCX_EL_OUTPUT);
+    assert(output_obj);
+
+    cache_timeout_obj = obj_find_child(
+        output_obj,
+        AGT_SES_CACHE_MODULE,
+        "cache-timeout");
+    assert(cache_timeout_obj);
+
+    cache_timeout_val = val_new_value();
+    if (cache_timeout_val == NULL) {
+        val_free_value(indentval);
+        val_free_value(linesizeval);
+        val_free_value(withdefval);
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(cache_timeout_val, cache_timeout_obj);
+    VAL_UINT(cache_timeout_val) = scb->cache_timeout;
+
     dlq_enque(indentval, &msg->rpc_dataQ);
     dlq_enque(linesizeval, &msg->rpc_dataQ);
     dlq_enque(withdefval, &msg->rpc_dataQ);
+    dlq_enque(cache_timeout_val, &msg->rpc_dataQ);
     msg->rpc_data_type = RPC_DATA_YANG;
     return NO_ERR;
 
@@ -215,6 +246,7 @@ static status_t
                            xml_node_t *methnode)
 {
     val_value_t     *indentval, *linesizeval, *withdefval;
+    val_value_t     *cache_timeout_val;
 
     (void)methnode;
 
@@ -241,6 +273,14 @@ static status_t
     if (withdefval && withdefval->res == NO_ERR) {
         scb->withdef =
             ncx_get_withdefaults_enum(VAL_ENUM_NAME(withdefval));
+    }
+
+    /* get the cache-timeout parameter */
+    cache_timeout_val = val_find_child(msg->rpc_input,
+                                AGT_SES_CACHE_MODULE,
+                                "cache-timeout");
+    if (cache_timeout_val && cache_timeout_val->res == NO_ERR) {
+        scb->cache_timeout = VAL_UINT(cache_timeout_val);
     }
 
     return NO_ERR;
@@ -291,6 +331,7 @@ status_t
     }
     next_sesid = 1;
     mysesmod = NULL;
+    mysescachemod = NULL;
 
     agttotals = ses_get_total_stats();
     memset(agttotals, 0x0, sizeof(ses_total_stats_t));
@@ -304,7 +345,16 @@ status_t
                              &agt_profile->agt_savedevQ,
                              &mysesmod);
     if (res != NO_ERR) {
-        return res;
+        return SET_ERROR(res);
+    }
+
+    /* load the netconf-state module */
+    res = ncxmod_load_module(AGT_SES_CACHE_MODULE,
+                             NULL,
+                             &agt_profile->agt_savedevQ,
+                             &mysescachemod);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
     }
 
     /* set up get-my-session RPC operation */

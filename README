@@ -45,10 +45,20 @@ sudo /etc/init.d/ssh restart
 
 You can verify everything is OK:
 
-yangcli --user="$USER" --server=localhost
+ yangcli --user="$USER" --server=localhost
 ...
-xget /helloworld
+ yangcli vladimir@localhost> xget /helloworld
+ 
+ RPC Data Reply 2 for session 2:
+ 
+ rpc-reply {
+   data {
+     helloworld {
+       message 'Hello World!'
+     }
+   }
+ }
 
 or
 
-xget /
+ xget /

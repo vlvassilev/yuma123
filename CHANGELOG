@@ -5,9 +5,10 @@ yuma123 (2.12) UNRELEASED; urgency=medium
   * Fixed anyxml support for config=true data
   * Improved /system-state/clock/current-datetime resolution to nanoseconds and
     disabled value caching
-  * Added yuma123-system:disable-cache RPC
+  * Augmented set-my-session and get-my-session RPCs with cache-timeout param
+    allowing cache to be disabled when cache-timeout=0
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 08 Nov 2018 09:47:50 +0100
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 12 Nov 2018 16:46:47 +0100
 
 yuma123 (2.11) stable; urgency=medium
 

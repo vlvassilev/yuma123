@@ -73,3 +73,5 @@ void
                       void  *cbfn);
 void
     tstamp123_datetime_nsec (xmlChar *buff);
+void
+    ncx123_set_vtimeout_value (uint32 sec);

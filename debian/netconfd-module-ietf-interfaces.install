@@ -1,2 +1,2 @@
 usr/lib/*/yuma/libietf-interfaces.so*
-usr/share/yuma/modules/interfaces-notifications.yang
+usr/share/yuma/modules/examples/interfaces-notifications.yang

@@ -1,0 +1,14 @@
+module mod2 {
+  prefix m2;
+  namespace "http://yuma123.org/ns/sec6_4/mod2";
+
+  container m2 {
+    leaf foo {
+      type uint32;
+    }
+    leaf bar {
+      type uint32;
+      must ". < ../foo";
+    }
+  }
+}

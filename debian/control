@@ -39,6 +39,7 @@ Description: NETCONF/YANG library
 Package: libyuma-dev
 Section: libdevel
 Architecture: any
+Multi-Arch: same
 Provides: libyuma-dev
 Depends: ${misc:Depends}
 Description: NETCONF/YANG application development files
@@ -85,6 +86,7 @@ Description: Validate YANG modules and convert them to different formats
 
 Package: netconfd-module-ietf-interfaces
 Architecture: any
+Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
 Description: SIL module for netconfd implementing ietf-interfaces.yang
  The NETCONF protocol and YANG modeling language provide a framework
@@ -96,6 +98,7 @@ Description: SIL module for netconfd implementing ietf-interfaces.yang
 
 Package: netconfd-module-ietf-system
 Architecture: any
+Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base, libyuma2 (>= 2.8)
 Description: SIL module for netconfd implementing ietf-system.yang
  The NETCONF protocol and YANG modeling language provide a framework
@@ -123,6 +126,7 @@ Description: NETCONF/YANG library for simple client applications
 Package: libyangrpc-dev
 Section: libdevel
 Architecture: any
+Multi-Arch: same
 Provides: libyangrpc-dev
 Depends: libc6-dev, libyangrpc2 (=${binary:Version}),${misc:Depends}
 Description: NETCONF/YANG simple client applications development files

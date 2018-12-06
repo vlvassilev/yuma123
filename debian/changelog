@@ -1,5 +1,6 @@
 yuma123 (2.12-0) UNRELEASED; urgency=medium
 
   * Unofficial package
+  * Added "Multi-Arch: foreign" to -dev and module packages
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 12 Nov 2018 16:47:11 +0100
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 06 Dec 2018 15:20:29 +0100

@@ -45,6 +45,7 @@ test_data()
             yanglint --path=${1}/ ${YANGLINT_MODULE_ARGS} ${DATA_FILE} 1>&2
             RES=$?
         elif [ "$RUN_WITH_CONFD" != "" ] ; then
+            sleep 1 # wait for confd to start
             confd_load -l test-cfg.xml 1>&2
             RES=$?
         else

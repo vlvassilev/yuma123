@@ -468,6 +468,7 @@ typedef struct xpath_walkerparms_t_ {
 /* Value node compare walker fn callback parameters */
 typedef struct xpath_compwalkerparms_t_ {
     xpath_result_t    *result2;
+    val_value_t       *cmpval;
     xmlChar           *cmpstring;
     ncx_num_t         *cmpnum;
     xmlChar           *buffer;

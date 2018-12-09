@@ -970,7 +970,6 @@ static boolean
 
 } /* compare_numbers */
 
-
 /********************************************************************
 * FUNCTION compare_booleans
 * 
@@ -1011,15 +1010,114 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION val2buf
+*
+* Helper function allocating new parms->buffer or allocating larger
+* and freeing the existing one.
+*
+* INPUTS:
+*    val == value to be stringified
+*    parms == ptr to xpath_compwalkerparms_t with buffsize and buffer fields
+*
+* RETURNS:
+*    NO_ERR in case operation is completed
+*    or error code if operation failed to complete
+*********************************************************************/
+static status_t val2buf(val_value_t* val, xpath_compwalkerparms_t *parms)
+{
+    uint32   cnt;
+    status_t res;
+    /* get value sprintf size */
+    res = val_sprintf_simval_nc(NULL, val, &cnt);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    if ((cnt+1) > parms->buffsize) {
+        if(parms->buffer) {
+            m__free(parms->buffer);
+        }
+        parms->buffsize=max(cnt+1,TEMP_BUFFSIZE);
+        parms->buffer = m__getMem(parms->buffsize);
+        if (!parms->buffer) {
+            return ERR_INTERNAL_MEM;
+        }
+    }
+
+    res = val_sprintf_simval_nc(parms->buffer, val, &cnt);
+    return res;
+}
+
+/********************************************************************
+* FUNCTION val2cmpstring
+*
+* Helper function allocating new parms->cmpstring buffer and
+* serializing the value there
+*
+* INPUTS:
+*    val == value to be stringified
+*    parms == ptr to xpath_compwalkerparms_t with cmpstring field
+*
+* RETURNS:
+*    NO_ERR in case operation is completed
+*    or error code if operation failed to complete
+*********************************************************************/
+static status_t val2cmpstring(val_value_t* val, xpath_compwalkerparms_t *parms)
+{
+    uint32   cnt;
+    status_t res;
+    /* get value sprintf size */
+    res = val_sprintf_simval_nc(NULL, val, &cnt);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    parms->cmpstring = m__getMem(cnt+1);
+    if (!parms->cmpstring) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    res = val_sprintf_simval_nc(parms->cmpstring, val, &cnt);
+    return res;
+}
+
+/********************************************************************
+* FUNCTION val2cmpnum
+*
+* Helper function allocating new parms->cmpnum buffer and
+* setting it to the number type stored in val casted to NCX_BT_FLOAT64
+*
+* INPUTS:
+*    val == value of number type
+*    parms == ptr to xpath_compwalkerparms_t with cmpnum field
+*
+* RETURNS:
+*    NO_ERR in case operation is completed
+*    or error code if operation failed to complete
+*********************************************************************/
+static status_t val2cmpnum(val_value_t* val, xpath_compwalkerparms_t *parms)
+{
+    status_t res;
+    parms->cmpnum = m__getMem(sizeof(ncx_num_t));
+    if (!parms->cmpnum) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    ncx_init_num(parms->cmpnum);
+    res = ncx_cast_num(&val->v.num,val->btyp,parms->cmpnum,NCX_BT_FLOAT64);
+    return res;
+}
+
+/********************************************************************
 * FUNCTION compare_walker_fn
 * 
-* Compare the parm string to the current value
+* Compare the parm value to the current value
 * Stop the walk on the first TRUE comparison
 *
 *    val1 <op>  val2
 *
-*  val1 == parms.cmpstring or parms.cmpnum
-*  val2 == string value of node passed by val walker
+*  val1 == parms.val and for optimization cached parms.cmpstring or parms.cmpnum
+*  val2 == value of node passed by val walker
 *    op == parms.exop
 *
 * Matches val_walker_fn_t template in val.h
@@ -1046,7 +1144,6 @@ static boolean
     xpath_compwalkerparms_t  *parms;
     xmlChar                  *buffer;
     status_t                  res;
-    uint32                    cnt;
 
     (void)cookie1;
     parms = (xpath_compwalkerparms_t *)cookie2;
@@ -1074,73 +1171,37 @@ static boolean
 
     if (obj_is_password(val->obj)) {
         parms->cmpresult = FALSE;
-    } else if (typ_is_string(val->btyp)) {
-        if (parms->cmpstring) {
-            parms->cmpresult = 
-                compare_strings(parms->cmpstring, 
-                                VAL_STR(useval),
-                                parms->exop);
+    } else if (typ_is_string(val->btyp) && typ_is_string(parms->cmpval->btyp)) {
+        parms->cmpresult = compare_strings(VAL_STR(parms->cmpval),VAL_STR(useval),parms->exop);
+    } else if (typ_is_number(val->btyp) && typ_is_number(parms->cmpval->btyp)) {
+        if(val->btyp==parms->cmpval->btyp) {
+            parms->cmpresult = convert_compare_result(ncx_compare_nums(&parms->cmpval->v.num,&useval->v.num,val->btyp),parms->exop);
         } else {
-            parms->cmpresult = 
-                compare_numbers(parms->cmpnum, 
-                                VAL_STR(useval),
-                                parms->exop);
-        }
-    } else {
-        /* get value sprintf size */
-        res = val_sprintf_simval_nc(NULL, useval, &cnt);
-        if (res != NO_ERR) {
-            parms->res = res;
-            return FALSE;
-        }
-
-        if (cnt < parms->buffsize) {
-            /* use pre-allocated buffer */
-            res = val_sprintf_simval_nc(parms->buffer, useval, &cnt);
-            if (res == NO_ERR) {
-                if (parms->cmpstring) {
-                    parms->cmpresult = 
-                        compare_strings(parms->cmpstring, 
-                                        parms->buffer,
-                                        parms->exop);
-                } else {
+            if(parms->cmpnum) {
+                parms->res=val2cmpnum(useval,parms);
+            }
+            if(parms->res == NO_ERR) {
+                parms->res = val2buf(useval,parms);
+                if (parms->res == NO_ERR) {
                     parms->cmpresult = 
                         compare_numbers(parms->cmpnum, 
                                         parms->buffer,
                                         parms->exop);
                 }
-            } else {
-                parms->res = res;
-                return FALSE;
             }
-        } else {
-            /* use a temp buffer */
-            buffer = m__getMem(cnt+1);
-            if (!buffer) {
-                parms->res = ERR_INTERNAL_MEM;
-                return FALSE;
+        }
+    } else {
+        parms->res=val2buf(useval,parms);
+        if (parms->res == NO_ERR) {
+            if (!parms->cmpstring) {
+                parms->res=val2cmpstring(useval,parms);
             }
-
-            res = val_sprintf_simval_nc(buffer, useval, &cnt);
-            if (res != NO_ERR) {
-                m__free(buffer);
-                parms->res = res;
-                return FALSE;
-            }
-
-            if (parms->cmpstring) {
+            if(parms->res == NO_ERR) {
                 parms->cmpresult = 
                     compare_strings(parms->cmpstring, 
-                                    buffer,
-                                    parms->exop);
-            } else {
-                parms->cmpresult = 
-                    compare_numbers(parms->cmpnum, 
-                                    buffer,
+                                    parms->buffer,
                                     parms->exop);
             }
-
-            m__free(buffer);
         }
     }
 
@@ -1152,14 +1213,14 @@ static boolean
 /********************************************************************
 * FUNCTION top_compare_walker_fn
 * 
-* Compare the current string in the 1st nodeset
+* Compare the current value in the 1st nodeset
 * to the entire 2nd node-set
 *
 * This callback should get called once for every
 * node in the first parmset.  Each time a simple
 * type is passed into the callback, the entire
 * result2 is processed with new callbacks to
-* compare the 'cmpstring' against each simple
+* compare the value against each simple
 * type in the 2nd node-set.
 *
 * Stop the walk on the first TRUE comparison
@@ -1171,7 +1232,7 @@ static boolean
 *    cookie1 == xpath_pcb_t * : parser control block to use
 *               currently not used!!!
 *    cookie2 == xpath_compwalkerparms_t *: walker parms to use
-*               result2 is used, not cmpstring
+*               result2 is used, not cmpstrings
 * OUTPUTS:
 *    *cookie2 contents adjusted  (parms.cmpresult and parms.res)
 *
@@ -1185,13 +1246,12 @@ static boolean
                            void *cookie2)
 {
     xpath_compwalkerparms_t  *parms, newparms;
-    xmlChar                  *buffer, *comparestr;
     xpath_pcb_t              *pcb;
     xpath_resnode_t          *resnode;
     val_value_t              *testval, *useval, *newval;
     status_t                  res;
     uint32                    cnt;
-    boolean                   fnresult, cfgonly;
+    boolean                   fnresult, cfgonly, ret;
 
     pcb = (xpath_pcb_t *)cookie1;
     parms = (xpath_compwalkerparms_t *)cookie2;
@@ -1202,7 +1262,6 @@ static boolean
     }
 
     res = NO_ERR;
-    buffer = NULL;
     newval = NULL;
 
     cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ? TRUE : FALSE;
@@ -1219,59 +1278,15 @@ static boolean
     } else {
         useval = val;
     }
-        
-    if (typ_is_string(val->btyp)) {
-        comparestr = VAL_STR(useval);
-    } else {
-        /* get value sprintf size */
-        res = val_sprintf_simval_nc(NULL, useval, &cnt);
-        if (res != NO_ERR) {
-            parms->res = res;
-            return FALSE;
-        }
-
-        if (cnt < parms->buffsize) {
-            /* use pre-allocated buffer */
-            res = val_sprintf_simval_nc(parms->buffer, useval, &cnt);
-            if (res != NO_ERR) {
-                parms->res = res;
-                return FALSE;
-            }
-            comparestr = parms->buffer;
-        } else {
-            /* use a temp buffer */
-            buffer = m__getMem(cnt+1);
-            if (!buffer) {
-                parms->res = ERR_INTERNAL_MEM;
-                return FALSE;
-            }
-
-            res = val_sprintf_simval_nc(buffer, useval, &cnt);
-            if (res != NO_ERR) {
-                m__free(buffer);
-                parms->res = res;
-                return FALSE;
-            }
-            comparestr = buffer;
-        }
-    }
 
     /* setup 2nd walker parms */
     memset(&newparms, 0x0, sizeof(xpath_compwalkerparms_t));
-    newparms.cmpstring = comparestr;
-    newparms.buffer = m__getMem(TEMP_BUFFSIZE);
-    if (!newparms.buffer) {
-        if (buffer) {
-            m__free(buffer);
-        }
-        parms->res = ERR_INTERNAL_MEM;
-        return FALSE;
-    }
-    newparms.buffsize = TEMP_BUFFSIZE;
+    newparms.cmpval = useval;
     newparms.exop = parms->exop;
     newparms.cmpresult = FALSE;
     newparms.res = NO_ERR;
 
+    ret=TRUE;
     /* go through all the nodes in the first node-set
      * and compare each leaf against all the leafs
      * in the other node-set; stop when condition
@@ -1302,22 +1317,24 @@ static boolean
             /* condition was met if return FALSE and
              * walkerparms.res == NO_ERR
              */
-            if (buffer) {
-                m__free(buffer);
-            }
-            m__free(newparms.buffer);
             parms->res = NO_ERR;
-            return FALSE;
+            ret=FALSE;
         }
     }
 
-    if (buffer != NULL) {
-        m__free(buffer);
+    if (newparms.buffer != NULL) {
+        m__free(newparms.buffer);
     }
 
-    m__free(newparms.buffer);
+    if (newparms.cmpstring != NULL) {
+        m__free(newparms.cmpstring);
+    }
 
-    return TRUE;
+    if (newparms.cmpnum != NULL) {
+        m__free(newparms.cmpnum);
+    }
+
+    return ret;
 
 }  /* top_compare_walker_fn */
 

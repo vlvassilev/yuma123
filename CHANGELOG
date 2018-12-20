@@ -7,8 +7,9 @@ yuma123 (2.12) UNRELEASED; urgency=medium
     disabled value caching
   * Augmented set-my-session and get-my-session RPCs with cache-timeout param
     allowing cache to be disabled when cache-timeout=0
+  * Fixed Xpath compare of nodeset to nodeset implementation for numeric nodesets
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Mon, 12 Nov 2018 16:46:47 +0100
+ -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 20 Dec 2018 15:52:58 +0100
 
 yuma123 (2.11) stable; urgency=medium
 

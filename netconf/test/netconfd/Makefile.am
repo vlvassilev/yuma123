@@ -1,4 +1,5 @@
 TESTS=\
+test-perf \
 test-anyxml \
 test-val123-api \
 test-netconf-1dot1 \

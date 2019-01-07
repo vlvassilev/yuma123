@@ -35,7 +35,8 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-alarms.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-nmda.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-flows.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler-state.yang
 
 dist_ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \

@@ -1,6 +1,7 @@
 /*
     module ietf-network-bridge
     namespace urn:ietf:params:xml:ns:yang:ietf-network-bridge
+    implementation of common functions e.g. deriving out-discards form all scheduler discard counters
  */
 
 #include <stdio.h>
@@ -37,80 +38,6 @@ static ncx_module_t *ietf_network_bridge_flows_mod;
 static ncx_module_t *example_bridge_mod;
 static obj_template_t* bridge_obj;
 
-
-
-
-static status_t
-     y_ietf_network_bridge_flows_transmit_packet (
-        ses_cb_t *scb,
-        rpc_msg_t *msg,
-        xml_node_t *methnode)
-{
-    return NO_ERR;
-}
-
-static status_t
-    y_ietf_network_bridge_flows_edit (
-        ses_cb_t *scb,
-        rpc_msg_t *msg,
-        agt_cbtyp_t cbtyp,
-        op_editop_t editop,
-        val_value_t *newval,
-        val_value_t *curval)
-{
-    status_t res;
-    val_value_t *errorval;
-    const xmlChar *errorstr;
-
-    res = NO_ERR;
-    errorval = NULL;
-    errorstr = NULL;
-
-    switch (cbtyp) {
-    case AGT_CB_VALIDATE:
-        /* description-stmt validation here */
-        break;
-    case AGT_CB_APPLY:
-        /* database manipulation done here */
-        break;
-    case AGT_CB_COMMIT:
-        /* device instrumentation done here */
-        switch (editop) {
-        case OP_EDITOP_LOAD:
-        case OP_EDITOP_MERGE:
-        case OP_EDITOP_REPLACE:
-        case OP_EDITOP_CREATE:
-        case OP_EDITOP_DELETE:
-            /*TODO*/
-            break;
-        default:
-            assert(0);
-        }
-
-        break;
-    case AGT_CB_ROLLBACK:
-        /* undo device instrumentation here */
-        break;
-    default:
-        res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* if error: set the res, errorstr, and errorval parms */
-    if (res != NO_ERR) {
-        agt_record_error(
-            scb,
-            &msg->mhdr,
-            NCX_LAYER_CONTENT,
-            res,
-            NULL,
-            NCX_NT_STRING,
-            errorstr,
-            NCX_NT_VAL,
-            errorval);
-    }
-
-    return res;
-}
 
 /*
  * This implementation independent function sums all discard counter instances with schema id
@@ -303,19 +230,6 @@ status_t
         "flows");
     assert(flows_obj != NULL);
 
-    res = agt_cb_register_callback(
-        "ietf-network-bridge-flows",
-        (const xmlChar *)"/flows",
-        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
-        y_ietf_network_bridge_flows_edit);
-    assert(res == NO_ERR);
-
-    res = agt_rpc_register_method(
-        "ietf-network-bridge-flows",
-        "transmit-packet",
-        AGT_RPC_PH_INVOKE,
-        y_ietf_network_bridge_flows_transmit_packet);
-    assert(res == NO_ERR);
 
     return res;
 }

@@ -6,6 +6,6 @@ libinterfaces_alarms_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma
 libinterfaces_alarms_la_LDFLAGS = -module -lyumaagt -lyumancx -lalarmctrl
 
 #yang_DATA = ietf-interfaces.yang
-yang_DATA = \
+dist_yang_DATA = \
 interfaces-alarms.yang
 

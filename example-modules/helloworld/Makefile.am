@@ -10,4 +10,4 @@ libhelloworld_la_CPPFLAGS = -I $(top_srcdir)/netconf/src/ -I$(top_srcdir)/netcon
 libhelloworld_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la
 endif
 
-examples_yang_DATA = helloworld.yang
+dist_examples_yang_DATA = helloworld.yang

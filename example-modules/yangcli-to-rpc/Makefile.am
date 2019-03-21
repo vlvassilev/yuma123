@@ -13,4 +13,4 @@ else
   libyangcli_to_rpc_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la
 endif
 
-yuma123_yang_DATA = yuma123-yangcli-to-rpc.yang
+dist_yuma123_yang_DATA = yuma123-yangcli-to-rpc.yang

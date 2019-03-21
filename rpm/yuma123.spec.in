@@ -40,14 +40,18 @@ rm -f %{buildroot}%{_libdir}/yuma/libtoaster.la
 
 # The base RPM is equivalent to the libyuma-base debian package
 %files
-%{_datarootdir}/yuma/modules/helloworld.yang
+%{_datarootdir}/yuma/modules/examples/helloworld.yang
+%{_datarootdir}/yuma/modules/examples/example-bridge.yang
 %{_datarootdir}/yuma/modules/ietf/*
 %{_datarootdir}/yuma/modules/ietf-derived/*
 %{_datarootdir}/yuma/modules/ietf-draft/*
-%{_datarootdir}/yuma/modules/ietf-patched/*
 %{_datarootdir}/yuma/modules/ietf-expired/*
 %{_datarootdir}/yuma/modules/netconfcentral/*
 %{_datarootdir}/yuma/modules/yuma123/*
+%{_datarootdir}/yuma/nmda-modules/ietf/*
+
+%exclude %{_libdir}/yuma/libietf-network-bridge*
+%exclude %{_libdir}/yuma/libyangcli-to-rpc*
 
 
 
@@ -129,7 +133,7 @@ The yuma123 netconfd module ietf-interfaces implements the functionality
 modeled in ietf-interfaces.yang using some common command line tools.
 %files netconfd-module-ietf-interfaces
 %{_libdir}/yuma/libietf-interfaces.so*
-%{_datarootdir}/yuma/modules/interfaces-notifications.yang
+%{_datarootdir}/yuma/modules/examples/interfaces-notifications.yang
 
 
 

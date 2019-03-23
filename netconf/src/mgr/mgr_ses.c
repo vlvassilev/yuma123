@@ -653,7 +653,7 @@ static void
     const char *str;
     char        buffer[1024];
     sprintf(buffer, 
-            "<ncx-connect xmlns=\"http://netconfcentral.org/ns/yuma-ncx\" version=\"1\" user=\"%s\" address=\"localhost\" magic=\"x56o8937ab17eg922z34rwhobskdbyswfehkpsqq3i55a0an960ccw24a4ek864aOpal1t2p\" transport=\"ssh\" port=\"%u\" />\n]]>]]>",
+            "<ncx-connect xmlns=\"http://netconfcentral.org/ns/yuma-ncx\" version=\"1\" user=\"%s\" address=\"127.0.0.1\" magic=\"x56o8937ab17eg922z34rwhobskdbyswfehkpsqq3i55a0an960ccw24a4ek864aOpal1t2p\" transport=\"ssh\" port=\"%u\" />\n]]>]]>",
             user,
             (unsigned int)port);
     ses_putstr(scb, (const xmlChar *)buffer);

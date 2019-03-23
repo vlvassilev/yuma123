@@ -964,6 +964,9 @@ status_t
                          pubkeyfile,
                          privkeyfile,
                          ssh_use_agent);
+    } else if (res == NO_ERR && transport == SES_TRANSPORT_TCP) {
+        int flags = fcntl(scb->fd, F_GETFL, 0);
+        fcntl(scb->fd, F_SETFL, flags | O_NONBLOCK);
     }
 
     if (res != NO_ERR) {

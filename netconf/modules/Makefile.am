@@ -39,7 +39,8 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler-state.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-generator.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-analyzer.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-loopback.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-loopback.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-interfaces-ethernet-like@2017-07-03.yang
 
 dist_ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \

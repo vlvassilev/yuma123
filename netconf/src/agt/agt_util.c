@@ -911,9 +911,15 @@ void
                 pathbuff = xml_strdup((const xmlChar *)error_path);
                 break;
             case NCX_NT_VAL:
-                res2 = val_gen_instance_id_ex(msghdr, 
-                                              (val_value_t *)error_path, 
-                                              NCX_IFMT_XPATH1, 
+                if(res == ERR_NCX_WRONG_NODETYP && ((val_value_t *)error_path)->obj->objtype == OBJ_TYP_LEAF_LIST) {
+                    log_error("\nError: To generate valid instance-id is impossible for leaf-list value "
+                              "parsed with ERR_NCX_WRONG_NODETYP since the value self "
+                              "is needed as key in the instance-id");
+                    break;
+                }
+                res2 = val_gen_instance_id_ex(msghdr,
+                                              (val_value_t *)error_path,
+                                              NCX_IFMT_XPATH1,
                                               FALSE, &pathbuff);
                 if (res2 != NO_ERR) {
                     log_error("\nError: Generate instance id failed (%s)",

@@ -27,5 +27,5 @@ else
   libietf_network_bridge_openflow_la_LDFLAGS = -module $(top_builddir)/netconf/src/agt/libyumaagt.la $(top_builddir)/netconf/src/ncx/libyumancx.la -lopenvswitch
 endif
 
-examples_yang_DATA = example-bridge.yang
+dist_examples_yang_DATA = example-bridge.yang
 

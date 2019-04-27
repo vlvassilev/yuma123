@@ -1,0 +1,23 @@
+module mod2 {
+  prefix m2;
+  namespace "http://yuma123.org/ns/sec7_5_4/mod2";
+
+  container interface {
+    leaf ifType {
+      type enumeration {
+        enum ethernet;
+        enum atm;
+      }
+    }
+    leaf ifMTU {
+      type uint32;
+    }
+    must 'string(ifType) != "ethernet" or ifMTU = 1500' {
+      error-message "An Ethernet MTU must be 1500";
+    }
+    must 'string(ifType) != "atm" or'
+       + ' (ifMTU <= 17966 and ifMTU >= 64)' {
+      error-message "An ATM MTU must be 64 .. 17966";
+    }
+  }
+}

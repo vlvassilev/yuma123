@@ -1,0 +1,3 @@
+<interface xmlns="http://yuma123.org/ns/sec7_5_4/mod1">
+  <ifMTU>1024</ifMTU>
+</interface>

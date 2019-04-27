@@ -5,6 +5,8 @@ test_data()
     #TODO
     declare -a schema_load_fail=("${!2}")
     declare -a data_file_load_fail=("${!3}")
+    MODULE_ARGS=""
+    YANGLINT_MODULE_ARGS=""
 
     for index in ${!schema_load_fail[*]}
     do

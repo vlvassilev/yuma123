@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <networks xmlns="urn:ietf:params:xml:ns:yang:ietf-network">
+    <network>
+      <network-id>example</network-id>
+      <node>
+        <node-id>switch</node-id>
+        <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+          <tp-id>s0-eth0</tp-id>
+        </termination-point>
+        <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+          <tp-id>s0-eth1</tp-id>
+        </termination-point>
+        <netconf-connect-params xmlns="urn:tntapi:netconf-node">
+          <user>root</user>
+          <server>localhost</server>
+          <ncport>8830</ncport>
+        </netconf-connect-params>
+      </node>
+      <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+        <source>
+          <source-node>switch</source-node>
+          <source-tp>s0-eth0</source-tp>
+        </source>
+        <destination>
+          <dest-node>switch</dest-node>
+          <dest-tp>s0-eth1</dest-tp>
+        </destination>
+        <link-id>loop</link-id>
+      </link>
+    </network>
+  </networks>
+</config>

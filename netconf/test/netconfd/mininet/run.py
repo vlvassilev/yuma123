@@ -16,6 +16,7 @@ from mininet.util import quietRun
 
 from time import sleep
 import tntapi
+import lxml
 from lxml import etree
 
 namespaces={"nc":"urn:ietf:params:xml:ns:netconf:base:1.0",
@@ -69,15 +70,28 @@ def scratchNet( cname='ovs-testcontroller', cargs='-v ptcp:16635' ):
 
     state_before = tntapi.network_get_state(network, conns)
     info( "*** Running test\n" )
+
+    #create flows configuration
+    yangcli_script="""
+merge /bridge/ports/port -- name=s0-eth0
+merge /interfaces/interface -- name=s0-eth0 type=ethernetCsmacd port-name=s0-eth0
+merge /bridge/ports/port -- name=s0-eth1
+merge /interfaces/interface -- name=s0-eth1 type=ethernetCsmacd port-name=s0-eth1
+create /flows/flow[id='h0-to-h1'] -- match/in-port=s0-eth0 actions/action[order='0']/output-action/out-port=s0-eth1
+create /flows/flow[id='h1-to-h0'] -- match/in-port=s0-eth1 actions/action[order='0']/output-action/out-port=s0-eth0
+"""
+    result=tntapi.yangcli_ok_script(yconns["s0"],yangcli_script)
+    tntapi.network_commit(conns)
+
+    info( "*** Running test\n" )
     h0.cmdPrint( 'ping -c1 ' + h1.IP() )
 
-    info( "*** Stopping network\n" )
     state_after = tntapi.network_get_state(network, conns)
     #delta = tntapi.get_network_counters_delta(state_before,state_after)
 
     tntapi.print_state_ietf_interfaces_statistics_delta(network, state_before, state_after)
 
-
+    info( "*** Stopping network\n" )
     #controller.cmd( 'kill %' + cname )
     switch.cmd( 'ovs-vsctl del-br dp0' )
     switch.deleteIntfs()
@@ -87,7 +101,7 @@ if __name__ == '__main__':
     setLogLevel( 'info' )
     info( '*** Scratch network demo (kernel datapath)\n' )
     Mininet.init()
-    scratchNet( cname='./run-netconfd', cargs="--module=ietf-network-bridge-openflow --no-startup --port=8830 --ncxserver-sockname=/tmp/ncxserver.8830.sock")
+    scratchNet( cname='./run-netconfd', cargs="--module=ietf-network-bridge-openflow --no-startup --port=8830 --ncxserver-sockname=/tmp/ncxserver.8830.sock --superuser=${USER}")
     #scratchNet( cname='ovs-testcontroller', cargs='-v ptcp:16635')
 
 

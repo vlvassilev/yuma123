@@ -4,7 +4,7 @@
     <network>
       <network-id>example</network-id>
       <node>
-        <node-id>switch</node-id>
+        <node-id>s0</node-id>
         <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
           <tp-id>s0-eth0</tp-id>
         </termination-point>

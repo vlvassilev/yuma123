@@ -15,6 +15,7 @@
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"
+#include "agt_commit_complete.h"
 #include "agt_timer.h"
 #include "agt_util.h"
 #include "agt_not.h"
@@ -29,6 +30,7 @@
 
 /* openvswitch */
 #include <openvswitch/vconn.h>
+#include <openvswitch/ofp-actions.h>
 #include <openvswitch/ofp-print.h>
 #include <openvswitch/ofpbuf.h>
 #include <openflow/openflow.h>
@@ -55,79 +57,158 @@ static obj_template_t* packet_received_notification_ingress_obj;
 static obj_template_t* packet_received_notification_payload_obj;
 
 static struct vconn *vconn;
-static uint32 timer_id;
+static int ofp_version;
+
+void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len);
 
 static status_t
-     y_ietf_network_bridge_flows_transmit_packet (
+     y_transmit_packet_invoke (
         ses_cb_t *scb,
         rpc_msg_t *msg,
         xml_node_t *methnode)
 {
+    status_t res;
+    int ret;
+    val_value_t *egress_val;
+    val_value_t *payload_val;
+
+    egress_val = val_find_child(
+        msg->rpc_input,
+        FLOWS_MOD,
+        "egress");
+    payload_val = val_find_child(
+        msg->rpc_input,
+        FLOWS_MOD,
+        "payload");
+
+    printf("transmit-packet egress=%s\n",VAL_STRING(egress_val));
+    transmit_packet(VAL_STRING(egress_val), payload_val->v.binary.ustr, payload_val->v.binary.ustrlen);
+
+    return NO_ERR;
+
+} /* y_transmit_packet_invoke */
+
+
+static void flow_enable(val_value_t* flow_val)
+{
+    /* implementation specific */
+    printf("flow_enable:\n");
+    val_dump_value(flow_val,1);
+}
+
+static void flow_disable(val_value_t* flow_val)
+{
+    /* implementation specific */
+    printf("flow_disable:\n");
+    val_dump_value(flow_val,1);
+}
+
+static unsigned int get_port_out_action_count(char* if_name, val_value_t* root_val)
+{
+    status_t res;
+    unsigned int match_count=0;
+    obj_template_t* out_port_obj;
+    val_value_t* out_port_val;
+
+    res = xpath_find_schema_target_int("/flow:flows/flow/actions/action/output-action/out-port",&out_port_obj);
+    assert(res==NO_ERR && out_port_obj!=NULL);
+
+    for(out_port_val=val123_get_first_obj_instance(root_val, out_port_obj);
+        out_port_val!=NULL;
+        out_port_val=val123_get_next_obj_instance(root_val, out_port_val)) {
+        if(0==strcmp(VAL_STRING(out_port_val),if_name)) {
+            match_count++;
+        }
+    }
+    return match_count;
+}
+
+static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
+{
+    status_t res;
+
+    val_value_t *flows_cur_val, *flow_cur_val;
+    val_value_t *flows_new_val, *flow_new_val;
+
+
+    if(config_new_val == NULL) {
+        flows_new_val = NULL;
+    } else {
+        flows_new_val = val_find_child(config_new_val,
+                               FLOWS_MOD,
+                               "flows");
+    }
+
+    if(config_cur_val == NULL) {
+        flows_cur_val = NULL;
+    } else {
+        flows_cur_val = val_find_child(config_cur_val,
+                                       FLOWS_MOD,
+                                       "flows");
+    }
+
+    /* 2 step (disable/enable) flow configuration */
+
+    /* 1. deactivation loop - disables all deleted or modified flows */
+    if(flows_cur_val!=NULL) {
+        for (flow_cur_val = val_get_first_child(flows_cur_val);
+             flow_cur_val != NULL;
+             flow_cur_val = val_get_next_child(flow_cur_val)) {
+            flow_new_val = val123_find_match(config_new_val, flow_cur_val);
+            if(flow_new_val==NULL || 0!=val_compare(flow_cur_val,flow_new_val)) {
+                flow_disable(flow_cur_val);
+            }
+        }
+    }
+
+    /* 2. activation loop - enables all new or modified flows */
+    if(flows_new_val!=NULL) {
+        for (flow_new_val = val_get_first_child(flows_new_val);
+             flow_new_val != NULL;
+             flow_new_val = val_get_next_child(flow_new_val)) {
+
+            flow_cur_val = val123_find_match(config_cur_val, flow_new_val);
+            if(flow_cur_val==NULL || 0!=val_compare(flow_new_val,flow_cur_val)) {
+                flow_enable(flow_new_val);
+            }
+        }
+    }
+
     return NO_ERR;
 }
 
-static status_t
-    y_ietf_network_bridge_flows_edit (
-        ses_cb_t *scb,
-        rpc_msg_t *msg,
-        agt_cbtyp_t cbtyp,
-        op_editop_t editop,
-        val_value_t *newval,
-        val_value_t *curval)
+static val_value_t* prev_root_val = NULL;
+static int update_config_wrapper()
 {
+    cfg_template_t        *runningcfg;
     status_t res;
-    val_value_t *errorval;
-    const xmlChar *errorstr;
-
-    res = NO_ERR;
-    errorval = NULL;
-    errorstr = NULL;
-
-    switch (cbtyp) {
-    case AGT_CB_VALIDATE:
-        /* description-stmt validation here */
-        break;
-    case AGT_CB_APPLY:
-        /* database manipulation done here */
-        break;
-    case AGT_CB_COMMIT:
-        /* device instrumentation done here */
-        switch (editop) {
-        case OP_EDITOP_LOAD:
-        case OP_EDITOP_MERGE:
-        case OP_EDITOP_REPLACE:
-        case OP_EDITOP_CREATE:
-        case OP_EDITOP_DELETE:
-            /*TODO*/
-            break;
-        default:
-            assert(0);
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    assert(runningcfg!=NULL && runningcfg->root!=NULL);
+    if(prev_root_val!=NULL) {
+        val_value_t* cur_root_val;
+        cur_root_val = val_clone_config_data(runningcfg->root, &res);
+        if(0==val_compare(cur_root_val,prev_root_val)) {
+            /*no change*/
+            val_free_value(cur_root_val);
+            return 0;
         }
-
-        break;
-    case AGT_CB_ROLLBACK:
-        /* undo device instrumentation here */
-        break;
-    default:
-        res = SET_ERROR(ERR_INTERNAL_VAL);
+        val_free_value(cur_root_val);
     }
+    update_config(prev_root_val, runningcfg->root);
 
-    /* if error: set the res, errorstr, and errorval parms */
-    if (res != NO_ERR) {
-        agt_record_error(
-            scb,
-            &msg->mhdr,
-            NCX_LAYER_CONTENT,
-            res,
-            NULL,
-            NCX_NT_STRING,
-            errorstr,
-            NCX_NT_VAL,
-            errorval);
+    if(prev_root_val!=NULL) {
+        val_free_value(prev_root_val);
     }
-
-    return res;
+    prev_root_val = val_clone_config_data(runningcfg->root, &res);
+    return 0;
 }
+
+static status_t y_commit_complete(void)
+{
+    update_config_wrapper();
+    return NO_ERR;
+}
+
 
 /* Helper functions */
 
@@ -164,6 +245,19 @@ static char* dict_get(dlq_hdr_t *que, unsigned int portnum)
         }
     }
     return NULL;
+}
+
+static int dict_get_num(dlq_hdr_t *que, const char* name)
+{
+    dict_node_t *dn;
+    for (dn = (dict_node_t *)dlq_firstEntry(que);
+         dn != NULL;
+         dn = (dict_node_t *)dlq_nextEntry(dn)) {
+        if(0==strcmp(dn->name,name)) {
+            return dn->portnum;
+        }
+    }
+    return -1;
 }
 
 static void dict_add(dlq_hdr_t *que, unsigned int portnum, const char* name)
@@ -478,7 +572,45 @@ process_packet_in(const struct ofp_header *msg)
     char* ingress;
     uint8_t* payload_buf;
     uint32_t payload_len;
-    send_packet_received_notification(dict_get(&port_to_name_dict, 6), pin.packet, pin.packet_len);
+    send_packet_received_notification(dict_get(&port_to_name_dict, 0), pin.packet, pin.packet_len);
+}
+
+void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
+{
+    struct ofputil_packet_out po;
+    struct ofpbuf ofpacts;
+    struct dp_packet *packet;
+    struct ofpbuf *opo;
+    const char *error_msg;
+    struct ofpbuf *reply;
+    enum ofputil_protocol protocol;
+    enum ofputil_protocol protocol_bits;
+
+    protocol = ofputil_protocol_from_ofp_version(ofp_version);
+
+    ofpbuf_init(&ofpacts, 64);
+    error_msg = ofpacts_parse_actions("output:2", &ofpacts, &protocol_bits);
+    assert(error_msg==NULL);
+
+    po.buffer_id = UINT32_MAX;
+    po.in_port = OFPP_NONE;//str_to_port_no(ctx->argv[1], ctx->argv[2]);
+    po.ofpacts = ofpacts.data;
+    po.ofpacts_len = ofpacts.size;
+
+    int port_num=dict_get_num(&port_to_name_dict, if_name);
+    assert(port_num>=0);
+
+    error_msg = eth_from_hex("6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112", &packet);
+    assert(error_msg==0);
+
+    po.packet = dp_packet_data(packet);
+    po.packet_len = dp_packet_size(packet);
+    ofp_version = vconn_get_version(vconn);
+    opo = ofputil_encode_packet_out(&po, protocol);
+    //vconn_transact_noreply(vconn, opo, &reply);
+    vconn_send_block(vconn, opo);
+    dp_packet_delete(packet);
+    ofpbuf_uninit(&ofpacts);
 }
 
 int network_bridge_timer(uint32 timer_id, void *cookie)
@@ -612,27 +744,30 @@ status_t
         "flows");
     assert(flows_obj != NULL);
 
-    res = agt_cb_register_callback(
-        "ietf-network-bridge-flows",
-        (const xmlChar *)"/flows",
-        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
-        y_ietf_network_bridge_flows_edit);
+    res=agt_commit_complete_register("ietf-network-bridge-openflow" /*SIL id string*/,
+                                     y_commit_complete);
     assert(res == NO_ERR);
 
     res = agt_rpc_register_method(
         "ietf-network-bridge-flows",
         "transmit-packet",
         AGT_RPC_PH_INVOKE,
-        y_ietf_network_bridge_flows_transmit_packet);
+        y_transmit_packet_invoke);
     assert(res == NO_ERR);
 
     /* Wait for connection from OpenFlow node */
     {
         int retval;
         struct pvconn *pvconn;
+        char* vconn_arg;
 
-        printf("Listen on %s ...\n", "ptcp:16635");
-        retval = pvconn_open("ptcp:16635", get_allowed_ofp_versions(), DSCP_DEFAULT,
+        vconn_arg=getenv("VCONN_ARG");
+        if(vconn_arg==NULL) {
+            vconn_arg="ptcp:16635";
+        }
+
+        printf("Listen on %s ...\n", vconn_arg);
+        retval = pvconn_open(vconn_arg, get_allowed_ofp_versions(), DSCP_DEFAULT,
                             &pvconn);
 
         printf("Waiting for connection");
@@ -661,7 +796,7 @@ status_t
         struct ofpbuf *request;
         struct ofpbuf *reply;
 
-        int ofp_version = vconn_get_version(vconn);
+        ofp_version = vconn_get_version(vconn);
     
         assert(ofp_version > 0 && ofp_version < 0xff);
          
@@ -687,6 +822,7 @@ status_t y_ietf_network_bridge_openflow_init2(void)
     obj_template_t* interfaces_obj;
     val_value_t* root_val;
     val_value_t* interfaces_val;
+    uint32 timer_id;
 
     runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
     assert(runningcfg && runningcfg->root);

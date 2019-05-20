@@ -31,6 +31,7 @@
 /* openvswitch */
 #include <openvswitch/vconn.h>
 #include <openvswitch/ofp-actions.h>
+#include <openvswitch/ofp-parse.h>
 #include <openvswitch/ofp-print.h>
 #include <openvswitch/ofpbuf.h>
 #include <openflow/openflow.h>
@@ -60,156 +61,6 @@ static struct vconn *vconn;
 static int ofp_version;
 
 void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len);
-
-static status_t
-     y_transmit_packet_invoke (
-        ses_cb_t *scb,
-        rpc_msg_t *msg,
-        xml_node_t *methnode)
-{
-    status_t res;
-    int ret;
-    val_value_t *egress_val;
-    val_value_t *payload_val;
-
-    egress_val = val_find_child(
-        msg->rpc_input,
-        FLOWS_MOD,
-        "egress");
-    payload_val = val_find_child(
-        msg->rpc_input,
-        FLOWS_MOD,
-        "payload");
-
-    printf("transmit-packet egress=%s\n",VAL_STRING(egress_val));
-    transmit_packet(VAL_STRING(egress_val), payload_val->v.binary.ustr, payload_val->v.binary.ustrlen);
-
-    return NO_ERR;
-
-} /* y_transmit_packet_invoke */
-
-
-static void flow_enable(val_value_t* flow_val)
-{
-    /* implementation specific */
-    printf("flow_enable:\n");
-    val_dump_value(flow_val,1);
-}
-
-static void flow_disable(val_value_t* flow_val)
-{
-    /* implementation specific */
-    printf("flow_disable:\n");
-    val_dump_value(flow_val,1);
-}
-
-static unsigned int get_port_out_action_count(char* if_name, val_value_t* root_val)
-{
-    status_t res;
-    unsigned int match_count=0;
-    obj_template_t* out_port_obj;
-    val_value_t* out_port_val;
-
-    res = xpath_find_schema_target_int("/flow:flows/flow/actions/action/output-action/out-port",&out_port_obj);
-    assert(res==NO_ERR && out_port_obj!=NULL);
-
-    for(out_port_val=val123_get_first_obj_instance(root_val, out_port_obj);
-        out_port_val!=NULL;
-        out_port_val=val123_get_next_obj_instance(root_val, out_port_val)) {
-        if(0==strcmp(VAL_STRING(out_port_val),if_name)) {
-            match_count++;
-        }
-    }
-    return match_count;
-}
-
-static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
-{
-    status_t res;
-
-    val_value_t *flows_cur_val, *flow_cur_val;
-    val_value_t *flows_new_val, *flow_new_val;
-
-
-    if(config_new_val == NULL) {
-        flows_new_val = NULL;
-    } else {
-        flows_new_val = val_find_child(config_new_val,
-                               FLOWS_MOD,
-                               "flows");
-    }
-
-    if(config_cur_val == NULL) {
-        flows_cur_val = NULL;
-    } else {
-        flows_cur_val = val_find_child(config_cur_val,
-                                       FLOWS_MOD,
-                                       "flows");
-    }
-
-    /* 2 step (disable/enable) flow configuration */
-
-    /* 1. deactivation loop - disables all deleted or modified flows */
-    if(flows_cur_val!=NULL) {
-        for (flow_cur_val = val_get_first_child(flows_cur_val);
-             flow_cur_val != NULL;
-             flow_cur_val = val_get_next_child(flow_cur_val)) {
-            flow_new_val = val123_find_match(config_new_val, flow_cur_val);
-            if(flow_new_val==NULL || 0!=val_compare(flow_cur_val,flow_new_val)) {
-                flow_disable(flow_cur_val);
-            }
-        }
-    }
-
-    /* 2. activation loop - enables all new or modified flows */
-    if(flows_new_val!=NULL) {
-        for (flow_new_val = val_get_first_child(flows_new_val);
-             flow_new_val != NULL;
-             flow_new_val = val_get_next_child(flow_new_val)) {
-
-            flow_cur_val = val123_find_match(config_cur_val, flow_new_val);
-            if(flow_cur_val==NULL || 0!=val_compare(flow_new_val,flow_cur_val)) {
-                flow_enable(flow_new_val);
-            }
-        }
-    }
-
-    return NO_ERR;
-}
-
-static val_value_t* prev_root_val = NULL;
-static int update_config_wrapper()
-{
-    cfg_template_t        *runningcfg;
-    status_t res;
-    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    assert(runningcfg!=NULL && runningcfg->root!=NULL);
-    if(prev_root_val!=NULL) {
-        val_value_t* cur_root_val;
-        cur_root_val = val_clone_config_data(runningcfg->root, &res);
-        if(0==val_compare(cur_root_val,prev_root_val)) {
-            /*no change*/
-            val_free_value(cur_root_val);
-            return 0;
-        }
-        val_free_value(cur_root_val);
-    }
-    update_config(prev_root_val, runningcfg->root);
-
-    if(prev_root_val!=NULL) {
-        val_free_value(prev_root_val);
-    }
-    prev_root_val = val_clone_config_data(runningcfg->root, &res);
-    return 0;
-}
-
-static status_t y_commit_complete(void)
-{
-    update_config_wrapper();
-    return NO_ERR;
-}
-
-
 /* Helper functions */
 
 #include "ovs-ofctl-utils.h"
@@ -271,6 +122,259 @@ static void dict_add(dlq_hdr_t *que, unsigned int portnum, const char* name)
 
 /* Registered callback functions: get_interfaces */
 static dlq_hdr_t port_to_name_dict;
+
+static status_t
+     y_transmit_packet_invoke (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        xml_node_t *methnode)
+{
+    status_t res;
+    int ret;
+    val_value_t *egress_val;
+    val_value_t *payload_val;
+
+    egress_val = val_find_child(
+        msg->rpc_input,
+        FLOWS_MOD,
+        "egress");
+    payload_val = val_find_child(
+        msg->rpc_input,
+        FLOWS_MOD,
+        "payload");
+
+    printf("transmit-packet egress=%s\n",VAL_STRING(egress_val));
+    transmit_packet(VAL_STRING(egress_val), payload_val->v.binary.ustr, payload_val->v.binary.ustrlen);
+
+    return NO_ERR;
+
+} /* y_transmit_packet_invoke */
+
+
+static void flow_common(val_value_t* flow_val, int delete)
+{
+    printf("flow_common: %s\n", delete?"delete":"add");
+    val_dump_value(flow_val,1);
+
+    status_t res;
+    val_value_t* id_val;
+    val_value_t* match_val;
+    val_value_t* in_port_val;
+    val_value_t* traffic_class_val;
+    val_value_t* match_ethernet_type_val;
+    val_value_t* match_vlan_id_val;
+    val_value_t* actions_val;
+    val_value_t* action_val;
+
+    char flow_spec_str[512]=""; /*compose flow spec str compatible with the ovs-ofctl FLOW format e.g. "in_port=2,actions=output:1" */
+
+
+    id_val=val_find_child(flow_val,FLOWS_MOD,"id");
+    assert(id_val);
+    printf("%s flow: %s\n", delete?"delete":"add", VAL_STRING(id_val));
+
+    res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/in-port", &in_port_val);
+    assert(res==NO_ERR);
+    if(in_port_val) {
+        sprintf(flow_spec_str+strlen(flow_spec_str),"in_port=%d",dict_get_num(&port_to_name_dict, VAL_STRING(in_port_val)));
+    }
+
+
+    res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/ethernet-match/ethernet-type/type", &match_ethernet_type_val);
+    assert(res==NO_ERR);
+    if(match_ethernet_type_val) {
+        /*TODO add ethernet-type match rule*/
+        assert(0);
+    }
+
+    res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/vlan-match/vlan-id/vlan-id", &match_vlan_id_val);
+    if(match_vlan_id_val) {
+        /*TODO add vlan-id match rule*/
+        assert(0);
+    }
+
+
+    sprintf(flow_spec_str+strlen(flow_spec_str),",actions=");
+
+
+    actions_val = val_find_child(flow_val, FLOWS_MOD, "actions");
+    for(action_val = val_find_child(actions_val, FLOWS_MOD, "action");
+        action_val != NULL;
+        action_val = val_find_next_child(actions_val, FLOWS_MOD, "action", action_val)) {
+        val_value_t* order_val;
+        val_value_t* output_action_val;
+        val_value_t* push_vlan_action_val;
+        val_value_t* pop_vlan_action_val;
+
+        order_val = val_find_child(action_val, FLOWS_MOD, "order");
+        assert(order_val);
+        output_action_val = val_find_child(action_val, FLOWS_MOD, "output-action");
+        push_vlan_action_val = val_find_child(action_val, FLOWS_MOD, "push-vlan-action");
+        pop_vlan_action_val = val_find_child(action_val, FLOWS_MOD, "pop-vlan-action");
+        if(output_action_val!=NULL) {
+            val_value_t* out_port_val;
+            out_port_val=val_find_child(output_action_val, FLOWS_MOD, "out-port");
+            sprintf(flow_spec_str+strlen(flow_spec_str),"output:%d",dict_get_num(&port_to_name_dict, VAL_STRING(out_port_val)));
+        } else if(push_vlan_action_val!=NULL) {
+            val_value_t* val;
+            val=val_find_child(push_vlan_action_val,FLOWS_MOD,"vlan-id");
+            if(val) {
+                /*TODO VAL_UINT32(val)*/
+                assert(0);
+            }
+            val=val_find_child(push_vlan_action_val,FLOWS_MOD,"ethernet-type");
+            if(val) {
+                /*TODO VAL_UINT32(val)*/
+                assert(0);
+            }
+            val=val_find_child(push_vlan_action_val,FLOWS_MOD,"pcp");
+            if(val) {
+                /*TODO VAL_UINT32(val)*/
+                assert(0);
+            }
+            val=val_find_child(push_vlan_action_val,FLOWS_MOD,"vlan-cfi");
+            if(val) {
+                /*TODO VAL_UINT32(val)*/
+                assert(0);
+            }
+        } else {
+            assert(0);
+        }
+    }
+
+    struct ofputil_flow_mod fm;
+    struct ofpbuf *reply;
+    char *error;
+    enum ofputil_protocol usable_protocols;
+    enum ofputil_protocol protocol;
+
+    protocol = ofputil_protocol_from_ofp_version(ofp_version);
+
+
+    error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */, delete?OFPFC_DELETE:OFPFC_ADD,
+                                       &usable_protocols);
+    assert(error==NULL);
+
+    vconn_transact_noreply(vconn, ofputil_encode_flow_mod(&fm, protocol), &reply);
+    free(CONST_CAST(struct ofpact *, fm.ofpacts));
+
+}
+
+static void flow_add(val_value_t* flow_val)
+{
+    flow_common(flow_val, 0 /*delete*/);
+}
+
+static void flow_delete(val_value_t* flow_val)
+{
+    flow_common(flow_val, 1 /*delete*/);
+}
+
+static unsigned int get_port_out_action_count(char* if_name, val_value_t* root_val)
+{
+    status_t res;
+    unsigned int match_count=0;
+    obj_template_t* out_port_obj;
+    val_value_t* out_port_val;
+
+    res = xpath_find_schema_target_int("/flow:flows/flow/actions/action/output-action/out-port",&out_port_obj);
+    assert(res==NO_ERR && out_port_obj!=NULL);
+
+    for(out_port_val=val123_get_first_obj_instance(root_val, out_port_obj);
+        out_port_val!=NULL;
+        out_port_val=val123_get_next_obj_instance(root_val, out_port_val)) {
+        if(0==strcmp(VAL_STRING(out_port_val),if_name)) {
+            match_count++;
+        }
+    }
+    return match_count;
+}
+
+static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
+{
+    status_t res;
+
+    val_value_t *flows_cur_val, *flow_cur_val;
+    val_value_t *flows_new_val, *flow_new_val;
+
+
+    if(config_new_val == NULL) {
+        flows_new_val = NULL;
+    } else {
+        flows_new_val = val_find_child(config_new_val,
+                               FLOWS_MOD,
+                               "flows");
+    }
+
+    if(config_cur_val == NULL) {
+        flows_cur_val = NULL;
+    } else {
+        flows_cur_val = val_find_child(config_cur_val,
+                                       FLOWS_MOD,
+                                       "flows");
+    }
+
+    /* 2 step (delete/add) flow configuration */
+
+    /* 1. deactivation loop - deletes all deleted or modified flows */
+    if(flows_cur_val!=NULL) {
+        for (flow_cur_val = val_get_first_child(flows_cur_val);
+             flow_cur_val != NULL;
+             flow_cur_val = val_get_next_child(flow_cur_val)) {
+            flow_new_val = val123_find_match(config_new_val, flow_cur_val);
+            if(flow_new_val==NULL || 0!=val_compare(flow_cur_val,flow_new_val)) {
+                flow_delete(flow_cur_val);
+            }
+        }
+    }
+
+    /* 2. activation loop - adds all new or modified flows */
+    if(flows_new_val!=NULL) {
+        for (flow_new_val = val_get_first_child(flows_new_val);
+             flow_new_val != NULL;
+             flow_new_val = val_get_next_child(flow_new_val)) {
+
+            flow_cur_val = val123_find_match(config_cur_val, flow_new_val);
+            if(flow_cur_val==NULL || 0!=val_compare(flow_new_val,flow_cur_val)) {
+                flow_add(flow_new_val);
+            }
+        }
+    }
+
+    return NO_ERR;
+}
+
+static val_value_t* prev_root_val = NULL;
+static int update_config_wrapper()
+{
+    cfg_template_t        *runningcfg;
+    status_t res;
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    assert(runningcfg!=NULL && runningcfg->root!=NULL);
+    if(prev_root_val!=NULL) {
+        val_value_t* cur_root_val;
+        cur_root_val = val_clone_config_data(runningcfg->root, &res);
+        if(0==val_compare(cur_root_val,prev_root_val)) {
+            /*no change*/
+            val_free_value(cur_root_val);
+            return 0;
+        }
+        val_free_value(cur_root_val);
+    }
+    update_config(prev_root_val, runningcfg->root);
+
+    if(prev_root_val!=NULL) {
+        val_free_value(prev_root_val);
+    }
+    prev_root_val = val_clone_config_data(runningcfg->root, &res);
+    return 0;
+}
+
+static status_t y_commit_complete(void)
+{
+    update_config_wrapper();
+    return NO_ERR;
+}
 
 static status_t
     get_interfaces(ses_cb_t *scb,
@@ -583,14 +687,16 @@ void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
     struct ofpbuf *opo;
     const char *error_msg;
     struct ofpbuf *reply;
+    enum ofputil_protocol usable_protocols;
     enum ofputil_protocol protocol;
-    enum ofputil_protocol protocol_bits;
 
     protocol = ofputil_protocol_from_ofp_version(ofp_version);
 
     ofpbuf_init(&ofpacts, 64);
-    error_msg = ofpacts_parse_actions("output:2", &ofpacts, &protocol_bits);
+    error_msg = ofpacts_parse_actions("output:2", &ofpacts, &usable_protocols);
     assert(error_msg==NULL);
+
+    assert(usable_protocols&protocol);
 
     po.buffer_id = UINT32_MAX;
     po.in_port = OFPP_NONE;//str_to_port_no(ctx->argv[1], ctx->argv[2]);

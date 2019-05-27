@@ -4,12 +4,12 @@
     <network>
       <network-id>example</network-id>
       <node>
-        <node-id>s0</node-id>
+        <node-id>b0</node-id>
         <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
-          <tp-id>s0-eth0</tp-id>
+          <tp-id>b0-eth0</tp-id>
         </termination-point>
         <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
-          <tp-id>s0-eth1</tp-id>
+          <tp-id>b0-eth1</tp-id>
         </termination-point>
         <netconf-connect-params xmlns="urn:tntapi:netconf-node">
           <user>root</user>
@@ -17,16 +17,107 @@
           <ncport>8830</ncport>
         </netconf-connect-params>
       </node>
+      <node>
+        <node-id>b1</node-id>
+        <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+          <tp-id>b1-eth0</tp-id>
+        </termination-point>
+        <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+          <tp-id>b1-eth1</tp-id>
+        </termination-point>
+        <netconf-connect-params xmlns="urn:tntapi:netconf-node">
+          <user>root</user>
+          <server>localhost</server>
+          <ncport>8831</ncport>
+        </netconf-connect-params>
+      </node>
+      <node>
+        <node-id>h0</node-id>
+        <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+          <tp-id>h0-eth0</tp-id>
+        </termination-point>
+        <netconf-connect-params xmlns="urn:tntapi:netconf-node">
+          <user>root</user>
+          <server>localhost</server>
+          <ncport>8832</ncport>
+        </netconf-connect-params>
+      </node>
+      <node>
+        <node-id>h1</node-id>
+        <termination-point xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+          <tp-id>h1-eth0</tp-id>
+        </termination-point>
+        <netconf-connect-params xmlns="urn:tntapi:netconf-node">
+          <user>root</user>
+          <server>localhost</server>
+          <ncport>8833</ncport>
+        </netconf-connect-params>
+      </node>
       <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
         <source>
-          <source-node>switch</source-node>
-          <source-tp>s0-eth0</source-tp>
+          <source-node>b0</source-node>
+          <source-tp>b0-eth1</source-tp>
         </source>
         <destination>
-          <dest-node>switch</dest-node>
-          <dest-tp>s0-eth1</dest-tp>
+          <dest-node>b1</dest-node>
+          <dest-tp>b1-eth0</dest-tp>
         </destination>
-        <link-id>loop</link-id>
+        <link-id>b0-s1</link-id>
+      </link>
+      <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+        <source>
+          <source-node>b1</source-node>
+          <source-tp>b1-eth0</source-tp>
+        </source>
+        <destination>
+          <dest-node>b0</dest-node>
+          <dest-tp>b0-eth1</dest-tp>
+        </destination>
+        <link-id>b1-b0</link-id>
+      </link>
+      <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+        <source>
+          <source-node>h0</source-node>
+          <source-tp>h0-eth0</source-tp>
+        </source>
+        <destination>
+          <dest-node>b0</dest-node>
+          <dest-tp>b0-eth0</dest-tp>
+        </destination>
+        <link-id>h0-b0</link-id>
+      </link>
+      <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+        <source>
+          <source-node>b0</source-node>
+          <source-tp>b0-eth0</source-tp>
+        </source>
+        <destination>
+          <dest-node>h0</dest-node>
+          <dest-tp>h0-eth0</dest-tp>
+        </destination>
+        <link-id>b0-h0</link-id>
+      </link>
+      <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+        <source>
+          <source-node>h1</source-node>
+          <source-tp>h1-eth0</source-tp>
+        </source>
+        <destination>
+          <dest-node>b1</dest-node>
+          <dest-tp>b1-eth1</dest-tp>
+        </destination>
+        <link-id>h1-b1</link-id>
+      </link>
+      <link xmlns="urn:ietf:params:xml:ns:yang:ietf-network-topology">
+        <source>
+          <source-node>b1</source-node>
+          <source-tp>b1-eth1</source-tp>
+        </source>
+        <destination>
+          <dest-node>h1</dest-node>
+          <dest-tp>h1-eth0</dest-tp>
+        </destination>
+        <link-id>b1-h1</link-id>
       </link>
     </network>
   </networks>

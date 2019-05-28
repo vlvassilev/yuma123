@@ -1,0 +1,15 @@
+module mod1 {
+  prefix m1;
+  namespace "http://yuma123.org/ns/test/yangdump/c/mod1";
+
+  rpc myrpc {
+    input {
+      leaf myleaf {
+        type union {
+          type uint32;
+          type string;
+        }
+      }
+    }
+  }
+}

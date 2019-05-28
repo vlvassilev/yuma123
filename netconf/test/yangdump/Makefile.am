@@ -1,2 +1,4 @@
 TESTS=\
-test-yangtree
+test-yangtree \
+test-c
+

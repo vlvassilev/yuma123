@@ -1276,7 +1276,7 @@ void
         if (isconst) {
             ses_putstr(scb, (const xmlChar *)"const ");
         }
-        ses_putstr(scb, (const xmlChar *)"xmlChar");
+        ses_putstr(scb, (const xmlChar *)"val_value_t");
         needstar = TRUE;
         break;
     case NCX_BT_BITS:

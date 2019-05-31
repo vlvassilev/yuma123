@@ -291,6 +291,13 @@ static status_t
     	str++;
     }
 
+    if(NULL!=getenv("INTERFACE_NAME_PREFIX")) {
+        char* prefix=getenv("INTERFACE_NAME_PREFIX");
+        if(strlen(name)<strlen(prefix) || 0!=memcmp(prefix,name,strlen(prefix))) {
+            return NO_ERR; /*skip*/
+        }
+    }
+
     /* interface */
     interface_obj = obj_find_child(interfaces_val->obj,
                                    "ietf-interfaces",

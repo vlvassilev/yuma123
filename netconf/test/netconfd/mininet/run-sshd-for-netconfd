@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+# run_sshd_for_netconfd starts dedicated sshd instance for specified netconfd netconf subsystem unix socket
+#Usage: run_sshd_for_netconfd <ssh_port> <netconfd_subsystem_unix_socket> <sshd_cfg_filename>
+#Example: run_sshd_for_netconfd 8830 /tmp/ncxserver.8830.sock /tmp/ncxserver.8830.sshd.config
+
+ssh_port=$1
+netconf_subsystem_unix_socket=$2
+sshd_cfg_filename=$3
+
+  cat > $sshd_cfg_filename << EOF
+ChallengeResponseAuthentication no
+UsePAM yes
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server
+PermitRootLogin yes
+Port ${ssh_port}
+Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=${ssh_port}@${netconf_subsystem_unix_socket}"
+EOF
+#ForceCommand /usr/sbin/netconf-subsystem-${port}
+
+/usr/sbin/sshd -f $sshd_cfg_filename

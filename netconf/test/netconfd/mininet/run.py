@@ -3,19 +3,19 @@
 """
 Build a simple network from scratch according to topology.xml.
 
-       eth0   eth0  eth1   eth0  eth1   eth0
-  +-----+      +-----+      +-----+      +-----+
-  | h0  |------| br0 |------| br1 |------| h1  |
-  +-----+      +-----+      +-----+      +-----+
+      eth0   eth0 eth1   eth0 eth1   eth0
+  +----+      +----+      +----+      +----+
+  | h0 |------| b0 |------| b1 |------| h1 |
+  +----+      +----+      +----+      +----+
 
 netconfd instance is started on each node with modules
 according to the node type.
 
 Node types:
 
- * h  - host (--module=ietf-interfaces --module=ietf-traffic-generator --module=ietf-traffic-analyzer)
- * br - bridge (--module=ietf-network-bridge-openflow)
- * rt - router (--module=ietf-interfaces --module=ietf-ip --module=ietf-routing)
+ * h - host (--module=ietf-interfaces --module=ietf-traffic-generator --module=ietf-traffic-analyzer)
+ * b - bridge (--module=ietf-network-bridge-openflow)
+ * r - router (--module=ietf-interfaces --module=ietf-ip --module=ietf-routing)
 
 After the network is started configuration is commited and connectivity tested.
 """
@@ -39,14 +39,20 @@ def netconfNet():
     "Create network from scratch using netconfd instance on each node."
 
     info( "*** Creating nodes\n" )
-    h0 = Node( 'h0', inNamespace=False)
-    h1 = Node( 'h1', inNamespace=False)
+    h0 = Node( 'h0', inNamespace=True)
+    h1 = Node( 'h1', inNamespace=True)
     b0 = Node( 'b0', inNamespace=False)
     b1 = Node( 'b1', inNamespace=False)
 
+    ncproxy = Node( 'ncproxy', inNamespace=False)
+
     info( "*** Creating links\n" )
-    Link( h0, b0 )
-    Link( b0, b1, intfName1="b0-eth1")
+    b0.cmd("ip link del b0-eth0")
+    b0.cmd("ip link del b0-eth1")
+    b1.cmd("ip link del b1-eth0")
+    b1.cmd("ip link del b1-eth1")
+    Link( h0, b0, intfName2="b0-eth0")
+    Link( b0, b1, intfName1="b0-eth1", intfName2="b1-eth0")
     Link( h1, b1, intfName2="b1-eth1")
 
     info( "*** Configuring hosts\n" )
@@ -58,8 +64,10 @@ def netconfNet():
     info( str( b1 ) + '\n' )
 
     info( "*** Starting network\n" )
-    h0.cmd( '''./run-netconfd --module=ietf-interfaces --no-startup --port=8832 --ncxserver-sockname=/tmp/ncxserver.8832.sock --superuser=${USER} &''' )
-    h1.cmd( '''./run-netconfd --module=ietf-interfaces --no-startup --port=8833 --ncxserver-sockname=/tmp/ncxserver.8833.sock --superuser=${USER} &''' )
+    h0.cmd( '''INTERFACE_NAME_PREFIX=h0- ./run-netconfd --module=ietf-interfaces --no-startup --port=8832 --ncxserver-sockname=/tmp/ncxserver.8832.sock --superuser=${USER} &''' )
+    ncproxy.cmd( '''./run-sshd-for-netconfd --port=8832 --ncxserver-sockname=/tmp/ncxserver.8832.sock &''' )
+    h1.cmd( '''INTERFACE_NAME_PREFIX=h1- ./run-netconfd --module=ietf-interfaces --no-startup --port=8833 --ncxserver-sockname=/tmp/ncxserver.8833.sock --superuser=${USER} &''' )
+    ncproxy.cmd( '''./run-sshd-for-netconfd --port=8833 --ncxserver-sockname=/tmp/ncxserver.8833.sock &''' )
 
     #bridge b0
     b0.cmd( '''VCONN_ARG=ptcp:16636 ./run-netconfd --module=ietf-network-bridge-openflow --no-startup --superuser=${USER} --port=8830 --ncxserver-sockname=/tmp/ncxserver.8830.sock &''' )
@@ -94,6 +102,8 @@ def netconfNet():
     b1.cmd( 'ovs-vsctl set-controller dp1 tcp:127.0.0.1:16635' )
 
     sleep(10)
+    raw_input("Press Enter to continue...")
+
 
     tree=etree.parse("topology.xml")
     network = tree.xpath('/nc:config/nd:networks/nd:network', namespaces=namespaces)[0]
@@ -136,7 +146,7 @@ create /flows/flow[id='h1-to-h0'] -- match/in-port=b1-eth1 actions/action[order=
 
 
     info( "*** Running test\n" )
-    h0.cmdPrint( 'ping -c1 ' + h1.IP() )
+    h0.cmdPrint( 'ping -I h0-eth0 -c10 ' + h1.IP() )
 
     b0.cmdPrint( 'ovs-ofctl dump-flows dp0' )
 
@@ -145,9 +155,13 @@ create /flows/flow[id='h1-to-h0'] -- match/in-port=b1-eth1 actions/action[order=
 
     tntapi.print_state_ietf_interfaces_statistics_delta(network, state_before, state_after)
 
+    raw_input("Press Enter to continue...")
+
     info( "*** Stopping network\n" )
+    b0.cmd( 'killall -KILL netconfd' )
     b0.cmd( 'ovs-vsctl del-br dp0' )
     b0.deleteIntfs()
+    b1.cmd( 'killall -KILL netconfd' )
     b1.cmd( 'ovs-vsctl del-br dp1' )
     b1.deleteIntfs()
     info( '\n' )

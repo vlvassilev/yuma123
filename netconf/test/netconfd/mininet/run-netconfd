@@ -1,28 +1,5 @@
 #!/bin/sh -e
 
-# run_netconf_sshd starts dedicated sshd instance for specified NETCONF subsystem instance
-#Usage: run_netconf_sshd <ssh_port> <netconf_subsystem_unix_socket> <sshd_cfg_filename>
-#Example: run_netconf_sshd 8830 /tmp/ncxserver.8830.sock /tmp/ncxserver.8830.sshd.config
-run_netconf_sshd()
-{
-  ssh_port=$1
-  netconf_subsystem_unix_socket=$2
-  sshd_cfg_filename=$3
-
-  cat > $sshd_cfg_filename << EOF
-ChallengeResponseAuthentication no
-UsePAM yes
-AcceptEnv LANG LC_*
-Subsystem sftp /usr/lib/openssh/sftp-server
-PermitRootLogin yes
-Port ${ssh_port}
-Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=${ssh_port}@${netconf_subsystem_unix_socket}"
-EOF
-#ForceCommand /usr/sbin/netconf-subsystem-${port}
-
-  /usr/sbin/sshd -f $sshd_cfg_filename
-}
-
 port=830
 ncxserver_sockname=/tmp/ncxserver.sock
 
@@ -46,6 +23,7 @@ kill -KILL `fuser $ncxserver_sockname 2>/dev/null` || true
 kill -KILL `fuser --ipv4 -v -n tcp $port 2>/dev/null` || true
 rm $ncxserver_sockname $sshd_cfg_filename || true
 
-run_netconf_sshd $port $ncxserver_sockname $sshd_cfg_filename
+#run dedicated sshd
+./run-sshd-for-netconfd $port $ncxserver_sockname $sshd_cfg_filename
 
 /usr/sbin/netconfd $args

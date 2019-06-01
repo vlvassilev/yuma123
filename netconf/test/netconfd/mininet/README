@@ -1,0 +1,40 @@
+This testcase demonstrates the use of netconfd for management of nodes
+in a network environment.
+
+Usage:
+ sudo ./run.py
+
+
+mininet is used to create network with 3 type of nodes:
+
+* hosts (h0,h1) ietf-interfaces (statistics), ietf-traffic-generator, ietf-traffic-analyzer
+* bridges (b0,b1) ietf-interfaces (statistics), ietf-network-bridge (OpenFlow+openvswitch implementation)
+* routers (none so far) ietf-interfaces (statistics), ietf-routing (Unix cli tools route,ip implementation)
+
+according to topology.xml and start netconfd instances to manage each with relevant
+set of module implementations provided as yuma123 example-modules.
+
+         h0-eth0  b0-eth0  b0-eth1  b1-eth0  b1-eth1  h1-eth0
+  +--------+        +--------+        +--------+        +--------+
+  |   h0   |--------|   b0   |--------|   b1   |--------|   h1   |
+  +--------+        +--------+        +--------+        +--------+
+
+The NETCONF server endpoint parameters for access to each of the nodes are
+formally specified in the topology.xml and are:
+
+* h0 localhost:8830
+* h1 localhost:8831
+* b0 localhost:8832
+* b1 localhost:8833
+
+All NETCONF server instances are started with root as superuser
+
+Your controller/client script can connect and manage the nodes using NETCONF
+once the network is created.
+
+Dependencies:
+
+* yuma123 installed (with ietf-interface and ietf-network-bridge example SILs)
+* tntapi for client side python scripting (optional)
+* since mininet requires root priviliges authorized local ssh key for root
+  (root@host:~# ssh root@localhost #should work without password)

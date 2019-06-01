@@ -10,14 +10,13 @@ netconf/modules \
 example-modules/helloworld \
 example-modules/ietf-interfaces \
 example-modules/ietf-system \
-example-modules/ietf-network-bridge \
 example-modules/yangcli-to-rpc \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
 netconf/man \
 netconf/src/yangdump
 
-
+#example-modules/ietf-network-bridge
 #netconf/src/yangdiff
 
 if WITH_TECLA

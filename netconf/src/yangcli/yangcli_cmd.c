@@ -2271,7 +2271,6 @@ static status_t
     val_value_t     *valset, *modval, *revval, *devval;
     ncx_module_t    *mod;
     modptr_t        *modptr;
-    dlq_hdr_t       *mgrloadQ;
     dlq_hdr_t        savedevQ;
     logfn_t          logfn;
     status_t         res;
@@ -2348,8 +2347,7 @@ static status_t
             if (!modptr) {
                 res = ERR_INTERNAL_MEM;
             } else {
-                mgrloadQ = get_mgrloadQ();
-                dlq_enque(modptr, mgrloadQ);
+                dlq_enque(modptr, &server_cb->modptrQ);
             }
         }
     }

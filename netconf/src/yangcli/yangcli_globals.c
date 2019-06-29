@@ -117,9 +117,6 @@ static boolean         runcommanddone;
 /* controls automaic command line history buffer load/save */
 static boolean autohistory;
 
-/* Q of modtrs that have been loaded with 'mgrload' */
-static dlq_hdr_t       mgrloadQ;
-
 /* temporary file control block for the program instance */
 static ncxmod_temp_progcb_t  *temp_progcb;
 

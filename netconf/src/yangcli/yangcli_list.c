@@ -413,24 +413,6 @@ static status_t
                 }
             }
         }
-
-        for (modptr = (modptr_t *)
-                 dlq_firstEntry(get_mgrloadQ());
-             modptr != NULL && res == NO_ERR;
-             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-            obj = ncx_get_first_object(modptr->mod);
-            while (obj && res == NO_ERR) {
-                if (obj_is_data_db(obj) && 
-                    obj_has_name(obj) &&
-                    !obj_is_hidden(obj) && 
-                    !obj_is_abstract(obj)) {
-                    anyout = TRUE;                  
-                    res = do_list_one_command(obj, mode);
-                }
-                obj = ncx_get_next_object(modptr->mod, obj);
-            }
-        }
     }
 
     if (!anyout) {

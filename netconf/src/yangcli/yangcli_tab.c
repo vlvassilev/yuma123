@@ -678,18 +678,6 @@ static obj_template_t *
                 return modObj;
             }
         }
-
-        /* check manager loaded commands next */
-        for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
-             modptr != NULL;
-             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-            modObj = check_find_xpath_top_obj(modptr->mod, line,
-                                              word_start, cmdlen);
-            if (modObj != NULL) {
-                return modObj;
-            }
-        }
     } else {
         ncx_module_t * mod = ncx_get_first_session_module();
         for(;mod!=NULL; mod = ncx_get_next_session_module(mod)) {
@@ -786,17 +774,6 @@ static status_t
         modptr_t *modptr = (modptr_t *)
             dlq_firstEntry(&comstate->server_cb->modptrQ);
         for (; modptr != NULL; modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-            res = check_save_xpath_completion(rpc, cpl, modptr->mod, line,
-                                              word_start, word_end, cmdlen);
-            if (res != NO_ERR) {
-                return res;
-            }
-        }
-
-        /* check manager loaded commands next */
-        for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
-             modptr != NULL;
-             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
             res = check_save_xpath_completion(rpc, cpl, modptr->mod, line,
                                               word_start, word_end, cmdlen);
             if (res != NO_ERR) {
@@ -1120,22 +1097,6 @@ static status_t
 
 #ifdef DEBUG_TRACE
                 log_debug("\nFilling from server_cb module %s", 
-                          modptr->mod->name);
-#endif
-
-                res = fill_one_module_completion_commands
-                    (modptr->mod, cpl, comstate, line, word_start,
-                     word_end, cmdlen);
-            }
-
-            /* list manager loaded commands next */
-            for (modptr = (modptr_t *)
-                     dlq_firstEntry(get_mgrloadQ());
-                 modptr != NULL && res == NO_ERR;
-                 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-#ifdef DEBUG_TRACE
-                log_debug("\nFilling from mgrloadQ module %s", 
                           modptr->mod->name);
 #endif
 

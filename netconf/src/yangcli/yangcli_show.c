@@ -596,13 +596,6 @@ static status_t
             res = do_show_one_module(modptr->mod, mode);
             anyout = TRUE;
         }
-        for (modptr = (modptr_t *)dlq_firstEntry(get_mgrloadQ());
-             modptr != NULL && res == NO_ERR;
-             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-            res = do_show_one_module(modptr->mod, mode);
-            anyout = TRUE;
-        }
     } else {
         mod = ncx_get_first_module();
         while (mod && res == NO_ERR) {
@@ -710,19 +703,6 @@ static status_t
     if (use_servercb(server_cb)) {
         for (modptr = (modptr_t *)
                  dlq_firstEntry(&server_cb->modptrQ);
-             modptr != NULL;
-             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-            for (obj = ncx_get_first_object(modptr->mod);
-                 obj != NULL && res == NO_ERR;
-                 obj = ncx_get_next_object(modptr->mod, obj)) {
-
-                res = do_show_one_object(obj, mode, &anyout);
-            }
-        }
-
-        for (modptr = (modptr_t *)
-                 dlq_firstEntry(get_mgrloadQ());
              modptr != NULL;
              modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 

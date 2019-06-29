@@ -685,19 +685,6 @@ extern const xmlChar *
 extern status_t
     replace_connect_valset (const val_value_t *valset);
 
-
-/********************************************************************
-* FUNCTION get_mgrloadQ
-* 
-*  Get the mgrloadQ value pointer
-* 
-* RETURNS:
-*    mgrloadQ variable
-*********************************************************************/
-extern dlq_hdr_t *
-    get_mgrloadQ (void);
-
-
 /********************************************************************
 * FUNCTION get_aliasQ
 * 

@@ -164,9 +164,6 @@ static boolean         runcommanddone;
 /* controls automaic command line history buffer load/save */
 static boolean autohistory;
 
-/* Q of modtrs that have been loaded with 'mgrload' */
-static dlq_hdr_t       mgrloadQ;
-
 /* Q of alias_cb_t structs representing all command aliases */
 static dlq_hdr_t      aliasQ;
 
@@ -3785,7 +3782,6 @@ void yangcli_init_module_static_vars()
     runscriptdone = FALSE;
     runcommand = NULL;
     runcommanddone = FALSE;
-    dlq_createSQue(&mgrloadQ);
     aliases_file = YANGCLI_DEF_ALIASES_FILE;
     autoaliases = TRUE;
     autocomp = TRUE;
@@ -4157,11 +4153,6 @@ static void
         }
     }
 
-    while (!dlq_empty(&mgrloadQ)) {
-        modptr = (modptr_t *)dlq_deque(&mgrloadQ);
-        free_modptr(modptr);
-    }
-
     while (!dlq_empty(&server_cbQ)) {
         server_cb = (server_cb_t *)dlq_deque(&server_cbQ);
         free_server_cb(server_cb);
@@ -4524,21 +4515,6 @@ status_t
     return NO_ERR;
 
 }  /* replace_connect_valset */
-
-
-/********************************************************************
-* FUNCTION get_mgrloadQ
-* 
-*  Get the mgrloadQ value pointer
-* 
-* RETURNS:
-*    mgrloadQ variable
-*********************************************************************/
-dlq_hdr_t *
-    get_mgrloadQ (void)
-{
-    return &mgrloadQ;
-}  /* get_mgrloadQ */
 
 
 /********************************************************************

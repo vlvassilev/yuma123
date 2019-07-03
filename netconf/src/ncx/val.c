@@ -3791,6 +3791,7 @@ void
                         boolean configonly)
 {
     FILE               *outputfile;
+    unsigned int       i;
 
 #ifdef DEBUG
     if (!val) {
@@ -3999,8 +4000,13 @@ void
         }
         break;
     case NCX_BT_BINARY:
-        (*dumpfn)("binary string, length '%u'",
-                  val->v.binary.ustrlen);
+        (*dumpfn)("binary string, length '%u': ", val->v.binary.ustrlen);
+        for(i=0;((i<val->v.binary.ustrlen) && (i<16));i++) {
+            (*dumpfn)("%02X",(unsigned int)(val->v.binary.ustr[i]));
+        }
+        if(i<val->v.binary.ustrlen) {
+            (*dumpfn)("...");
+        }
         break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:

@@ -151,11 +151,8 @@ static status_t
 } /* y_transmit_packet_invoke */
 
 
-static void flow_common(val_value_t* flow_val, int delete)
+static char* make_flow_spec_str(val_value_t* flow_val)
 {
-    printf("flow_common: %s\n", delete?"delete":"add");
-    val_dump_value(flow_val,1);
-
     status_t res;
     val_value_t* id_val;
     val_value_t* match_val;
@@ -166,12 +163,10 @@ static void flow_common(val_value_t* flow_val, int delete)
     val_value_t* actions_val;
     val_value_t* action_val;
 
-    char flow_spec_str[512]=""; /*compose flow spec str compatible with the ovs-ofctl FLOW format e.g. "in_port=2,actions=output:1" */
-
+    char flow_spec_str[512]=""; /* flow spec str compatible with the ovs-ofctl FLOW format e.g. "in_port=2,actions=output:1" */
 
     id_val=val_find_child(flow_val,FLOWS_MOD,"id");
     assert(id_val);
-    printf("%s flow: %s\n", delete?"delete":"add", VAL_STRING(id_val));
 
     res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/in-port", &in_port_val);
     assert(res==NO_ERR);
@@ -241,23 +236,31 @@ static void flow_common(val_value_t* flow_val, int delete)
             assert(0);
         }
     }
+    return strdup(flow_spec_str);
+}
+
+static void flow_common(val_value_t* flow_val, int delete)
+{
+    printf("flow_common: %s\n", delete?"delete":"add");
+    val_dump_value(flow_val,1);
 
     struct ofputil_flow_mod fm;
     struct ofpbuf *reply;
     char *error;
     enum ofputil_protocol usable_protocols;
     enum ofputil_protocol protocol;
+    char* flow_spec_str;
 
     protocol = ofputil_protocol_from_ofp_version(ofp_version);
 
-
+    flow_spec_str = make_flow_spec_str(flow_val);
     error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */, delete?OFPFC_DELETE:OFPFC_ADD,
                                        &usable_protocols);
     assert(error==NULL);
 
     vconn_transact_noreply(vconn, ofputil_encode_flow_mod(&fm, protocol), &reply);
     free(CONST_CAST(struct ofpact *, fm.ofpacts));
-
+    free(flow_spec_str);
 }
 
 static void flow_add(val_value_t* flow_val)
@@ -289,6 +292,12 @@ static unsigned int get_port_out_action_count(char* if_name, val_value_t* root_v
     }
     return match_count;
 }
+
+static status_t
+    get_flow_statistics(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val);
 
 static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
 {
@@ -322,7 +331,7 @@ static int update_config(val_value_t* config_cur_val, val_value_t* config_new_va
              flow_cur_val != NULL;
              flow_cur_val = val_get_next_child(flow_cur_val)) {
             flow_new_val = val123_find_match(config_new_val, flow_cur_val);
-            if(flow_new_val==NULL || 0!=val_compare(flow_cur_val,flow_new_val)) {
+            if(flow_new_val==NULL || 0!=val_compare_ex(flow_cur_val,flow_new_val,TRUE)) {
                 flow_delete(flow_cur_val);
             }
         }
@@ -335,8 +344,24 @@ static int update_config(val_value_t* config_cur_val, val_value_t* config_new_va
              flow_new_val = val_get_next_child(flow_new_val)) {
 
             flow_cur_val = val123_find_match(config_cur_val, flow_new_val);
-            if(flow_cur_val==NULL || 0!=val_compare(flow_new_val,flow_cur_val)) {
+            if(flow_cur_val==NULL || 0!=val_compare_ex(flow_new_val,flow_cur_val,TRUE)) {
                 flow_add(flow_new_val);
+
+                /* register flow-statistics */
+                obj_template_t* flow_statistics_obj;
+                val_value_t* flow_statistics_val;
+                flow_statistics_obj = obj_find_child(flow_new_val->obj,
+                                   "ietf-network-bridge-flows",
+                                   "flow-statistics");
+                assert(flow_statistics_obj);
+
+                flow_statistics_val = val_new_value();
+                assert(flow_statistics_val);
+
+                val_init_virtual(flow_statistics_val,
+                     get_flow_statistics,
+                     flow_statistics_obj);
+                val_add_child(flow_statistics_val, flow_new_val);
             }
         }
     }
@@ -456,23 +481,16 @@ static status_t
                                    "in-discards");
     assert(in_discards_obj);
 
-    request = ofputil_encode_port_desc_stats_request(vconn_get_version(vconn), /*port*/ OFPP_ANY);
-    retval=vconn_transact(vconn, request, &reply);
-    assert(retval==0);
-    ofp_print(stdout, reply->data, reply->size, 10 + 1);
-    ofpbuf_delete(reply);
 
     struct port_iterator pi;
     struct ofputil_phy_port p;
-
-    dict_clear(&port_to_name_dict);
 
     for (port_iterator_init(&pi, vconn); port_iterator_next(&pi, &p); ) {
         struct ofputil_port_stats ps;
 
         printf("[%d] %s\n", p.port_no, p.name);
-        dict_add(&port_to_name_dict, p.port_no, p.name);
-
+        //dict_add(&port_to_name_dict, p.port_no, p.name);
+        assert(p.port_no==dict_get_num(&port_to_name_dict, p.name));
         interface_val=val_new_value();
         assert(interface_val);
         val_init_from_template(interface_val, interface_obj);
@@ -603,6 +621,103 @@ static status_t
     return res;
 }
 
+static status_t
+    get_flow_statistics(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val)
+{
+    status_t res;
+    res = NO_ERR;
+    int retval;
+    struct ofpbuf *request;
+    struct ofpbuf *reply;
+    int port;
+    enum ofputil_protocol protocol;
+
+    obj_template_t* obj;
+    val_value_t* val;
+
+    val_value_t* flow_statistics_val;
+
+    flow_statistics_val = dst_val;
+
+    res = NO_ERR;
+    printf("Called get_flow_statistics.\n");
+
+
+    struct ofputil_flow_stats fs;
+    struct ofpbuf ofpacts;
+    ovs_be32 send_xid;
+    ovs_be32 recv_xid;
+    struct ofputil_flow_stats_request fsr;
+    char* flow_spec_str;
+    enum ofputil_protocol usable_protocols;
+    char* error;
+
+    /* fill the protocol independent flow stats request struct */
+    flow_spec_str = make_flow_spec_str(flow_statistics_val->parent);
+
+    struct ofputil_flow_mod fm;
+    error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */, OFPFC_ADD /* not important */,
+                                       &usable_protocols);
+    assert(error==NULL);
+    free(flow_spec_str);
+
+    fsr.aggregate = false;
+    //match_init_catchall(&fsr.match);
+    fsr.match=fm.match;
+    fsr.out_port = OFPP_ANY;
+    fsr.out_group = OFPG_ANY;
+    fsr.table_id = 0xff;
+    fsr.cookie = fsr.cookie_mask = htonll(0);
+
+    /* generate protocol specific request */
+    protocol = ofputil_protocol_from_ofp_version(ofp_version);
+    request = ofputil_encode_flow_stats_request(&fsr, protocol);
+
+    send_xid = ((struct ofp_header *) request->data)->xid;
+    vconn_send_block(vconn, request);
+    vconn_recv_block(vconn, &reply);
+    recv_xid = ((struct ofp_header *) reply->data)->xid;
+    assert(send_xid == recv_xid);
+
+    /* Pull an individual flow stats reply out of the message. */
+    ofpbuf_init(&ofpacts, 0);
+    retval = ofputil_decode_flow_stats_reply(&fs, reply, false, &ofpacts);
+    assert(retval==0);
+
+    ofpbuf_uninit(&ofpacts);
+    ofpbuf_delete(reply);
+
+    /* packet-count */
+    obj = obj_find_child(flow_statistics_val->obj,
+                         "ietf-network-bridge-flows",
+                         "packet-count");
+    assert(obj);
+
+    val=val_new_value();
+    assert(val);
+    val_init_from_template(val, obj);
+    VAL_UINT64(val)=fs.packet_count;
+    val_add_child(val, flow_statistics_val);
+
+    /* byte-count */
+    obj = obj_find_child(flow_statistics_val->obj,
+                         "ietf-network-bridge-flows",
+                         "byte-count");
+    assert(obj);
+
+    val=val_new_value();
+    assert(val);
+    val_init_from_template(val, obj);
+    VAL_UINT64(val)=fs.byte_count;
+    val_add_child(val, flow_statistics_val);
+
+
+    return res;
+}
+
 static void
 process_echo_request(const struct ofp_header *rq)
 {
@@ -721,7 +836,7 @@ void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
 
 int network_bridge_timer(uint32 timer_id, void *cookie)
 {
-    int retval;
+    int retval=0;
     struct ofpbuf *msg;
     struct ofpbuf *request;
     struct ofpbuf *reply;
@@ -873,7 +988,7 @@ status_t
         }
 
         printf("Listen on %s ...\n", vconn_arg);
-        retval = pvconn_open(vconn_arg, get_allowed_ofp_versions(), DSCP_DEFAULT,
+        retval = pvconn_open(vconn_arg, /*get_allowed_ofp_versions()*/(1u << OFP10_VERSION), DSCP_DEFAULT,
                             &pvconn);
 
         printf("Waiting for connection");
@@ -915,6 +1030,16 @@ status_t
         ofpbuf_delete(reply);
 
         dict_init(&port_to_name_dict);
+        struct port_iterator pi;
+        struct ofputil_phy_port p;
+
+        for (port_iterator_init(&pi, vconn); port_iterator_next(&pi, &p); ) {
+            struct ofputil_port_stats ps;
+
+            printf("[%d] %s\n", p.port_no, p.name);
+            dict_add(&port_to_name_dict, p.port_no, p.name);
+        }
+        port_iterator_destroy(&pi);
     }
 
     return res;

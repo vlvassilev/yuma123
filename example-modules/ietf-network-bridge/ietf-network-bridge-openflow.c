@@ -158,10 +158,13 @@ static char* make_flow_spec_str(val_value_t* flow_val)
     val_value_t* match_val;
     val_value_t* in_port_val;
     val_value_t* traffic_class_val;
+    val_value_t* match_ethernet_source_address_val;
+    val_value_t* match_ethernet_destination_address_val;
     val_value_t* match_ethernet_type_val;
     val_value_t* match_vlan_id_val;
     val_value_t* actions_val;
     val_value_t* action_val;
+    boolean      add_comma;
 
     char flow_spec_str[512]=""; /* flow spec str compatible with the ovs-ofctl FLOW format e.g. "in_port=2,actions=output:1" */
 
@@ -174,18 +177,37 @@ static char* make_flow_spec_str(val_value_t* flow_val)
         sprintf(flow_spec_str+strlen(flow_spec_str),"in_port=%d",dict_get_num(&port_to_name_dict, VAL_STRING(in_port_val)));
     }
 
+    res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/ethernet-match/ethernet-destination/address", &match_ethernet_destination_address_val);
+    assert(res==NO_ERR);
+    if(match_ethernet_destination_address_val) {
+        val_value_t* mask_val;
+        mask_val = val_find_child(match_ethernet_destination_address_val->parent,"ietf-network-bridge-flows","mask");
+        sprintf(flow_spec_str+strlen(flow_spec_str),",dl_dst=%s",VAL_STRING(match_ethernet_destination_address_val));
+        if(mask_val) {
+        sprintf(flow_spec_str+strlen(flow_spec_str),",/%s",VAL_STRING(mask_val));
+        }
+    }
+
+    res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/ethernet-match/ethernet-source/address", &match_ethernet_source_address_val);
+    assert(res==NO_ERR);
+    if(match_ethernet_source_address_val) {
+        val_value_t* mask_val;
+        mask_val = val_find_child(match_ethernet_source_address_val->parent,"ietf-network-bridge-flows","mask");
+        sprintf(flow_spec_str+strlen(flow_spec_str),",dl_src=%s",VAL_STRING(match_ethernet_source_address_val));
+        if(mask_val) {
+        sprintf(flow_spec_str+strlen(flow_spec_str),",/%s",VAL_STRING(mask_val));
+        }
+    }
 
     res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/ethernet-match/ethernet-type/type", &match_ethernet_type_val);
     assert(res==NO_ERR);
     if(match_ethernet_type_val) {
-        /*TODO add ethernet-type match rule*/
-        assert(0);
+        sprintf(flow_spec_str+strlen(flow_spec_str),",dl_type=%u",VAL_UINT32(match_ethernet_type_val));
     }
 
     res = xpath_find_val_target(flow_val, NULL/*mod*/, "./match/vlan-match/vlan-id/vlan-id", &match_vlan_id_val);
     if(match_vlan_id_val) {
-        /*TODO add vlan-id match rule*/
-        assert(0);
+        sprintf(flow_spec_str+strlen(flow_spec_str),",dl_vlan=%u",VAL_UINT32(match_vlan_id_val));
     }
 
 
@@ -193,6 +215,7 @@ static char* make_flow_spec_str(val_value_t* flow_val)
 
 
     actions_val = val_find_child(flow_val, FLOWS_MOD, "actions");
+    add_comma=FALSE;
     for(action_val = val_find_child(actions_val, FLOWS_MOD, "action");
         action_val != NULL;
         action_val = val_find_next_child(actions_val, FLOWS_MOD, "action", action_val)) {
@@ -200,6 +223,12 @@ static char* make_flow_spec_str(val_value_t* flow_val)
         val_value_t* output_action_val;
         val_value_t* push_vlan_action_val;
         val_value_t* pop_vlan_action_val;
+
+        if(add_comma) {
+            sprintf(flow_spec_str+strlen(flow_spec_str),",");
+        } else {
+            add_comma=TRUE;
+        }
 
         order_val = val_find_child(action_val, FLOWS_MOD, "order");
         assert(order_val);
@@ -214,24 +243,23 @@ static char* make_flow_spec_str(val_value_t* flow_val)
             val_value_t* val;
             val=val_find_child(push_vlan_action_val,FLOWS_MOD,"vlan-id");
             if(val) {
-                /*TODO VAL_UINT32(val)*/
-                assert(0);
+                sprintf(flow_spec_str+strlen(flow_spec_str),"mod_vlan_vid:%u", VAL_UINT16(val));
             }
             val=val_find_child(push_vlan_action_val,FLOWS_MOD,"ethernet-type");
             if(val) {
-                /*TODO VAL_UINT32(val)*/
-                assert(0);
+                sprintf(flow_spec_str+strlen(flow_spec_str),"push_vlan:%u", VAL_UINT32(val));
             }
             val=val_find_child(push_vlan_action_val,FLOWS_MOD,"pcp");
             if(val) {
-                /*TODO VAL_UINT32(val)*/
-                assert(0);
+                sprintf(flow_spec_str+strlen(flow_spec_str),"mod_vlan_pcp:%u", VAL_UINT32(val));
             }
             val=val_find_child(push_vlan_action_val,FLOWS_MOD,"vlan-cfi");
             if(val) {
                 /*TODO VAL_UINT32(val)*/
                 assert(0);
             }
+        } else if(pop_vlan_action_val!=NULL) {
+            sprintf(flow_spec_str+strlen(flow_spec_str),"strip_vlan");
         } else {
             assert(0);
         }
@@ -627,6 +655,7 @@ static status_t
                          val_value_t *vir_val,
                          val_value_t *dst_val)
 {
+    int ret;
     status_t res;
     res = NO_ERR;
     int retval;
@@ -678,9 +707,8 @@ static status_t
 
     send_xid = ((struct ofp_header *) request->data)->xid;
     vconn_send_block(vconn, request);
-    vconn_recv_block(vconn, &reply);
-    recv_xid = ((struct ofp_header *) reply->data)->xid;
-    assert(send_xid == recv_xid);
+    ret = vconn_recv_xid(vconn, send_xid, &reply);
+    assert(ret==0);
 
     /* Pull an individual flow stats reply out of the message. */
     ofpbuf_init(&ofpacts, 0);
@@ -791,7 +819,7 @@ process_packet_in(const struct ofp_header *msg)
     char* ingress;
     uint8_t* payload_buf;
     uint32_t payload_len;
-    send_packet_received_notification(dict_get(&port_to_name_dict, 0), pin.packet, pin.packet_len);
+    send_packet_received_notification(dict_get(&port_to_name_dict, pin.flow_metadata.flow.in_port.ofp_port), pin.packet, pin.packet_len);
 }
 
 void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
@@ -804,11 +832,13 @@ void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
     struct ofpbuf *reply;
     enum ofputil_protocol usable_protocols;
     enum ofputil_protocol protocol;
+    char action_str[]="output:2147483648";
 
     protocol = ofputil_protocol_from_ofp_version(ofp_version);
 
     ofpbuf_init(&ofpacts, 64);
-    error_msg = ofpacts_parse_actions("output:2", &ofpacts, &usable_protocols);
+    sprintf(action_str,"output:%u",dict_get_num(&port_to_name_dict, if_name));
+    error_msg = ofpacts_parse_actions(action_str, &ofpacts, &usable_protocols);
     assert(error_msg==NULL);
 
     assert(usable_protocols&protocol);
@@ -818,11 +848,13 @@ void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
     po.ofpacts = ofpacts.data;
     po.ofpacts_len = ofpacts.size;
 
-    int port_num=dict_get_num(&port_to_name_dict, if_name);
-    assert(port_num>=0);
-
+#if 0
     error_msg = eth_from_hex("6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112", &packet);
     assert(error_msg==0);
+#else
+    packet=dp_packet_new(len);
+    dp_packet_put(packet, (const void *) packet_data, len);
+#endif
 
     po.packet = dp_packet_data(packet);
     po.packet_len = dp_packet_size(packet);
@@ -836,6 +868,7 @@ void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
 
 int network_bridge_timer(uint32 timer_id, void *cookie)
 {
+    unsigned int i;
     int retval=0;
     struct ofpbuf *msg;
     struct ofpbuf *request;
@@ -843,14 +876,16 @@ int network_bridge_timer(uint32 timer_id, void *cookie)
     enum ofptype type;
 
     printf("In network_bridge_timer.\n");
-    do {
+    for(i=0;retval==0;i++) {
         retval = vconn_recv(vconn, &msg);
         if(retval == EAGAIN) {
             break;
         } else if(retval!=0) {
             assert(0);
         }
-        ofp_print(stdout, msg->data, msg->size, 10 + 1);
+        if(i<10) {
+            ofp_print(stdout, msg->data, msg->size, 10 + 1);
+        }
 
         if(ofptype_pull(&type, msg)) {
             assert(0);
@@ -859,7 +894,9 @@ int network_bridge_timer(uint32 timer_id, void *cookie)
         if (type == OFPTYPE_ECHO_REQUEST) {
             process_echo_request(msg->header);
         } else if (type == OFPTYPE_PACKET_IN) {
-            process_packet_in(msg->header);
+            if(i<10) {
+                process_packet_in(msg->header);
+            }
         } else if (type == OFPTYPE_FLOW_REMOVED) {
             /* Nothing to do. */
             assert(0);
@@ -867,8 +904,10 @@ int network_bridge_timer(uint32 timer_id, void *cookie)
 
         ofpbuf_delete(msg);
 
-    } while(retval==0);
-
+    }
+    if(i>1) {
+        printf("OpenFlow notifications processed: %u\n", i);
+    }
     printf("Out network_bridge_timer.\n");
     return 0;
 }

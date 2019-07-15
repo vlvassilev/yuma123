@@ -9,8 +9,7 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
-
-
+#include <errno.h>
 #include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
@@ -34,12 +33,16 @@
 #include <openvswitch/ofp-parse.h>
 #include <openvswitch/ofp-print.h>
 #include <openvswitch/ofpbuf.h>
-#include <openflow/openflow.h>
-#include <lib/ofp-version-opt.h>
-#include <lib/flow.h>
-#include <lib/socket-util.h>
-#include <lib/flow.h>
-#include <lib/dp-packet.h>
+#include <openvswitch/ofp-port.h>
+#include <openvswitch/ofp-packet.h>
+#include <openvswitch/ofp-print.h>
+#include <openvswitch/ofp-flow.h>
+#include <openvswitch/ofp-msgs.h>
+#include <openvswitch/ofp-switch.h>
+#include <openvswitch/ofp-util.h>
+
+#include <netinet/ip.h>
+#define DSCP_DEFAULT (IPTOS_PREC_INTERNETCONTROL >> 2)
 
 #define SCHED_STATE_MOD "ietf-network-bridge-scheduler-state"
 #define FLOWS_MOD "ietf-network-bridge-flows"
@@ -282,8 +285,11 @@ static void flow_common(val_value_t* flow_val, int delete)
     protocol = ofputil_protocol_from_ofp_version(ofp_version);
 
     flow_spec_str = make_flow_spec_str(flow_val);
-    error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */, delete?OFPFC_DELETE:OFPFC_ADD,
-                                       &usable_protocols);
+    error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */,
+                                   NULL,
+                                  NULL,
+                                   delete?OFPFC_DELETE:OFPFC_ADD,
+                                   &usable_protocols);
     assert(error==NULL);
 
     vconn_transact_noreply(vconn, ofputil_encode_flow_mod(&fm, protocol), &reply);
@@ -556,7 +562,6 @@ static status_t
     request = ofputil_encode_dump_ports_request(vconn_get_version(vconn), /*port*/ OFPP_ANY);
     retval=vconn_transact(vconn, request, &reply);
     assert(retval==0);
-    ofp_print(stdout, reply->data, reply->size, 10 + 1);
 
     for (;;) {
         char* port_name;
@@ -568,7 +573,7 @@ static status_t
         }
         assert(retval==0);
 
-        printf("[%u]", ofp_to_u16(ps.port_no));
+        printf("[%u]", (uint32_t)ps.port_no);
         printf("\n");
 
         printf("rx:\n");
@@ -687,12 +692,15 @@ static status_t
     /* fill the protocol independent flow stats request struct */
     flow_spec_str = make_flow_spec_str(flow_statistics_val->parent);
 
+#if 0
     struct ofputil_flow_mod fm;
-    error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */, OFPFC_ADD /* not important */,
-                                       &usable_protocols);
+    error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */,
+                                   NULL,
+                                   NULL,
+                                   OFPFC_ADD /* not important */,
+                                   &usable_protocols);
     assert(error==NULL);
     free(flow_spec_str);
-
     fsr.aggregate = false;
     //match_init_catchall(&fsr.match);
     fsr.match=fm.match;
@@ -700,6 +708,9 @@ static status_t
     fsr.out_group = OFPG_ANY;
     fsr.table_id = 0xff;
     fsr.cookie = fsr.cookie_mask = htonll(0);
+#else
+    error = parse_ofp_flow_stats_request_str(&fsr,false /*aggregate*/,flow_spec_str,NULL,NULL,&usable_protocols);
+#endif
 
     /* generate protocol specific request */
     protocol = ofputil_protocol_from_ofp_version(ofp_version);
@@ -750,9 +761,8 @@ static void
 process_echo_request(const struct ofp_header *rq)
 {
     struct ofpbuf *reply;
-    reply=make_echo_reply(rq);
+    reply=ofputil_encode_echo_reply(rq);
     printf("process_echo_request send reply len=%d\n", reply->size);
-    ofp_print(stdout, reply->data, reply->size, 10 + 1);
     vconn_send(vconn, reply);
 }
 
@@ -798,7 +808,7 @@ process_packet_in(const struct ofp_header *msg)
 {
     struct ofputil_packet_in pin;
     struct ofpbuf continuation;
-    enum ofperr error = ofputil_decode_packet_in(msg, true, &pin,
+    enum ofperr error = ofputil_decode_packet_in(msg, true, NULL, NULL, &pin,
                                                  NULL, NULL, &continuation);
 
     assert(error==0);
@@ -809,12 +819,6 @@ process_packet_in(const struct ofp_header *msg)
                                                       pin.userdata_len);
     //const struct action_header *ah = ofpbuf_pull(&userdata, sizeof(*ah));
     //assert(ah);
-
-    struct dp_packet packet;
-    dp_packet_use_const(&packet, pin.packet, pin.packet_len);
-    struct flow headers;
-    flow_extract(&packet, &headers);
-
 
     char* ingress;
     uint8_t* payload_buf;
@@ -838,31 +842,43 @@ void transmit_packet(char* if_name, uint8_t* packet_data, unsigned int len)
 
     ofpbuf_init(&ofpacts, 64);
     sprintf(action_str,"output:%u",dict_get_num(&port_to_name_dict, if_name));
-    error_msg = ofpacts_parse_actions(action_str, &ofpacts, &usable_protocols);
+
+    struct ofpact_parse_params pp = {
+        .port_map = NULL,
+        .table_map = NULL,
+        .ofpacts = &ofpacts,
+        .usable_protocols = &usable_protocols
+    };
+    error_msg = ofpacts_parse_actions(action_str, &pp);
     assert(error_msg==NULL);
 
     assert(usable_protocols&protocol);
 
     po.buffer_id = UINT32_MAX;
-    po.in_port = OFPP_NONE;//str_to_port_no(ctx->argv[1], ctx->argv[2]);
     po.ofpacts = ofpacts.data;
     po.ofpacts_len = ofpacts.size;
 
 #if 0
     error_msg = eth_from_hex("6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112", &packet);
     assert(error_msg==0);
-#else
+//#else
     packet=dp_packet_new(len);
     dp_packet_put(packet, (const void *) packet_data, len);
-#endif
-
     po.packet = dp_packet_data(packet);
     po.packet_len = dp_packet_size(packet);
+#else
+    void* buf = malloc(len);
+    memcpy(buf, packet_data, len);
+    po.packet = buf;
+    po.packet_len = len;
+#endif
     ofp_version = vconn_get_version(vconn);
     opo = ofputil_encode_packet_out(&po, protocol);
     //vconn_transact_noreply(vconn, opo, &reply);
     vconn_send_block(vconn, opo);
+#if 0
     dp_packet_delete(packet);
+#endif
     ofpbuf_uninit(&ofpacts);
 }
 
@@ -884,7 +900,7 @@ int network_bridge_timer(uint32 timer_id, void *cookie)
             assert(0);
         }
         if(i<10) {
-            ofp_print(stdout, msg->data, msg->size, 10 + 1);
+            ofp_print(stdout, msg->data, msg->size, NULL, NULL, 10 + 1);
         }
 
         if(ofptype_pull(&type, msg)) {
@@ -1065,7 +1081,7 @@ status_t
         retval=vconn_transact(vconn, request, &reply);
         assert(retval==0);
 
-        ofp_print(stdout, reply->data, reply->size, 10 + 1);
+        ofp_print(stdout, reply->data, reply->size, NULL, NULL, 10 + 1);
         ofpbuf_delete(reply);
 
         dict_init(&port_to_name_dict);

@@ -1,5 +1,5 @@
 ==Standalone project for netconfd module implementing ietf-network-bridge*.yang==
-Dependency: installed netconfd run-time binaries and development shared libraries and headers and openvswitch-dev.
+Dependency: installed netconfd run-time binaries and development shared libraries and headers and openvswitch-dev>=2-10.
 
 ===Build and install===
  sudo apt-get install openvswitch-dev

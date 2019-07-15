@@ -124,3 +124,12 @@ Terminal 2:
    }
  }
 
+==Environment variables==
+===INTERFACE_NAME_PREFIX===
+Controls the prefix of the interface names. Allows to start multiple netconfd instances handling different interface sets.
+
+Example:
+
+ INTERFACE_NAME_PREFIX='br0-eth' netconfd ...
+ INTERFACE_NAME_PREFIX='br1-eth' netconfd ...
+

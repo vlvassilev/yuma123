@@ -55,7 +55,7 @@ port_iterator_fetch_features(struct port_iterator *pi)
     enum ofp_version version = vconn_get_version(pi->vconn);
     struct ofpbuf *rq = ofpraw_alloc(OFPRAW_OFPT_FEATURES_REQUEST, version, 0);
     retval=vconn_transact(pi->vconn, rq, &pi->reply);
-    assert(retval);
+    assert(retval==0);
 
     enum ofptype type;
     if (ofptype_decode(&type, pi->reply->data)
@@ -77,8 +77,9 @@ port_iterator_fetch_features(struct port_iterator *pi)
     struct ofputil_switch_features features;
     enum ofperr error = ofputil_pull_switch_features(pi->reply, &features);
     if (error) {
-        ovs_fatal(0, "%s: failed to decode features reply (%s)",
+        printf("%s: failed to decode features reply (%s)",
                   vconn_get_name(pi->vconn), ofperr_to_string(error));
+        assert(0);
     }
 }
 

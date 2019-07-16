@@ -31,7 +31,8 @@ make
 sudo make install
 
 ==Configure and start==
-touch /tmp/startup-cfg.xml
+
+echo '<config/>' > /tmp/startup-cfg.xml
 /usr/sbin/netconfd --module=helloworld --startup=/tmp/startup-cfg.xml --log-level="debug4" --superuser="$USER"
 
 The server is now started with the example helloworld module.

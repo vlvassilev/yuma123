@@ -1,0 +1,25 @@
+==Standalone project for netconfd module implementing ietf-traffic-generator.yang==
+Dependency: installed netconfd run-time binaries and development shared libraries and headers.
+
+===Build and install===
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+
+ sudo /usr/sbin/netconfd --module=ietf-traffic-generator --no-startup --log-level=debug4 --superuser=root
+
+===Functionality===
+ yangcli root@localhost> create /interfaces/interface[name='eth0'] -- type=ethernetCsmacd
+ yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=20 frame-data=\
+     6CA96F0000026CA96F00000108004500\
+     002ED4A500000A115816C0000201C000\
+     0202C0200007001A0000010203040506\
+     0708090A0B0C0D0E0F101112
+ yangcli root@localhost> commit
+
+==Design notes==
+The libtraffic_generator library creates performance efficient traffic generator
+instance context from the ietf-traffic-generator data upon initialization. Then
+each call fills frame buffer and returns it timestamp and length until after
+the last frame is generated. Then zero length is returned.

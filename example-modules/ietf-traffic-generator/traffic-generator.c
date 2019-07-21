@@ -14,6 +14,7 @@
 #include <asm/errno.h>
 
 #include "libtraffic-generator.h"
+#include "timespec_math.h"
 
 typedef struct raw_socket_t_ {
     int socket;
@@ -58,16 +59,7 @@ static int raw_socket_send(raw_socket_t* raw_socket, uint8_t* raw_frame, uint32_
     if ( rc < 0 ) {
         return rc;
     }
-    printf(".");
     return 0;
-}
-
-static void ts_add(struct timespec* a, struct timespec* b, struct timespec* sum)
-{
-}
-
-static void ts_sub(struct timespec* after, struct timespec* before, struct timespec* diff)
-{
 }
 
 int main(int args, char** argv)
@@ -86,22 +78,30 @@ int main(int args, char** argv)
 
     ret = raw_socket_init(/* "eth0" */ argv[1], &raw_socket);
     assert(ret==0);
-    tg = traffic_generator_init(/*argv[2]*/"<traffic-generator><frame-size>64</frame-size><frame-data>...</frame-data></traffic-generator>", &max_frame_len);
+    tg = traffic_generator_init(/*argv[2]*/"<traffic-generator><frame-size>64</frame-size><frame-data>...</frame-data></traffic-generator>");
     clock_gettime( CLOCK_MONOTONIC, &epoch);
-    frame_buf = malloc(max_frame_len);
-    assert(frame_buf);
 
+    uint64_t frm=0;
+    uint64_t print_sec=0;
     while(1) {
-        ret = traffic_generator_get_frame(tg, &frame_len, frame_buf, &tx_time_sec, &tx_time_nsec);
-        assert(ret==0);
+        ret = traffic_generator_get_frame(tg, &frame_len, &frame_buf, &tx_time_sec, &tx_time_nsec);
+        if(ret!=0) {
+            break;
+        }
         clock_gettime( CLOCK_MONOTONIC, &now);
         rel.tv_sec = tx_time_sec;        /* seconds */
         rel.tv_nsec = tx_time_nsec;      /* nanoseconds */
-        ts_add(&rel,&epoch,&abs);
-        ts_sub(&abs,&now,&req);
+        timespec_add(&rel, &epoch, &abs);
+        timespec_sub(&now, &abs, &req);
         ret=nanosleep(&req,&rem);
-        assert(ret==0);
+        //assert(ret==0);
         ret = raw_socket_send(&raw_socket, frame_buf, frame_len);
         assert(ret==0);
+
+        if(now.tv_sec>print_sec) {
+            print_sec=now.tv_sec;
+            printf("%llu\n",frm);
+        }
+        frm++;
     }
 }

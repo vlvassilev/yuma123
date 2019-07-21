@@ -25,6 +25,7 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "rpc.h"
+#include "val.h"
 #include "val123.h"
 
 #define IF_MOD "ietf-interfaces"
@@ -43,14 +44,30 @@ static status_t
 
 static void traffic_generator_delete(val_value_t* traffic_generator_val)
 {
+    char cmd_buf[512];
+    val_value_t* name_val;
+
     printf("traffic_generator_delete:\n");
     val_dump_value(traffic_generator_val,NCX_DEF_INDENT);
+    name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
+    assert(name_val);
+
+    sprintf(cmd_buf, "pkill -f 'traffic-generator %s blah'", VAL_STRING(name_val));
+    system(cmd_buf);
 }
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)
 {
+    char cmd_buf[512];
+    val_value_t* name_val;
+
     printf("traffic_generator_create:\n");
     val_dump_value(traffic_generator_val,NCX_DEF_INDENT);
+    name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
+    assert(name_val);
+
+    sprintf(cmd_buf, "traffic-generator %s blah &", VAL_STRING(name_val));
+    system(cmd_buf);
 }
 
 static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)

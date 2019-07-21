@@ -17,5 +17,6 @@ bin_PROGRAMS = traffic-generator
 
 traffic_generator_SOURCES = \
 traffic-generator.c \
-libtraffic-generator.c
+libtraffic-generator.c \
+timespec_math.c
 

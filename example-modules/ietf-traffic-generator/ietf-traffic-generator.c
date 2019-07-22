@@ -42,16 +42,64 @@ static status_t
                          val_value_t *vir_val,
                          val_value_t *dst_val);
 
+
+/*
+    {"interface-name", required_argument, NULL, 'i'},
+    {"frame-size", required_argument, NULL, 's'},
+    {"frame-data", required_argument, NULL, 'd'},
+    {"interframe-gap", required_argument, NULL, 'f'},
+    {"interburst-gap", required_argument, NULL, 'b'},
+    {"frames-per-burst", required_argument, NULL, 'n'},
+    {"bursts-per-stream", required_argument, NULL, 'p'},
+    {"total-frames", required_argument, NULL, 't'},
+*/
 static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
 {
-    val_value_t* name_val;
-    name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
-    sprintf(cli_args_str,"--interface-name=%s",name_val);
+    val_value_t* val;
+    unsigned int i;
+
+    val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
+    sprintf(cli_args_str,"--interface-name=%s",VAL_STRING(val));
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","frame-size");
+    sprintf(cli_args_str+strlen(cli_args_str)," --frame-size=%u",VAL_UINT32(val));
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","frame-data");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --frame-data=");
+        
+        for(i=0;i<val->v.binary.ustrlen;i++) {
+            sprintf(cli_args_str+strlen(cli_args_str),"%02X",(unsigned int)(val->v.binary.ustr[i]));
+        }
+    }
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","interframe-gap");
+    sprintf(cli_args_str+strlen(cli_args_str)," --interframe-gap=%u",VAL_UINT32(val));
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","interburst-gap");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --interburst-gap=%u",VAL_UINT32(val));
+    }
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","frames-per-burst");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --frames-per-burst=%u",VAL_UINT32(val));
+    }
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","bursts-per-stream");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --bursts-per-stream=%u",VAL_UINT32(val));
+    }
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","total-frames");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --total-frames=%llu",VAL_UINT64(val));
+    }
 }
 
 static void traffic_generator_delete(val_value_t* traffic_generator_val)
 {
-    char cmd_buf[512];
+    char cmd_buf[4096];
     static char cmd_args_buf[4096];
     val_value_t* name_val;
 
@@ -67,7 +115,7 @@ static void traffic_generator_delete(val_value_t* traffic_generator_val)
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)
 {
-    char cmd_buf[512];
+    char cmd_buf[4096];
     static char cmd_args_buf[4096];
     val_value_t* name_val;
 

@@ -42,9 +42,17 @@ static status_t
                          val_value_t *vir_val,
                          val_value_t *dst_val);
 
+static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
+{
+    val_value_t* name_val;
+    name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
+    sprintf(cli_args_str,"--interface-name=%s",name_val);
+}
+
 static void traffic_generator_delete(val_value_t* traffic_generator_val)
 {
     char cmd_buf[512];
+    static char cmd_args_buf[4096];
     val_value_t* name_val;
 
     printf("traffic_generator_delete:\n");
@@ -52,13 +60,15 @@ static void traffic_generator_delete(val_value_t* traffic_generator_val)
     name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
     assert(name_val);
 
-    sprintf(cmd_buf, "pkill -f 'traffic-generator %s blah'", VAL_STRING(name_val));
+    serialize_params(traffic_generator_val, cmd_args_buf);
+    sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
     system(cmd_buf);
 }
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)
 {
     char cmd_buf[512];
+    static char cmd_args_buf[4096];
     val_value_t* name_val;
 
     printf("traffic_generator_create:\n");
@@ -66,7 +76,8 @@ static void traffic_generator_create(val_value_t* traffic_generator_val)
     name_val = val_find_child(traffic_generator_val->parent,"ietf-interfaces","name");
     assert(name_val);
 
-    sprintf(cmd_buf, "traffic-generator %s blah &", VAL_STRING(name_val));
+    serialize_params(traffic_generator_val, cmd_args_buf);
+    sprintf(cmd_buf, "traffic-generator %s &", cmd_args_buf);
     system(cmd_buf);
 }
 
@@ -200,6 +211,8 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
+
+    agt_disable_feature ("ietf-traffic-generator", "multi-stream");
 
     res=agt_commit_complete_register("ietf-traffic-generator" /*SIL id string*/,
                                      y_commit_complete);

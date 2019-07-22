@@ -1,18 +1,17 @@
 #include <stdint.h>
 
 typedef struct burst_t_ {
-    uint32_t frame_length;
-    uint8_t* raw_frame_data;
-    uint32_t interframe_gap;
-    uint32_t frames_per_burst;
-    uint32_t interburst_gap;
 } burst_t;
 
 typedef struct stream_t_ {
+    uint32_t frame_size;
+    uint8_t* frame_data;
+    uint32_t interframe_gap;
+    uint32_t frames_per_burst;
+    uint32_t interburst_gap;
     unsigned int bursts_per_stream;
     unsigned int burst_index;
     uint32_t interstream_gap;
-    burst_t* bursts;
 } stream_t;
 
 typedef struct traffic_generator_t_ {
@@ -29,6 +28,5 @@ typedef struct traffic_generator_t_ {
 } traffic_generator_t;
 
 
-traffic_generator_t* traffic_generator_init(const char* config_str);
+traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_frame, uint64_t total_frames);
 int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_length, uint8_t** frame, uint64_t* tx_time_sec, uint32_t* tx_time_nsec);
-

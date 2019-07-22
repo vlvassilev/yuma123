@@ -12,6 +12,7 @@
 #include <linux/if_arp.h>
 #include <arpa/inet.h>
 #include <asm/errno.h>
+#include <getopt.h>
 
 #include "libtraffic-generator.h"
 #include "timespec_math.h"
@@ -62,29 +63,84 @@ static int raw_socket_send(raw_socket_t* raw_socket, uint8_t* raw_frame, uint32_
     return 0;
 }
 
-int main(int args, char** argv)
+static struct option const long_options[] =
+{
+    {"interface-name", required_argument, NULL, 'i'},
+    {"frame-size", required_argument, NULL, 's'},
+    {"frame-data", required_argument, NULL, 'd'},
+    {"interframe-gap", required_argument, NULL, 'f'},
+    {"interburst-gap", required_argument, NULL, 'b'},
+    {"frames-per-burst", required_argument, NULL, 'n'},
+    {"bursts-per-stream", required_argument, NULL, 'p'},
+    {"total-frames", required_argument, NULL, 't'},
+    {NULL, 0, NULL, 0}
+};
+
+int main(int argc, char** argv)
 {
     int ret;
     raw_socket_t raw_socket;
     uint64_t tx_time_sec;
     uint32_t tx_time_nsec;
-    uint32_t max_frame_len;
-    uint8_t* frame_buf;
-    uint32_t frame_len;
 
+    char* interface_name;
+    uint32_t frame_size=64;
+    char* frame_data_hexstr="000102030405060708090A0B";
+    uint32_t interframe_gap=20;
+    uint32_t interburst_gap=20;
+    uint32_t frames_per_burst=0;
+    uint32_t bursts_per_stream=0;
+    uint64_t total_frames=0;
+
+    int optc;
     struct timespec epoch,rel,abs,now,req,rem;
 
     traffic_generator_t* tg;
 
-    ret = raw_socket_init(/* "eth0" */ argv[1], &raw_socket);
+    while ((optc = getopt_long (argc, argv, "i:s:d:f:b:n:p:t", long_options, NULL)) != -1) {
+        switch (optc) {
+            case 'i':
+                interface_name=optarg;
+                break;
+            case 's':
+                frame_size = atoi(optarg);
+                break;
+            case 'd':
+                frame_data_hexstr = optarg; /*hexstr*/
+                break;
+            case 'f':
+                interframe_gap = atoi(optarg);
+                break;
+            case 'b':
+                interburst_gap = atoi(optarg);
+                break;
+            case 'n':
+                frames_per_burst = atoi(optarg);
+                break;
+            case 'p':
+                bursts_per_stream = atoi(optarg);
+                break;
+            case 't':
+                total_frames = atoll(optarg);
+                break;
+            default:
+                exit (-1);
+        }
+    }
+
+    ret = raw_socket_init(interface_name /*e.g eth0*/, &raw_socket);
     assert(ret==0);
-    tg = traffic_generator_init(/*argv[2]*/"<traffic-generator><frame-size>64</frame-size><frame-data>...</frame-data></traffic-generator>");
+
+    tg = traffic_generator_init(frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames);
     clock_gettime( CLOCK_MONOTONIC, &epoch);
 
     uint64_t frm=0;
     uint64_t print_sec=0;
     while(1) {
-        ret = traffic_generator_get_frame(tg, &frame_len, &frame_buf, &tx_time_sec, &tx_time_nsec);
+        uint8_t* cur_frame_data;
+        uint32_t cur_frame_size;
+
+        ret = traffic_generator_get_frame(tg, &cur_frame_size, &cur_frame_data, &tx_time_sec, &tx_time_nsec);
         if(ret!=0) {
             break;
         }
@@ -93,9 +149,10 @@ int main(int args, char** argv)
         rel.tv_nsec = tx_time_nsec;      /* nanoseconds */
         timespec_add(&rel, &epoch, &abs);
         timespec_sub(&now, &abs, &req);
-        ret=nanosleep(&req,&rem);
-        //assert(ret==0);
-        ret = raw_socket_send(&raw_socket, frame_buf, frame_len);
+
+        nanosleep(&req,&rem);
+
+        ret = raw_socket_send(&raw_socket, cur_frame_data, cur_frame_size);
         assert(ret==0);
 
         if(now.tv_sec>print_sec) {

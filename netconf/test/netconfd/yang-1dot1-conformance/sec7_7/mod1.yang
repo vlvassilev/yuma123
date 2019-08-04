@@ -1,0 +1,23 @@
+module mod1 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/sec7_7/mod1";
+  prefix m1;
+
+  organization
+    "yuma123.org";
+
+  description 'sec7_7 The "leaf-list" Statement';
+
+  revision 2019-08-04 {
+    description
+      "Initial version";
+  }
+  container top {
+    leaf-list a {
+      type uint32;
+      default 3;
+      default 4;
+    }
+  }
+}

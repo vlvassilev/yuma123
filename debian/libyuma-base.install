@@ -1,5 +1,4 @@
 usr/share/yuma/modules/examples/helloworld.yang
-usr/share/yuma/modules/examples/example-bridge.yang
 usr/share/yuma/modules/ietf/
 usr/share/yuma/modules/ietf-derived/
 usr/share/yuma/modules/ietf-draft/

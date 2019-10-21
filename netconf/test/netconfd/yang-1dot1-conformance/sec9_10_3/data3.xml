@@ -1,0 +1,3 @@
+<foo xmlns="http://yuma123.org/ns/sec9_10_3/mod1">X</foo>
+<fooref xmlns="http://yuma123.org/ns/sec9_10_3/mod2" xmlns:mod1="http://yuma123.org/ns/sec9_10_3/mod1">mod1:X</fooref>
+<foorefref xmlns="http://yuma123.org/ns/sec9_10_3/mod3" xmlns:a="http://yuma123.org/ns/sec9_10_3/mod1">a:X</foorefref>

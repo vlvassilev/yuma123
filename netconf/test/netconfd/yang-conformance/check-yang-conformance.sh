@@ -92,6 +92,10 @@ test_schema()
     FAIL=0
     OK=0
 
+    if [ "$RUN_WITH_CONFD" != "" ] ; then
+        rm *.fxs
+    fi
+
     for index in ${!schema_load_fail[*]}
     do
         #printf "%4d: %s\n" $index ${schema_load_fail[$index]}

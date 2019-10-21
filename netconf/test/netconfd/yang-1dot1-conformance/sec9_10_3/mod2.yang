@@ -1,0 +1,13 @@
+module mod2 {
+  prefix m2;
+  namespace "http://yuma123.org/ns/sec9_10_3/mod2";
+  import mod1 {
+    prefix a;
+  }
+  reference "https://mailarchive.ietf.org/arch/msg/netmod/D7ASSAQdpGmGXjIdRo_PCnQmVP8";
+  leaf fooref {
+    type leafref {
+      path "/a:foo";
+    }
+  }
+}

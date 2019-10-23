@@ -2,47 +2,54 @@ Yuma123 README
 -----------
 
 ==What is Yuma123==
-The purpose of the Yuma123 project is to provide an opensource YANG API in C and netconf cli (yangcli) and server (netconfd) appications. 
+The purpose of the Yuma123 project is to provide an opensource YANG API in C and cli (yangcli) and server (netconfd) YANG automation enabled appications.
 Branching from the last BSD licensed branch of the Yuma project the code has evolved in the following direction:
 - a more mainstream build system based on autoconf/automake was added
 - a number of critical bugs have been fixed
 - new IETF standards support was added (ietf-nacm, ietf-system, etc.)
 - support was added for new YANG extensions
+- added to debian.org repositories
 
-==Checkout, Build and Installation steps (ment for Debian should be easy to figure out on other systems)==
-===Option 1: Install from the Debian repository==
-apt-get update
-apt-get -y upgrade
+==Option 1: Debian installation==
+===Option 1.1: Install from the yuma123 Debian repository (latest packages)===
+ apt-get -y install netconfd yangcli
+ apt-get update
+ apt-get -y upgrade
+ apt-get -y install software-properties-common
+ add-apt-repository -s "deb http://yuma123.org/repos/apt/debian stable main"
+ apt-get -y install wget gnupg
+ wget -O - http://yuma123.org/repos/yuma123.gpg.key | apt-key add -
+ apt-get update
+ apt-get -y install netconfd yangcli
 
-apt-get -y install software-properties-common
-add-apt-repository -s "deb http://yuma123.org/repos/apt/debian stretch main"
-apt-get -y install wget gnupg
-wget -O - http://yuma123.org/repos/yuma123.gpg.key | apt-key add -
-apt-get update
-apt-get -y install netconfd yangcli
-===Option 2: Build from source===
-sudo apt-get install git autoconf gcc libtool libxml2-dev libssh2-1-dev make libncurses5-dev zlib1g-dev libreadline-dev libssl-dev
+===Option 1.2: Install from the official repository===
+ apt-get update
+ apt-get -y install netconfd yangcli
 
-git clone git://git.code.sf.net/p/yuma123/git yuma123-git
-cd yuma123-git
-autoreconf -i -f
-./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
-make
-sudo make install
+==Option 2: Compilation and installation from source==
+ #Build and runtime dependencies resolution for Debian stretch. Replace with appropriate command line if you are not using Debian.
+ sudo apt-get install git autoconf gcc libtool libxml2-dev libssh2-1-dev make libncurses5-dev zlib1g-dev libreadline-dev libssl-dev
+ git clone git://git.code.sf.net/p/yuma123/git yuma123-git
+ cd yuma123-git
+ autoreconf -i -f
+ ./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
+ make
+ sudo make install
 
 ==Configure and start==
 
-echo '<config/>' > /tmp/startup-cfg.xml
-/usr/sbin/netconfd --module=helloworld --startup=/tmp/startup-cfg.xml --log-level="debug4" --superuser="$USER"
+ echo '<config/>' > /tmp/startup-cfg.xml
+ /usr/sbin/netconfd --module=helloworld --startup=/tmp/startup-cfg.xml --log-level="debug4" --superuser="$USER"
 
 The server is now started with the example helloworld module.
 
 Tell sshd to listen on port 830. Add the following 2 lines to /etc/ssh/sshd_config:
 
-Port 830
-Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
+ Port 830
+ Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
 
-sudo /etc/init.d/ssh restart
+Then:
+ sudo /etc/init.d/ssh restart
 
 You can verify everything is OK:
 

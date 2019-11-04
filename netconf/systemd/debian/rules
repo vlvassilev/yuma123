@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_systemd_enable:
+	dh_systemd_enable -pnetconfd-service --name netconfd netconfd.service
+	dh_systemd_enable -pnetconfd-openssh-server-service --name netconfd-ssh netconfd-ssh.service

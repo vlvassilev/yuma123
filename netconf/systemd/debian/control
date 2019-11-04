@@ -1,0 +1,34 @@
+Source: yuma123-systemd-services
+Section: net
+Priority: optional
+Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.8
+Homepage: http://lightside-instruments.com
+
+Package: netconfd-service
+Section: net
+Architecture: all
+Depends: ${misc:Depends}
+Multi-Arch: foreign
+Description: Init scripts and systemd service definitions
+ for starting netconfd listening on /tmp/ncxserver.sock
+ .
+ SSH and TLS services with compatible NETCONF subsystems can
+ be installed to enable incomming sessions to be forwarded to
+ /tmp/ncxserver.sock
+
+
+Package: netconfd-openssh-server-service
+Section: net
+Architecture: all
+Depends: ${misc:Depends}, openssh-server, netconfd-service
+Multi-Arch: foreign
+Provides: netconfd-ssh-service
+Description: Init scripts and systemd service definitions
+ for starting openssh-server sshd instance listening
+ on the NETCONF port 830 with only the netconf subsystem
+ enabled.
+ .
+ Edit the /etc/netconfd/ssh/sshd_config to modify the
+ configuration.

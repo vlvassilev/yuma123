@@ -1,0 +1,11 @@
+PidFile /run/ssh-netconf.pid
+ChallengeResponseAuthentication no
+UsePAM yes
+AcceptEnv LANG LC_*
+PermitRootLogin yes
+Port 830
+Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
+ForceCommand /usr/sbin/netconf-subsystem
+#LogLevel DEBUG3
+#SyslogFacility
+

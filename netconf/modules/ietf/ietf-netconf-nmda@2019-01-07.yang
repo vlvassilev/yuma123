@@ -5,31 +5,40 @@ module ietf-netconf-nmda {
 
   import ietf-yang-types {
     prefix yang;
-    reference "RFC 6991: Common YANG Data Types.";
+    reference
+      "RFC 6991: Common YANG Data Types";
   }
   import ietf-inet-types {
     prefix inet;
-    reference "RFC 6991: Common YANG Data Types.";
+    reference
+      "RFC 6991: Common YANG Data Types";
   }
   import ietf-datastores {
     prefix ds;
-    reference "RFC 8342: Network Management Datastore Architecture.";
+    reference
+      "RFC 8342: Network Management Datastore Architecture
+                 (NMDA)";
   }
   import ietf-origin {
     prefix or;
-    reference "RFC 8342: Network Management Datastore Architecture.";
+    reference
+      "RFC 8342: Network Management Datastore Architecture
+                 (NMDA)";
   }
   import ietf-netconf {
     prefix nc;
-    reference "RFC 6241: Network Configuration Protocol (NETCONF)";
+    reference
+      "RFC 6241: Network Configuration Protocol (NETCONF)";
   }
   import ietf-netconf-with-defaults {
     prefix ncwd;
-    reference "RFC 6243: With-defaults Capability for NETCONF.";
+    reference
+      "RFC 6243: With-defaults Capability for NETCONF";
   }
 
   organization
     "IETF NETCONF Working Group";
+
   contact
     "WG Web:   <https://datatracker.ietf.org/wg/netconf/>
 
@@ -45,15 +54,21 @@ module ietf-netconf-nmda {
                <mailto:phil@juniper.net>
 
      Author:   Kent Watsen
-               <mailto:kwatsen@juniper.net>
+               <mailto:kent+ietf@watsen.net>
 
-     Author:   Rob Wilton
-               <rwilton@cisco.com>";
+     Author:   Robert Wilton
+               <mailto:rwilton@cisco.com>";
   description
     "This YANG module defines a set of NETCONF operations to support
      the Network Management Datastore Architecture (NMDA).
 
-     Copyright (c) 2018 IETF Trust and the persons identified as
+     The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL
+     NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'NOT RECOMMENDED',
+     'MAY', and 'OPTIONAL' in this document are to be interpreted as
+     described in BCP 14 (RFC 2119) (RFC 8174) when, and only when,
+     they appear in all capitals, as shown here.
+
+     Copyright (c) 2019 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -61,21 +76,16 @@ module ietf-netconf-nmda {
      the license terms contained in, the Simplified BSD License set
      forth in Section 4.c of the IETF Trust's Legal Provisions
      Relating to IETF Documents
-     (http://trustee.ietf.org/license-info).
+     (https://trustee.ietf.org/license-info).
 
-     This version of this YANG module is part of RFC XXXX
-     (http://www.rfc-editor.org/info/rfcxxxx); see the RFC itself
-     for full legal notices.";
+     This version of this YANG module is part of RFC 8526; see
+     the RFC itself for full legal notices.";
 
-  // RFC Ed.: update the date below with the date of RFC publication
-  // and remove this note.
-  // RFC Ed.: replace XXXX with actual RFC number and remove this
-  // note.
-  revision 2018-05-22 {
+  revision 2019-01-07 {
     description
       "Initial revision.";
     reference
-      "RFC XXXX: NETCONF Extensions to Support the Network Management
+      "RFC 8526: NETCONF Extensions to Support the Network Management
                  Datastore Architecture";
   }
 
@@ -83,31 +93,34 @@ module ietf-netconf-nmda {
     description
       "Indicates that the server supports the 'origin' annotation.";
     reference
-      "RFC 8342: Network Management Datastore Architecture";
+      "RFC 8342: Network Management Datastore Architecture (NMDA)";
   }
 
   feature with-defaults {
     description
-       "NETCONF :with-defaults capability; If the server advertises
-        the :with-defaults capability for a session, then this
-        feature must also be enabled for that session.  Otherwise,
-        this feature must not be enabled.";
+      "NETCONF :with-defaults capability.  If the server advertises
+       the :with-defaults capability for a session, then this
+       feature must also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
     reference
-      "RFC 6243: With-defaults Capability for NETCONF, section 4; and
-       RFC XXXX: NETCONF Extensions to Support the Network Management
-       Datastore Architecture, section 3.1.1.1.";
+      "RFC 6243: With-defaults Capability for NETCONF, Section 4; and
+       RFC 8526: NETCONF Extensions to Support the Network Management
+                 Datastore Architecture, Section 3.1.1.2";
   }
 
   rpc get-data {
     description
-      "Retrieve data from an NMDA datastore. The content returned
+      "Retrieve data from an NMDA datastore.  The content returned
        by get-data must satisfy all filters, i.e., the filter
        criteria are logically ANDed.
 
+       Any ancestor nodes (including list keys) of nodes selected by
+       the filters are included in the response.
+
        The 'with-origin' parameter is only valid for an operational
-       datastore. If 'with-origin' is used with an invalid datastore,
-       then the server MUST return an <rpc-error> element with an
-       <error-tag> value of 'invalid-value'.
+       datastore.  If 'with-origin' is used with an invalid
+       datastore, then the server MUST return an <rpc-error> element
+       with an <error-tag> value of 'invalid-value'.
 
        The 'with-defaults' parameter only applies to the operational
        datastore if the NETCONF :with-defaults and
@@ -120,6 +133,8 @@ module ietf-netconf-nmda {
       leaf datastore {
         type ds:datastore-ref;
         mandatory true;
+
+
         description
           "Datastore from which to retrieve data.
 
@@ -127,20 +142,19 @@ module ietf-netconf-nmda {
            server MUST return an <rpc-error> element with an
            <error-tag> value of 'invalid-value'.";
       }
-
       choice filter-spec {
         description
           "The content filter specification for this request.";
-
         anydata subtree-filter {
           description
             "This parameter identifies the portions of the
              target datastore to retrieve.";
           reference
-            "RFC 6241: Network Configuration Protocol, Section 6.";
+            "RFC 6241: Network Configuration Protocol (NETCONF),
+                       Section 6";
         }
         leaf xpath-filter {
-          if-feature nc:xpath;
+          if-feature "nc:xpath";
           type yang:xpath1.0;
           description
             "This parameter contains an XPath expression identifying
@@ -148,8 +162,8 @@ module ietf-netconf-nmda {
 
              If the expression returns a node-set, all nodes in the
              node-set are selected by the filter.  Otherwise, if the
-             expression does not return a node-set, then the get-data
-             operation fails.
+             expression does not return a node-set, then the
+             <get-data> operation fails.
 
              The expression is evaluated in the following XPath
              context:
@@ -160,49 +174,59 @@ module ietf-netconf-nmda {
                o  The set of variable bindings is empty.
 
                o  The function library is the core function library,
-                  and the XPath functions defined in section 10 in
-                  RFC 7950.
+                  and the XPath functions are defined in Section 10
+                  of RFC 7950.
 
                o  The context node is the root node of the target
                   datastore.";
         }
       }
-
       leaf config-filter {
         type boolean;
         description
-          "Filter for nodes with the given value for their
-           'config' property.";
+          "Filter for nodes with the given value for their 'config'
+           property.  When this leaf is set to 'true', only 'config
+           true' nodes are selected, and when set to 'false', only
+           'config false' nodes are selected.  If this leaf is not
+           present, no nodes are filtered.";
       }
       choice origin-filters {
         when 'derived-from-or-self(datastore, "ds:operational")';
-        if-feature origin;
+        if-feature "origin";
         description
-          "Filters based on the 'origin' annotation.";
+          "Filters configuration nodes based on the 'origin'
+           annotation.  Configuration nodes that do not have an
+           'origin' annotation are treated as if they have the
+           'origin' annotation 'or:unknown'.
+
+           System state nodes are not affected by origin-filters and
+           thus not filtered.  Note that system state nodes can be
+           filtered with the 'config-filter' leaf.";
 
         leaf-list origin-filter {
           type or:origin-ref;
           description
-            "Filter based on the 'origin' annotation.  A node matches
-             the filter if its 'origin' annotation is derived from or
-             equal to any of the given filter values.";
+            "Filter based on the 'origin' annotation.  A
+             configuration node matches the filter if its 'origin'
+             annotation is derived from or equal to any of the given
+             filter values.";
         }
         leaf-list negated-origin-filter {
           type or:origin-ref;
           description
-            "Filter based on the 'origin' annotation.  A node matches
-             the filter if its 'origin' annotation is not derived
-             from and not equal to all of the given filter values.";
+            "Filter based on the 'origin' annotation.  A
+             configuration node matches the filter if its 'origin'
+             annotation is neither derived from nor equal to any of
+             the given filter values.";
         }
       }
-
       leaf max-depth {
         type union {
           type uint16 {
             range "1..65535";
           }
           type enumeration {
-            enum "unbounded" {
+            enum unbounded {
               description
                 "All descendant nodes are included.";
             }
@@ -210,31 +234,28 @@ module ietf-netconf-nmda {
         }
         default "unbounded";
         description
-          "For each node selected by the filter, this parameter
-           selects how many conceptual sub-tree levels should be
+          "For each node selected by the filters, this parameter
+           selects how many conceptual subtree levels should be
            returned in the reply.  If the depth is 1, the reply
            includes just the selected nodes but no children.  If the
            depth is 'unbounded', all descendant nodes are included.";
       }
-
       leaf with-origin {
         when 'derived-from-or-self(../datastore, "ds:operational")';
-        if-feature origin;
+        if-feature "origin";
         type empty;
         description
           "If this parameter is present, the server will return
-           the 'origin' annotation for the nodes that has one.";
+           the 'origin' annotation for the nodes that have one.";
       }
-
       uses ncwd:with-defaults-parameters {
-        if-feature with-defaults;
+        if-feature "with-defaults";
       }
     }
-
     output {
       anydata data {
         description
-          "Copy of the source datastore subset which matched
+          "Copy of the source datastore subset that matched
            the filter criteria (if any).  An empty data
            container indicates that the request did not
            produce any results.";
@@ -255,8 +276,11 @@ module ietf-netconf-nmda {
       leaf datastore {
         type ds:datastore-ref;
         mandatory true;
+
+
+
         description
-          "Datastore which is the target of the edit-data operation.
+          "Datastore that is the target of the <edit-data> operation.
 
            If the target datastore is not writable, or is not
            supported by the server, then the server MUST return an
@@ -265,15 +289,15 @@ module ietf-netconf-nmda {
       }
       leaf default-operation {
         type enumeration {
-          enum "merge" {
+          enum merge {
             description
               "The default operation is merge.";
           }
-          enum "replace" {
+          enum replace {
             description
               "The default operation is replace.";
           }
-          enum "none" {
+          enum none {
             description
               "There is no default operation.";
           }
@@ -286,54 +310,55 @@ module ietf-netconf-nmda {
         mandatory true;
         description
           "The content for the edit operation.";
-
         anydata config {
           description
             "Inline config content.";
         }
         leaf url {
-          if-feature nc:url;
+          if-feature "nc:url";
           type inet:uri;
           description
-            "URL based config content.";
+            "URL-based config content.";
         }
       }
     }
   }
 
   /*
-   * Augment the lock and unlock operations with a
+   * Augment the <lock> and <unlock> operations with a
    * "datastore" parameter.
    */
 
   augment "/nc:lock/nc:input/nc:target/nc:config-target" {
     description
-      "Add NMDA Datastore as target.";
+      "Add NMDA datastore as target.";
     leaf datastore {
       type ds:datastore-ref;
       description
         "Datastore to lock.
 
-         The lock operation is only supported on writable datastores.
+         The <lock> operation is only supported on writable
+         datastores.
 
-         If the lock operation is not supported by the server on the
-         specified target datastore, then the server MUST return an
-         <rpc-error> element with an <error-tag> value of
+         If the <lock> operation is not supported by the server on
+         the specified target datastore, then the server MUST return
+         an <rpc-error> element with an <error-tag> value of
          'invalid-value'.";
     }
   }
+
   augment "/nc:unlock/nc:input/nc:target/nc:config-target" {
     description
-      "Add NMDA Datastore as target.";
+      "Add NMDA datastore as target.";
     leaf datastore {
       type ds:datastore-ref;
       description
         "Datastore to unlock.
 
-         The unlock operation is only supported on writable
+         The <unlock> operation is only supported on writable
          datastores.
 
-         If the unlock operation is not supported by the server on
+         If the <unlock> operation is not supported by the server on
          the specified target datastore, then the server MUST return
          an <rpc-error> element with an <error-tag> value of
          'invalid-value'.";
@@ -341,26 +366,25 @@ module ietf-netconf-nmda {
   }
 
   /*
-   * Augment the validate operation with a
+   * Augment the <validate> operation with a
    * "datastore" parameter.
    */
 
   augment "/nc:validate/nc:input/nc:source/nc:config-source" {
     description
-      "Add NMDA Datastore as source.";
+      "Add NMDA datastore as source.";
     leaf datastore {
       type ds:datastore-ref;
       description
         "Datastore to validate.
 
-         The validate operation is supported only on configuration
+         The <validate> operation is supported only on configuration
          datastores.
 
-         If the validate operation is not supported by the server on
-         the specified target datastore, then the server MUST return
-         an <rpc-error> element with an <error-tag> value of
+         If the <validate> operation is not supported by the server
+         on the specified target datastore, then the server MUST
+         return an <rpc-error> element with an <error-tag> value of
          'invalid-value'.";
-
     }
   }
 }

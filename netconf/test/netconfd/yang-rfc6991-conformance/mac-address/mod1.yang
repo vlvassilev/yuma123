@@ -1,0 +1,17 @@
+module mod1 {
+  prefix m1;
+  namespace "http://yuma123.org/ns/mac-address/mod1";
+  import ietf-yang-types {
+    revision-date "2013-07-15";
+    prefix yang;
+  }
+
+  container c {
+    list l {
+      key "mac";
+      leaf mac {
+        type yang:mac-address;
+      }
+    }
+  }
+}

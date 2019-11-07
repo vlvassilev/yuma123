@@ -1,0 +1,8 @@
+<c xmlns="http://yuma123.org/ns/mac-address/mod1">
+  <l>
+    <mac>AA:BB:CC:DD:EE:FF</mac>
+  </l>
+  <l>
+    <mac>aa:bb:cc:dd:ee:ff</mac>
+  </l>
+</c>

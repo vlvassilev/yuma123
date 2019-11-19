@@ -154,7 +154,7 @@ static status_t
 } /* y_transmit_packet_invoke */
 
 
-static char* make_flow_spec_str(val_value_t* flow_val)
+static char* make_flow_spec_str(val_value_t* flow_val, int delete)
 {
     status_t res;
     val_value_t* id_val;
@@ -213,7 +213,7 @@ static char* make_flow_spec_str(val_value_t* flow_val)
         sprintf(flow_spec_str+strlen(flow_spec_str),",dl_vlan=%u",VAL_UINT32(match_vlan_id_val));
     }
 
-
+    if(!delete) {
     sprintf(flow_spec_str+strlen(flow_spec_str),",actions=");
 
 
@@ -267,6 +267,7 @@ static char* make_flow_spec_str(val_value_t* flow_val)
             assert(0);
         }
     }
+    }
     return strdup(flow_spec_str);
 }
 
@@ -284,7 +285,7 @@ static void flow_common(val_value_t* flow_val, int delete)
 
     protocol = ofputil_protocol_from_ofp_version(ofp_version);
 
-    flow_spec_str = make_flow_spec_str(flow_val);
+    flow_spec_str = make_flow_spec_str(flow_val, delete);
     error = parse_ofp_flow_mod_str(&fm, flow_spec_str /*for example "in_port=2,actions=output:1" */,
                                    NULL,
                                   NULL,
@@ -690,7 +691,7 @@ static status_t
     char* error;
 
     /* fill the protocol independent flow stats request struct */
-    flow_spec_str = make_flow_spec_str(flow_statistics_val->parent);
+    flow_spec_str = make_flow_spec_str(flow_statistics_val->parent, 1);
 
 #if 0
     struct ofputil_flow_mod fm;

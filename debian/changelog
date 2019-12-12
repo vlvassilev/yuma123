@@ -2,5 +2,6 @@ yuma123 (2.12-0) UNRELEASED; urgency=medium
 
   * Unofficial package
   * Added "Multi-Arch: same" to -dev and module packages
+  * 
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 06 Dec 2018 15:34:31 +0100
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Thu, 12 Dec 2019 15:38:21 +0100

@@ -8,13 +8,13 @@ wget http://www.yang-central.org/twiki/pub/Main/YangTools/rfcstrip
 wget https://www.rfc-editor.org/rfc/rfc6991.txt
 wget https://www.rfc-editor.org/rfc/rfc7224.txt
 wget https://www.rfc-editor.org/rfc/rfc8343.txt
-wget https://www.ietf.org/id/draft-vassilev-bmwg-network-interconnect-tester-00.txt
+wget https://www.ietf.org/id/draft-vassilev-bmwg-network-interconnect-tester-02.txt
 
 #xml2rfc draft-vassilev-bmwg-network-interconnect-tester-00.xml
 sh ./rfcstrip rfc6991.txt
 sh ./rfcstrip rfc7224.txt
 sh ./rfcstrip rfc8343.txt
-sh ./rfcstrip draft-vassilev-bmwg-network-interconnect-tester-00.txt
+sh ./rfcstrip draft-vassilev-bmwg-network-interconnect-tester-02.txt
 
 pyang -f tree --path . ietf-traffic-generator*.yang
 pyang -f tree --path . ietf-traffic-analyzer*.yang
@@ -39,8 +39,8 @@ else
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
 
-  /usr/sbin/netconfd --modpath=.:/usr/share/yuma/modules --module=ietf-loopback --module=ietf-traffic-generator --module=ietf-traffic-analyzer --no-startup --validate-config-only --superuser=$USER
-  /usr/sbin/netconfd --modpath=.:/usr/share/yuma/modules --module=ietf-loopback --module=ietf-traffic-generator --module=ietf-traffic-analyzer --no-startup --superuser=$USER
+  /usr/sbin/netconfd --modpath=.:/usr/share/yuma/modules --module=ietf-traffic-generator --module=ietf-traffic-analyzer --no-startup --validate-config-only --superuser=$USER
+  /usr/sbin/netconfd --modpath=.:/usr/share/yuma/modules --module=ietf-traffic-generator --module=ietf-traffic-analyzer --no-startup --superuser=$USER
   SERVER_PID=$!
   cd ..
 fi

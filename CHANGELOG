@@ -8,8 +8,10 @@ yuma123 (2.12) UNRELEASED; urgency=medium
   * Augmented set-my-session and get-my-session RPCs with cache-timeout param
     allowing cache to be disabled when cache-timeout=0
   * Fixed Xpath compare of nodeset to nodeset implementation for numeric nodesets
+  * Updated IETF draft YANG modules
+  * 
 
- -- Vladimir Vassilev <vladimir@transpacket.com>  Thu, 20 Dec 2018 15:52:58 +0100
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Thu, 12 Dec 2019 15:35:24 +0100
 
 yuma123 (2.11) stable; urgency=medium
 

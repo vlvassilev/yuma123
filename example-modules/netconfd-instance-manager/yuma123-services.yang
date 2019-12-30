@@ -1,0 +1,82 @@
+module yuma123-services {
+  namespace "urn:yuma123:params:xml:ns:yang:services";
+  prefix srvc;
+
+  revision 2019-12-30 {
+    description
+      "Initial revision.";
+  }
+
+  /*
+   * Identities
+   */
+
+  identity service-type {
+    description
+      "Base identity from which specific service types are
+       derived.";
+  }
+
+  container services {
+    description
+      "Service parameters.";
+    list service {
+      key "name";
+      description
+        "The list of bridge ports on the device.";
+      leaf name {
+        type string;
+      }
+      leaf type {
+        type identityref {
+          base service-type;
+        }
+        mandatory true;
+        description
+          "The type of the service.
+
+           When a service entry is created, a server MAY
+           initialize the type leaf with a valid value, e.g., if it
+           is possible to derive the type from the name of the
+           service.
+
+           If a client tries to set the type of a service to a
+           value that can never be used by the system, e.g., if the
+           type is not supported or if the type does not match the
+           name of the service, the server MUST reject the request.
+           A NETCONF server MUST reply with an rpc-error with the
+           error-tag 'invalid-value' in this case.";
+      }
+      container environment-variables {
+        description
+          "Some SIL modules require configuration through
+           environment variables in addition to the
+           configuration data of the YANG modules
+           implemented.";
+        list var {
+          key "name";
+          leaf name {
+            type string;
+          }
+          leaf value {
+            type string;
+          }
+        }
+      }
+      container state {
+        leaf is-running {
+          type boolean;
+        }
+      }
+    }
+  }
+
+  typedef sevice-ref {
+    type leafref {
+      path "/srvc:services/srvc:service/srvc:name";
+    }
+    description
+      "This type is used by data models that need to reference
+       configured services.";
+  }
+}

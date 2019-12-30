@@ -1,0 +1,59 @@
+module yuma123-services-netconfd {
+  yang-version 1.1;
+  namespace "urn:yuma123:params:xml:ns:yang:services-netconfd";
+  prefix srvc-netconfd;
+
+  import yuma-ncx {
+    prefix ncx;
+  }
+  import yuma-types {
+    prefix nt;
+  }
+  import yuma-app-common {
+    prefix ncxapp;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import yuma123-services {
+    prefix srvc;
+  }
+
+  revision 2019-12-28 {
+    description
+      "Initial revision.";
+  }
+
+  /*
+   * Identities
+   */
+
+  identity netconf {
+    base srvc:service-type;
+  }
+
+  identity netconfd {
+    base netconf;
+  }
+
+  augment "/srvc:services/srvc:service" {
+    when "derived-from-or-self(../srvc:type,
+                                 'srvc-netconfd:netconfd')";
+    container parameters {
+      leaf port {
+        description
+          "Specifies the TCP ports that the server will accept
+           connections from.";
+        type inet:port-number;
+        mandatory true;
+      }
+      choice model-spec {
+        case cli {
+          uses ncxapp:ModuleParm;
+          uses ncxapp:DeviationParm;
+          uses ncxapp:CommonFeatureParms;
+        }
+      }
+    }
+  }
+}

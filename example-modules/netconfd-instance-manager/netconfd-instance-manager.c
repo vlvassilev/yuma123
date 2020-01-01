@@ -35,6 +35,33 @@
 #define SERVICES_MOD "yuma123-services"
 #define SERVICES_NETCONFD_MOD "yuma123-services-netconfd"
 
+void sshd_for_netconfd_start(unsigned int port)
+{
+    FILE* f;
+    int ret;
+    char filename[]="/var/run/yuma/sshd-netconf-config-65536";
+    char cmd_buf[]="/usr/sbin/sshd -f /var/run/yuma/sshd-netconf-config-65536 &";
+
+    sprintf(filename, "/var/run/yuma/sshd-netconf-config-%u",port);
+    f=fopen(filename,"w");
+    assert(f!=NULL);
+    fprintf(f,"PidFile /var/run/yuma/sshd-netconf-%u.pid\n"
+              "ChallengeResponseAuthentication no\n"
+              "UsePAM yes\n"
+              "AcceptEnv LANG LC_*\n"
+              "PermitRootLogin yes\n"
+              "Port %u\n"
+              "Subsystem netconf \"/usr/sbin/netconf-subsystem --ncxserver-sockname=%u@/var/run/yuma/ncxserver-%u.sock\"\n"
+              "#ForceCommand /usr/run/yuma/netconf-subsystem-%u\n"
+              "#LogLevel DEBUG3\n"
+              "#SyslogFacility\n"
+              ,port,port,port,port,port);
+    fclose(f);
+    sprintf(cmd_buf, "/usr/sbin/sshd -f %s &",filename);
+    ret=system(cmd_buf);
+    assert(ret==0);
+}
+
 /*
    The returned value is the strlen of string.
    If cli_args_str is NULL the function only calculates the length.
@@ -106,10 +133,12 @@ void service_add(val_value_t* service_new_val)
     snprintf(background_cmd_buf, len+1, "%s &", buf);
 
     res=system(background_cmd_buf);
-
     assert(res==0);
+
     free(background_cmd_buf);
     free(buf);
+
+    sshd_for_netconfd_start(VAL_UINT16(port_val));
 }
 
 void service_delete(val_value_t* service_cur_val)

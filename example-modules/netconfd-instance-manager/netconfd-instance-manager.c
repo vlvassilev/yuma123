@@ -16,7 +16,6 @@
 #include <sys/wait.h>
 
 
-#include <libxml/xmlstring.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_commit_complete.h"
@@ -40,20 +39,20 @@ void sshd_for_netconfd_start(unsigned int port)
 {
     FILE* f;
     int ret;
-    char filename[]="/var/run/yuma/sshd-netconf-config-65536";
-    char cmd_buf[]="/usr/sbin/sshd -f /var/run/yuma/sshd-netconf-config-65536 &";
+    char filename[]="/var/run/netconfd-ssh/config-65536";
+    char cmd_buf[]="/usr/sbin/sshd -f /var/run/netconfd-ssh/config-65536 &";
 
-    sprintf(filename, "/var/run/yuma/sshd-netconf-config-%u",port);
+    sprintf(filename, "/var/run/netconfd-ssh/config-%u",port);
     f=fopen(filename,"w");
     assert(f!=NULL);
-    fprintf(f,"PidFile /var/run/yuma/sshd-netconf-%u.pid\n"
+    fprintf(f,"PidFile /var/run/netconfd-ssh/%u.pid\n"
               "ChallengeResponseAuthentication no\n"
               "UsePAM yes\n"
               "AcceptEnv LANG LC_*\n"
               "PermitRootLogin yes\n"
               "Port %u\n"
-              "Subsystem netconf \"/usr/sbin/netconf-subsystem --ncxserver-sockname=%u@/var/run/yuma/ncxserver-%u.sock\"\n"
-              "#ForceCommand /usr/run/yuma/netconf-subsystem-%u\n"
+              "Subsystem netconf \"/usr/sbin/netconf-subsystem --ncxserver-sockname=%u@/var/run/netconfd/ncxserver-%u.sock\"\n"
+              "#ForceCommand /var/run/netconfd/netconf-subsystem-%u.sh\n"
               "#LogLevel DEBUG3\n"
               "#SyslogFacility\n"
               ,port,port,port,port,port);
@@ -120,11 +119,11 @@ char* generate_netconfd_cmd(val_value_t* service_val)
     parameters_val = val_find_child(service_val,SERVICES_NETCONFD_MOD,"parameters");
     port_val = val_find_child(parameters_val,SERVICES_NETCONFD_MOD,"port");
 
-    header_len = snprintf(NULL, 0, "/usr/sbin/netconfd --startup=/var/lib/yuma/startup-cfg-%u.xml --ncxserver-sockname=/var/run/yuma/ncxserver-%u.sock ", (unsigned int)VAL_UINT16(port_val), (unsigned int)VAL_UINT16(port_val));
+    header_len = snprintf(NULL, 0, "/usr/sbin/netconfd --startup=/var/lib/netconfd/startup-cfg-%u.xml --ncxserver-sockname=/var/run/netconfd/ncxserver-%u.sock ", (unsigned int)VAL_UINT16(port_val), (unsigned int)VAL_UINT16(port_val));
 
     container_to_cli_args_str(parameters_val, NULL, &len);
     buf=malloc(header_len+len+1);
-    header_len = snprintf(buf, header_len+1, "/usr/sbin/netconfd --startup=/var/lib/yuma/startup-cfg-%u.xml --ncxserver-sockname=/var/run/yuma/ncxserver-%u.sock ", (unsigned int)VAL_UINT16(port_val), (unsigned int)VAL_UINT16(port_val));
+    header_len = snprintf(buf, header_len+1, "/usr/sbin/netconfd --startup=/var/lib/netconfd/startup-cfg-%u.xml --ncxserver-sockname=/var/run/netconfd/ncxserver-%u.sock ", (unsigned int)VAL_UINT16(port_val), (unsigned int)VAL_UINT16(port_val));
     container_to_cli_args_str(parameters_val, buf+header_len, &len);
     return buf;
 }
@@ -142,11 +141,11 @@ void service_add(val_value_t* service_new_val)
     parameters_val = val_find_child(service_new_val,SERVICES_NETCONFD_MOD,"parameters");
     port_val = val_find_child(parameters_val,SERVICES_NETCONFD_MOD,"port");
 
-    sprintf(cmd_buf, "rm /var/run/yuma/ncxserver-%u.pid",(unsigned int)VAL_UINT16(port_val));
+    sprintf(cmd_buf, "rm /var/run/netconfd/ncxserver-%u.pid",(unsigned int)VAL_UINT16(port_val));
     system(cmd_buf);
-    sprintf(cmd_buf, "rm /var/run/yuma/ncxserver-%u.sock",(unsigned int)VAL_UINT16(port_val));
+    sprintf(cmd_buf, "rm /var/run/netconfd/ncxserver-%u.sock",(unsigned int)VAL_UINT16(port_val));
     system(cmd_buf);
-//    sprintf(cmd_buf, "rm /var/lib/yuma/startup-cfg-%u.xml", (unsigned int)VAL_UINT16(port_val));
+//    sprintf(cmd_buf, "rm /var/lib/netconfd/startup-cfg-%u.xml", (unsigned int)VAL_UINT16(port_val));
 //    system(cmd_buf);
 
     val_dump_value(service_new_val,NCX_DEF_INDENT);
@@ -362,6 +361,7 @@ status_t
     status_t res;
     agt_profile_t* agt_profile;
     ncx_module_t * mod;
+    int ret;
 
     agt_profile = agt_get_profile();
 
@@ -382,6 +382,12 @@ status_t
     res=agt_commit_complete_register("external-handler",
                                      netconfd_instance_manager_commit_complete_cb);
     assert(res == NO_ERR);
+
+    ret=system("mkdir -p /var/run/netconfd");
+    assert(ret==0);
+    system("mkdir -p /var/run/netconfd-ssh");
+    assert(ret==0);
+
     return NO_ERR;
 }
 

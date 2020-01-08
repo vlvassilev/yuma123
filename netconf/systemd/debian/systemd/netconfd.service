@@ -7,7 +7,7 @@ After=network.target auditd.service
 Type=simple
 EnvironmentFile=-/etc/default/netconfd
 ExecStartPre=/usr/sbin/netconfd --validate-config-only
-ExecStart=/usr/sbin/netconfd $NETCONFD_OPTS --superuser=root
+ExecStart=/usr/sbin/netconfd $NETCONFD_OPTS --startup=/var/lib/netconfd/startup-cfg.xml --superuser=root
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=control-group
 RuntimeDirectory=netconfd

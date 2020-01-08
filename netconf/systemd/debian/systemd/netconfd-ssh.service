@@ -13,7 +13,7 @@ KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
 Type=notify
-RuntimeDirectory=netconfd-sshd
+RuntimeDirectory=netconfd-ssh
 RuntimeDirectoryMode=0755
 
 [Install]

@@ -9,8 +9,11 @@ AC_SUBST(netconfmoduledir)
 yangdir="$prefix/share/yuma/modules"
 AC_SUBST(yangdir)
 
-netconf_ssh_configdir="$sysconfdir/netconf/ssh"
-AC_SUBST(netconf_ssh_configdir)
+netconfd_ssh_configdir="$sysconfdir/netconf/ssh"
+AC_SUBST(netconfd_ssh_configdir)
+
+netconfd_statedir="$localstatedir/lib/netconfd"
+AC_SUBST(netconfd_statedir)
 
 AC_CONFIG_FILES([
         Makefile

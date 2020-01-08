@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 
 
@@ -83,6 +84,30 @@ static unsigned int container_to_cli_args_str(val_value_t* container_val, char* 
     return len;
 }
 
+static void setup_env_vars(val_value_t* service_val)
+{
+    val_value_t* environment_variables_val;
+    val_value_t* val;
+    int ret;
+    environment_variables_val = val_find_child(service_val,SERVICES_MOD,"environment-variables");
+    if(environment_variables_val==NULL) {
+        return;
+    }
+    for (val = val_get_first_child(environment_variables_val);
+         val != NULL;
+         val = val_get_next_child(val)) {
+        val_value_t* name_val;
+        val_value_t* value_val;
+
+        name_val = val_find_child(val,SERVICES_MOD,"name");
+        assert(name_val!=NULL);
+        value_val = val_find_child(val,SERVICES_MOD,"value");
+        assert(value_val!=NULL);
+        ret=setenv(VAL_STRING(name_val), VAL_STRING(value_val), TRUE /*overwrite*/);
+        assert(ret==0);
+    }
+}
+
 /* free the malloc-ed buffer when done using it */
 char* generate_netconfd_cmd(val_value_t* service_val)
 {
@@ -132,8 +157,26 @@ void service_add(val_value_t* service_new_val)
     background_cmd_buf=malloc(len+1);
     snprintf(background_cmd_buf, len+1, "%s &", buf);
 
-    res=system(background_cmd_buf);
-    assert(res==0);
+    {
+        int status;
+        pid_t child_pid;
+
+        if((child_pid = fork()) == 0) {
+
+            /* child */
+            setup_env_vars(service_new_val);
+            res=system(background_cmd_buf);
+            exit(res);
+        } else {
+            /* parent */
+            while (child_pid != wait(&status)) {
+                if(child_pid==-1) {
+                    assert(0);
+                }
+            }
+            assert(status==0);
+        }
+    }
 
     free(background_cmd_buf);
     free(buf);

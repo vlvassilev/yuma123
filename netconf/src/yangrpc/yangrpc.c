@@ -1075,6 +1075,7 @@ status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line,
         }
     }
     *request_val = reqdata;
+    free(line);
     return res;
 }
 

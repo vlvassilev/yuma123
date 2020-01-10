@@ -25,6 +25,8 @@ def yangcli(yangrpc_cb,cmd_line,strip_namespaces=True):
 		raise NameError("Error: yuma.val_make_serialized_string failed!")
 		return None
 
+	yuma.val_free_value(reply_val);
+
 	myetree = etree.fromstring(reply_xml_str)
 
 	return myetree

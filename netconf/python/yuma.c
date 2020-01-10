@@ -179,6 +179,21 @@ yuma_val_make_serialized_string(PyObject *self, PyObject *args)
     return py_retval;
 }
 
+static PyObject *
+yuma_val_free_value(PyObject *self, PyObject *args)
+{
+    PyObject *py_val;
+    int res;
+    val_value_t* val;
+
+    if (!PyArg_ParseTuple(args, (char *) "O:yuma_val_dump_value", &py_val)) {
+        return (NULL);
+    }
+    val = (val_value_t*)PyCapsule_GetPointer(py_val, "val_value_t_ptr");
+    val_free_value(val);
+    Py_RETURN_NONE;
+}
+
 /*  define functions in module */
 static PyMethodDef YumaMethods[] =
 {
@@ -189,6 +204,7 @@ static PyMethodDef YumaMethods[] =
      {"val_string", yuma_val_string, METH_VARARGS, "get value of val represented as string"},
      {"val_dump_value", yuma_val_dump_value, METH_VARARGS, "dump the value of the provided variable to stdout"},
      {"val_make_serialized_string", yuma_val_make_serialized_string, METH_VARARGS, "serialize val variable to new dynamic memory buffer string"},
+     {"val_free_value", yuma_val_free_value, METH_VARARGS, "free the provided val"},
      {NULL, NULL, 0, NULL}
 };
 

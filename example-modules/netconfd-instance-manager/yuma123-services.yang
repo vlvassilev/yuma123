@@ -64,6 +64,7 @@ module yuma123-services {
         }
       }
       container state {
+        config false;
         leaf is-running {
           type boolean;
         }

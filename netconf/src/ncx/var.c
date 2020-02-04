@@ -44,7 +44,6 @@ date         init     comment
 #include "val_util.h"
 #include "var.h"
 
-
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -645,6 +644,18 @@ static status_t
                                                new_parm);
                 }                            
             }
+        } else if(varval->btyp==NCX_BT_EXTERN) {
+            FILE* f;
+            val_value_t* tmp_val;
+            f = fopen(VAL_EXTERN(varval),"r");
+            assert(f!=NULL);
+            res = xml_rd_open_file (f, obj, &tmp_val);
+            if(res==NO_ERR) {
+                val_move_children(tmp_val, new_parm);
+                val_free_value(tmp_val);
+            }
+
+            fclose(f);
         } else {
             res = ERR_NCX_WRONG_DATATYP;
         }

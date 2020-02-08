@@ -510,6 +510,41 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION set_val_from_external
+*
+* set a value struct from a external source (file)
+*
+* INPUTS:
+*   obj == expected object template
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
+*   varval == var value node that was found
+*   new_parm == value in progress to fill in
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    set_val_from_external (obj_template_t *obj,
+                      val_value_t *varval,
+                      val_value_t *new_parm)
+{
+    FILE* f;
+    status_t res;
+    val_value_t* tmp_val;
+
+    f = fopen(VAL_EXTERN(varval),"r");
+    assert(f!=NULL);
+    res = xml_rd_open_file (f, obj, &tmp_val);
+    if(res==NO_ERR) {
+        val_move_children(tmp_val, new_parm);
+        val_free_value(tmp_val);
+    }
+
+    fclose(f);
+}
+
+/********************************************************************
 * FUNCTION set_val_from_var
 * 
 * set a value struct from a var parm
@@ -639,26 +674,17 @@ static status_t
             } else {
                 val_move_children(cloneval, new_parm);
                 val_free_value(cloneval);
-                if (new_parm->btyp == NCX_BT_LIST) {
-                    res = val_gen_index_chain(new_parm->obj,
-                                               new_parm);
-                }                            
             }
         } else if(varval->btyp==NCX_BT_EXTERN) {
-            FILE* f;
-            val_value_t* tmp_val;
-            f = fopen(VAL_EXTERN(varval),"r");
-            assert(f!=NULL);
-            res = xml_rd_open_file (f, obj, &tmp_val);
-            if(res==NO_ERR) {
-                val_move_children(tmp_val, new_parm);
-                val_free_value(tmp_val);
-            }
-
-            fclose(f);
+            set_val_from_external(obj, varval, new_parm);
         } else {
             res = ERR_NCX_WRONG_DATATYP;
         }
+        if (res == NO_ERR && new_parm->btyp == NCX_BT_LIST) {
+            res = val_gen_index_chain(new_parm->obj,
+                                      new_parm);
+        }
+
         break;
     case OBJ_TYP_ANYXML:
         if (!typ_is_simple(varval->btyp)) {
@@ -674,9 +700,13 @@ static status_t
                     /* adding a container to a complex parm like 'value' */
                     val_add_child(cloneval, new_parm);
                 } else {
-                    /* the old code moved the children to the anyxml container */
-                    val_move_children(cloneval, new_parm);
-                    val_free_value(cloneval);
+                    if(varval->btyp==NCX_BT_EXTERN) {
+                        set_val_from_external(obj, varval, new_parm);
+                    } else {
+                        /* the old code moved the children to the anyxml container */
+                        val_move_children(cloneval, new_parm);
+                        val_free_value(cloneval);
+                    }
 
                     /* change the new_parm->btyp from ANYXML to CONTAINER */
                     new_parm->btyp = NCX_BT_CONTAINER;

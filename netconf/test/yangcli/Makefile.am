@@ -8,4 +8,5 @@ test-feature-depending-completion \
 test-mutikey-list-tab-completion \
 test-unversioned-module-imports \
 test-identical-node-names \
-test-identical-identity-names
+test-identical-identity-names \
+test-external-file-vars

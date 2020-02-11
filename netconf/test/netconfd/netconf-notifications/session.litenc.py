@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import time
 import sys, os
+import lxml
 sys.path.append("../../litenc")
 import litenc
 import litenc_lxml
@@ -82,12 +83,18 @@ def main():
 
 	print "[OK] Receiving <hello> =%(reply_xml)s:" % {'reply_xml':reply_xml}
 
-	(ret, notification_xml)=conn.receive()
-	if ret != 0:
+	notification_xml=conn_lxml.receive()
+	if notification_xml == None:
 		print("[FAILED] Receiving <netconf-session-start> notification")
 		return(-1)
 
-	print "[OK] Receiving <netconf-session-start> notification =%(notification_xml)s:" % {'notification_xml':notification_xml}
+	print lxml.etree.tostring(notification_xml)
+
+	notification_xml=litenc_lxml.strip_namespaces(notification_xml)
+	match=notification_xml.xpath("/notification/netconf-session-start")
+	assert(len(match)==1)
+
+	print "[OK] Receiving <netconf-session-start>"
 
 	return(0)
 

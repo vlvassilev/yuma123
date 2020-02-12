@@ -611,14 +611,15 @@ static status_t
             
             filptr = NULL;
 
+#if 0
             /* check access control if scb is non-NULL */
-            if (isnotif && scb && 
+            if (isnotif && scb &&
                 !agt_acm_val_read_allowed(msg,
                                           scb->username, 
                                           curchild)) {
                 continue;
             }
-
+#endif
             /* check any attr-match tests */
             if (!attr_test(filchild, curchild)) {
                 /* failed an attr-match test so skip it */

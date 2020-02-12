@@ -22,7 +22,8 @@ else
 fi
 
 sleep 3
-python session.litenc.py
+python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD --with-filter-subtree
 #kill $SERVER_PID
 cat tmp/server.log
 sleep 1

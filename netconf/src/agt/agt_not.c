@@ -889,14 +889,14 @@ static status_t
                 agt_tree_test_filter(&msghdr,
                                      sub->scb,
                                      sub->filterval,
-                                     notif->event);
+                                     notif->event->parent);
             break;
         case OP_FILTER_XPATH:
             filterpassed = 
                 agt_xpath_test_filter(&msghdr,
                                       sub->scb,
                                       sub->selectval,
-                                      notif->event);
+                                      notif->event->parent);
             break;
         case OP_FILTER_NONE:
         default:

@@ -11,7 +11,7 @@ expect {
 }
 
 expect {
-    "rd-bar"  {send "?c"}
+    "rd-bar"  {send "\n"}
     timeout {exit 1}
 }
 

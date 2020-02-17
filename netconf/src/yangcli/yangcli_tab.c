@@ -212,7 +212,7 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION fill_parm_completion
+ * FUNCTION fill_parm_completion_ex
  * 
  * fill the command struct for one RPC parameter value
  * check all the parameter values that match, if possible
@@ -231,6 +231,9 @@ static status_t
  *              this may not be the same as 
  *              word_end - word_start if the cursor was
  *              moved within a long line
+ *    typdef == the typdef of paramobj
+ *    basetypdef == the basetypdef of typdef
+ *    btyp == the btyp of paramobj
  *
  * OUTPUTS:
  *   cpl filled in if any matching commands found
@@ -239,34 +242,25 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    fill_parm_completion (obj_template_t *parmobj,
+    fill_parm_completion_ex (obj_template_t *parmobj,
                           WordCompletion *cpl,
                           completion_state_t *comstate,
                           const char *line,
                           int word_start,
                           int word_end,
-                          int parmlen)
+                          int parmlen,
+                          typ_def_t *typdef,
+                          typ_def_t *basetypdef,
+                          ncx_btype_t btyp
+                          )
 {
     const char            *defaultstr;
     typ_enum_t            *typenum;
-    typ_def_t             *typdef, *basetypdef;
-    ncx_btype_t            btyp;
     status_t               res;
+    typ_unionnode_t *un = NULL;
 
-#ifdef YANGCLI_TAB_DEBUG
-    log_debug2("\n*** fill parm %s ***\n", obj_get_name(parmobj));
-#endif
-
-    typdef = obj_get_typdef(parmobj);
-    if (typdef == NULL) {
-        return NO_ERR;
-    }
-
-    res = NO_ERR;
-    basetypdef = typ_get_base_typdef(typdef);
-    btyp = obj_get_basetype(parmobj);
-
-    switch (btyp) {
+   res = NO_ERR;
+   switch (btyp) {
     case NCX_BT_IDREF:
         {
             const typ_idref_t *idref;
@@ -316,6 +310,17 @@ static status_t
         return res;
     case NCX_BT_INSTANCE_ID:
         break;
+    case NCX_BT_UNION:
+        for (un = (typ_unionnode_t *)dlq_firstEntry(&typdef->def.simple.unionQ);
+             un != NULL && res == NO_ERR;
+             un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+            /* recursive call for each member of the union */
+            res = fill_parm_completion_ex (parmobj,cpl,comstate,line,word_start,word_end,parmlen,
+                                           un->typdef,
+                                           typ_get_base_typdef(un->typdef),
+                                           typ_get_basetype(un->typdef));
+        }
+        break;
     default:
         break;
     }
@@ -331,7 +336,70 @@ static status_t
 
     return NO_ERR;
 
-}  /* fill_parm_completion */
+}  /* fill_parm_completion_ex */
+
+/********************************************************************
+ * FUNCTION fill_parm_completion
+ * 
+ * fill the command struct for one RPC parameter value
+ * check all the parameter values that match, if possible
+ *
+ * command state is CMD_STATE_FULL or CMD_STATE_GETVAL
+ *
+ * INPUTS:
+ *    parmobj == RPC input parameter template to use
+ *    cpl == word completion struct to fill in
+ *    comstate == completion state record to use
+ *    line == line passed to callback
+ *    word_start == start position within line of the
+ *                  word being completed
+ *    word_end == word_end passed to callback
+ *    parmlen == length of parameter name already entered
+ *              this may not be the same as 
+ *              word_end - word_start if the cursor was
+ *              moved within a long line
+ *
+ * OUTPUTS:
+ *   cpl filled in if any matching commands found
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    fill_parm_completion (obj_template_t *parmobj,
+                          WordCompletion *cpl,
+                          completion_state_t *comstate,
+                          const char *line,
+                          int word_start,
+                          int word_end,
+                          int parmlen)
+{
+    typ_def_t             *typdef, *basetypdef;
+    ncx_btype_t            btyp;
+
+#ifdef YANGCLI_TAB_DEBUG
+    log_debug2("\n*** fill parm %s ***\n", obj_get_name(parmobj));
+#endif
+
+    typdef = obj_get_typdef(parmobj);
+    if (typdef == NULL) {
+        return NO_ERR;
+    }
+
+    basetypdef = typ_get_base_typdef(typdef);
+    btyp = obj_get_basetype(parmobj);
+
+    return fill_parm_completion_ex (parmobj,
+                          cpl,
+                          comstate,
+                          line,
+                          word_start,
+                          word_end,
+                          parmlen,
+                          typdef,
+                          basetypdef,
+                          btyp);
+}
 
 static status_t
     fill_xpath_predicate_completion (obj_template_t *rpc, obj_template_t *parentObj,

@@ -1160,8 +1160,8 @@ void
         agt_acm_cleanup();
         agt_ncx_cleanup();
         agt_hello_cleanup();
-        agt_cli_cleanup();
         agt_nmda_cleanup();
+        agt_cli_cleanup();
         agt_yang_library_cleanup();
         agt_sys_cleanup();
         agt_state_cleanup();

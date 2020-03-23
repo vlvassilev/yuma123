@@ -525,7 +525,13 @@ status_t
 
 }  /* yang_library_blocking_get_modules */
 
-status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key, char* extra_args, yangrpc_cb_ptr_t* yangrpc_cb_ptr)
+status_t yangrpc_connect(const char * const server, uint16_t port,
+                         const char * const user,
+                         const char * const password,
+                         const char * const public_key,
+                         const char * const private_key,
+                         const char * const extra_args,
+                         yangrpc_cb_ptr_t* yangrpc_cb_ptr)
 {
     char* server_arg;
     char* port_arg;
@@ -902,7 +908,9 @@ void
 }  /* yangcli_reply_handler_ */
 
 #include "yangcli_cmd.h"
-status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* original_line, val_value_t** request_val)
+status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr,
+                           const char * const original_line,
+                           val_value_t** request_val)
 {
 
 

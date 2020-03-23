@@ -56,7 +56,13 @@ status_t yangrpc_init(char* args);
 * RETURNS:
 *   status
 *********************************************************************/
-status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password, char* public_key, char* private_key, char* extra_args, yangrpc_cb_ptr_t* yangrpc_cb_ptr);
+status_t yangrpc_connect(const char * const server, uint16_t port,
+                         const char * const user,
+                         const char * const password,
+                         const char * const public_key,
+                         const char * const private_key,
+                         const char * const extra_args,
+                         yangrpc_cb_ptr_t* yangrpc_cb_ptr);
 
 /********************************************************************
 * FUNCTION yangrpc_parse_cli
@@ -79,7 +85,9 @@ status_t yangrpc_connect(char* server, uint16_t port, char* user, char* password
 * RETURNS:
 *   status
 *********************************************************************/
-status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr, char* cli_cmd_str, val_value_t** request_val);
+status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr,
+                           const char * const cli_cmd_str,
+                           val_value_t** request_val);
 
 /********************************************************************
 * FUNCTION yangrpc_exec

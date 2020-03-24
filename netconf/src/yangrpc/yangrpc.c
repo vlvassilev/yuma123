@@ -463,7 +463,7 @@ status_t
         }
         /* exit loop if we get here */
 #else
-	printf("<get-schema>:%s\n",searchresult->module);
+	log_info("\n<get-schema>:%s",searchresult->module);
         res = make_get_schema_reqdata(server_cb,
                                       scb,
                                       searchresult->module,
@@ -1126,7 +1126,7 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
     	
         res = ses_accept_input(scb);
         if(res!=NO_ERR) {
-            printf("error: ses_accept_input res=%d\n",res);
+            log_error("\nerror: ses_accept_input res=%d",res);
             assert(0);
         }
         if(mgr_ses_process_first_ready() && global_reply_val!=NULL) {

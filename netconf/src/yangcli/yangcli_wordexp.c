@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "log.h"
 #include "yangcli_wordexp.h"
 
 int yangcli_wordexp (const char* words, yangcli_wordexp_t* pwordexp, int flags)
@@ -65,6 +66,6 @@ void yangcli_wordexp_dump(yangcli_wordexp_t * pwordexp)
 {
     int i;
     for(i=0;i<pwordexp->we_wordc;i++) {
-        printf("[%d] %s\n",i,pwordexp->we_wordv[i]);
+        log_debug("\n[%d] %s",i,pwordexp->we_wordv[i]);
     }
 }

@@ -2155,8 +2155,8 @@ void
      val = val_find_child(server_cb->connect_valset,
                           YANGCLI_MOD, 
                           YANGCLI_TCP_DIRECT_ENABLE);
-     if(val == NULL) printf("val is NULL.\n");
-     if(val->res == NO_ERR) printf("val->res is NO_ERR.\n");
+     if(val == NULL) log_error("\nval is NULL.");
+     if(val->res == NO_ERR) log_debug("\nval->res is NO_ERR.");
 
      if (val != NULL && 
          val->res == NO_ERR && 

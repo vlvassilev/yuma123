@@ -83,7 +83,8 @@ def main():
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
-	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
+	conn=litenc_lxml.litenc_lxml(conn_raw)
+	conn.strip_namespaces=False
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
  <capabilities>
@@ -112,9 +113,9 @@ def main():
 """
 
 	print("<get> - /ietf-yang-library:modules-state ...")
-	result = conn.rpc(get_yang_library_rpc, strip_ns=False)
+	result = conn.rpc(get_yang_library_rpc)
 	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
-        namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
+	namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
 
@@ -146,7 +147,8 @@ def main():
 	print("<edit-config> - load example config to 'candidate' ...")
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
-	ok = result.xpath('./ok')
+	namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
+	ok = result.xpath('./nc:ok', namespaces=namespaces)
 	assert(len(ok)==1)
 
 	commit_rpc = '<commit/>'
@@ -154,7 +156,7 @@ def main():
 	print("<commit> - commit example config ...")
 	result = conn.rpc(commit_rpc)
 	print lxml.etree.tostring(result)
-	ok = result.xpath('./ok')
+	ok = result.xpath('./nc:ok', namespaces=namespaces)
 	assert(len(ok)==1)
 
 
@@ -171,9 +173,9 @@ def main():
 """
 
 	print("<get> - example data ...")
-	result = conn.rpc(get_example_data_rpc, strip_ns=False)
+	result = conn.rpc(get_example_data_rpc)
 	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
-        namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
+	namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
 	assert(len(data)==1)
 

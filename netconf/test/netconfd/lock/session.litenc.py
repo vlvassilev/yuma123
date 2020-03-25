@@ -15,7 +15,7 @@ def connect(server, port, user, password):
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
-	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
+	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
  <capabilities>
@@ -90,10 +90,10 @@ def step_1(server, port, user, password):
 	print("#1 - Create 2 sessions.")
 	print("Connecting #1 ...")
 	conn_raw_1 = connect(server=server, port=port, user=user, password=password)
-	conn_1=litenc_lxml.litenc_lxml(conn_raw_1, strip_namespaces=True)
+	conn_1=litenc_lxml.litenc_lxml(conn_raw_1)
 	print("Connecting #2 ...")
 	conn_raw_2 = connect(server=server, port=port, user=user, password=password)
-	conn_2=litenc_lxml.litenc_lxml(conn_raw_2, strip_namespaces=True)
+	conn_2=litenc_lxml.litenc_lxml(conn_raw_2)
 
 	print("Connected ...")
 	return (conn_raw_1, conn_1, conn_raw_2, conn_2)

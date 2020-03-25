@@ -139,7 +139,8 @@ def main():
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
-	conn=litenc_lxml.litenc_lxml(conn_raw,strip_namespaces=True)
+	conn=litenc_lxml.litenc_lxml(conn_raw)
+	conn.strip_namespaces=True
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
  <capabilities>
@@ -168,7 +169,8 @@ def main():
 """
 
 	print("<get> - /ietf-yang-library:modules-state ...")
-	result = conn.rpc(get_yang_library_rpc, strip_ns=False)
+	conn.strip_namespaces=False
+	result = conn.rpc(get_yang_library_rpc)
 	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
         namespaces = {"nc":"urn:ietf:params:xml:ns:netconf:base:1.0"}
 	data = result.xpath('./nc:data', namespaces=namespaces)
@@ -209,6 +211,7 @@ def main():
 """
 
 	print("<edit-config> - load Appendix B. example config to 'candidate' ...")
+	conn.strip_namespaces=True
 	result = conn.rpc(edit_config_rpc)
 	print lxml.etree.tostring(result)
 	ok = result.xpath('./ok')
@@ -234,7 +237,8 @@ def main():
 """
 
 	print("<get-data> - Appendix B. data ...")
-	result = conn.rpc(get_example_data_rpc, strip_ns=False)
+	conn.strip_namespaces=False
+	result = conn.rpc(get_example_data_rpc)
 	print lxml.etree.tostring(result, pretty_print=True, inclusive_ns_prefixes=True)
         namespaces = {"ncds":"urn:ietf:params:xml:ns:yang:ietf-netconf-datastores"}
 	data = result.xpath('./ncds:data', namespaces=namespaces)

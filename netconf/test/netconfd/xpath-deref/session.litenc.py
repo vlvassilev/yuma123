@@ -52,7 +52,7 @@ def main():
 		print "[FAILED] Connecting to server=%(server)s:" % {'server':server}
 		return(-1)
 	print "[OK] Connecting to server=%(server)s:" % {'server':server}
-	conn=litenc_lxml.litenc_lxml(conn_raw, strip_namespaces=True)
+	conn=litenc_lxml.litenc_lxml(conn_raw)
 	ret = conn_raw.send("""
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
  <capabilities>

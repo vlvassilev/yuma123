@@ -42,7 +42,8 @@ class litenc_lxml():
 		reply_lxml = lxml.etree.fromstring(reply_xml)
 		if(self.strip_namespaces):
 			reply_lxml_striped=strip_namespaces(reply_lxml)
- 		return reply_lxml_striped
+			return reply_lxml_striped
+		return reply_lxml.getroottree()
 
 	def rpc(self, xml, message_id=1):
 		ret=self.litenc.send('''<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="'''+str(message_id)+'''">'''+xml+"</rpc>")

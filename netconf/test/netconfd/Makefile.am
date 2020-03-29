@@ -18,6 +18,7 @@ test-instance-identifier \
 test-xpath-current \
 test-xpath-re-match \
 test-xpath-deref \
+test-xpath-deref-2 \
 test-xpath-derived-from \
 test-xpath-derived-from-or-self \
 test-xpath-enum-value \

@@ -1,15 +1,25 @@
-#!/bin/bash -e
-rm -rf tmp || true
-mkdir tmp
+#!/bin/bash -ex
+MODULES="\
+/usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang \
+/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang \
+./test-xpath-deref.yang"
+
+SESSION_SCRIPT=session.litenc.py
+
+if [ "$#" -gt 0 ] ; then
+  if [ "$1" == "2" ] ; then
+    MODULES="${MODULES} ./mod2.yang"
+    SESSION_SCRIPT=session-2.litenc.py
+  fi
+fi
+
 if [ "$RUN_WITH_CONFD" != "" ] ; then
-  cp *.yang tmp
-  cd tmp
   killall -KILL confd || true
   echo "Starting confd: $RUN_WITH_CONFD"
   source $RUN_WITH_CONFD/confdrc
-  confdc -c /usr/share/yuma/modules/ietf/ietf-interfaces@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf -o ietf-interfaces.fxs
-  confdc -c /usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --yangpath /usr/share/yuma/modules/ietf -o iana-if-type.fxs
-  confdc -c ../test-xpath-deref.yang --yangpath /usr/share/yuma/modules/ietf -o test-xpath-deref.fxs
+  for module in $MODULES ; do
+    confdc -c $module --yangpath /usr/share/yuma/modules/ietf -o "`basename ${module}`".fxs
+  done
   NCPORT=2022
   NCUSER=admin
   NCPASSWORD=admin
@@ -17,13 +27,18 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   SERVER_PID=$!
   cd ..
 else
+  MODULE_ARGS=""
+  for module in $MODULES ; do
+    MODULE_ARGS="${MODULE_ARGS} --module=${module}"
+  done
+
   killall -KILL netconfd || true
   rm /tmp/ncxserver.sock || true
-  /usr/sbin/netconfd --module=/usr/share/yuma/modules/ietf/iana-if-type@2014-05-08.yang --module=./test-xpath-deref.yang --no-startup --superuser=$USER 2>&1 1>tmp/server.log &
+  /usr/sbin/netconfd $MODULE_ARGS --no-startup --superuser=$USER 2>&1 1>server.log &
   SERVER_PID=$!
 fi
 sleep 3
-python session.litenc.py --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
+python ${SESSION_SCRIPT} --server=$NCSERVER --port=$NCPORT --user=$NCUSER --password=$NCPASSWORD
 kill -KILL $SERVER_PID
-cat tmp/server.log
+cat server.log
 sleep 1

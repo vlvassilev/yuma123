@@ -12,9 +12,8 @@ def main():
 	print("""
 #Description: Demonstrate that deref() works.
 #Procedure:
-#1 - Create interfaces foo enabled=true and bar enabled=false.
-#2 - Validate management-interface/name=foo can be created.
-#3 - Validate management-interface/name=bar can not be created.
+#1 - Create interface foo of type ethernetCsmacd.
+#2 - Validate management-interface/mod2:ethernet-foo can be created.
 """)
 
 	parser = argparse.ArgumentParser()
@@ -109,12 +108,6 @@ def main():
             xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
           <enabled>true</enabled>
         </interface>
-        <interface xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" nc:operation="create">
-          <name>bar</name>
-          <type
-            xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
-          <enabled>false</enabled>
-        </interface>
       </interfaces>
     </config>
   </edit-config>
@@ -145,7 +138,10 @@ def main():
     <default-operation>merge</default-operation>
     <test-option>set</test-option>
     <config>
-        <mgmt-interface xmlns="http://yuma123.org/ns/test-xpath-deref"><name>foo</name><type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type></mgmt-interface>
+        <mgmt-interface xmlns="http://yuma123.org/ns/test-xpath-deref"><name>foo</name>
+            <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+            <ethernet-foo xmlns="http://yuma123.org/ns/test-xpath-deref/m2">123</ethernet-foo>
+        </mgmt-interface>
     </config>
   </edit-config>
 """
@@ -164,50 +160,5 @@ def main():
 	print lxml.etree.tostring(result)
 	ok = result.xpath('//ok')
 	assert(len(ok)==1)
-
-	edit_config_rpc = """
-<edit-config>
-    <target>
-      <candidate/>
-    </target>
-    <default-operation>merge</default-operation>
-    <test-option>set</test-option>
-    <config>
-        <mgmt-interface xmlns="http://yuma123.org/ns/test-xpath-deref"><name>foo</name><type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type></mgmt-interface>
-    </config>
-  </edit-config>
-"""
-	print("edit-config - delete mgmt-interface ...")
-	result = conn.rpc(edit_config_rpc)
-
-	print("commit ...")
-	result = conn.rpc(commit_rpc)
-	print lxml.etree.tostring(result)
-	ok = result.xpath('//ok')
-	assert(len(ok)==1)
-
-	edit_config_rpc = """
-<edit-config>
-    <target>
-      <candidate/>
-    </target>
-    <default-operation>merge</default-operation>
-    <test-option>set</test-option>
-    <config>
-        <mgmt-interface xmlns="http://yuma123.org/ns/test-xpath-deref"><name>bar</name><type>ianaift:ethernetCsmacd</type></mgmt-interface>
-    </config>
-  </edit-config>
-"""
-	print("edit-config - create mgmt-interface=bar ...")
-	result = conn.rpc(edit_config_rpc)
-	print lxml.etree.tostring(result)
-	ok = result.xpath('//ok')
-	assert(len(ok)==1)
-
-	print("commit ...")
-	result = conn.rpc(commit_rpc)
-	print lxml.etree.tostring(result)
-	ok = result.xpath('//ok')
-	assert(len(ok)!=1)
 
 sys.exit(main())

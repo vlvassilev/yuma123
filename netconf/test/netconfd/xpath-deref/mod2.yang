@@ -1,0 +1,37 @@
+module mod2 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test-xpath-deref/m2";
+  prefix m2;
+
+  import test-xpath-deref {
+    prefix m1;
+  }
+
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  import iana-if-type {
+    prefix ianaift;
+  }
+
+
+  organization
+    "yuma123.org";
+
+  description
+    'Testcase with deref() argument differen then
+     current() and XPath used in when statement.';
+
+  revision 2020-03-29 {
+    description
+      "Initial version";
+  }
+  augment "/m1:mgmt-interface" {
+    when "deref(./m1:name)/../if:type = 'ianaift:ethernetCsmacd'";
+    leaf ethernet-foo {
+      type string;
+    }
+  }
+}

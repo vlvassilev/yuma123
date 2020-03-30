@@ -25,7 +25,6 @@ if [ "$RUN_WITH_CONFD" != "" ] ; then
   NCPASSWORD=admin
   confd --verbose --foreground --addloadpath ${RUN_WITH_CONFD}/src/confd --addloadpath ${RUN_WITH_CONFD}/src/confd --addloadpath ${RUN_WITH_CONFD}/src/confd/yang --addloadpath ${RUN_WITH_CONFD}/src/confd/aaa --addloadpath . 2>&1 1>server.log &
   SERVER_PID=$!
-  cd ..
 else
   MODULE_ARGS=""
   for module in $MODULES ; do

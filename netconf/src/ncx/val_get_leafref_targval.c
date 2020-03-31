@@ -29,8 +29,17 @@ val_value_t* val_get_leafref_targval(val_value_t *leafref_val, val_value_t *root
     val_value_t* target_val =NULL;
 
     xpath_resnode_t *resnode;
-    xpath_result_t *result =
-            xpath1_eval_expr(leafref_val->xpathpcb, leafref_val, root_val, FALSE /* logerrors */, FALSE /* non-configonly */, &res);
+    xpath_result_t *result;
+    xpath_pcb_t* xpathpcb;
+
+    if(leafref_val->xpathpcb == NULL) {
+        typ_def_t *typdef = obj_get_typdef(leafref_val->obj);
+        xpathpcb = typ_get_leafref_pcb(typdef);
+    } else {
+        xpathpcb = leafref_val->xpathpcb;
+    }
+
+    result = xpath1_eval_expr(xpathpcb, leafref_val, root_val, FALSE /* logerrors */, FALSE /* non-configonly */, &res);
     assert(result);
     for (resnode = (xpath_resnode_t *)dlq_firstEntry(&result->r.nodeQ);
          resnode != NULL;
@@ -46,6 +55,7 @@ val_value_t* val_get_leafref_targval(val_value_t *leafref_val, val_value_t *root
         }
         free(target_str);
     }
+
     free(result);
     return target_val;
 }

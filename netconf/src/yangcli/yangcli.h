@@ -198,6 +198,7 @@ extern "C" {
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PROTOCOLS   (const xmlChar *)"protocols"
 #define YANGCLI_PRIVATE_KEY (const xmlChar *)"private-key"
+#define YANGCLI_PRIVKEY_PASSPHRASE (const xmlChar *)"privkey-passphrase"
 #define YANGCLI_PUBLIC_KEY  (const xmlChar *)"public-key"
 #define YANGCLI_RESTART_OK  (const xmlChar *)"restart-ok"
 #define YANGCLI_RETRY_INTERVAL (const xmlChar *)"retry-interval"

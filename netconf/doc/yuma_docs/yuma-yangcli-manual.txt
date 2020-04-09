@@ -9059,6 +9059,38 @@ If both 'public-key' and 'private-key' files are present, the client will attemp
 |   yangcli –private-key=~/.ssh/mykey
 
 |}
+== --privkey-passphrase ==
+The '''--privkey-passphrase''' parameter specifies the passphrase used to unlock an encrypted client-side private key.
+
+<center>'''--privkey-passphrase parameter'''</center>
+
+
+
+{| class=wikitable border="1"
+|  Syntax
+|  string
+
+|-
+|  Default:
+|  none
+
+|-
+|  Min Allowed:
+|  0
+
+|-
+|  Max Allowed:
+|  1
+
+|-
+|  Supported by:
+|  yangcli
+
+|-
+|  Example:
+|   yangcli –privkey-passphrase='my-secret-passphrase'
+
+|}
 == --protocols ==
 The '''--protocols''' parameter specifies which protocol versions the program or session will attempt to use. Empty set is not allowed. 
 

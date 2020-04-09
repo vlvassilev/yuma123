@@ -2043,6 +2043,7 @@ void
     create_session (server_cb_t *server_cb)
 {
     const xmlChar          *server, *username, *password;
+    const xmlChar          *privkeypass;
     const char             *publickey, *privatekey;
     modptr_t               *modptr;
     ncxmod_search_result_t *searchresult;
@@ -2141,6 +2142,13 @@ void
         privatekey = (const char *)VAL_STR(val);
     }
 
+    privkeypass = NULL;
+    val = val_find_child(server_cb->connect_valset,
+                         YANGCLI_MOD, YANGCLI_PRIVKEY_PASSPHRASE);
+    if (val && val->res == NO_ERR) {
+        privkeypass = (const xmlChar *)VAL_STR(val);
+    }
+
     tcp = FALSE;
     val = val_find_child(server_cb->connect_valset,
                          YANGCLI_MOD, YANGCLI_TRANSPORT);
@@ -2192,6 +2200,7 @@ void
                               password, 
                               publickey,
                               privatekey,
+                              privkeypass,
                               ssh_use_agent,
                               server, 
                               port,

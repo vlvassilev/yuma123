@@ -477,6 +477,13 @@ module yangcli {
           ncx:password;
         }
 
+        leaf privkey-passphrase {
+          description
+            "Passphrase to unlock the SSH private key.";
+          type string;
+          ncx:password;
+        }
+
         leaf ncport {
           description 
             "NETCONF port number to use.  If not present, then

@@ -221,6 +221,7 @@ static status_t
                 const char *password,
                 const char *pubkeyfile,
                 const char *privkeyfile,
+                const char *privkeypass,
                 boolean ssh_use_agent)
                 
 {
@@ -393,7 +394,7 @@ agent_done:
                     (mscb->session, user, 
                      (const char *)expand_pubkey, 
                      (const char *)expand_privkey, 
-                     password);
+                     privkeypass ? privkeypass : "");
                 m__free(expand_pubkey);
                 m__free(expand_privkey);
 
@@ -841,6 +842,7 @@ status_t
                          const xmlChar *password,
                          const char *pubkeyfile,
                          const char *privkeyfile,
+                         const xmlChar *privkeypass,
                          boolean ssh_use_agent,
                          const xmlChar *target,
                          uint16 port,
@@ -963,6 +965,7 @@ status_t
                          (const char *)password,
                          pubkeyfile,
                          privkeyfile,
+                         (const char *)privkeypass,
                          ssh_use_agent);
     } else if (res == NO_ERR && transport == SES_TRANSPORT_TCP) {
         int flags = fcntl(scb->fd, F_GETFL, 0);

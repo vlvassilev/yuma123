@@ -1,0 +1,17 @@
+module mod2 {
+
+    namespace "http://example.com/ns/identityref-submodule-2-m2";
+
+    prefix "m2";
+
+    organization  "example.com";
+
+    description 
+      "Testing identityref leaf defined in included submodule.";
+
+    revision 2020-04-10 {
+        description
+            "Initial.";
+    }
+    identity mybase;
+}

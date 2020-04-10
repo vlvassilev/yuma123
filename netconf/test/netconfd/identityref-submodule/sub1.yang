@@ -1,0 +1,25 @@
+submodule sub1 {
+    belongs-to mod1 {
+      prefix "m1";
+    }
+    import mod2 {
+      prefix "m2";
+    }
+
+    organization  "example.com";
+
+    description 
+      "Testing identityref typedef type defined in imported submodule.";
+
+    revision 2020-04-10 {
+        description
+            "Initial.";
+    }
+    container b {
+        leaf foo {
+            type identityref {
+                base "m2:mybase";
+            }
+        }
+    }
+}

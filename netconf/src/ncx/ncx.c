@@ -57,7 +57,7 @@ date         init     comment
 #include "def_reg.h"
 #include "dlq.h"
 #include "ext.h"
-#include "grp.h"
+#include "ncx_grp.h"
 #include "log.h"
 #include "ncx.h"
 #include "ncx_appinfo.h"

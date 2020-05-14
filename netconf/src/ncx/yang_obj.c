@@ -127,7 +127,7 @@ date         init     comment
 #include "procdefs.h"
 #include "def_reg.h"
 #include "dlq.h"
-#include "grp.h"
+#include "ncx_grp.h"
 #include "log.h"
 #include "ncxconst.h"
 #include "ncxtypes.h"

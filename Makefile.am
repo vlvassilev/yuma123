@@ -35,7 +35,7 @@ $(top_srcdir)/netconf/src/ncx/yinyang.h \
 $(top_srcdir)/netconf/src/ncx/ncx.h \
 $(top_srcdir)/netconf/src/ncx/bobhash.h \
 $(top_srcdir)/netconf/src/ncx/log.h \
-$(top_srcdir)/netconf/src/ncx/grp.h \
+$(top_srcdir)/netconf/src/ncx/ncx_grp.h \
 $(top_srcdir)/netconf/src/ncx/tstamp.h \
 $(top_srcdir)/netconf/src/ncx/xpath_yang.h \
 $(top_srcdir)/netconf/src/ncx/status.h \

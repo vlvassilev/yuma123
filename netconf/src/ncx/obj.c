@@ -36,7 +36,7 @@ date         init     comment
 
 #include "procdefs.h"
 #include "dlq.h"
-#include "grp.h"
+#include "ncx_grp.h"
 #include "ncxconst.h"
 #include "ncx.h"
 #include "ncx_appinfo.h"

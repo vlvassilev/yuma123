@@ -30,7 +30,7 @@
 #include "c_util.h"
 #include "dlq.h"
 #include "ext.h"
-#include "grp.h"
+#include "ncx_grp.h"
 #include "ncx.h"
 #include "ncxconst.h"
 #include "ncxmod.h"

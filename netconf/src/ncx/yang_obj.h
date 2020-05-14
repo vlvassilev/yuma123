@@ -132,8 +132,8 @@ date	     init     comment
 #include "dlq.h"
 #endif
 
-#ifndef _H_grp
-#include "grp.h"
+#ifndef _H_ncx_grp
+#include "ncx_grp.h"
 #endif
 
 #ifndef _H_ncxtypes

@@ -8,10 +8,10 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-#ifndef _H_grp
-#define _H_grp
+#ifndef _H_ncx_grp
+#define _H_ncx_grp
 
-/*  FILE: grp.h
+/*  FILE: ncx_grp.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *

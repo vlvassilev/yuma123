@@ -477,7 +477,7 @@ module yangcli {
           ncx:password;
         }
 
-        leaf privkey-passphrase {
+        leaf private-key-pass {
           description
             "Passphrase to unlock the SSH private key.";
           type string;

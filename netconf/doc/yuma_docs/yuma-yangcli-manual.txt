@@ -2625,12 +2625,12 @@ Command Parameters:
 ** type: string
 ** usage: optional
 ** default: --private-key configuration parameter setting
-** Specifies the SSH private key file to use. Overrides –private-key configuration parameter.
+** Specifies the SSH private key file to use. Overrides --private-key configuration parameter.
 * '''public-key'''
 ** type: string
 ** usage: optional
 ** default: '''--public-key''' configuration parameter setting
-** Specifies the SSH public key file to use. Overrides '''–public-key '''configuration parameter.
+** Specifies the SSH public key file to use. Overrides '''--public-key '''configuration parameter.
 
 Positive Response:
 
@@ -9059,10 +9059,10 @@ If both 'public-key' and 'private-key' files are present, the client will attemp
 |   yangcli –private-key=~/.ssh/mykey
 
 |}
-== --privkey-passphrase ==
-The '''--privkey-passphrase''' parameter specifies the passphrase used to unlock an encrypted client-side private key.
+== --private-key-pass ==
+The '''--privkey-pass''' parameter specifies the passphrase used to unlock an encrypted client-side private key.
 
-<center>'''--privkey-passphrase parameter'''</center>
+<center>'''--private-key-pass parameter'''</center>
 
 
 
@@ -9088,8 +9088,7 @@ The '''--privkey-passphrase''' parameter specifies the passphrase used to unlock
 
 |-
 |  Example:
-|   yangcli –privkey-passphrase='my-secret-passphrase'
-
+|   yangcli --private-key-pass='my-secret-passphrase'
 |}
 == --protocols ==
 The '''--protocols''' parameter specifies which protocol versions the program or session will attempt to use. Empty set is not allowed. 

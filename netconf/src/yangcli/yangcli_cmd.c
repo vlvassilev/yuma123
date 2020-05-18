@@ -2144,7 +2144,7 @@ void
 
     privkeypass = NULL;
     val = val_find_child(server_cb->connect_valset,
-                         YANGCLI_MOD, YANGCLI_PRIVKEY_PASSPHRASE);
+                         YANGCLI_MOD, YANGCLI_PRIVATE_KEY_PASS);
     if (val && val->res == NO_ERR) {
         privkeypass = (const xmlChar *)VAL_STR(val);
     }
@@ -2196,7 +2196,7 @@ void
     /* this function call will cause us to block while the
      * protocol layer connect messages are processed
      */
-    res = mgr_ses_new_session(username, 
+    res = mgr_ses_new_session2(username,
                               password, 
                               publickey,
                               privatekey,

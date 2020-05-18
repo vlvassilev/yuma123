@@ -119,9 +119,26 @@ static boolean mgr_init_done = FALSE;
 
 static boolean mgr_shutdown;
 
+static boolean mgr_allow_sighandlers = TRUE;
+
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
+/********************************************************************
+* FUNCTION mgr_disable_sighandlers
+*
+* Prevent mgr library from registering signal handlers.  Call this
+* BEFORE mgr_init() if the application will install its own handlers.
+* In this case,  the application may need to call mgr_request_shutdown()
+* at the appropriate times.  mgr_cleanup() will restore the default
+* behavior of allowing the library to register handlers.
+*
+*********************************************************************/
+void
+    mgr_disable_sighandlers(void)
+{
+    mgr_allow_sighandlers = FALSE;
+}
 
 /********************************************************************
 * FUNCTION mgr_init
@@ -169,7 +186,8 @@ status_t
 
     mgr_ses_init();
     mgr_io_init();
-    mgr_signal_init();
+    if (mgr_allow_sighandlers)
+        mgr_signal_init();
 
     mgr_init_done = TRUE;
     return NO_ERR;
@@ -198,7 +216,9 @@ void
         mgr_not_cleanup();
         mgr_ses_cleanup();
         mgr_hello_cleanup();
-        mgr_signal_cleanup();
+        if (mgr_allow_sighandlers)
+            mgr_signal_cleanup();
+        mgr_allow_sighandlers = TRUE;
         mgr_shutdown = FALSE;
         mgr_init_done = FALSE;
     }

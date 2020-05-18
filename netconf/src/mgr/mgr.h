@@ -111,6 +111,19 @@ typedef struct mgr_scb_t_ {
 *								    *
 *********************************************************************/
 
+/********************************************************************
+* FUNCTION mgr_disable_sighandlers
+*
+* Prevent mgr library from registering signal handlers.  Call this
+* BEFORE mgr_init() if the application will install its own handlers.
+* In this case,  the application may need to call mgr_request_shutdown()
+* at the appropriate times.  mgr_cleanup() will restore the default
+* behavior of allowing the library to register handlers.
+*
+*********************************************************************/
+extern void
+    mgr_disable_sighandlers(void);
+
 
 /********************************************************************
 * FUNCTION mgr_init

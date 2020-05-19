@@ -1304,6 +1304,8 @@ static status_t
                     return res;
                 }
             } else {
+                m__free(str);
+                str = NULL;
                 if(0==xml_strcmp(TK_CUR_VAL(tkc), YANG_VERSION10_STR)) {
                     mod->langver = NCX_YANG_VERSION10;
                 } else if(0==xml_strcmp(TK_CUR_VAL(tkc), YANG_VERSION11_STR)) {

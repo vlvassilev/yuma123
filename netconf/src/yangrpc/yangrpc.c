@@ -74,15 +74,52 @@
 
 #include "yangrpc.h"
 
+
+static char* server_arg;
+static char* port_arg;
+static char* user_arg;
+static char* password_arg;
+static char* public_key_arg;
+static char* private_key_arg;
+
 extern void
     create_session (server_cb_t *server_cb);
+
+static void
+    yangrpc_free_static_vars(void)
+{
+    if (server_arg) {
+        free(server_arg);
+        server_arg = NULL;
+    }
+    if (port_arg) {
+        free(port_arg);
+        port_arg = NULL;
+    }
+    if (user_arg) {
+        free(user_arg);
+        user_arg = NULL;
+    }
+    if (password_arg) {
+        free(password_arg);
+        password_arg = NULL;
+    }
+    if (public_key_arg) {
+        free(public_key_arg);
+        public_key_arg = NULL;
+    }
+    if (private_key_arg) {
+        free(private_key_arg);
+        private_key_arg = NULL;
+    }
+}
 
 static void
     yangrpc_notification_handler (ses_cb_t *scb,
                                   mgr_not_msg_t *msg,
                                   boolean *consumed)
 {
-    assert(0);
+    log_debug2("\n%s called", __func__);
 }
 
 /********************************************************************
@@ -470,7 +507,9 @@ status_t
                                       searchresult->revision,
                                       &rpc,
                                       &reqdata);
-        assert(res == NO_ERR);
+        if (res != NO_ERR)
+            return res;
+
         res = yangrpc_exec((yangrpc_cb_ptr_t) server_cb, reqdata, &reply_val);
         res = get_schema_reply_to_temp_filcb(server_cb, (mgr_scb_t *)scb->mgrcb /*mscb*/, searchresult->module, searchresult->revision, reply_val);
         if (res != NO_ERR) {
@@ -517,10 +556,18 @@ status_t
                                       scb,
                                       &rpc,
                                       &reqdata);
-    assert(res == NO_ERR);
+    if (res != NO_ERR)
+        return res;
+
     res = yangrpc_exec((yangrpc_cb_ptr_t) server_cb, reqdata, &reply_val);
-    assert(res == NO_ERR);
+    if (res != NO_ERR) {
+        val_free_value(reqdata);
+        return res;
+    }
+
     res = get_yang_library_modules_state_reply_to_searchresult_entries(server_cb, scb, reply_val);
+    val_free_value(reqdata);
+    val_free_value(reply_val);
     return res;
 
 }  /* yang_library_blocking_get_modules */
@@ -533,12 +580,6 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
                          const char * const extra_args,
                          yangrpc_cb_ptr_t* yangrpc_cb_ptr)
 {
-    char* server_arg;
-    char* port_arg;
-    char* user_arg;
-    char* password_arg;
-    char* public_key_arg;
-    char* private_key_arg;
     char* mandatory_argv[]={"exec-name-dummy", "--server=?", "--port=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
     int mandatory_argc=sizeof(mandatory_argv)/sizeof(char*);
     char** argv;
@@ -565,9 +606,13 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
         connect_valset=NULL;
     }
     connect_valset = val_new_value();
-    assert(connect_valset);
+    if (connect_valset == NULL)
+        return ERR_INTERNAL_MEM;
+
     obj = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
-    assert(obj!=NULL);
+    if (obj == NULL)
+        return ERR_NCX_DEF_NOT_FOUND;
+
     val_init_from_template(connect_valset, obj);
 
     dlq_createSQue(&savedevQ);
@@ -579,43 +624,56 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
         return ERR_INTERNAL_PTR;
     }
     argv = mandatory_argv;
-
+    yangrpc_free_static_vars();
     argc=0;
     argv[argc++]="yangrpc-conn-instance";
 
     server_arg = malloc(strlen("--server=")+strlen(server)+1);
-    assert(server_arg!=NULL);
+    if (server_arg==NULL)
+        return ERR_INTERNAL_MEM;
+
     sprintf(server_arg,"--server=%s",server);
     argv[argc++]=server_arg;
 
     port_arg = malloc(strlen("--ncport=")+strlen("65535")+1);
-    assert(port_arg!=NULL);
+    if (port_arg==NULL)
+        return ERR_INTERNAL_MEM;
+
     sprintf(port_arg,"--ncport=%u", (unsigned int)port);
     argv[argc++]=port_arg;
 
     user_arg = malloc(strlen("--user=")+strlen(user)+1);
-    assert(user_arg!=NULL);
+    if (user_arg==NULL)
+        return ERR_INTERNAL_MEM;
+
     sprintf(user_arg,"--user=%s",user);
     argv[argc++]=user_arg;
 
     /* at least password or public_key and private_key pair has to be specified */
-    assert(password!=NULL || (public_key!=NULL && private_key!=NULL));
+    if (!(password!=NULL || (public_key!=NULL && private_key!=NULL)))
+        return ERR_INTERNAL_MEM;
 
     if(password!=NULL) {
         password_arg = malloc(strlen("--password=")+strlen(password)+1);
-        assert(password_arg!=NULL);
+        if (password_arg==NULL)
+            return ERR_INTERNAL_MEM;
+
         sprintf(password_arg,"--password=%s",password);
         argv[argc++]=password_arg;
     }
 
     if(public_key!=NULL && private_key!=NULL) {
         public_key_arg = malloc(strlen("--public-key=")+strlen(public_key)+1);
-        assert(public_key_arg!=NULL);
+        if (public_key_arg==NULL)
+            return ERR_INTERNAL_MEM;
+
         sprintf(public_key_arg,"--public-key=%s",public_key);
         argv[argc++]=public_key_arg;
 
         private_key_arg = malloc(strlen("--private-key=")+strlen(private_key)+1);
-        assert(private_key_arg!=NULL);
+        if (private_key_arg==NULL)
+            return ERR_INTERNAL_MEM;
+
         sprintf(private_key_arg,"--private-key=%s",private_key);
         argv[argc++]=private_key_arg;
     }
@@ -798,10 +856,13 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
         mgr_scb_t* mscb;
 
         scb = mgr_ses_get_scb(server_cb->mysid);
-        assert(scb!=NULL);
+        if (scb == NULL)
+            return ERR_INTERNAL_VAL;
 
         res = ses_msg_send_buffs(scb);
-        assert(res==NO_ERR);
+        if (res != NO_ERR)
+            return res;
+
         while(1) {
             res = ses_accept_input(scb);
             if(res!=NO_ERR) {
@@ -1121,13 +1182,15 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
 
     //mgr_io_run();
     res = ses_msg_send_buffs(scb);
-    assert(res==NO_ERR);
+    if (res != NO_ERR)
+        return res;
+
     while(1) {
     	
         res = ses_accept_input(scb);
         if(res!=NO_ERR) {
             log_error("\nerror: ses_accept_input res=%d",res);
-            assert(0);
+            return res;
         }
         if(mgr_ses_process_first_ready() && global_reply_val!=NULL) {
             break;
@@ -1140,5 +1203,26 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
 
 void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)
 {
+    server_cb_t* server_cb;
+    server_cb = (server_cb_t*)yangrpc_cb_ptr;
+
     log_info("Closing session\n");
+
+    if(connect_valset!=NULL) {
+        val_free_value(connect_valset);
+    }
+    connect_valset = val_new_value();
+
+    free_server_cb(server_cb);
+
+    /* Cleanup the Netconf Server Library */
+    mgr_cleanup();
+
+    /* cleanup the module library search results */
+    ncxmod_clean_search_result_queue(&modlibQ);
+
+    /* cleanup the NCX engine and registries */
+    ncx_cleanup();
+
+    yangrpc_free_static_vars();
 }

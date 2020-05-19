@@ -345,7 +345,8 @@ status_t yangrpc_init(char* args)
     free(prog_w_args);
     if(ret!=0) {
         perror(args);
-        return ERR_CMDLINE_OPT_UNKNOWN;
+        res = ERR_CMDLINE_OPT_UNKNOWN;
+        goto out;
     }
 
     /* set the default debug output level */
@@ -359,7 +360,7 @@ status_t yangrpc_init(char* args)
      */
     res = ncx_init(NCX_SAVESTR, log_level, TRUE, NULL, p.we_wordc, p.we_wordv);
     if (res != NO_ERR) {
-        return res;
+        goto out;
     }
 
 #ifdef YANGCLI_DEBUG
@@ -378,7 +379,7 @@ status_t yangrpc_init(char* args)
     if (res != NO_ERR) {
         log_error("\nError: could not setup yuma dir '%s'",
                   ncxmod_get_yumadir());
-        return res;
+        goto out;
     }
 
     /* make sure the Yuma temp directory
@@ -388,7 +389,7 @@ status_t yangrpc_init(char* args)
     if (res != NO_ERR) {
         log_error("\nError: could not setup temp dir '%s/tmp'",
                   ncxmod_get_yumadir());
-        return res;
+        goto out;
     }
 
     /* at this point, modules that need to read config
@@ -398,13 +399,13 @@ status_t yangrpc_init(char* args)
     /* Load the yangcli base module */
     res = load_base_schema();
     if (res != NO_ERR) {
-        return res;
+        goto out;
     }
 
     /* Initialize the Netconf Manager Library */
     res = mgr_init();
     if (res != NO_ERR) {
-        return res;
+        goto out;
     }
 
     /* set up handler for incoming notifications */
@@ -416,13 +417,15 @@ status_t yangrpc_init(char* args)
      */
     obj = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
     if (obj==NULL) {
-        return ERR_NCX_DEF_NOT_FOUND;
+        res = ERR_NCX_DEF_NOT_FOUND;
+        goto out;
     }
 
     /* set the parmset object to the input node of the RPC */
     obj = obj_find_child(obj, NULL, YANG_K_INPUT);
     if (obj==NULL) {
-        return ERR_NCX_DEF_NOT_FOUND;
+        res = ERR_NCX_DEF_NOT_FOUND;
+        goto out;
     }
 
 #if 0
@@ -431,7 +434,9 @@ status_t yangrpc_init(char* args)
 #endif
 
 
-    return NO_ERR;
+out:
+    yangcli_wordfree(&p);
+    return res;
 }
 
 /********************************************************************

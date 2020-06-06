@@ -1879,6 +1879,18 @@ status_t
             return res;
         }
 
+#ifdef SES_DEBUG
+        if (LOGDEBUG4) {
+            char* buf;
+            buf = malloc(scb->readbuffsize+1);
+            buf[scb->readbuffsize]=0;
+            memcpy(buf, scb->readbuff, scb->readbuffsize);
+            log_debug4("\nses: read (%s)",
+                       buf);
+            free(buf);
+        }
+#endif
+
         if(scb->indefer_len>0) {
             ret = scb->indefer_len;
             scb->indefer_len=0;

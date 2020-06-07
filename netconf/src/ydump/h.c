@@ -563,7 +563,7 @@ static void
     neednotif = need_notif_includes(mod, cp);
 
     /* add xmlChar include */
-    write_ext_include(scb, (const xmlChar *)"xmlstring.h");
+    write_ext_include(scb, (const xmlChar *)"libxml/xmlstring.h");
 
     if (cp->isuser) {
         write_ncx_include(scb, (const xmlChar *)"agt");

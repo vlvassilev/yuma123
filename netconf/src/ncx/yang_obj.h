@@ -269,12 +269,11 @@ extern status_t
                           tk_chain_t *tkc,
 			  ncx_module_t  *mod);
 
-
 /********************************************************************
-* FUNCTION yang_obj_consume_notification
+* FUNCTION yang_obj_consume_notififcation
 * 
 * Parse the next N tokens as a notification-stmt
-* Create a obj_template_t struct and add it to the specified module
+* Create and fill in an obj_template_t struct
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -285,17 +284,20 @@ extern status_t
 *   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
-*
-* OUTPUTS:
-*   new notification added to module
+*   que == Q to hold the obj_template_t that gets created
+*   parent == parent object or NULL if top-level
+*   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
-extern status_t 
+status_t
     yang_obj_consume_notification (yang_pcb_t *pcb,
                                    tk_chain_t *tkc,
-				   ncx_module_t  *mod);
+                                   ncx_module_t *mod,
+                                   dlq_hdr_t  *que,
+                                   obj_template_t *parent,
+                                   grp_template_t *grp);
 
 /********************************************************************
 * FUNCTION yang_obj_consume_augment

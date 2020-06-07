@@ -3654,167 +3654,6 @@ static status_t
 
 }  /* consume_action */
 
-/********************************************************************
-* FUNCTION consume_notif
-* 
-* Parse the next N tokens as a notification-stmt
-* Create and fill in an obj_template_t struct
-*
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* Current token is the 'notification' keyword
-*
-* INPUTS:
-*   pcb == parser control block to use
-*   tkc == token chain
-*   mod == module in progress
-*   que == Q to hold the obj_template_t that gets created
-*   parent == parent object or NULL if top-level
-*   grp == parent grp_template_t or NULL if not child of grp
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
-static status_t 
-    consume_notif (yang_pcb_t *pcb,
-                   tk_chain_t *tkc,
-                   ncx_module_t *mod,
-                   dlq_hdr_t  *que,
-                   obj_template_t *parent,
-                   grp_template_t *grp)
-{
-    obj_template_t  *obj = NULL;
-    obj_notif_t     *notif = NULL;
-    const xmlChar   *val = NULL;
-    const char      *expstr = "keyword";
-    tk_type_t        tktyp = TK_TT_NONE;
-    boolean          done = FALSE, stat = FALSE;
-    boolean          desc = FALSE, ref = FALSE;
-    status_t         res = NO_ERR, retres = NO_ERR;
-
-    /* Get a new obj_template_t to fill in */
-    obj = obj_new_template(OBJ_TYP_NOTIF);
-    if (!obj) {
-        res = ERR_INTERNAL_MEM;
-        ncx_print_errormsg(tkc, mod, res);
-        return res;
-    }
-
-    ncx_set_error(&obj->tkerr,
-                  mod,
-                  TK_CUR_LNUM(tkc),
-                  TK_CUR_LPOS(tkc));
-
-    obj->parent = parent;
-    obj->grp = grp;
-    obj->nsid = mod->nsid;
-    if (que == &mod->datadefQ) {
-        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
-    }
-
-    notif = obj->def.notif;
-        
-    /* Get the mandatory RPC method name */
-    res = yang_consume_id_string(tkc, mod, &notif->name);
-    CHK_OBJ_EXIT(obj, res, retres);
-
-    res = consume_semi_lbrace(tkc, mod, obj, &done);
-    CHK_OBJ_EXIT(obj, res, retres);
-
-    /* get the container statements and any appinfo extensions */
-    while (!done) {
-        /* get the next token */
-        res = TK_ADV(tkc);
-        if (res != NO_ERR) {
-            ncx_print_errormsg(tkc, mod, res);
-            obj_free_template(obj);
-            return res;
-        }
-
-        tktyp = TK_CUR_TYP(tkc);
-        val = TK_CUR_VAL(tkc);
-
-        /* check the current token type */
-        switch (tktyp) {
-        case TK_TT_NONE:
-            res = ERR_NCX_EOF;
-            ncx_print_errormsg(tkc, mod, res);
-            obj_free_template(obj);
-            return res;
-        case TK_TT_MSTRING:
-            /* vendor-specific clause found instead */
-            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-            CHK_OBJ_EXIT(obj, res, retres);
-            continue;
-        case TK_TT_RBRACE:
-            done = TRUE;
-            continue;
-        case TK_TT_TSTRING:
-            break;  /* YANG clause assumed */
-        default:
-            retres = ERR_NCX_WRONG_TKTYPE;
-            ncx_mod_exp_err(tkc, mod, retres, expstr);
-            continue;
-        }
-
-        /* Got a token string so check the value */
-        if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-            res = yang_typ_consume_typedef(pcb,
-                                           tkc, 
-                                           mod, 
-                                           &notif->typedefQ);
-        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-            res = yang_grp_consume_grouping(pcb,
-                                            tkc, 
-                                            mod, 
-                                            &notif->groupingQ, 
-                                            obj);
-        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-            res = yang_consume_iffeature(tkc, 
-                                         mod, 
-                                         &obj->iffeatureQ,
-                                         &obj->appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
-            res = yang_consume_status(tkc, 
-                                      mod, 
-                                      &notif->status,
-                                      &stat, 
-                                      &obj->appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-            res = yang_consume_descr(tkc,
-                                     mod, 
-                                     &notif->descr,
-                                     &desc,
-                                     &obj->appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-            res = yang_consume_descr(tkc,
-                                     mod,
-                                     &notif->ref,
-                                     &ref,
-                                     &obj->appinfoQ);
-        } else {
-            res = consume_datadef(pcb,
-                                  tkc,
-                                  mod,
-                                  &notif->datadefQ,
-                                  obj,
-                                  NULL);
-        }
-        CHK_OBJ_EXIT(obj, res, retres);
-    }
-
-    /* save or delete the obj_template_t struct */
-    if (notif->name && ncx_valid_name2(notif->name)) {
-        res = add_object(tkc, mod, que, obj);
-        CHK_EXIT(res, retres);
-    } else {
-        obj_free_template(obj);
-    }
-
-    return retres;
-
-}  /* consume_notif */
 
 /********************************************************************
  * Handle an unsupported deviate operation
@@ -9779,10 +9618,10 @@ status_t
 
 
 /********************************************************************
-* FUNCTION yang_obj_consume_notification
-* 
+* FUNCTION yang_obj_consume_notififcation
+*
 * Parse the next N tokens as a notification-stmt
-* Create a obj_template_t struct and add it to the specified module
+* Create and fill in an obj_template_t struct
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -9793,31 +9632,152 @@ status_t
 *   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
-*
-* OUTPUTS:
-*   new notification added to module
+*   que == Q to hold the obj_template_t that gets created
+*   parent == parent object or NULL if top-level
+*   grp == parent grp_template_t or NULL if not child of grp
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
-status_t 
+status_t
     yang_obj_consume_notification (yang_pcb_t *pcb,
                                    tk_chain_t *tkc,
-                                   ncx_module_t *mod)
+                                   ncx_module_t *mod,
+                                   dlq_hdr_t  *que,
+                                   obj_template_t *parent,
+                                   grp_template_t *grp)
 {
-    status_t         res;
+    obj_template_t  *obj = NULL;
+    obj_notif_t     *notif = NULL;
+    const xmlChar   *val = NULL;
+    const char      *expstr = "keyword";
+    tk_type_t        tktyp = TK_TT_NONE;
+    boolean          done = FALSE, stat = FALSE;
+    boolean          desc = FALSE, ref = FALSE;
+    status_t         res = NO_ERR, retres = NO_ERR;
 
-#ifdef DEBUG
-    if (!pcb || !tkc || !mod) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
+    /* Get a new obj_template_t to fill in */
+    obj = obj_new_template(OBJ_TYP_NOTIF);
+    if (!obj) {
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
-#endif
 
-    res = consume_notif(pcb, tkc, mod, &mod->datadefQ, NULL, NULL);
-    return res;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
-}  /* yang_obj_consume_notification */
+    obj->parent = parent;
+    obj->grp = grp;
+    obj->nsid = mod->nsid;
+    if (que == &mod->datadefQ) {
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+    }
 
+    notif = obj->def.notif;
+
+    /* Get the mandatory RPC method name */
+    res = yang_consume_id_string(tkc, mod, &notif->name);
+    CHK_OBJ_EXIT(obj, res, retres);
+
+    res = consume_semi_lbrace(tkc, mod, obj, &done);
+    CHK_OBJ_EXIT(obj, res, retres);
+
+    /* get the container statements and any appinfo extensions */
+    while (!done) {
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
+
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
+
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
+                                           tkc,
+                                           mod,
+                                           &notif->typedefQ);
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
+                                            tkc,
+                                            mod,
+                                            &notif->groupingQ,
+                                            obj);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc,
+                                         mod,
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc,
+                                      mod,
+                                      &notif->status,
+                                      &stat,
+                                      &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc,
+                                     mod,
+                                     &notif->descr,
+                                     &desc,
+                                     &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc,
+                                     mod,
+                                     &notif->ref,
+                                     &ref,
+                                     &obj->appinfoQ);
+        } else {
+            res = consume_datadef(pcb,
+                                  tkc,
+                                  mod,
+                                  &notif->datadefQ,
+                                  obj,
+                                  NULL);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
+    }
+
+    /* save or delete the obj_template_t struct */
+    if (notif->name && ncx_valid_name2(notif->name)) {
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
+    } else {
+        obj_free_template(obj);
+    }
+
+    return retres;
+
+}  /* consume_notif */
 
 /********************************************************************
 * FUNCTION yang_obj_consume_augment

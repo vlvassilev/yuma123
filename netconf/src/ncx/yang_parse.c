@@ -39,7 +39,9 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#define _GNU_SOURCE
 #include <stdio.h>
+#undef _GNU_SOURCE
 #include <stdlib.h>
 #include <memory.h>
 #include <ctype.h>
@@ -964,12 +966,18 @@ static status_t
                                      &identity->descr,
                                      &desc, 
                                      &identity->appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE) &&
+                   mod->langver == NCX_YANG_VERSION11) {
             res = yang_consume_descr(tkc, 
                                      mod, 
                                      &identity->ref,
                                      &ref, 
                                      &identity->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc,
+                                         mod,
+                                         &identity->iffeatureQ,
+                                         &identity->appinfoQ);
         } else {
             retres = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1019,6 +1027,33 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION identity_resolve_iffeatureQ
+*
+* INPUTS:
+*   pcb == parser control block to use
+*   tkc == token chain
+*   mod == ncx_module_t in progress
+*   identity == resolve iffeatures in this ncx_identity_t
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t
+    identity_resolve_iffeatureQ (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            ncx_identity_t *identity)
+{
+    xmlChar *namestr;
+
+    if (asprintf((char **)&namestr, "identity '%s'", identity->name) < 0)
+        return ERR_INTERNAL_MEM;
+
+    return ncx_resolve_iffeatureQ(pcb, tkc, mod, namestr, &identity->iffeatureQ);
+}
+
+
+/********************************************************************
 * FUNCTION resolve_identity
 * 
 * Validate the identity statement base clause, if any
@@ -1045,6 +1080,9 @@ static status_t
     ncx_identity_base_t * base;
     status_t res = NO_ERR;
     boolean errdone = FALSE;
+
+    /* Yang 1.1: first, resolve if-feature statements */
+    res = identity_resolve_iffeatureQ(pcb, tkc, mod, identity);
 
     if (identity->isroot) {
         return NO_ERR;

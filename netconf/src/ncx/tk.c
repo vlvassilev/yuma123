@@ -3719,5 +3719,30 @@ uint32
 
 }  /* tk_tkptr_quotes */
 
+/********************************************************************
+ * FUNCTION set_tkc_error
+ *
+ * utility function for setting and reporting tkc errors.
+ *
+ * INPUTS:
+ *   tkc the parser token chain (may be NULL)
+ *   mod the module
+ *   res the error status.
+ *
+ * RETURNS:
+ *   the error status
+ ***************************************************************/
+status_t
+    set_tkc_error( tk_chain_t *tkc,
+                   ncx_module_t *mod,
+                   ncx_error_t *err,
+                   status_t res )
+{
+    if ( tkc ) {
+        tkc->curerr = err;
+    }
+    ncx_print_errormsg( tkc, mod, res );
+    return res;
+}
 
 /* END file tk.c */

@@ -128,6 +128,8 @@ date         init     comment
 #include "yangconst.h"
 #endif
 
+#include "tk.h"
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -2445,8 +2447,7 @@ status_t
         }
     }
 
-    tkc->curerr = tkerr;
-    ncx_print_errormsg(tkc, mod, res);
+    set_tkc_error(tkc, mod, tkerr, res);
 
     return res;
 

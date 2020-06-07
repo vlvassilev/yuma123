@@ -3299,6 +3299,7 @@ ncx_identity_t *
 
     dlq_createSQue(&identity->childQ);
     dlq_createSQue(&identity->baseQ);
+    dlq_createSQue(&identity->iffeatureQ);
     dlq_createSQue(&identity->appinfoQ);
     return identity;
 
@@ -3371,6 +3372,7 @@ void
     }
 
     ncx_clean_appinfoQ(&identity->appinfoQ);
+    ncx_clean_iffeatureQ(&identity->iffeatureQ);
 
     m__free(identity);
     
@@ -3399,6 +3401,9 @@ ncx_identity_t *
 
     ncx_identity_t *identity = ncx_find_identity_que(&mod->identityQ, name);
     if (identity) {
+        if (!identity_is_enabled(identity))
+            return NULL;
+
         return identity;
     }
 
@@ -3416,6 +3421,8 @@ ncx_identity_t *
                 identity = ncx_find_identity_que(&node->submod->identityQ, 
                                                  name);
                 if (identity) {
+                    if (!identity_is_enabled(identity))
+                        return NULL;
                     return identity;
                 }
             }
@@ -3445,6 +3452,8 @@ ncx_identity_t *
             /* check the identity Q in this submodule */
             identity = ncx_find_identity_que(&inc->submod->identityQ, name);
             if (identity) {
+                if (!identity_is_enabled(identity))
+                    return NULL;
                 return identity;
             }
         }
@@ -7087,5 +7096,81 @@ boolean
     return allow_top_mandatory;
 }
 
+/********************************************************************
+* FUNCTION identity_get_first_iffeature
+*
+* Get the first if-feature clause (if any) for the specified identity
+*
+* INPUTS:
+*     identity == identity structure to check
+*
+* RETURNS:
+*     pointer to first if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    identity_get_first_iffeature (const ncx_identity_t *identity)
+{
+
+#ifdef DEBUG
+    if (!identity) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (const ncx_iffeature_t *)
+        dlq_firstEntry(&identity->iffeatureQ);
+
+}  /* identity_get_first_iffeature */
+
+/********************************************************************
+* FUNCTION identity_get_next_iffeature
+*
+* Get the next if-feature clause (if any)
+*
+* INPUTS:
+*     iffeature == current iffeature struct
+*
+* RETURNS:
+*     pointer to next if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    identity_get_next_iffeature (const ncx_iffeature_t  *iffeature)
+{
+
+#ifdef DEBUG
+    if (!iffeature) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (const ncx_iffeature_t *)dlq_nextEntry(iffeature);
+
+}  /* identity_get_next_iffeature */
+
+
+/********************************************************************
+ * Check any if-feature statement that may
+ * cause the specified object to be invisible
+ *
+ * \param obj the obj_template to check
+ * \return TRUE if object is enabled
+ *********************************************************************/
+boolean identity_is_enabled (const ncx_identity_t *identity)
+{
+    assert(identity && "identity is NULL" );
+
+    const ncx_iffeature_t *iffeature = identity_get_first_iffeature(identity);
+    for ( ; iffeature ; iffeature = identity_get_next_iffeature(iffeature)) {
+        if (!iffeature->feature || !ncx_feature_enabled(iffeature->feature)) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
 
 /* END file ncx.c */

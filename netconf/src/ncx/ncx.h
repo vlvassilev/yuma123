@@ -2956,4 +2956,50 @@ extern boolean
 }  /* end extern 'C' */
 #endif
 
+/********************************************************************
+* FUNCTION identity_get_first_iffeature
+*
+* Get the first if-feature clause (if any) for the specified identity
+*
+* INPUTS:
+*     identity == identity structure to check
+*
+* RETURNS:
+*     pointer to first if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    identity_get_first_iffeature (const ncx_identity_t *identity);
+
+/********************************************************************
+* FUNCTION identity_get_next_iffeature
+*
+* Get the next if-feature clause (if any)
+*
+* INPUTS:
+*     iffeature == current iffeature struct
+*
+* RETURNS:
+*     pointer to next if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    identity_get_next_iffeature (const ncx_iffeature_t  *iffeature);
+
+/********************************************************************
+* FUNCTION identity_is_enabled
+*
+* Check any if-feature statement that may
+* cause the specified identity to be invisible
+*
+* INPUTS:
+*    identity == ncx_identity_t to check
+
+* RETURNS:
+*    TRUE if identity is enabled
+*    FALSE if any if-features are present and FALSE
+*********************************************************************/
+extern boolean
+    identity_is_enabled (const ncx_identity_t *identity);
+
 #endif	    /* _H_ncx */

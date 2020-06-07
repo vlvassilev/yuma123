@@ -116,7 +116,9 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#define _GNU_SOURCE
 #include <stdio.h>
+#undef _GNU_SOURCE
 #include <stdlib.h>
 #include <memory.h>
 #include <ctype.h>
@@ -148,6 +150,7 @@ date         init     comment
 #include "yang_grp.h"
 #include "yang_obj.h"
 #include "yang_typ.h"
+#include "tk.h"
 
 /********************************************************************
 *                                                                   *
@@ -288,35 +291,13 @@ static status_t
                       dlq_hdr_t *datadefQ,
                       boolean redo);
 
-static status_t 
-    resolve_iffeatureQ (yang_pcb_t *pcb,
-                        tk_chain_t *tkc,
-                        ncx_module_t *mod,
-                        obj_template_t *obj);
+static status_t
+    obj_resolve_iffeatureQ (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            obj_template_t *obj);
 
 /*************    U T I L I T Y   F U N C T I O N S    **********/
-/**
- * utility function for setting and reporting tkc errors.
- * 
- * \param tkc the parser token chain (may be NULL)
- * \param mod the module
- * \param res the error status.
- * \return the error status.
- ***************************************************************/
-static status_t set_tkc_error( tk_chain_t *tkc,
-                               ncx_module_t *mod,
-                               ncx_error_t *err,
-                               status_t res )
-
-{
-    if ( tkc ) {
-        tkc->curerr = err;
-    }
-    ncx_print_errormsg( tkc, mod, res );
-    return res;
-}
-
-
 /*
  * Handle the TOP_LEVEL_MANDATORY warning or error
  * 
@@ -8902,7 +8883,7 @@ static status_t
         res = ncx_resolve_appinfoQ(pcb, tkc, mod, &testobj->appinfoQ);
         CHK_EXIT(res, retres);
 
-        res = resolve_iffeatureQ(pcb, tkc, mod, testobj);
+        res = obj_resolve_iffeatureQ(pcb, tkc, mod, testobj);
         CHK_EXIT(res, retres);
     }
 
@@ -9106,86 +9087,19 @@ static status_t
 }  /* consume_datadef */
 
 
-/********************************************************************
-* FUNCTION resolve_iffeatureQ
-* 
-* Check the Q of if-feature statements for the specified object
-
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   pcb == parser control block
-*   tkc == token chain
-*   mod == module in progress
-*   obj == object to check
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
-static status_t 
-    resolve_iffeatureQ (yang_pcb_t *pcb,
-                        tk_chain_t *tkc,
-                        ncx_module_t *mod,
-                        obj_template_t *obj)
+static status_t
+    obj_resolve_iffeatureQ (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            obj_template_t *obj)
 {
-    ncx_feature_t    *testfeature;
-    ncx_iffeature_t  *iff;
-    status_t          res, retres;
-    boolean           errdone;
+    xmlChar *namestr;
 
-    retres = NO_ERR;
+    if (asprintf((char **)&namestr, "object '%s'", obj_get_name(obj)) < 0)
+        return ERR_INTERNAL_MEM;
 
-    /* check if there are any if-feature statements inside
-     * this object that need to be resolved
-     */
-    for (iff = (ncx_iffeature_t *)
-             dlq_firstEntry(&obj->iffeatureQ);
-         iff != NULL;
-         iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
-
-        testfeature = NULL;
-        errdone = FALSE;
-        res = NO_ERR;
-
-        if (iff->prefix &&
-            xml_strcmp(iff->prefix, mod->prefix)) {
-            /* find the feature in another module */
-            res = yang_find_imp_feature(pcb,
-                                        tkc, 
-                                        mod, 
-                                        iff->prefix,
-                                        iff->name, 
-                                        &iff->tkerr,
-                                        &testfeature);
-            if (res != NO_ERR) {
-                retres = res;
-                errdone = TRUE;
-            }
-        } else {
-            testfeature = ncx_find_feature(mod, iff->name);
-        }
-
-        if (!testfeature && !errdone) {
-            log_error("\nError: Feature '%s' not found "
-                      "for if-feature statement in object '%s'",
-                      iff->name, 
-                      obj_get_name(obj));
-            res = retres = set_tkc_error( tkc, mod, &iff->tkerr, 
-                                ERR_NCX_DEF_NOT_FOUND );
-        }
-
-        if (testfeature) {
-            iff->feature = testfeature;
-        }
-    }
-
-    /* check the feature mismatch corner cases later,
-     * after the OBJ_FL_KEY flags have been set
-     */
-    return retres;
-                                    
-}  /* resolve_iffeatureQ */
+    return ncx_resolve_iffeatureQ(pcb, tkc, mod, namestr, &obj->iffeatureQ);
+}
 
 
 /********************************************************************

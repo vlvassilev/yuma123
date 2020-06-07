@@ -600,6 +600,87 @@ ncx_iffeature_t *
 
 
 /********************************************************************
+* FUNCTION ncx_resolve_iffeatureQ
+*
+* Check the Q of if-feature statements for the specified object
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain
+*   mod == module in progress
+*   obj == object to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    ncx_resolve_iffeatureQ (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            const xmlChar *name,
+                            dlq_hdr_t *iffeatureQ)
+{
+    ncx_feature_t    *testfeature;
+    ncx_iffeature_t  *iff;
+    status_t          res, retres;
+    boolean           errdone;
+
+    retres = NO_ERR;
+
+    /* check if there are any if-feature statements inside
+     * this element that need to be resolved
+     */
+    for (iff = (ncx_iffeature_t *)
+             dlq_firstEntry(iffeatureQ);
+         iff != NULL;
+         iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+        testfeature = NULL;
+        errdone = FALSE;
+        res = NO_ERR;
+
+        if (iff->prefix &&
+            xml_strcmp(iff->prefix, mod->prefix)) {
+            /* find the feature in another module */
+            res = yang_find_imp_feature(pcb,
+                                        tkc,
+                                        mod,
+                                        iff->prefix,
+                                        iff->name,
+                                        &iff->tkerr,
+                                        &testfeature);
+            if (res != NO_ERR) {
+                retres = res;
+                errdone = TRUE;
+            }
+        } else {
+            testfeature = ncx_find_feature(mod, iff->name);
+        }
+
+        if (!testfeature && !errdone) {
+            log_error("\nError: Feature '%s' not found "
+                      "for if-feature statement in %s",
+                      iff->name, name);
+            res = retres = set_tkc_error( tkc, mod, &iff->tkerr,
+                                ERR_NCX_DEF_NOT_FOUND );
+        }
+
+        if (testfeature) {
+            iff->feature = testfeature;
+        }
+    }
+
+    /* check the feature mismatch corner cases later,
+     * after the OBJ_FL_KEY flags have been set
+     */
+    return retres;
+
+}  /* resolve_iffeatureQ */
+
+/********************************************************************
 * FUNCTION ncx_new_feature
 * 
 * Get a new ncx_feature_t struct

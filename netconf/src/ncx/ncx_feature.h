@@ -173,6 +173,29 @@ extern ncx_iffeature_t *
 			const xmlChar *name,
 			const xmlChar *modprefix);
 
+/********************************************************************
+* FUNCTION ncx_resolve_iffeatureQ
+*
+* Check the Q of if-feature statements for the specified object
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain
+*   mod == module in progress
+*   obj == object to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    ncx_resolve_iffeatureQ (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            const xmlChar *name,
+                            dlq_hdr_t *iffeatureQ);
 
 /********************************************************************
 * FUNCTION ncx_new_feature

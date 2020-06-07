@@ -673,6 +673,7 @@ typedef struct ncx_identity_t_ {
     xmlChar              *descr;
     xmlChar              *ref;
     ncx_status_t          status;
+    dlq_hdr_t             iffeatureQ;   /* Q of ncx_iffeature_t */
     dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
     status_t              res;     /* may be stored with errors */
     boolean               isroot;    /* empty baseQ not an error */

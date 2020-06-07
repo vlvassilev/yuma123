@@ -411,6 +411,13 @@ status_t
                                      &grp->ref,
                                      &ref, 
                                      &grp->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_NOTIFICATION)) {
+            res = yang_obj_consume_notification(pcb,
+                                                tkc,
+                                                mod,
+                                                &grp->datadefQ,
+                                                parent,
+                                                grp);
         } else {
             res = yang_obj_consume_datadef_grp(pcb,
                                                tkc, 

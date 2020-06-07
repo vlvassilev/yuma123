@@ -3017,7 +3017,7 @@ static status_t
         } else if (!xml_strcmp(val, YANG_K_RPC)) {
             res = yang_obj_consume_rpc( pcb, tkc, mod );
         } else if (!xml_strcmp(val, YANG_K_NOTIFICATION)) {
-            res = yang_obj_consume_notification( pcb, tkc, mod );
+            res = yang_obj_consume_notification( pcb, tkc, mod, &mod->datadefQ, NULL, NULL );
         } else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
             res = yang_obj_consume_augment( pcb, tkc, mod );
         } else if (!xml_strcmp(val, YANG_K_DEVIATION)) {

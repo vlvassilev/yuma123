@@ -1738,7 +1738,7 @@ static obj_rpc_t *
  *
  * \param rpc the RPC struct to free
  *********************************************************************/
-static void free_rpc (obj_rpc_t *rpc)
+static void free_rpc (obj_rpc_t *rpc, uint32 flags)
 {
     if ( !rpc ) {
         return;
@@ -1748,13 +1748,94 @@ static void free_rpc (obj_rpc_t *rpc)
     m__free(rpc->descr);
     m__free(rpc->ref);
 
-    typ_clean_typeQ(&rpc->typedefQ);
-    grp_clean_groupingQ(&rpc->groupingQ);
+    if (!(flags & OBJ_FL_CLONE)) {
+        typ_clean_typeQ(&rpc->typedefQ);
+        grp_clean_groupingQ(&rpc->groupingQ);
+    }
     obj_clean_datadefQ(&rpc->datadefQ);
 
     m__free(rpc);
 }  /* free_rpc */
 
+/********************************************************************
+* FUNCTION clone_rpc
+*
+* Clone an rpc struct
+*
+* INPUTS:
+*    not == obj_rpc_t data structure to clone
+*    mnot == obj_refine_t data structure to merge
+*            into the clone, as refinements.  Only
+*            legal container refinements will be checked
+*            (May be NULL)
+*
+* RETURNS:
+*   pointer to malloced object clone
+*   NULL if  malloc error or internal error
+*********************************************************************/
+static obj_rpc_t *
+    clone_rpc (ncx_module_t *mod,
+               obj_rpc_t *rpc,
+               obj_refine_t *mrpc)
+{
+    obj_rpc_t *newrpc;
+    status_t         res;
+
+    newrpc = new_rpc();
+    if (!newrpc) {
+        return NULL;
+    }
+
+    /* set the fields that canrpc be refined */
+    newrpc->name = xml_strdup(rpc->name);
+    newrpc->status = rpc->status;
+    newrpc->typedefQ = rpc->typedefQ;
+    newrpc->groupingQ = rpc->groupingQ;
+    newrpc->nsid = rpc->nsid;
+    newrpc->supported = rpc->supported;
+
+
+    if (mrpc && mrpc->descr) {
+        newrpc->descr = xml_strdup(mrpc->descr);
+        if (!newrpc->descr) {
+            free_rpc(newrpc, OBJ_FL_CLONE);
+            return NULL;
+        }
+    } else if (rpc->descr) {
+        newrpc->descr = xml_strdup(rpc->descr);
+        if (!newrpc->descr) {
+            free_rpc(newrpc, OBJ_FL_CLONE);
+            return NULL;
+        }
+    }
+
+    if (mrpc && mrpc->ref) {
+        newrpc->ref = xml_strdup(mrpc->ref);
+        if (!newrpc->ref) {
+            free_rpc(newrpc, OBJ_FL_CLONE);
+            return NULL;
+        }
+    } else if (rpc->ref) {
+        newrpc->ref = xml_strdup(rpc->ref);
+        if (!newrpc->ref) {
+            free_rpc(newrpc, OBJ_FL_CLONE);
+            return NULL;
+        }
+    }
+
+    res = clone_datadefQ(mod,
+                         &newrpc->datadefQ,
+                         &rpc->datadefQ,
+                         NULL,
+                         NULL);
+    if (res != NO_ERR) {
+        free_rpc(newrpc, OBJ_FL_CLONE);
+        return NULL;
+    }
+
+    return newrpc;
+
+}  /* clone_rpc */
 
 /********************************************************************
 * FUNCTION new_rpcio
@@ -1791,18 +1872,66 @@ static obj_rpcio_t *
  *
  * \param rpcio the RPC IO struct to free
  *********************************************************************/
-static void free_rpcio (obj_rpcio_t *rpcio)
+static void free_rpcio (obj_rpcio_t *rpcio, uint32 flags)
 {
     if ( !rpcio ) {
         return;
     }
 
     m__free(rpcio->name);
-    typ_clean_typeQ(&rpcio->typedefQ);
-    grp_clean_groupingQ(&rpcio->groupingQ);
+    if (!(flags & OBJ_FL_CLONE)) {
+        typ_clean_typeQ(&rpcio->typedefQ);
+        grp_clean_groupingQ(&rpcio->groupingQ);
+    }
     obj_clean_datadefQ(&rpcio->datadefQ);
     m__free(rpcio);
 }  /* free_rpcio */
+
+/********************************************************************
+* FUNCTION clone_rpcio
+*
+* Clone rpcio struct
+*
+* INPUTS:
+*    mod == module in progress
+*    rpcio == obj_notif_t data structure to clone
+*    mrpcio == obj_refine_t data structure to merge
+*            into the clone, as refinements.  Only
+*            legal container refinements will be checked
+*            (May be NULL)
+*
+* RETURNS:
+*   pointer to malloced rpcio clone
+*   NULL if  malloc error or internal error
+*********************************************************************/
+static obj_rpcio_t *
+    clone_rpcio (ncx_module_t *mod,
+                 obj_rpcio_t *rpcio,
+                 obj_refine_t *mrpcio)
+{
+    obj_rpcio_t *newrpcio = new_rpcio();
+    status_t res;
+
+    if (newrpcio == NULL)
+        return NULL;
+
+    newrpcio->name = xml_strdup(rpcio->name);
+    newrpcio->typedefQ = rpcio->typedefQ;
+    newrpcio->groupingQ = rpcio->groupingQ;
+    newrpcio->defaultparm = rpcio->defaultparm; /* does this need to be cloned? */
+
+    res = clone_datadefQ(mod,
+                         &newrpcio->datadefQ,
+                         &rpcio->datadefQ,
+                         NULL,
+                         NULL);
+    if (res != NO_ERR) {
+        free_rpcio(newrpcio, OBJ_FL_CLONE);
+        return NULL;
+    }
+
+    return newrpcio;
+}
 
 
 /********************************************************************
@@ -1839,7 +1968,7 @@ static obj_notif_t *
  *
  * \param notif == notification struct to free
  *********************************************************************/
-static void free_notif (obj_notif_t *notif)
+static void free_notif (obj_notif_t *notif, uint32 flags)
 {
     if ( !notif ) {
         return;
@@ -1848,11 +1977,91 @@ static void free_notif (obj_notif_t *notif)
     m__free(notif->name);
     m__free(notif->descr);
     m__free(notif->ref);
-    typ_clean_typeQ(&notif->typedefQ);
-    grp_clean_groupingQ(&notif->groupingQ);
+
+    if (!(flags & OBJ_FL_CLONE)) {
+        typ_clean_typeQ(&notif->typedefQ);
+        grp_clean_groupingQ(&notif->groupingQ);
+    }
     obj_clean_datadefQ(&notif->datadefQ);
     m__free(notif);
 }  /* free_notif */
+
+/********************************************************************
+* FUNCTION clone_notif
+*
+* Clone a notification struct
+*
+* INPUTS:
+*    not == obj_notif_t data structure to clone
+*    mnot == obj_refine_t data structure to merge
+*            into the clone, as refinements.  Only
+*            legal container refinements will be checked
+*            (May be NULL)
+*
+* RETURNS:
+*   pointer to malloced object clone
+*   NULL if  malloc error or internal error
+*********************************************************************/
+static obj_notif_t *
+    clone_notif (ncx_module_t *mod,
+                 obj_notif_t *not,
+                 obj_refine_t *mnot)
+{
+    obj_notif_t *newnot;
+    status_t         res;
+
+    newnot = new_notif();
+    if (!newnot) {
+        return NULL;
+    }
+
+    /* set the fields that cannot be refined */
+    newnot->name = xml_strdup(not->name);
+    newnot->status = not->status;
+    newnot->typedefQ = not->typedefQ;
+    newnot->groupingQ = not->groupingQ;
+
+    if (mnot && mnot->descr) {
+        newnot->descr = xml_strdup(mnot->descr);
+        if (!newnot->descr) {
+            free_notif(newnot, OBJ_FL_CLONE);
+            return NULL;
+        }
+    } else if (not->descr) {
+        newnot->descr = xml_strdup(not->descr);
+        if (!newnot->descr) {
+            free_notif(newnot, OBJ_FL_CLONE);
+            return NULL;
+        }
+    }
+
+    if (mnot && mnot->ref) {
+        newnot->ref = xml_strdup(mnot->ref);
+        if (!newnot->ref) {
+            free_notif(newnot, OBJ_FL_CLONE);
+            return NULL;
+        }
+    } else if (not->ref) {
+        newnot->ref = xml_strdup(not->ref);
+        if (!newnot->ref) {
+            free_notif(newnot, OBJ_FL_CLONE);
+            return NULL;
+        }
+    }
+
+    res = clone_datadefQ(mod,
+                         &newnot->datadefQ,
+                         &not->datadefQ,
+                         NULL,
+                         NULL);
+    if (res != NO_ERR) {
+        free_notif(newnot, OBJ_FL_CLONE);
+        return NULL;
+    }
+
+    return newnot;
+
+}  /* clone_notif */
 
 /********************************************************************/
 /** 
@@ -3861,7 +4070,7 @@ obj_template_t* obj_new_template( obj_type_t objtype )
 {
     obj_template_t  *obj;
 
-    if ( objtype == OBJ_TYP_NONE || objtype > OBJ_TYP_NOTIF )
+    if ( objtype == OBJ_TYP_NONE || objtype > OBJ_TYP_RPCIO )
     {
         SET_ERROR( ERR_INTERNAL_VAL );
         return NULL;
@@ -4009,15 +4218,15 @@ void obj_free_template( obj_template_t *obj )
         break;
 
     case OBJ_TYP_RPC:
-        free_rpc(obj->def.rpc);
+        free_rpc(obj->def.rpc, obj->flags);
         break;
 
     case OBJ_TYP_RPCIO:
-        free_rpcio(obj->def.rpcio);
+        free_rpcio(obj->def.rpcio, obj->flags);
         break;
 
     case OBJ_TYP_NOTIF:
-        free_notif(obj->def.notif);
+        free_notif(obj->def.notif, obj->flags);
         break;
 
     case OBJ_TYP_NONE:
@@ -6428,8 +6637,11 @@ obj_template_t *
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
-    if (srcobj->objtype == OBJ_TYP_NONE ||
-        srcobj->objtype > OBJ_TYP_AUGMENT) {
+
+    /* RPCs and Actions share the same object type.  Need to clone
+     * actions when found within a grouping.
+     */
+    if (srcobj->objtype == OBJ_TYP_NONE) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
@@ -6593,6 +6805,14 @@ obj_template_t *
             newobj->flags |= OBJ_FL_DEFCLONE;
         }
         break;
+    case OBJ_TYP_NOTIF:
+        newobj->def.notif =
+            clone_notif(mod, srcobj->def.notif,
+                        (mobj) ? mobj->def.refine : NULL);
+        if (!newobj->def.notif) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
     case OBJ_TYP_AUGMENT:
         if (mobj) {
             res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -6600,6 +6820,22 @@ obj_template_t *
             /* set back pointer to augment! do not clone! */
             newobj->def.augment = srcobj->def.augment;
             newobj->flags |= OBJ_FL_DEFCLONE;
+        }
+        break;
+    case OBJ_TYP_RPC: /* action */
+        newobj->def.rpc =
+            clone_rpc(mod, srcobj->def.rpc,
+                      (mobj) ? mobj->def.refine : NULL);
+        if (!newobj->def.rpc) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
+    case OBJ_TYP_RPCIO: /* action */
+        newobj->def.rpcio =
+            clone_rpcio(mod, srcobj->def.rpcio,
+                      (mobj) ? mobj->def.refine : NULL);
+        if (!newobj->def.rpcio) {
+            res = ERR_INTERNAL_MEM;
         }
         break;
     case OBJ_TYP_NONE:

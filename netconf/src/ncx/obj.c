@@ -873,6 +873,78 @@ static obj_leaf_t *
 
 }  /* clone_leaf */
 
+/********************************************************************
+* FUNCTION clean_defvalsQ
+*
+* Free memory allocated by leaf-list default values queue
+*
+* INPUTS:
+*  defvalsQ == dlq_hdr_t pointer to the list of default values
+*
+*********************************************************************/
+static void
+    clean_defvalsQ (dlq_hdr_t *defvalsQ)
+{
+    obj_leaflist_defval_t *def;
+
+    if (defvalsQ == NULL)
+        return;
+
+    while (!dlq_empty(defvalsQ)) {
+        def = (obj_leaflist_defval_t *)dlq_deque(defvalsQ);
+        if (def->defval)
+            m__free(def->defval);
+        m__free(def);
+    }
+}
+
+/********************************************************************
+* FUNCTION clone_defvalsQ
+*
+* Create a deep copy of the leaf-list defvals queue.
+*
+* INPUTS:
+*  defvalsQ == dlq_hdr_t pointer to the list of default values
+*
+* RETURNS:
+*  dlq_hdr_t pointer to the new copy or NULL if an error
+*********************************************************************/
+static dlq_hdr_t *
+    clone_defvalsQ (dlq_hdr_t *defvalsQ)
+{
+    dlq_hdr_t *cpy;
+    obj_leaflist_defval_t *def;
+    obj_leaflist_defval_t *tmp;
+
+    if (defvalsQ == NULL)
+        return NULL;
+
+    cpy = dlq_createQue();
+    if (cpy == NULL)
+        return NULL;
+
+    for (def = (obj_leaflist_defval_t *)dlq_firstEntry(defvalsQ);
+         def;
+         def = (obj_leaflist_defval_t *)dlq_nextEntry(def)) {
+        tmp = m__getMem(sizeof(*tmp));
+        if (tmp == NULL)
+            goto err;
+
+        tmp->defval = xml_strdup(def->defval);
+        if (tmp->defval == NULL) {
+            m__free(tmp);
+            goto err;
+        }
+
+        dlq_enque(tmp, cpy);
+    }
+
+    return cpy;
+
+err:
+    clean_defvalsQ(cpy);
+    return NULL;
+}
 
 /********************************************************************
 * FUNCTION new_leaflist
@@ -906,6 +978,13 @@ static obj_leaflist_t *
         }
         leaflist->status = NCX_STATUS_CURRENT;
         leaflist->ordersys = TRUE;
+
+        leaflist->defvalsQ = dlq_createQue();
+        if (!leaflist->defvalsQ) {
+            dlq_destroyQue(leaflist->defvalsQ);
+            m__free(leaflist);
+            return NULL;
+        }
     }
 
     dlq_createSQue(&leaflist->mustQ);
@@ -941,6 +1020,8 @@ static void free_leaflist (obj_leaflist_t *leaflist, uint32 flags)
     m__free(leaflist->descr);
     m__free(leaflist->ref);
 
+    if (leaflist->defvalsQ)
+        clean_defvalsQ(leaflist->defvalsQ);
     clean_mustQ(&leaflist->mustQ);
 
     m__free(leaflist);
@@ -1032,6 +1113,12 @@ static obj_leaflist_t *
     } else {
         newleaflist->maxelems = leaflist->maxelems;
         newleaflist->maxset = leaflist->maxset;
+    }
+
+    newleaflist->defvalsQ = clone_defvalsQ(leaflist->defvalsQ);
+    if (newleaflist->defvalsQ == NULL) {
+        free_leaflist(newleaflist, OBJ_FL_CLONE);
+        return NULL;
     }
 
     return newleaflist;

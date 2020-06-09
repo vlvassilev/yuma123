@@ -3551,6 +3551,104 @@ status_t
 }  /* val_build_index_chains */
 
 
+/********************************************************************
+* FUNCTION val_find_nearest_ancestor
+*
+* Find a leaf-lists value node's nearest ancestor that meets the
+* conditions set in RFC 7950 section 7.7.2.
+*
+* INPUTS:
+*   val == leaf-list value node from which test starts
+*
+* OUTPUTS:
+*   pobj == parent object found from schema tree.  If this is a
+*           case node, it will not be the same as the object pointed
+*           to by the returned val_value_t.
+*
+* RETURNS:
+*   The
+*********************************************************************/
+val_value_t *
+    val_find_nearest_ancestor(val_value_t *val, obj_template_t **pobj)
+{
+    obj_template_t *curobj;
+
+    if (val->obj->objtype != OBJ_TYP_LEAF_LIST)
+        return NULL;
+
+    curobj = val->obj->parent;
+
+    while (curobj) {
+
+        if (curobj->objtype == OBJ_TYP_USES ||
+            curobj->objtype == OBJ_TYP_AUGMENT) {
+            goto skip;
+        }
+
+        if (val->parent && val->parent->obj == curobj)
+            val = val->parent;
+
+        if (curobj->objtype != OBJ_TYP_CONTAINER) {
+            /* found something not a container - can stop */
+            break;
+        }
+
+        if (obj_get_presence_string(curobj)) {
+            /* found a container, but it's a presence node - can stop */
+            break;
+        }
+
+skip:
+        curobj = curobj->parent;
+    }
+
+    if (curobj) {
+        if (val->obj != curobj) {
+            val = val->parent;
+        }
+        *pobj = curobj;
+        return val;
+    }
+
+    return NULL;
+}
+
+/********************************************************************
+* FUNCTION val_has_default_leaf_list
+*
+*
+* INPUTS:
+*   val == value node to check for potential leaf-list child
+*
+* RETURNS:
+*   true if a value has an empty leaf-list with defaults,
+*   false otherwise.
+*********************************************************************/
+boolean
+    val_has_default_leaf_list(const val_value_t *val)
+{
+    obj_template_t *obj;
+
+    /* Check if each child object is a leaf-list.  There could be more
+     * than one
+     */
+    for (obj = obj_first_child_deep(val->obj);
+         obj;
+         obj = obj_next_child_deep(obj)) {
+        if (obj->objtype == OBJ_TYP_LEAF_LIST) {
+            /* does this leaf list have any values? */
+            if (val_find_child(val, obj_get_mod_name(obj), obj_get_name(obj))) {
+                continue;
+            }
+            /* no values.  does it have one more more default values? */
+            if (obj_get_first_default(obj)) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
 /* END file val_util.c */
 
 

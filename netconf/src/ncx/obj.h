@@ -2393,6 +2393,49 @@ extern const xmlChar *
 extern obj_template_t *
     obj_get_default_case (obj_template_t *obj);
 
+/********************************************************************
+* FUNCTION obj_get_first_default
+*
+* Get the first default value for this object, if any.  Only works
+* for leaf-lists.
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   pointer to first obj_leaflist_defval_t in queue, or NULL if none
+*********************************************************************/
+obj_leaflist_defval_t *
+    obj_get_first_default (const obj_template_t *obj);
+
+/********************************************************************
+* FUNCTION obj_get_next_default
+*
+* Get the next default value for this object, if any.  Only works
+* for leaf-lists.
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   pointer to the next obj_leaflist_defval_t in queue, or NULL if none
+*********************************************************************/
+obj_leaflist_defval_t *
+    obj_get_next_default (const obj_leaflist_defval_t *def);
+
+/********************************************************************
+* FUNCTION obj_get_defaults_count
+*
+* Get the next number of default values for this leaf-list object.
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   the number of default values in the schema for this object
+*********************************************************************/
+unsigned int
+    obj_get_defaults_count (const obj_template_t *obj);
 
 /********************************************************************
 * FUNCTION obj_get_level

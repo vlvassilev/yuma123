@@ -363,6 +363,27 @@ static void
     assert(res == NO_ERR);
 }
 
+/*
+ * Add a string to the default value(s) for a leaf-list
+ *
+ * \param defvalsQ list to which value should be appended
+ * \param defval value to append
+ ***************************************************************/
+static status_t
+    append_defvalsQ (dlq_hdr_t *defvalsQ, xmlChar *defval)
+{
+    obj_leaflist_defval_t *tmp;
+
+    tmp = m__getMem(sizeof(*tmp));
+    if (tmp == NULL)
+        return ERR_INTERNAL_MEM;
+
+    tmp->defval = defval;
+
+    dlq_enque(tmp, defvalsQ);
+    return NO_ERR;
+}
+
 /*************    P A R S E   F U N C T I O N S    *************/
 
 
@@ -1420,6 +1441,19 @@ static status_t
                                      &llist->ref,
                                      &ref, 
                                      &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+            xmlChar *defval = NULL;
+
+            res = yang_consume_strclause(tkc,
+                                         mod,
+                                         &defval,
+                                         NULL, /* don't check for duplicate */
+                                         &obj->appinfoQ);
+            if (res == NO_ERR) {
+                res = append_defvalsQ (obj->def.leaflist->defvalsQ, defval);
+                if (res != NO_ERR)
+                    m__free(defval);
+            }
         } else {
             res = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, res, expstr);

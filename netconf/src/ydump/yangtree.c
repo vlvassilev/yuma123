@@ -280,7 +280,7 @@ void print_data_obj(obj_template_t *obj, char* line_prefix)
         /* /  for a top-level data node in a mounted module */
         /* @  for a top-level data node in a parent referenced module */
 
-        if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE || chobj->objtype == OBJ_TYP_RPCIO || chobj->objtype == OBJ_TYP_RPC /*should be OBJ_TYP_ACTION*/) {
+        if(chobj->objtype == OBJ_TYP_LIST || chobj->objtype == OBJ_TYP_CONTAINER || chobj->objtype == OBJ_TYP_CHOICE || chobj->objtype == OBJ_TYP_CASE || chobj->objtype == OBJ_TYP_RPCIO || chobj->objtype == OBJ_TYP_RPC /*should be OBJ_TYP_ACTION*/ || chobj->objtype == OBJ_TYP_NOTIF) {
             check_for_subnodes=TRUE;
         } else {
             check_for_subnodes=FALSE;

@@ -232,6 +232,11 @@ typedef struct obj_unique_t_ {
     ncx_error_t     tkerr;
 } obj_unique_t;
 
+/* One YANG leaf-list default value */
+typedef struct obj_leaflist_defval_t_ {
+    dlq_hdr_t       qhdr;
+    xmlChar        *defval;
+} obj_leaflist_defval_t;
 
 /* One YANG 'container' definition */
 typedef struct obj_container_t_ {
@@ -270,6 +275,7 @@ typedef struct obj_leaflist_t_ {
     xmlChar       *descr;
     xmlChar       *ref;
     typ_def_t     *typdef;
+    dlq_hdr_t     *defvalsQ; /* Q of obj_leaflist_defval_t */
     boolean        ordersys; /* ordered-by system or user */
     boolean        minset;
     uint32         minelems;

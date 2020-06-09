@@ -1003,6 +1003,39 @@ extern void
 extern status_t
     val_build_index_chains (val_value_t *val);
 
+/********************************************************************
+* FUNCTION val_find_nearest_ancestor
+*
+* Find a leaf-lists value node's nearest ancestor that meets the
+* conditions set in RFC 7950 section 7.7.2.
+*
+* INPUTS:
+*   val == leaf-list value node from which test starts
+*
+* OUTPUTS:
+*   pobj == parent object found from schema tree.  If this is a
+*           case node, it will not be the same as the object pointed
+*           to by the returned val_value_t.
+*
+* RETURNS:
+*   The
+*********************************************************************/
+val_value_t *
+    val_find_nearest_ancestor(val_value_t *val, obj_template_t **pobj);
+
+/********************************************************************
+* FUNCTION val_has_default_leaf_list
+*
+*
+* INPUTS:
+*   val == value node to check for potential leaf-list child
+*
+* RETURNS:
+*   true if a value has an empty leaf-list with defaults,
+*   false otherwise.
+*********************************************************************/
+boolean
+    val_has_default_leaf_list(const val_value_t *val);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

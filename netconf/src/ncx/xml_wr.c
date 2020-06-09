@@ -50,6 +50,7 @@ date         init     comment
 #include "xpath.h"
 #include "xpath_wr.h"
 #include "xpath_yang.h"
+#include "cli.h"
 
 
 /********************************************************************
@@ -63,6 +64,30 @@ date         init     comment
 #endif
 
 #define XML_WR_MAX_LINESTR   34
+
+
+/********************************************************************
+* FUNCTION xml_wr_default_leaf_list
+*
+* Check if this value has a leaf-list with defaults in use.
+*
+* INPUTS:
+*   val == value to check
+*
+* RETURNS:
+*   TRUE if the node should be treated like it has content because
+*   of an empty leaf-list with defaults.  FALSE otherwise.
+*********************************************************************/
+static boolean
+    xml_wr_default_leaf_list(const xml_msg_hdr_t *msg,
+                             const val_value_t *val)
+{
+    if ((msg->withdef == NCX_WITHDEF_REPORT_ALL ||
+         msg->withdef == NCX_WITHDEF_REPORT_ALL) &&
+        val_has_default_leaf_list(val))
+        return TRUE;
+    return FALSE;
+}
 
 /********************************************************************
 * FUNCTION fit_on_line
@@ -415,6 +440,8 @@ static void
 *   indent == number of chars to indent after a newline
 *           == -1 means no newline or indent
 *           == 0 means just newline
+*   empty == true if the value has no content
+          == false if it has content or a leaf-list with defaults enabled
 * RETURNS:
 *   none
 *********************************************************************/
@@ -422,17 +449,17 @@ static void
     begin_elem_val (ses_cb_t *scb,
                     xml_msg_hdr_t *msg,
                     val_value_t *val,
-                    int32 indent)
+                    int32 indent,
+                    boolean empty)
 {
     const xmlChar       *pfix,  *elname;
     const dlq_hdr_t     *attrQ;
     const xpath_pcb_t   *xpathpcb;
-    boolean              xneeded, empty, xmlcontent, isdefault;
+    boolean              xneeded, xmlcontent, isdefault;
     xmlns_id_t           nsid, parent_nsid;
     status_t             res;
     uint32               retcount;
 
-    empty = !val_has_content(val);
     elname = val->name;
     nsid = val->nsid;
     attrQ = &val->metaQ;
@@ -821,6 +848,237 @@ static void write_child_values( ses_cb_t *scb,
     } 
 }
 
+static boolean
+    not_non_presence_container (ncx_withdefaults_t withdef,
+                                boolean realtest,
+                                val_value_t *node)
+{
+    if (node->obj->objtype != OBJ_TYP_CONTAINER) {
+        return TRUE;
+    }
+
+    if (obj_get_presence_string(node->obj)) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+/**
+ * Check a leaf-list node's ancestry to determine if defaults are in use.
+ * See RFC 7950 section 7.7.2.
+ *
+ * \param val leaf-list we have created with default value
+ * \param real_parent value that we searched for empty leaf-lists
+ */
+static boolean
+    leaf_list_use_default (val_value_t *val, val_value_t *real_parent)
+{
+    val_value_t *ancestor;
+    val_value_t *child;
+    obj_template_t *ancestor_obj = NULL;
+    obj_template_t *choice_obj;
+    obj_template_t *defcase;
+    boolean other_case = FALSE;
+
+    /* "If no such ancestor exists in the schema tree, the default values
+     * MUST be used."
+     */
+    ancestor = val_find_nearest_ancestor(val, &ancestor_obj);
+    if (ancestor == NULL) {
+        return TRUE;
+    }
+
+    /* If the nearest ancestor that is not a non-presence container is the
+     * real parent value that we searched for empty leaf-lists, use _that_
+     * value instead of the dummy value because it may be necessary to look
+     * for children of other CASEs, etc.
+     */
+    if (ancestor->obj == real_parent->obj) {
+        ancestor = real_parent;
+    }
+
+    /* "Otherwise, the default values MUST be used if the ancestor node
+     * exists in the data tree."
+     *
+     * Not a case node - we're done.
+     */
+    if (ancestor_obj->objtype != OBJ_TYP_CASE) {
+        return TRUE;
+    }
+
+    /* "Otherwise, if this ancestor is a case node, the default values
+     * MUST be used if any node from the case exists in the data tree
+     * or the case node is the choice's default case, and if no nodes
+     * from any other case exist in the data tree."
+     *
+     *
+     * This is a CASE node.  Do any nodes from this case exist in the
+     * data tree?
+     */
+    choice_obj = ancestor_obj->parent;
+    for (child = val_get_first_child(ancestor);
+         child;
+         child = val_get_next_child(child)) {
+        /* Don't look our temporary leaf-list value. */
+        if (child == val) {
+            continue; /* shouldn't need this any more */
+        }
+
+        if (child->obj->parent == ancestor_obj)
+            return TRUE;
+
+        /* Is this a child of a different CASE in this OPTION?  If so,
+         * we can stop since there won't be any children of the case
+         * we're looking for.
+         */
+        if (child->obj->objtype == OBJ_TYP_CASE &&
+            child->obj->parent == choice_obj) {
+            other_case = TRUE;
+            break;
+        }
+    }
+
+    /* This CASE node has no children.  Is it the default?  If so,
+     * use the leaf-list defaults IF no other case in the choice
+     * has any children.
+     */
+    defcase = obj_get_default_case(choice_obj);
+    if (ancestor_obj == defcase && other_case == FALSE) {
+        return TRUE;
+    }
+
+    /* So, this is a CASE with no child nodes that is not the default.
+     * do _not_ use the leaf-list defaults.
+     */
+    return FALSE;
+}
+
+/**
+ * Evaluate conditionals for a leaf-list as if it was actually present
+ * in the data tree.
+ *
+ * \param val candidate leaf-list value node to examine
+ */
+static boolean
+    leaf_list_check_conditionals (val_value_t *val)
+{
+    val_value_t *root = val;
+    boolean condres;
+    uint32 count = 0;
+    status_t res;
+
+    while (root->parent && !obj_is_root(root->obj))
+        root = root->parent;
+
+    /* Evaluate when statements */
+    res = val_check_obj_when(val->parent, root, NULL, val->obj, &condres,
+                             &count);
+    if (res != NO_ERR) {
+        log_error("\n%s: failed to check when statements");
+        return FALSE;
+    }
+    if (count > 0 && condres == FALSE) {
+        return FALSE;
+    }
+
+    return obj_is_enabled(val->obj);
+}
+
+/**
+ * Check for leaf-lists in the schema tree that do not exist in the data tree
+ * and format the default values.  Leaf-list defaults are handled differently
+ * than leaf defaults in that the default values are used only when no leaf-list
+ * values exist in the data tree.  See RFC 7950 section 7.7.2.
+ *
+ * \param scb the session control block.
+ * \param msg the message (xml_msg_hdr_t) being processed.
+ * \param out the value to search for empty child leaf-lists.
+ * \param indent the start indent amount if indent is enabled.
+ * \param testfn callback function to use, NULL if not used
+ */
+static void
+    write_child_leaf_list_defaults (ses_cb_t *scb,
+                                    xml_msg_hdr_t *msg,
+                                    val_value_t *out,
+                                    int32 indent,
+                                    val_nodetest_fn_t testfn)
+{
+    val_value_t *dummy;  /* temporary container to hold new leaf-list values */
+    val_value_t *llval;
+    val_value_t *chval;
+    obj_template_t *chobj;
+    obj_leaflist_defval_t *cur;
+
+    if (msg->withdef != NCX_WITHDEF_REPORT_ALL_TAGGED &&
+        msg->withdef != NCX_WITHDEF_REPORT_ALL) {
+        return;
+    }
+
+    if (out->obj == NULL) {
+        return;
+    }
+
+    dummy = val_new_value();
+    if (dummy == NULL) {
+        SET_ERROR(ERR_INTERNAL_MEM);
+        return;
+    }
+
+    val_init_from_template(dummy, out->obj);
+
+    /* search for child schema nodes of objtype leaf-list */
+    for (chobj = obj_first_child_deep(out->obj);
+         chobj;
+         chobj = obj_next_child_deep(chobj)) {
+        if (chobj->objtype != OBJ_TYP_LEAF_LIST) {
+            continue;
+        }
+
+        /* make sure there is at least one default value */
+        cur = obj_get_first_default(chobj);
+        if (cur == NULL) {
+            continue;
+        }
+
+        chval = val_find_child(out, obj_get_mod_name(chobj),
+                               obj_get_name(chobj));
+        if (chval != NULL) {
+            continue;
+        }
+
+
+        /* accumulate one value for each default in the schema */
+        for (; cur; cur = obj_get_next_default(cur)) {
+            status_t res;
+
+            res = cli_parse_parm(NULL, dummy, chobj, cur->defval, TRUE);
+            if (res != NO_ERR) {
+                val_free_value(dummy);
+                SET_ERROR(res);
+                return;
+            }
+        }
+    }
+
+    /* output the accumulated values */
+    for (llval = val_get_first_child(dummy);
+         llval;
+         llval = val_get_next_child(llval)) {
+        if (!leaf_list_use_default(llval, out)) {
+            continue;
+        }
+        if (leaf_list_check_conditionals(llval) == FALSE) {
+            continue;
+        }
+
+        /* make sure tag added with with-default=report-all-tagged */
+        llval->flags |= VAL_FL_DEFSET;
+        xml_wr_full_check_val(scb, msg, llval, indent, testfn);
+    }
+    val_free_value(dummy);
+}
+
 /********************************************************************
 * FUNCTION write_check_val
 * 
@@ -937,6 +1195,7 @@ static void write_check_val ( ses_cb_t *scb,
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
         write_child_values( scb, msg, out, indent, testfn );
+        write_child_leaf_list_defaults( scb, msg, out, indent, testfn );
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -1534,9 +1793,9 @@ void
         xml_wr_qname_elem(scb, msg, out->v.idref.nsid, out->v.idref.name,
                           (out->parent) ? out->parent->nsid : 0, out->nsid, 
                            out->name, &out->metaQ, FALSE, indent, isdefault);
-    } else if (val_has_content(out)) {
+    } else if (val_has_content(out) || xml_wr_default_leaf_list(msg, out)) {
         /* write the top-level start node */
-        begin_elem_val(scb, msg, out, indent);
+        begin_elem_val(scb, msg, out, indent, FALSE);
 
         /* write the value node contents; skip ACM on this node */
         write_check_val(scb, msg, out, indent+ses_indent_count(scb), testfn,
@@ -1547,7 +1806,7 @@ void
                         fit_on_line(scb, out) ? -1 : indent);
     } else {
         /* write the top-level empty node */
-        begin_elem_val(scb, msg, out, indent);
+        begin_elem_val(scb, msg, out, indent, TRUE);
     }
 
     if (malloced) {

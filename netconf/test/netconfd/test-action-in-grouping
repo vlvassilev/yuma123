@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -e
+
+cd yang-1dot1
+./test-action-in-grouping.sh

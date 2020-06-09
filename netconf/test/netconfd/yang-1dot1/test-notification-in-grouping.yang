@@ -1,0 +1,34 @@
+module test-notification-in-grouping {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-notification-in-grouping";
+	prefix test;
+
+	organization "";
+	contact	"";
+	description
+		"Expand a grouping that holds a notification.";
+
+	revision 2020-06-06 {
+		reference "";
+	}
+
+	grouping grouping-with-notification {
+		description
+			"Take notice.";
+		notification something-happened {
+			description
+				"A notification indicating that something
+				happened.";
+			leaf some-information {
+				type int8;
+				mandatory true;
+				description
+					"a number";
+			}
+		}
+	}
+
+	container top-notifications {
+		uses grouping-with-notification;
+	}
+}

@@ -1,0 +1,281 @@
+module test-leaf-list-defaults {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-leaf-list-defaults";
+	prefix test;
+
+	organization "";
+	contact	"";
+	description
+		"A model to test logic that decides when leaf-list
+		default values are used.  See RFC 7950 section 7.7.2.
+
+		These test cases are supported by this model:
+
+		1) no ancestor present that is not a non-presence
+		container, i.e., all ancestors are non-presence
+		containers.  --> shoud use defaults
+
+		2) nearest ancestor that is not a non-presence container
+		is a presence container.  --> should use defaults
+
+		3) nearest ancestor that is not a non-presence container
+		is a CASE that also happens to be the default CASE and
+		it has no child nodes.	--> should use defaults
+
+		4) nearest ancestor that is not a non-presence container
+		is a CASE that also happens to be the default CASE and
+		it has child nodes.  --> should use defaults
+
+		5) nearest ancestor that is not a non-presence container
+		is a CASE that is not the default case and that has
+		child nodes. --> should use defaults
+
+		6) nearest ancestor that is not a non-presence container
+		is a CASE that is not the default case and that has no
+		child nodes. --> should _not_ use defaults
+
+		7) leaf-list has if-feature that evaluates to false.
+		--> should _not_ use defaults
+
+		8) leaf-list has 'must' that evaluates to false.  -->
+		should _not_ use defaults
+
+		9) ancestor of leaf-list has if-feature that evaluates
+		to false.  --> should _not_ use defaults
+
+		10) leaf-list has multiple default values.  Ensure that
+		all values reported.  --> should use defaults.
+
+		11) leaf-list has multiple default values and _one_
+		configured value.  --> should _not_ use defaults.";
+
+	revision 2020-06-13 {
+		description "Initial revision.";
+		reference "";
+	}
+
+	feature always-disabled-feature {
+		description
+			"This should never be enabled and is used to
+			disable ancestor nodes of a leaf-leaf.";
+	}
+
+	container test-one {
+		leaf-list data {
+			type int8;
+			default 3;
+			description "data";
+		}
+		description
+			"1) no ancestor present that is not a non-presence
+			container, i.e., all ancestors are non-presence
+			containers.  --> shoud use defaults";
+	}
+	container test-two {
+		presence "true";
+		leaf-list data {
+			type int8;
+			default 3;
+			description "data";
+		}
+		description
+			"2) nearest ancestor that is not a non-presence
+			container is a presence container.  --> should
+			use defaults";
+	}
+	container test-three {
+		choice data-choice {
+			case first {
+				leaf-list data {
+					type int8;
+					default 3;
+					description "";
+				}
+				description "";
+			}
+			case second {
+				leaf other-data {
+					type int8;
+					description "";
+				}
+				description "";
+			}
+			default "first";
+			description "";
+		}
+		description
+			"3) nearest ancestor that is not a non-presence
+			container is a CASE that also happens to be
+			the default CASE and it has no child nodes.
+			--> should use defaults";
+	}
+	container test-four {
+		choice data-choice {
+			case first {
+				leaf-list data {
+					type int8;
+					default 3;
+					description "";
+				}
+				leaf should-have-a-value {
+					type int8;
+					description
+						"The test program should
+						ensure that this leaf
+						has a value in the
+						data tree.";
+				}
+				description "The default";
+			}
+			case second {
+				leaf other-data {
+					type int8;
+					description "";
+				}
+				description "";
+			}
+			default "first";
+			description "";
+		}
+		description
+			"4) nearest ancestor that is not a non-presence
+			container is a CASE that also happens to be
+			the default CASE and it has child nodes.  -->
+			should use defaults";
+	}
+	container test-five {
+		choice data-choice {
+			case first {
+				leaf-list data {
+					type int8;
+					default 3;
+					description "";
+				}
+				leaf should-have-a-value {
+					type int8;
+					description
+						"The test program should
+						ensure that this leaf
+						has a value in the
+						data tree.";
+				}
+				description "";
+			}
+			case second {
+				leaf other-data {
+					type int8;
+					description "";
+				}
+				description "The default";
+			}
+			default "second";
+			description "";
+		}
+		description
+			"5) nearest ancestor that is not a non-presence
+			container is a CASE that is not the default
+			case and that has child nodes. --> should use
+			defaults";
+	}
+	container test-six {
+		choice data-choice {
+			case first {
+				leaf-list data {
+					type int8;
+					default 3;
+					description "";
+				}
+				leaf should-not-have-a-value {
+					type int8;
+					description
+						"The test program should
+						ensure that this leaf
+						does not have a value
+						in the data tree.";
+				}
+				description "";
+			}
+			case second {
+				leaf other-data {
+					type int8;
+					description "";
+				}
+				description "The default";
+			}
+			default "second";
+			description "";
+		}
+		description
+			"6) nearest ancestor that is not a non-presence
+			container is a CASE that is not the default case
+			and that has no child nodes. --> should _not_
+			use defaults";
+	}
+	container test-seven {
+		leaf-list data {
+			if-feature "always-disabled-feature";
+			type int8;
+			default 3;
+			description "data";
+		}
+		description
+			"7) leaf-list has if-feature that evaluates
+			to false.  --> should _not_ use defaults";
+	}
+	container test-eight {
+		leaf missing-data {
+			type int8;
+			description
+				"The test program should never create this
+				value so that the 'when' statement in the
+				leaf-list always evaluates to 'false'.";
+		}
+		leaf-list data {
+			type int8;
+			when "../missing-data=4";
+			default 3;
+			description "data";
+		}
+		description
+			"8) leaf-list has 'must' that evaluates to false.
+			--> should _not_ use defaults";
+	}
+	container test-nine {
+		if-feature "always-disabled-feature";
+		leaf-list data {
+			type int8;
+			default 3;
+			description "data";
+		}
+		description
+			"9) ancestor of leaf-list has if-feature that
+			evaluates to false.  --> should _not_ use
+			defaults";
+	}
+	container test-ten {
+		leaf-list data {
+			type int8;
+			default 3;
+			default 4;
+			default 5;
+			description "data";
+		}
+		description
+			"10) leaf-list has multiple default values.
+			Ensure that all values reported.  --> should
+			use defaults.";
+	}
+	container test-eleven {
+		leaf-list data {
+			type int8;
+			default 3;
+			default 4;
+			default 5;
+			description "data";
+		}
+		description
+			"11) leaf-list has multiple default values
+			and _one_ configured value.  --> should _not_
+			use defaults.";
+	}
+}

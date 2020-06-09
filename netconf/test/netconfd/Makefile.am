@@ -1,4 +1,9 @@
 TESTS=\
+test-notification-in-grouping \
+test-identity-iffeature-pass \
+test-identity-iffeature-fail \
+test-action-in-grouping \
+test-leaf-list-defaults \
 test-perf \
 test-anyxml \
 test-val123-api \

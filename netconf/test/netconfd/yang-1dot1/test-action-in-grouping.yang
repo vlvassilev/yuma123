@@ -1,0 +1,35 @@
+module test-action-in-grouping {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-action-in-grouping";
+	prefix test;
+
+	organization "";
+	contact	"";
+	description
+		"Expand a grouping that holds an action.";
+
+	revision 2020-06-06 {
+		reference "";
+	}
+
+	grouping grouping-with-action {
+		description
+			"A group containing an action.";
+		action make-something-happen {
+			description
+				"Take action.";
+			input {
+				leaf some-information {
+					type int8;
+					mandatory true;
+					description
+						"a number";
+				}
+			}
+		}
+	}
+
+	container top-actions {
+		uses grouping-with-action;
+	}
+}

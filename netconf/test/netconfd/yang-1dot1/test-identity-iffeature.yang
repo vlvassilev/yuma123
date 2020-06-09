@@ -1,0 +1,44 @@
+module test-identity-iffeature {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-identity-iffeature";
+	prefix test;
+
+	organization "";
+	contact	"";
+	description
+		"Create an identity-ref leaf to check if an if-feature
+		statement within an identity can be used to disable
+		that identity.";
+
+	revision 2020-06-06 {
+		reference "";
+	}
+
+	feature extra-identity {
+		description
+		 "The derived identity is available when th is feature
+		 is enabled.";
+	}
+
+	identity test-base-identity {
+		description
+		 "Base identity";
+	}
+
+	identity derived-identity {
+		if-feature extra-identity;
+		description
+		 "Derived identity.  Conditionally enabled.";
+		base test-base-identity;
+	}
+
+	container top {
+		leaf the-test {
+			type identityref {
+				base test-base-identity;
+			}
+			description "";
+		}
+		description "";
+	}
+}

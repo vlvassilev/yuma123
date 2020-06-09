@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+cd yang-1dot1
+./test-identity-iffeature-fail.sh

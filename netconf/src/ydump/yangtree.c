@@ -241,6 +241,8 @@ void print_data_obj(obj_template_t *obj, char* line_prefix)
                 printf("%s ", obj_in_rpc(chobj)?"-w":"ro");
             } else if(chobj->objtype==OBJ_TYP_RPC /*should be OBJ_TYP_ACTION*/) {
                 printf("%s ", "-x");
+            } else if(chobj->objtype==OBJ_TYP_NOTIF) {
+                printf("%s ", "-n");
             } else {
                 printf("%s ", obj_get_config_flag(chobj)?"rw":"ro");
             }

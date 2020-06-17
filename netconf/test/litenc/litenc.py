@@ -95,9 +95,6 @@ class litenc:
 	(ret,reply_xml)=self.receive()
         return (ret,reply_xml)
 
-    def terminate(self):
+    def close(self):
         self.chan.close()
         self.t.close()
-
-        return
-

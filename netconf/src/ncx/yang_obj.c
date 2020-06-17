@@ -291,12 +291,6 @@ static status_t
                       dlq_hdr_t *datadefQ,
                       boolean redo);
 
-static status_t
-    obj_resolve_iffeatureQ (yang_pcb_t *pcb,
-                            tk_chain_t *tkc,
-                            ncx_module_t *mod,
-                            obj_template_t *obj);
-
 /*************    U T I L I T Y   F U N C T I O N S    **********/
 /*
  * Handle the TOP_LEVEL_MANDATORY warning or error
@@ -8752,10 +8746,19 @@ static status_t
         "\nyang_obj_resolve: %s", obj_get_name(testobj));
 
     if (!redo) {
+        xmlChar *namestr;
+
         res = ncx_resolve_appinfoQ(pcb, tkc, mod, &testobj->appinfoQ);
         CHK_EXIT(res, retres);
 
-        res = obj_resolve_iffeatureQ(pcb, tkc, mod, testobj);
+        if (asprintf((char **)&namestr, "object '%s'",
+                     obj_get_name(testobj)) < 0) {
+            res = ERR_INTERNAL_MEM;
+        } else {
+            res = ncx_resolve_iffeatureQ(pcb, tkc, mod, namestr,
+                                         &testobj->iffeatureQ);
+        }
+
         CHK_EXIT(res, retres);
     }
 
@@ -8957,21 +8960,6 @@ static status_t
     return res;
 
 }  /* consume_datadef */
-
-
-static status_t
-    obj_resolve_iffeatureQ (yang_pcb_t *pcb,
-                            tk_chain_t *tkc,
-                            ncx_module_t *mod,
-                            obj_template_t *obj)
-{
-    xmlChar *namestr;
-
-    if (asprintf((char **)&namestr, "object '%s'", obj_get_name(obj)) < 0)
-        return ERR_INTERNAL_MEM;
-
-    return ncx_resolve_iffeatureQ(pcb, tkc, mod, namestr, &obj->iffeatureQ);
-}
 
 
 /********************************************************************

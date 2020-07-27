@@ -613,6 +613,7 @@ status_t
     status_t            res;
     uint32              modlen;
     boolean             startup_loaded;
+    ncx_save_deviations_t *savedev;
 
     log_debug3("\nServer Init-2 Starting...");
 
@@ -848,6 +849,49 @@ status_t
     if (res != NO_ERR) {
         log_error("\nError: one or more modules could not be loaded");
         return ERR_NCX_OPERATION_FAILED;
+    }
+
+    /* Finish filling in the deviation modules' import structures.
+     * Loading deviation modules skips over this step, but since all
+     * modules should be loaded by this point, iterate through the
+     * imports and search for each missing module.
+     */
+
+    for (savedev = (ncx_save_deviations_t *)dlq_firstEntry(&agt_profile.agt_savedevQ);
+         savedev && res == NO_ERR;
+         savedev = (ncx_save_deviations_t *)dlq_nextEntry(savedev)) {
+        res = ncxmod_process_deviation_imports(savedev);
+    }
+
+    if (res != NO_ERR) {
+        log_error("\nError: one or more modules imported by %s could not be found.",
+                  savedev->devmodule);
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    /* After the deviations have been resolved, any nodes to be deleted
+     * will have been marked as such.  ncxmod_apply_deviations() will
+     * cause those nodes to actually be deleted.  This happens in a
+     * separate loop because, in the case that the target node is the
+     * result of a yang augment statement, the module in which the target
+     * obj_template_t will be found may (generally will) be different
+     * than the module in which the deviation was resolved.
+     */
+
+    for (retmod = ncx_get_first_module();
+         retmod;
+         retmod = ncx_get_next_module(retmod)) {
+        res = ncxmod_resolve_deviations(retmod, &agt_profile.agt_savedevQ);
+        if (res != NO_ERR)
+            return ERR_NCX_OPERATION_FAILED;
+    }
+
+    for (retmod = ncx_get_first_module();
+         retmod;
+         retmod = ncx_get_next_module(retmod)) {
+        res = ncxmod_apply_deviations(retmod);
+        if (res != NO_ERR)
+            return ERR_NCX_OPERATION_FAILED;
     }
 
     if (ncx_any_mod_errors()) {

@@ -51,6 +51,7 @@ date         init     comment
 #include "xml_util.h"
 #include "yangconst.h"
 #include "yang_parse.h"
+#include "yang_obj.h"
 
 
 /********************************************************************
@@ -3301,6 +3302,128 @@ status_t
     return res;
 
 }  /* ncxmod_load_deviation */
+
+
+/********************************************************************
+* FUNCTION ncxmod_process_deviation_imports
+*
+* Iterate over the deviation module's imports and fill in the
+* module structure for each.  ncxmod_load_deviation() skips loading
+* imported modules.  This function should be called after all
+* modules have already been loaded.
+*
+* INPUTS:
+*   savedev == deviation structure to update
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+ncxmod_process_deviation_imports(ncx_save_deviations_t *savedev)
+{
+    status_t res = NO_ERR;
+    ncx_import_t       *imp;
+    ncx_module_t       *impmod;
+
+    for (imp = (ncx_import_t *)dlq_firstEntry(&savedev->importQ);
+         imp != NULL;
+         imp = (ncx_import_t *)dlq_nextEntry(imp)) {
+        impmod = ncx_find_module(imp->module, imp->revision);
+
+        if (impmod == NULL) {
+            res = ERR_NCX_OPERATION_FAILED;
+            break;
+        }
+
+        imp->res = NO_ERR;
+        imp->mod = impmod;
+    }
+    return res;
+} /* ncxmod_process_deviation_imports */
+
+/********************************************************************
+* FUNCTION ncxmod_resolve_deviations
+*
+* Iterate over the saved deviations and resolve those deviations
+* that target the current module.
+*
+* INPUTS:
+*   mod == the module in which deviations should be resolved
+*   savedevQ == a queue of deviations to try
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncxmod_resolve_deviations(ncx_module_t *mod,
+                            dlq_hdr_t  *savedevQ)
+{
+    status_t    res;
+    yang_pcb_t *tmppcb;
+
+    tmppcb = yang_new_pcb();
+    if (tmppcb == NULL) {
+        res = ERR_INTERNAL_MEM;
+        goto out;
+    }
+
+    tmppcb->savedevQ = savedevQ;
+    res = yang_obj_resolve_ext_deviations(tmppcb, NULL, mod);
+    if (res != NO_ERR)
+        goto out;
+
+out:
+    if (tmppcb)
+        yang_free_pcb(tmppcb);
+    return res;
+}
+
+/********************************************************************
+* FUNCTION ncxmod_apply_deviations
+*
+* Iterate over the saved deviations and apply those deviations
+* that target the current module.
+*
+* INPUTS:
+*   mod == the module to which deviations should be applied
+*   savedevQ == a queue of deviations to try
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncxmod_apply_deviations(ncx_module_t *mod)
+{
+    status_t    res;
+    yang_pcb_t *tmppcb;
+    tk_chain_t *tmptkc = NULL;
+
+    tmppcb = yang_new_pcb();
+    if (tmppcb == NULL) {
+        res = ERR_INTERNAL_MEM;
+        goto out;
+    }
+
+    tmptkc = tk_new_chain();
+    if (tmptkc == NULL) {
+        res = ERR_INTERNAL_MEM;
+        goto out;
+    }
+
+    /* remove any nodes that were marked as deleted by deviations */
+    if (LOGDEBUG4) {
+        log_debug4("\n%s: remove deleted nodes in module %s", __func__,
+                   mod->name);
+    }
+    res = yang_obj_remove_deleted_nodes(tmppcb, tmptkc, mod, &mod->datadefQ);
+
+out:
+    if (tmppcb)
+        yang_free_pcb(tmppcb);
+    if (tmptkc)
+        tk_free_chain(tmptkc);
+    return res;
+}
 
 
 /********************************************************************

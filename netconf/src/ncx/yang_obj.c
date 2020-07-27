@@ -8554,11 +8554,10 @@ static status_t
                 (*runningtotal)++;
             }
         }
-    }
-
-    /* check if any devmodlist entry needed */
-    if (anydone) {
-        devmodlist_update(mod, obj_get_mod(deviation->targobj));
+        /* check if any devmodlist entry needed */
+        if (anydone) {
+            devmodlist_update(mod, obj_get_mod(deviation->targobj));
+        }
     }
 
     /* restore the savedev structure */
@@ -10329,7 +10328,7 @@ status_t
 * FUNCTION yang_obj_resolve_deviations
 * 
 *
-* Validate any deviation statements within the 
+* Validate any local deviation statements within the
 * module deviationQ
 *
 * Error messages are printed by this function!!
@@ -10348,10 +10347,9 @@ status_t
                                  ncx_module_t *mod)
 {
     obj_deviation_t        *deviation;
-    ncx_save_deviations_t  *savedev, *nextdev;
+    ncx_save_deviations_t  *savedev;
     status_t                res, retres;
     boolean                 anydevs;
-    uint32                  extdevcount;
 
 #ifdef DEBUG
     if (!tkc || !mod) {
@@ -10390,7 +10388,6 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
     anydevs = FALSE;
-    extdevcount = 0;
 
     /* first resolve all the local deviations */
     for (deviation = (obj_deviation_t *)
@@ -10411,6 +10408,46 @@ status_t
         CHK_EXIT(res, retres);
     }
 
+    if (retres == NO_ERR && anydevs) {
+        retres = normalize_deviationQ(tkc, mod);
+    }
+
+    return retres;
+}  /* yang_obj_resolve_deviations */
+
+
+
+/********************************************************************
+* FUNCTION yang_obj_resolve_ext_deviations
+*
+*
+* Validate any external deviation statements for the
+* module and then apply all deviations.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    yang_obj_resolve_ext_deviations (yang_pcb_t *pcb,
+                                     tk_chain_t *tkc,
+                                     ncx_module_t *mod)
+{
+    obj_deviation_t        *deviation;
+    ncx_save_deviations_t  *savedev, *nextdev;
+    status_t                res, retres;
+    uint32                  extdevcount;
+
+    res = NO_ERR;
+    retres = NO_ERR;
+    extdevcount = 0;
+
     /* next gather all the external deviations that apply
      * to this module; they will be moved from the global
      * pcb->savedevQ to the mod->deviationQ
@@ -10423,6 +10460,10 @@ status_t
              savedev = nextdev) {
 
             nextdev = (ncx_save_deviations_t *)dlq_nextEntry(savedev);
+
+            if (dlq_empty(&savedev->deviationQ)) {
+                continue;
+            }
 
             /* check if the deviation module is this module; skip */
             if (!xml_strcmp(savedev->devmodule, mod->name)) {
@@ -10442,20 +10483,19 @@ status_t
      * target objects; combine any deviations for the
      * same targobj; check errors deferred from resolve_module
      */
-    if (retres == NO_ERR && (anydevs || extdevcount)) {
+    if (retres == NO_ERR && extdevcount) {
         retres = normalize_deviationQ(tkc, mod);
     }
 
-    /* pick out any deviations for this module and 
+    /* pick out any deviations for this module and
      * patch them into the object tree
      */
-    if (retres == NO_ERR && (anydevs || extdevcount)) {
+    if (retres == NO_ERR) {
         retres = apply_all_object_deviations(pcb, tkc, mod);
     }
 
     return retres;
-
-}  /* yang_obj_resolve_deviations */
+}  /* yang_obj_resolve_ext_deviations */
 
 
 /********************************************************************

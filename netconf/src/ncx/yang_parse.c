@@ -3545,12 +3545,6 @@ while(!done) {
     res = yang_obj_resolve_deviations(pcb, tkc, mod);
     CHK_EXIT(res, retres);
 
-    /* remove any nodes that were marked as deleted by deviations */
-    if (LOGDEBUG4) {
-        log_debug4("\nyang_parse: remove deleted nodes");
-    }
-    res = yang_obj_remove_deleted_nodes(pcb, tkc, mod, &mod->datadefQ);
-
     /* One final check for grouping integrity */
     if (LOGDEBUG4) {
         log_debug4("\nyang_parse: resolve grp final");

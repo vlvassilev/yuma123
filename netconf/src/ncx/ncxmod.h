@@ -465,6 +465,56 @@ extern status_t
     ncxmod_load_deviation (const xmlChar *deviname,
                            dlq_hdr_t *deviationQ);
 
+/********************************************************************
+ * * FUNCTION ncxmod_process_deviation_imports
+ * *
+ * * Iterate over the deviation module's imports and fill in the
+ * * module structure for each.  ncxmod_load_deviation() skips loading
+ * * imported modules.  This function should be called after all
+ * * modules have already been loaded.
+ * *
+ * * INPUTS:
+ * *   savedev == deviation structure to update
+ * *
+ * * RETURNS:
+ * *   status
+ * *********************************************************************/
+extern status_t
+    ncxmod_process_deviation_imports (ncx_save_deviations_t *savedev);
+
+
+/********************************************************************
+* FUNCTION ncxmod_resolve_deviations
+*
+* Iterate over the saved deviations and resolve those deviations
+* that target the current module.
+*
+* INPUTS:
+*   mod == the module in which deviations should be resolved
+*   savedevQ == a queue of deviations to try
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncxmod_resolve_deviations(ncx_module_t *mod,
+                              dlq_hdr_t  *savedevQ);
+
+/********************************************************************
+* FUNCTION ncxmod_apply_deviations
+*
+* Iterate over the saved deviations and apply those deviations
+* that target the current module.
+*
+* INPUTS:
+*   mod == the module to which deviations should be applied
+*   savedevQ == a queue of deviations to try
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncxmod_apply_deviations(ncx_module_t *mod);
 
 /********************************************************************
 * FUNCTION ncxmod_load_imodule

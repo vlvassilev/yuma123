@@ -473,9 +473,9 @@ extern status_t
 
 /********************************************************************
 * FUNCTION yang_obj_resolve_deviations
-* 
 *
-* Validate any deviation statements within the 
+*
+* Validate any local deviation statements within the
 * module deviationQ
 *
 * Error messages are printed by this function!!
@@ -492,6 +492,28 @@ extern status_t
     yang_obj_resolve_deviations (yang_pcb_t *pcb,
 				 tk_chain_t *tkc,
 				 ncx_module_t  *mod);
+
+/********************************************************************
+* FUNCTION yang_obj_resolve_ext_deviations
+*
+*
+* Validate any external deviation statements that apply to
+* this module
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t
+    yang_obj_resolve_ext_deviations (yang_pcb_t *pcb,
+                                     tk_chain_t *tkc,
+                                     ncx_module_t  *mod);
 
 
 /********************************************************************

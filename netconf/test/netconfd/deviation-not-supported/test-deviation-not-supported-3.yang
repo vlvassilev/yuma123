@@ -1,0 +1,28 @@
+module test-deviation-not-supported-3 {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-deviation-not-supported-3";
+	prefix dev3;
+
+	import ietf-interfaces {
+		prefix if;
+	}
+
+	import ietf-ip {
+		prefix ip;
+	}
+
+	organization "";
+	contact	"";
+	description
+		"Add an external deviation to a path, with multiple
+		module prefixes, created by an 'augment' to ensure that
+		it is applied without crashing netconfd.";
+
+	revision 2020-07-28 {
+		reference "";
+	}
+
+	deviation /if:interfaces/if:interface/ip:ipv4/ip:forwarding {
+		deviate not-supported;
+	}
+}

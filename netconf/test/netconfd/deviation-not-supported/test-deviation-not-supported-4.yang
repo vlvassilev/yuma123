@@ -1,0 +1,23 @@
+module test-deviation-not-supported-4 {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-deviation-not-supported-4";
+	prefix dev4;
+
+	import ietf-system {
+		prefix sys;
+	}
+
+	organization "";
+	contact	"";
+	description
+		"Add an external deviation to a 'base' module to ensure
+		that it is applied.";
+
+	revision 2020-07-28 {
+		reference "";
+	}
+
+	deviation /sys:system/sys:location {
+		deviate not-supported;
+	}
+}

@@ -12,6 +12,7 @@ test-netconf-1dot1 \
 test-yang-validation \
 test-copy-config \
 test-deviation-add-must \
+test-deviation-not-supported \
 test-edit-config \
 test-lock \
 test-multiple-edit-callbacks \

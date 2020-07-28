@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+cd deviation-not-supported
+./test-deviation-not-supported.sh

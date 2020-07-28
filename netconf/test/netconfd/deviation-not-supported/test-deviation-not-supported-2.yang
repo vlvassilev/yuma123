@@ -1,0 +1,22 @@
+module test-deviation-not-supported-2 {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-deviation-not-supported-2";
+	prefix dev2;
+
+	import ietf-interfaces {
+		prefix if;
+	}
+
+	organization "";
+	contact	"";
+	description
+		"Add an external deviation to ensure that it is applied.";
+
+	revision 2020-07-28 {
+		reference "";
+	}
+
+	deviation /if:interfaces/if:interface/if:link-up-down-trap-enable {
+		deviate not-supported;
+	}
+}

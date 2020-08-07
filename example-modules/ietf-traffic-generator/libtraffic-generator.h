@@ -12,6 +12,7 @@ typedef struct stream_t_ {
     unsigned int bursts_per_stream;
     unsigned int burst_index;
     uint32_t interstream_gap;
+    int testframe;
 } stream_t;
 
 typedef struct traffic_generator_t_ {
@@ -28,5 +29,6 @@ typedef struct traffic_generator_t_ {
 } traffic_generator_t;
 
 
-traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_frame, uint64_t total_frames);
+traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, int testframe);
 int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_length, uint8_t** frame, uint64_t* tx_time_sec, uint32_t* tx_time_nsec);
+void traffic_generator_set_epoch(traffic_generator_t* tg, uint64_t sec, uint32_t nsec);

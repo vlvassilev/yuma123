@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "libtraffic-generator.h"
-#include "timespec_math.h"
+#include "timespec-math.h"
 
 static unsigned char hexchar2byte(char hexchar)
 {
@@ -33,7 +33,7 @@ static void hexstr2bin(char* hexstr, uint8_t* data)
     }
 }
 
-traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames)
+traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, int testframe)
 {
     unsigned int i;
     traffic_generator_t* tg;
@@ -56,12 +56,38 @@ traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_dat
         assert(strlen(frame_data_hexstr)/2 <= frame_size);
         hexstr2bin(frame_data_hexstr,tg->streams[i].frame_data);
 
-        tg->streams[i].interframe_gap=20;
-        tg->streams[i].frames_per_burst=10;
-        tg->streams[i].interburst_gap=(tg->streams[i].interframe_gap+tg->streams[i].frame_size)*tg->streams[i].frames_per_burst; /*50%*/
+        tg->streams[i].interframe_gap=interframe_gap;
+        tg->streams[i].frames_per_burst=frames_per_burst;
+        tg->streams[i].interburst_gap=interburst_gap;
+        tg->streams[i].frames_per_burst=frames_per_burst;
+        if(interburst_gap!=0) {
+            tg->streams[i].interstream_gap=interburst_gap;
+        } else {
+            tg->streams[i].interstream_gap=interframe_gap;
+        }
+        tg->streams[i].testframe=testframe;
     }
 
     return tg;
+}
+
+void frame_timestamp(traffic_generator_t* tg)
+{
+    uint8_t* timestamp;
+    unsigned int offset;
+    offset = tg->streams[tg->stream_index].frame_size - 10;
+    timestamp = (uint8_t*)&tg->streams[tg->stream_index].frame_data[offset];
+    timestamp[0] = (tg->sec&0x0000FF0000000000)>>40;
+    timestamp[1] = (tg->sec&0x000000FF00000000)>>32;
+    timestamp[2] = (tg->sec&0x00000000FF000000)>>24;
+    timestamp[3] = (tg->sec&0x0000000000FF0000)>>16;
+    timestamp[4] = (tg->sec&0x000000000000FF00)>>8;
+    timestamp[5] = (tg->sec&0x00000000000000FF)>>0;
+
+    timestamp[6] = (tg->nsec&0x00000000FF000000)>>24;
+    timestamp[7] = (tg->nsec&0x0000000000FF0000)>>16;
+    timestamp[8] = (tg->nsec&0x000000000000FF00)>>8;
+    timestamp[9] = (tg->nsec&0x00000000000000FF)>>0;
 }
 
 int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, uint8_t** frame_data, uint64_t* tx_time_sec, uint32_t* tx_time_nsec)
@@ -77,7 +103,7 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     *frame_data = tg->streams[tg->stream_index].frame_data;
     *frame_size = tg->streams[tg->stream_index].frame_size;
     *tx_time_sec = tg->sec;
-    *tx_time_sec = tg->nsec;
+    *tx_time_nsec = tg->nsec;
 
     start.tv_sec = tg->sec;
     start.tv_nsec = tg->nsec;
@@ -101,8 +127,18 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     }
     timespec_add(&start, &delta, &next);
 
+    if(tg->streams[tg->stream_index].testframe) {
+        frame_timestamp(tg);
+    }
+
     tg->sec = next.tv_sec;
     tg->nsec = next.tv_nsec;
-
     return 0;
 }
+
+void traffic_generator_set_epoch(traffic_generator_t* tg, uint64_t sec, uint32_t nsec)
+{
+    tg->sec=sec;
+    tg->nsec=nsec;
+}
+

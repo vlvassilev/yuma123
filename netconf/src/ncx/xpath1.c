@@ -2503,10 +2503,6 @@ static xpath_result_t *
 {
     xpath_result_t *result;
 
-    if (!pcb->val && !pcb->obj) {
-        return NULL;
-    }
-
     (void)parmQ;
 
     result = new_nodeset(pcb, 

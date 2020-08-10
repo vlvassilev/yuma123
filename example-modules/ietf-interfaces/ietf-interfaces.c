@@ -11,6 +11,7 @@
 #include "agt.h"
 #include "agt_cb.h"
 #include "agt_cli.h"
+#include "agt_commit_complete.h"
 #include "agt_timer.h"
 #include "agt_util.h"
 #include "agt_not.h"
@@ -492,6 +493,138 @@ static status_t init2_w_nmda(void)
 {
 }
 
+static void interface_delete(val_value_t* interface_val)
+{
+    int ret;
+    int n;
+    char* cmd_buf;
+    val_value_t* name_val;
+
+    name_val = val_find_child(interface_val,"ietf-interfaces","name");
+    assert(name_val);
+
+    n = snprintf(NULL, 0, "ifconfig %s down", VAL_STRING(name_val));
+    assert(n>0);
+    cmd_buf=malloc(n+1);
+    snprintf(cmd_buf, n+1, "ifconfig %s down", VAL_STRING(name_val));
+    log_info("Interface down: %s\n", cmd_buf);
+    ret=system(cmd_buf);
+    //assert(ret==0);
+    if(ret!=0) {
+        perror(cmd_buf);
+    }
+    free(cmd_buf);
+}
+
+static void interface_create(val_value_t* interface_val)
+{
+    int ret;
+    int n;
+    char* cmd_buf;
+    val_value_t* name_val;
+
+    name_val = val_find_child(interface_val,"ietf-interfaces","name");
+    assert(name_val);
+
+    n = snprintf(NULL, 0, "ifconfig %s up", VAL_STRING(name_val));
+    assert(n>0);
+    cmd_buf=malloc(n+1);
+    snprintf(cmd_buf, n+1, "ifconfig %s up", VAL_STRING(name_val));
+    log_info("Interface up: %s\n", cmd_buf);
+    ret=system(cmd_buf);
+    //assert(ret==0);
+    if(ret!=0) {
+        perror(cmd_buf);
+    }
+
+    free(cmd_buf);
+}
+ 
+static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
+{
+
+    status_t res;
+
+    val_value_t *interfaces_cur_val, *interface_cur_val;
+    val_value_t *interfaces_new_val, *interface_new_val;
+
+
+    if(config_new_val == NULL) {
+        interfaces_new_val = NULL;
+    } else {
+        interfaces_new_val = val_find_child(config_new_val,
+                               "ietf-interfaces",
+                               "interfaces");
+    }
+
+    if(config_cur_val == NULL) {
+        interfaces_cur_val = NULL;
+    } else {
+        interfaces_cur_val = val_find_child(config_cur_val,
+                                       "ietf-interfaces",
+                                       "interfaces");
+    }
+
+    /* 2 step (delete/add) interface configuration */
+
+    /* 1. deactivation loop - deletes all deleted interface -s */
+    if(interfaces_cur_val!=NULL) {
+        for (interface_cur_val = val_get_first_child(interfaces_cur_val);
+             interface_cur_val != NULL;
+             interface_cur_val = val_get_next_child(interface_cur_val)) {
+            interface_new_val = val123_find_match(config_new_val, interface_cur_val);
+            if(interface_new_val==NULL) {
+                interface_delete(interface_cur_val);
+            }
+        }
+    }
+
+    /* 2. activation loop - creates all new interface -s */
+    if(interfaces_new_val!=NULL) {
+        for (interface_new_val = val_get_first_child(interfaces_new_val);
+             interface_new_val != NULL;
+             interface_new_val = val_get_next_child(interface_new_val)) {
+            interface_cur_val = val123_find_match(config_cur_val, interface_new_val);
+            if(interface_cur_val==NULL) {
+                interface_create(interface_new_val);
+            }
+        }
+    }
+    return NO_ERR;
+}
+
+static val_value_t* prev_root_val = NULL;
+static int update_config_wrapper()
+{
+    cfg_template_t        *runningcfg;
+    status_t res;
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    assert(runningcfg!=NULL && runningcfg->root!=NULL);
+    if(prev_root_val!=NULL) {
+        val_value_t* cur_root_val;
+        cur_root_val = val_clone_config_data(runningcfg->root, &res);
+        if(0==val_compare(cur_root_val,prev_root_val)) {
+            /*no change*/
+            val_free_value(cur_root_val);
+            return 0;
+        }
+        val_free_value(cur_root_val);
+    }
+    update_config(prev_root_val, runningcfg->root);
+
+    if(prev_root_val!=NULL) {
+        val_free_value(prev_root_val);
+    }
+    prev_root_val = val_clone_config_data(runningcfg->root, &res);
+    return 0;
+}
+
+static status_t y_commit_complete(void)
+{
+    update_config_wrapper();
+    return NO_ERR;
+}
+
 /* The 3 mandatory callback functions: y_ietf_interfaces_init, y_ietf_interfaces_init2, y_ietf_interfaces_cleanup */
 
 status_t
@@ -536,6 +669,10 @@ status_t
         NULL,
         &agt_profile->agt_savedevQ,
         &mod);
+    assert(res == NO_ERR);
+
+    res=agt_commit_complete_register("ietf-interfaces" /*SIL id string*/,
+                                     y_commit_complete);
     assert(res == NO_ERR);
 
     return res;

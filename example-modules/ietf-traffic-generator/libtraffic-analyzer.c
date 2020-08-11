@@ -53,7 +53,7 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
 
     timespec_sub(&ta->last_rx_time, &ta->last_tx_time, &ta->last_latency);
 
-    if(ta->last_latency.tv_sec>ta->max_latency.tv_sec || (ta->last_latency.tv_sec==ta->max_latency.tv_sec && ta->last_latency.tv_nsec>ta->max_latency.tv_nsec)) {
+    if(ta->testframes<=1 || ta->last_latency.tv_sec>ta->max_latency.tv_sec || (ta->last_latency.tv_sec==ta->max_latency.tv_sec && ta->last_latency.tv_nsec>ta->max_latency.tv_nsec)) {
         ta->max_latency.tv_nsec = ta->last_latency.tv_nsec;
         ta->max_latency.tv_sec = ta->last_latency.tv_sec;
     }

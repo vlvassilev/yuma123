@@ -387,6 +387,7 @@ status_t y_ietf_traffic_analyzer_init2(void)
     assert(runningcfg && runningcfg->root);
     root_val = runningcfg->root;
 
+    y_commit_complete();
 
     return res;
 }

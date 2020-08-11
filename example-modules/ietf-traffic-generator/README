@@ -11,12 +11,50 @@ Dependency: installed netconfd run-time binaries and development shared librarie
 
 ===Functionality===
  yangcli root@localhost> create /interfaces/interface[name='eth0'] -- type=ethernetCsmacd
- yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=20 frame-data=\
+ yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=67000000  testframe=true frame-data=\
  6CA96F0000026CA96F00000108004500\
  002ED4A500000A115816C0000201C000\
  0202C0200007001A0000010203040506\
  0708090A0B0C0D0E0F101112
+
+ yangcli root@localhost> create /interfaces/interface[name='eth1'] -- type=ethernetCsmacd
+ yangcli root@localhost> create /interfaces/interface[name='eth1']/traffic-analyzer
+
  yangcli root@localhost> commit
+
+yangcli vladimir@localhost> xget /interfaces
+
+RPC Data Reply 34 for session 1:
+
+rpc-reply {
+  data {
+    interfaces {
+      interface enxe46f13f4af57 {
+        name enxe46f13f4af57
+        type ianaift:ethernetCsmacd
+        traffic-generator {
+          frame-size 64
+          frame-data 6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112
+          interframe-gap 67000000
+          testframe true
+        }
+        traffic-analyzer {
+          state {
+            pkts 984
+            testframe-stats {
+              testframe-pkts 984
+              latency {
+                min 204715
+                max 3253501
+                latest 355891
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 ==Design notes==
 The libtraffic_generator library creates performance efficient traffic generator

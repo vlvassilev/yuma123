@@ -52,6 +52,7 @@ static status_t
     {"frames-per-burst", required_argument, NULL, 'n'},
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
+    {"testframe", required_argument, NULL, 'T'},
 */
 static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
 {
@@ -68,9 +69,13 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
     if(val!=NULL) {
         sprintf(cli_args_str+strlen(cli_args_str)," --frame-data=");
         
+#if 0
         for(i=0;i<val->v.binary.ustrlen;i++) {
             sprintf(cli_args_str+strlen(cli_args_str),"%02X",(unsigned int)(val->v.binary.ustr[i]));
         }
+#else
+        sprintf(cli_args_str+strlen(cli_args_str),VAL_STRING(val));
+#endif
     }
 
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","interframe-gap");
@@ -94,6 +99,11 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
     val = val_find_child(traffic_generator_val,"ietf-traffic-generator","total-frames");
     if(val!=NULL) {
         sprintf(cli_args_str+strlen(cli_args_str)," --total-frames=%llu",VAL_UINT64(val));
+    }
+
+    val = val_find_child(traffic_generator_val,"traffic-generator-testframe","testframe");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --testframe=%s",VAL_BOOL(val)?"true":"false");
     }
 }
 
@@ -282,6 +292,7 @@ status_t y_ietf_traffic_generator_init2(void)
     assert(runningcfg && runningcfg->root);
     root_val = runningcfg->root;
 
+    y_commit_complete();
 
     return res;
 }

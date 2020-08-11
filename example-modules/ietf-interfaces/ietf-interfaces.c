@@ -110,23 +110,19 @@ void oper_status_update(val_value_t* cur_val)
         val_init_from_template(last_change_val, last_change_obj);
         val_set_simval_obj(last_change_val, last_change_obj, tstamp_buf);
 
-        val = val123_find_match(root_prev_val, cur_val);
-        val_remove_child(val);
-        val_free_value(val);
-        res=val123_clone_instance(root_prev_val, cur_val, &val);
-
-        last_change_prev_val = val_find_child(val->parent, "ietf-interfaces", "last-change");
+        last_change_prev_val = val_find_child(prev_val->parent, "ietf-interfaces", "last-change");
         if(last_change_prev_val) {
             val_remove_child(last_change_prev_val);
             val_free_value(last_change_prev_val);
         }
-        val_add_child(last_change_val, val->parent);
+        val_add_child(last_change_val, prev_val->parent);
 
         /* notify */
         name_val=val_find_child(cur_val->parent,"ietf-interfaces","name");
         assert(name_val);
         printf("Notification /interfaces/interface[name=%s]: oper-status changes from %s to %s at %s\n", VAL_STRING(name_val), VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
         my_send_link_state_notification(VAL_STRING(cur_val), VAL_STRING(name_val));
+        val_set_simval_obj(prev_val, prev_val->obj, VAL_STRING(cur_val));
 
     }
 }
@@ -740,6 +736,9 @@ status_t y_ietf_interfaces_init2(void)
                            my_timer_fn,
                            interfaces_val/*cookie*/,
                            &timer_id);
+
+    y_commit_complete();
+
     return res;
 }
 

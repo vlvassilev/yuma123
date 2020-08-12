@@ -3,12 +3,15 @@
 typedef struct traffic_analyzer_t_ {
     uint64_t totalframes;
     uint64_t testframes;
-    /* testframe stats */
-    struct timespec last_tx_time;
     struct timespec last_rx_time;
-    struct timespec last_latency;
-    struct timespec min_latency;
-    struct timespec max_latency;
+    /* testframe stats */
+    struct testframe_ {
+        struct timespec last_rx_time;
+        struct timespec last_tx_time;
+        struct timespec last_latency;
+        struct timespec min_latency;
+        struct timespec max_latency;
+    } testframe;
 } traffic_analyzer_t;
 
 traffic_analyzer_t* traffic_analyzer_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_frame, uint64_t total_frames);

@@ -30,7 +30,7 @@ void* monitor(void* arg)
             exit(0);
         }
         ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><testframe-pkts>%llu</testframe-pkts><latency><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats></state>\n",
-                ta->testframes,
+                ta->totalframes,
                 ta->testframes,
                 (uint64_t)ta->min_latency.tv_nsec,
                 (uint64_t)ta->max_latency.tv_nsec,

@@ -11,7 +11,7 @@ Dependency: installed netconfd run-time binaries and development shared librarie
 
 ===Functionality===
  yangcli root@localhost> create /interfaces/interface[name='eth0'] -- type=ethernetCsmacd
- yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=67000000  testframe=true frame-data=\
+ yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=67000000  testframe/type=testframe-ipv4-udp frame-data=\
  6CA96F0000026CA96F00000108004500\
  002ED4A500000A115816C0000201C000\
  0202C0200007001A0000010203040506\
@@ -22,31 +22,37 @@ Dependency: installed netconfd run-time binaries and development shared librarie
 
  yangcli root@localhost> commit
 
-yangcli vladimir@localhost> xget /interfaces
+yangcli root@192.168.0.17> xget /interfaces
 
-RPC Data Reply 34 for session 1:
+RPC Data Reply 51 for session 1:
 
 rpc-reply {
   data {
     interfaces {
-      interface enxe46f13f4af57 {
-        name enxe46f13f4af57
+      interface eth0 {
+        name eth0
         type ianaift:ethernetCsmacd
         traffic-generator {
           frame-size 64
           frame-data 6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112
           interframe-gap 67000000
-          testframe true
+          testframe {
+            type dt:testframe-ipv4-udp
+          }
         }
+      }
+      interface eth1 {
+        name eth1
+        type ianaift:ethernetCsmacd
         traffic-analyzer {
           state {
-            pkts 984
+            pkts 15687
             testframe-stats {
-              testframe-pkts 984
+              testframe-pkts 15223
               latency {
-                min 204715
-                max 3253501
-                latest 355891
+                min 54190
+                max 2084628
+                latest 218892
               }
             }
           }

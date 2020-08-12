@@ -103,7 +103,10 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
 
     val = val_find_child(traffic_generator_val,"traffic-generator-testframe","testframe");
     if(val!=NULL) {
-        sprintf(cli_args_str+strlen(cli_args_str)," --testframe=%s",VAL_BOOL(val)?"true":"false");
+        val = val_find_child(val,"traffic-generator-testframe","type");
+        if(val!=NULL) {
+            sprintf(cli_args_str+strlen(cli_args_str)," --testframe=%s", val->v.idref.name);
+        }
     }
 }
 
@@ -120,6 +123,7 @@ static void traffic_generator_delete(val_value_t* traffic_generator_val)
 
     serialize_params(traffic_generator_val, cmd_args_buf);
     sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
+    log_info(cmd_buf);
     system(cmd_buf);
 }
 
@@ -136,6 +140,7 @@ static void traffic_generator_create(val_value_t* traffic_generator_val)
 
     serialize_params(traffic_generator_val, cmd_args_buf);
     sprintf(cmd_buf, "traffic-generator %s &", cmd_args_buf);
+    log_info(cmd_buf);
     system(cmd_buf);
 }
 

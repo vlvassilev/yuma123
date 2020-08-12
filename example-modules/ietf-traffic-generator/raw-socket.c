@@ -68,7 +68,7 @@ int raw_socket_send(raw_socket_t* raw_socket, uint8_t* raw_frame, uint32_t raw_f
     memset(ta.sll_addr, 0, sizeof(ta.sll_addr));
     memcpy(ta.sll_addr, &raw_frame[0]/*destination mac*/, 6);
 
-    int rc = sendto(raw_socket->socket, raw_frame, raw_frame_len, 0,(struct sockaddr*)&ta, sizeof(ta));
+    int rc = sendto(raw_socket->socket, raw_frame, raw_frame_len - 4 /* without crc */, 0,(struct sockaddr*)&ta, sizeof(ta));
     if ( rc < 0 ) {
         return rc;
     }

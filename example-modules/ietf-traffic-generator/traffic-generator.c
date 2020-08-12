@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     uint32_t frames_per_burst=0;
     uint32_t bursts_per_stream=0;
     uint64_t total_frames=0;
-    int testframe=0;
+    char* testframe;
 
     int optc;
     struct timespec epoch,rel,abs,now,req,rem;
@@ -74,9 +74,7 @@ int main(int argc, char** argv)
                 total_frames = atoll(optarg);
                 break;
             case 'T':
-                if(0==strcmp(optarg,"true")) {
-                    testframe = 1;
-                }
+                testframe = optarg;
                 break;
             default:
                 exit (-1);

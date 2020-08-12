@@ -33,7 +33,7 @@ static void hexstr2bin(char* hexstr, uint8_t* data)
     }
 }
 
-traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, int testframe)
+traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe)
 {
     unsigned int i;
     traffic_generator_t* tg;
@@ -65,17 +65,22 @@ traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_dat
         } else {
             tg->streams[i].interstream_gap=interframe_gap;
         }
-        tg->streams[i].testframe=testframe;
+        if(testframe!=NULL) {
+            tg->streams[i].testframe=1;
+            if(0==strcmp(testframe,"testframe-ipv4-udp")) {
+                tg->streams[i].testframe_ipv4_udp=1;
+            }
+        }
     }
 
     return tg;
 }
 
-void frame_timestamp(traffic_generator_t* tg)
+static void frame_time_stamp(traffic_generator_t* tg)
 {
     uint8_t* timestamp;
     unsigned int offset;
-    offset = tg->streams[tg->stream_index].frame_size - 10;
+    offset = tg->streams[tg->stream_index].frame_size - 10 - 4 /* crc */;
     timestamp = (uint8_t*)&tg->streams[tg->stream_index].frame_data[offset];
     timestamp[0] = (tg->sec&0x0000FF0000000000)>>40;
     timestamp[1] = (tg->sec&0x000000FF00000000)>>32;
@@ -88,6 +93,35 @@ void frame_timestamp(traffic_generator_t* tg)
     timestamp[7] = (tg->nsec&0x0000000000FF0000)>>16;
     timestamp[8] = (tg->nsec&0x000000000000FF00)>>8;
     timestamp[9] = (tg->nsec&0x00000000000000FF)>>0;
+}
+
+static void frame_sequence_stamp(traffic_generator_t* tg)
+{
+    uint64_t index;
+    uint8_t* seqnum;
+    unsigned int offset;
+    offset = tg->streams[tg->stream_index].frame_size - 18 - 4 /* crc */;
+    seqnum = (uint8_t*)&tg->streams[tg->stream_index].frame_data[offset];
+    index = tg->total_frame_index-1;
+    seqnum[0] = (index&0xFF00000000000000)>>56;
+    seqnum[1] = (index&0x00FF000000000000)>>48;
+    seqnum[2] = (index&0x0000FF0000000000)>>40;
+    seqnum[3] = (index&0x000000FF00000000)>>32;
+    seqnum[4] = (index&0x00000000FF000000)>>24;
+    seqnum[5] = (index&0x0000000000FF0000)>>16;
+    seqnum[6] = (index&0x000000000000FF00)>>8;
+    seqnum[7] = (index&0x00000000000000FF)>>0;
+}
+
+static void frame_udp_checksum_update(traffic_generator_t* tg)
+{
+    uint8_t* checksum;
+    unsigned int offset;
+    offset = 14/*ethernet*/+20+6; /* no vlan */
+    checksum = (uint8_t*)&tg->streams[tg->stream_index].frame_data[offset];
+    checksum[0] = 0;
+    checksum[1] = 0;
+    /* TODO - zero is OK */
 }
 
 int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, uint8_t** frame_data, uint64_t* tx_time_sec, uint32_t* tx_time_nsec)
@@ -108,7 +142,7 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     start.tv_sec = tg->sec;
     start.tv_nsec = tg->nsec;
 
-    /* update time and indexes for next step */
+    /* update time and indexes for next transmission */
     if((tg->frame_index+1) < tg->streams[tg->stream_index].frames_per_burst) {
         tg->frame_index++;
         delta.tv_sec=0;
@@ -128,7 +162,14 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     timespec_add(&start, &delta, &next);
 
     if(tg->streams[tg->stream_index].testframe) {
-        frame_timestamp(tg);
+
+        frame_time_stamp(tg);
+
+        frame_sequence_stamp(tg);
+
+        if(tg->streams[tg->stream_index].testframe_ipv4_udp) {
+            frame_udp_checksum_update(tg);
+        }
     }
 
     tg->sec = next.tv_sec;

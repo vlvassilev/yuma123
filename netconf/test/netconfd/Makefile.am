@@ -1,4 +1,5 @@
 TESTS=\
+test-get \
 test-notification-in-grouping \
 test-identity-iffeature-pass \
 test-identity-iffeature-fail \

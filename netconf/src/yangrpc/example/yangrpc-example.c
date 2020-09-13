@@ -1,10 +1,30 @@
+/* Usage:
+   ./yangrpc-example --server=myserver.com --port=830 --user=vladimir --password='mypass' \
+                     --private-key=/home/vladimir/.ssh/id_rsa \
+                     --public-key=/home/vladimir/.ssh/id_rsa.pub
+*/
+
 #include <assert.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <getopt.h>
 
 #include "ncx.h"
 #include "ncxmod.h"
 #include "val.h"
 #include "yangrpc.h"
+
+static struct option const long_options[] =
+{
+    {"server", required_argument, NULL, 's'},
+    {"port", required_argument, NULL, 'p'},
+    {"user", required_argument, NULL, 'u'},
+    {"password", required_argument, NULL, 'P'},
+    {"private-key", required_argument, NULL, 'k'},
+    {"public-key", required_argument, NULL, 'K'},
+    {NULL, 0, NULL, 0}
+};
 
 int main(int argc, char* argv[])
 {
@@ -21,9 +41,47 @@ int main(int argc, char* argv[])
     val_value_t* type_meta_val;
     val_value_t* select_meta_val;
 
+    int optc;
+
+    char* server="127.0.0.1";
+    unsigned int port=830;
+    char* user=getlogin();
+    char* password=NULL;
+    char private_key[1024];
+    char public_key[1024];
+
+    sprintf(private_key,"/home/%s/.ssh/id_rsa",user);
+    sprintf(public_key,"/home/%s/.ssh/id_rsa.pub",user);
+
+    while ((optc = getopt_long (argc, argv, "s:p:u:P:k:K", long_options, NULL)) != -1) {
+        switch (optc) {
+            case 's':
+                server=optarg;
+                break;
+            case 'p':
+                port = atoi(optarg);
+                break;
+            case 'u':
+                user = optarg;
+                break;
+            case 'P':
+                password = optarg;
+                break;
+            case 'k':
+                strcpy(private_key,optarg);
+                break;
+            case 'K':
+                strcpy(public_key,optarg);
+                break;
+            default:
+                exit (-1);
+        }
+    }
+
+
     res = yangrpc_init(NULL);
     assert(res==NO_ERR);
-    res = yangrpc_connect("127.0.0.1"/*server*/, 830/*port*/, "vladimir"/*user*/,""/*password*/,"/home/vladimir/.ssh/id_rsa.pub"/*public_key*/, "/home/vladimir/.ssh/id_rsa"/*private_key*/, NULL, &yangrpc_cb_ptr);
+    res = yangrpc_connect(server /*127.0.0.1*/, port /*830*/, user /*vladimir*/, password /* "" */, public_key /* "/home/vladimir/.ssh/id_rsa.pub" */, private_key /* "/home/vladimir/.ssh/id_rsa" */, NULL, &yangrpc_cb_ptr);
     assert(res==NO_ERR);
 
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
@@ -64,5 +122,6 @@ int main(int argc, char* argv[])
     val_free_value(reply_val);
 
     yangrpc_close(yangrpc_cb_ptr);
+
     return 0;
 }

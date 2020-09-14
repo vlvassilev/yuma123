@@ -1297,15 +1297,13 @@ static status_t
             ver = TRUE;
 
             /* get the version number */
-            res = yang_consume_string(tkc, mod, &str);
+            res = yang_consume_string(tkc, mod, NULL);
             if (res != NO_ERR) {
                 retres = res;
                 if (NEED_EXIT(res)) {
                     return res;
                 }
             } else {
-                m__free(str);
-                str = NULL;
                 if(0==xml_strcmp(TK_CUR_VAL(tkc), YANG_VERSION10_STR)) {
                     mod->langver = NCX_YANG_VERSION10;
                 } else if(0==xml_strcmp(TK_CUR_VAL(tkc), YANG_VERSION11_STR)) {

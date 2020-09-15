@@ -74,45 +74,8 @@
 
 #include "yangrpc.h"
 
-
-static char* server_arg;
-static char* port_arg;
-static char* user_arg;
-static char* password_arg;
-static char* public_key_arg;
-static char* private_key_arg;
-
 extern void
     create_session (server_cb_t *server_cb);
-
-static void
-    yangrpc_free_static_vars(void)
-{
-    if (server_arg) {
-        free(server_arg);
-        server_arg = NULL;
-    }
-    if (port_arg) {
-        free(port_arg);
-        port_arg = NULL;
-    }
-    if (user_arg) {
-        free(user_arg);
-        user_arg = NULL;
-    }
-    if (password_arg) {
-        free(password_arg);
-        password_arg = NULL;
-    }
-    if (public_key_arg) {
-        free(public_key_arg);
-        public_key_arg = NULL;
-    }
-    if (private_key_arg) {
-        free(private_key_arg);
-        private_key_arg = NULL;
-    }
-}
 
 static void
     yangrpc_notification_handler (ses_cb_t *scb,
@@ -345,8 +308,7 @@ status_t yangrpc_init(char* args)
     free(prog_w_args);
     if(ret!=0) {
         perror(args);
-        res = ERR_CMDLINE_OPT_UNKNOWN;
-        goto out;
+        return ERR_CMDLINE_OPT_UNKNOWN;
     }
 
     /* set the default debug output level */
@@ -360,7 +322,8 @@ status_t yangrpc_init(char* args)
      */
     res = ncx_init(NCX_SAVESTR, log_level, TRUE, NULL, p.we_wordc, p.we_wordv);
     if (res != NO_ERR) {
-        goto out;
+        yangcli_wordfree(&p);
+        return res;
     }
 
 #ifdef YANGCLI_DEBUG
@@ -371,6 +334,7 @@ status_t yangrpc_init(char* args)
         }
     }
 #endif
+    yangcli_wordfree(&p);
 
     /* make sure the Yuma directory
      * exists for saving per session data
@@ -379,7 +343,7 @@ status_t yangrpc_init(char* args)
     if (res != NO_ERR) {
         log_error("\nError: could not setup yuma dir '%s'",
                   ncxmod_get_yumadir());
-        goto out;
+        return res;
     }
 
     /* make sure the Yuma temp directory
@@ -389,7 +353,7 @@ status_t yangrpc_init(char* args)
     if (res != NO_ERR) {
         log_error("\nError: could not setup temp dir '%s/tmp'",
                   ncxmod_get_yumadir());
-        goto out;
+        return res;
     }
 
     /* at this point, modules that need to read config
@@ -399,13 +363,14 @@ status_t yangrpc_init(char* args)
     /* Load the yangcli base module */
     res = load_base_schema();
     if (res != NO_ERR) {
-        goto out;
+        return res;
     }
 
     /* Initialize the Netconf Manager Library */
+    mgr_disable_sighandlers();
     res = mgr_init();
     if (res != NO_ERR) {
-        goto out;
+        return res;
     }
 
     /* set up handler for incoming notifications */
@@ -417,15 +382,13 @@ status_t yangrpc_init(char* args)
      */
     obj = ncx_find_object(yangcli_mod, YANGCLI_CONNECT);
     if (obj==NULL) {
-        res = ERR_NCX_DEF_NOT_FOUND;
-        goto out;
+        return ERR_NCX_DEF_NOT_FOUND;
     }
 
     /* set the parmset object to the input node of the RPC */
     obj = obj_find_child(obj, NULL, YANG_K_INPUT);
     if (obj==NULL) {
-        res = ERR_NCX_DEF_NOT_FOUND;
-        goto out;
+        return ERR_NCX_DEF_NOT_FOUND;
     }
 
 #if 0
@@ -433,10 +396,7 @@ status_t yangrpc_init(char* args)
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
 #endif
 
-
-out:
-    yangcli_wordfree(&p);
-    return res;
+    return NO_ERR;
 }
 
 /********************************************************************
@@ -585,6 +545,13 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
                          const char * const extra_args,
                          yangrpc_cb_ptr_t* yangrpc_cb_ptr)
 {
+    char* server_arg;
+    char* port_arg;
+    char* user_arg;
+    char* password_arg;
+    char* public_key_arg;
+    char* private_key_arg;
+
     char* mandatory_argv[]={"exec-name-dummy", "--server=?", "--port=?", "--user=?", "--password=?", "--private-key=?", "--public-key=?"};
     int mandatory_argc=sizeof(mandatory_argv)/sizeof(char*);
     char** argv;
@@ -601,6 +568,7 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
     int                   ret;
     yangcli_wordexp_t     p;
     obj_template_t       *obj;
+    int                   i;
 
     ncx_clear_temp_modQ();
     ncx_clear_session_modQ();
@@ -629,7 +597,6 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
         return ERR_INTERNAL_PTR;
     }
     argv = mandatory_argv;
-    yangrpc_free_static_vars();
     argc=0;
     argv[argc++]="yangrpc-conn-instance";
 
@@ -704,6 +671,9 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
 
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);
+    for(i=0;i<argc;i++) {
+        free(argv[i]);
+    }
     if (res != NO_ERR) {
         log_error("\n process_cli_input failed (%s)", get_error_string(res));
         return res;
@@ -1228,6 +1198,4 @@ void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
-
-    yangrpc_free_static_vars();
 }

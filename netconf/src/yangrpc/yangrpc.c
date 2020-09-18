@@ -671,7 +671,9 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
 
     /* Get any command line and conf file parameters */
     res = process_cli_input(server_cb, argc, argv);
-    for(i=0;i<argc;i++) {
+
+    /* Skip argv[0] - it was not allocated with malloc */
+    for(i=1;i<argc;i++) {
         free(argv[i]);
     }
     if (res != NO_ERR) {

@@ -3360,6 +3360,7 @@ status_t
 {
     status_t    res;
     yang_pcb_t *tmppcb;
+    tk_chain_t *tkc = NULL;
 
     tmppcb = yang_new_pcb();
     if (tmppcb == NULL) {
@@ -3367,14 +3368,22 @@ status_t
         goto out;
     }
 
+    tkc = tk_new_chain();
+    if (tkc == NULL) {
+        res = ERR_INTERNAL_MEM;
+        goto out;
+    }
+
     tmppcb->savedevQ = savedevQ;
-    res = yang_obj_resolve_ext_deviations(tmppcb, NULL, mod);
+    res = yang_obj_resolve_ext_deviations(tmppcb, tkc, mod);
     if (res != NO_ERR)
         goto out;
 
 out:
     if (tmppcb)
         yang_free_pcb(tmppcb);
+    if (tkc)
+        tk_free_chain(tkc);
     return res;
 }
 

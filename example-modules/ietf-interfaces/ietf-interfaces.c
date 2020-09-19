@@ -236,10 +236,10 @@ static status_t
         return ERR_NCX_SKIPPED;
     }
     fgets_ret = fgets((char *)status_buf, NCX_MAX_LINELEN, f);
+    fclose(f);
     if(fgets_ret==NULL) {
         return ERR_NCX_SKIPPED;
     }
-    fclose(f);
     strtok(status_buf,"\n");
 
     VAL_UINT64(dst_val) = (uint64_t)1000000*atoi(status_buf);

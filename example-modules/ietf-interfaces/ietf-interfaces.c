@@ -207,6 +207,46 @@ static status_t
     return res;
 }
 
+static status_t
+    get_speed(ses_cb_t *scb,
+                       getcb_mode_t cbmode,
+                       val_value_t *vir_val,
+                       val_value_t  *dst_val)
+{
+    status_t res;
+    val_value_t *interface_val;
+    val_value_t *name_val;
+    FILE* f;
+    char filename[NCX_MAX_LINELEN];
+    char status_buf[NCX_MAX_LINELEN];
+    char* fgets_ret;
+
+    interface_val = vir_val->parent;
+    assert(interface_val);
+
+    name_val = val_find_child(interface_val,
+                              "ietf-interfaces",
+                              "name");
+    assert(name_val);
+
+    /* open the /proc/net/dev file for reading */
+    sprintf(filename, "/sys/class/net/%s/speed", VAL_STRING(name_val));
+    f = fopen(filename, "r");
+    if (f == NULL) {
+        return ERR_NCX_SKIPPED;
+    }
+    fgets_ret = fgets((char *)status_buf, NCX_MAX_LINELEN, f);
+    if(fgets_ret==NULL) {
+        return ERR_NCX_SKIPPED;
+    }
+    fclose(f);
+    strtok(status_buf,"\n");
+
+    VAL_UINT64(dst_val) = (uint64_t)1000000*atoi(status_buf);
+
+    return NO_ERR;
+}
+
 /*
 
 Inter-|   Receive                                                |  Transmit
@@ -345,7 +385,7 @@ static status_t
 
     val_add_child(oper_status_val, interface_val);
 
-    /* interface/oper-state */
+    /* interface/last-change */
     last_change_obj = obj_find_child(interface_obj,
                          "ietf-interfaces",
                          "last-change");
@@ -358,6 +398,20 @@ static status_t
                      last_change_obj);
 
     val_add_child(last_change_val, interface_val);
+
+    /* interface/speed */
+    obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "speed");
+
+    val = val_new_value();
+    assert(val);
+
+    val_init_virtual(val,
+                     get_speed,
+                     obj);
+
+    val_add_child(val, interface_val);
 
     /* interface/statistics */
     statistics_obj = obj_find_child(interface_obj,

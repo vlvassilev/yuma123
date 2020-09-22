@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+cd yang-1dot1
+./test-enum-iffeature-pass.sh
+./test-enum-iffeature-fail.sh
+

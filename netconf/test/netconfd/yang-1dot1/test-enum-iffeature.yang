@@ -1,0 +1,32 @@
+module test-enum-iffeature {
+	yang-version 1.1;
+	namespace "http://yuma123.org/ns/test-enum-iffeature";
+	prefix test;
+
+	organization "";
+	contact	"";
+	description
+		"Create an enum leaf to check if an if-feature
+		statement within an enum can be used to disable
+		that enum.";
+
+	revision 2020-09-22 {
+		reference "";
+	}
+
+	feature extra-enum {
+		description
+		 "The enum is available when this feature
+		 is enabled.";
+	}
+
+	container top {
+		leaf the-test {
+			type enumeration {
+				enum test-enum {
+					if-feature extra-enum;
+				}
+			}
+		}
+	}
+}

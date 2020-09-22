@@ -1,8 +1,8 @@
 TESTS=\
 test-get \
 test-notification-in-grouping \
-test-identity-iffeature-pass \
-test-identity-iffeature-fail \
+test-identity-iffeature \
+test-enum-iffeature \
 test-action-in-grouping \
 test-leaf-list-defaults \
 test-perf \

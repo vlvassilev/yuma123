@@ -37,6 +37,7 @@ date         init     comment
 #include "ncxconst.h"
 #include "ncx.h"
 #include "ncx_appinfo.h"
+#include "ncx_feature.h"
 #include "ncx_num.h"
 #include "tk.h"
 #include "typ.h"
@@ -778,12 +779,14 @@ typ_enum_t *
         return NULL;
     }
     memset(ev, 0, sizeof(typ_enum_t));
+
     ev->name = xml_strdup(name);
     if (!ev->name) {
         m__free(ev);
         return NULL;
     }
     dlq_createSQue(&ev->appinfoQ);
+    dlq_createSQue(&ev->iffeatureQ);
     return ev;
 
 }  /* typ_new_enum */
@@ -822,6 +825,7 @@ typ_enum_t *
     memset(ev, 0, sizeof(typ_enum_t));
     ev->name = name;
     dlq_createSQue(&ev->appinfoQ);
+    dlq_createSQue(&ev->iffeatureQ);
     return ev;
 
 }  /* typ_new_enum2 */
@@ -855,8 +859,8 @@ void
     if (en->ref) {
         m__free(en->ref);
     }
-
     ncx_clean_appinfoQ(&en->appinfoQ);
+    ncx_clean_iffeatureQ(&en->iffeatureQ);
 
     m__free(en);
 

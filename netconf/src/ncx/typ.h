@@ -180,6 +180,7 @@ typedef struct typ_enum_t_ {
     uint32        pos;
     uint32        flags;
     dlq_hdr_t     appinfoQ;
+    dlq_hdr_t     iffeatureQ;
 } typ_enum_t;
 
 

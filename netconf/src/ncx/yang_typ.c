@@ -65,6 +65,7 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -81,6 +82,7 @@ date         init     comment
 #include "ncxtypes.h"
 #include "ncx.h"
 #include "ncx_appinfo.h"
+#include "ncx_feature.h"
 #include "ncx_num.h"
 #include "obj.h"
 #include "status.h"
@@ -1797,6 +1799,12 @@ static status_t
                                      &valdone,
                                      &enu->appinfoQ);
             enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE) &&
+                   mod->langver == NCX_YANG_VERSION11) {
+            res = yang_consume_iffeature(tkc,
+                                         mod,
+                                         &enu->iffeatureQ,
+                                         &enu->appinfoQ);
         } else {
             res = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -3459,8 +3467,18 @@ static status_t
                          dlq_firstEntry(&typdef->def.simple.valQ);
                      enu != NO_ERR;
                      enu = (typ_enum_t *)dlq_nextEntry(enu)) {
+                    xmlChar *namestr;
 
                     res = ncx_resolve_appinfoQ(pcb, tkc, mod, &enu->appinfoQ);
+                    CHK_EXIT(res, retres);
+
+                    if(asprintf((char **)&namestr, "enum '%s'",
+                       enu->name) < 0) {
+                        res = ERR_INTERNAL_MEM;
+                    } else {
+                        res = ncx_resolve_iffeatureQ(pcb, tkc, mod, namestr,
+                                                     &enu->iffeatureQ);
+                    }
                     CHK_EXIT(res, retres);
                 }
                 res = NO_ERR;

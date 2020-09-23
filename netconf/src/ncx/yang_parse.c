@@ -966,14 +966,14 @@ static status_t
                                      &identity->descr,
                                      &desc, 
                                      &identity->appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_REFERENCE) &&
-                   mod->langver == NCX_YANG_VERSION11) {
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
             res = yang_consume_descr(tkc, 
                                      mod, 
                                      &identity->ref,
                                      &ref, 
                                      &identity->appinfoQ);
-        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE) &&
+                   mod->langver == NCX_YANG_VERSION11) {
             res = yang_consume_iffeature(tkc,
                                          mod,
                                          &identity->iffeatureQ,

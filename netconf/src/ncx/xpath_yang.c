@@ -1330,7 +1330,8 @@ static status_t
                     }
                     done = TRUE;
                     continue;
-                } else if (pcb->altobj == pcb->varobj) {
+                } else if (0 && (pcb->altobj == pcb->varobj)) {
+/* TODO should only get here if the path target is abosolute and not relevant to a child leaf e.g. /user-plane-configuration/tx-array-carriers[name=current()/../name]/type is OK */
                     res = ERR_NCX_DEF_LOOP;
                     if (pcb->logerrors) {
                         log_error("\nError: path target '%s' is set to "

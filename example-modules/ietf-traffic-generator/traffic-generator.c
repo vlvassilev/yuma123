@@ -22,8 +22,16 @@ static struct option const long_options[] =
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
     {"testframe", required_argument, NULL, 'T'},
+    {"realtime-epoch", required_argument, NULL, 'e'},
+    {"stdout-mode", required_argument, NULL, 'm'},
     {NULL, 0, NULL, 0}
 };
+
+void print_frame(uint64_t frame_index, uint32_t frame_size, uint8_t* frame_data, uint64_t tx_time_sec, uint32_t tx_time_nsec)
+{
+    printf("%9llu %015llu:%09u %4u\n", frame_index, tx_time_sec, tx_time_nsec, frame_size);
+}
+
 
 int main(int argc, char** argv)
 {
@@ -41,13 +49,15 @@ int main(int argc, char** argv)
     uint32_t bursts_per_stream=0;
     uint64_t total_frames=0;
     char* testframe;
+    char* realtime_epoch;
 
     int optc;
     struct timespec epoch,rel,abs,now,req,rem;
 
     traffic_generator_t* tg;
+    int stdout_mode = 0;
 
-    while ((optc = getopt_long (argc, argv, "i:s:d:f:b:n:p:t:T", long_options, NULL)) != -1) {
+    while ((optc = getopt_long (argc, argv, "i:s:d:f:b:n:p:t:T:e:m", long_options, NULL)) != -1) {
         switch (optc) {
             case 'i':
                 interface_name=optarg;
@@ -76,17 +86,39 @@ int main(int argc, char** argv)
             case 'T':
                 testframe = optarg;
                 break;
+            case 'e':
+                realtime_epoch = optarg;
+                break;
+            case 'm':
+                stdout_mode = 1;
+                break;
             default:
                 exit (-1);
         }
     }
 
-    ret = raw_socket_init(interface_name /*e.g eth0*/, &raw_socket);
-    assert(ret==0);
+    setenv("TZ", "UTC", 1);
+    tzset();
 
-    tg = traffic_generator_init(frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe);
-    clock_gettime( CLOCK_REALTIME/*CLOCK_MONOTONIC*/, &epoch);
-    traffic_generator_set_epoch(tg, epoch.tv_sec, epoch.tv_nsec);
+    if(!stdout_mode) {
+        ret = raw_socket_init(interface_name /*e.g eth0*/, &raw_socket);
+        assert(ret==0);
+    }
+
+    if(realtime_epoch==NULL) {
+        time_t sec;
+        struct tm t;
+
+        static char buf[] = "YYYY-MM-DDThh:mm:ss.nnnnnnnnnZ";
+
+        clock_gettime( CLOCK_REALTIME/*CLOCK_MONOTONIC*/, &epoch);
+        sec = epoch.tv_sec + 1; /* round up */
+        assert (localtime_r(&sec, &t) != NULL);
+        ret = strftime(buf, strlen(buf)+1, "%FT%T.000000000Z", &t);
+        assert(ret==strlen("YYYY-MM-DDThh:mm:ss.nnnnnnnnnZ"));
+        realtime_epoch = buf;
+    }
+    tg = traffic_generator_init(realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe);
 
     uint64_t frm=0;
     uint64_t print_sec=0;
@@ -98,20 +130,20 @@ int main(int argc, char** argv)
         if(ret!=0) {
             break;
         }
-        clock_gettime( CLOCK_REALTIME /*CLOCK_MONOTONIC*/, &now);
-        abs.tv_sec = tx_time_sec;        /* seconds */
-        abs.tv_nsec = tx_time_nsec;      /* nanoseconds */
-        timespec_sub(&abs, &now, &req);
+        if(stdout_mode) {
+            print_frame(frm, cur_frame_size, cur_frame_data, tx_time_sec, tx_time_nsec);
+        } else {
+            clock_gettime( CLOCK_REALTIME /*CLOCK_MONOTONIC*/, &now);
+            abs.tv_sec = tx_time_sec;        /* seconds */
+            abs.tv_nsec = tx_time_nsec;      /* nanoseconds */
+            timespec_sub(&abs, &now, &req);
 
-        nanosleep(&req,&rem);
+            nanosleep(&req,&rem);
 
-        ret = raw_socket_send(&raw_socket, cur_frame_data, cur_frame_size);
-        assert(ret==0);
-
-        if(now.tv_sec>print_sec) {
-            print_sec=now.tv_sec;
-            printf("%llu\n",frm);
+            ret = raw_socket_send(&raw_socket, cur_frame_data, cur_frame_size);
+            assert(ret==0);
         }
+
         frm++;
     }
 }

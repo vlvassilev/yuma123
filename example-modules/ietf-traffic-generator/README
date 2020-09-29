@@ -7,7 +7,7 @@ Dependency: installed netconfd run-time binaries and development shared librarie
  make
  sudo make install
 
- sudo /usr/sbin/netconfd --module=ietf-traffic-generator --module=ietf-traffic-analyzer --module=traffic-generator-testframe --no-startup --log-level=debug4 --superuser=root
+ sudo /usr/sbin/netconfd --module=ietf-interfaces --module=ietf-traffic-generator --module=ietf-traffic-analyzer --module=traffic-generator-testframe --no-startup --log-level=debug4 --superuser=root
 
 ===Functionality===
  yangcli root@localhost> create /interfaces/interface[name='eth0'] -- type=ethernetCsmacd
@@ -61,6 +61,15 @@ rpc-reply {
     }
   }
 }
+
+=== realtime-epoch ===
+Generation can be synchronized in realtime using the realtime-epoch leaf.
+The configured epoch should be in future. Restarting traffic generation on two interfaces with 1s phase difference.
+Assuming time is 2020-09-29T13:43:59.000000000Z or earlier when you commit.
+
+ yangcli root@localhost> merge /interfaces/interface[name='eth1']/traffic-generator -- realtime-epoch="2020-09-29T13:44:00.000000000Z"
+ yangcli root@localhost> merge /interfaces/interface[name='eth0']/traffic-generator -- realtime-epoch="2020-09-29T13:44:01.000000000Z"
+ yangcli root@localhost> commit
 
 ==Design notes==
 The libtraffic_generator library creates performance efficient traffic generator

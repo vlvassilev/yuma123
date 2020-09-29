@@ -33,10 +33,83 @@ static void hexstr2bin(char* hexstr, uint8_t* data)
     }
 }
 
-traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe)
+int yang_date_and_time_to_1588(char* date_and_time, uint64_t* sec, uint32_t* nsec)
+{
+    /* YYYY-MM-DDThh:mm:ss.n*Z */
+    struct tm tm;
+    char nsec_str[]="000000000";
+
+    unsigned int date_and_time_len;
+    unsigned int nsec_digits;
+    unsigned int i;
+    int ret;
+    char* ptr;
+
+    *sec=0;
+    *nsec=0;
+
+    date_and_time_len = strlen(date_and_time);
+
+
+    if(date_and_time_len < strlen("YYYY-MM-DDThh:mm:ssZ")) {
+        return -1;
+    }
+
+    if(date_and_time[date_and_time_len-1] != 'Z') {
+        return -1;
+    }
+
+#if 0
+//#define _XOPEN_SOURCE
+    ptr = strptime(date_and_time, "%Y-%m-%dT%H:%M:%S", &tm);
+    if(ptr!=date_and_time+strlen("YYYY-MM-DDThh:mm:ss")) {
+        return -1;
+    }
+#else
+    memset(&tm, 0, sizeof(struct tm));
+    ret = sscanf(date_and_time, "%04d-%02d-%02dT%02d:%02d:%02d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
+    if(ret!=6) {
+        return -1;
+    }
+    tm.tm_year = tm.tm_year - 1900;
+    tm.tm_mon = tm.tm_mon - 1;
+
+    tm.tm_isdst = 0;
+    ptr = date_and_time + strlen("YYYY-MM-DDThh:mm:ss");
+#endif
+    *sec = mktime(&tm);
+
+    if(ptr==(date_and_time+date_and_time_len-1)) {
+        return 0;
+    }
+
+    if(*ptr!='.') {
+        return -1;
+    }
+
+    ptr++;
+
+    nsec_digits = date_and_time_len-strlen("YYYY-MM-DDThh:mm:ss.")-strlen("Z");
+
+    for(i=0;i<nsec_digits;i++) {
+        if(ptr[i]<'0' || ptr[i]>'9') {
+            return -1;
+        }
+        nsec_str[i] = ptr[i];
+    }
+
+    *nsec = atoi(nsec_str);
+
+    return 0;
+}
+
+
+traffic_generator_t* traffic_generator_init(char* realtime_epoch, uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe)
 {
     unsigned int i;
     traffic_generator_t* tg;
+    int ret;
+
     tg = (traffic_generator_t*)malloc(sizeof(traffic_generator_t));
     memset(tg,0,sizeof(traffic_generator_t));
 
@@ -72,6 +145,9 @@ traffic_generator_t* traffic_generator_init(uint32_t frame_size, char* frame_dat
             }
         }
     }
+
+    ret = yang_date_and_time_to_1588(realtime_epoch, &tg->sec, &tg->nsec);
+    assert(ret==0);
 
     return tg;
 }

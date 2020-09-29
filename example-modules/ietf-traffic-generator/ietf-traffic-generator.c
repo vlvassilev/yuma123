@@ -108,6 +108,11 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
             sprintf(cli_args_str+strlen(cli_args_str)," --testframe=%s", val->v.idref.name);
         }
     }
+
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator-testframe","realtime-epoch");
+    if(val!=NULL) {
+        sprintf(cli_args_str+strlen(cli_args_str)," --realtime-epoch=%llu",VAL_STRING(val));
+    }
 }
 
 static void traffic_generator_delete(val_value_t* traffic_generator_val)

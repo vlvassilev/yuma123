@@ -72,7 +72,21 @@ Assuming time is 2020-09-29T13:43:59.000000000Z or earlier when you commit.
  yangcli root@localhost> commit
 
 ==Design notes==
-The libtraffic_generator library creates performance efficient traffic generator
-instance context from the ietf-traffic-generator data upon initialization. Then
+The libtraffic_generator library creates traffic generator instance context
+from the ietf-traffic-generator data upon initialization. Then
 each call fills frame buffer and returns it timestamp and length until after
 the last frame is generated. Then zero length is returned.
+
+The traffic-generator tool is started for each interface with configured
+/interfaces/interface/traffic-generator container.
+
+There is a --stdout-mode option that can be used for a dry run.
+
+Usage:
+
+ $ ./traffic-generator --stdout-mode --interface=eth0 --frame-size=64 --interframe-gap=20 --interburst-gap=124999852 \
+   --frames-per-burst=2 --total-frames=4 --realtime-epoch="1970-01-01T00:00:00.000000000Z" --interface-speed=1000000000
+        0 000000000000000:000000000   64
+        1 000000000000000:000000672   64
+        2 000000000000001:000000000   64
+        3 000000000000001:000000672   64

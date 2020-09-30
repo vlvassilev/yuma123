@@ -2,7 +2,7 @@
 
 void timespec_add(struct timespec* a, struct timespec* b, struct timespec* sum)
 {
-    if ((a->tv_nsec + b->tv_nsec) > 1000000000) {
+    if ((a->tv_nsec + b->tv_nsec) >= 1000000000) {
         sum->tv_sec = a->tv_sec + b->tv_sec + 1;
         sum->tv_nsec = a->tv_nsec + b->tv_nsec - 1000000000;
     } else {

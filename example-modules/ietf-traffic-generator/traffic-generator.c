@@ -23,6 +23,7 @@ static struct option const long_options[] =
     {"total-frames", required_argument, NULL, 't'},
     {"testframe", required_argument, NULL, 'T'},
     {"realtime-epoch", required_argument, NULL, 'e'},
+    {"interface-speed", required_argument, NULL, 'S'},
     {"stdout-mode", required_argument, NULL, 'm'},
     {NULL, 0, NULL, 0}
 };
@@ -49,7 +50,8 @@ int main(int argc, char** argv)
     uint32_t bursts_per_stream=0;
     uint64_t total_frames=0;
     char* testframe;
-    char* realtime_epoch;
+    char* realtime_epoch=NULL;
+    uint64_t interface_speed=1000000000; /* 1G */
 
     int optc;
     struct timespec epoch,rel,abs,now,req,rem;
@@ -57,7 +59,7 @@ int main(int argc, char** argv)
     traffic_generator_t* tg;
     int stdout_mode = 0;
 
-    while ((optc = getopt_long (argc, argv, "i:s:d:f:b:n:p:t:T:e:m", long_options, NULL)) != -1) {
+    while ((optc = getopt_long (argc, argv, "i:s:d:f:b:n:p:t:T:e:S:m", long_options, NULL)) != -1) {
         switch (optc) {
             case 'i':
                 interface_name=optarg;
@@ -89,6 +91,9 @@ int main(int argc, char** argv)
             case 'e':
                 realtime_epoch = optarg;
                 break;
+            case 'S':
+                interface_speed = atoll(optarg);
+                break;
             case 'm':
                 stdout_mode = 1;
                 break;
@@ -118,7 +123,7 @@ int main(int argc, char** argv)
         assert(ret==strlen("YYYY-MM-DDThh:mm:ss.nnnnnnnnnZ"));
         realtime_epoch = buf;
     }
-    tg = traffic_generator_init(realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe);
+    tg = traffic_generator_init(interface_speed, realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe);
 
     uint64_t frm=0;
     uint64_t print_sec=0;

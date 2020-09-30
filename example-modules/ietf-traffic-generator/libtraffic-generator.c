@@ -104,7 +104,7 @@ int yang_date_and_time_to_1588(char* date_and_time, uint64_t* sec, uint32_t* nse
 }
 
 
-traffic_generator_t* traffic_generator_init(char* realtime_epoch, uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe)
+traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* realtime_epoch, uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe)
 {
     unsigned int i;
     traffic_generator_t* tg;
@@ -117,7 +117,8 @@ traffic_generator_t* traffic_generator_init(char* realtime_epoch, uint32_t frame
     tg->streams = malloc(sizeof(stream_t)*tg->streams_num);
     memset(tg->streams,0,sizeof(stream_t)*tg->streams_num);
 
-    tg->ns_per_octet = 8.0; /* hardcode to 1Gb */
+    tg->nsec_per_octet = ((double)8*1000000000) / interface_speed; /* e.g. 8.0 for 1Gb */
+    tg->octets_per_sec = interface_speed / 8;
     tg->total_frames = total_frames; /* hardcode to 10 sec at 50% rate with minimum packets 10*(1000000000/((20+64)*8))/2=7440476 */
     tg->total_frame_index = 0;
 
@@ -203,8 +204,10 @@ static void frame_udp_checksum_update(traffic_generator_t* tg)
 int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, uint8_t** frame_data, uint64_t* tx_time_sec, uint32_t* tx_time_nsec)
 {
     struct timespec start, delta, next;
+    double delta_nsec;
+    uint64_t delta_time_octets;
 
-    if((tg->total_frames>0) && ((tg->total_frame_index+1)==tg->total_frames)) {
+    if((tg->total_frames>0) && (tg->total_frame_index==tg->total_frames)) {
         return 1;
     } else {
         tg->total_frame_index++;
@@ -221,20 +224,24 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
     /* update time and indexes for next transmission */
     if((tg->frame_index+1) < tg->streams[tg->stream_index].frames_per_burst) {
         tg->frame_index++;
-        delta.tv_sec=0;
-        delta.tv_nsec=(*frame_size+tg->streams[tg->stream_index].interframe_gap)*tg->ns_per_octet;
+        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].interframe_gap);
     } else if((tg->burst_index+1) < tg->streams[tg->stream_index].bursts_per_stream) {
         tg->frame_index=0;
         tg->burst_index++;
-        delta.tv_sec=0;
-        delta.tv_nsec=(*frame_size+tg->streams[tg->stream_index].interburst_gap)*tg->ns_per_octet;
+        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].interburst_gap);
     } else {
-        delta.tv_sec=0;
-        delta.tv_nsec=(*frame_size+tg->streams[tg->stream_index].interstream_gap)*tg->ns_per_octet;
+        delta_time_octets=(*frame_size+tg->streams[tg->stream_index].interstream_gap);
         tg->frame_index=0;
         tg->burst_index=0;
         tg->stream_index=(tg->stream_index+1)%tg->streams_num;
     }
+
+    delta.tv_sec=(delta_time_octets/tg->octets_per_sec);
+    delta_nsec = (delta_time_octets-delta.tv_sec*tg->octets_per_sec)*(double)tg->nsec_per_octet + tg->nsec_fraction;
+    delta.tv_sec += (long)delta_nsec/1000000000;
+    delta.tv_nsec=(long)delta_nsec%1000000000;
+    tg->nsec_fraction = delta_nsec - (long)delta_nsec;
+
     timespec_add(&start, &delta, &next);
 
     if(tg->streams[tg->stream_index].testframe) {

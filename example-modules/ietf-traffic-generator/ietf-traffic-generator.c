@@ -233,6 +233,7 @@ static int update_config_wrapper()
         val_free_value(prev_root_val);
     }
     prev_root_val = val_clone_config_data(runningcfg->root, &res);
+
     return 0;
 }
 
@@ -281,6 +282,8 @@ status_t
     }
 
     agt_disable_feature ("ietf-traffic-generator", "multi-stream");
+    agt_disable_feature("ietf-traffic-generator", "ethernet-vlan");
+    agt_disable_feature("ietf-traffic-generator", "ingress-direction");
 
     res=agt_commit_complete_register("ietf-traffic-generator" /*SIL id string*/,
                                      y_commit_complete);

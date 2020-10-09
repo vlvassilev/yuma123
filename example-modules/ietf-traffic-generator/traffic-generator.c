@@ -30,7 +30,12 @@ static struct option const long_options[] =
 
 void print_frame(uint64_t frame_index, uint32_t frame_size, uint8_t* frame_data, uint64_t tx_time_sec, uint32_t tx_time_nsec)
 {
-    printf("%9llu %015llu:%09u %4u\n", frame_index, tx_time_sec, tx_time_nsec, frame_size);
+    int i;
+    printf("%9llu %015llu:%09u %4u ", frame_index, tx_time_sec, tx_time_nsec, frame_size);
+    for(i=0;i<frame_size;i++) {
+        printf("%02X",frame_data[i]);
+    }
+    printf("\n");
 }
 
 
@@ -49,9 +54,15 @@ int main(int argc, char** argv)
     uint32_t frames_per_burst=0;
     uint32_t bursts_per_stream=0;
     uint64_t total_frames=0;
-    char* testframe;
+    char* testframe=NULL;
     char* realtime_epoch=NULL;
     uint64_t interface_speed=1000000000; /* 1G */
+    char* src_mac_address=NULL;
+    char* dst_mac_address=NULL;
+    char* src_ipv4_address=NULL;
+    char* dst_ipv4_address=NULL;
+    char* src_udp_port=NULL;
+    char* dst_udp_port=NULL;
 
     int optc;
     struct timespec epoch,rel,abs,now,req,rem;
@@ -123,6 +134,7 @@ int main(int argc, char** argv)
         assert(ret==strlen("YYYY-MM-DDThh:mm:ss.nnnnnnnnnZ"));
         realtime_epoch = buf;
     }
+
     tg = traffic_generator_init(interface_speed, realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe);
 
     uint64_t frm=0;

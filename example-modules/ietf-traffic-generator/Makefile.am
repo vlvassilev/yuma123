@@ -21,6 +21,28 @@ libtraffic-generator.c \
 raw-socket.c \
 timespec-math.c
 
+traffic_generator_CPPFLAGS =
+traffic_generator_LDFLAGS = -lz
+
+bin_PROGRAMS += traffic-generator-make-testframe
+
+traffic_generator_make_testframe_SOURCES = \
+traffic-generator-make-testframe.c \
+libtraffic-generator.c \
+timespec-math.c
+
+
+traffic_generator_make_testframe_CPPFLAGS =
+traffic_generator_make_testframe_LDFLAGS = -lz
+
+#bin_PROGRAMS += traffic-generator-dpdk
+#
+#traffic_generator_dpdk_SOURCES = \
+#traffic-generator-dpdk.c
+
+#traffic_generator_dpdk_CPPFLAGS = -I${includedir}/dpdk -I${includedir}/x86_64-linux-gnu/dpdk
+#traffic_generator_dpdk_LDFLAGS =
+
 netconfmodule_LTLIBRARIES += libietf-traffic-analyzer.la
 
 libietf_traffic_analyzer_la_SOURCES = \

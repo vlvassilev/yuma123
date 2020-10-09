@@ -227,20 +227,24 @@ static void update_ipv4_len(uint8_t* frame_data, uint32_t frame_size)
 static void update_ipv4_header_checksum(uint8_t* frame_data, uint32_t frame_size)
 {
     unsigned int i;
-    uint16_t* w;
+    uint32_t w;
     uint8_t* ptr;
-    uint16_t sum;
+    uint32_t sum;
 
     ptr = frame_data+IPV4_HEADER_CHECKSUM_OFFSET;
     ptr[0] = 0;
     ptr[1] = 0;
-    w = (uint16_t*)(frame_data+IPV4_PDU_OFFSET);
+
     sum = 0;
     for(i=0;i<(IPV4_HEADER_LEN/2);i++) {
-        sum += w[i];
+        w = (((uint32_t)frame_data[IPV4_PDU_OFFSET+i*2])<<8) + frame_data[IPV4_PDU_OFFSET+i*2+1];
+        sum += w;
+        if(sum>0xFFFF) {
+            sum = sum - 0xFFFF;
+        }
     }
-    ptr[0] = (~sum) >> 8;
-    ptr[1] = (~sum) && 0xFF;
+    ptr[0] = ((~sum) >> 8) & 0xFF;
+    ptr[1] = (~sum) & 0xFF;
 }
 static void update_ipv4_udp_len(uint8_t* frame_data, uint32_t frame_size)
 {

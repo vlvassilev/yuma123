@@ -97,5 +97,5 @@ While you could use any ethernet frame specified with the --frame-data parameter
 
 Usage:
 
-  $ ./traffic-generator-make-testframe --frame-size=64 --dst-mac-address="12:34:56:78:9A:BC" --src-mac-address="DE:F0:12:34:56:78" --src-ipv4-address="192.0.2.1" --src-ipv4-udp-port=49184 --dst-ipv4-address="192.0.2.2" --dst-ipv4-udp-port=7
+  $ ./traffic-generator-make-testframe --frame-size=64 --dst-mac-address="12:34:56:78:9A:BC" --src-mac-address="DE:F0:12:34:56:78" --src-ipv4-address="192.0.2.1" --ipv4-ttl=10 --src-ipv4-udp-port=49184 --dst-ipv4-address="192.0.2.2" --dst-ipv4-udp-port=7
  123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A0000000102030405060708090A0B0C0D0E0F10119CD50E0F

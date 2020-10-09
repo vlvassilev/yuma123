@@ -132,12 +132,14 @@ int yang_date_and_time_to_1588(char* date_and_time, uint64_t* sec, uint32_t* nse
 #define IPV4_PDU_OFFSET 14
 #define IPV4_LEN_OFFSET 16
 #define IPV4_HEADER_LEN 20
+#define IPV4_TTL_OFFSET 22
 #define IPV4_HEADER_CHECKSUM_OFFSET 24
 #define SRC_IPV4_ADDRESS_OFFSET 26
 #define DST_IPV4_ADDRESS_OFFSET 30
 #define SRC_IPV4_UDP_PORT_OFFSET 34
 #define DST_IPV4_UDP_PORT_OFFSET 36
 #define IPV4_UDP_LEN_OFFSET 38
+#define IPV4_UDP_CHECKSUM_OFFSET 40
 #define IPV4_UDP_PAYLOAD_OFFSET 42
 
 static void update_dst_mac_address(uint8_t* frame_data, uint32_t frame_size, char* mac_address)
@@ -145,8 +147,10 @@ static void update_dst_mac_address(uint8_t* frame_data, uint32_t frame_size, cha
     unsigned int mac[6];
     uint8_t* ptr;
     int i;
+    int ret;
 
-    sscanf(mac_address, "%x:%x:%x:%x:%x:%x", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+    ret = sscanf(mac_address, "%x:%x:%x:%x:%x:%x", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+    assert(ret==6);
     ptr = frame_data+DST_MAC_OFFSET;
     for(i=0;i<6;i++) {
         ptr[i] = mac[i];
@@ -158,8 +162,10 @@ static void update_src_mac_address(uint8_t* frame_data, uint32_t frame_size, cha
     unsigned int mac[6];
     uint8_t* ptr;
     int i;
+    int ret;
 
-    sscanf(mac_address, "%x:%x:%x:%x:%x:%x", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+    ret = sscanf(mac_address, "%x:%x:%x:%x:%x:%x", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
+    assert(ret==6);
     ptr = frame_data+SRC_MAC_OFFSET;
     for(i=0;i<6;i++) {
         ptr[i] = mac[i];
@@ -214,6 +220,13 @@ static void update_src_ipv4_udp_port(uint8_t* frame_data, uint32_t frame_size, c
     ptr[1] = port & 0xFF;
 }
 
+static void update_ipv4_ttl(uint8_t* frame_data, uint32_t frame_size, char* ipv4_ttl)
+{
+    uint8_t* ptr;
+    ptr = frame_data+IPV4_TTL_OFFSET;
+    ptr[0] = atoi(ipv4_ttl);
+}
+
 static void update_ipv4_len(uint8_t* frame_data, uint32_t frame_size)
 {
     uint8_t* ptr;
@@ -256,6 +269,15 @@ static void update_ipv4_udp_len(uint8_t* frame_data, uint32_t frame_size)
     ptr[1] = len & 0xFF;
 }
 
+static void update_ipv4_udp_checksum(uint8_t* frame_data, uint32_t frame_size)
+{
+    /* Checksum of 0 is what rfc2544 specifies */
+    uint8_t* ptr;
+    ptr = frame_data+IPV4_UDP_CHECKSUM_OFFSET;
+    ptr[0] = 0;
+    ptr[1] = 0;
+}
+
 static void update_crc(uint8_t* frame_data, uint32_t frame_size)
 {
     uint32_t crc_final;
@@ -281,7 +303,7 @@ static char* rfc2544_testframe =
 /* UDP DATA */
 "000102030405060708090A0B0C0D0E0F10110DBD8EC6";
 
-char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hexstr, char* src_mac_address, char* dst_mac_address, char* src_ipv4_address, char* dst_ipv4_address, char* src_ipv4_udp_port, char* dst_ipv4_udp_port)
+char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hexstr, char* src_mac_address, char* dst_mac_address, char* src_ipv4_address, char* dst_ipv4_address, char* ipv4_ttl, char* src_ipv4_udp_port, char* dst_ipv4_udp_port)
 {
     unsigned int i;
     uint8_t* frame_data;
@@ -312,7 +334,7 @@ char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hex
     }
 
     update_ipv4_udp_len(frame_data, frame_size);
-    //update_ipv4_udp_checksum(frame_data, frame_size);
+    update_ipv4_udp_checksum(frame_data, frame_size);
 
     if(src_ipv4_address) {
         update_src_ipv4_address(frame_data, frame_size, src_ipv4_address);
@@ -322,6 +344,9 @@ char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hex
         update_dst_ipv4_address(frame_data, frame_size, dst_ipv4_address);
     }
 
+    if(ipv4_ttl) {
+        update_ipv4_ttl(frame_data, frame_size, ipv4_ttl);
+    }
     update_ipv4_len(frame_data, frame_size);
     update_ipv4_header_checksum(frame_data, frame_size);
 

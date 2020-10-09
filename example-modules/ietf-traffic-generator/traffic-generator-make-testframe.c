@@ -19,6 +19,7 @@ static struct option const long_options[] =
     {"dst-ipv4-address", required_argument, NULL, 'V'},
     {"src-ipv4-udp-port", required_argument, NULL, 'p'},
     {"dst-ipv4-udp-port", required_argument, NULL, 'P'},
+    {"ipv4-ttl", required_argument, NULL, 't'},
 
     {NULL, 0, NULL, 0}
 }; 
@@ -34,6 +35,7 @@ int main(int argc, char** argv)
     char* dst_ipv4_address=NULL;
     char* src_ipv4_udp_port=NULL;
     char* dst_ipv4_udp_port=NULL;
+    char* ipv4_ttl=NULL;
 
     int optc;
     struct timespec epoch,rel,abs,now,req,rem;
@@ -41,7 +43,7 @@ int main(int argc, char** argv)
     traffic_generator_t* tg;
     int stdout_mode = 0;
 
-    while ((optc = getopt_long (argc, argv, "s:d:a:A:v:V:p:P:", long_options, NULL)) != -1) {
+    while ((optc = getopt_long (argc, argv, "s:d:a:A:v:V:p:P:t:", long_options, NULL)) != -1) {
         switch (optc) {
             case 's':
                 frame_size = atoi(optarg);
@@ -70,12 +72,15 @@ int main(int argc, char** argv)
             case 'P':
                 dst_ipv4_udp_port = optarg;
                 break;
+            case 't':
+                ipv4_ttl = optarg;
+                break;
             default:
                 exit (-1);
         }
     }
 
-    frame_data_hexstr = traffic_generator_make_testframe(frame_size, frame_data_hexstr, src_mac_address, dst_mac_address, src_ipv4_address, dst_ipv4_address, src_ipv4_udp_port, dst_ipv4_udp_port);
+    frame_data_hexstr = traffic_generator_make_testframe(frame_size, frame_data_hexstr, src_mac_address, dst_mac_address, src_ipv4_address, dst_ipv4_address, ipv4_ttl, src_ipv4_udp_port, dst_ipv4_udp_port);
 
     printf("%s\n", frame_data_hexstr);
 

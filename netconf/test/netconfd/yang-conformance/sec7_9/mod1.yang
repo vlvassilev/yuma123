@@ -1,0 +1,53 @@
+module mod1 {
+  namespace "http://yuma123.org/ns/sec7_9/mod1";
+  prefix m1;
+
+  container m1 {
+    choice ch1 {
+      case ca1 {
+        leaf foo1 {
+          type uint32;
+        }
+        leaf bar1 {
+          type uint32;
+        }
+        choice ch01 {
+          case ca011 {
+            leaf foo11 {
+              type uint32;
+            }
+            leaf bar11 {
+              type uint32;
+            }
+          }
+          case ca012 {
+            leaf foo12 {
+              type uint32;
+            }
+            leaf bar12 {
+              type uint32;
+            }
+          }
+        }
+        choice ch02 {
+          case ca021 {
+            leaf foo021 {
+              type uint32;
+            }
+            leaf bar021 {
+              type uint32;
+            }
+          }
+        }
+      }
+      case ca2 {
+        leaf foo2 {
+          type uint32;
+        }
+        leaf bar2 {
+          type uint32;
+        }
+      }
+    }
+  }
+}

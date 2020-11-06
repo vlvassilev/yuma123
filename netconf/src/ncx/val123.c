@@ -1390,3 +1390,31 @@ void
     dlq_enque(getcb_node, &val->getcbQ);
 
 }  /* val_add_virtual_cb */
+
+
+/********************************************************************
+* FUNCTION obj123_get_top_uses
+*
+*  Returns the case obj of value for a specified parent choice object.
+*
+* INPUTS:
+*   choicobj  == obj template for the choice to be resolved
+*   testval   == value
+*
+* RETURNS:
+*   pointer to obj_template_t of used case or NULL
+*********************************************************************/
+obj_template_t*
+    val123_get_case_for_choice(obj_template_t* choicobj, val_value_t* testval)
+{
+    obj_template_t* obj;
+    obj = testval->obj;
+    while(obj) {
+        if(obj->parent == choicobj) {
+            return obj;
+        }
+        obj = obj->parent;
+    }
+    return NULL;
+}
+

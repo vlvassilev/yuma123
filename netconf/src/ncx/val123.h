@@ -75,3 +75,6 @@ void
     tstamp123_datetime_nsec (xmlChar *buff);
 void
     ncx123_set_vtimeout_value (uint32 sec);
+obj_template_t*
+    val123_get_case_for_choice(obj_template_t* choicobj, val_value_t* testval);
+

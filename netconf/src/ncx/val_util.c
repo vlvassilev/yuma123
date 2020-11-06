@@ -51,6 +51,7 @@ date         init     comment
 #include "status.h"
 #include "typ.h"
 #include "val.h"
+#include "val123.h"
 #include "val_util.h"
 #include "xml_util.h"
 #include "xpath.h"
@@ -153,8 +154,7 @@ static status_t
     /* check if any objects from other cases are present */
     testval = val_get_choice_next_set(choicobj, chval);
     while (testval) {
-        if ((testval->casobj != chval->casobj) &&
-            (testval->casobj->parent == chval->casobj->parent)) {
+        if (val123_get_case_for_choice(choicobj, testval) != val123_get_case_for_choice(choicobj, chval)) {
             /* error: extra case object in this choice */
             retres = ERR_NCX_EXTRA_CHOICE;
             log_error("\nError: Extra object '%s' "

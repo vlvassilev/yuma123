@@ -60,6 +60,7 @@ date         init     comment
 #include "typ.h"
 #include "tstamp.h"
 #include "val.h"
+#include "val123.h"
 #include "val_util.h"
 #include "xmlns.h"
 #include "xpath.h"
@@ -4106,7 +4107,6 @@ static status_t
     
 }  /* instance_check */
 
-
 /********************************************************************
 * FUNCTION choice_check_agt
 * 
@@ -4192,7 +4192,7 @@ static status_t
     /* check if any objects from other cases are present */
     val_value_t *testval = val_get_choice_next_set(choicobj, chval);
     while (testval) {
-        if (testval->casobj != chval->casobj) {
+        if (val123_get_case_for_choice(choicobj, testval) != val123_get_case_for_choice(choicobj, chval)) {
             /* error: extra case object in this choice */
             retres = res = ERR_NCX_EXTRA_CHOICE;
             agt_record_error(scb, msg, layer, res, NULL, 

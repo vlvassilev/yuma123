@@ -59,9 +59,15 @@ Tell sshd to listen on port 830. Add the following 2 lines to /etc/ssh/sshd_conf
  Port 830
  Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
 
-Then:
- sudo /etc/init.d/ssh restart
+For Cent OS 8 with SELINUX in enforcing mode
+ sudo dnf install policycoreutils-python-utils
+ sudo semanage port -a -t ssh_port_t -p tcp 830
 
+Then on Debian:
+ sudo /etc/init.d/ssh restart
+or on Cent OS 8
+ sudo service sshd restart
+ 
 You can verify everything is OK:
 
  yangcli --user="$USER" --server=localhost

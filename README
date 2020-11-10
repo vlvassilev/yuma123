@@ -36,6 +36,17 @@ Branching from the last BSD licensed branch of the Yuma project the code has evo
  make
  sudo make install
 
+#Build and runtime dependencies resolution for Cent OS 8.
+sudo dnf group install "Development Tools"
+sudo dnf -y install epel-release
+sudo dnf install ncurses-devel readline-devel libxml2-devel zlib-devel openssl-devel libssh2-devel
+git clone git://git.code.sf.net/p/yuma123/git yuma123-git
+cd yuma123-git
+autoreconf -i -f
+./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0' --prefix=/usr
+make
+sudo make install
+ 
 ==Configure and start==
 
  echo '<config/>' > /tmp/startup-cfg.xml

@@ -3718,6 +3718,8 @@ status_t
     status_t res;
     FILE* fp;
     cookie_io_functions_t io_functions;
+    val_value_t* copy_val;
+
     io_functions.read=NULL;
     io_functions.write=(cookie_write_function_t *)writer_fn;
     io_functions.seek=NULL;
@@ -3730,8 +3732,11 @@ status_t
     ser.cur=NULL;
     ser.buf_len=0;
 
+    copy_val = val_clone(val);
+    val123_devirtualize(copy_val);
+
     /* dry-run figure the required buffer length */
-    res = val_dump_value_max_w_file(val,
+    res = val_dump_value_max_w_file(copy_val,
                         0/*startident*/,
                         NCX_DEF_INDENT/*indent_amount*/,
                         mode,
@@ -3749,7 +3754,7 @@ status_t
     ser.buf=(char*)malloc(ser.buf_len+1);
     ser.cur=ser.buf;
     ser.buf[ser.buf_len]=0;
-    res = val_dump_value_max_w_file(val,
+    res = val_dump_value_max_w_file(copy_val,
                         0/*startident*/,
                         NCX_DEF_INDENT/*indent_amount*/,
                         mode,
@@ -3757,6 +3762,7 @@ status_t
                         FALSE/*configonly*/,
                         fp);
     fclose(fp);
+    val_free_value(copy_val);
 
     *str = ser.buf;
     return NO_ERR;

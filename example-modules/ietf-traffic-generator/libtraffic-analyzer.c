@@ -51,7 +51,7 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
         /* no filter specification
          * default testframe is any IPV4 UDP dstport 7 frame
          */
-        if(!(frame_data[DST_IPV4_UDP_PORT_OFFSET]==0 && frame_data[DST_IPV4_UDP_PORT_OFFSET]==7)) {
+        if(!(frame_data[DST_IPV4_UDP_PORT_OFFSET]==0 && frame_data[DST_IPV4_UDP_PORT_OFFSET+1]==7)) {
             return;
         }
     } else {

@@ -54,8 +54,9 @@ sudo make install
 
 The server is now started with the example helloworld module.
 
-Tell sshd to listen on port 830. Add the following 2 lines to /etc/ssh/sshd_config:
+Tell sshd to listen on port 830. Add the following 3 lines to /etc/ssh/sshd_config:
 
+ Port 80
  Port 830
  Subsystem netconf "/usr/sbin/netconf-subsystem --ncxserver-sockname=830@/tmp/ncxserver.sock"
 

@@ -29,12 +29,13 @@ void* monitor(void* arg)
         if(ret==EOF) {
             exit(0);
         }
-        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><testframe-pkts>%llu</testframe-pkts><latency><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats></state>\n",
+        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><testframe-pkts>%llu</testframe-pkts><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats></state>\n",
                 ta->totalframes,
                 ta->testframes,
-                (uint64_t)ta->testframe.min_latency.tv_nsec,
-                (uint64_t)ta->testframe.max_latency.tv_nsec,
-                (uint64_t)ta->testframe.last_latency.tv_nsec);
+                (uint64_t)ta->testframe.latency.samples,
+                (uint64_t)ta->testframe.latency.min.tv_nsec,
+                (uint64_t)ta->testframe.latency.max.tv_nsec,
+                (uint64_t)ta->testframe.latency.last.tv_nsec);
         fflush(stdout);
         assert(ret>0);
         //sleep(1);
@@ -95,7 +96,7 @@ int main(int argc, char** argv)
         traffic_analyzer_put_frame(ta, raw_frame_data, raw_frame_len, now.tv_sec, now.tv_nsec);
 
         if(verbose) {
-            fprintf(stderr,"#%llu, size %09u latency %09u nsec\n", ta->totalframes, raw_frame_len, ta->testframe.last_latency.tv_nsec);
+            fprintf(stderr,"#%llu, size %09u latency %09u nsec\n", ta->totalframes, raw_frame_len, ta->testframe.latency.last.tv_nsec);
         }
 
     }

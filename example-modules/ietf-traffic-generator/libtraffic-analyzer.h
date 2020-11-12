@@ -6,11 +6,18 @@ typedef struct traffic_analyzer_t_ {
     struct timespec last_rx_time;
     /* testframe stats */
     struct testframe_ {
+        struct filter_ {
+            int enabled;
+        } filter;
         struct timespec last_rx_time;
-        struct timespec last_tx_time;
-        struct timespec last_latency;
-        struct timespec min_latency;
-        struct timespec max_latency;
+        struct latency_ {
+            uint64_t samples;
+            struct timespec last_tx_time;
+            struct timespec last_rx_time;
+            struct timespec last;
+            struct timespec min;
+            struct timespec max;
+        } latency;
     } testframe;
 } traffic_analyzer_t;
 

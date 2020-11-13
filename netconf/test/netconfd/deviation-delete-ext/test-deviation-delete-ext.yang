@@ -1,0 +1,25 @@
+module test-deviation-delete-ext {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-deviation-delete-ext";
+	prefix devext;
+
+	import ietf-interfaces {
+		prefix if;
+	}
+
+	organization "";
+	contact	"";
+	description
+		"Create an external deviation that deletes a default
+		value.	Check later it see if netconfd crashed.";
+
+	revision 2020-11-13 {
+		reference "";
+	}
+
+	deviation /if:interfaces/if:interface/if:enabled {
+		deviate delete {
+			default "true";
+		}
+	}
+}

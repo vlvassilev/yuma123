@@ -14,6 +14,7 @@ test-yang-validation \
 test-copy-config \
 test-deviation-add-must \
 test-deviation-not-supported \
+test-deviation-delete-ext \
 test-edit-config \
 test-lock \
 test-multiple-edit-callbacks \

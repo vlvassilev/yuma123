@@ -1,0 +1,3 @@
+This regression test ensures that netconfd does not abort when an
+external deviation deletes a default value.  See commit 7ca55483c98f
+("fix abort when processing external deviations").

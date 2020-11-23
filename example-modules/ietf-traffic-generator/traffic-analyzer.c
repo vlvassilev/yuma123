@@ -29,9 +29,10 @@ void* monitor(void* arg)
         if(ret==EOF) {
             exit(0);
         }
-        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><testframe-pkts>%llu</testframe-pkts><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats></state>\n",
+        ret = fprintf(stdout,"<state xmlns=\"urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer\"><pkts>%llu</pkts><testframe-stats><testframe-pkts>%llu</testframe-pkts><sequence-errors>%llu</sequence-errors><latency><samples>%llu</samples><min>%llu</min><max>%llu</max><latest>%llu</latest></latency></testframe-stats></state>\n",
                 ta->totalframes,
                 ta->testframes,
+                ta->testframe.sequence_errors,
                 (uint64_t)ta->testframe.latency.samples,
                 (uint64_t)ta->testframe.latency.min.tv_nsec,
                 (uint64_t)ta->testframe.latency.max.tv_nsec,

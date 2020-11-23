@@ -41,9 +41,10 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
     struct timespec check_last_tx_time;
     struct timespec check_last_latency;
     uint8_t* timestamp;
-    unsigned int offset;
-    offset = frame_len - 10;
-    timestamp = frame_data+offset;
+    uint8_t* seq_num_ptr;
+    uint64_t seq_num;
+    timestamp = frame_data+(frame_len - 10);
+    seq_num_ptr = frame_data+(frame_len - 18);
 
     ta->totalframes++;
 
@@ -60,6 +61,16 @@ void traffic_analyzer_put_frame(traffic_analyzer_t* ta, uint8_t* frame_data, uin
     }
 
     ta->testframes++;
+
+    seq_num = ((uint64_t)seq_num_ptr[0]<<56) + ((uint64_t)seq_num_ptr[1]<<48) + ((uint64_t)seq_num_ptr[2]<<40) + ((uint64_t)seq_num_ptr[3]<<32) + ((uint64_t)seq_num_ptr[4]<<24) + ((uint64_t)seq_num_ptr[5]<<16)  + ((uint64_t)seq_num_ptr[6]<<8) + ((uint64_t)seq_num_ptr[7]<<0);
+    if(ta->testframe.expected_seq_num == seq_num) {
+        ta->testframe.expected_seq_num++;
+    } else {
+        ta->testframe.expected_seq_num = seq_num+1;
+        ta->testframe.sequence_errors++;
+    }
+
+
     memcpy(&ta->testframe.last_rx_time, &ta->last_rx_time, sizeof(struct timespec));
 
     /* TODO - add support for timestamped testframes in the draft for now just expect 10 byte PTP timestamp at the end of the frame */

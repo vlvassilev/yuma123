@@ -6,6 +6,8 @@ typedef struct traffic_analyzer_t_ {
     struct timespec last_rx_time;
     /* testframe stats */
     struct testframe_ {
+        uint64_t sequence_errors;
+        uint64_t expected_seq_num;
         struct filter_ {
             int enabled;
         } filter;

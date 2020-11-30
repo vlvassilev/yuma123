@@ -1146,6 +1146,9 @@ status_t y_ietf_network_bridge_openflow_init2(void)
                            interfaces_val/*cookie*/,
                            &timer_id);
 
+    /* Apply initial config - as if y_commit_complete was called */
+    y_commit_complete();
+
     return res;
 }
 

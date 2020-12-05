@@ -120,6 +120,7 @@ static void traffic_analyzer_delete(val_value_t* traffic_analyzer_val)
     static char cmd_args_buf[4096];
     val_value_t* name_val;
     io_t* io;
+    char* name_buf;
 
     printf("traffic_analyzer_io_dictdelete:\n");
     val_dump_value(traffic_analyzer_val,NCX_DEF_INDENT);
@@ -136,8 +137,9 @@ static void traffic_analyzer_delete(val_value_t* traffic_analyzer_val)
     fclose(io->in);
     fclose(io->out);
 
+    name_buf = dict_get_name(&io_dict, io);
     dict_remove(&io_dict, VAL_STRING(name_val));
-
+    free(name_buf);
     free(io);
 }
 
@@ -197,7 +199,7 @@ static void traffic_analyzer_create(val_value_t* traffic_analyzer_val)
             io->in = fdopen(fd_in[0], "r");
             assert(io->in != NULL);
 
-            dict_add(&io_dict, VAL_STRING(name_val), (void *)io);
+            dict_add(&io_dict, strdup(VAL_STRING(name_val)), (void *)io);
 
 #if 1
             fputs("\n",io->out);
@@ -271,7 +273,7 @@ static int update_config(val_value_t* config_cur_val, val_value_t* config_new_va
             if(traffic_analyzer_cur_val==NULL || 0!=val_compare_ex(traffic_analyzer_new_val,traffic_analyzer_cur_val,TRUE)) {
                 traffic_analyzer_create(traffic_analyzer_new_val);
             }
-            if(traffic_analyzer_cur_val==NULL) {
+            if(traffic_analyzer_new_val!=NULL) {
                 val_value_t * state_val;
                 state_val = val_find_child(traffic_analyzer_new_val,TA_MOD,"state");
                 if(state_val==NULL) {

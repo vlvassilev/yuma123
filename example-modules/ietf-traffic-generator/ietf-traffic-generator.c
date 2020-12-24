@@ -130,6 +130,10 @@ static void traffic_generator_delete(val_value_t* traffic_generator_val)
     sprintf(cmd_buf, "pkill -f 'traffic-generator %s'", cmd_args_buf);
     log_info(cmd_buf);
     system(cmd_buf);
+
+    sprintf(cmd_buf, "traffic-generator %s --disable &", cmd_args_buf);
+    log_info(cmd_buf);
+    system(cmd_buf);
 }
 
 static void traffic_generator_create(val_value_t* traffic_generator_val)

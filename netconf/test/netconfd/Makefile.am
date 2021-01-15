@@ -15,6 +15,7 @@ test-copy-config \
 test-deviation-add-must \
 test-deviation-not-supported \
 test-deviation-delete-ext \
+test-deviation-replace-type \
 test-edit-config \
 test-lock \
 test-multiple-edit-callbacks \

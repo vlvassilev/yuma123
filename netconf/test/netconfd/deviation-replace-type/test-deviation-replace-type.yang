@@ -1,0 +1,30 @@
+module test-deviation-replace-type {
+	yang-version 1.1;
+	namespace "urn:labn:params:xml:ns:yang:test-deviation-replace-type";
+	prefix devext;
+
+	import ietf-interfaces {
+		prefix if;
+	}
+
+	import ietf-ip {
+		prefix ip;
+	}
+
+	organization "";
+	contact	"";
+	description
+		"Create an external deviation that replaces the type of
+		an object that exists due to an augment.  Run from valgrind
+		and check for invalid reads/writes.";
+
+	revision 2021-01-15 {
+		reference "";
+	}
+
+	deviation /if:interfaces/if:interface/ip:ipv4/ip:mtu {
+		deviate replace {
+			type uint32;
+		}
+	}
+}

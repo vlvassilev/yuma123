@@ -3734,13 +3734,15 @@ static status_t apply_object_deviate_type( obj_template_t *targobj,
         case OBJ_TYP_ANYXML:
         case OBJ_TYP_ANYDATA:
         case OBJ_TYP_LEAF:
-            typ_free_typdef(targobj->def.leaf->typdef);
+            if (targobj->flags & OBJ_FL_CLONE == 0)
+                typ_free_typdef(targobj->def.leaf->typdef);
             targobj->def.leaf->typdef = devi->typdef;
             devi->typdef = NULL;
             break;
     
         case OBJ_TYP_LEAF_LIST:
-            typ_free_typdef(targobj->def.leaflist->typdef);
+            if (targobj->flags & OBJ_FL_CLONE == 0)
+                typ_free_typdef(targobj->def.leaflist->typdef);
             targobj->def.leaflist->typdef = devi->typdef;
             devi->typdef = NULL;
             break;

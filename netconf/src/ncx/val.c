@@ -3732,8 +3732,7 @@ status_t
     ser.cur=NULL;
     ser.buf_len=0;
 
-    copy_val = val_clone(val);
-    val123_devirtualize(copy_val);
+    copy_val = val123_clone_real(val);
 
     /* dry-run figure the required buffer length */
     res = val_dump_value_max_w_file(copy_val,

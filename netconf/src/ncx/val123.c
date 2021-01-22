@@ -1025,73 +1025,62 @@ val_value_t* val123_select_obj(val_value_t* parent_val, obj_template_t* child_ob
 } /* val123_select_obj */
 
 /********************************************************************
-* FUNCTION val123_devirtualize
-*
-* Resolves and replaces all virtual nodes under val with real val
-* nodes
-*
-* INPUTS:
-*   val == top val node
-*
-* OUTPUTS:
-* None
-* RETURNS:
-*   status_t
-*********************************************************************/
-status_t val123_devirtualize(val_value_t* val)
-{
-    status_t res=NO_ERR;
-    val_value_t* child_val;
-    if(val_is_virtual(val)) {
-        val_value_t* real_val;
-        val_value_t* copy_val;
-
-        real_val = val_get_virtual_value(NULL, val, &res);
-        if(res==NO_ERR && real_val!=NULL) {
-            copy_val = val_clone(real_val); /* needed since val_replace starts by destroying the val->virtualval of the destination */
-            val_replace(copy_val, val);
-            val_free_value(copy_val);
-        } else if(res==ERR_NCX_SKIPPED) {
-            return res;
-        } else {
-            return SET_ERROR(res);
-        }
-    }
-    child_val = val_get_first_child(val);
-    while(child_val) {
-        val_value_t* next_child_val;
-        next_child_val = val_get_next_child(child_val);
-        res=val123_devirtualize(child_val);
-        if(res==ERR_NCX_SKIPPED) {
-            val_remove_child(child_val);
-            val_free_value(child_val);
-        }
-        child_val = next_child_val;
-    }
-    return res;
-} /* val123_devirtualize */
-
-/********************************************************************
 * FUNCTION val123_clone_real
 *
-* Clones val tree and devirtualizes the clone before returning
+* Makes a copy of a val node resolving all virtual nodes part of it
+* so that the returned result has no virtual data nodes.
 *
 * INPUTS:
-*   val == top val node to clone
+*   val == input val node
 *
-* OUTPUTS:
-* None
 * RETURNS:
-*   val ptr to a cloned devirtualized tree
+* Real val == clone of val with only real (non-virtual) values
+*
 *********************************************************************/
 val_value_t* val123_clone_real(val_value_t* val)
 {
-    val_value_t* val_cloned;
-    val_cloned = val_clone(val);
-    assert(val_cloned);
-    val123_devirtualize(val_cloned);
-    return val_cloned;
+    status_t res;
+    val_value_t* child_val;
+    val_value_t* real_val;
+    val_value_t* real_child_val;
+    val_value_t* useval;
+
+    if(val_is_virtual(val)) {
+        useval = val_get_virtual_value(NULL, val, &res);
+        if(res != NO_ERR) {
+            return NULL;
+        }
+    } else {
+        useval = val;
+    }
+
+    if(obj_is_leafy(useval->obj)) {
+        real_val = val_clone(useval);
+        return real_val;
+    } else {
+        real_val = val_new_value();
+        assert(real_val);
+        val_init_from_template(real_val, val->obj);
+    }
+
+    child_val = val_get_first_child(useval);
+    while(child_val) {
+        val_value_t* next_child_val;
+        next_child_val = val_get_next_child(child_val);
+        real_child_val=val123_clone_real(child_val);
+        if(real_child_val) {
+            val_add_child(real_child_val,real_val);
+            if(real_child_val->btyp == NCX_BT_LIST) {
+                res = val_gen_index_chain(real_child_val->obj, real_child_val);
+                assert(res == NO_ERR);
+            }
+        }
+        child_val = next_child_val;
+    }
+
+    return real_val;
 } /* val123_clone_real */
+
 
 /********************************************************************
 * FUNCTION obj123_get_top_uses

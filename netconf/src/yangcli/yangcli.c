@@ -3131,6 +3131,65 @@ void
 
 } /* check_module_capabilities */
 
+status_t
+    process_module_deviations (dlq_hdr_t *savedevQ)
+{
+    ncx_save_deviations_t *savedev;
+    ncx_module_t *retmod;
+    status_t res = NO_ERR;
+
+    /* Finish filling in the deviation modules' import structures.
+     * Loading deviation modules skips over this step, but since all
+     * modules should be loaded by this point, iterate through the
+     * imports and search for each missing module.
+     *
+     * NOTE: ncxmod_process_deviation_imports() uses ncx_find_module()
+     * which honors the "session" module queue.
+     */
+
+    for (savedev = (ncx_save_deviations_t *)dlq_firstEntry(savedevQ);
+         savedev;
+         savedev = (ncx_save_deviations_t *)dlq_nextEntry(savedev)) {
+        res = ncxmod_process_deviation_imports(savedev);
+        if (res != NO_ERR) {
+            log_error("\nError: one or more modules imported by %s is not loaded.",
+                      savedev->devmodule);
+            return ERR_NCX_OPERATION_FAILED;
+        }
+    }
+
+    /* After the deviations have been resolved, any nodes to be deleted
+     * will have been marked as such.  ncxmod_apply_deviations() will
+     * cause those nodes to actually be deleted.  This happens in a
+     * separate loop because, in the case that the target node is the
+     * result of a yang augment statement, the module in which the target
+     * obj_template_t will be found may (generally will) be different
+     * than the module in which the deviation was resolved.
+     *
+     * NOTE: ncx_get_first_module() honors the "current" module queue,
+     * NOT the "session" queue.  Be sure to call ncx_set_cur_modQ()
+     * first if proessing deviations for a particular session.
+     */
+
+    for (retmod = ncx_get_first_module();
+         retmod;
+         retmod = ncx_get_next_module(retmod)) {
+        res = ncxmod_resolve_deviations(retmod, savedevQ);
+        if (res != NO_ERR)
+            return ERR_NCX_OPERATION_FAILED;
+    }
+
+    for (retmod = ncx_get_first_module();
+         retmod;
+         retmod = ncx_get_next_module(retmod)) {
+        res = ncxmod_apply_deviations(retmod);
+        if (res != NO_ERR)
+            return ERR_NCX_OPERATION_FAILED;
+    }
+
+    return res;
+}
+
 
 /********************************************************************
 * message_timed_out
@@ -3347,7 +3406,7 @@ static mgr_io_state_t
     server_cb_t     *server_cb;
     xmlChar        *line;
     const xmlChar  *resultstr;
-    ses_cb_t       *scb;
+    ses_cb_t       *scb = NULL;
     mgr_scb_t      *mscb;
     boolean         getrpc, fileassign, done;
     status_t        res;
@@ -3573,6 +3632,22 @@ static mgr_io_state_t
      */
     if (server_cb->command_mode != CMD_MODE_NORMAL) {
         return server_cb->state;
+    }
+
+    /* The scb pointer will only have been initialized if a connection
+     * was established.  If not, mscb will not have been initialized
+     * and it's not safe to use temp_modQ.
+     *
+     * However, if a connection has been established, then at this point
+     * all of the modules, including deviations, should have been loaded.
+     * Now let's apply the deviations.  The "session" module queue is
+     * already set (ncx_set_session_modQ()).
+     */
+    if (scb != NULL && server_cb->deviations_applied == FALSE) {
+        ncx_set_cur_modQ(&mscb->temp_modQ);
+        process_module_deviations(&server_cb->autoload_savedevQ);
+        server_cb->deviations_applied = TRUE;
+        ncx_reset_modQ();
     }
 
     /* check the run-script parameters */
@@ -3908,6 +3983,11 @@ static status_t
     dlq_hdr_t             savedevQ;
     xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
 
+    /* deviations processing */
+    ncx_module_t          *retmod;
+    ncx_save_deviations_t *savedev;
+
+
 #ifdef YANGCLI_DEBUG
     int   i;
 #endif
@@ -4106,6 +4186,12 @@ static status_t
             modval = val_find_next_child(mgr_cli_valset, YANGCLI_MOD,
                                          NCX_EL_MODULE, modval);
         }
+    }
+
+    res = process_module_deviations(&savedevQ);
+    if (res != NO_ERR) {
+        log_error("\n%s: Failed to process deviations.", __func__);
+        return res;
     }
 
     /* discard any deviations loaded from the CLI or conf file */

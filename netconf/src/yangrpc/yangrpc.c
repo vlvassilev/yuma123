@@ -23,7 +23,9 @@
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>
-#include <assert.h>
+#ifdef DEBUG
+# include <assert.h>
+#endif
 
 #include "mgr.h"
 
@@ -864,6 +866,7 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
 }
 
 val_value_t* global_reply_val;
+status_t global_reply_status;
 
 /********************************************************************
  * FUNCTION yangcli_reply_handler_
@@ -933,7 +936,10 @@ void
 #else
         //val_dump_value(rpy->reply,0);
         global_reply_val = val_clone(rpy->reply);
-        assert(global_reply_val!=NULL);
+        if (global_reply_val == NULL) {
+            log_error("\nRPC Failed to clone reply");
+            global_reply_status = ERR_INTERNAL_VAL;
+        }
 #endif
     }
 
@@ -1042,7 +1048,16 @@ status_t yangrpc_parse_cli(yangrpc_cb_ptr_t yangrpc_cb_ptr,
             uint32 timeval;
             res = do_local_conn_command_reqdata(server_cb, rpc, useline, len, &reqdata, &timeval);
             if (res == ERR_NCX_SKIPPED) {
+#ifdef DEBUG
                 assert(0);
+#else
+		log_error("\nError: %s\n", get_error_string(res));
+		if (newline) {
+		    m__free(newline);
+		}
+		return res;
+#endif /* DEBUG */
+
 		/*res = do_local_command(server_cb, rpc, useline, len);*/
             }
         }
@@ -1155,6 +1170,7 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
 
     /* the request will be stored if this returns NO_ERR */
     global_reply_val=NULL;
+    global_reply_status=NO_ERR;
     res = mgr_rpc_send_request(scb, req, yangcli_reply_handler_);
 
     //mgr_io_run();
@@ -1169,13 +1185,14 @@ status_t yangrpc_exec(yangrpc_cb_ptr_t yangrpc_cb_ptr, val_value_t* request_val,
             log_error("\nerror: ses_accept_input res=%d",res);
             return res;
         }
-        if(mgr_ses_process_first_ready() && global_reply_val!=NULL) {
+        if(global_reply_status != NO_ERR ||
+           (mgr_ses_process_first_ready() && global_reply_val!=NULL)) {
             break;
         }
     }
     *reply_val = global_reply_val;
 
-    return NO_ERR;
+    return global_reply_status;
 }
 
 void yangrpc_close(yangrpc_cb_ptr_t yangrpc_cb_ptr)

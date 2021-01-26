@@ -572,6 +572,9 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
     obj_template_t       *obj;
     int                   i;
 
+    /* deviations processing */
+    ncx_save_deviations_t *savedev;
+
     ncx_clear_temp_modQ();
     ncx_clear_session_modQ();
 
@@ -745,6 +748,12 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
         }
     }
 
+    res = process_module_deviations(&savedevQ);
+    if (res != NO_ERR) {
+        log_error("\n%s: Failed to process deviations.", __func__);
+        return res;
+    }
+
     /* discard any deviations loaded from the CLI or conf file */
     ncx_clean_save_deviationsQ(&savedevQ);
     if (res != NO_ERR) {
@@ -858,6 +867,15 @@ status_t yangrpc_connect(const char * const server, uint16_t port,
         ncx_set_temp_modQ(&mscb->temp_modQ);
         report_capabilities(server_cb, scb, TRUE, HELP_MODE_NONE);
         check_module_capabilities(server_cb, scb, autoload_blocking_get_modules, yang_library_blocking_get_module_set);
+
+        if (scb != NULL && server_cb->deviations_applied == FALSE) {
+            ncx_set_session_modQ(&mscb->temp_modQ);
+            ncx_set_cur_modQ(&mscb->temp_modQ);
+            process_module_deviations(&server_cb->autoload_savedevQ);
+            server_cb->deviations_applied = TRUE;
+            ncx_reset_modQ();
+            ncx_clear_session_modQ();
+        }
 
     }
 

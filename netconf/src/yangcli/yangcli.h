@@ -496,6 +496,7 @@ typedef struct server_cb_t_ {
 
     /* support fot auto-get-schema feature */
     dlq_hdr_t            autoload_savedevQ; /* Q of ncx_save_deviations_t */
+    boolean              deviations_applied;
 
     /* support for temp directory for downloaded modules */
     ncxmod_temp_progcb_t *temp_progcb;
@@ -855,6 +856,9 @@ extern void
                                ses_cb_t *scb,
                                status_t (*get_modules_fn)(server_cb_t*,ses_cb_t*),
                                status_t (*get_module_set_fn)(server_cb_t*,ses_cb_t*));
+status_t
+    process_module_deviations (dlq_hdr_t *savedevQ);
+
 extern status_t
     process_cli_input (server_cb_t *server_cb,
                        int argc,

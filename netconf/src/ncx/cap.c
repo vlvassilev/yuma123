@@ -283,7 +283,7 @@ static xmlChar *
                      ncx_module_t *mod)
 {
     xmlChar              *str, *p;
-    ncx_lmem_t           *listmember;
+    ncx_save_deviations_t *devmod;
     uint32                len, feature_count, deviation_count;
 
     feature_count = 0;
@@ -313,17 +313,17 @@ static xmlChar *
             ncx_for_all_features(mod, get_features_len, &len, TRUE);
         }
 
-        deviation_count = ncx_list_cnt(&mod->devmodlist);
+        deviation_count = dlq_count(&mod->devmodlist);
         if (deviation_count > 0) {
             len++;   /* & char */
             len += xml_strlen(CAP_DEVIATIONS_EQ);
             len += (deviation_count-1);   /* all the commas */
             
-            for (listmember = ncx_first_lmem(&mod->devmodlist);
-                 listmember != NULL;
-                 listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+            for (devmod = (ncx_save_deviations_t *)dlq_firstEntry(&mod->devmodlist);
+                 devmod != NULL;
+                 devmod = (ncx_save_deviations_t *)dlq_nextEntry(devmod)) {
 
-                len += xml_strlen(listmember->val.str);
+                len += xml_strlen(devmod->devmodule);
             }
         }
     }
@@ -364,11 +364,11 @@ static xmlChar *
             *p++ = (xmlChar)'&';
             p += xml_strcpy(p, CAP_DEVIATIONS_EQ);
 
-            for (listmember = ncx_first_lmem(&mod->devmodlist);
-                 listmember != NULL;
-                 listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+            for (devmod = (ncx_save_deviations_t *)dlq_firstEntry(&mod->devmodlist);
+                 devmod != NULL;
+                 devmod = (ncx_save_deviations_t *)dlq_nextEntry(devmod)) {
 
-                p += xml_strcpy(p, listmember->val.str);
+                p += xml_strcpy(p, devmod->devmodule);
                 *p++ = ',';
             }
 

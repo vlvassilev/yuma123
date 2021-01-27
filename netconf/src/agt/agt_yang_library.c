@@ -118,7 +118,7 @@ static status_t
     val_value_t *submodule_val;
     val_value_t *childval;
     ncx_feature_t *feature;
-    ncx_lmem_t    *listmember;
+    ncx_save_deviations_t *devmod;
     ncx_include_t *inc;
 
     module_obj = obj_find_child(ietf_yang_library_modules_state_obj, "ietf-yang-library", "module");
@@ -191,9 +191,9 @@ static status_t
         /* deviation */
         deviation_obj = obj_find_child(module_obj, "ietf-yang-library", "deviation");
         assert(deviation_obj);
-        for (listmember = ncx_first_lmem(&mod->devmodlist);
-             listmember != NULL;
-             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+        for (devmod = dlq_firstEntry(&mod->devmodlist);
+             devmod != NULL;
+             devmod = (ncx_save_deviations_t *)dlq_nextEntry(devmod)) {
             ncx_module_t *match_mod;
             char* revision_str;
 
@@ -203,24 +203,14 @@ static status_t
 
             childval = agt_make_leaf(deviation_obj,
                                  "name",
-                                 listmember->val.str,
+                                 devmod->devmodule,
                                 &res);
             assert(res==NO_ERR && childval);
             val_add_child(childval, deviation_val);
 
-            for (match_mod = ncx_get_first_module();
-                 match_mod != NULL;
-                 match_mod = ncx_get_next_module(match_mod)) {
-                if(0==strcmp(match_mod->name,listmember->val.str) && match_mod->implemented) {
-                    revision_str=match_mod->version;
-                    break;
-                }
-            }
-            assert(match_mod); /* match must exist */
-
             childval = agt_make_leaf(deviation_obj,
                                  "revision",
-                                 revision_str,
+                                 devmod->devrevision,
                                 &res);
             assert(res==NO_ERR && childval);
 

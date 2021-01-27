@@ -1230,9 +1230,18 @@ status_t
         mod = ncx_find_module(searchresult->module,
                               searchresult->revision);
         if(mod==NULL) {
+            ncx_list_t *devlist = NULL;
+
+            /* prefer the list of deviations from modules-state */
+            if (ncx_list_cnt(&searchresult->devlist) > 0) {
+                devlist = &searchresult->devlist;
+            } else if (searchresult->cap) {
+                devlist = &searchresult->cap->cap_deviation_list;
+            }
+
             res = autoload_module(searchresult->module,
                                   searchresult->revision,
-                                  searchresult->cap?&searchresult->cap->cap_deviation_list:NULL,
+                                  devlist,
                                   &mod);
 
             searchresult->res = res;

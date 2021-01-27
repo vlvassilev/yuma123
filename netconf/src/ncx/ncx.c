@@ -516,8 +516,7 @@ static void
     if (mod->belongs) {
         m__free(mod->belongs);
     }
-
-    ncx_clean_list(&mod->devmodlist);
+    ncx_clean_save_deviationsQ(&mod->devmodlist);
 
     m__free(mod);
 
@@ -1275,7 +1274,7 @@ ncx_module_t *
     dlq_createSQue(&mod->stmtQ);
     dlq_createSQue(&mod->featureQ);
     dlq_createSQue(&mod->identityQ);
-    ncx_init_list(&mod->devmodlist, NCX_BT_STRING);
+    dlq_createSQue(&mod->devmodlist);
     return mod;
 
 }  /* ncx_new_module */

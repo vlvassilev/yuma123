@@ -336,25 +336,27 @@ static status_t
  ***************************************************************/
 
 static void
-    devmodlist_update(ncx_module_t * target_mod, ncx_module_t * deviation_mod)
+    devmodlist_update(ncx_module_t * target_mod,
+                      const ncx_save_deviations_t *savedev)
 {
     status_t res;
-    ncx_lmem_t *listmember;
+    ncx_save_deviations_t *devmod;
 
     /* skip if reference already present */
-    for (listmember = ncx_first_lmem(&target_mod->devmodlist);
-         listmember != NULL;
-         listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+    for (devmod = (ncx_save_deviations_t *)
+               dlq_firstEntry(&target_mod->devmodlist);
+         devmod != NULL;
+         devmod = (ncx_save_deviations_t *)dlq_nextEntry(devmod)) {
 
-        if(0==strcmp(listmember->val.str, deviation_mod->name)) {
+        if(0==strcmp(devmod->devmodule, savedev->devmodule)) {
             return;
         }
     }
 
-    res = ncx_set_list(NCX_BT_STRING,
-                       deviation_mod->name,
-                       &target_mod->devmodlist);
-    assert(res == NO_ERR);
+    devmod = ncx_new_save_deviations (savedev->devmodule, savedev->devrevision,
+                                      savedev->devnamespace, savedev->devprefix);
+    assert(devmod != NULL);
+    dlq_enque(devmod, &target_mod->devmodlist);
 }
 
 /*
@@ -4243,11 +4245,6 @@ static status_t apply_object_deviations( yang_pcb_t *pcb,
         YANG_OBJ_DEBUG3( "\nRechecking %s:%s after applying deviation(s)",
                          obj_get_mod_name(targobj), obj_get_name(targobj) );
         res = resolve_datadef(pcb, tkc, mod, targobj, TRUE );
-    }
-
-    if(res == NO_ERR) {
-        /* add mod to the devmodlist que of the target if not present yet */
-        devmodlist_update(obj_get_mod(targobj), mod);
     }
 
     return res;
@@ -8552,7 +8549,7 @@ static status_t
         }
         /* check if any devmodlist entry needed */
         if (anydone) {
-            devmodlist_update(mod, obj_get_mod(deviation->targobj));
+            devmodlist_update(obj_get_mod(deviation->targobj), savedev);
         }
     }
 

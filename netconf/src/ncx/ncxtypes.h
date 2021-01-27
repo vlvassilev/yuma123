@@ -639,7 +639,10 @@ typedef struct ncx_module_t_ {
 
     dlq_hdr_t         incchainQ;   /* used if parent == NULL */
 
-    ncx_list_t        devmodlist;     /* for deviations list */
+    /* Q of ncx_save_deviations_t to track modules that deviate this
+     * module.
+     */
+    dlq_hdr_t         devmodlist;
 
    /* yang-library conformance-type {implement,import} */
    boolean implemented;

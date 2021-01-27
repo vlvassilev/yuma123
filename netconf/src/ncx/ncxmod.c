@@ -5803,6 +5803,7 @@ ncxmod_search_result_t *
     }
 
     searchresult->ismod = mod->ismod;
+    ncx_init_list(&searchresult->devlist, NCX_BT_STRING);
     
     return searchresult;
 
@@ -5853,6 +5854,7 @@ ncxmod_search_result_t *
         }
     }
     searchresult->res = ERR_NCX_MOD_NOT_FOUND;
+    ncx_init_list(&searchresult->devlist, NCX_BT_STRING);
     return searchresult;
 
 }  /* ncxmod_new_search_result_str */
@@ -5891,6 +5893,7 @@ void
     if (searchresult->source) {
         m__free(searchresult->source);
     }
+    ncx_clean_list(&searchresult->devlist);
     m__free(searchresult);
 
 }  /* ncxmod_free_search_result */
@@ -6079,6 +6082,7 @@ ncxmod_search_result_t *
     newsr->module_val = sr->module_val;
     newsr->capmatch = sr->capmatch;
     newsr->ismod = sr->ismod;
+    ncx_copy_list(&sr->devlist, &newsr->devlist);
 
     return newsr;
 

@@ -2632,6 +2632,62 @@ static void
 
 }  /* namespace_mismatch_warning */
 
+static const xmlChar *IYL = (const xmlChar *)"ietf-yang-library";
+static const xmlChar *DEV = (const xmlChar *)"deviation";
+
+static status_t
+    check_module_deviations (server_cb_t *server_cb,
+                             const val_value_t *module_val,
+                             ncx_list_t *devlist)
+{
+    val_value_t *dev;
+    val_value_t *name;
+    val_value_t *revision;
+    const xmlChar *str;
+    status_t res;
+    ncxmod_search_result_t *searchresult;
+
+
+    for (dev = val_find_child(module_val, IYL, DEV);
+         dev;
+         dev = val_find_next_child(module_val, IYL, DEV, dev)) {
+        name = val_find_child(dev, IYL, "name");
+        if (name == NULL) {
+            log_debug("\nmodule-state deviation has no name");
+            continue;
+        }
+
+        revision = val_find_child(dev, IYL, "revision");
+        if (revision == NULL) {
+            log_debug("\nmodule-state deviation %s has no revision",
+                      VAL_STR(name));
+            continue;
+        }
+
+        str = xml_strdup(VAL_STR(name));
+        if (str == NULL)
+            return ERR_INTERNAL_MEM;
+
+        res = ncx_set_list(NCX_BT_STRING, str, devlist);
+        if (res != NO_ERR) {
+            m__free((void *)str);
+            return res;
+        }
+
+        searchresult = ncxmod_find_module(VAL_STR(name), VAL_STR(revision));
+        if (searchresult == NULL) {
+            searchresult = ncxmod_new_search_result();
+            if (searchresult == NULL)
+                return ERR_INTERNAL_MEM;
+
+            searchresult->module_val = dev;
+            searchresult->module = xml_strdup(VAL_STR(name));
+            searchresult->revision = xml_strdup(VAL_STR(revision));
+        }
+        dlq_enque(searchresult, &server_cb->searchresultQ);
+    }
+    return NO_ERR;
+}
 
 /********************************************************************
 * FUNCTION check_module_capabilities
@@ -2857,6 +2913,12 @@ void
                     searchresult = ncxmod_find_module(module, revision);
                 }
                 if (searchresult) {
+                    if (submodule_val)
+                        check_module_deviations(server_cb, submodule_val,
+                                                &searchresult->devlist);
+                    else if (module_val)
+                        check_module_deviations(server_cb, module_val,
+                                                &searchresult->devlist);
 
                     searchresult->cap = cap;
                     searchresult->module_val = module_val;
@@ -2953,6 +3015,14 @@ void
                             ncxmod_new_search_result_str(module, 
                                                          revision);
                         if (searchresult) {
+                            if (submodule_val)
+                                check_module_deviations(server_cb,
+                                                        submodule_val,
+                                                        &searchresult->devlist);
+                            else if (module_val)
+                                check_module_deviations(server_cb,
+                                                        module_val,
+                                                        &searchresult->devlist);
                             searchresult->cap = cap;
                             searchresult->module_val = module_val;
                             dlq_enque(searchresult, &server_cb->searchresultQ);

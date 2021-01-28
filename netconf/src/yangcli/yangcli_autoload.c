@@ -678,9 +678,9 @@ static status_t
     autoload_module (const xmlChar *modname,
                      const xmlChar *revision,
                      ncx_list_t *devlist,
+                     dlq_hdr_t *savedevQ_ptr,
                      ncx_module_t **retmod)
 {
-    dlq_hdr_t               savedevQ;
     ncx_lmem_t             *listmember;
     status_t                res;
     log_debug_t             loglevel;
@@ -693,7 +693,6 @@ static status_t
     }
 
     res = NO_ERR;
-    dlq_createSQue(&savedevQ);
 
     /* first load any deviations */
     if (devlist != NULL) {
@@ -702,7 +701,7 @@ static status_t
              listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
 
             res = ncxmod_load_deviation(listmember->val.str,
-                                        &savedevQ);
+                                        savedevQ_ptr);
             if (res != NO_ERR) {
                 log_error("\nError: Deviation module %s not loaded (%s)!!",
                           listmember->val.str, 
@@ -716,12 +715,12 @@ static status_t
      */
     if (res == NO_ERR) {
         if (LOGDEBUG) {
-            res = ncxmod_parse_module(modname, revision, &savedevQ, retmod);
+            res = ncxmod_parse_module(modname, revision, savedevQ_ptr, retmod);
         } else {
             /* ignore parse warnings during autoload unless debug mode */
             loglevel = log_get_debug_level();
             log_set_debug_level(LOG_DEBUG_ERROR);
-            res = ncxmod_parse_module(modname, revision, &savedevQ, retmod);
+            res = ncxmod_parse_module(modname, revision, savedevQ_ptr, retmod);
             log_set_debug_level(loglevel);
         }
         if (res != NO_ERR) {
@@ -732,8 +731,6 @@ static status_t
             (*retmod)->defaultrev = TRUE;
         }
     }
-
-    ncx_clean_save_deviationsQ(&savedevQ);
 
     return res;
 
@@ -1187,6 +1184,7 @@ status_t
     res = autoload_module(NCXMOD_YUMA_NETCONF,
                           NULL,
                           NULL, 
+                          &server_cb->autoload_savedevQ,
                           &ncmod);
     if (res == NO_ERR && ncmod != NULL) {
         /* Set the features in yuma-netconf.yang according
@@ -1242,6 +1240,7 @@ status_t
             res = autoload_module(searchresult->module,
                                   searchresult->revision,
                                   devlist,
+                                  &server_cb->autoload_savedevQ,
                                   &mod);
 
             searchresult->res = res;

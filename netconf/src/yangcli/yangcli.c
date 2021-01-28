@@ -504,6 +504,8 @@ void
         runstack_free_context(server_cb->runstack_context);
     }
 
+    ncx_clean_save_deviationsQ(&server_cb->autoload_savedevQ);
+
     m__free(server_cb);
 
 }  /* free_server_cb */
@@ -596,8 +598,7 @@ server_cb_t *
     dlq_createSQue(&server_cb->searchresultQ);
     dlq_createSQue(&server_cb->modptrQ);
     dlq_createSQue(&server_cb->notificationQ);
-    dlq_createSQue(&server_cb->autoload_modcbQ);
-    dlq_createSQue(&server_cb->autoload_devcbQ);
+    dlq_createSQue(&server_cb->autoload_savedevQ);
 
     /* set the default CLI history file (may not get used) */
     server_cb->history_filename = xml_strdup(YANGCLI_DEF_HISTORY_FILE);

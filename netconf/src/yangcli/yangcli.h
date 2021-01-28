@@ -495,10 +495,7 @@ typedef struct server_cb_t_ {
     dlq_hdr_t            notificationQ;   /* Q of mgr_not_msg_t */
 
     /* support fot auto-get-schema feature */
-    dlq_hdr_t            autoload_modcbQ;  /* Q of autoload_modcb_t */
-    dlq_hdr_t            autoload_devcbQ;  /* Q of autoload_devcb_t */
-    autoload_modcb_t    *autoload_curmod;
-    autoload_devcb_t    *autoload_curdev;
+    dlq_hdr_t            autoload_savedevQ; /* Q of ncx_save_deviations_t */
 
     /* support for temp directory for downloaded modules */
     ncxmod_temp_progcb_t *temp_progcb;

@@ -2774,6 +2774,10 @@ void
         log_info("Current module-set-id: %s.\n", VAL_STRING(module_set_id_val));
     }
 
+
+    /* switch to the session module queue */
+    ncx_set_cur_modQ(&mscb->temp_modQ);
+
     retrieval_supported = cap_set(&mscb->caplist,
                                   CAP_SCHEMA_RETRIEVAL);
 
@@ -2908,7 +2912,7 @@ void
                     if (searchresult == NULL) {
                         log_error("\nError: cannot load file, "
                                   "malloc failed");
-                        return;
+                        goto out;
                     }
                 } else {
                     searchresult = ncxmod_find_module(module, revision);
@@ -3036,7 +3040,7 @@ void
                         } else {
                             log_error("\nError: cannot load file, "
                                       "malloc failed");
-                            return;
+                            goto out;
                         }
                     }
                 }
@@ -3060,7 +3064,7 @@ void
             searchresult = ncxmod_new_search_result_ex(mod);
             if (searchresult == NULL) {
                 log_error("\nError: cannot load file, malloc failed");
-                return;
+                goto out;
             } else {
                 searchresult->cap = cap;
                 searchresult->module_val = module_val;
@@ -3108,7 +3112,9 @@ void
         /*
          * get-schema operations are done or just started
          */
-         res = get_modules_fn(server_cb, scb);
+        ncx_reset_modQ();
+        res = get_modules_fn(server_cb, scb);
+        ncx_set_cur_modQ(&mscb->temp_modQ);
         if (res != NO_ERR) {
             log_error("\nError: autoload get modules failed (%s)",
                       get_error_string(res));
@@ -3129,6 +3135,8 @@ void
         }
     }
 
+out:
+    ncx_reset_modQ();
 } /* check_module_capabilities */
 
 status_t

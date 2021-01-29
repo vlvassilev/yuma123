@@ -774,6 +774,7 @@ status_t
     ncx_module_t            *testmod;
     status_t                 res, retres;
     boolean                  need_yt, need_ncx, need_nacm, need_ync;
+    dlq_hdr_t                savedevQ;
 
 #ifdef DEBUG
     if (!server_cb || !scb) {
@@ -845,51 +846,56 @@ status_t
     }
 
     if (retres == NO_ERR) {
+        dlq_createSQue(&savedevQ);
+
         if (need_yt) {
-            testmod = ncx_find_module(NCXMOD_IETF_YANG_TYPES,
-                                      NULL);
-            if (testmod != NULL) {
+            res = ncxmod_load_module(NCXMOD_IETF_YANG_TYPES, NULL, &savedevQ,
+                                     &testmod);
+            if (res == NO_ERR) {
                 res = copy_module_to_tempdir(mscb,
                                              testmod->name,
                                              testmod->version,
                                              testmod->source);
             } else {
-                SET_ERROR(ERR_INTERNAL_VAL);
+                SET_ERROR(res);
             }
         }
         if (need_ncx) {
-            testmod = ncx_find_module(NCXMOD_NCX, NULL);
-            if (testmod != NULL) {
+            res = ncxmod_load_module(NCXMOD_NCX, NULL, &savedevQ, &testmod);
+            if (res == NO_ERR) {
                 res = copy_module_to_tempdir(mscb,
                                              testmod->name,
                                              testmod->version,
                                              testmod->source);
             } else {
-                SET_ERROR(ERR_INTERNAL_VAL);
+                SET_ERROR(res);
             }
         }
         if (need_nacm) {
-            testmod = ncx_find_module(NCXMOD_IETF_NETCONF_ACM, NULL);
-            if (testmod != NULL) {
+            res = ncxmod_load_module(NCXMOD_IETF_NETCONF_ACM, NULL, &savedevQ,
+                                     &testmod);
+            if (res == NO_ERR) {
                 res = copy_module_to_tempdir(mscb,
                                              testmod->name,
                                              testmod->version,
                                              testmod->source);
             } else {
-                SET_ERROR(ERR_INTERNAL_VAL);
+                SET_ERROR(res);
             }
         }
         if (need_ync) {
-            testmod = ncx_find_module(NCXMOD_YUMA_NETCONF, NULL);
-            if (testmod != NULL) {
+            res = ncxmod_load_module(NCXMOD_YUMA_NETCONF, NULL, &savedevQ, &testmod);
+            if (res == NO_ERR) {
                 res = copy_module_to_tempdir(mscb,
                                              testmod->name,
                                              testmod->version,
                                              testmod->source);
             } else {
-                SET_ERROR(ERR_INTERNAL_VAL);
+                SET_ERROR(res);
             }
         }
+
+        ncx_clean_save_deviationsQ(&savedevQ);
     }
     return retres;
 

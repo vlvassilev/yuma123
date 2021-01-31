@@ -1069,11 +1069,13 @@ static status_t get_schema_validate( ses_cb_t *scb,
 
     ncx_module_t    *findmod;
     const xmlChar   *identifier, *version, *format;
+    xmlChar         *source;
     val_value_t     *validentifier, *valversion, *valformat;
     xmlns_id_t       nsid;
     status_t         res;
     uint32           revcount;
     ncx_modformat_t  modformat;
+    boolean          found;
 
 
     res = NO_ERR;
@@ -1081,7 +1083,9 @@ static status_t get_schema_validate( ses_cb_t *scb,
     identifier = NULL;
     version = NULL;
     format = NULL;
+    source = NULL;
     nsid = 0;
+    found = FALSE;
 
     /* get the identifier parameter */
     validentifier = val_find_child(msg->rpc_input, 
@@ -1223,8 +1227,21 @@ static status_t get_schema_validate( ses_cb_t *scb,
      */
     if (res == NO_ERR) {
         findmod = ncx_find_module(identifier, version);
+        if (findmod) {
+            source = xml_strdup(findmod->source);
+            found = TRUE;
+        } else {
+            ncxmod_search_result_t *searchresult;
 
-        if (findmod == NULL) {
+            searchresult = ncxmod_find_module(identifier, version);
+            if (searchresult) {
+                source = xml_strdup(searchresult->source);
+                found = TRUE;
+            }
+        }
+
+
+        if (found == FALSE) {
             val_value_t *errval = validentifier;
 
             res = ERR_NCX_NO_MATCHES;
@@ -1244,15 +1261,28 @@ static status_t get_schema_validate( ses_cb_t *scb,
                              NCX_NT_VAL, 
                              errval);
         } else {
+            if (source == NULL) {
+                agt_record_error(scb,
+                                 &msg->mhdr,
+                                 NCX_LAYER_OPERATION,
+                                 ERR_INTERNAL_MEM,
+                                 methnode,
+                                 NCX_NT_NONE,
+                                 NULL,
+                                 NCX_NT_NONE,
+                                 NULL);
+                return ERR_INTERNAL_MEM;
+            }
+
             /* check if format is correct for request */
             switch (modformat) {
             case NCX_MODFORMAT_YANG:
-                if (yang_fileext_is_yin(findmod->source)) {
+                if (yang_fileext_is_yin(source)) {
                     res = ERR_NCX_VALUE_NOT_SUPPORTED;
                 }
                 break;
             case NCX_MODFORMAT_YIN:
-                if (yang_fileext_is_yang(findmod->source)) {
+                if (yang_fileext_is_yang(source)) {
                     res = ERR_NCX_VALUE_NOT_SUPPORTED;
                 }
                 break;
@@ -1278,7 +1308,7 @@ static status_t get_schema_validate( ses_cb_t *scb,
          * setup the automatic output using the callback
          * function in agt_util.c
          */
-        msg->rpc_user1 = (void *)findmod->source;
+        msg->rpc_user1 = (void *)source;
         msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
         msg->rpc_data_type = RPC_DATA_STD;
         msg->rpc_datacb = agt_output_schema;

@@ -17,6 +17,7 @@
 
 static struct option const long_options[] =
 {
+    {"autoload", optional_argument, NULL, 'a'},
     {"server", required_argument, NULL, 's'},
     {"port", required_argument, NULL, 'p'},
     {"user", required_argument, NULL, 'u'},
@@ -49,12 +50,17 @@ int main(int argc, char* argv[])
     char* password=NULL;
     char private_key[1024];
     char public_key[1024];
+    boolean autoload = TRUE;
 
     sprintf(private_key,"/home/%s/.ssh/id_rsa",user);
     sprintf(public_key,"/home/%s/.ssh/id_rsa.pub",user);
 
-    while ((optc = getopt_long (argc, argv, "s:p:u:P:k:K", long_options, NULL)) != -1) {
+    while ((optc = getopt_long (argc, argv, "a:s:p:u:P:k:K", long_options, NULL)) != -1) {
         switch (optc) {
+            case 'a':
+                if (optarg != NULL && strcasecmp(optarg, "false") == 0)
+                    autoload = FALSE;
+                break;
             case 's':
                 server=optarg;
                 break;
@@ -81,7 +87,14 @@ int main(int argc, char* argv[])
 
     res = yangrpc_init(NULL);
     assert(res==NO_ERR);
-    res = yangrpc_connect(server /*127.0.0.1*/, port /*830*/, user /*vladimir*/, password /* "" */, public_key /* "/home/vladimir/.ssh/id_rsa.pub" */, private_key /* "/home/vladimir/.ssh/id_rsa" */, NULL, &yangrpc_cb_ptr);
+    res = yangrpc_connect(server /*127.0.0.1*/,
+                          port /*830*/,
+                          user /*vladimir*/,
+                          password /* "" */,
+                          public_key /* "/home/vladimir/.ssh/id_rsa.pub" */,
+                          private_key /* "/home/vladimir/.ssh/id_rsa" */,
+                          autoload ? "--autoload=true" : "--autoload=false",
+                          &yangrpc_cb_ptr);
     assert(res==NO_ERR);
 
     res = ncxmod_load_module ("ietf-netconf", NULL, NULL, &ietf_netconf_mod);
@@ -115,7 +128,12 @@ int main(int argc, char* argv[])
     	val_value_t* interfaces_state_val;
         data_val = val_find_child(reply_val,NULL,"data");
         interfaces_state_val = val_find_child(data_val,"ietf-interfaces","interfaces-state");
-        val_dump_value(interfaces_state_val,0);
+        if (interfaces_state_val) {
+            val_dump_value(interfaces_state_val,0);
+        } else {
+            log_info("\nReply to 'get' RPC did not contain interfaces-state.");
+        }
+
     }
 
     val_free_value(request_val);

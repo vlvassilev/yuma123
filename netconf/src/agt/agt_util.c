@@ -1539,7 +1539,10 @@ status_t
         res = ERR_FIL_OPEN;
     }
 
+    m__free(msg->rpc_user1);
     m__free(buffer);
+
+    msg->rpc_user1 = NULL;
 
     return res;
                 

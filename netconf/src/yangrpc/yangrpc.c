@@ -245,7 +245,8 @@ status_t
         }
 
         /* skip found modules with errors */          
-        if (!(searchresult->res == ERR_NCX_WRONG_VERSION ||
+        if (searchresult->res != NO_ERR &&
+            !(searchresult->res == ERR_NCX_WRONG_VERSION ||
               searchresult->res == ERR_NCX_MOD_NOT_FOUND)) {
             continue;
         }

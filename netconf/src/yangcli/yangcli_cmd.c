@@ -7488,7 +7488,7 @@ status_t
     val_value_t           *connect_valset;
     val_value_t           *valset, *testval;
     status_t               res;
-    boolean                s1, s2, s3, tcp;
+    boolean                s1, s2, s3, s4, s5, tcp;
 
 #ifdef DEBUG
     if (server_cb == NULL) {
@@ -7567,6 +7567,10 @@ status_t
                         YANGCLI_USER) ? TRUE : FALSE;
     s3 = val_find_child(valset, YANGCLI_MOD,
                         YANGCLI_PASSWORD) ? TRUE : FALSE;
+    s4 = val_find_child(valset, YANGCLI_MOD,
+                        YANGCLI_PUBLIC_KEY) ? TRUE : FALSE;
+    s5 = val_find_child(valset, YANGCLI_MOD,
+                        YANGCLI_PRIVATE_KEY) ? TRUE : FALSE;
 
     /* check the transport parameter */
     testval = val_find_child(valset, 
@@ -7585,7 +7589,7 @@ status_t
      * try to get any missing params in valset 
      */
     if (interactive_mode()) {
-        if (startupmode && s1 && s2 && (s3 || tcp)) {
+        if (startupmode && s1 && s2 && (s3 || (s4 && s5) || tcp)) {
             if (LOGDEBUG3) {
                 log_debug3("\nyangcli: CLI direct connect mode");
             }
@@ -7628,10 +7632,14 @@ status_t
         s3 = val_find_child(server_cb->connect_valset, 
                             YANGCLI_MOD,
                             YANGCLI_PASSWORD) ? TRUE : FALSE;
+        s4 = val_find_child(valset, YANGCLI_MOD,
+                            YANGCLI_PUBLIC_KEY) ? TRUE : FALSE;
+        s5 = val_find_child(valset, YANGCLI_MOD,
+                            YANGCLI_PRIVATE_KEY) ? TRUE : FALSE;
     }
 
     /* check if all params present yet */
-    if (s1 && s2 && (s3 || tcp)) {
+    if (s1 && s2 && (s3 || (s4 && s5) || tcp)) {
 
         res = replace_connect_valset(server_cb->connect_valset);
         if (res != NO_ERR) {

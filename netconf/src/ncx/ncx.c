@@ -2335,7 +2335,7 @@ status_t
      */
     if (mod->ismod) {
         /* save the module in the module Q */
-        add_to_modQ(mod, &ncx_modQ);
+        add_to_modQ(mod, ncx_curQ);
         mod->added = TRUE;
 
         /* !!! hack to cleanup after xmlns init cycle !!!

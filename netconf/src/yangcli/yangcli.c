@@ -2888,6 +2888,18 @@ void
             }
         }
 
+        /* Make an exception for ietf-netconf.  Yuma123 quietly replaces
+         * this module with yuma123-netconf.
+         */
+
+        if (strcmp(module, NCXMOD_IETF_NETCONF) == 0) {
+            log_debug2("\nUsing module %s in place of %s\n", NCXMOD_NETCONF,
+                       NCXMOD_IETF_NETCONF);
+            module = NCXMOD_NETCONF;
+            revision = NULL;
+            /* namespace is already "urn:ietf:params:xml:ns:netconf:base:1.0" */
+        }
+
         mod = ncx_find_module(module, revision);
         if (mod != NULL) {
             /* make sure that the namespace URIs match */

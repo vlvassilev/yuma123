@@ -16,6 +16,7 @@ test-deviation-add-must \
 test-deviation-not-supported \
 test-deviation-delete-ext \
 test-deviation-replace-type \
+test-deviation-in-modules-state \
 test-edit-config \
 test-lock \
 test-multiple-edit-callbacks \

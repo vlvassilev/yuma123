@@ -1,0 +1,15 @@
+spawn yangcli --user=$env(NCUSER) --server=$env(NCSERVER) --ncport=$env(NCPORT) --password=$env(NCPASSWORD)
+
+expect {
+    "yangcli $env(NCUSER)@$env(NCSERVER)>" {send "show modules\n"}
+    timeout {exit 1}
+}
+
+set fp [open "tmp/modlist" "w"]
+expect -re ".*yangcli $env(NCUSER)@$env(NCSERVER)>"
+regsub {.*show modules} $expect_out(buffer) {} modlist
+regsub -all {\r} $modlist {} modlist
+regsub -all -line {^.*:} $modlist {} modlist
+regsub -all -line {^yangcli.*$} $modlist {} modlist
+puts -nonewline $fp $modlist
+close $fp

@@ -25,6 +25,7 @@ test-validate-config-only \
 test-identityref-typedef \
 test-identityref-submodule \
 test-instance-identifier \
+test-when \
 test-xpath-current \
 test-xpath-re-match \
 test-xpath-deref \

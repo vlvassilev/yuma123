@@ -2122,7 +2122,7 @@ status_t
 
             if (testobj->when) {
                 cnt++;
-                res = check_when_stmt(val, valroot, val->parent, 
+                res = check_when_stmt(val, valroot, val, 
                                       testobj->when, condresult);
                 if (res != NO_ERR || !*condresult) {
                     if (whencount) {

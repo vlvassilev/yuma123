@@ -1,0 +1,34 @@
+module mod1 {
+  prefix m1;
+  namespace "http://yuma123.org/ns/test/netconfd/when/mod1";
+  identity b;
+  identity foo {
+    base b;
+  }
+  identity bar {
+    base b;
+  }
+  container top {
+    container child {
+      leaf type {
+          type identityref {
+            base b;
+          }
+      }
+      choice top-type {
+        case foos {
+          when "type = 'm1:foo'";
+          leaf foo {
+            type string;
+          }
+        }
+        case bars {
+          when "type = 'm1:bar'";
+          leaf bar {
+            type string;
+          }
+        }
+      }
+    }
+  }
+}

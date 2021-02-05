@@ -478,6 +478,7 @@ ses_accept_defered_input:
                                 agt_ses_kill_session(scb,
                                                      scb->sid,
                                                      SES_TR_DROPPED);
+                                scb = NULL;
                             }
                         }
                     }
@@ -491,6 +492,7 @@ ses_accept_defered_input:
             while (!done2) {
                 if (!agt_ses_process_first_ready()) {
                     done2 = TRUE;
+                    scb = NULL;
                 } else if (agt_shutdown_requested()) {
                     done = done2 = TRUE;
                 } else {

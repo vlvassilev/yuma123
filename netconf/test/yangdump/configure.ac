@@ -1,4 +1,4 @@
-AC_INIT([yangdump-test-suite], [2.12], [vladimir@transpacket.com])
+AC_INIT([yangdump-test-suite], [2.12], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

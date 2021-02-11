@@ -1,18 +1,19 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: yuma123
-Upstream-Contact: Vladimir Vassilev <vladimir@transpacket.com>
+Upstream-Contact: Vladimir Vassilev <vladimir@lightside-instruments.com>
 Source: https://sourceforge.net/projects/yuma123
 
 Files: *
 Copyright: 2008-2012 Andy Bierman <andy@yumaworks.com>
            2009-2010 Netconf Central, Inc.
            2012 YumaWorks, Inc. <support@yumaworks.com>
-           2013-2018 Vladimir Vassilev <vladimir@transpacket.com>
+           2013-2021 Vladimir Vassilev <vladimir@lightside-instruments.com>
            2013-2018 Transpacket AS <support@transpacket.com>
+           2019-2021 Lightside Instruments AS <admin@lightside-instruments.com>
 License: BSD-3-clause
 
 Files: debian/*
-Copyright: 2013-2018 Vladimir Vassilev <vladimir@transpacket.com>
+Copyright: 2013-2021 Vladimir Vassilev <vladimir@lightside-instruments.com>
 License: BSD-3-clause
 
 Files: netconf/modules/ietf/*

@@ -506,15 +506,14 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
 
     timespec_add(&start, &delta, &next);
 
-    if(tg->streams[tg->stream_index].testframe_type) {
+    if(tg->streams[tg->stream_index].testframe_type && tg->streams[tg->stream_index].testframe_type_dynamic) {
 
         frame_time_stamp(tg);
 
         frame_sequence_stamp(tg);
 
-        if(tg->streams[tg->stream_index].testframe_type_dynamic) {
-            frame_udp_checksum_update(tg);
-        }
+        frame_udp_checksum_update(tg);
+
         update_crc(tg->streams[tg->stream_index].frame_data, tg->streams[tg->stream_index].frame_size);
 
     }

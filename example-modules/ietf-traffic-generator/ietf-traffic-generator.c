@@ -52,7 +52,7 @@ static status_t
     {"frames-per-burst", required_argument, NULL, 'n'},
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
-    {"testframe_type", required_argument, NULL, 'T'},
+    {"testframe-type", required_argument, NULL, 'T'},
 */
 static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
 {

@@ -24,7 +24,7 @@ static struct option const long_options[] =
     {"testframe-type", required_argument, NULL, 'T'},
     {"realtime-epoch", required_argument, NULL, 'e'},
     {"interface-speed", required_argument, NULL, 'S'},
-    {"stdout-mode", required_argument, NULL, 'm'},
+    {"stdout-mode", no_argument, NULL, 'm'},
     {NULL, 0, NULL, 0}
 };
 

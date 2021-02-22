@@ -11,7 +11,7 @@ Dependency: installed netconfd run-time binaries and development shared librarie
 
 ===Functionality===
  yangcli root@localhost> create /interfaces/interface[name='eth0'] -- type=ethernetCsmacd
- yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=67000000  testframe/type=testframe-ipv4-udp frame-data=\
+ yangcli root@localhost> create /interfaces/interface[name='eth0']/traffic-generator -- frame-size=64 interframe-gap=67000000  testframe-type=dynamic frame-data=\
  6CA96F0000026CA96F00000108004500\
  002ED4A500000A115816C0000201C000\
  0202C0200007001A0000010203040506\
@@ -36,9 +36,7 @@ rpc-reply {
           frame-size 64
           frame-data 6CA96F0000026CA96F00000108004500002ED4A500000A115816C0000201C0000202C0200007001A00000102030405060708090A0B0C0D0E0F101112
           interframe-gap 67000000
-          testframe {
-            type dt:testframe-ipv4-udp
-          }
+          testframe-type dynamic
         }
       }
       interface eth1 {
@@ -91,6 +89,15 @@ Usage:
         1 000000000000000:000000672   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A0000000102030405060708090A0B0C0D0E0F10119CD50E0F
         2 000000000000001:000000000   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A0000000102030405060708090A0B0C0D0E0F10119CD50E0F
         3 000000000000001:000000672   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A0000000102030405060708090A0B0C0D0E0F10119CD50E0F
+
+==Dynamic testframe - stamped with sequence number and time==
+Adding the --testframe-type=dynamc according to the model testframes are dynamically stamped with sequence number (8 octets) and IEEE 1588 timestamp (10 octets).
+These dynamic fields are added at the back of the payload within the specified --frame-size argument:
+        ...
+        0 000000000000000:000000000   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A00000000000000000000000000000000000000005465E0B4
+        1 000000000000000:000000672   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A00000000000000000001000000000000000002A0FE7B8E91
+        2 000000000000001:000000000   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A000000000000000000020000000000010000000025F5ECD1
+        3 000000000000001:000000672   64 123456789ABCDEF01234567808004500002E000000000A112CBCC0000201C0000202C0200007001A00000000000000000003000000000001000002A08FEB82F4
 
 ===Testframe generation===
 While you could use any ethernet frame specified with the --frame-data parameter there is a tool that generates RFC2544 sec C.2.6.4 testframe.

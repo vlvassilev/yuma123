@@ -7,11 +7,9 @@ module ietf-network-bridge-flows {
   }
   import ietf-inet-types {
     prefix inet;
-    revision-date 2013-07-15;
   }
   import ietf-yang-types {
     prefix yang;
-    revision-date 2013-07-15;
   }
 
   organization
@@ -21,13 +19,13 @@ module ietf-network-bridge-flows {
      WG List:  <mailto:netmod@ietf.org>
 
      Editor:   Vladimir Vassilev
-               <mailto:vladimir@transpacket.com>";
+               <mailto:vladimir@lightside-instruments.com>";
   description
     "This module contains a collection of YANG definitions for
      description and management of network bridge based on
      flows.
 
-     Copyright (c) 2019 IETF Trust and the persons identified as
+     Copyright (c) 2020 IETF Trust and the persons identified as
      authors of the code. All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -40,237 +38,11 @@ module ietf-network-bridge-flows {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2019-07-05 {
+  revision 2021-02-17 {
     description
       "Unreleased revision.";
     reference
       "RFC XXXX: Network Bridge";
-  }
-
-  typedef vlan-pcp {
-    type uint8 {
-      range "0..7";
-    }
-    description
-      "IEEE 802.1p priority. It indicates the frame priority level.
-       Values are from 0 (best effort) to 7 (highest);
-       1 represents the lowest priority.";
-  }
-
-  typedef vlan-id {
-    type uint16 {
-      range "0..4095";
-    }
-  }
-
-  typedef ether-type {
-    type uint32;
-  }
-
-  typedef vlan-cfi {
-    type int32;
-  }
-
-  grouping address {
-    choice address {
-      case ipv4 {
-        leaf ipv4-address {
-          type inet:ipv4-prefix;
-        }
-      }
-      case ipv6 {
-        leaf ipv6-address {
-          type inet:ipv6-prefix;
-        }
-      }
-    }
-  }
-
-  grouping ordered {
-    leaf order {
-      type int32;
-    }
-  }
-
-  grouping action-list {
-    list action {
-      key "order";
-      uses ordered;
-      uses action;
-    }
-  }
-
-  grouping action {
-    choice action {
-      case output-action-case {
-        container output-action {
-          leaf out-port {
-            type netbr:port-ref;
-          }
-          leaf max-length {
-            type uint16;
-          }
-        }
-      }
-      case controller-action-case {
-        container controller-action {
-          leaf max-length {
-            type uint16;
-          }
-        }
-      }
-      case drop-action-case {
-        container drop-action {
-          presence "no content action";
-        }
-      }
-      case pop-vlan-action-case {
-        container pop-vlan-action {
-          presence "no content action";
-        }
-      }
-      case push-vlan-action-case {
-        container push-vlan-action {
-          leaf ethernet-type {
-            type uint16;
-          }
-          leaf tag {
-            type int32;
-          }
-          leaf pcp {
-            type int32;
-          }
-          leaf cfi {
-            type vlan-cfi;
-          }
-          leaf vlan-id {
-            type vlan-id;
-          }
-        }
-      }
-      case set-vlan-cfi-action-case {
-        container set-vlan-cfi-action {
-          leaf vlan-cfi {
-            type vlan-cfi;
-          }
-        }
-      }
-      case set-vlan-id-action-case {
-        container set-vlan-id-action {
-          leaf vlan-id {
-            type vlan-id;
-          }
-        }
-      }
-      case set-vlan-pcp-action-case {
-        container set-vlan-pcp-action {
-          leaf vlan-pcp {
-            type vlan-pcp;
-          }
-        }
-      }
-      case strip-vlan-action-case {
-        container strip-vlan-action {
-          presence "no content action";
-        }
-      }
-    }
-  }
-
-  grouping mac-address-filter {
-    leaf address {
-      type yang:mac-address;
-      mandatory true;
-    }
-    leaf mask {
-      type yang:mac-address;
-    }
-  }
-
-  grouping ethernet-match-fields {
-    container ethernet-source {
-      presence "Match field is active and set";
-      description
-        "Ethernet source address.";
-      uses mac-address-filter;
-    }
-    container ethernet-destination {
-      presence "Match field is active and set";
-      description
-        "Ethernet destination address.";
-      uses mac-address-filter;
-    }
-    container ethernet-type {
-      presence "Match field is active and set";
-      description
-        "Ethernet frame type.";
-      leaf type {
-        type ether-type;
-        mandatory true;
-      }
-    }
-  }
-
-  grouping vlan-match-fields {
-    container vlan-id {
-      presence "Match field is active and set";
-      description
-        "VLAN id.";
-      leaf vlan-id-present {
-        type boolean;
-      }
-      leaf vlan-id {
-        type vlan-id;
-      }
-    }
-    leaf vlan-pcp {
-      type vlan-pcp;
-      description
-        "VLAN priority.";
-    }
-  }
-
-  grouping match {
-    leaf in-port {
-      type netbr:port-ref;
-    }
-    container ethernet-match {
-      uses ethernet-match-fields;
-    }
-    container vlan-match {
-      uses vlan-match-fields;
-    }
-  }
-
-  grouping raw-packet {
-    description
-      "Basic packet structure.";
-    leaf ingress {
-      type netbr:port-ref;
-    }
-    leaf payload {
-      type binary;
-    }
-  }
-
-  grouping packet-in {
-    leaf packet-in-reason {
-      type identityref {
-        base packet-in-reason;
-      }
-    }
-    uses raw-packet;
-  }
-
-  grouping ethernet-packet {
-    description
-      "Ethernet packet headers structure.";
-    leaf source {
-      type yang:mac-address;
-    }
-    leaf destination {
-      type yang:mac-address;
-    }
   }
 
   identity packet-in-reason {
@@ -296,12 +68,381 @@ module ietf-network-bridge-flows {
       "Packet with invalid TTL";
   }
 
-  notification packet-received {
+  typedef vlan-pcp {
+    type uint8 {
+      range "0..7";
+    }
     description
-      "Delivery of incoming packet.";
-    uses packet-in;
+      "IEEE 802.1p priority. It indicates the frame priority level.
+       Values are from 0 (best effort) to 7 (highest);
+       1 represents the lowest priority.";
+  }
+
+  typedef vlan-id {
+    type uint16 {
+      range "0..4095";
+    }
+    description
+      "IETF 802.1q VLAN tag id.";
+  }
+
+  typedef ether-type {
+    type uint16;
+    description
+      "Length/Type field of the generated Ethernet packet.";
+    reference
+      "IEEE 802-2014 Clause 9.2";
+  }
+
+  typedef vlan-cfi {
+    type int32;
+    description
+      "Canonical Format Identifier (CFI) field
+       (shall be 0 for Ethernet switches) of the
+       transmitted 802.1q VLAN tag.";
+  }
+
+  typedef flow-id {
+    type inet:uri;
+    description
+      "Flow identifier.";
+  }
+
+  grouping address {
+    description
+      "IP address.";
+    choice address {
+      description
+        "Address choice.";
+      case ipv4 {
+        leaf ipv4-address {
+          type inet:ipv4-prefix;
+          description
+            "IPv4 address.";
+        }
+      }
+      case ipv6 {
+        leaf ipv6-address {
+          type inet:ipv6-prefix;
+          description
+            "IPv6 address.";
+        }
+      }
+    }
+  }
+
+  grouping action-list {
+    description
+      "Action list grouping.";
+    list action {
+      key "order";
+      description
+        "Contains action with corresponding order index.";
+      leaf order {
+        type int32;
+        description
+          "Order index.";
+      }
+      uses action;
+    }
+  }
+
+  grouping action {
+    description
+      "Grouping of all action data definitions.";
+    choice action {
+      description
+        "Choice with alternative action cases.";
+      case output-action-case {
+        container output-action {
+          description
+            "Contains output action specific data.";
+          leaf out-port {
+            type netbr:port-ref;
+            description
+              "Port on which the packet is sent.";
+          }
+          leaf max-length {
+            type uint16;
+            description
+              "Packets above this length are discarded.";
+          }
+        }
+      }
+      case controller-action-case {
+        container controller-action {
+          description
+            "Contains controller action specific data.";
+          leaf max-length {
+            type uint16;
+            description
+              "Packets above this length are discarted.";
+          }
+        }
+      }
+      case drop-action-case {
+        container drop-action {
+          presence "Drop action case";
+          description
+            "Drop action presence container.";
+        }
+      }
+      case pop-vlan-action-case {
+        container pop-vlan-action {
+          presence "Pop-vlan action case.";
+          description
+            "Pop-vlan presence container";
+        }
+      }
+      case push-vlan-action-case {
+        container push-vlan-action {
+          description
+            "Contains push-vlan action specific data.";
+          leaf ethernet-type {
+            type ether-type;
+            description
+              "Tag protocol identifier (TPID) as defined in
+               IEEE 802.1q";
+          }
+          leaf pcp {
+            type vlan-pcp;
+            description
+              "Specifies the IEEE 802.1p Priority Code Point (PCP) value
+               of the pushed 802.1q VLAN tag.";
+          }
+          leaf cfi {
+            type vlan-cfi;
+            description
+              "Configures the Canonical Format Identifier (CFI) field
+               (shall be 0 for Ethernet switches) of the transmitted
+               802.1q VLAN tag.";
+          }
+          leaf vlan-id {
+            type vlan-id;
+            description
+              "Specifies the VLAN ID as defined in IEEE 802.1q of the
+               pushed VLAN tag.";
+          }
+        }
+      }
+      case set-vlan-cfi-action-case {
+        container set-vlan-cfi-action {
+          description
+            "Contains set-vlan-cfi action specific data. The
+             set-vlan-cfi action is used to replace CFI field
+             on already tagged packets.";
+          leaf vlan-cfi {
+            type vlan-cfi;
+            description
+              "Configures the Canonical Format Identifier (CFI) field
+               to set on the transmitted 802.1q VLAN tagged packet.";
+          }
+        }
+      }
+      case set-vlan-id-action-case {
+        container set-vlan-id-action {
+          description
+            "Contains set-vlan-id action specific data. The set-vlan-id
+             action is used to replace VLAN ID field on already tagged
+             packets.";
+          leaf vlan-id {
+            type vlan-id;
+            description
+              "Specifies the VLAN ID to set on the 802.1q VLAN tagged
+               packet.";
+          }
+        }
+      }
+      case set-vlan-pcp-action-case {
+        container set-vlan-pcp-action {
+          description
+            "Contains set-vlan-pcp action specific data. The
+             set-vlan-pcp action is used to replace VLAN PCP
+             field on already tagged packets.";
+          leaf vlan-pcp {
+            type vlan-pcp;
+            description
+              "Specifies the IEEE 802.1p Priority Code Point
+               (PCP) value to set on the 802.1q VLAN tagged
+               packet.";
+          }
+        }
+      }
+      case strip-vlan-action-case {
+        container strip-vlan-action {
+          presence "Strip-vlan action case";
+          description
+            "Strip-vlan presence container.";
+        }
+      }
+    }
+  }
+
+  grouping mac-address-filter {
+    description
+      "Defines address and mask pair for
+       definition of basic MAC address filter rules.";
+    leaf address {
+      type yang:mac-address;
+      mandatory true;
+      description
+        "MAC address to compare with.";
+    }
+    leaf mask {
+      type yang:mac-address;
+      description
+        "The mask specifies the bits to compare.
+         All bits that are 1s are significant.";
+    }
+  }
+
+  grouping ethernet-match-fields {
+    description
+      "Defines data for specification of filter rules for Ethernet
+       frames based on source and destination MAC addresses and
+       the ethernet type field.";
+    container ethernet-source {
+      presence "Match field is active and set";
+      description
+        "Ethernet source address.";
+      uses mac-address-filter;
+    }
+    container ethernet-destination {
+      presence "Match field is active and set";
+      description
+        "Ethernet destination address.";
+      uses mac-address-filter;
+    }
+    container ethernet-type {
+      presence "Match field is active and set";
+      description
+        "Ethernet frame type.";
+      leaf type {
+        type ether-type;
+        mandatory true;
+        description
+          "Type field of the Ethernet frame.";
+      }
+    }
+  }
+
+  grouping vlan-match-fields {
+    description
+      "Defines data for specification of filter rules for
+       VLAN tagged or not Ethernet frames based on the
+       presence of VLAN tag, the value of the VLAN ID and
+       VLAN PCP fields.";
+    container vlan-id {
+      presence "Match field is active and set";
+      description
+        "Match 802.1q VLAN ID.";
+      leaf vlan-id-present {
+        type boolean;
+        description
+          "If set to false match packets with different
+           VLAN ID then the specified in the vlan-id leaf.";
+      }
+      leaf vlan-id {
+        type vlan-id;
+        description
+          "802.1q VLAN ID to match. The match rule can
+           be inverted by setting vlan-id-present to
+           false.";
+      }
+    }
+    leaf vlan-pcp {
+      type vlan-pcp;
+      description
+        "Match 802.1p VLAN Priority code point (PCP) field.";
+    }
+  }
+
+  grouping match {
+    description
+      "Defines data for specification of filter rules.";
+    leaf in-port {
+      type netbr:port-ref;
+      description
+        "Input port to match.";
+    }
+    container ethernet-match {
+      description
+        "Ethernet match rules.";
+      uses ethernet-match-fields;
+    }
+    container vlan-match {
+      description
+        "VLAN match rules.";
+      uses vlan-match-fields;
+    }
+  }
+
+  grouping raw-packet {
+    description
+      "Basic packet structure.";
+    leaf ingress {
+      type netbr:port-ref;
+      description
+        "Port the packet was received on.";
+    }
+    leaf payload {
+      type binary;
+      description
+        "Payload of the packet.";
+    }
+  }
+
+  grouping packet-in {
+    description
+      "Input packet event data:
+       ingress port, payload, event reason.";
+    leaf packet-in-reason {
+      type identityref {
+        base packet-in-reason;
+      }
+      description
+        "Reason identity:
+         no-match, send-to-controller, invalid-ttl or another
+         reason for the corresponding packet-in event.";
+    }
+    uses raw-packet;
+  }
+
+  grouping ethernet-packet {
+    description
+      "Ethernet packet headers structure.";
+    leaf source {
+      type yang:mac-address;
+      description
+        "MAC source address.";
+    }
+    leaf destination {
+      type yang:mac-address;
+      description
+        "MAC destination address.";
+    }
+  }
+
+  grouping flow {
+    description
+      "The definition of a flow has a name,
+       match container specifying filter rules and
+       ordered list of actions to be performed on
+       each packet.";
+    leaf id {
+      type flow-id;
+      description
+        "Flow identifier.";
+    }
     container match {
+      description
+        "Filter rules for the flow.";
       uses match;
+    }
+    container actions {
+      description
+        "Ordered list of actions.";
+      uses action-list;
     }
   }
 
@@ -311,55 +452,59 @@ module ietf-network-bridge-flows {
     input {
       leaf egress {
         type netbr:port-ref;
+        description
+          "Egress port the packet will be transmitted from.";
       }
       uses raw-packet;
       uses action-list;
     }
   }
 
-  container packet-in-message {
+  notification packet-received {
+    description
+      "Delivery of incoming packet.";
     uses packet-in;
     container match {
+      description
+        "Match data that triggered the source of the
+         packet-received event.";
       uses match;
     }
   }
 
-  grouping flow {
+  container packet-in-message {
+    description
+      "Container with the last packet-in reported.
+       Useful for basic monitoring.";
+    uses packet-in;
     container match {
+      description
+        "Match data that triggered the source of the
+         last packet-received event.";
       uses match;
     }
-    container actions {
-      uses action-list;
-    }
-    leaf priority {
-      type uint16;
-    }
-    leaf container-name {
-      type string;
-    }
-    leaf flow-name {
-      type string;
-    }
   }
-
-  typedef flow-id {
-    type inet:uri;
-  }
-
   container flows {
+    description
+      "Contains the list of all configured flows.";
     list flow {
       key "id";
-      leaf id {
-        type flow-id;
-      }
+      description
+        "";
       uses flow;
       container flow-statistics {
         config false;
+        description
+          "Contains flow counters.";
         leaf packet-count {
           type yang:counter64;
+          description
+            "Packets matched.";
         }
         leaf byte-count {
           type yang:counter64;
+          description
+            "Sum of the bytes of all matched packets.";
         }
       }
     }

@@ -71,6 +71,6 @@ timespec-math.c
 
 traffic_analyzer_LDFLAGS = -pthread
 
-dist_examples_yang_DATA = \
-traffic-generator-testframe.yang
+#dist_examples_yang_DATA = \
+#traffic-generator-testframe.yang
 

@@ -21,7 +21,7 @@ static struct option const long_options[] =
     {"frames-per-burst", required_argument, NULL, 'n'},
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
-    {"testframe", required_argument, NULL, 'T'},
+    {"testframe-type", required_argument, NULL, 'T'},
     {"realtime-epoch", required_argument, NULL, 'e'},
     {"interface-speed", required_argument, NULL, 'S'},
     {"stdout-mode", required_argument, NULL, 'm'},
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     uint32_t frames_per_burst=0;
     uint32_t bursts_per_stream=0;
     uint64_t total_frames=0;
-    char* testframe=NULL;
+    char* testframe_type=NULL;
     char* realtime_epoch=NULL;
     uint64_t interface_speed=1000000000; /* 1G */
     char* src_mac_address=NULL;
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
                 total_frames = atoll(optarg);
                 break;
             case 'T':
-                testframe = optarg;
+                testframe_type = optarg;
                 break;
             case 'e':
                 realtime_epoch = optarg;
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
         realtime_epoch = buf;
     }
 
-    tg = traffic_generator_init(interface_speed, realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe);
+    tg = traffic_generator_init(interface_speed, realtime_epoch, frame_size, frame_data_hexstr, interframe_gap, interburst_gap, frames_per_burst, bursts_per_stream, total_frames, testframe_type);
 
     uint64_t frm=0;
     uint64_t print_sec=0;

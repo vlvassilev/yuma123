@@ -366,7 +366,7 @@ char* traffic_generator_make_testframe(uint32_t frame_size, char* frame_data_hex
     return result_frame_hexstr;
 }
 
-traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* realtime_epoch, uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe)
+traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* realtime_epoch, uint32_t frame_size, char* frame_data_hexstr, uint32_t interframe_gap, uint32_t interburst_gap, uint32_t frames_per_burst, uint32_t bursts_per_stream, uint64_t total_frames, char* testframe_type)
 {
     unsigned int i;
     traffic_generator_t* tg;
@@ -401,10 +401,10 @@ traffic_generator_t* traffic_generator_init(uint64_t interface_speed, char* real
         } else {
             tg->streams[i].interstream_gap=interframe_gap;
         }
-        if(testframe!=NULL) {
-            tg->streams[i].testframe=1;
-            if(0==strcmp(testframe,"testframe-ipv4-udp")) {
-                tg->streams[i].testframe_ipv4_udp=1;
+        if(testframe_type!=NULL) {
+            tg->streams[i].testframe_type=1;
+            if(0==strcmp(testframe_type,"dynamic")) {
+                tg->streams[i].testframe_type_dynamic=1;
             }
         }
     }
@@ -506,13 +506,13 @@ int traffic_generator_get_frame(traffic_generator_t* tg, uint32_t* frame_size, u
 
     timespec_add(&start, &delta, &next);
 
-    if(tg->streams[tg->stream_index].testframe) {
+    if(tg->streams[tg->stream_index].testframe_type) {
 
         frame_time_stamp(tg);
 
         frame_sequence_stamp(tg);
 
-        if(tg->streams[tg->stream_index].testframe_ipv4_udp) {
+        if(tg->streams[tg->stream_index].testframe_type_dynamic) {
             frame_udp_checksum_update(tg);
         }
         update_crc(tg->streams[tg->stream_index].frame_data, tg->streams[tg->stream_index].frame_size);

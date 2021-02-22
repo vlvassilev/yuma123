@@ -52,7 +52,7 @@ static status_t
     {"frames-per-burst", required_argument, NULL, 'n'},
     {"bursts-per-stream", required_argument, NULL, 'p'},
     {"total-frames", required_argument, NULL, 't'},
-    {"testframe", required_argument, NULL, 'T'},
+    {"testframe_type", required_argument, NULL, 'T'},
 */
 static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_str)
 {
@@ -101,15 +101,12 @@ static void serialize_params(val_value_t* traffic_generator_val, char* cli_args_
         sprintf(cli_args_str+strlen(cli_args_str)," --total-frames=%llu",VAL_UINT64(val));
     }
 
-    val = val_find_child(traffic_generator_val,"traffic-generator-testframe","testframe");
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","testframe-type");
     if(val!=NULL) {
-        val = val_find_child(val,"traffic-generator-testframe","type");
-        if(val!=NULL) {
-            sprintf(cli_args_str+strlen(cli_args_str)," --testframe=%s", val->v.idref.name);
-        }
+        sprintf(cli_args_str+strlen(cli_args_str)," --testframe-type=%s", val->v.idref.name);
     }
 
-    val = val_find_child(traffic_generator_val,"ietf-traffic-generator-testframe","realtime-epoch");
+    val = val_find_child(traffic_generator_val,"ietf-traffic-generator","realtime-epoch");
     if(val!=NULL) {
         sprintf(cli_args_str+strlen(cli_args_str)," --realtime-epoch=%llu",VAL_STRING(val));
     }

@@ -1,0 +1,9 @@
+To install this module use
+
+sudo apt-get install python-dev
+autoreconf -i -f
+./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+make
+sudo make install
+python setup.py install
+

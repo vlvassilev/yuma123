@@ -1,9 +1,21 @@
 ==Standalone project for netconfd module implementing ietf-traffic-generator.yang==
 Dependency: installed netconfd run-time binaries and development shared libraries and headers.
 
+===Dependencies===
+On Debian 9 install the following
+
+apt-get install libxml2-dev libtool netconfd autoconf build-essential zlib1g-dev make libtool libssl-dev git libssh2-1-dev openssh-server libncurses5-dev libreadline-dev
+
+then install OpenYuma 
+
+git clone https://github.com/OpenClovis/OpenYuma
+cd OpenYuma
+make
+make install
+
 ===Build and install===
  autoreconf -i -f
- ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr CPPFLAGS="-I/usr/include/libxml2/libxml"
  make
  sudo make install
 

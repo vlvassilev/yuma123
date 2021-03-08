@@ -399,15 +399,23 @@ static unsigned int find_all_object_matches( xpath_pcb_t* pcb,
 
     if (nsid==0 && prefix==NULL && pcb->targobj) {
         if(obj_is_root(pcb->targobj)) {
+            unsigned int matched_cnt_temp = 0;
+            unsigned int matched_cnt_cur = 0;
             dlq_hdr_t *modQ = ncx_get_temp_modQ();
-            if(modQ==NULL) {
-                /* when not in yangcli context - TODO */
-                modQ=ncx_get_cur_modQ();
-            }
-            matched_cnt=ncx123_find_all_homonym_top_objs(modQ,
+            if(modQ!=NULL) {
+                /* check temp context - e.g. mgr/yangcli modules */
+                matched_cnt_temp = ncx123_find_all_homonym_top_objs(modQ,
                              nodename,
                              matched_objs,
                              matched_objs_limit);
+            }
+
+            modQ=ncx_get_cur_modQ();
+            matched_cnt_cur=ncx123_find_all_homonym_top_objs(modQ,
+                             nodename,
+                             matched_objs+matched_cnt_temp,
+                             matched_objs_limit-matched_cnt_temp);
+            matched_cnt = matched_cnt_cur + matched_cnt_temp;
         } else {
             matched_cnt=obj123_find_all_homonym_child_objs(pcb->targobj,
                              nodename,

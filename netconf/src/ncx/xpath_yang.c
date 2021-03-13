@@ -427,6 +427,8 @@ static unsigned int find_all_object_matches( xpath_pcb_t* pcb,
                            0==strcmp(obj_get_mod_name(matched_objs[matched_cnt_temp+i]), obj_get_mod_name(matched_objs[j]))) {
                             break;
                         }
+                    }
+                    if(j==matched_cnt_temp) {
                         matched_objs[matched_cnt_unique++]=matched_objs[matched_cnt_temp+i];
                     }
                 }

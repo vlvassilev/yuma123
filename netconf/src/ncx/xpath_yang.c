@@ -413,9 +413,25 @@ static unsigned int find_all_object_matches( xpath_pcb_t* pcb,
             modQ=ncx_get_cur_modQ();
             matched_cnt_cur=ncx123_find_all_homonym_top_objs(modQ,
                              nodename,
-                             matched_objs+matched_cnt_temp,
-                             matched_objs_limit-matched_cnt_temp);
+                             matched_objs?matched_objs+matched_cnt_temp:NULL,
+                             matched_objs?matched_objs_limit-matched_cnt_temp:0);
             matched_cnt = matched_cnt_cur + matched_cnt_temp;
+
+            // remove duplicated mod:name entries .e.g /nacm - temp modules take precedence
+            if(matched_objs && matched_cnt_cur>0 && matched_cnt_temp>0) {
+                unsigned int matched_cnt_unique = matched_cnt_temp;
+                unsigned int i,j;
+                for(i=0;i<matched_cnt_cur;i++) {
+                    for(j=0;j<matched_cnt_temp;j++) {
+                        if(0==strcmp(obj_get_name(matched_objs[matched_cnt_temp+i]), obj_get_name(matched_objs[j])) &&
+                           0==strcmp(obj_get_mod_name(matched_objs[matched_cnt_temp+i]), obj_get_mod_name(matched_objs[j]))) {
+                            break;
+                        }
+                        matched_objs[matched_cnt_unique++]=matched_objs[matched_cnt_temp+i];
+                    }
+                }
+                return matched_cnt_unique;
+            }
         } else {
             matched_cnt=obj123_find_all_homonym_child_objs(pcb->targobj,
                              nodename,

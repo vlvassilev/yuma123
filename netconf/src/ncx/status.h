@@ -383,7 +383,8 @@ typedef enum status_t_
     ERR_NCX_TOP_LEVEL_MANDATORY,        /* 448 */
     ERR_NCX_FILE_MOD_MISMATCH,          /* 449 */
     ERR_NCX_UNIQUE_CONDITIONAL_MISMATCH, /* 450 */
-    ERR_LAST_WARN,                      /* 451 -- not really used */
+    ERR_NCX_DUP_DATE_IN_REV_HISTORY,    /* 451 */
+    ERR_LAST_WARN,                      /* 452 -- not really used */
 
     /* system info return codes start at 900 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 900 */

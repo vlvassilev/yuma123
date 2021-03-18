@@ -780,6 +780,8 @@ const char *
         return "file name does not match [sub]module name";
     case ERR_NCX_UNIQUE_CONDITIONAL_MISMATCH:
         return "unique-stmt component conditions do not match parent list";
+    case ERR_NCX_DUP_DATE_IN_REV_HISTORY:
+        return "duplicated dates in revision history";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

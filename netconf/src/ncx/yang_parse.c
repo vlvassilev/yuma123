@@ -2745,13 +2745,17 @@ static status_t
             
         /* check if the revision is already present */
         testrev = ncx_find_revhist(mod, rev->version);
-        if (testrev) {
-            /* error for dup. revision with same version */
-            retres = ERR_NCX_DUP_ENTRY;
-            log_error("\nError: revision with same date on line %u",
+        if (testrev && ncx_warning_enabled(ERR_NCX_DUP_DATE_IN_REV_HISTORY)) {
+            log_warn("\nWarning: revisions with same date (%s) in %s line %u",
+                      rev->version,
+                      mod->name,
                       testrev->tkerr.linenum);
             tkc->curerr = &rev->tkerr;
-            ncx_print_errormsg(tkc, mod, retres);
+            ncx_print_errormsg(tkc,
+                               mod,
+                               ERR_NCX_DUP_DATE_IN_REV_HISTORY);
+        } else {
+            ncx_inc_warnings(mod);
         }
     }
 

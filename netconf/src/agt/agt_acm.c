@@ -1480,8 +1480,16 @@ static boolean
                  xpath1_check_node_exists_slow( datarule_cache->pcb,
                                                 resnodeQ, val ))
             {
+                val_value_t* action_val;
                 *done = TRUE;
-                granted = TRUE;
+                action_val = val_find_child(datarule_cache->datarule,
+                                            AGT_ACM_MODULE,
+                                            "action");
+                if(action_val && 0==strcmp(VAL_STRING(action_val),"deny")) {
+                    granted = FALSE;
+                } else {
+                    granted = TRUE;
+                }
             }
         }
     }

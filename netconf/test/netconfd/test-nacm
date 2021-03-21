@@ -1,0 +1,3 @@
+#!/bin/bash -e
+cd nacm
+./run.sh

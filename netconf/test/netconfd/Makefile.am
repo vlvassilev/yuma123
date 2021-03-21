@@ -1,4 +1,5 @@
 TESTS=\
+test-nacm \
 test-get \
 test-notification-in-grouping \
 test-identity-iffeature \

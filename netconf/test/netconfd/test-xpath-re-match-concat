@@ -1,0 +1,4 @@
+#!/bin/bash -e
+cd xpath-re-match
+./run.sh concat
+

@@ -30,6 +30,7 @@ test-instance-identifier \
 test-when \
 test-xpath-current \
 test-xpath-re-match \
+test-xpath-re-match-concat \
 test-xpath-deref \
 test-xpath-deref-2 \
 test-xpath-derived-from \

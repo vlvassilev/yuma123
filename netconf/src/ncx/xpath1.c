@@ -2254,7 +2254,7 @@ static xpath_result_t *
     xpath_result_t  *parm, *result;
     xmlChar         *str, *returnstr;
     uint32           parmcnt, len;
-
+    //1
     if (!pcb->val && !pcb->obj) {
         return NULL;
     }
@@ -7672,6 +7672,7 @@ static xpath_result_t *
     tk_type_t               nexttyp;
     int32                   parmcnt;
     boolean                 done;
+    boolean                 has_null_arg;
 
     val1 = NULL;
     parmcnt = 0;
@@ -7704,6 +7705,8 @@ static xpath_result_t *
         /* get parms until a matching right paren is reached */
         nexttyp = tk_next_typ(pcb->tkc);
         done = (nexttyp == TK_TT_RPAREN) ? TRUE : FALSE;
+
+        has_null_arg=FALSE;
         while (!done && *res == NO_ERR) {
             val1 = parse_expr(pcb, res);
             if (*res == NO_ERR) {
@@ -7711,6 +7714,8 @@ static xpath_result_t *
                 if (val1) {
                     dlq_enque(val1, &parmQ);
                     val1 = NULL;
+                } else {
+                    has_null_arg=TRUE;
                 }
 
                 /* check for right paren or else should be comma */
@@ -7744,8 +7749,12 @@ static xpath_result_t *
                 /*** log agent error ***/
             }
         } else {
-            /* make the function call */
-            val1 = (*fncb->fn)(pcb, &parmQ, res);
+            if(has_null_arg==FALSE) {
+                /* make the function call */
+                val1 = (*fncb->fn)(pcb, &parmQ, res);
+            } else {
+                val1 = NULL;
+            }
 
             if (LOGDEBUG3) {
                 if (val1) {

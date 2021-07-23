@@ -40,7 +40,8 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge-scheduler-state.yan
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-generator.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-analyzer.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-if-extensions.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-if-ethernet-like.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-if-ethernet-like.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-geo-location.yang
 
 dist_ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \

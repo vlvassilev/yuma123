@@ -1,0 +1,18 @@
+module geo-location {
+  yang-version 1.1;
+  namespace "http://example.com/ns/geo-location";
+  prefix geol;
+
+  import ietf-geo-location { prefix geo; }
+
+  organization  "example.com";
+
+  description
+    "Container with geo location data.";
+
+  revision 2021-07-23 {
+    description
+      "Initial";
+  }
+  uses geo:geo-location;
+}

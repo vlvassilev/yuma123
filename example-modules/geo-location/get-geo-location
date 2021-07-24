@@ -6,9 +6,8 @@
 latitude=$(gpspipe -w -n 10 |grep lon|tail -n1|cut -d":" -f9|cut -d"," -f1)
 longitude=$(gpspipe -w -n 10 |grep lon|tail -n1|cut -d":" -f10|cut -d"," -f1)
 
-echo -n '<geo-location xmlns="http://example.com/ns/geo-location"><latitude>'
+echo -n '<geo-location xmlns="http://example.com/ns/geo-location"><geo-location><latitude>'
 echo -n "$latitude"
 echo -n '</latitude><longitude>'
 echo -n "$longitude"
-echo -n '</longitude></geo-location>'
-
+echo -n '</longitude></geo-location></geo-location>'

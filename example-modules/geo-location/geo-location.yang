@@ -15,7 +15,7 @@ module geo-location {
       "Added config false top level container.";
   }
   container geo-location {
-    config fasle;
+    config false;
     uses geo:geo-location;
   }
 }

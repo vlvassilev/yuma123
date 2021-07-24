@@ -10,12 +10,14 @@ module geo-location {
   description
     "Container with geo location data.";
 
-  revision 2021-07-24 {
+  revision 2021-07-23 {
     description
-      "Added config false top level container.";
+      "Added refine to set config false in /geo-location.";
   }
-  container geo-location {
-    config false;
-    uses geo:geo-location;
+
+  uses geo:geo-location {
+    refine geo-location {
+      config false;
+    }
   }
 }

@@ -1,4 +1,4 @@
-yuma123 (2.12) UNRELEASED; urgency=medium
+yuma123 (2.12) stable; urgency=medium
 
   * Added val123_add_virtual_cb to support multiple calbacks "filling" common
     virtual container.
@@ -9,9 +9,8 @@ yuma123 (2.12) UNRELEASED; urgency=medium
     allowing cache to be disabled when cache-timeout=0
   * Fixed Xpath compare of nodeset to nodeset implementation for numeric nodesets
   * Updated IETF draft YANG modules
-  * 
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Thu, 12 Dec 2019 15:35:24 +0100
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 18 Aug 2021 00:08:23 +0200
 
 yuma123 (2.11) stable; urgency=medium
 

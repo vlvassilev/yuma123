@@ -1,5 +1,5 @@
-yuma123-systemd-services (2.12-1) UNRELEASED; urgency=medium
+yuma123-systemd-services (2.12-1) stable; urgency=medium
 
   * New upstream release
 
- -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Fri, 25 Oct 2019 19:16:48 +0200
+ -- Vladimir Vassilev <vladimir@lightside-instruments.com>  Wed, 18 Aug 2021 00:18:57 +0200

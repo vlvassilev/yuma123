@@ -2,7 +2,6 @@ module ietf-traffic-analyzer {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-traffic-analyzer";
   prefix ta;
-
   import ietf-interfaces {
     prefix if;
     reference
@@ -39,7 +38,7 @@ module ietf-traffic-analyzer {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2021-02-16 {
+  revision 2021-07-11 {
     description
       "Initial revision.";
     reference
@@ -51,7 +50,6 @@ module ietf-traffic-analyzer {
     description
       "The device can analyze traffic from the egress direction.";
   }
-
   feature ingress-direction {
     description
       "The device can generate traffic from the ingress direction.";
@@ -183,6 +181,67 @@ module ietf-traffic-analyzer {
     }
   }
 
+  grouping capture-config-data {
+    description
+      "Grouping with a capture configuration container.";
+    container capture {
+      if-feature "capture";
+
+      description
+        "Contains capture parameters.";
+
+      container start-trigger {
+          description
+            "Configures when the capture start is triggered.";
+        choice start-trigger {
+          description
+            "If none of the cases in this choice are configured the
+             capture process starts from the first frame received.";
+          case frame-index {
+            description
+              "Start capturing frames at the specified frame index.";
+            leaf frame-index {
+              type uint64;
+              description
+                "First captured frame index.";
+            }
+          }
+          case testframe-index {
+            description
+              "Start capturing frames at the specified
+               testframe index.";
+            leaf testframe-index {
+              type uint64;
+              description
+                "Starts capture as specified testframe index.";
+            }
+          }
+        }
+      }
+      container stop-trigger {
+          description
+            "Configures when the capture is stopped.";
+        choice stop-trigger {
+          description
+            "If none of the cases in this choice are configured the
+             captured frames are always the last frames received for
+             as many frames the implementation can buffer.";
+          case when-full {
+            description
+              "Stops capturing when the implementation can not store
+               more frames.";
+            leaf when-full {
+                type empty;
+                description
+                  "When present in configuration capture stops when
+                   the capture buffer is full.";
+            }
+          }
+        }
+      }
+    }
+  }
+
   grouping capture-data {
     description
       "Grouping with statistics and data
@@ -231,7 +290,6 @@ module ietf-traffic-analyzer {
       }
     }
   }
-
   grouping filter-data {
     description
       "Grouping with a filter container specifying the filtering
@@ -266,6 +324,7 @@ module ietf-traffic-analyzer {
       description
         "Traffic analyzer for ingress direction.";
       uses filter-data;
+      uses capture-config-data;
       container state {
         config false;
         description
@@ -280,6 +339,7 @@ module ietf-traffic-analyzer {
       description
         "Traffic analyzer for egress direction.";
       uses filter-data;
+      uses capture-config-data;
       container state {
         config false;
         description

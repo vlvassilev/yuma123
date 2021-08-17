@@ -43,7 +43,7 @@ module ietf-traffic-generator {
      This version of this YANG module is part of RFC XXXX; see
      the RFC itself for full legal notices.";
 
-  revision 2021-02-16 {
+  revision 2021-07-11 {
     description
       "Initial revision.";
     reference
@@ -123,7 +123,6 @@ module ietf-traffic-generator {
          after the specified number of frames are generated.";
     }
   }
-
   grouping burst-data {
     description
       "Generated traffic burst parameters.";

@@ -2,9 +2,9 @@ Source: yuma123-perl
 Section: net
 Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
-Build-Depends: debhelper (>= 10), autoconf, libyuma-dev (>=2.12), libyangrpc-dev (>=2.12)
+Build-Depends: debhelper (>= 10), autoconf, libyuma-dev (>=2.13), libyangrpc-dev (>=2.13)
 Standards-Version: 4.1.4
-Homepage: https://sourceforge.net/projects/yuma123
+Homepage: https://yuma123.org
 
 Package: libyuma-perl
 Section: perl

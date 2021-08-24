@@ -1,14 +1,14 @@
 Source: yuma123-netconfd-module-ietf-interfaces
 Section: net
 Priority: optional
-Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 10), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev, libyuma-dev (>= 2.12)
+Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
+Build-Depends: debhelper (>= 10), autoconf, libncurses5-dev, libssh2-1-dev, libxml2-dev, libtool, libreadline-dev, zlib1g-dev, libssl-dev, libyuma-dev (>= 2.13)
 Standards-Version: 4.1.4
-Homepage: http://transpacket.com/
+Homepage: http://yuma123.org
 
 Package: netconfd-module-ietf-interfaces
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.12)
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, lsb-base (>= 3.2-13), libyuma2 (>= 2.13)
 Description: SIL module for netconfd implementing ietf-interfaces.yang
  The NETCONFprotocol and YANG modeling language provide a framework
  for the exchange of management information between agents (servers)

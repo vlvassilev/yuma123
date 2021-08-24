@@ -1,4 +1,4 @@
-AC_INIT([yuma123-netconfd-module-ietf-network-bridge], [2.12], [vladimir@lightside-instruments.com])
+AC_INIT([yuma123-netconfd-module-ietf-network-bridge], [2.13], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

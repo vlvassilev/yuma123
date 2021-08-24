@@ -2,9 +2,9 @@ Source: yuma123-systemd-services
 Section: net
 Priority: optional
 Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
-Build-Depends: debhelper (>= 9)
-Standards-Version: 3.9.8
-Homepage: http://lightside-instruments.com
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.1.4
+Homepage: http://yuma123.org
 
 Package: netconfd-service
 Section: net

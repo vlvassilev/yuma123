@@ -1,4 +1,4 @@
-AC_INIT([yangrpc-test-suite], [2.12], [vladimir@lightside-instruments.com])
+AC_INIT([yangrpc-test-suite], [2.13], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
 

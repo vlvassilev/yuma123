@@ -1,10 +1,10 @@
 Source: libapache2-mod-yangrpc-example
 Section: net
 Priority: optional
-Maintainer: Vladimir Vassilev <vladimir@transpacket.com>
-Build-Depends: debhelper (>= 10), autoconf, libxml2-dev, libtool, libyuma-dev (>= 2.12), libyangrpc-dev (>= 2.12), apache2-dev
+Maintainer: Vladimir Vassilev <vladimir@lightside-instruments.com>
+Build-Depends: debhelper (>= 10), autoconf, libxml2-dev, libtool, libyuma-dev (>= 2.13), libyangrpc-dev (>= 2.13), apache2-dev
 Standards-Version: 4.1.4
-Homepage: https://sourceforge.net/projects/yuma123
+Homepage: https://yuma123.org
 
 Package: libapache2-mod-yangrpc-example
 Architecture: any

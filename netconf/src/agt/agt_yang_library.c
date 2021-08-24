@@ -191,7 +191,7 @@ static status_t
         /* deviation */
         deviation_obj = obj_find_child(module_obj, "ietf-yang-library", "deviation");
         assert(deviation_obj);
-        for (devmod = dlq_firstEntry(&mod->devmodlist);
+        for (devmod = (ncx_save_deviations_t *)dlq_firstEntry(&mod->devmodlist);
              devmod != NULL;
              devmod = (ncx_save_deviations_t *)dlq_nextEntry(devmod)) {
             ncx_module_t *match_mod;

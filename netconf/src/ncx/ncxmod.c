@@ -46,6 +46,7 @@ date         init     comment
 #include "ncxconst.h"
 #include "ncxtypes.h"
 #include "ncxmod.h"
+#include "ncx_list.h"
 #include "status.h"
 #include "tstamp.h"
 #include "xml_util.h"

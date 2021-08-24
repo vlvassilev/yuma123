@@ -40,6 +40,7 @@ date         init     comment
 #include "ncxmod.h"
 #include "runstack.h"
 #include "status.h"
+#include "xml_rd.h"
 #include "val.h"
 #include "val_util.h"
 #include "var.h"

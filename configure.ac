@@ -1,7 +1,7 @@
 AC_INIT([yuma123], [2.13], [vladimir@lightside-instruments.com])
 
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_INIT([disable-static])
 
 AC_PROG_CC

@@ -49,6 +49,8 @@ date         init     comment
 #include <netdb.h>
 #include <libssh2.h>
 #include <assert.h>
+#include <errno.h>
+#include <poll.h>
 
 #include "procdefs.h"
 #include "def_reg.h"
@@ -103,6 +105,98 @@ static uint32     next_sesid;
 
 static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 
+/********************************************************************
+*                                                                   *
+*                      STATIC FUNCTIONS - START                     *
+*                                                                   *
+*********************************************************************/
+
+static int set_nonblock(int fd)
+{
+        int val;
+
+        val = fcntl(fd, F_GETFL);
+        if (val < 0) {
+                log_error("fcntl(%d, F_GETFL): %s", fd, strerror(errno));
+                return (-1);
+        }
+        if (val & O_NONBLOCK) {
+                log_debug3("fd %d is O_NONBLOCK", fd);
+                return (0);
+        }
+        log_debug2("fd %d setting O_NONBLOCK", fd);
+        val |= O_NONBLOCK;
+        if (fcntl(fd, F_SETFL, val) == -1) {
+                log_debug("fcntl(%d, F_SETFL, O_NONBLOCK): %s", fd,
+                    strerror(errno));
+                return (-1);
+        }
+        return (0);
+}
+
+static void monotime_ts(struct timespec *ts)
+{
+        struct timeval tv;
+        static int gettime_failed = 0;
+
+        if (!gettime_failed) {
+                if (clock_gettime(CLOCK_MONOTONIC, ts) == 0)
+                        return;
+        }
+        gettimeofday(&tv, NULL);
+        ts->tv_sec = tv.tv_sec;
+        ts->tv_nsec = (long)tv.tv_usec * 1000;
+}
+
+static void monotime_tv(struct timeval *tv)
+{
+        struct timespec ts;
+
+        monotime_ts(&ts);
+        tv->tv_sec = ts.tv_sec;
+        tv->tv_usec = ts.tv_nsec / 1000;
+}
+
+static void ms_subtract_diff(struct timeval *start, int *ms)
+{
+        struct timeval diff, finish;
+
+        monotime_tv(&finish);
+        timersub(&finish, start, &diff);
+        *ms -= (diff.tv_sec * 1000) + (diff.tv_usec / 1000);
+}
+
+static int waitrfd(int fd, int *timeoutp)
+{
+        struct pollfd pfd;
+        struct timeval t_start;
+        int oerrno, r;
+
+        monotime_tv(&t_start);
+        pfd.fd = fd;
+        pfd.events = POLLIN;
+        for (; *timeoutp >= 0;) {
+                r = poll(&pfd, 1, *timeoutp);
+                oerrno = errno;
+                ms_subtract_diff(&t_start, timeoutp);
+                errno = oerrno;
+                if (r > 0)
+                        return 0;
+                else if (r == -1 && errno != EAGAIN)
+                        return -1;
+                else if (r == 0)
+                        break;
+        }
+        /* timeout */
+        errno = ETIMEDOUT;
+        return -1;
+}
+
+/********************************************************************
+*                                                                   *
+*                      STATIC FUNCTIONS - END                       *
+*                                                                   *
+*********************************************************************/
 
 /********************************************************************
 * FUNCTION connect_to_server
@@ -130,6 +224,10 @@ static status_t
     struct sockaddr_in  targ;
     int                 ret;
     boolean             userport, done;
+    int                 *timeoutp;
+    int                 optval = 0;
+    socklen_t           optlen = sizeof(optval);
+    *timeoutp = 5000;
 
     /* get a file descriptor for the new socket */
     scb->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -137,15 +235,7 @@ static status_t
         return ERR_NCX_RESOURCE_DENIED;
     }
 
-    /* set non-blocking IO */
-    if (fcntl(scb->fd, F_SETFD, O_NONBLOCK)) {
-        if (LOGINFO) {
-            log_info("\nmgr_ses: fnctl failed");
-        }
-    }
-
-    /* activate the socket in the select loop */
-    mgr_io_activate_session(scb->fd);
+    set_nonblock(scb->fd);
 
     /* set the NETCONF server address */
     memset(&targ, 0x0, sizeof(targ));
@@ -166,30 +256,37 @@ static status_t
     ret = connect(scb->fd, 
                   (struct sockaddr *)&targ,
                   sizeof(struct sockaddr_in));
+
     if (!ret) {
-        done = TRUE;
+        goto done;
     }
 
-    /* try SSH (port 22) next */
-    if (!userport && !done) {
-        port = NCX_SSH_PORT;
-        targ.sin_port = htons(port);
-        ret = connect(scb->fd, 
-                      (struct sockaddr *)&targ,
-                      sizeof(struct sockaddr_in));
-        if (!ret) {
-            done = TRUE;
-        }
+    if (errno!=EINPROGRESS) {
+        close(scb->fd);
+        return ERR_NCX_CONNECT_FAILED;
     }
 
-    if (done) {
-        return NO_ERR;
+    if (waitrfd(scb->fd, timeoutp) == -1) {
+        close(scb->fd);
+        return ERR_NCX_CONNECT_FAILED;
     }
 
-    /* de-activate the socket in the select loop */
-    mgr_io_deactivate_session(scb->fd);
+    /* Completed or failed */
+    if (getsockopt(scb->fd, SOL_SOCKET, SO_ERROR, &optval, &optlen) == -1) {
+        log_debug("getsockopt: %s", strerror(errno));
+        close(scb->fd);
+        return ERR_NCX_CONNECT_FAILED;
+    }
+    if (optval != 0) {
+        close(scb->fd);
+        errno = optval;
+        return ERR_NCX_CONNECT_FAILED;
 
-    return ERR_NCX_CONNECT_FAILED;
+    }
+
+done:
+    mgr_io_activate_session(scb->fd);
+    return NO_ERR;
 
 }  /* connect_to_server */
 

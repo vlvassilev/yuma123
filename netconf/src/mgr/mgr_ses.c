@@ -212,6 +212,7 @@ static int waitrfd(int fd, int *timeoutp)
 *   scb == session control block
 *   hent == host entry struct
 *   port == port number to try, or 0 for defaults
+*   timeout == connection establishment timeout in milliseconds
 *
 * RETURNS:
 *   status
@@ -219,15 +220,14 @@ static int waitrfd(int fd, int *timeoutp)
 static status_t
     connect_to_server (ses_cb_t *scb,
                       struct hostent *hent,
-                      uint16_t port)
+                      uint16_t port,
+                      uint32_t timeout)
 {
     struct sockaddr_in  targ;
     int                 ret;
     boolean             userport, done;
-    int                 *timeoutp;
     int                 optval = 0;
     socklen_t           optlen = sizeof(optval);
-    *timeoutp = 5000;
 
     /* get a file descriptor for the new socket */
     scb->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -266,7 +266,7 @@ static status_t
         return ERR_NCX_CONNECT_FAILED;
     }
 
-    if (waitrfd(scb->fd, timeoutp) == -1) {
+    if (waitrfd(scb->fd, &timeout) == -1) {
         close(scb->fd);
         return ERR_NCX_CONNECT_FAILED;
     }
@@ -955,6 +955,9 @@ status_t
     struct hostent *hent;
     uint       i, slot;
     int        tcp_direct_enable = 0;
+    val_value_t* input_val;
+    val_value_t* val;
+    uint32_t timeout;
 
     if(transport == SES_TRANSPORT_TCP_DIRECT) {
     	tcp_direct_enable = 1;
@@ -1046,11 +1049,20 @@ status_t
     mscb->target = xml_strdup(target);
     mscb->getvar_fn = getvar_fn;
 
+
+    //input_val = val_find_child(params_val, NULL, "input");
+    //assert(input_val!=NULL);
+
+    val = val_find_child(params_val, NULL, "timeout");
+
+    assert(val); //timeout = 30*1000;
+    timeout = VAL_UINT32(val)*1000;
+
     /* get the hostname for the specified target */
     hent = gethostbyname((const char *)target);
     if (hent) {
         /* entry OK, try to get a TCP connection to server */
-        res = connect_to_server(scb, hent, port);
+        res = connect_to_server(scb, hent, port, timeout);
     } else {
         res = ERR_NCX_UNKNOWN_HOST;
     } 

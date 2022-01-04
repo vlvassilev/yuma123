@@ -28,6 +28,7 @@ test-identityref-typedef \
 test-identityref-submodule \
 test-instance-identifier \
 test-when \
+test-xpath-ancestor \
 test-xpath-current \
 test-xpath-re-match \
 test-xpath-re-match-concat \

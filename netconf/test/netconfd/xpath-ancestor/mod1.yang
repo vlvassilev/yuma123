@@ -1,0 +1,34 @@
+module mod1 {
+  yang-version 1.1;
+
+  namespace "http://yuma123.org/ns/test/netconfd/xpath-ancestor/mod1";
+  prefix m1;
+
+  organization
+    "yuma123.org";
+
+  description
+    "Part of the xpath-ancestor test.";
+
+  revision 2022-01-01 {
+    description
+      "Initial version";
+  }
+
+  container a {
+    leaf value {
+      type string;
+    }
+    container b {
+      leaf value {
+        type string;
+      }
+      container c {
+        leaf value {
+          type string;
+          must '. = ancestor::a/value';
+        }
+      }
+    }
+  }
+}

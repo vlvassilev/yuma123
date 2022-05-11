@@ -2155,14 +2155,19 @@ status_t
         if (num->dec.val == 0) {
             ilen = xml_strcpy(buff, (const xmlChar *)"0.0");
         } else if (num->dec.zeroes > 0) {
-            ilen = xml_strcpy(buff, (const xmlChar *)"0.");
+
+            if(num->dec.val>0) {
+                ilen = xml_strcpy(buff, (const xmlChar *)"0.");
+            } else {
+                ilen = xml_strcpy(buff, (const xmlChar *)"-0.");
+            }
             i = 1;
             while (i < num->dec.zeroes) {
                 buff[ilen++] = '0';
                 i++;
             }
             ilen += sprintf((char *)&buff[ilen], "%lld", 
-                            (long long)num->dec.val);
+                            (long long)llabs(num->dec.val));
         } else {
             if (num->dec.digits == 0) {
                 return SET_ERROR(ERR_INTERNAL_VAL);

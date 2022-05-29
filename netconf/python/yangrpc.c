@@ -130,8 +130,21 @@ static PyMethodDef yang_rpc_methods[] =
 };
 
 /* module initialization */
-PyMODINIT_FUNC
-inityangrpc(void)
+static struct PyModuleDef py_mod_def =
 {
-    (void) Py_InitModule("yangrpc", yang_rpc_methods);
+    PyModuleDef_HEAD_INIT,
+    "yangrpc", /* name of module */
+    "",          /* module documentation, may be NULL */
+    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    yang_rpc_methods
+};
+
+PyMODINIT_FUNC
+PyInit_yangrpc(void)
+{
+    PyObject *m;
+
+    //(void) Py_InitModule("yangrpc", yang_rpc_methods);
+    m = PyModule_Create(&py_mod_def);
+    return m;
 }

@@ -195,7 +195,7 @@ yuma_val_free_value(PyObject *self, PyObject *args)
 }
 
 /*  define functions in module */
-static PyMethodDef YumaMethods[] =
+static PyMethodDef yuma_methods[] =
 {
      {"init", yuma_init, METH_VARARGS, "initialization"},
      {"schema_module_load", yuma_schema_module_load, METH_VARARGS, "load schema module"},
@@ -208,17 +208,32 @@ static PyMethodDef YumaMethods[] =
      {NULL, NULL, 0, NULL}
 };
 
+
 /* module initialization */
+static struct PyModuleDef py_mod_def =
+{
+    PyModuleDef_HEAD_INIT,
+    "yuma", /* name of module */
+    "",          /* module documentation, may be NULL */
+    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    yuma_methods
+};
+
+
 PyMODINIT_FUNC
-inityuma(void)
+PyInit_yuma(void)
 {
     PyObject *m;
     int res;
-    m = Py_InitModule("yuma", YumaMethods);
+    //m = Py_InitModule("yuma", YumaMethods);
+    m = PyModule_Create(&py_mod_def);
+
     res = PyModule_AddIntConstant(m, "NCX_DISPLAY_MODE_XML", NCX_DISPLAY_MODE_XML);
     assert(res==0);
     res = PyModule_AddIntConstant(m, "NCX_DISPLAY_MODE_XML_NONS", NCX_DISPLAY_MODE_XML_NONS);
     assert(res==0);
     res = PyModule_AddIntConstant(m, "NCX_DISPLAY_MODE_JSON", NCX_DISPLAY_MODE_JSON);
     assert(res==0);
+
+    return m;
 }

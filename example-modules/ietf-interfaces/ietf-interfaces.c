@@ -25,11 +25,14 @@
 #include "rpc.h"
 #include "val.h"
 #include "val123.h"
+#include "val_set_cplxval_obj.h"
 
 /* module static variables */
 static val_value_t* root_prev_val;
 static val_value_t* with_nmda_param_val;
 static     uint32 timer_id;
+
+#define BUFSIZE 1024
 
 static void my_send_link_state_notification(char* new_state, char* if_name)
 {
@@ -247,6 +250,67 @@ static status_t
     return NO_ERR;
 }
 
+static status_t
+    get_ipv4(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val)
+{
+    status_t res;
+    obj_template_t* obj;
+    val_value_t* val;
+
+    val_value_t* name_val;
+    char* state_xml = "<ipv4 xmlns=\"urn:ietf:params:xml:ns:yang:ietf-ip\"><address><ip>123.123.123.123</ip></address ></ipv4>";
+    ssize_t n;
+
+    name_val = val_find_child(dst_val->parent,
+                              "ietf-interfaces",
+                              "name");
+    assert(name_val);
+
+    char* ptr;
+    res = NO_ERR;
+
+    /* .../ipv4 */
+
+    char cmd[BUFSIZE]="";
+
+    char buf[BUFSIZE]="";
+    FILE *fp;
+
+    sprintf(cmd, "get-interface-ipv4 %s", VAL_STRING(name_val));
+
+#if 1
+    if ((fp = popen(cmd, "r")) == NULL) {
+        printf("Error opening pipe!\n");
+        assert(0);
+    }
+    do {
+        ptr = fgets(buf+strlen(buf), BUFSIZE, fp);
+    } while(ptr);
+
+    printf("get-interface-ipv4: %s", buf);
+
+    if(pclose(fp))  {
+        printf("Command not found or exited with error status\n");
+        assert(0);
+    }
+#else
+    strcpy(buf, state_xml);
+#endif
+
+    if(0==strlen(buf)) {
+        return ERR_NCX_SKIPPED;
+    }
+
+    res = val_set_cplxval_obj(dst_val,
+                              vir_val->obj,
+                              buf);
+
+    return res;
+}
+
 /*
 
 Inter-|   Receive                                                |  Transmit
@@ -265,6 +329,7 @@ static status_t
     obj_template_t* oper_status_obj;
     obj_template_t* last_change_obj;
     obj_template_t* statistics_obj;
+    obj_template_t* ipv4_obj;
     obj_template_t* obj;
 
     /*vals*/
@@ -273,6 +338,7 @@ static status_t
     val_value_t* oper_status_val;
     val_value_t* last_change_val;
     val_value_t* statistics_val;
+    val_value_t* ipv4_val;
     val_value_t* val;
 
     status_t res=NO_ERR;
@@ -457,6 +523,25 @@ static status_t
             break;
         }
     }
+
+    /* Add ipv4 container */
+    ipv4_obj = obj_find_child(interface_obj,
+                         "ietf-ip",
+                         "ipv4");
+    assert(ipv4_obj != NULL);
+    ipv4_val = val_new_value();
+    if (ipv4_val == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(ipv4_val, ipv4_obj);
+
+    val_init_virtual(ipv4_val,
+                     get_ipv4,
+                     ipv4_obj);
+
+    val_add_child(ipv4_val, interface_val);
+
     return res;
 }
 
@@ -713,6 +798,14 @@ status_t
         &agt_profile->agt_savedevQ,
         &mod);
     assert(res == NO_ERR);
+
+    res = ncxmod_load_module(
+        "ietf-ip",
+        NULL,
+        &agt_profile->agt_savedevQ,
+        &mod);
+    assert(res == NO_ERR);
+
 
     res = ncxmod_load_module(
         "interfaces-notifications",

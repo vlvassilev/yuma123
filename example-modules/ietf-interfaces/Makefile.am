@@ -15,3 +15,5 @@ endif
 
 dist_examples_yang_DATA = \
 interfaces-notifications.yang
+
+bin_SCRIPTS = get-interface-ipv4

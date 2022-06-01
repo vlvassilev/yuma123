@@ -30,7 +30,9 @@ $(top_srcdir)/netconf/modules/ietf/ietf-datastores@2018-02-14.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-network@2018-02-26.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-network-state@2018-02-26.yang \
 $(top_srcdir)/netconf/modules/ietf/ietf-network-topology@2018-02-26.yang \
-$(top_srcdir)/netconf/modules/ietf/ietf-network-topology-state@2018-02-26.yang
+$(top_srcdir)/netconf/modules/ietf/ietf-network-topology-state@2018-02-26.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-geo-location@2022-02-11.yang
+
 
 dist_ietf_draft_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-network-bridge.yang \
@@ -41,7 +43,6 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-generator.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-analyzer.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-if-extensions.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-if-ethernet-like.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-geo-location.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-client.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-ssh-client.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-tcp-client.yang \

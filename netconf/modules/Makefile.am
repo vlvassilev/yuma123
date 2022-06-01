@@ -41,7 +41,23 @@ $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-generator.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-traffic-analyzer.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-if-extensions.yang \
 $(top_srcdir)/netconf/modules/ietf-draft/ietf-if-ethernet-like.yang \
-$(top_srcdir)/netconf/modules/ietf-draft/ietf-geo-location.yang
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-geo-location.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-netconf-client.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-ssh-client.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-tcp-client.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-tcp-server.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-tls-client.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-crypto-types.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-tcp-common.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-truststore.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-keystore.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-ssh-common.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/iana-ssh-encryption-algs.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/iana-ssh-key-exchange-algs.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/iana-ssh-mac-algs.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/iana-ssh-public-key-algs.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/ietf-tls-common.yang \
+$(top_srcdir)/netconf/modules/ietf-draft/iana-tls-cipher-suite-algs.yang
 
 dist_ietf_derived_yang_DATA = \
 $(top_srcdir)/netconf/modules/ietf-derived/nc-notifications.yang \

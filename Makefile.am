@@ -12,10 +12,10 @@ netconf/src/yangrpc/example \
 netconf/man \
 netconf/src/yangdump
 
-# example-modules/helloworld \
-# example-modules/ietf-interfaces \
-# example-modules/ietf-system \
-# example-modules/yangcli-to-rpc \
+# example-modules/helloworld 
+# example-modules/ietf-interfaces 
+# example-modules/ietf-system 
+# example-modules/yangcli-to-rpc 
 #example-modules/ietf-network-bridge
 #netconf/src/yangdiff
 
@@ -154,5 +154,5 @@ EXTRA_DIST= \
 netconf/src/yangdiff \
 rpm
 
-# example-modules/ietf-interfaces \
-# example-modules/ietf-system \
+# example-modules/ietf-interfaces 
+# example-modules/ietf-system 

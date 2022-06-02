@@ -7,15 +7,15 @@ netconf/src/subsys \
 netconf/src/yangcli \
 libtoaster/src \
 netconf/modules \
-example-modules/helloworld \
-example-modules/ietf-interfaces \
-example-modules/ietf-system \
-example-modules/yangcli-to-rpc \
 netconf/src/yangrpc \
 netconf/src/yangrpc/example \
 netconf/man \
 netconf/src/yangdump
 
+# example-modules/helloworld \
+# example-modules/ietf-interfaces \
+# example-modules/ietf-system \
+# example-modules/yangcli-to-rpc \
 #example-modules/ietf-network-bridge
 #netconf/src/yangdiff
 
@@ -152,6 +152,7 @@ $(top_srcdir)/netconf/src/yangrpc/yangrpc.h
 
 EXTRA_DIST= \
 netconf/src/yangdiff \
-example-modules/ietf-interfaces \
-example-modules/ietf-system \
 rpm
+
+# example-modules/ietf-interfaces \
+# example-modules/ietf-system \

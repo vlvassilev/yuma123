@@ -5333,7 +5333,7 @@ obj_template_t *
 * 
 * Get the next child object if the specified object
 * has any children.  Look past choice and case nodes
-* to the real nodes within them
+* to the real nodes within them.
 *
 *  !!!! SKIPS OVER AUGMENT AND USES !!!!
 *
@@ -5344,10 +5344,10 @@ obj_template_t *
 *    pointer to next child obj_template_t or 
 *    NULL if not found 
 *********************************************************************/
-obj_template_t *
+extern obj_template_t *
     obj_next_child_deep (obj_template_t *obj)
 {
-    obj_template_t  *cas, *next, *last, *child;
+    obj_template_t  *next, *last, *child;
 
 #ifdef DEBUG
     if (!obj) {
@@ -5359,71 +5359,40 @@ obj_template_t *
     /* start the loop at the current object to set the
      * 'last' object correctly
      */
-    next = obj;
+    last = obj;
+    next = last;
     while (next) {
         last = next;
 
         /* try next sibling */
         next = obj_next_child(next);
         if (next) {
-            switch (next->objtype) {
-            case OBJ_TYP_CHOICE:
-                /* dive into each case to find a first object
-                 * this should return the first object in the 
-                 * first case, but it checks the entire choice
-                 * to support empty case arms
-                 */
-                for (cas = obj_first_child(next);
-                     cas != NULL;
-                     cas = obj_next_child(next)) {
-                    child = obj_first_child(cas);
-                    if (child) {
-                        return child;
-                    }
-                }
-                continue;
-            case OBJ_TYP_CASE:
-                child = obj_first_child(next);
+            if(next->objtype == OBJ_TYP_CHOICE || next->objtype == OBJ_TYP_CASE) {
+                child = obj_first_child_deep(next);
                 if (child) {
                     return child;
                 }
-                continue;
-            default:
+            } else {
                 return next;
             }
         }
-
-        /* was last sibling, try parent if this is a case */
-        if (last->parent && 
-            (last->parent->objtype==OBJ_TYP_CASE)) {
-
-            cas = (obj_template_t *)
-                dlq_nextEntry(last->parent);
-            if (!cas) {
-                /* no next case, try next object after choice */
-                return obj_next_child_deep(last->parent->parent);
-            } else {
-                /* keep trying the next case until one with
-                 * a child node is found
-                 */
-                while (1) {
-                    next = obj_first_child(cas);
-                    if (next) {
-                        return next;
-                    } else {
-                        cas = (obj_template_t *)
-                            dlq_nextEntry(cas);
-                        if (!cas) {
-                            /* no next case, ret. object after choice */
-                            return 
-                                obj_next_child_deep(last->parent->parent);
-                        }
-                    }
-                }
-                /*NOTREACHED*/
-            }
-        }
     }
+
+    /* was last sibling, try parent if this is a case */
+    if(!obj_is_choice_or_case(obj->parent)) {
+        return NULL;
+    }
+
+    while(last->parent && obj_is_choice_or_case(last->parent)) {
+       next = obj_next_child_deep(last->parent);
+       if(next) {
+           return next;
+       }
+
+       last = last->parent;
+    }
+
+
     return NULL;
 
 }  /* obj_next_child_deep */

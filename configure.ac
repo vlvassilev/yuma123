@@ -103,7 +103,10 @@ AC_CONFIG_FILES([
         netconf/src/yangdump/Makefile
         netconf/man/Makefile
         rpm/yuma123.spec
-        libintri/private/Makefile
+
+        libintri/private/intri-test/Makefile
+        libintri/private/intri-device/Makefile
+
         libstandard/ietf-interfaces/Makefile
         libstandard/ietf-system/Makefile
 

@@ -9,9 +9,10 @@ netconf/modules \
 netconf/src/yangrpc \
 netconf/man \
 netconf/src/yangdump \
-libintri/private \
 libstandard/ietf-interfaces \
-libstandard/ietf-system
+libstandard/ietf-system \
+libintri/private/intri-test \
+libintri/private/intri-device
 
 # libtoaster/src \
 # netconf/src/yangrpc/example \

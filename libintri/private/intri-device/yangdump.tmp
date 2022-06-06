@@ -1,0 +1,11 @@
+yangdump \
+		--format=h \
+		--versionnames=false \
+		--subtree=. \
+		--unified=true \
+		--output=.
+yangdump \
+		--format=c \
+		--versionnames=false \
+		--subtree=. \
+		--output=.

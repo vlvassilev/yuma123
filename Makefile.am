@@ -9,14 +9,14 @@ netconf/modules \
 netconf/src/yangrpc \
 netconf/man \
 netconf/src/yangdump \
-libintri/private
+libintri/private \
+libstandard/ietf-interfaces \
+libstandard/ietf-system
 
 # libtoaster/src \
 # netconf/src/yangrpc/example \
-# example-modules/helloworld 
-# example-modules/ietf-interfaces 
-# example-modules/ietf-system 
-# example-modules/yangcli-to-rpc 
+# example-modules/helloworld
+# example-modules/yangcli-to-rpc
 #example-modules/ietf-network-bridge
 #netconf/src/yangdiff
 
@@ -155,5 +155,5 @@ EXTRA_DIST= \
 netconf/src/yangdiff \
 rpm
 
-# example-modules/ietf-interfaces 
-# example-modules/ietf-system 
+# example-modules/ietf-interfaces
+# example-modules/ietf-system

@@ -1,0 +1,28 @@
+==Standalone project for netconfd module implementing ietf-system.yang==
+Dependency: installed netconfd run-time binaries and development shared libraries and headers.
+
+===Build and install===
+ autoreconf -i -f
+ ./configure CFLAGS="-g -O0"  CXXFLAGS="-g -O0" --prefix=/usr
+ make
+ sudo make install
+
+ sudo netconfd --module=ietf-system
+
+===Functionality===
+yangcli root@localhost> xget /system-state/clock/current-datetime
+
+RPC Data Reply 3 for session 1:
+
+rpc-reply {
+  data {
+    system-state {
+      clock {
+        current-datetime 2016-03-08T16:47:50Z
+      }
+    }
+  }
+}
+...
+ yangcli root@localhost> set-current-datetime current-datetime=1970-01-01T15:34:27.882201125Z
+...

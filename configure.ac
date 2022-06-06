@@ -48,6 +48,9 @@ AC_SUBST(yuma123_yangdir)
 # examples_yangdir="$prefix/share/yuma/modules/examples"
 # AC_SUBST(examples_yangdir)
 
+intri_private_yangdir=${datarootdir}/yuma/modules/intri/private
+AC_SUBST(intri_private_yangdir)
+
 ncx_netconf_includedir=${includedir}/yuma/ncx
 AC_SUBST(ncx_netconf_includedir)
 
@@ -96,14 +99,15 @@ AC_CONFIG_FILES([
         netconf/src/ncx/Makefile
         netconf/src/yangcli/Makefile
         netconf/src/subsys/Makefile
-        libtoaster/src/Makefile
         netconf/src/yangrpc/Makefile
-        netconf/src/yangrpc/example/Makefile
         netconf/src/yangdump/Makefile
         netconf/man/Makefile
         rpm/yuma123.spec
+        libintri/private/Makefile
 ])
 
+        # libtoaster/src/Makefile
+        # netconf/src/yangrpc/example/Makefile
 # # Disabled example
 #         example-modules/helloworld/Makefile
 #         example-modules/ietf-interfaces/Makefile

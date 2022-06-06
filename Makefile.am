@@ -5,13 +5,14 @@ netconf/src/agt \
 netconf/src/netconfd \
 netconf/src/subsys \
 netconf/src/yangcli \
-libtoaster/src \
 netconf/modules \
 netconf/src/yangrpc \
-netconf/src/yangrpc/example \
 netconf/man \
-netconf/src/yangdump
+netconf/src/yangdump \
+libintri/private
 
+# libtoaster/src \
+# netconf/src/yangrpc/example \
 # example-modules/helloworld 
 # example-modules/ietf-interfaces 
 # example-modules/ietf-system 

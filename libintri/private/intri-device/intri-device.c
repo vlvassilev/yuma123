@@ -34,6 +34,9 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "intri-device.h"
+#include "../../.libintrishare/github.com/Intrising/intri-type/common/common.pb.h"
+#include "../../.libintrishare/github.com/golang/protobuf/ptypes/empty/empty.pb.h"
+#include "../../.libintrishare/libintrishare.h"
 
 /* ian: add head files */
 #include "../../.libintrishare/libintrishare.h"
@@ -99,17 +102,13 @@ static status_t intri_device_intri_device_get_mac_addr_mac_addr_get(
   }
 
   /* set the mac_addr var here, change EMPTY_STRING */
-  GoString in = {};
-  GoString out = {};
-  GoInt err_code = 0;
 
-  char in_char_arr[] = "{}";
-  in.p = in_char_arr;
-  in.n = sizeof(in_char_arr);
-  Device_Device_GetPortLists(&in, &out, &err_code);
-  // Device_Device_GetMACAddress(&in, &out, &err_code);
+  struct emptypb_Empty in;
+  struct commonpb_MACAddress out;
 
-  mac_addr = out.p;
+  device_Device_GetMACAddress(&in, &out);
+
+  mac_addr = out.MACAddr;
   res = val_set_simval_obj(
       dstval,
       dstval->obj,

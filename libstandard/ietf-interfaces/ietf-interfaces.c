@@ -2,11 +2,12 @@
     module ietf-interfaces
     namespace urn:ietf:params:xml:ns:yang:ietf-interfaces
  */
- 
+
 #include <libxml/xmlstring.h>
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 #include "procdefs.h"
 #include "agt.h"
 #include "agt_cb.h"
@@ -25,6 +26,7 @@
 #include "rpc.h"
 #include "val.h"
 #include "val123.h"
+#include "../../libintri/.libintrishare/libintrishare.h"
 
 /* module static variables */
 static val_value_t* root_prev_val;
@@ -255,7 +257,7 @@ Inter-|   Receive                                                |  Transmit
  wlan0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
   eth0: 604474858 23680030    0    0    0     0          0    357073 701580994 6935958    0    0    0     0       1          0
  */
- 
+
 static status_t
     add_interface_entry(char* buf, val_value_t* interfaces_val)
 {
@@ -302,7 +304,6 @@ static status_t
         NULL/*out-carrier*/,
         NULL/*out-compressed*/
     };
-
     /* get the start of the interface name */
     str = buf;
     while (*str && isspace(*str)) {
@@ -360,8 +361,8 @@ static status_t
     name_val = val_new_value();
     if (name_val == NULL) {
                 return ERR_INTERNAL_MEM;
-    }       
-    
+    }
+
     val_init_from_template(name_val, name_obj);
 
     res = val_set_simval_obj(name_val, name_obj, name);
@@ -475,6 +476,17 @@ static status_t
     char* buf;
     unsigned int line;
 
+    /* set the mac_addr var here, change EMPTY_STRING */
+    GoString in = {};
+    GoString out = {};
+    GoInt err_code = 0;
+
+    char in_char_arr[] = "{\"list\": []}";
+    in.p = in_char_arr;
+    in.n = sizeof(in_char_arr);
+    Rmon_RMON_GetIngress(&in, &out, &err_code);
+    printf("\n@@@@@@@@@@@@@@@@@@ %s\n", out.p);
+
     /* open /proc/net/dev for reading */
     f = fopen("/proc/net/dev", "r");
     if (f == NULL) {
@@ -502,8 +514,11 @@ static status_t
 
         if (line < 3) {
             /* skip the first 2 lines */
+            printf("first 2 is %s\n", buf);
             continue;
         }
+
+        printf("buf is %s\n", buf);
 
         res = add_interface_entry(buf, dst_val);
         if (res != NO_ERR) {
@@ -513,7 +528,7 @@ static status_t
 
     fclose(f);
     free(buf);
-
+    printf("###### res %d\n", res);
     return res;
 }
 
@@ -589,7 +604,7 @@ static void interface_create(val_value_t* interface_val)
 
     free(cmd_buf);
 }
- 
+
 static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
 {
 
@@ -766,7 +781,7 @@ status_t y_ietf_interfaces_init2(void)
         interfaces_val = val_find_child(root_val,
                                         "ietf-interfaces",
                                         "interfaces-state");
-        
+
     }
 
     /* not designed to coexist with other implementations */
@@ -785,12 +800,6 @@ status_t y_ietf_interfaces_init2(void)
     root_prev_val = val_new_value();
     val_init_from_template(root_prev_val, root_val->obj);
 
-    res = agt_timer_create(1/* 1 sec period */,
-                           TRUE/*periodic*/,
-                           my_timer_fn,
-                           interfaces_val/*cookie*/,
-                           &timer_id);
-
     y_commit_complete();
 
     return res;
@@ -805,6 +814,5 @@ void y_ietf_interfaces_cleanup (void)
     agt_cb_unregister_callbacks( "ietf-interfaces",
                                (const xmlChar *)"/interfaces/interface/enable");
 #endif
-    agt_timer_delete(timer_id);
 }
 

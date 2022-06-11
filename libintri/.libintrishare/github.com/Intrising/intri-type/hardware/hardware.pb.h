@@ -13,6 +13,7 @@
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -255,7 +256,7 @@ struct hardwarepb_DLDPConfig {
 
 struct hardwarepb_DLDPSystemConfig {
   bool Enabled;
-  long int AdvertisementInterval;
+  int32_t AdvertisementInterval;
   enum hardwarepb_ShutdownModeTypeOptions ShutDownMode;
   enum hardwarepb_DLDPAuthCationModeTypeOptions AuthMode;
   enum hardwarepb_DLDPWorkModeTypeOptions WorkMode;
@@ -284,8 +285,8 @@ struct hardwarepb_DLDPPortStatusEntry {
 
 struct hardwarepb_DLDPNeighborEntry {
   char *NeighborMACAddress;
-  long int PortNo;
-  long int NeighborAgetime;
+  int32_t PortNo;
+  int32_t NeighborAgetime;
   enum hardwarepb_DLDPNeighobrStateTypeOptions NeighborState;
 };
 
@@ -369,8 +370,8 @@ struct hardwarepb_FanSpeedConfig {
 };
 
 struct hardwarepb_FanSpeedConfigEntry {
-  long int FanNo;
-  long int RotatingSpeed;
+  int32_t FanNo;
+  int32_t RotatingSpeed;
 };
 
 struct hardwarepb_FanStatus {
@@ -379,8 +380,8 @@ struct hardwarepb_FanStatus {
 };
 
 struct hardwarepb_FanStatusEntry {
-  long int FanNo;
-  long int RotatingSpeedRPM;
+  int32_t FanNo;
+  int32_t RotatingSpeedRPM;
 };
 
 struct hardwarepb_TemperatureStatus {
@@ -390,8 +391,8 @@ struct hardwarepb_TemperatureStatus {
 
 struct hardwarepb_TemperatureStatusEntry {
   char *Name;
-  long int ID;
-  long int Temperature;
+  int32_t ID;
+  int32_t Temperature;
 };
 
 struct hardwarepb_PowerRedundantState {
@@ -437,17 +438,22 @@ struct hardwarepb_PowerGeneralState {
   bool Power54V;
 };
 
+enum hardwarepb_PowerState_PowerType_Union_Options {
+  hardwarepb_PowerState_PowerType_Union_Options_PowerRedundantState,
+  hardwarepb_PowerState_PowerType_Union_Options_PowerGeneralState,
+};
 struct hardwarepb_PowerState {
   enum hardwarepb_PowerTypeOptions Type;
+  enum hardwarepb_PowerState_PowerType_Union_Options PowerType_Union_Option;
   union {
-    struct hardwarepb_PowerRedundantState *PowerState_PowerType_PowerRedundantState;
-    struct hardwarepb_PowerGeneralState *PowerState_PowerType_PowerGeneralState;
-  };
+    struct hardwarepb_PowerRedundantState *PowerType_PowerRedundantState;
+    struct hardwarepb_PowerGeneralState *PowerType_PowerGeneralState;
+  } PowerType;
 };
 
 struct hardwarepb_TimeControlRegister {
-  long int RegBase;
-  long int Offset;
+  int32_t RegBase;
+  int32_t Offset;
   unsigned char *Data;
 };
 
@@ -464,8 +470,8 @@ struct hardwarepb_Ports {
 
 struct hardwarepb_PortEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int HardwarePortNo;
-  long int SwitchPortNo;
+  int32_t HardwarePortNo;
+  int32_t SwitchPortNo;
   enum devicepb_PortInterfaceTypeOptions InterfaceType;
   unsigned int Properies_Len; // auto-gen: for list
   enum devicepb_PortPropertyTypeOptions *Properies;
@@ -494,8 +500,8 @@ struct hardwarepb_FanPercent {
 };
 
 struct hardwarepb_FanPercentEntry {
-  long int FanNo;
-  long int PercentRPM;
+  int32_t FanNo;
+  int32_t PercentRPM;
 };
 
 struct hardwarepb_LEDType {
@@ -531,7 +537,7 @@ struct hardwarepb_DeviceI2CAddress {
 };
 
 struct hardwarepb_DeviceI2CAddressInfo {
-  long int Ch;
+  int32_t Ch;
   unsigned int Address_Len; // auto-gen: for list
   char **Address;
 };
@@ -595,11 +601,11 @@ struct hardwarepb_PoESystemStatus {
   double VMainVoltage;
   double IMainCurrent;
   double PowerConsumption;
-  long int Budget;
+  int32_t Budget;
   char *Version;
 };
 
 struct hardwarepb_PoESystemBudgetEntry {
-  long int Budget;
+  int32_t Budget;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_hardware_hardware

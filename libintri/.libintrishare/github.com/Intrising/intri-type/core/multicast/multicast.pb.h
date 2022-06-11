@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -91,29 +92,29 @@ struct multicastpb_Snooping {
 
 struct multicastpb_SnoopingConfigEntry {
   // Index (only for update)
-  long int VlanID;
+  int32_t VlanID;
   bool SnoopingEnabled;
   enum multicastpb_VersionTypeOptions QuerierVersion;
   enum multicastpb_RouterDetectionTypeOptions MulticastRouterDetection;
   bool EnableFastLeave;
   bool EnableReportSuppression;
-  long int GroupLimit;
+  int32_t GroupLimit;
   // The unit of this field is second
-  long int GroupMembershipInterval;
+  int32_t GroupMembershipInterval;
   // The unit of this field is second
-  long int LastMemberQueryTime;
+  int32_t LastMemberQueryTime;
   // The unit of this field is second
-  long int MaxResponseTime;
+  int32_t MaxResponseTime;
   // The unit of this field is second
-  long int RouterAgingTime;
+  int32_t RouterAgingTime;
   // The unit of this field is second
-  long int StartQueryCount;
+  int32_t StartQueryCount;
   // The unit of this field is second
-  long int StartQueryInterval;
+  int32_t StartQueryInterval;
   // The unit of this field is second
-  long int QueryInterval;
+  int32_t QueryInterval;
   // The unit of this field is second
-  long int Robustness;
+  int32_t Robustness;
   unsigned int IdentifyiesConfig_Len; // auto-gen: for list
   struct multicastpb_PortEnabledEntry **IdentifyiesConfig;
 };
@@ -126,7 +127,7 @@ struct multicastpb_UnregisterFlood {
 
 struct multicastpb_UnregisterFloodVlan {
   // Index (for update)
-  long int VlanID;
+  int32_t VlanID;
   bool Enabled;
 };
 
@@ -138,7 +139,7 @@ struct multicastpb_RouterPort {
 
 struct multicastpb_RouterPortVlanEntry {
   // Index (for update)
-  long int VlanID;
+  int32_t VlanID;
   unsigned int PortList_Len; // auto-gen: for list
   struct multicastpb_PortEnabledEntry **PortList;
 };
@@ -157,7 +158,7 @@ struct multicastpb_Static {
 
 struct multicastpb_StaticGroupsConfigEntry {
   // vlan_i_d+multicast_address (for add/update/delete); should exist in vlan filter list
-  long int VlanID;
+  int32_t VlanID;
   char *Name;
   // ipv4 or ipv6 address
   char *MulticastAddress;
@@ -171,17 +172,17 @@ struct multicastpb_IGMPStatistics {
 };
 
 struct multicastpb_IGMPStatisticEntry {
-  long int VlanID;
+  int32_t VlanID;
   // The unit of this field is packet
-  long int RxGeneralQueries;
+  int32_t RxGeneralQueries;
   // The unit of this field is packet
-  long int RxV3Reports;
+  int32_t RxV3Reports;
   // The unit of this field is packet
-  long int RxV2Reports;
+  int32_t RxV2Reports;
   // The unit of this field is packet
-  long int RxV2Leaves;
+  int32_t RxV2Leaves;
   // The unit of this field is packet
-  long int RxV1Reports;
+  int32_t RxV1Reports;
   bool Querier;
 };
 
@@ -191,7 +192,7 @@ struct multicastpb_RouterStatus {
 };
 
 struct multicastpb_RouterStatusEntry {
-  long int VlanID;
+  int32_t VlanID;
   unsigned int List_Len; // auto-gen: for list
   struct multicastpb_RouterPortStatusEntry **List;
 };
@@ -208,9 +209,9 @@ struct multicastpb_DynamicGroups {
 };
 
 struct multicastpb_DynamicGroupEntry {
-  long int VlanID;
+  int32_t VlanID;
   char *Address;
-  long int TTL;
+  int32_t TTL;
   unsigned int IdentifyList_Len; // auto-gen: for list
   struct devicepb_InterfaceIdentify **IdentifyList;
 };
@@ -222,20 +223,20 @@ struct multicastpb_MLDStatistics {
 };
 
 struct multicastpb_MLDStatisticEntry {
-  long int VlanID;
+  int32_t VlanID;
   // The unit of this field is packet
-  long int RxGeneralQueries;
+  int32_t RxGeneralQueries;
   // The unit of this field is packet
-  long int RxV2Reports;
+  int32_t RxV2Reports;
   // The unit of this field is packet
-  long int RxV1Reports;
+  int32_t RxV1Reports;
   // The unit of this field is packet
-  long int RxV1Leaves;
+  int32_t RxV1Leaves;
   bool Querier;
 };
 
 struct multicastpb_VlanList {
   unsigned int List_Len; // auto-gen: for list
-  long int *List;
+  int32_t *List;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_multicast_multicast

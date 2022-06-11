@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -39,13 +40,13 @@ struct gvrppb_PortConfigEntry {
   bool IsEnabled;
   enum gvrppb_PortModeTypeOptions Mode;
   // unit: ms
-  long int LeaveAllTimerInterval;
+  int32_t LeaveAllTimerInterval;
   // unit: ms, the join timer time upper threshold should less than half of leave timer time
-  long int JoinTimerInterval;
+  int32_t JoinTimerInterval;
   // unit: ms, the hold timer time upper threshold should less than half of join timer time
-  long int HoldTimerInterval;
+  int32_t HoldTimerInterval;
   // unit: ms, the leave timer time upper threshold should less than leave all timer time
-  long int LeaveTimerInterval;
+  int32_t LeaveTimerInterval;
 };
 
 struct gvrppb_PortsConfig {

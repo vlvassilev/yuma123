@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/event/event.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *

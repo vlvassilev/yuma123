@@ -11,6 +11,7 @@
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -63,7 +64,7 @@ struct timepb_Config {
   char *BackupNTPServer;
   bool TrustedServerEnabled;
   // The unit of this field is second
-  long int SyncInterval;
+  int32_t SyncInterval;
   // Valid format is the entry in ListTimeZones
   char *TimeZone;
   // remove : unused
@@ -91,7 +92,7 @@ struct timepb_RequestWithTimestamp {
 
 struct timepb_RequestWithInt64 {
   // The unit of this field is second
-  long long int Ts;
+  int64_t Ts;
 };
 
 struct timepb_Response {

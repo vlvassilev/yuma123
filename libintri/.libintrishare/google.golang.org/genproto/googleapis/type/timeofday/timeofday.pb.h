@@ -8,6 +8,7 @@
  *                                                                                                    *
  **************************************************************************************************** */
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -28,13 +29,13 @@
 struct timeofdaypb_TimeOfDay {
   // Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
 // to allow the value "24:00:00" for scenarios like business closing time.
-  long int Hours;
+  int32_t Hours;
   // Minutes of hour of day. Must be from 0 to 59.
-  long int Minutes;
+  int32_t Minutes;
   // Seconds of minutes of the time. Must normally be from 0 to 59. An API may
 // allow the value 60 if it allows leap-seconds.
-  long int Seconds;
+  int32_t Seconds;
   // Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
-  long int Nanos;
+  int32_t Nanos;
 };
 #endif // _H_intri_pb_google_golang_org_genproto_googleapis_type_timeofday_timeofday

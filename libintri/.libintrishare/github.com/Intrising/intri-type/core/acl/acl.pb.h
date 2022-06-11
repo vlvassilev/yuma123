@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -94,37 +95,45 @@ struct aclpb_ACEList {
   struct aclpb_ACEEntry **List;
 };
 
+enum aclpb_ACEEntry_Param_Union_Options {
+  aclpb_ACEEntry_Param_Union_Options_Mac,
+  aclpb_ACEEntry_Param_Union_Options_IPv4,
+  aclpb_ACEEntry_Param_Union_Options_IPv6,
+  aclpb_ACEEntry_Param_Union_Options_MacIPv4,
+  aclpb_ACEEntry_Param_Union_Options_MacIPv6,
+};
 struct aclpb_ACEEntry {
   // Index (for add/update/delete); unique
   char *Name;
   // string description = 2 [(validate.rules).string = {min_len: 0, max_len: 63636}]; // optionnal
   enum aclpb_RuleActionTypeOptions Action;
-  long int Priority;
+  int32_t Priority;
   // should exist in `TimeRangeConfig`
   char *TimeRangeName;
   enum aclpb_RuleParamTypeOptions ParamType;
+  enum aclpb_ACEEntry_Param_Union_Options Param_Union_Option;
   union {
     // filter vlan id in packet
 // RuleVlan vlan = 7;
 // filter mac address in packet
-    struct aclpb_RuleMAC *ACEEntry_Param_Mac;
+    struct aclpb_RuleMAC *Param_Mac;
     // filter ipv4 in packet
-    struct aclpb_RuleIPv4 *ACEEntry_Param_IPv4;
+    struct aclpb_RuleIPv4 *Param_IPv4;
     // filter ipv6 in packet
-    struct aclpb_RuleIPv6 *ACEEntry_Param_IPv6;
+    struct aclpb_RuleIPv6 *Param_IPv6;
     // filter mac address and ipv4 in packet
-    struct aclpb_RuleMACIPv4 *ACEEntry_Param_MacIPv4;
+    struct aclpb_RuleMACIPv4 *Param_MacIPv4;
     // filter mac address and ipv6 in packet
-    struct aclpb_RuleMACIPv6 *ACEEntry_Param_MacIPv6;
-  };
+    struct aclpb_RuleMACIPv6 *Param_MacIPv6;
+  } Param;
 };
 
 struct aclpb_RuleVlan {
   // the field `vlan_i_d` should validated in vlan filter list
 // https://github.com/Intrising/test-switch/issues/2615
-  long int VlanID;
+  int32_t VlanID;
   // https://github.com/Intrising/test-switch/issues/2615
-  long int VlanIDMask;
+  int32_t VlanIDMask;
 };
 
 struct aclpb_RuleMACIPv4 {
@@ -141,7 +150,7 @@ struct aclpb_RuleMAC {
   struct aclpb_EtherTypeConfig *EtherType;
   struct aclpb_MACConfig *Source;
   struct aclpb_MACConfig *Destination;
-  long int VlanId;
+  int32_t VlanId;
 };
 
 struct aclpb_MACConfig {
@@ -189,8 +198,8 @@ struct aclpb_RuleLayer4Port {
 };
 
 struct aclpb_IPWithLayer4PortConfig {
-  long int PortNumber;
-  long int PortNumberMask;
+  int32_t PortNumber;
+  int32_t PortNumberMask;
 };
 
 struct aclpb_BindingList {
@@ -199,6 +208,10 @@ struct aclpb_BindingList {
   struct aclpb_BindingEntry **List;
 };
 
+enum aclpb_BindingEntry_Param_Union_Options {
+  aclpb_BindingEntry_Param_Union_Options_IPv4,
+  aclpb_BindingEntry_Param_Union_Options_IPv6,
+};
 struct aclpb_BindingEntry {
   // Index (for add/update/delete); unique
   char *Name;
@@ -206,10 +219,11 @@ struct aclpb_BindingEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   char *Mac;
   enum aclpb_RuleParamTypeOptions ParamType;
+  enum aclpb_BindingEntry_Param_Union_Options Param_Union_Option;
   union {
-    char *BindingEntry_Param_IPv4;
-    char *BindingEntry_Param_IPv6;
-  };
+    char *Param_IPv4;
+    char *Param_IPv6;
+  } Param;
 };
 
 struct aclpb_FlowMirroringEntry {

@@ -43,6 +43,7 @@
 #include "../../../../github.com/Intrising/intri-type/log/log.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *

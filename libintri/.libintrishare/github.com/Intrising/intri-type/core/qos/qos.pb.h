@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -50,30 +51,30 @@ enum qospb_PrioritySchemeTypeOptions {
 
 struct qospb_WeightedFairTrafficRatioQueueEntry {
   // Index (for update); the field `queue_no` should validated in boundary (`BoundaryQoS`, `queue_list_range`)
-  long int QueueNo;
-  long int Priority;
+  int32_t QueueNo;
+  int32_t Priority;
   enum qospb_PrioritySchemeTypeOptions Scheme;
 };
 
 struct qospb_MappingCoSDot1PToQueueEntry {
   // Index (for update); the field `cos_no` should validated in boundary (`BoundaryQoS`, `co_s_range`)
-  long int CosNo;
-  long int QueueNo;
+  int32_t CosNo;
+  int32_t QueueNo;
 };
 
 struct qospb_MappingDSCPToQueueEntry {
   // Index (for update); the field `d_s_c_p_no` should validated in boundary (`BoundaryQoS`, `d_s_c_p_range`)
-  long int DSCPNo;
+  int32_t DSCPNo;
   // the field `queue_no` should exist in `queue_list` in `Config`
-  long int QueueNo;
+  int32_t QueueNo;
 };
 
 struct qospb_InterfaceConfigEntry {
   // Index (for update); physical port
   struct devicepb_InterfaceIdentify *IdentifyNo;
   bool IsEnabled;
-  long int EgressBandwidth;
-  long int IngressBandwidth;
+  int32_t EgressBandwidth;
+  int32_t IngressBandwidth;
   bool IngressUnicastEnabled;
   bool IngressMulticastEnabled;
   bool IngressBroadcastEnabled;

@@ -10,6 +10,7 @@
 #include "../../../../github.com/golang/protobuf/ptypes/duration/duration.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -34,34 +35,58 @@ enum validatepb_KnownRegex {
 
 // FieldRules encapsulates the rules for each type of field. Depending on the
 // field, the correct set should be used to ensure proper validations.
+enum validatepb_FieldRules_Type_Union_Options {
+  validatepb_FieldRules_Type_Union_Options_Float,
+  validatepb_FieldRules_Type_Union_Options_Double,
+  validatepb_FieldRules_Type_Union_Options_Int32,
+  validatepb_FieldRules_Type_Union_Options_Int64,
+  validatepb_FieldRules_Type_Union_Options_Uint32,
+  validatepb_FieldRules_Type_Union_Options_Uint64,
+  validatepb_FieldRules_Type_Union_Options_Sint32,
+  validatepb_FieldRules_Type_Union_Options_Sint64,
+  validatepb_FieldRules_Type_Union_Options_Fixed32,
+  validatepb_FieldRules_Type_Union_Options_Fixed64,
+  validatepb_FieldRules_Type_Union_Options_Sfixed32,
+  validatepb_FieldRules_Type_Union_Options_Sfixed64,
+  validatepb_FieldRules_Type_Union_Options_Bool,
+  validatepb_FieldRules_Type_Union_Options_String_,
+  validatepb_FieldRules_Type_Union_Options_Bytes,
+  validatepb_FieldRules_Type_Union_Options_Enum,
+  validatepb_FieldRules_Type_Union_Options_Repeated,
+  validatepb_FieldRules_Type_Union_Options_Map,
+  validatepb_FieldRules_Type_Union_Options_Any,
+  validatepb_FieldRules_Type_Union_Options_Duration,
+  validatepb_FieldRules_Type_Union_Options_Timestamp,
+};
 struct validatepb_FieldRules {
   struct validatepb_MessageRules *Message;
+  enum validatepb_FieldRules_Type_Union_Options Type_Union_Option;
   union {
     // Scalar Field Types
-    struct validatepb_FloatRules *FieldRules_Type_Float;
-    struct validatepb_DoubleRules *FieldRules_Type_Double;
-    struct validatepb_Int32Rules *FieldRules_Type_Int32;
-    struct validatepb_Int64Rules *FieldRules_Type_Int64;
-    struct validatepb_UInt32Rules *FieldRules_Type_Uint32;
-    struct validatepb_UInt64Rules *FieldRules_Type_Uint64;
-    struct validatepb_SInt32Rules *FieldRules_Type_Sint32;
-    struct validatepb_SInt64Rules *FieldRules_Type_Sint64;
-    struct validatepb_Fixed32Rules *FieldRules_Type_Fixed32;
-    struct validatepb_Fixed64Rules *FieldRules_Type_Fixed64;
-    struct validatepb_SFixed32Rules *FieldRules_Type_Sfixed32;
-    struct validatepb_SFixed64Rules *FieldRules_Type_Sfixed64;
-    struct validatepb_BoolRules *FieldRules_Type_Bool;
-    struct validatepb_StringRules *FieldRules_Type_String;
-    struct validatepb_BytesRules *FieldRules_Type_Bytes;
+    struct validatepb_FloatRules *Type_Float;
+    struct validatepb_DoubleRules *Type_Double;
+    struct validatepb_Int32Rules *Type_Int32;
+    struct validatepb_Int64Rules *Type_Int64;
+    struct validatepb_UInt32Rules *Type_Uint32;
+    struct validatepb_UInt64Rules *Type_Uint64;
+    struct validatepb_SInt32Rules *Type_Sint32;
+    struct validatepb_SInt64Rules *Type_Sint64;
+    struct validatepb_Fixed32Rules *Type_Fixed32;
+    struct validatepb_Fixed64Rules *Type_Fixed64;
+    struct validatepb_SFixed32Rules *Type_Sfixed32;
+    struct validatepb_SFixed64Rules *Type_Sfixed64;
+    struct validatepb_BoolRules *Type_Bool;
+    struct validatepb_StringRules *Type_String;
+    struct validatepb_BytesRules *Type_Bytes;
     // Complex Field Types
-    struct validatepb_EnumRules *FieldRules_Type_Enum;
-    struct validatepb_RepeatedRules *FieldRules_Type_Repeated;
-    struct validatepb_MapRules *FieldRules_Type_Map;
+    struct validatepb_EnumRules *Type_Enum;
+    struct validatepb_RepeatedRules *Type_Repeated;
+    struct validatepb_MapRules *Type_Map;
     // Well-Known Field Types
-    struct validatepb_AnyRules *FieldRules_Type_Any;
-    struct validatepb_DurationRules *FieldRules_Type_Duration;
-    struct validatepb_TimestampRules *FieldRules_Type_Timestamp;
-  };
+    struct validatepb_AnyRules *Type_Any;
+    struct validatepb_DurationRules *Type_Duration;
+    struct validatepb_TimestampRules *Type_Timestamp;
+  } Type;
 };
 
 // FloatRules describes the constraints applied to `float` values
@@ -129,29 +154,29 @@ struct validatepb_DoubleRules {
 // Int32Rules describes the constraints applied to `int32` values
 struct validatepb_Int32Rules {
   // Const specifies that this field must be exactly the specified value
-  long int Const;
+  int32_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  long int Lt;
+  int32_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  long int Lte;
+  int32_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  long int Gt;
+  int32_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  long int Gte;
+  int32_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long int *In;
+  int32_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long int *NotIn;
+  int32_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -160,29 +185,29 @@ struct validatepb_Int32Rules {
 // Int64Rules describes the constraints applied to `int64` values
 struct validatepb_Int64Rules {
   // Const specifies that this field must be exactly the specified value
-  long long int Const;
+  int64_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  long long int Lt;
+  int64_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  long long int Lte;
+  int64_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  long long int Gt;
+  int64_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  long long int Gte;
+  int64_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long long int *In;
+  int64_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long long int *NotIn;
+  int64_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -191,29 +216,29 @@ struct validatepb_Int64Rules {
 // UInt32Rules describes the constraints applied to `uint32` values
 struct validatepb_UInt32Rules {
   // Const specifies that this field must be exactly the specified value
-  unsigned long int Const;
+  uint32_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  unsigned long int Lt;
+  uint32_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  unsigned long int Lte;
+  uint32_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  unsigned long int Gt;
+  uint32_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  unsigned long int Gte;
+  uint32_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  unsigned long int *In;
+  uint32_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  unsigned long int *NotIn;
+  uint32_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -222,29 +247,29 @@ struct validatepb_UInt32Rules {
 // UInt64Rules describes the constraints applied to `uint64` values
 struct validatepb_UInt64Rules {
   // Const specifies that this field must be exactly the specified value
-  unsigned long long int Const;
+  uint64_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  unsigned long long int Lt;
+  uint64_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  unsigned long long int Lte;
+  uint64_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  unsigned long long int Gt;
+  uint64_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  unsigned long long int Gte;
+  uint64_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  unsigned long long int *In;
+  uint64_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  unsigned long long int *NotIn;
+  uint64_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -253,29 +278,29 @@ struct validatepb_UInt64Rules {
 // SInt32Rules describes the constraints applied to `sint32` values
 struct validatepb_SInt32Rules {
   // Const specifies that this field must be exactly the specified value
-  long int Const;
+  int32_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  long int Lt;
+  int32_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  long int Lte;
+  int32_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  long int Gt;
+  int32_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  long int Gte;
+  int32_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long int *In;
+  int32_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long int *NotIn;
+  int32_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -284,29 +309,29 @@ struct validatepb_SInt32Rules {
 // SInt64Rules describes the constraints applied to `sint64` values
 struct validatepb_SInt64Rules {
   // Const specifies that this field must be exactly the specified value
-  long long int Const;
+  int64_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  long long int Lt;
+  int64_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  long long int Lte;
+  int64_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  long long int Gt;
+  int64_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  long long int Gte;
+  int64_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long long int *In;
+  int64_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long long int *NotIn;
+  int64_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -315,29 +340,29 @@ struct validatepb_SInt64Rules {
 // Fixed32Rules describes the constraints applied to `fixed32` values
 struct validatepb_Fixed32Rules {
   // Const specifies that this field must be exactly the specified value
-  unsigned long int Const;
+  uint32_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  unsigned long int Lt;
+  uint32_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  unsigned long int Lte;
+  uint32_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  unsigned long int Gt;
+  uint32_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  unsigned long int Gte;
+  uint32_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  unsigned long int *In;
+  uint32_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  unsigned long int *NotIn;
+  uint32_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -346,29 +371,29 @@ struct validatepb_Fixed32Rules {
 // Fixed64Rules describes the constraints applied to `fixed64` values
 struct validatepb_Fixed64Rules {
   // Const specifies that this field must be exactly the specified value
-  unsigned long long int Const;
+  uint64_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  unsigned long long int Lt;
+  uint64_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  unsigned long long int Lte;
+  uint64_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  unsigned long long int Gt;
+  uint64_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  unsigned long long int Gte;
+  uint64_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  unsigned long long int *In;
+  uint64_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  unsigned long long int *NotIn;
+  uint64_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -377,29 +402,29 @@ struct validatepb_Fixed64Rules {
 // SFixed32Rules describes the constraints applied to `sfixed32` values
 struct validatepb_SFixed32Rules {
   // Const specifies that this field must be exactly the specified value
-  long int Const;
+  int32_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  long int Lt;
+  int32_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  long int Lte;
+  int32_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  long int Gt;
+  int32_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  long int Gte;
+  int32_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long int *In;
+  int32_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long int *NotIn;
+  int32_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -408,29 +433,29 @@ struct validatepb_SFixed32Rules {
 // SFixed64Rules describes the constraints applied to `sfixed64` values
 struct validatepb_SFixed64Rules {
   // Const specifies that this field must be exactly the specified value
-  long long int Const;
+  int64_t Const;
   // Lt specifies that this field must be less than the specified value,
 // exclusive
-  long long int Lt;
+  int64_t Lt;
   // Lte specifies that this field must be less than or equal to the
 // specified value, inclusive
-  long long int Lte;
+  int64_t Lte;
   // Gt specifies that this field must be greater than the specified value,
 // exclusive. If the value of Gt is larger than a specified Lt or Lte, the
 // range is reversed.
-  long long int Gt;
+  int64_t Gt;
   // Gte specifies that this field must be greater than or equal to the
 // specified value, inclusive. If the value of Gte is larger than a
 // specified Lt or Lte, the range is reversed.
-  long long int Gte;
+  int64_t Gte;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long long int *In;
+  int64_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long long int *NotIn;
+  int64_t *NotIn;
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
@@ -443,30 +468,42 @@ struct validatepb_BoolRules {
 };
 
 // StringRules describe the constraints applied to `string` values
+enum validatepb_StringRules_WellKnown_Union_Options {
+  validatepb_StringRules_WellKnown_Union_Options_Email,
+  validatepb_StringRules_WellKnown_Union_Options_Hostname,
+  validatepb_StringRules_WellKnown_Union_Options_Ip,
+  validatepb_StringRules_WellKnown_Union_Options_Ipv4,
+  validatepb_StringRules_WellKnown_Union_Options_Ipv6,
+  validatepb_StringRules_WellKnown_Union_Options_Uri,
+  validatepb_StringRules_WellKnown_Union_Options_UriRef,
+  validatepb_StringRules_WellKnown_Union_Options_Address,
+  validatepb_StringRules_WellKnown_Union_Options_Uuid,
+  validatepb_StringRules_WellKnown_Union_Options_WellKnownRegex,
+};
 struct validatepb_StringRules {
   // Const specifies that this field must be exactly the specified value
   char *Const;
   // Len specifies that this field must be the specified number of
 // characters (Unicode code points). Note that the number of
 // characters may differ from the number of bytes in the string.
-  unsigned long long int Len;
+  uint64_t Len;
   // MinLen specifies that this field must be the specified number of
 // characters (Unicode code points) at a minimum. Note that the number of
 // characters may differ from the number of bytes in the string.
-  unsigned long long int MinLen;
+  uint64_t MinLen;
   // MaxLen specifies that this field must be the specified number of
 // characters (Unicode code points) at a maximum. Note that the number of
 // characters may differ from the number of bytes in the string.
-  unsigned long long int MaxLen;
+  uint64_t MaxLen;
   // LenBytes specifies that this field must be the specified number of bytes
 // at a minimum
-  unsigned long long int LenBytes;
+  uint64_t LenBytes;
   // MinBytes specifies that this field must be the specified number of bytes
 // at a minimum
-  unsigned long long int MinBytes;
+  uint64_t MinBytes;
   // MaxBytes specifies that this field must be the specified number of bytes
 // at a maximum
-  unsigned long long int MaxBytes;
+  uint64_t MaxBytes;
   // Pattern specifes that this field must match against the specified
 // regular expression (RE2 syntax). The included expression should elide
 // any delimiters.
@@ -500,52 +537,58 @@ struct validatepb_StringRules {
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
+  enum validatepb_StringRules_WellKnown_Union_Options WellKnown_Union_Option;
   union {
     // Email specifies that the field must be a valid email address as
 // defined by RFC 5322
-    bool StringRules_WellKnown_Email;
+    bool WellKnown_Email;
     // Hostname specifies that the field must be a valid hostname as
 // defined by RFC 1034. This constraint does not support
 // internationalized domain names (IDNs).
-    bool StringRules_WellKnown_Hostname;
+    bool WellKnown_Hostname;
     // Ip specifies that the field must be a valid IP (v4 or v6) address.
 // Valid IPv6 addresses should not include surrounding square brackets.
-    bool StringRules_WellKnown_Ip;
+    bool WellKnown_Ip;
     // Ipv4 specifies that the field must be a valid IPv4 address.
-    bool StringRules_WellKnown_Ipv4;
+    bool WellKnown_Ipv4;
     // Ipv6 specifies that the field must be a valid IPv6 address. Valid
 // IPv6 addresses should not include surrounding square brackets.
-    bool StringRules_WellKnown_Ipv6;
+    bool WellKnown_Ipv6;
     // Uri specifies that the field must be a valid, absolute URI as defined
 // by RFC 3986
-    bool StringRules_WellKnown_Uri;
+    bool WellKnown_Uri;
     // UriRef specifies that the field must be a valid URI as defined by RFC
 // 3986 and may be relative or absolute.
-    bool StringRules_WellKnown_UriRef;
+    bool WellKnown_UriRef;
     // Address specifies that the field must be either a valid hostname as
 // defined by RFC 1034 (which does not support internationalized domain
 // names or IDNs), or it can be a valid IP (v4 or v6).
-    bool StringRules_WellKnown_Address;
+    bool WellKnown_Address;
     // Uuid specifies that the field must be a valid UUID as defined by
 // RFC 4122
-    bool StringRules_WellKnown_Uuid;
+    bool WellKnown_Uuid;
     // WellKnownRegex specifies a common well known pattern defined as a regex.
-    enum validatepb_KnownRegex StringRules_WellKnown_WellKnownRegex;
-  };
+    enum validatepb_KnownRegex WellKnown_WellKnownRegex;
+  } WellKnown;
 };
 
 // BytesRules describe the constraints applied to `bytes` values
+enum validatepb_BytesRules_WellKnown_Union_Options {
+  validatepb_BytesRules_WellKnown_Union_Options_Ip,
+  validatepb_BytesRules_WellKnown_Union_Options_Ipv4,
+  validatepb_BytesRules_WellKnown_Union_Options_Ipv6,
+};
 struct validatepb_BytesRules {
   // Const specifies that this field must be exactly the specified value
   unsigned char *Const;
   // Len specifies that this field must be the specified number of bytes
-  unsigned long long int Len;
+  uint64_t Len;
   // MinLen specifies that this field must be the specified number of bytes
 // at a minimum
-  unsigned long long int MinLen;
+  uint64_t MinLen;
   // MaxLen specifies that this field must be the specified number of bytes
 // at a maximum
-  unsigned long long int MaxLen;
+  uint64_t MaxLen;
   // Pattern specifes that this field must match against the specified
 // regular expression (RE2 syntax). The included expression should elide
 // any delimiters.
@@ -570,34 +613,35 @@ struct validatepb_BytesRules {
   // IgnoreEmpty specifies that the validation rules of this field should be
 // evaluated only if the field is not empty
   bool IgnoreEmpty;
+  enum validatepb_BytesRules_WellKnown_Union_Options WellKnown_Union_Option;
   union {
     // Ip specifies that the field must be a valid IP (v4 or v6) address in
 // byte format
-    bool BytesRules_WellKnown_Ip;
+    bool WellKnown_Ip;
     // Ipv4 specifies that the field must be a valid IPv4 address in byte
 // format
-    bool BytesRules_WellKnown_Ipv4;
+    bool WellKnown_Ipv4;
     // Ipv6 specifies that the field must be a valid IPv6 address in byte
 // format
-    bool BytesRules_WellKnown_Ipv6;
-  };
+    bool WellKnown_Ipv6;
+  } WellKnown;
 };
 
 // EnumRules describe the constraints applied to enum values
 struct validatepb_EnumRules {
   // Const specifies that this field must be exactly the specified value
-  long int Const;
+  int32_t Const;
   // DefinedOnly specifies that this field must be only one of the defined
 // values for this enum, failing on any undefined value.
   bool DefinedOnly;
   // In specifies that this field must be equal to one of the specified
 // values
   unsigned int In_Len; // auto-gen: for list
-  long int *In;
+  int32_t *In;
   // NotIn specifies that this field cannot be equal to one of the specified
 // values
   unsigned int NotIn_Len; // auto-gen: for list
-  long int *NotIn;
+  int32_t *NotIn;
 };
 
 // MessageRules describe the constraints applied to embedded message values.
@@ -614,10 +658,10 @@ struct validatepb_MessageRules {
 struct validatepb_RepeatedRules {
   // MinItems specifies that this field must have the specified number of
 // items at a minimum
-  unsigned long long int MinItems;
+  uint64_t MinItems;
   // MaxItems specifies that this field must have the specified number of
 // items at a maximum
-  unsigned long long int MaxItems;
+  uint64_t MaxItems;
   // Unique specifies that all elements in this field must be unique. This
 // contraint is only applicable to scalar and enum types (messages are not
 // supported).
@@ -635,10 +679,10 @@ struct validatepb_RepeatedRules {
 struct validatepb_MapRules {
   // MinPairs specifies that this field must have the specified number of
 // KVs at a minimum
-  unsigned long long int MinPairs;
+  uint64_t MinPairs;
   // MaxPairs specifies that this field must have the specified number of
 // KVs at a maximum
-  unsigned long long int MaxPairs;
+  uint64_t MaxPairs;
   // NoSparse specifies values in this field cannot be unset. This only
 // applies to map's with message value types.
   bool NoSparse;

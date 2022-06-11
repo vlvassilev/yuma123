@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/hardware/hardware.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -39,7 +40,7 @@ struct poepb_Config {
 };
 
 struct poepb_SystemBudget {
-  long int MaxPowerAvailable;
+  int32_t MaxPowerAvailable;
 };
 
 struct poepb_PortConfig {
@@ -88,6 +89,6 @@ struct poepb_PortStatusEntry {
 
 struct poepb_SetPoEMaxPowerAvailableRequest {
   // (units: W)
-  long int MaxPowerAvailable;
+  int32_t MaxPowerAvailable;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_poe_poe

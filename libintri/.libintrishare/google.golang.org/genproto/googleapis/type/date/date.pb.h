@@ -8,6 +8,7 @@
  *                                                                                                    *
  **************************************************************************************************** */
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -37,13 +38,13 @@
 struct datepb_Date {
   // Year of the date. Must be from 1 to 9999, or 0 to specify a date without
 // a year.
-  long int Year;
+  int32_t Year;
   // Month of a year. Must be from 1 to 12, or 0 to specify a year without a
 // month and day.
-  long int Month;
+  int32_t Month;
   // Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
 // to specify a year by itself or a year and month where the day isn't
 // significant.
-  long int Day;
+  int32_t Day;
 };
 #endif // _H_intri_pb_google_golang_org_genproto_googleapis_type_date_date

@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -51,7 +52,7 @@ struct lacppb_Config {
 
 struct lacppb_SystemConfig {
   // default 32768
-  long int SystemPriority;
+  int32_t SystemPriority;
   enum lacppb_ModeTypeOptions Mode;
   enum lacppb_IntervalTypeOptions TransmitInterval;
 };
@@ -64,7 +65,7 @@ struct lacppb_LAGConfig {
 
 struct lacppb_LAGConfigEntry {
   // Index (for update); unique, generate by device.GetLAGPortLists()
-  long int TrunkID;
+  int32_t TrunkID;
   enum lacppb_ConfigLinkAggregationTypeOptions LacpEnable;
   // physical port, should not duplicated in list
   struct devicepb_PortList *Identify;
@@ -76,7 +77,7 @@ struct lacppb_Status {
 };
 
 struct lacppb_StatusEntry {
-  long int TrunkID;
+  int32_t TrunkID;
   struct devicepb_InterfaceIdentify *IdentifyNo;
   enum lacppb_ConfigLinkAggregationTypeOptions LacpEnable;
   struct lacppb_ActorPartnerInfo *Actor;
@@ -85,11 +86,11 @@ struct lacppb_StatusEntry {
 
 struct lacppb_ActorPartnerInfo {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int PortPriority;
-  long int SystemPriority;
+  int32_t PortPriority;
+  int32_t SystemPriority;
   unsigned char *MACAddress;
-  long int AdminKey;
-  long int OperKey;
+  int32_t AdminKey;
+  int32_t OperKey;
   struct lacppb_State *Status;
 };
 

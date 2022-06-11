@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -69,7 +70,7 @@ struct portsecuritypb_PortSecurityConfigEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   bool Enabled;
   enum portsecuritypb_PortSecurityModeTypeOptions Mode;
-  long int MaxMACCount;
+  int32_t MaxMACCount;
   // if mode is PORT_SECURITY_MODE_TYPE_STATIC, the field can be configured, and the boundary depeneds on max_m_a_c_count
 // if mode is PORT_SECURITY_MODE_TYPE_STICKY or PORT_SECURITY_MODE_TYPE_DYNAMIC, the field can not be configured
   unsigned int SecureAddressList_Len; // auto-gen: for list
@@ -79,7 +80,7 @@ struct portsecuritypb_PortSecurityConfigEntry {
 
 struct portsecuritypb_SecureEntry {
   // index : vlan_i_d + m_a_c_address
-  long int VlanID;
+  int32_t VlanID;
   char *MACAddress;
 };
 
@@ -100,8 +101,8 @@ struct portsecuritypb_PortSecurityStatusEntry {
   bool Enabled;
   enum portsecuritypb_PortSecurityStatusTypeOptions Status;
   enum portsecuritypb_PortSecurityViolationTypeOptions ViolationMode;
-  long int MaxMACCount;
-  long int SecureMACCount;
+  int32_t MaxMACCount;
+  int32_t SecureMACCount;
   char *LastSourceMACaddressVlan;
 };
 
@@ -109,6 +110,6 @@ struct portsecuritypb_PortSecurityStatusEntry {
 struct portsecuritypb_PortSecurityAge {
   bool StaticAging;
   enum portsecuritypb_PortSecurityAgeModeTypeOptions Type;
-  long int Time;
+  int32_t Time;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_portsecurity_portsecurity

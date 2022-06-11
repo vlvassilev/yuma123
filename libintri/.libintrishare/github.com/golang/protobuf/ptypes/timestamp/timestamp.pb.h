@@ -8,6 +8,7 @@
  *                                                                                                    *
  **************************************************************************************************** */
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -94,13 +95,11 @@
 // 01:30 UTC on January 15, 2017.
 //
 // In JavaScript, one can convert a Date object to this format using the
-// standard
-// [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString)
+// standard [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString)
 // method. In Python, a standard `datetime.datetime` object can be converted
-// to this format using
-// [`strftime`](https://docs.python.org/2/library/time.html#time.strftime) with
-// the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
-// the Joda Time's [`ISODateTimeFormat.dateTime()`](
+// to this format using [`strftime`](https://docs.python.org/2/library/time.html#time.strftime)
+// with the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one
+// can use the Joda Time's [`ISODateTimeFormat.dateTime()`](
 // http://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime%2D%2D
 // ) to obtain a formatter capable of generating timestamps in this format.
 //
@@ -109,11 +108,11 @@ struct timestamppb_Timestamp {
   // Represents seconds of UTC time since Unix epoch
 // 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
 // 9999-12-31T23:59:59Z inclusive.
-  long long int Seconds;
+  int64_t Seconds;
   // Non-negative fractions of a second at nanosecond resolution. Negative
 // second values with fractions must still have non-negative nanos values
 // that count forward in time. Must be from 0 to 999,999,999
 // inclusive.
-  long int Nanos;
+  int32_t Nanos;
 };
 #endif // _H_intri_pb_github_com_golang_protobuf_ptypes_timestamp_timestamp

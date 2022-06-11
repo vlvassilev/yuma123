@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -53,8 +54,8 @@ struct stormcontrolpb_SuppressionConfigEntry {
   bool IsEnable;
   enum stormcontrolpb_StormControlActionTypeOptions ActionOption;
   enum stormcontrolpb_StormControlSuppressionUnitTypeOptions UnitOption;
-  unsigned long long int BpsUpperThreshold;
-  unsigned long long int PpsUpperThreshold;
+  uint64_t BpsUpperThreshold;
+  uint64_t PpsUpperThreshold;
 };
 
 struct stormcontrolpb_PortConfigEntry {

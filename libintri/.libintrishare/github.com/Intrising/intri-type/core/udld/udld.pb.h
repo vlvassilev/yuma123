@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -73,7 +74,7 @@ struct udldpb_Config {
 struct udldpb_BasicConfig {
   bool IsEnabled;
   enum udldpb_ModeTypeOptions ModeOption;
-  long int MessageIntervalSeconds;
+  int32_t MessageIntervalSeconds;
 };
 
 struct udldpb_PortConfig {
@@ -118,8 +119,8 @@ struct udldpb_NeighborStatusEntry {
   char *MacAddress;
   char *DeviceName;
   enum udldpb_PortStateTypeOptions StateOption;
-  long int ExpirationTimeSeconds;
-  long int MessageTimeSeconds;
+  int32_t ExpirationTimeSeconds;
+  int32_t MessageTimeSeconds;
 };
 
 struct udldpb_Statistics {
@@ -144,6 +145,6 @@ struct udldpb_PacketStatistics {
 
 struct udldpb_PacketStatisticsEntry {
   enum udldpb_PacketOpcodeTypeOptions OpcodeOption;
-  unsigned long long int Count;
+  uint64_t Count;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_udld_udld

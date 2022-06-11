@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/event/event.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -61,7 +62,7 @@ struct fdbpb_Config {
 
 struct fdbpb_AgingTime {
   // The unit of this field is second
-  long int GlobalAgingTime;
+  int32_t GlobalAgingTime;
 };
 
 struct fdbpb_ForwardConfig {
@@ -73,7 +74,7 @@ struct fdbpb_ForwardConfig {
 struct fdbpb_ForwardConfigEntry {
   // m_a_c_address+vlan_i_d is unique Index (for add/remove/update)
   char *MACAddress;
-  long int VlanID;
+  int32_t VlanID;
   // Only support INTERFACE_TYPE_PORT and INTERFACE_TYPE_TRUNK
   struct devicepb_InterfaceIdentify *IdentifyNo;
 };
@@ -87,7 +88,7 @@ struct fdbpb_DropConfig {
 struct fdbpb_DropConfigEntry {
   // m_a_c_address+vlan_i_d is unique Index (for add/remove/update)
   char *MACAddress;
-  long int VlanID;
+  int32_t VlanID;
   // Only support INTERFACE_TYPE_PORT and INTERFACE_TYPE_TRUNK
   struct devicepb_InterfaceIdentify *IdentifyNo;
 };
@@ -101,20 +102,20 @@ struct fdbpb_PortLearningLimit {
 struct fdbpb_PortLearningLimitEntry {
   // Index (for update); unique. support INTERFACE_TYPE_PORT and INTERFACE_TYPE_TRUNK
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int Limit;
+  int32_t Limit;
 };
 
 // Info :
 struct fdbpb_Info {
-  long int UsedAgingTime;
-  long int NumberOfFreeEntries;
-  long int NumberOfUsedEntries;
-  long int NumberOfMacUnicastDynamicEntries;
-  long int NumberOfMacUnicastStaticEntries;
-  long int NumberOfMacMulticastDynamicEntries;
-  long int NumberOfMacMulticastStaticEntries;
-  long int NumberOfIpv4MulticastEntries;
-  long int NumberOfIpv6MulticastEntries;
+  int32_t UsedAgingTime;
+  int32_t NumberOfFreeEntries;
+  int32_t NumberOfUsedEntries;
+  int32_t NumberOfMacUnicastDynamicEntries;
+  int32_t NumberOfMacUnicastStaticEntries;
+  int32_t NumberOfMacMulticastDynamicEntries;
+  int32_t NumberOfMacMulticastStaticEntries;
+  int32_t NumberOfIpv4MulticastEntries;
+  int32_t NumberOfIpv6MulticastEntries;
 };
 
 struct fdbpb_Status {
@@ -125,7 +126,7 @@ struct fdbpb_Status {
 
 // Index : m_a_c_address,identify_no,vlan_i_d; unique
 struct fdbpb_StatusEntry {
-  long int VlanID;
+  int32_t VlanID;
   char *MACAddress;
   // support INTERFACE_TYPE_PORT and INTERFACE_TYPE_TRUNK
   struct devicepb_InterfaceIdentify *IdentifyNo;

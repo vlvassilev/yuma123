@@ -12,6 +12,7 @@
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -71,15 +72,15 @@ struct logpb_ActionConfigEntry {
 };
 
 struct logpb_Statistics {
-  unsigned long long int NumberOfTargets;
-  long int SyslogCounter;
-  long int SnmpTrapCounter;
-  long int SnmpInfoCounter;
-  long int DisplayInCliCounter;
+  uint64_t NumberOfTargets;
+  int32_t SyslogCounter;
+  int32_t SnmpTrapCounter;
+  int32_t SnmpInfoCounter;
+  int32_t DisplayInCliCounter;
 };
 
 struct logpb_LogFileEntry {
-  unsigned long long int LogID;
+  uint64_t LogID;
   struct timestamppb_Timestamp *Ts;
   enum eventpb_LoggingTypeOptions LoggingType;
   enum eventpb_LoggingSeverityTypeOptions LoggingSeverityType;

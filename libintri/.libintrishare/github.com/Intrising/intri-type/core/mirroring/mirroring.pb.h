@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -60,7 +61,7 @@ struct mirroringpb_Config {
 
 struct mirroringpb_DestinationSessionEntry {
   // Index (for add/update/delete); the index should validated in boundary (`BoundaryMirroring`, `session`)
-  long int Index;
+  int32_t Index;
   enum mirroringpb_DestinationTypeOptions Type;
   // phycial port only, using device_i_d and port_no
   struct devicepb_InterfaceIdentify *IdentifyNo;
@@ -76,7 +77,7 @@ struct mirroringpb_SourceSessionEntry {
   // Index (for add/update/delete)
 // the index should validated in boundary (`BoundaryMirroring`, `session`)
 // the index should validated in destination list (`DestinationSession`, `list`)
-  long int DestinationIndex;
+  int32_t DestinationIndex;
   enum mirroringpb_SourceInterfaceTypeOptions SourceInterface;
   // only for SOURCE_INTERFACE_TYPE_LOCAL
 // phycial port, the type INTERFACE_TYPE_PORT only, using device_i_d and port_no
@@ -93,6 +94,6 @@ struct mirroringpb_SourceSession {
 struct mirroringpb_RSPANConfig {
   bool Enabled;
   // the field `vlan_i_d` should exist in VLAN filter list (`VLANConfig`, `filters`)
-  long int VlanID;
+  int32_t VlanID;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_mirroring_mirroring

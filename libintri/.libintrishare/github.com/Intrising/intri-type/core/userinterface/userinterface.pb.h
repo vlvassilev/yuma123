@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/common/common.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -48,7 +49,7 @@ struct userinterfacepb_CLIConfig {
   bool SSHEnabled;
   char *WelcomeMessage;
   // The unit of this field is second
-  long int InactivityTimeout;
+  int32_t InactivityTimeout;
 };
 
 // SNMP Config 
@@ -72,11 +73,11 @@ struct userinterfacepb_WebConfig {
 // NOTE: web server needs to be restart to activate the protocol changes
   enum userinterfacepb_WebProtocolTypeOptions Protocol;
   // The time that web will auto logout if detects no action, the unit is second
-  long int WebTimeout;
+  int32_t WebTimeout;
   // NOTE: web server needs to be restart to activate the protocol changes
-  long int HTTPPort;
+  int32_t HTTPPort;
   // NOTE: web server needs to be restart to activate the protocol changes
-  long int HTTPSPort;
+  int32_t HTTPSPort;
   // Only encrypted passphrase can be set in this web config
 // If you need to use plaintext password, you need to use Service/Access/RunEncryptPassword for transformation
   char *EncryptedCertPassphrase;

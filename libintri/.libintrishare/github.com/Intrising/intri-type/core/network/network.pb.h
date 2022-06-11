@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/common/common.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -47,7 +48,7 @@ struct networkpb_Config {
 struct networkpb_BasicConfig {
   char *HostName;
   char *DomainName;
-  long int LocalMTU;
+  int32_t LocalMTU;
 };
 
 struct networkpb_IPConfig {

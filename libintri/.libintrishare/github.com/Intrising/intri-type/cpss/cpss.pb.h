@@ -9,6 +9,7 @@
  **************************************************************************************************** */
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -375,7 +376,7 @@ struct cpsspb_Enabled {
 
 struct cpsspb_IndexList {
   unsigned int List_Len; // auto-gen: for list
-  long int *List;
+  int32_t *List;
 };
 
 struct cpsspb_MACAddress {
@@ -398,16 +399,16 @@ struct cpsspb_DeviceInformation {
 };
 
 struct cpsspb_DevicePortProperty {
-  long int PortNo;
+  int32_t PortNo;
   enum cpsspb_PortTypeOptions Type;
-  long int MACNo;
+  int32_t MACNo;
   struct cpsspb_PHYInterface *PHYInterface;
-  long int PHYID1;
-  long int PHYID2;
-  long int PHYChipID;
-  long int PoENo;
-  long int PoEChipNo;
-  long int PoELEDNo;
+  int32_t PHYID1;
+  int32_t PHYID2;
+  int32_t PHYChipID;
+  int32_t PoENo;
+  int32_t PoEChipNo;
+  int32_t PoELEDNo;
   unsigned int SupportedTypeList_Len; // auto-gen: for list
   enum cpsspb_PortTypeOptions *SupportedTypeList;
   unsigned int SupportedMediaList_Len; // auto-gen: for list
@@ -415,29 +416,29 @@ struct cpsspb_DevicePortProperty {
 };
 
 struct cpsspb_PHYInterface {
-  long int Interface;
+  int32_t Interface;
   enum cpsspb_PHYInterfaceTypeOptions Type;
 };
 
 struct cpsspb_DevicePortAllocationTable {
-  long int CPUPortNo;
+  int32_t CPUPortNo;
   unsigned int PortPropertyList_Len; // auto-gen: for list
   struct cpsspb_DevicePortProperty **PortPropertyList;
   unsigned int PortList_Len; // auto-gen: for list
-  long int *PortList;
+  int32_t *PortList;
   unsigned int MACNoList_Len; // auto-gen: for list
-  long int *MACNoList;
+  int32_t *MACNoList;
   unsigned int PoEList_Len; // auto-gen: for list
-  long int *PoEList;
+  int32_t *PoEList;
   unsigned int SFPList_Len; // auto-gen: for list
-  long int *SFPList;
+  int32_t *SFPList;
   unsigned int LAGList_Len; // auto-gen: for list
-  long int *LAGList;
+  int32_t *LAGList;
 };
 
 struct cpsspb_DevicePortEntry {
-  long int DeviceID;
-  long int PortNo;
+  int32_t DeviceID;
+  int32_t PortNo;
 };
 
 struct cpsspb_DevicePortList {
@@ -446,8 +447,8 @@ struct cpsspb_DevicePortList {
 };
 
 struct cpsspb_DeviceTrunkEntry {
-  long int DeviceID;
-  long int TrunkID;
+  int32_t DeviceID;
+  int32_t TrunkID;
 };
 
 struct cpsspb_DeviceTrunkList {
@@ -457,9 +458,9 @@ struct cpsspb_DeviceTrunkList {
 
 struct cpsspb_DeviceInterfaceEntry {
   enum cpsspb_InterfaceTypeOptions Type;
-  long int DeviceID;
-  long int PortNo;
-  long int LAGNo;
+  int32_t DeviceID;
+  int32_t PortNo;
+  int32_t LAGNo;
 };
 
 struct cpsspb_DeviceInterfaceList {
@@ -468,18 +469,18 @@ struct cpsspb_DeviceInterfaceList {
 };
 
 struct cpsspb_TrunkingGroupMemberEntry {
-  long int LAGNo;
+  int32_t LAGNo;
   struct cpsspb_DevicePortList *EnableMemberList;
   struct cpsspb_DevicePortList *DisableMemberList;
 };
 
 struct cpsspb_TrunkingMemberEntry {
-  long int LAGNo;
+  int32_t LAGNo;
   struct cpsspb_DevicePortList *MemberList;
 };
 
 struct cpsspb_TrunkingGroupID {
-  long int LAGNo;
+  int32_t LAGNo;
 };
 
 struct cpsspb_TrunkingLoadBalanceMode {
@@ -488,7 +489,7 @@ struct cpsspb_TrunkingLoadBalanceMode {
 
 struct cpsspb_ACLIndexList {
   unsigned int List_Len; // auto-gen: for list
-  long int *List;
+  int32_t *List;
 };
 
 struct cpsspb_ACLUserDefinedRuleList {
@@ -497,7 +498,7 @@ struct cpsspb_ACLUserDefinedRuleList {
 };
 
 struct cpsspb_ACLUserDefinedRuleEntry {
-  long int Index;
+  int32_t Index;
   char *UniqueID;
   enum cpsspb_ACLDirectionTypeOptions DirectionType;
   enum cpsspb_ACLRuleTypeOptions Type;
@@ -505,19 +506,19 @@ struct cpsspb_ACLUserDefinedRuleEntry {
   char *SourceMACMask;
   char *DestinationMAC;
   char *DestinationMACMask;
-  long int EtherType;
-  long int EtherTypeMask;
+  int32_t EtherType;
+  int32_t EtherTypeMask;
   char *SourceIPAddr;
   char *SourceIPMask;
   char *DestinationIPAddr;
   char *DestinationIPMask;
-  long int IPProtocol;
-  long int IPProtocolMask;
-  long int L4SourcePort;
-  long int L4SourcePortMask;
-  long int L4DestinationPort;
-  long int L4DestinationPortMask;
-  long int VlanID;
+  int32_t IPProtocol;
+  int32_t IPProtocolMask;
+  int32_t L4SourcePort;
+  int32_t L4SourcePortMask;
+  int32_t L4DestinationPort;
+  int32_t L4DestinationPortMask;
+  int32_t VlanID;
   struct cpsspb_ACLSourceInterfaceEntry *SourceInterface;
   struct cpsspb_ACLActionEntry *Action;
 };
@@ -528,29 +529,39 @@ struct cpsspb_ACLUserDefinedRuleRemovalList {
 };
 
 struct cpsspb_ACLUserDefinedRuleRemovalEntry {
-  long int Index;
+  int32_t Index;
   char *UniqueID;
 };
 
+enum cpsspb_ACLControlRuleEntry_Rule_Union_Options {
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACIPBindingRule,
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_SubnetBasedRule,
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACBasedRule,
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_SelectiveQinQRule,
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_FlowMirrorRule,
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACCountingRule,
+  cpsspb_ACLControlRuleEntry_Rule_Union_Options_PTPMessageRule,
+};
 struct cpsspb_ACLControlRuleEntry {
   enum cpsspb_ACLRuleTypeOptions Type;
-  long int Index;
+  int32_t Index;
   struct cpsspb_ACLSourceInterfaceEntry *SourceInterface;
   struct cpsspb_ACLActionEntry *Action;
+  enum cpsspb_ACLControlRuleEntry_Rule_Union_Options Rule_Union_Option;
   union {
-    struct cpsspb_ACLMACIPBindingRuleEntry *ACLControlRuleEntry_Rule_MACIPBindingRule;
-    struct cpsspb_ACLSubnetBasedRuleEntry *ACLControlRuleEntry_Rule_SubnetBasedRule;
-    struct cpsspb_ACLMACBasedRuleEntry *ACLControlRuleEntry_Rule_MACBasedRule;
-    struct cpsspb_ACLSelectiveQinQRuleEntry *ACLControlRuleEntry_Rule_SelectiveQinQRule;
-    struct cpsspb_ACLFlowMirrorRuleEntry *ACLControlRuleEntry_Rule_FlowMirrorRule;
-    struct cpsspb_ACLMACCountingRuleEntry *ACLControlRuleEntry_Rule_MACCountingRule;
-    struct cpsspb_ACLPTPMessageRuleEntry *ACLControlRuleEntry_Rule_PTPMessageRule;
-  };
+    struct cpsspb_ACLMACIPBindingRuleEntry *Rule_MACIPBindingRule;
+    struct cpsspb_ACLSubnetBasedRuleEntry *Rule_SubnetBasedRule;
+    struct cpsspb_ACLMACBasedRuleEntry *Rule_MACBasedRule;
+    struct cpsspb_ACLSelectiveQinQRuleEntry *Rule_SelectiveQinQRule;
+    struct cpsspb_ACLFlowMirrorRuleEntry *Rule_FlowMirrorRule;
+    struct cpsspb_ACLMACCountingRuleEntry *Rule_MACCountingRule;
+    struct cpsspb_ACLPTPMessageRuleEntry *Rule_PTPMessageRule;
+  } Rule;
 };
 
 struct cpsspb_ACLSourceInterfaceEntry {
   enum cpsspb_InterfaceTypeOptions Type;
-  long int VlanID;
+  int32_t VlanID;
   unsigned int PortList_Len; // auto-gen: for list
   struct cpsspb_DevicePortEntry **PortList;
   unsigned int LAGList_Len; // auto-gen: for list
@@ -562,9 +573,9 @@ struct cpsspb_ACLActionEntry {
 };
 
 struct cpsspb_ACLG8032RuleEntry {
-  long int RingID;
-  long int VlanID;
-  long int DestinationRingPort;
+  int32_t RingID;
+  int32_t VlanID;
+  int32_t DestinationRingPort;
 };
 
 struct cpsspb_ACLMACIPBindingRuleEntry {
@@ -575,18 +586,18 @@ struct cpsspb_ACLMACIPBindingRuleEntry {
 struct cpsspb_ACLSubnetBasedRuleEntry {
   char *SourceIPAddr;
   char *SourceIPMask;
-  long int ModifyVlanID;
+  int32_t ModifyVlanID;
 };
 
 struct cpsspb_ACLMACBasedRuleEntry {
   char *SourceMAC;
   char *SourceMACMask;
-  long int ModifyVlanID;
+  int32_t ModifyVlanID;
 };
 
 struct cpsspb_ACLSelectiveQinQRuleEntry {
-  long int VlanFrom;
-  long int VlanTo;
+  int32_t VlanFrom;
+  int32_t VlanTo;
 };
 
 struct cpsspb_ACLFlowMirrorRuleEntry {
@@ -595,19 +606,23 @@ struct cpsspb_ACLFlowMirrorRuleEntry {
 };
 
 struct cpsspb_ACLMACCountingRuleEntry {
-  long int CNCCounterIndex;
+  int32_t CNCCounterIndex;
   char *SourceMAC;
 };
 
 struct cpsspb_ACLPTPMessageRuleEntry {
-  long int EtherType;
+  int32_t EtherType;
 };
 
+enum cpsspb_CNCCountingEntry_Entry_Union_Options {
+  cpsspb_CNCCountingEntry_Entry_Union_Options_MACAddressCountingEntry,
+};
 struct cpsspb_CNCCountingEntry {
   enum cpsspb_CNCCountingTypeOptions Type;
+  enum cpsspb_CNCCountingEntry_Entry_Union_Options Entry_Union_Option;
   union {
-    struct cpsspb_CNCMACAddressCountingEntry *CNCCountingEntry_Entry_MACAddressCountingEntry;
-  };
+    struct cpsspb_CNCMACAddressCountingEntry *Entry_MACAddressCountingEntry;
+  } Entry;
 };
 
 struct cpsspb_CNCMACAddressCountingEntry {
@@ -615,8 +630,8 @@ struct cpsspb_CNCMACAddressCountingEntry {
 };
 
 struct cpsspb_CNCCounter {
-  unsigned long long int ByteCount;
-  unsigned long long int PktCount;
+  uint64_t ByteCount;
+  uint64_t PktCount;
 };
 
 struct cpsspb_FDBAutoLearningEnable {
@@ -624,7 +639,7 @@ struct cpsspb_FDBAutoLearningEnable {
 };
 
 struct cpsspb_FDBIdentifyEntry {
-  long int VlanID;
+  int32_t VlanID;
   char *Address;
 };
 
@@ -637,7 +652,7 @@ struct cpsspb_FDBMACEntry {
   enum cpsspb_InterfaceTypeOptions InterfaceType;
   bool IsStatic;
   bool IsForward;
-  long int VlanID;
+  int32_t VlanID;
   char *Address;
   struct cpsspb_DevicePortEntry *Port;
   struct cpsspb_DeviceTrunkEntry *Trunk;
@@ -652,12 +667,12 @@ struct cpsspb_FDBDumpEntry {
 
 struct cpsspb_FDBHashEntry {
   enum cpsspb_FDBLayerTypeOptions LayerType;
-  long int VlanID;
+  int32_t VlanID;
   char *Address;
 };
 
 struct cpsspb_FDBAgingTime {
-  long int Time;
+  int32_t Time;
 };
 
 struct cpsspb_FDBFlushEntry {
@@ -666,25 +681,25 @@ struct cpsspb_FDBFlushEntry {
   bool IsUnicastAll;
   bool IsMulticast;
   unsigned int VlanList_Len; // auto-gen: for list
-  long int *VlanList;
+  int32_t *VlanList;
   struct cpsspb_DevicePortList *PortList;
   struct cpsspb_DeviceTrunkList *TrunkList;
 };
 
 struct cpsspb_FDBMulticastEntry {
   enum cpsspb_MulticastEntryTypeOptions EntryType;
-  long int VIDX;
+  int32_t VIDX;
 };
 
 struct cpsspb_FDBCounters {
-  long int NumberOfFreeEntries;
-  long int NumberOfUsedEntries;
-  long int NumberOfMacUnicastDynamicEntries;
-  long int NumberOfMacUnicastStaticEntries;
-  long int NumberOfMacMulticastDynamicEntries;
-  long int NumberOfMacMulticastStaticEntries;
-  long int NumberOfIpv4MulticastEntries;
-  long int NumberOfIpv6MulticastEntries;
+  int32_t NumberOfFreeEntries;
+  int32_t NumberOfUsedEntries;
+  int32_t NumberOfMacUnicastDynamicEntries;
+  int32_t NumberOfMacUnicastStaticEntries;
+  int32_t NumberOfMacMulticastDynamicEntries;
+  int32_t NumberOfMacMulticastStaticEntries;
+  int32_t NumberOfIpv4MulticastEntries;
+  int32_t NumberOfIpv6MulticastEntries;
 };
 
 struct cpsspb_MirroringSessionEntry {
@@ -704,7 +719,7 @@ struct cpsspb_MirroringSourcePortEntry {
 
 struct cpsspb_MirroringSourceVlanEntry {
   enum cpsspb_MirroringDirectionTypeOptions Direction;
-  long int VlanID;
+  int32_t VlanID;
 };
 
 struct cpsspb_MirroringSessionList {
@@ -720,35 +735,35 @@ struct cpsspb_MirroringPolicyBased {
 struct cpsspb_MirroringRSPANEntry {
   bool IsLocalEnabled;
   bool IsRemoteEnabled;
-  long int AnalyzerVlanID;
+  int32_t AnalyzerVlanID;
 };
 
 struct cpsspb_MiscMACRegisterEntry {
-  unsigned long int Address;
-  unsigned long int Data;
+  uint32_t Address;
+  uint32_t Data;
 };
 
 struct cpsspb_MiscSMIRegisterEntry {
-  unsigned long int PHYInterface;
-  unsigned long int PHYID;
-  unsigned long int Address;
-  unsigned long int Data;
+  uint32_t PHYInterface;
+  uint32_t PHYID;
+  uint32_t Address;
+  uint32_t Data;
 };
 
 struct cpsspb_MiscXSMIRegisterEntry {
-  unsigned long int PHYInterface;
-  unsigned long int PHYID;
-  unsigned long int PHYDev;
-  unsigned long int Address;
-  unsigned long int Data;
+  uint32_t PHYInterface;
+  uint32_t PHYID;
+  uint32_t PHYDev;
+  uint32_t Address;
+  uint32_t Data;
 };
 
 struct cpsspb_MiscRegisterData {
-  unsigned long int Data;
+  uint32_t Data;
 };
 
 struct cpsspb_MiscTemperature {
-  long int Temperature;
+  int32_t Temperature;
 };
 
 struct cpsspb_MiscPHYPortModel {
@@ -761,16 +776,16 @@ struct cpsspb_MiscModel {
 };
 
 struct cpsspb_VlanID {
-  long int VlanID;
+  int32_t VlanID;
 };
 
 struct cpsspb_VlanList {
   unsigned int List_Len; // auto-gen: for list
-  long int *List;
+  int32_t *List;
 };
 
 struct cpsspb_VlanMemberTaggingList {
-  long int VlanID;
+  int32_t VlanID;
   unsigned int List_Len; // auto-gen: for list
   struct cpsspb_VlanMemeberTaggingEntry **List;
 };
@@ -781,7 +796,7 @@ struct cpsspb_VlanMemeberTaggingEntry {
 };
 
 struct cpsspb_VlanDefaultVIDEntry {
-  long int VlanID;
+  int32_t VlanID;
   struct cpsspb_DeviceInterfaceEntry *Interface;
 };
 
@@ -792,12 +807,12 @@ struct cpsspb_VlanAcceptFrameTypeEntry {
 
 struct cpsspb_VlanTPIDIndexEntry {
   struct cpsspb_DeviceInterfaceEntry *Interface;
-  long int Index;
+  int32_t Index;
 };
 
 struct cpsspb_VlanTPIDEntry {
-  long int Index;
-  long int TPID;
+  int32_t Index;
+  int32_t TPID;
 };
 
 struct cpsspb_VlanTPIDList {
@@ -806,15 +821,15 @@ struct cpsspb_VlanTPIDList {
 };
 
 struct cpsspb_VlanStatusEntry {
-  long int VlanID;
+  int32_t VlanID;
   unsigned int UntaggedList_Len; // auto-gen: for list
-  long int *UntaggedList;
+  int32_t *UntaggedList;
   unsigned int TaggedList_Len; // auto-gen: for list
-  long int *TaggedList;
+  int32_t *TaggedList;
   unsigned int ProviderList_Len; // auto-gen: for list
-  long int *ProviderList;
+  int32_t *ProviderList;
   unsigned int CustomerList_Len; // auto-gen: for list
-  long int *CustomerList;
+  int32_t *CustomerList;
 };
 
 struct cpsspb_VlanStatusList {
@@ -824,7 +839,7 @@ struct cpsspb_VlanStatusList {
 
 struct cpsspb_VlanFlushEntry {
   bool IsFlushAll;
-  long int VlanID;
+  int32_t VlanID;
 };
 
 struct cpsspb_VlanTunnelEntry {
@@ -833,19 +848,19 @@ struct cpsspb_VlanTunnelEntry {
 };
 
 struct cpsspb_VlanProtocolClassID {
-  long int ClassID;
+  int32_t ClassID;
 };
 
 struct cpsspb_VlanProtocolClassEntry {
-  long int ClassID;
-  long int EtherType;
+  int32_t ClassID;
+  int32_t EtherType;
   enum cpsspb_VlanProtocolBasedEncapsulationTypeOptions Encapsulation;
 };
 
 struct cpsspb_VlanProtocolEntry {
   struct cpsspb_DeviceInterfaceEntry *Interface;
-  long int ClassID;
-  long int VlanID;
+  int32_t ClassID;
+  int32_t VlanID;
 };
 
 struct cpsspb_VlanTranslationEntry {
@@ -854,8 +869,8 @@ struct cpsspb_VlanTranslationEntry {
 };
 
 struct cpsspb_VlanTranslationMappingEntry {
-  long int SourceVlanID;
-  long int TranslatedVlanID;
+  int32_t SourceVlanID;
+  int32_t TranslatedVlanID;
 };
 
 struct cpsspb_MulticastBridgeGroupEntry {
@@ -865,21 +880,21 @@ struct cpsspb_MulticastBridgeGroupEntry {
 };
 
 struct cpsspb_MulticastUnregisteredFloodingEntry {
-  long int VlanID;
+  int32_t VlanID;
   unsigned int InterfaceList_Len; // auto-gen: for list
   struct cpsspb_DeviceInterfaceEntry **InterfaceList;
 };
 
 struct cpsspb_MulticastTableVlanFloodingEntry {
-  long int VlanID;
-  long int VIDX;
+  int32_t VlanID;
+  int32_t VIDX;
   unsigned int PortList_Len; // auto-gen: for list
   struct cpsspb_DevicePortEntry **PortList;
 };
 
 struct cpsspb_MulticastTableBridgeGroupEntry {
-  long int VlanID;
-  long int VIDX;
+  int32_t VlanID;
+  int32_t VIDX;
   char *Address;
   unsigned int PortList_Len; // auto-gen: for list
   struct cpsspb_DevicePortEntry **PortList;
@@ -894,7 +909,7 @@ struct cpsspb_MulticastTable {
 
 struct cpsspb_PacketControlActionEntry {
   bool Enable;
-  long int VlanID;
+  int32_t VlanID;
   struct cpsspb_DevicePortEntry *Port;
 };
 
@@ -908,7 +923,7 @@ struct cpsspb_PacketControlInterfaceStatusEntry {
   enum cpsspb_PacketControlProtocolTypeOptions Protocol;
   enum cpsspb_InterfaceTypeOptions Type;
   unsigned int EnabledList_Len; // auto-gen: for list
-  long int *EnabledList;
+  int32_t *EnabledList;
   enum cpsspb_PacketCommandOptions PacketCommand;
 };
 
@@ -925,12 +940,12 @@ struct cpsspb_PolicerStormCountingEnableEntry {
 };
 
 struct cpsspb_PolicerStormCountingCounterEntry {
-  unsigned long long int UnknownUnicastByteCount;
-  unsigned long long int UnknownUnicastPktCount;
-  unsigned long long int MulticastByteCount;
-  unsigned long long int MulticastPktCount;
-  unsigned long long int BroadcastByteCount;
-  unsigned long long int BroadcastPktCount;
+  uint64_t UnknownUnicastByteCount;
+  uint64_t UnknownUnicastPktCount;
+  uint64_t MulticastByteCount;
+  uint64_t MulticastPktCount;
+  uint64_t BroadcastByteCount;
+  uint64_t BroadcastPktCount;
 };
 
 struct cpsspb_PortEnableEntry {
@@ -961,41 +976,41 @@ struct cpsspb_PortEEEEntry {
 
 struct cpsspb_PortCounterEntry {
   struct cpsspb_DevicePortEntry *Port;
-  unsigned long long int GoodOctetsRecv;
-  unsigned long long int BadOctetsRecv;
-  unsigned long long int MACTransmitErr;
-  unsigned long long int GoodPktsRecv;
-  unsigned long long int BadPktsRecv;
-  unsigned long long int BrdcPktsRecv;
-  unsigned long long int McPktsRecv;
-  unsigned long long int Pkts64Octets;
-  unsigned long long int Pkts65To127Octets;
-  unsigned long long int Pkts128To255Octets;
-  unsigned long long int Pkts256To511Octets;
-  unsigned long long int Pkts512To1023Octets;
-  unsigned long long int Pkts1024ToMaxOctets;
-  unsigned long long int GoodOctetsSent;
-  unsigned long long int GoodPktsSent;
-  unsigned long long int ExcessiveCollisions;
-  unsigned long long int McPktsSent;
-  unsigned long long int BrdcPktsSent;
-  unsigned long long int UnrecogMACCntrRecv;
-  unsigned long long int FCSent;
-  unsigned long long int GoodFCRecv;
-  unsigned long long int DropEvents;
-  unsigned long long int UndersizePkts;
-  unsigned long long int FragmentsPkts;
-  unsigned long long int OversizePkts;
-  unsigned long long int JabberPkts;
-  unsigned long long int MACRecvError;
-  unsigned long long int BadCrc;
-  unsigned long long int Collisions;
-  unsigned long long int LateCollisions;
-  unsigned long long int BadFcRecv;
-  unsigned long long int UcPktsRecv;
-  unsigned long long int UcPktsSent;
-  unsigned long long int MultiplePktsSent;
-  unsigned long long int DeferredPktsSent;
+  uint64_t GoodOctetsRecv;
+  uint64_t BadOctetsRecv;
+  uint64_t MACTransmitErr;
+  uint64_t GoodPktsRecv;
+  uint64_t BadPktsRecv;
+  uint64_t BrdcPktsRecv;
+  uint64_t McPktsRecv;
+  uint64_t Pkts64Octets;
+  uint64_t Pkts65To127Octets;
+  uint64_t Pkts128To255Octets;
+  uint64_t Pkts256To511Octets;
+  uint64_t Pkts512To1023Octets;
+  uint64_t Pkts1024ToMaxOctets;
+  uint64_t GoodOctetsSent;
+  uint64_t GoodPktsSent;
+  uint64_t ExcessiveCollisions;
+  uint64_t McPktsSent;
+  uint64_t BrdcPktsSent;
+  uint64_t UnrecogMACCntrRecv;
+  uint64_t FCSent;
+  uint64_t GoodFCRecv;
+  uint64_t DropEvents;
+  uint64_t UndersizePkts;
+  uint64_t FragmentsPkts;
+  uint64_t OversizePkts;
+  uint64_t JabberPkts;
+  uint64_t MACRecvError;
+  uint64_t BadCrc;
+  uint64_t Collisions;
+  uint64_t LateCollisions;
+  uint64_t BadFcRecv;
+  uint64_t UcPktsRecv;
+  uint64_t UcPktsSent;
+  uint64_t MultiplePktsSent;
+  uint64_t DeferredPktsSent;
 };
 
 struct cpsspb_PortCounterList {
@@ -1015,7 +1030,7 @@ struct cpsspb_PortIsolationList {
 };
 
 struct cpsspb_PortIPGSize {
-  long int Size;
+  int32_t Size;
 };
 
 struct cpsspb_PortFaultStatusEntry {
@@ -1035,41 +1050,41 @@ struct cpsspb_PortStatusEntry {
 };
 
 struct cpsspb_PTPToD {
-  unsigned long long int Sec;
-  unsigned long int Ns;
+  uint64_t Sec;
+  uint32_t Ns;
 };
 
 struct cpsspb_PTPToDFrequency {
-  unsigned long int FractionalNs;
+  uint32_t FractionalNs;
 };
 
 struct cpsspb_PTPQueueInfo {
-  unsigned long long int Sec;
-  unsigned long int Ns;
+  uint64_t Sec;
+  uint32_t Ns;
 };
 
 struct cpsspb_PTPMessageInfo {
   struct cpsspb_DevicePortEntry *Port;
-  unsigned long int SeqID;
-  unsigned long int MessageType;
-  unsigned long int QueueNo;
+  uint32_t SeqID;
+  uint32_t MessageType;
+  uint32_t QueueNo;
 };
 
 struct cpsspb_PTPLinkDelay {
   struct cpsspb_DevicePortEntry *Port;
-  long int Delay;
+  int32_t Delay;
 };
 
 struct cpsspb_PTPPortDelay {
   struct cpsspb_DevicePortEntry *Port;
   enum cpsspb_PTPPortDelayTypeOptions Direction;
-  long int Delay;
+  int32_t Delay;
 };
 
 struct cpsspb_PTPMode {
   struct cpsspb_DevicePortEntry *Port;
-  unsigned long int DomainIndex;
-  unsigned long int DomainNumber;
+  uint32_t DomainIndex;
+  uint32_t DomainNumber;
   enum cpsspb_PTPModeTypeOptions Mode;
 };
 
@@ -1096,14 +1111,14 @@ struct cpsspb_QoSPortQueueList {
 };
 
 struct cpsspb_QoSPortQueueEntry {
-  long int QueueNo;
-  long int Ratio;
+  int32_t QueueNo;
+  int32_t Ratio;
   enum cpsspb_QoSSchedulerTypeOptions Scheduler;
 };
 
 struct cpsspb_QoSCoSProfile {
-  long int CoSNo;
-  long int QueueNo;
+  int32_t CoSNo;
+  int32_t QueueNo;
 };
 
 struct cpsspb_QoSCoSProfileList {
@@ -1112,8 +1127,8 @@ struct cpsspb_QoSCoSProfileList {
 };
 
 struct cpsspb_QoSDSCPProfile {
-  long int DSCPNo;
-  long int QueueNo;
+  int32_t DSCPNo;
+  int32_t QueueNo;
 };
 
 struct cpsspb_QoSDSCPProfileList {
@@ -1125,7 +1140,7 @@ struct cpsspb_RateLimitingIngressEntry {
   unsigned int FilterTypes_Len; // auto-gen: for list
   enum cpsspb_RateLimitingIngressFilterTypeOptions *FilterTypes;
   struct cpsspb_DevicePortEntry *Port;
-  long int Rate;
+  int32_t Rate;
 };
 
 struct cpsspb_RateLimitingIngressList {
@@ -1135,7 +1150,7 @@ struct cpsspb_RateLimitingIngressList {
 
 struct cpsspb_RateLimitingEgressEntry {
   struct cpsspb_DevicePortEntry *Port;
-  long int Rate;
+  int32_t Rate;
 };
 
 struct cpsspb_RateLimitingEgressList {
@@ -1144,12 +1159,12 @@ struct cpsspb_RateLimitingEgressList {
 };
 
 struct cpsspb_STPID {
-  long int ID;
+  int32_t ID;
   enum cpsspb_STPProtocolTypeOptions Proto;
 };
 
 struct cpsspb_STPPortState {
-  long int ID;
+  int32_t ID;
   struct cpsspb_DeviceInterfaceEntry *IdentifyNo;
   enum cpsspb_STPPortStateTypeOptions State;
   bool InActive;
@@ -1157,14 +1172,14 @@ struct cpsspb_STPPortState {
 };
 
 struct cpsspb_STPVlanBinding {
-  long int ID;
+  int32_t ID;
   enum cpsspb_STPProtocolTypeOptions Proto;
   unsigned int VlanList_Len; // auto-gen: for list
-  long int *VlanList;
+  int32_t *VlanList;
 };
 
 struct cpsspb_STPIDState {
-  long int ID;
+  int32_t ID;
   enum cpsspb_STPPortStateTypeOptions State;
   enum cpsspb_STPProtocolTypeOptions Proto;
 };

@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/event/event.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -141,9 +142,9 @@ struct accesspb_AuthenticationServerEntry {
   char *Name;
   enum accesspb_AuthenticationServerTypeOptions ServerType;
   char *HostAddress;
-  long int PortNumber;
+  int32_t PortNumber;
   char *SharedSecret;
-  long long int InterimInterval;
+  int64_t InterimInterval;
 };
 
 struct accesspb_AuthenticationServersConfig {
@@ -251,7 +252,7 @@ struct accesspb_UserPassword {
 
 // the below messages "NumberOfLogins,LoginStatusEntry,LoginStatus" are not used currently.
 struct accesspb_NumberOfLogins {
-  long int NumberOfLogins;
+  int32_t NumberOfLogins;
 };
 
 // each entry is unique.
@@ -262,7 +263,7 @@ struct accesspb_LoginStatusEntry {
   char *LoginID;
   char *LoginTimeStamp;
   char *LoginEpoch;
-  long long int ConnectTime;
+  int64_t ConnectTime;
   enum eventpb_LoginInterfaceNameTypeOptions Service;
 };
 

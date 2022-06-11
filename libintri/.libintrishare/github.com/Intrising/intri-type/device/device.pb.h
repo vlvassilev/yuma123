@@ -10,6 +10,7 @@
 #include "../../../../github.com/Intrising/intri-type/common/common.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -275,78 +276,96 @@ enum devicepb_InterfaceTypeOptions {
  *                                                                                                    *
  **************************************************************************************************** */
 
+enum devicepb_LedInfo_Device_Union_Options {
+  devicepb_LedInfo_Device_Union_Options_LEDDevice,
+  devicepb_LedInfo_Device_Union_Options_I2CDevice,
+  devicepb_LedInfo_Device_Union_Options_GPIODevice,
+};
 struct devicepb_LedInfo {
   char *Name;
-  long int PortNo;
+  int32_t PortNo;
   enum devicepb_DeviceTypeOptions Type;
   char *Direction;
+  enum devicepb_LedInfo_Device_Union_Options Device_Union_Option;
   union {
-    struct devicepb_MCULedDevice *LedInfo_Device_LEDDevice;
-    struct devicepb_I2CDevice *LedInfo_Device_I2CDevice;
-    struct devicepb_GPIODevice *LedInfo_Device_GPIODevice;
-  };
+    struct devicepb_MCULedDevice *Device_LEDDevice;
+    struct devicepb_I2CDevice *Device_I2CDevice;
+    struct devicepb_GPIODevice *Device_GPIODevice;
+  } Device;
 };
 
+enum devicepb_MonitorInfo_Device_Union_Options {
+  devicepb_MonitorInfo_Device_Union_Options_MonitorDevice,
+  devicepb_MonitorInfo_Device_Union_Options_I2CDevice,
+  devicepb_MonitorInfo_Device_Union_Options_GPIODevice,
+};
 struct devicepb_MonitorInfo {
   char *Name;
   enum devicepb_DeviceTypeOptions Type;
   char *Direction;
+  enum devicepb_MonitorInfo_Device_Union_Options Device_Union_Option;
   union {
-    struct devicepb_MCUMonitorDevice *MonitorInfo_Device_MonitorDevice;
-    struct devicepb_I2CDevice *MonitorInfo_Device_I2CDevice;
-    struct devicepb_GPIODevice *MonitorInfo_Device_GPIODevice;
-  };
+    struct devicepb_MCUMonitorDevice *Device_MonitorDevice;
+    struct devicepb_I2CDevice *Device_I2CDevice;
+    struct devicepb_GPIODevice *Device_GPIODevice;
+  } Device;
 };
 
+enum devicepb_PSUInfo_Device_Union_Options {
+  devicepb_PSUInfo_Device_Union_Options_PSUDevice,
+  devicepb_PSUInfo_Device_Union_Options_I2CDevice,
+  devicepb_PSUInfo_Device_Union_Options_GPIODevice,
+};
 struct devicepb_PSUInfo {
   char *Name;
   enum devicepb_DeviceTypeOptions Type;
   char *Direction;
+  enum devicepb_PSUInfo_Device_Union_Options Device_Union_Option;
   union {
-    struct devicepb_MCUPSUDevice *PSUInfo_Device_PSUDevice;
-    struct devicepb_I2CDevice *PSUInfo_Device_I2CDevice;
-    struct devicepb_GPIODevice *PSUInfo_Device_GPIODevice;
-  };
+    struct devicepb_MCUPSUDevice *Device_PSUDevice;
+    struct devicepb_I2CDevice *Device_I2CDevice;
+    struct devicepb_GPIODevice *Device_GPIODevice;
+  } Device;
 };
 
 struct devicepb_MCULedDevice {
-  long int I2cAddr;
-  long int AddrRegister;
+  int32_t I2cAddr;
+  int32_t AddrRegister;
   enum devicepb_LedTypeOptions LedAction;
-  long int ActiveBit;
+  int32_t ActiveBit;
 };
 
 struct devicepb_MCUMonitorDevice {
-  long int I2cAddr;
-  long int AddrRegister;
+  int32_t I2cAddr;
+  int32_t AddrRegister;
   enum devicepb_MonitorTypeOptions MonitorAction;
-  long int ActiveBit;
+  int32_t ActiveBit;
 };
 
 struct devicepb_MCUPSUDevice {
-  long int I2cAddr;
-  long int AddrRegister;
+  int32_t I2cAddr;
+  int32_t AddrRegister;
   enum devicepb_PSUTypeOptions PSUAction;
-  long int ActiveBit;
+  int32_t ActiveBit;
 };
 
 struct devicepb_MCUFanDevice {
-  long int I2cAddr;
-  long int AddrRegister;
+  int32_t I2cAddr;
+  int32_t AddrRegister;
   enum devicepb_FanTypeOptions FANAction;
-  long int ActiveBit;
+  int32_t ActiveBit;
 };
 
 struct devicepb_I2CDevice {
-  long int I2cAddr;
-  long int AddrRegister;
-  long int Action;
-  long int ActiveBit;
+  int32_t I2cAddr;
+  int32_t AddrRegister;
+  int32_t Action;
+  int32_t ActiveBit;
 };
 
 struct devicepb_GPIODevice {
-  long int Register;
-  long int Pin;
+  int32_t Register;
+  int32_t Pin;
   bool Action;
   bool Enable;
 };
@@ -385,27 +404,38 @@ struct devicepb_UARTDevice {
   char *Name;
   char *Path;
   char *Direction;
-  long int Bandwidth;
+  int32_t Bandwidth;
 };
 
+enum devicepb_FanInfo_Device_Union_Options {
+  devicepb_FanInfo_Device_Union_Options_FANDevice,
+  devicepb_FanInfo_Device_Union_Options_I2CDevice,
+  devicepb_FanInfo_Device_Union_Options_GPIODevice,
+};
 struct devicepb_FanInfo {
   char *Name;
   enum devicepb_FanDeviceTypeOptions Type;
-  long int FanNumber;
+  int32_t FanNumber;
+  enum devicepb_FanInfo_Device_Union_Options Device_Union_Option;
   union {
-    struct devicepb_MCUFanDevice *FanInfo_Device_FANDevice;
-    struct devicepb_I2CDevice *FanInfo_Device_I2CDevice;
-    struct devicepb_GPIODevice *FanInfo_Device_GPIODevice;
-  };
+    struct devicepb_MCUFanDevice *Device_FANDevice;
+    struct devicepb_I2CDevice *Device_I2CDevice;
+    struct devicepb_GPIODevice *Device_GPIODevice;
+  } Device;
 };
 
+enum devicepb_PoEInfo_Device_Union_Options {
+  devicepb_PoEInfo_Device_Union_Options_I2CDevice,
+  devicepb_PoEInfo_Device_Union_Options_UartDevice,
+};
 struct devicepb_PoEInfo {
   char *Name;
   enum devicepb_PoEDeviceTypeOptions Type;
+  enum devicepb_PoEInfo_Device_Union_Options Device_Union_Option;
   union {
-    struct devicepb_I2CDevice *PoEInfo_Device_I2CDevice;
-    struct devicepb_UARTDevice *PoEInfo_Device_UartDevice;
-  };
+    struct devicepb_I2CDevice *Device_I2CDevice;
+    struct devicepb_UARTDevice *Device_UartDevice;
+  } Device;
 };
 
 struct devicepb_HardwareInfo {
@@ -432,44 +462,44 @@ struct devicepb_HardwareInfo {
 };
 
 struct devicepb_HardwareTableSize {
-  long int TcamSize;
-  long int BridgeFDBEntries;
-  long int VirtualPorts;
-  long int VirtualBridgeDomains;
-  long int ARPTableEntries;
-  long int RouterIPv4HostEntries;
-  long int RouterIPv6HostEntries;
-  long int RouterNextHopEntries;
-  long int MulticastPhysicalPortGroups;
-  long int MulticastLinkedListEntries;
-  long int CentralizedCounters;
-  long int SpanningTreeGroups;
-  long int QoSProfiles;
-  long int L2L3PortIsolation;
+  int32_t TcamSize;
+  int32_t BridgeFDBEntries;
+  int32_t VirtualPorts;
+  int32_t VirtualBridgeDomains;
+  int32_t ARPTableEntries;
+  int32_t RouterIPv4HostEntries;
+  int32_t RouterIPv6HostEntries;
+  int32_t RouterNextHopEntries;
+  int32_t MulticastPhysicalPortGroups;
+  int32_t MulticastLinkedListEntries;
+  int32_t CentralizedCounters;
+  int32_t SpanningTreeGroups;
+  int32_t QoSProfiles;
+  int32_t L2L3PortIsolation;
 };
 
 struct devicepb_PhyInterface {
-  long int Interface;
+  int32_t Interface;
   enum devicepb_PhyInterfaceTypeOptions Type;
 };
 
 struct devicepb_PortInfo {
-  long int PortNo;
-  long int MACChip;
-  long int MACNo;
-  long int PortGroup;
-  long int PhyID1;
-  long int PhyID2;
+  int32_t PortNo;
+  int32_t MACChip;
+  int32_t MACNo;
+  int32_t PortGroup;
+  int32_t PhyID1;
+  int32_t PhyID2;
   struct devicepb_PhyInterface *PhyInterface;
-  long int PoENo;
+  int32_t PoENo;
   unsigned int PoEChannel_Len; // auto-gen: for list
-  long int *PoEChannel;
-  long int PoEChipNo;
-  long int MacsecEncLen;
+  int32_t *PoEChannel;
+  int32_t PoEChipNo;
+  int32_t MacsecEncLen;
   enum devicepb_PortInterfaceTypeOptions InterfaceType;
   unsigned int Properties_Len; // auto-gen: for list
   enum devicepb_PortPropertyTypeOptions *Properties;
-  long int DeviceID;
+  int32_t DeviceID;
   unsigned int SpeedProperties_Len; // auto-gen: for list
   enum devicepb_DevicePortSpeedDuplexTypeOptions *SpeedProperties;
 };
@@ -483,7 +513,7 @@ struct devicepb_BoardInfo {
   unsigned int HwFeatures_Len; // auto-gen: for list
   enum devicepb_FactoryHwFeatureTypeOptions *HwFeatures;
   struct devicepb_HardwareTableSize *HwSize;
-  long int CPUPort;
+  int32_t CPUPort;
   struct devicepb_HardwareInfo *BoardDevice;
   struct devicepb_TimeControlInfo *TimeControl;
   // https://oidref.com/1.3.6.1.2.1.1.2
@@ -493,16 +523,16 @@ struct devicepb_BoardInfo {
 struct devicepb_TimeControlSpeedFrequencyEntry {
   enum devicepb_PortPropertyTypeOptions Speed;
   // for frequency is 0
-  long long int Frequency;
-  long long int M;
-  long long int N;
-  long long int Div;
+  int64_t Frequency;
+  int64_t M;
+  int64_t N;
+  int64_t Div;
 };
 
 struct devicepb_TimeControlPortInfoEntry {
-  long int PortNo;
+  int32_t PortNo;
   enum devicepb_RCLKTypeOptions RCLKPin;
-  long long int Frequency;
+  int64_t Frequency;
   enum devicepb_InputClockIndexTypeOptions InputClock;
 };
 
@@ -523,8 +553,8 @@ struct devicepb_TimeControlInfo {
 
 struct devicepb_Boundary {
   enum devicepb_BoundaryTypeOptions Type;
-  long int Max;
-  long int Min;
+  int32_t Max;
+  int32_t Min;
   double Lower;
   double Upper;
 };
@@ -727,10 +757,10 @@ struct devicepb_InterfaceIdentify {
   enum devicepb_InterfaceTypeOptions Type;
   // DeviceID is pre-defined for switch stacking https://en.wikipedia.org/wiki/Stackable_switch
 // pre-generated, not visible for User, the value will all be 0 for now
-  long int DeviceID;
-  long int PortNo;
-  long int LAGNo;
-  long int VlanID;
+  int32_t DeviceID;
+  int32_t PortNo;
+  int32_t LAGNo;
+  int32_t VlanID;
 };
 
 // for user interface like WEB, CLI, SNMP, we only need to show attributes below.

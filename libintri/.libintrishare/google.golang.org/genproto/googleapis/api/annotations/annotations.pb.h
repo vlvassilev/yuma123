@@ -8,6 +8,7 @@
  *                                                                                                    *
  **************************************************************************************************** */
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -308,6 +309,14 @@ struct annotationspb_Http {
 // If an API needs to use a JSON array for request or response body, it can map
 // the request or response body to a repeated field. However, some gRPC
 // Transcoding implementations may not support this feature.
+enum annotationspb_HttpRule_Pattern_Union_Options {
+  annotationspb_HttpRule_Pattern_Union_Options_Get,
+  annotationspb_HttpRule_Pattern_Union_Options_Put,
+  annotationspb_HttpRule_Pattern_Union_Options_Post,
+  annotationspb_HttpRule_Pattern_Union_Options_Delete,
+  annotationspb_HttpRule_Pattern_Union_Options_Patch,
+  annotationspb_HttpRule_Pattern_Union_Options_Custom,
+};
 struct annotationspb_HttpRule {
   // Selects a method to which this rule applies.
 //
@@ -332,24 +341,25 @@ struct annotationspb_HttpRule {
 // the nesting may only be one level deep).
   unsigned int AdditionalBindings_Len; // auto-gen: for list
   struct annotationspb_HttpRule **AdditionalBindings;
+  enum annotationspb_HttpRule_Pattern_Union_Options Pattern_Union_Option;
   union {
     // Maps to HTTP GET. Used for listing and getting information about
 // resources.
-    char *HttpRule_Pattern_Get;
+    char *Pattern_Get;
     // Maps to HTTP PUT. Used for replacing a resource.
-    char *HttpRule_Pattern_Put;
+    char *Pattern_Put;
     // Maps to HTTP POST. Used for creating a resource or performing an action.
-    char *HttpRule_Pattern_Post;
+    char *Pattern_Post;
     // Maps to HTTP DELETE. Used for deleting a resource.
-    char *HttpRule_Pattern_Delete;
+    char *Pattern_Delete;
     // Maps to HTTP PATCH. Used for updating a resource.
-    char *HttpRule_Pattern_Patch;
+    char *Pattern_Patch;
     // The custom pattern is used for specifying an HTTP method that is not
 // included in the `pattern` field, such as HEAD, or "*" to leave the
 // HTTP method unspecified for this rule. The wild-card rule is useful
 // for services that provide content to Web (HTML) clients.
-    struct annotationspb_CustomHttpPattern *HttpRule_Pattern_Custom;
-  };
+    struct annotationspb_CustomHttpPattern *Pattern_Custom;
+  } Pattern;
 };
 
 // A custom pattern is used for defining custom HTTP verb.

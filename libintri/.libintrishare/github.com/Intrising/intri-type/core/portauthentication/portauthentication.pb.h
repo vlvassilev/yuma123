@@ -12,6 +12,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -121,7 +122,7 @@ struct portauthenticationpb_AuthorizedMACs {
 
 struct portauthenticationpb_SystemConfig {
   bool PortAccessControlEnabled;
-  long int ReauthenticationPeriod;
+  int32_t ReauthenticationPeriod;
   char *NASIdentifier;
   char *MACSeparatorChar;
   enum portauthenticationpb_MACSpellingTypeOptions MACSpelling;
@@ -131,7 +132,7 @@ struct portauthenticationpb_SystemConfig {
   char *PrimaryAcctServerName;
   char *FallbackAuthServerName;
   char *FallbackAcctServerName;
-  long int ServerDownTimeout;
+  int32_t ServerDownTimeout;
 };
 
 struct portauthenticationpb_PortConfig {
@@ -145,8 +146,8 @@ struct portauthenticationpb_PortConfigEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   enum portauthenticationpb_AuthorizationModeTypeOptions AuthorizedMode;
   enum portauthenticationpb_UnAuthorizationModeTypeOptions UnAuthorizedMode;
-  long int AuthFailRetryInterval;
-  long int LimitedNumberOfMACs;
+  int32_t AuthFailRetryInterval;
+  int32_t LimitedNumberOfMACs;
   enum portauthenticationpb_MACTimeoutTypeOptions MACTimeout;
 };
 
@@ -160,8 +161,8 @@ struct portauthenticationpb_PortStatusEntry {
   enum portauthenticationpb_AuthorizationStateTypeOptions AuthorizationState;
   enum portauthenticationpb_AuthorizationModeTypeOptions AuthorizationMode;
   char *LastStateChange;
-  long int NumberOfMACsToLearn;
-  long int NumberOfLearnedMACs;
+  int32_t NumberOfMACsToLearn;
+  int32_t NumberOfLearnedMACs;
 };
 
 struct portauthenticationpb_PortAuthorizationStatus {
@@ -177,8 +178,8 @@ struct portauthenticationpb_PortAuthorizationStatusEntry {
   // Not Support : 802.1X with VLAN assignment
 // string vlan_alias = 5;
 // int32 vlan_i_d = 6 [json_name = "vid"];
-  long int IdleTimeout;
-  long int SessionTimeout;
+  int32_t IdleTimeout;
+  int32_t SessionTimeout;
   // Not Support : 802.1X dynamic access control list(ACL) based on RADIUS attributes
 // string filter_i_d = 9;
   char *LastStateChange;
@@ -198,9 +199,9 @@ struct portauthenticationpb_UserStatusEntry {
   char *UserName;
   // Not Support : 802.1X with VLAN assignment
 // string vlan_alias = 7;
-  long int VlanID;
-  long int IdleTimeout;
-  long int SessionTimeout;
+  int32_t VlanID;
+  int32_t IdleTimeout;
+  int32_t SessionTimeout;
   // Not Support : 802.1X dynamic access control list(ACL) based on RADIUS attributes
 // string filter_i_d = 11;
   char *LoginTimeStamp;
@@ -209,7 +210,7 @@ struct portauthenticationpb_UserStatusEntry {
 struct portauthenticationpb_LearnMACNowEntry {
   // Index
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int Amount;
+  int32_t Amount;
 };
 
 struct portauthenticationpb_UnauthorizeMACEntry {

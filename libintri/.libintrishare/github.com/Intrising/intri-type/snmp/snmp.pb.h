@@ -13,6 +13,7 @@
 #include "../../../../github.com/Intrising/intri-type/core/userinterface/userinterface.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -27,7 +28,7 @@
  **************************************************************************************************** */
 
 struct snmppb_EngineInfo {
-  long int Boots;
-  long long int RunTime;
+  int32_t Boots;
+  int64_t RunTime;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_snmp_snmp

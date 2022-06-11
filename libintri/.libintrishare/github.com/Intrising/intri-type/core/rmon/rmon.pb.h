@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -35,21 +36,21 @@ enum rmonpb_UtilizationIntervalTypeOptions {
 struct rmonpb_IngressEntry {
   // Only support INTERFACE_TYPE_PORT
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  unsigned long long int InGoodOctets;
-  unsigned long long int InBadOctets;
-  unsigned long long int InTotalPackets;
-  unsigned long long int InUnicasts;
-  unsigned long long int InNonUnicasts;
-  unsigned long long int InBroadcasts;
-  unsigned long long int InMulticasts;
-  unsigned long long int InPause;
-  unsigned long long int InTotalReceiveErrors;
-  unsigned long long int InUndersize;
-  unsigned long long int InOversize;
-  unsigned long long int InFragments;
-  unsigned long long int InJabber;
-  unsigned long long int InFcsErrors;
-  unsigned long long int InDiscarded;
+  uint64_t InGoodOctets;
+  uint64_t InBadOctets;
+  uint64_t InTotalPackets;
+  uint64_t InUnicasts;
+  uint64_t InNonUnicasts;
+  uint64_t InBroadcasts;
+  uint64_t InMulticasts;
+  uint64_t InPause;
+  uint64_t InTotalReceiveErrors;
+  uint64_t InUndersize;
+  uint64_t InOversize;
+  uint64_t InFragments;
+  uint64_t InJabber;
+  uint64_t InFcsErrors;
+  uint64_t InDiscarded;
 };
 
 struct rmonpb_Ingress {
@@ -61,20 +62,20 @@ struct rmonpb_Ingress {
 struct rmonpb_EgressEntry {
   // Only support INTERFACE_TYPE_PORT
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  unsigned long long int OutGoodOctets;
-  unsigned long long int OutUnicasts;
-  unsigned long long int OutNonUnicasts;
-  unsigned long long int OutBroadcasts;
-  unsigned long long int OutMulticasts;
-  unsigned long long int OutPause;
-  unsigned long long int OutDeferred;
-  unsigned long long int OutTotalCollisions;
-  unsigned long long int OutTotalPackets;
-  unsigned long long int OutExcessiveCollisions;
-  unsigned long long int OutLateCollisions;
-  unsigned long long int OutFcsErrors;
-  unsigned long long int OutDroppedPackets;
-  unsigned long long int OutMultipleCollisions;
+  uint64_t OutGoodOctets;
+  uint64_t OutUnicasts;
+  uint64_t OutNonUnicasts;
+  uint64_t OutBroadcasts;
+  uint64_t OutMulticasts;
+  uint64_t OutPause;
+  uint64_t OutDeferred;
+  uint64_t OutTotalCollisions;
+  uint64_t OutTotalPackets;
+  uint64_t OutExcessiveCollisions;
+  uint64_t OutLateCollisions;
+  uint64_t OutFcsErrors;
+  uint64_t OutDroppedPackets;
+  uint64_t OutMultipleCollisions;
 };
 
 struct rmonpb_Egress {
@@ -86,12 +87,12 @@ struct rmonpb_Egress {
 struct rmonpb_HistogramEntry {
   // Only support INTERFACE_TYPE_PORT
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  unsigned long long int In64Octets;
-  unsigned long long int In65To127Octets;
-  unsigned long long int In128To255Octets;
-  unsigned long long int In256To511Octets;
-  unsigned long long int In512To1023Octets;
-  unsigned long long int In1024ToMaxOctets;
+  uint64_t In64Octets;
+  uint64_t In65To127Octets;
+  uint64_t In128To255Octets;
+  uint64_t In256To511Octets;
+  uint64_t In512To1023Octets;
+  uint64_t In1024ToMaxOctets;
 };
 
 struct rmonpb_Histogram {
@@ -102,7 +103,7 @@ struct rmonpb_Histogram {
 
 struct rmonpb_UtilizationRate {
   enum rmonpb_UtilizationIntervalTypeOptions Type;
-  long int Rate;
+  int32_t Rate;
 };
 
 struct rmonpb_UtilizationEntry {

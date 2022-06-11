@@ -76,6 +76,10 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 #include "google.golang.org/genproto/googleapis/type/date/date.pb.h"
 #include "google.golang.org/genproto/googleapis/type/dayofweek/dayofweek.pb.h"
 #include "google.golang.org/genproto/googleapis/type/timeofday/timeofday.pb.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #line 1 "cgo-generated-wrapper"
 

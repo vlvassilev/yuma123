@@ -11,6 +11,7 @@
 #include "../../../../../github.com/Intrising/intri-type/event/event.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -145,12 +146,12 @@ struct monitorpb_SystemLimitConfig {
 };
 
 struct monitorpb_RangeValue {
-  long int IntMin;
-  long int IntMax;
+  int32_t IntMin;
+  int32_t IntMax;
   float FloatMin;
   float FloatMax;
-  long long int Int64Min;
-  long long int Int64Max;
+  int64_t Int64Min;
+  int64_t Int64Max;
   double Float64Min;
   double Float64Max;
 };
@@ -207,9 +208,9 @@ struct monitorpb_SystemStatus {
 
 struct monitorpb_DisplayValue {
   char *ValueUnit;
-  long int IntValue;
+  int32_t IntValue;
   float FloatValue;
-  long long int Int64Value;
+  int64_t Int64Value;
   double Float64Value;
 };
 
@@ -239,6 +240,6 @@ struct monitorpb_LEDStateEntry {
   enum monitorpb_LEDStateTypeOptions StateOption;
   enum monitorpb_LEDColorTypeOptions ColorOption;
   // for the `state_option` is `LED_STATE_TYPE_BLINKING`
-  long int BlinkingIntervalMs;
+  int32_t BlinkingIntervalMs;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_monitor_monitor

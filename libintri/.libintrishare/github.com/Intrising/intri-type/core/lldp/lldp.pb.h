@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -293,9 +294,9 @@ struct lldppb_SystemConfig {
   // Default value is false
   bool Enabled;
   // Default value is 128, the unit of this field is second
-  long int TimeToLive;
+  int32_t TimeToLive;
   // Default value is 30, the unit of this field is second
-  long int MsgTxInterval;
+  int32_t MsgTxInterval;
   // Default value is false
   bool VoiceDisableVlanTLV;
   // Default value is false
@@ -337,7 +338,7 @@ struct lldppb_LocalInfoEntry {
 
 struct lldppb_NeighborInfoEntry {
   struct devicepb_InterfaceIdentify *RecvIdentifyNo;
-  long int TimeToLive;
+  int32_t TimeToLive;
   struct lldppb_ChassisInfo *Chassis;
   unsigned int MgmtAddress_Len; // auto-gen: for list
   struct lldppb_PortManagementAddressInfo **MgmtAddress;
@@ -358,7 +359,7 @@ struct lldppb_NeighborInfoEntry {
 struct lldppb_LinkAggregation {
   bool Capabilities;
   bool Status;
-  long int AggregationPortNo;
+  int32_t AggregationPortNo;
 };
 
 struct lldppb_ExtendedPowerViaMDI {
@@ -379,7 +380,7 @@ struct lldppb_MACPHYConfig {
 struct lldppb_MediaCapability {
   unsigned int Capabilities_Len; // auto-gen: for list
   enum lldppb_MedCapabilitiesTypeOptions *Capabilities;
-  long int ClassType;
+  int32_t ClassType;
 };
 
 struct lldppb_SystemManagementInfo {
@@ -430,7 +431,7 @@ struct lldppb_ChassisInfo {
 
 struct lldppb_PortID {
   enum lldppb_PortIdSubtypeTypeOptions Subtype;
-  long int VlanID;
+  int32_t VlanID;
   char *ID;
 };
 
@@ -441,17 +442,17 @@ struct lldppb_Statistic {
 
 struct lldppb_StatisticEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int FramesOut;
-  long int FramesIn;
-  long int FramesInErrors;
+  int32_t FramesOut;
+  int32_t FramesIn;
+  int32_t FramesInErrors;
 };
 
 struct lldppb_VoiceVlanEntry {
   enum lldppb_PoliciesApplicationTypeOptions ApplicationType;
   bool PolicyDefined;
   bool TaggedVlan;
-  long int VlanID;
+  int32_t VlanID;
   enum lldppb_PoliciesLayer2PriorityTypeOptions Layer2Priority;
-  long int DSCP;
+  int32_t DSCP;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_lldp_lldp

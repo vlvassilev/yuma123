@@ -11,6 +11,7 @@
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -248,7 +249,7 @@ struct timecontrolpb_DPLLFrequencyControl {
 
 struct timecontrolpb_DPLLFrequencyControlEntry {
   enum timecontrolpb_DPLLManageIndexTypeOptions Index;
-  long long int FreqOffset;
+  int64_t FreqOffset;
 };
 
 struct timecontrolpb_DPLLPhaseControl {
@@ -258,7 +259,7 @@ struct timecontrolpb_DPLLPhaseControl {
 
 struct timecontrolpb_DPLLPhaseControlEntry {
   enum timecontrolpb_DPLLManageIndexTypeOptions Index;
-  long int PhOffset;
+  int32_t PhOffset;
 };
 
 struct timecontrolpb_DPLLPhaseSlopeLimit {
@@ -268,7 +269,7 @@ struct timecontrolpb_DPLLPhaseSlopeLimit {
 
 struct timecontrolpb_DPLLPhaseSlopeLimitEntry {
   enum timecontrolpb_DPLLManageIndexTypeOptions Index;
-  long int Limit;
+  int32_t Limit;
 };
 
 struct timecontrolpb_DPLLPhaseControlTimer {
@@ -278,6 +279,6 @@ struct timecontrolpb_DPLLPhaseControlTimer {
 
 struct timecontrolpb_DPLLPhaseControlTimerEntry {
   enum timecontrolpb_DPLLManageIndexTypeOptions Index;
-  long int Timeout;
+  int32_t Timeout;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_timecontrol_timecontrol

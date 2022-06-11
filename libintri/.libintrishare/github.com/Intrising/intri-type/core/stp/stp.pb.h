@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -89,34 +90,34 @@ enum stppb_PortStatusRoleTypeOptions {
 struct stppb_MSTPConfig {
   enum stppb_BridgeConfigModeTypeOptions Mode;
   char *Name;
-  long int Revision;
-  long int MaxAge;
-  long int HelloTime;
-  long int ForwardDelay;
-  long int MaxHops;
-  long int TxHoldCount;
+  int32_t Revision;
+  int32_t MaxAge;
+  int32_t HelloTime;
+  int32_t ForwardDelay;
+  int32_t MaxHops;
+  int32_t TxHoldCount;
   struct stppb_CISTEntry *Cist;
   unsigned int Mstis_Len; // auto-gen: for list
   struct stppb_MSTIEntry **Mstis;
 };
 
 struct stppb_CISTEntry {
-  long int No;
+  int32_t No;
   // in steps of 4096
-  long int Priority;
+  int32_t Priority;
   unsigned int Ports_Len; // auto-gen: for list
   struct stppb_MSTPCistPort **Ports;
 };
 
 struct stppb_MSTIEntry {
   // Index (for update/delete)
-  long int No;
+  int32_t No;
   // the `int32` in the field `vlans` should exist in VLAN filter list (`VLANConfig`, `filters`)
   unsigned int Vlans_Len; // auto-gen: for list
-  long int *Vlans;
+  int32_t *Vlans;
   bool Enabled;
   // in steps of 4096
-  long int Priority;
+  int32_t Priority;
   unsigned int Ports_Len; // auto-gen: for list
   struct stppb_MSTPMstiPort **Ports;
 };
@@ -130,9 +131,9 @@ struct stppb_MSTPCistPort {
   // Index (for update)
 // - if `no` is physical port then the `no` value should less than 100
 // - if `no` is lag port then the `no` value should grater than 100
-  long int No;
-  long int PathCost;
-  long int Priority;
+  int32_t No;
+  int32_t PathCost;
+  int32_t Priority;
   bool STPEnabled;
   enum stppb_PortConfigAdminP2PPortTypeOptions P2PMode;
   bool EdgeMode;
@@ -147,42 +148,42 @@ struct stppb_MSTPMstiPort {
   // Index (for update)
 // - if `no` is physical port then the `no` value should less than 100
 // - if `no` is lag port then the `no` value should grater than 100
-  long int No;
-  long int PathCost;
-  long int Priority;
+  int32_t No;
+  int32_t PathCost;
+  int32_t Priority;
 };
 
 // Status
 struct stppb_MSTPID {
   char *MACAddress;
   // in steps of 4096
-  long int Priority;
+  int32_t Priority;
 };
 
 struct stppb_CISTStatus {
-  long int No;
+  int32_t No;
   struct stppb_MSTPID *BridgeID;
   struct stppb_MSTPID *RootID;
-  long int RootPort;
-  long int RootCost;
+  int32_t RootPort;
+  int32_t RootCost;
   struct stppb_MSTPID *RegionalRoot;
-  long int InternalRootCost;
+  int32_t InternalRootCost;
   bool TopologyChange;
-  long int TopologyChangeCount;
-  long int TimeSinceTopologyChange;
+  int32_t TopologyChangeCount;
+  int32_t TimeSinceTopologyChange;
   unsigned int Ports_Len; // auto-gen: for list
   struct stppb_CISTPortEntryStatus **Ports;
 };
 
 struct stppb_CISTPortEntryStatus {
-  long int No;
+  int32_t No;
   char *Role;
   char *State;
-  long int Priority;
-  long int PathCost;
+  int32_t Priority;
+  int32_t PathCost;
   bool EdgeMode;
   bool P2PMode;
-  long int Uptime;
+  int32_t Uptime;
   char *BPDUGuard;
 };
 
@@ -192,35 +193,35 @@ struct stppb_MSTIStatus {
 };
 
 struct stppb_MSTIStatusEntry {
-  long int No;
+  int32_t No;
   struct stppb_MSTPID *BridgeID;
   struct stppb_MSTPID *RootID;
-  long int RootPort;
-  long int RootCost;
+  int32_t RootPort;
+  int32_t RootCost;
   bool TopologyChange;
-  long int TopologyChangeCount;
-  long int TimeSinceTopologyChange;
+  int32_t TopologyChangeCount;
+  int32_t TimeSinceTopologyChange;
   unsigned int Ports_Len; // auto-gen: for list
   struct stppb_MSTIPortStatusEntry **Ports;
 };
 
 struct stppb_MSTIPortStatusEntry {
-  long int No;
+  int32_t No;
   char *Role;
   char *State;
-  long int Priority;
-  long int PathCost;
-  long int Uptime;
+  int32_t Priority;
+  int32_t PathCost;
+  int32_t Uptime;
 };
 
 // MSTP-VLAN
 struct stppb_MSTPVLANGroupPortEntry {
-  long int PortNo;
+  int32_t PortNo;
   bool Tagged;
 };
 
 struct stppb_MSTPVLANGroupEntry {
-  long int VLANID;
+  int32_t VLANID;
   unsigned int Ports_Len; // auto-gen: for list
   struct stppb_MSTPVLANGroupPortEntry **Ports;
 };
@@ -228,14 +229,14 @@ struct stppb_MSTPVLANGroupEntry {
 // STP Config 
 struct stppb_STPConfigBridge {
   enum stppb_BridgeConfigModeTypeOptions Mode;
-  long int Priority;
-  long int HelloTime;
-  long int MaxAge;
-  long int ForwardDelay;
-  long int TxHoldCount;
+  int32_t Priority;
+  int32_t HelloTime;
+  int32_t MaxAge;
+  int32_t ForwardDelay;
+  int32_t TxHoldCount;
   char *MSTPRegionName;
-  long int MSTPRevisionLevel;
-  long int MSTPMaxHops;
+  int32_t MSTPRevisionLevel;
+  int32_t MSTPMaxHops;
 };
 
 struct stppb_STPConfigPortEntry {
@@ -245,26 +246,26 @@ struct stppb_STPConfigPortEntry {
 // error:
 // found "[" but expected [constant]:found "[" but expected [;]. Use -v for more details
 // --protolint_out: protoc-gen-protolint: Plugin failed with status code 2.
-  long int PortNo;
+  int32_t PortNo;
   bool Enabled;
-  long int Priority;
+  int32_t Priority;
   enum stppb_PortConfigAdminP2PPortTypeOptions AdminP2PPort;
   bool AdminEdgePort;
-  long int AdminPathCost;
-  long int MSTPDefaultPriority;
+  int32_t AdminPathCost;
+  int32_t MSTPDefaultPriority;
   unsigned int MSTPPortPriority_Len; // auto-gen: for list
   char **MSTPPortPriority;
-  long int MSTPDefaultAdminPathCost;
+  int32_t MSTPDefaultAdminPathCost;
   unsigned int MSTPPortAdminPathCost_Len; // auto-gen: for list
   char **MSTPPortAdminPathCost;
   enum stppb_PortConfigBPDUGuardTypeOptions BPDUGuard;
 };
 
 struct stppb_STPConfigMSTPGroupEntry {
-  long int MSTPID;
-  long int BridgePriority;
+  int32_t MSTPID;
+  int32_t BridgePriority;
   unsigned int VIDs_Len; // auto-gen: for list
-  long int *VIDs;
+  int32_t *VIDs;
 };
 
 struct stppb_STPConfig {
@@ -280,23 +281,23 @@ struct stppb_BridgeConfigMode {
 };
 
 struct stppb_BridgeConfigPriority {
-  long int Priority;
+  int32_t Priority;
 };
 
 struct stppb_BridgeConfigHelloTime {
-  long int HelloTime;
+  int32_t HelloTime;
 };
 
 struct stppb_BridgeConfigMaxAge {
-  long int MaxAge;
+  int32_t MaxAge;
 };
 
 struct stppb_BridgeConfigForwardDelay {
-  long int ForwardDelay;
+  int32_t ForwardDelay;
 };
 
 struct stppb_BridgeConfigTxHoldCount {
-  long int TxHoldCount;
+  int32_t TxHoldCount;
 };
 
 struct stppb_BridgeConfigMSTPRegionName {
@@ -304,15 +305,15 @@ struct stppb_BridgeConfigMSTPRegionName {
 };
 
 struct stppb_BridgeConfigMSTPRevisionLevel {
-  long int MSTPRevisionLevel;
+  int32_t MSTPRevisionLevel;
 };
 
 struct stppb_BridgeConfigMSTPMaxHops {
-  long int MSTPMaxHops;
+  int32_t MSTPMaxHops;
 };
 
 struct stppb_STPPortConfigEnabledEntry {
-  long int PortNo;
+  int32_t PortNo;
   bool Enabled;
 };
 
@@ -322,8 +323,8 @@ struct stppb_STPPortConfigEnabled {
 };
 
 struct stppb_STPPortConfigPriorityEntry {
-  long int PortNo;
-  long int Priority;
+  int32_t PortNo;
+  int32_t Priority;
 };
 
 struct stppb_STPPortConfigPriority {
@@ -332,7 +333,7 @@ struct stppb_STPPortConfigPriority {
 };
 
 struct stppb_STPPortConfigAdminP2PPortEntry {
-  long int PortNo;
+  int32_t PortNo;
   enum stppb_PortConfigAdminP2PPortTypeOptions AdminP2PPort;
 };
 
@@ -342,7 +343,7 @@ struct stppb_STPPortConfigAdminP2PPort {
 };
 
 struct stppb_STPPortConfigAdminEdgePortEntry {
-  long int PortNo;
+  int32_t PortNo;
   bool AdminEdgePort;
 };
 
@@ -352,8 +353,8 @@ struct stppb_STPPortConfigAdminEdgePort {
 };
 
 struct stppb_STPPortConfigAdminPathCostEntry {
-  long int PortNo;
-  long int AdminPathCost;
+  int32_t PortNo;
+  int32_t AdminPathCost;
 };
 
 struct stppb_STPPortConfigAdminPathCost {
@@ -362,8 +363,8 @@ struct stppb_STPPortConfigAdminPathCost {
 };
 
 struct stppb_STPPortConfigMSTPDefaultPriorityEntry {
-  long int PortNo;
-  long int MSTPDefaultPriority;
+  int32_t PortNo;
+  int32_t MSTPDefaultPriority;
 };
 
 struct stppb_STPPortConfigMSTPDefaultPriority {
@@ -372,7 +373,7 @@ struct stppb_STPPortConfigMSTPDefaultPriority {
 };
 
 struct stppb_STPPortConfigMSTPPortPriorityEntry {
-  long int PortNo;
+  int32_t PortNo;
   unsigned int MSTPPortPriority_Len; // auto-gen: for list
   char **MSTPPortPriority;
 };
@@ -383,8 +384,8 @@ struct stppb_STPPortConfigMSTPPortPriority {
 };
 
 struct stppb_STPPortConfigMSTPDefaultAdminPathCostEntry {
-  long int PortNo;
-  long int MSTPDefaultAdminPathCost;
+  int32_t PortNo;
+  int32_t MSTPDefaultAdminPathCost;
 };
 
 struct stppb_STPPortConfigMSTPDefaultAdminPathCost {
@@ -393,7 +394,7 @@ struct stppb_STPPortConfigMSTPDefaultAdminPathCost {
 };
 
 struct stppb_STPPortConfigMSTPPortAdminPathCostEntry {
-  long int PortNo;
+  int32_t PortNo;
   unsigned int MSTPPortAdminPathCost_Len; // auto-gen: for list
   char **MSTPPortAdminPathCost;
 };
@@ -404,7 +405,7 @@ struct stppb_STPPortConfigMSTPPortAdminPathCost {
 };
 
 struct stppb_STPPortConfigBPDUGuardEntry {
-  long int PortNo;
+  int32_t PortNo;
   enum stppb_PortConfigBPDUGuardTypeOptions BPDUGuard;
 };
 
@@ -414,7 +415,7 @@ struct stppb_STPPortConfigBPDUGuard {
 };
 
 struct stppb_STPPortConfigBPDUReceiveOnlyEntry {
-  long int PortNo;
+  int32_t PortNo;
   bool BPDUReceiveOnly;
 };
 
@@ -424,7 +425,7 @@ struct stppb_STPPortConfigBPDUReceiveOnly {
 };
 
 struct stppb_STPPortConfigRestrictTcnEntry {
-  long int PortNo;
+  int32_t PortNo;
   bool RestrictTcn;
 };
 
@@ -434,7 +435,7 @@ struct stppb_STPPortConfigRestrictTcn {
 };
 
 struct stppb_STPPortConfigRestrictRootEntry {
-  long int PortNo;
+  int32_t PortNo;
   bool RestrictRoot;
 };
 
@@ -445,14 +446,14 @@ struct stppb_STPPortConfigRestrictRoot {
 
 struct stppb_MSTPIDList {
   unsigned int IDList_Len; // auto-gen: for list
-  long int *IDList;
+  int32_t *IDList;
 };
 
 struct stppb_STPMSTPGroupEntry {
-  long int MSTPID;
-  long int BridgePriority;
+  int32_t MSTPID;
+  int32_t BridgePriority;
   unsigned int VIDs_Len; // auto-gen: for list
-  long int *VIDs;
+  int32_t *VIDs;
 };
 
 struct stppb_MSTPGroup {

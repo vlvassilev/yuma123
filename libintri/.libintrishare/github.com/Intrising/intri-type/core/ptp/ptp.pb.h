@@ -12,6 +12,7 @@
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -212,7 +213,7 @@ struct ptppb_SystemModeConfig {
 // IEEE_1588_V2    : 0-255 , default is 0
 // ITU_G8275_DOT_1 : 24-43 , default is 24
 // ITU_G8275_DOT_2 : 44-63 , default is 44
-  long int DomainNumber;
+  int32_t DomainNumber;
   //
 // mode.profile is
 // IEEE_1588_V2    : DELAY_MECHANISM_TYPE_E2E , DELAY_MECHANISM_TYPE_P2P
@@ -227,27 +228,27 @@ struct ptppb_SystemTimerConfig {
 // IEEE_1588_V2    : -6 ~ 7, default is 0
 // ITU_G8275_DOT_1 : not relevant
 // ITU_G8275_DOT_2 : not relevant
-  long int PdelayReq;
+  int32_t PdelayReq;
   //
 // mode.profile is
 // IEEE_1588_V2    : 0 ~ 4, default is 1
 // ITU_G8275_DOT_1 : 3
 // ITU_G8275_DOT_2 : 3
-  long int Announce;
+  int32_t Announce;
   //
 // mode.profile is
 // IEEE_1588_V2    : 2 ~ 10, default is 2
 // ITU_G8275_DOT_1 : 3
 // ITU_G8275_DOT_2 : 2
-  long int AnnounceTimeOut;
+  int32_t AnnounceTimeOut;
   //
 // mode.profile is
 // IEEE_1588_V2    : -1 ~ 1, default is 0
 // ITU_G8275_DOT_1 : 0, TODO: standard is 4
 // ITU_G8275_DOT_2 : 0, TODO: standard is 6
-  long int Sync;
+  int32_t Sync;
   // Default value is 50
-  long int SyncLimit;
+  int32_t SyncLimit;
 };
 
 struct ptppb_SystemClockConfig {
@@ -256,13 +257,13 @@ struct ptppb_SystemClockConfig {
 // IEEE_1588_V2    : 0-255, default is 128
 // ITU_G8275_DOT_1 : 128
 // ITU_G8275_DOT_2 : 128
-  long int Priority1;
+  int32_t Priority1;
   //
 // mode.profile is
 // IEEE_1588_V2    : 0-255, default is 128
 // ITU_G8275_DOT_1 : 0-255, default is 128
 // ITU_G8275_DOT_2 : 0-255, default is 128
-  long int Priority2;
+  int32_t Priority2;
 };
 
 struct ptppb_PortConfig {
@@ -290,12 +291,12 @@ struct ptppb_ClockStatus {
 };
 
 struct ptppb_ClockInfo {
-  long int DomainNumber;
+  int32_t DomainNumber;
   unsigned char *ClockIdentity;
   unsigned char *PortIdentity;
-  long int NumberOfPorts;
-  long int Priority1;
-  long int Priority2;
+  int32_t NumberOfPorts;
+  int32_t Priority1;
+  int32_t Priority2;
 };
 
 struct ptppb_GrandmasterInfo {
@@ -304,11 +305,11 @@ struct ptppb_GrandmasterInfo {
 };
 
 struct ptppb_ClockQuality {
-  long int Class;
+  int32_t Class;
   enum ptppb_ClockAccuracyTypeOptions Accuracy;
   enum ptppb_TimeSourceTypeOptions TimeSource;
-  long int OffsetScaledLogVariance;
-  long int Offset;
+  int32_t OffsetScaledLogVariance;
+  int32_t Offset;
 };
 
 struct ptppb_PortStatusEntry {
@@ -316,17 +317,17 @@ struct ptppb_PortStatusEntry {
   unsigned char *ClockIdentity;
   unsigned char *PortIdentity;
   enum ptppb_PortStateTypeOptions State;
-  long int PathDelay;
+  int32_t PathDelay;
 };
 
 struct ptppb_PortCounterEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  unsigned long long int RxPdelayReq;
-  unsigned long long int RxPdelayResp;
-  unsigned long long int RxPdelayRespFollow;
-  unsigned long long int TxPdelayReq;
-  unsigned long long int TxPdelayResp;
-  unsigned long long int TxPdelayRespFollow;
+  uint64_t RxPdelayReq;
+  uint64_t RxPdelayResp;
+  uint64_t RxPdelayRespFollow;
+  uint64_t TxPdelayReq;
+  uint64_t TxPdelayResp;
+  uint64_t TxPdelayRespFollow;
 };
 
 struct ptppb_TimeStatus {

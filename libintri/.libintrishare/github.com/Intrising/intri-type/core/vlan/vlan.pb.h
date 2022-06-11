@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -90,14 +91,14 @@ struct vlanpb_MACBasedGroupEntry {
   char *MACAddress;
   char *MACAddressMask;
   // Index (for update / delete); unique. boundary is according to device.GetBoundary().VLAN.MACBased
-  long int GroupID;
+  int32_t GroupID;
 };
 
 struct vlanpb_MACBasedGroupMemberEntry {
   // Index (for update / delete); unique. Only  ID defined in Filters are available.
-  long int VlanID;
+  int32_t VlanID;
   // GroupID CAN duplicate with other MemberEntry. boundary is according to device.GetBoundary().VLAN.MACBased
-  long int GroupID;
+  int32_t GroupID;
   // Can be physical ports or LAG ports. Any interface cannot duplicated among other group member.
   unsigned int IdentifyList_Len; // auto-gen: for list
   struct devicepb_InterfaceIdentify **IdentifyList;
@@ -114,7 +115,7 @@ struct vlanpb_MACBasedConfig {
 // Cannot be deleted if the GroupID is used by any GroupMember.
 struct vlanpb_ProtocolBasedGroupEntry {
   // Index (for update / delete); unique among groups. boundary is according to device.GetBoundary().VLAN.ProtocolBased
-  long int GroupID;
+  int32_t GroupID;
   enum vlanpb_ProtocolBasedEncapsulationTypeOptions Encapsulation;
   // Hex in string, ex: `0x1234`. Range is 0x0600-0xffff
   char *Protocol;
@@ -122,9 +123,9 @@ struct vlanpb_ProtocolBasedGroupEntry {
 
 struct vlanpb_ProtocolBasedGroupMemberEntry {
   // Index (for update / delete); unique among entries. Only  ID defined in Filters are available.
-  long int VlanID;
+  int32_t VlanID;
   // GroupID CAN duplicate with other MemberEntry.  boundary is according to device.GetBoundary().VLAN.ProtocolBased
-  long int GroupID;
+  int32_t GroupID;
   // Must be physical ports. Any interface cannot duplicated among other group member.
   unsigned int IdentifyList_Len; // auto-gen: for list
   struct devicepb_InterfaceIdentify **IdentifyList;
@@ -146,9 +147,9 @@ struct vlanpb_SelectiveQinQConfig {
 
 struct vlanpb_SelectiveQinQTranslatedEntry {
   // Index (for update / delete); unique among mappings. Only  ID defined in Filters are available.
-  long int SourceVlanID;
+  int32_t SourceVlanID;
   // Only  ID defined in Filters are available.
-  long int TranslatedVlanID;
+  int32_t TranslatedVlanID;
 };
 
 // Cannot be deleted if the GroupID is used by any GroupMember.
@@ -157,14 +158,14 @@ struct vlanpb_SubnetBasedGroupEntry {
   char *IPAddressMask;
   enum vlanpb_IPVersionTypeOptions IPVersion;
   // Index (for update / delete); unique  boundary is according to device.GetBoundary().VLAN.SubnetBased
-  long int GroupID;
+  int32_t GroupID;
 };
 
 struct vlanpb_SubnetBasedGroupMemberEntry {
   // Index (for update / delete); unique. Only  ID defined in Filters are available.
-  long int VlanID;
+  int32_t VlanID;
   // GroupID CAN duplicate with other MemberEntry.  boundary is according to device.GetBoundary().VLAN.SubnetBased
-  long int GroupID;
+  int32_t GroupID;
   // Can be any type of ports. Any interface cannot duplicated among other group member.
   unsigned int IdentifyList_Len; // auto-gen: for list
   struct devicepb_InterfaceIdentify **IdentifyList;
@@ -201,9 +202,9 @@ struct vlanpb_MappingConfig {
 
 struct vlanpb_MappingEntry {
   // Index (for update / delete); unique among mappings. Only  ID defined in Filters are available.
-  long int SourceVlanID;
+  int32_t SourceVlanID;
   // Only  ID defined in Filters are available.
-  long int TranslatedVlanID;
+  int32_t TranslatedVlanID;
 };
 
 struct vlanpb_Config {
@@ -220,16 +221,16 @@ struct vlanpb_Config {
 
 struct vlanpb_ManagementConfig {
   // Only  ID defined in Filters are available.
-  long int ManagementVlanID;
+  int32_t ManagementVlanID;
 };
 
 struct vlanpb_VoiceConfig {
   // Only  ID defined in Filters are available.
-  long int VlanID;
-  long int Prio;
-  long int SignalPrio;
-  long int DSCP;
-  long int SignalDSCP;
+  int32_t VlanID;
+  int32_t Prio;
+  int32_t SignalPrio;
+  int32_t DSCP;
+  int32_t SignalDSCP;
 };
 
 struct vlanpb_PortsConfig {
@@ -251,19 +252,19 @@ struct vlanpb_PortEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   enum vlanpb_PortConfigVLANModeTypeOptions Mode;
   // Only  ID defined in Filters are available.
-  long int DefaultVlanID;
+  int32_t DefaultVlanID;
   // Only  ID defined in Filters are available.
-  long int UnauthorizedVlanID;
+  int32_t UnauthorizedVlanID;
   // Only  ID defined in Filters are available.
-  long int FallBackVlanID;
+  int32_t FallBackVlanID;
   enum vlanpb_PortConfigQinQEtherTypeOptions QinQEthertype;
   enum vlanpb_AcceptFrameTypeOptions AcceptableFrametype;
   // Only  ID defined in Filters are available.
   unsigned int TaggedList_Len; // auto-gen: for list
-  long int *TaggedList;
+  int32_t *TaggedList;
   // Only  ID defined in Filters are available.
   unsigned int UntaggedList_Len; // auto-gen: for list
-  long int *UntaggedList;
+  int32_t *UntaggedList;
 };
 
 struct vlanpb_FiltersConfig {
@@ -278,7 +279,7 @@ struct vlanpb_FiltersConfig {
 // deleted.
 struct vlanpb_FilterEntry {
   // boundary is according to device.GetBoundary().VLAN.VlanID, should be 1-4094
-  long int VlanID;
+  int32_t VlanID;
   // MACBasedConfig, SubnetBasedConfig, ProtocolBasedConfig requires this enabled.
   bool Enabled;
   char *Name;
@@ -290,19 +291,19 @@ struct vlanpb_Used {
 
 struct vlanpb_VlanPortVlanEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int VlanID;
+  int32_t VlanID;
   enum vlanpb_StatusUsedTypeOptions Used;
 };
 
 // internal use
 struct vlanpb_DefaultPortVlanEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int DefaultVlanID;
+  int32_t DefaultVlanID;
   enum vlanpb_StatusUsedTypeOptions LastUpdateMethod;
 };
 
 struct vlanpb_StatusEntry {
-  long int VlanID;
+  int32_t VlanID;
   unsigned int TaggedList_Len; // auto-gen: for list
   struct devicepb_InterfaceIdentify **TaggedList;
   unsigned int UntaggedList_Len; // auto-gen: for list
@@ -310,7 +311,7 @@ struct vlanpb_StatusEntry {
 };
 
 struct vlanpb_StatusMapping_MappingEntry {
-  long int Key;
+  int32_t Key;
   struct vlanpb_StatusEntry *Value;
 };
 

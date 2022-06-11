@@ -11,6 +11,7 @@
 #include "../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -641,7 +642,7 @@ enum eventpb_LoggingSeverityTypeOptions {
 
 struct eventpb_ACLParameter {
   char *Name;
-  long int Index;
+  int32_t Index;
   enum eventpb_ACLActionTypeOptions Type;
 };
 
@@ -663,13 +664,18 @@ struct eventpb_ProtocolUsed {
 };
 
 // for aggregation changed event message
+enum eventpb_AggrParameter_Used_Union_Options {
+  eventpb_AggrParameter_Used_Union_Options_Lgport,
+  eventpb_AggrParameter_Used_Union_Options_Protocol,
+};
 struct eventpb_AggrParameter {
   enum eventpb_AggrSourceTypeOptions Type;
-  long int TrunkID;
+  int32_t TrunkID;
+  enum eventpb_AggrParameter_Used_Union_Options Used_Union_Option;
   union {
-    struct eventpb_LgportUsed *AggrParameter_Used_Lgport;
-    struct eventpb_ProtocolUsed *AggrParameter_Used_Protocol;
-  };
+    struct eventpb_LgportUsed *Used_Lgport;
+    struct eventpb_ProtocolUsed *Used_Protocol;
+  } Used;
 };
 
 struct eventpb_AUParameter {
@@ -682,7 +688,7 @@ struct eventpb_FDBEntry {
   bool IsStatic;
   bool IsForward;
   char *Address;
-  long int VlanID;
+  int32_t VlanID;
   bool IsAgeout;
   enum eventpb_FDBEntryActionTypeOptions Action;
 };
@@ -739,15 +745,15 @@ struct eventpb_EthernetLayer {
 };
 
 struct eventpb_LLCLayer {
-  unsigned long int DSAP;
+  uint32_t DSAP;
   bool DSAPEnabled;
   bool IG;
   bool IGEnabled;
-  unsigned long int SSAP;
+  uint32_t SSAP;
   bool SSAPEnabled;
   bool CR;
   bool CREnabled;
-  unsigned long int Control;
+  uint32_t Control;
   bool ControlEnabled;
 };
 
@@ -761,9 +767,9 @@ struct eventpb_IPLayer {
 };
 
 struct eventpb_Layer4Port {
-  unsigned long int L4SrcPort;
+  uint32_t L4SrcPort;
   bool L4SrcPortEnabled;
-  unsigned long int L4DstPort;
+  uint32_t L4DstPort;
   bool L4DstPortEnabled;
 };
 
@@ -777,7 +783,7 @@ struct eventpb_LoginParameter {
   enum eventpb_LoginResultTypeOptions Result;
   enum eventpb_LoginInterfaceNameTypeOptions InterfaceName;
   char *Name;
-  long int Privilege;
+  int32_t Privilege;
   char *Token;
   char *AccessToken;
   char *ErrCode;
@@ -790,7 +796,7 @@ struct eventpb_MaintenanceParameter {
 
 struct eventpb_MulticastParameter {
   enum eventpb_MulticastActionTypeOptions Type;
-  long int VlanID;
+  int32_t VlanID;
   char *Addr;
 };
 
@@ -832,24 +838,24 @@ struct eventpb_PacketContent {
 
 struct eventpb_PoEParameter {
   enum eventpb_PoEParameterTypeOptions Type;
-  long int PortNo;
+  int32_t PortNo;
 };
 
 struct eventpb_PortParameter {
-  long int DeviceID;
-  long int PortNo;
+  int32_t DeviceID;
+  int32_t PortNo;
   bool Enabled;
 };
 
 struct eventpb_PortAuthParameter {
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  long int VlanID;
+  int32_t VlanID;
   char *MACAddress;
 };
 
 struct eventpb_SFPInfo {
-  long int DeviceID;
-  long int PortNo;
+  int32_t DeviceID;
+  int32_t PortNo;
   char *Location;
   unsigned int Status_Len; // auto-gen: for list
   enum eventpb_SFPStatusTypeOptions *Status;
@@ -880,8 +886,8 @@ struct eventpb_SFPInfo {
 
 struct eventpb_SFPParameter {
   enum eventpb_SFPActionTypeOptions Type;
-  long int DeviceID;
-  long int PortNo;
+  int32_t DeviceID;
+  int32_t PortNo;
   // Only for Inserted 
   struct eventpb_SFPInfo *Info;
 };
@@ -909,11 +915,15 @@ struct eventpb_TimeRangeParameter {
   bool IsActive;
 };
 
+enum eventpb_UdldParameter_ActionOptionParam_Union_Options {
+  eventpb_UdldParameter_ActionOptionParam_Union_Options_PortShutdown,
+};
 struct eventpb_UdldParameter {
   enum eventpb_UdldActionTypeOptions ActionOption;
+  enum eventpb_UdldParameter_ActionOptionParam_Union_Options ActionOptionParam_Union_Option;
   union {
-    struct eventpb_UdldActionPortShutdown *UdldParameter_ActionOptionParam_PortShutdown;
-  };
+    struct eventpb_UdldActionPortShutdown *ActionOptionParam_PortShutdown;
+  } ActionOptionParam;
 };
 
 struct eventpb_UdldActionPortShutdown {
@@ -923,13 +933,13 @@ struct eventpb_UdldActionPortShutdown {
 // for vlan changed event message
 struct eventpb_VLANParameter {
   enum eventpb_VLANParameterTypeOptions Type;
-  long int VlanID;
-  long int DeviceID;
+  int32_t VlanID;
+  int32_t DeviceID;
   struct devicepb_InterfaceIdentify *IdentifyNo;
 };
 
 struct eventpb_ManagmentVLANPriority {
-  long int Priority;
+  int32_t Priority;
 };
 
 struct eventpb_InternalTypeUnion {
@@ -937,35 +947,60 @@ struct eventpb_InternalTypeUnion {
   enum eventpb_InternalTypeOptions *List;
 };
 
+enum eventpb_Internal_Parameter_Union_Options {
+  eventpb_Internal_Parameter_Union_Options_Init,
+  eventpb_Internal_Parameter_Union_Options_Vlan,
+  eventpb_Internal_Parameter_Union_Options_DHCP,
+  eventpb_Internal_Parameter_Union_Options_Login,
+  eventpb_Internal_Parameter_Union_Options_Link,
+  eventpb_Internal_Parameter_Union_Options_Aggr,
+  eventpb_Internal_Parameter_Union_Options_NTP,
+  eventpb_Internal_Parameter_Union_Options_Boot,
+  eventpb_Internal_Parameter_Union_Options_Network,
+  eventpb_Internal_Parameter_Union_Options_Maintenance,
+  eventpb_Internal_Parameter_Union_Options_SFP,
+  eventpb_Internal_Parameter_Union_Options_Port,
+  eventpb_Internal_Parameter_Union_Options_PortAuth,
+  eventpb_Internal_Parameter_Union_Options_FDB,
+  eventpb_Internal_Parameter_Union_Options_AU,
+  eventpb_Internal_Parameter_Union_Options_PoE,
+  eventpb_Internal_Parameter_Union_Options_ACL,
+  eventpb_Internal_Parameter_Union_Options_TimeRange,
+  eventpb_Internal_Parameter_Union_Options_Button,
+  eventpb_Internal_Parameter_Union_Options_Stormcontrol,
+  eventpb_Internal_Parameter_Union_Options_Multicast,
+  eventpb_Internal_Parameter_Union_Options_Udld,
+};
 struct eventpb_Internal {
   enum eventpb_InternalTypeOptions Type;
   char *Message;
   struct timestamppb_Timestamp *Ts;
   enum eventpb_LoggingTypeOptions LoggingType;
+  enum eventpb_Internal_Parameter_Union_Options Parameter_Union_Option;
   union {
-    struct eventpb_ServiceInitialized *Internal_Parameter_Init;
-    struct eventpb_VLANParameter *Internal_Parameter_Vlan;
-    struct eventpb_DHCPParameter *Internal_Parameter_DHCP;
-    struct eventpb_LoginParameter *Internal_Parameter_Login;
-    struct eventpb_LinkParameter *Internal_Parameter_Link;
-    struct eventpb_AggrParameter *Internal_Parameter_Aggr;
-    enum eventpb_NTPActionTypeOptions Internal_Parameter_NTP;
-    struct eventpb_BootParameter *Internal_Parameter_Boot;
-    struct eventpb_NetworkParameter *Internal_Parameter_Network;
-    struct eventpb_MaintenanceParameter *Internal_Parameter_Maintenance;
-    struct eventpb_SFPParameter *Internal_Parameter_SFP;
-    struct eventpb_PortParameter *Internal_Parameter_Port;
-    struct eventpb_PortAuthParameter *Internal_Parameter_PortAuth;
-    struct eventpb_FDBParameter *Internal_Parameter_FDB;
-    struct eventpb_AUParameter *Internal_Parameter_AU;
-    struct eventpb_PoEParameter *Internal_Parameter_PoE;
-    struct eventpb_ACLParameter *Internal_Parameter_ACL;
-    struct eventpb_TimeRangeParameter *Internal_Parameter_TimeRange;
-    struct eventpb_ButtonParameter *Internal_Parameter_Button;
-    struct eventpb_StormcontrolParameter *Internal_Parameter_Stormcontrol;
-    struct eventpb_MulticastParameter *Internal_Parameter_Multicast;
-    struct eventpb_UdldParameter *Internal_Parameter_Udld;
-  };
+    struct eventpb_ServiceInitialized *Parameter_Init;
+    struct eventpb_VLANParameter *Parameter_Vlan;
+    struct eventpb_DHCPParameter *Parameter_DHCP;
+    struct eventpb_LoginParameter *Parameter_Login;
+    struct eventpb_LinkParameter *Parameter_Link;
+    struct eventpb_AggrParameter *Parameter_Aggr;
+    enum eventpb_NTPActionTypeOptions Parameter_NTP;
+    struct eventpb_BootParameter *Parameter_Boot;
+    struct eventpb_NetworkParameter *Parameter_Network;
+    struct eventpb_MaintenanceParameter *Parameter_Maintenance;
+    struct eventpb_SFPParameter *Parameter_SFP;
+    struct eventpb_PortParameter *Parameter_Port;
+    struct eventpb_PortAuthParameter *Parameter_PortAuth;
+    struct eventpb_FDBParameter *Parameter_FDB;
+    struct eventpb_AUParameter *Parameter_AU;
+    struct eventpb_PoEParameter *Parameter_PoE;
+    struct eventpb_ACLParameter *Parameter_ACL;
+    struct eventpb_TimeRangeParameter *Parameter_TimeRange;
+    struct eventpb_ButtonParameter *Parameter_Button;
+    struct eventpb_StormcontrolParameter *Parameter_Stormcontrol;
+    struct eventpb_MulticastParameter *Parameter_Multicast;
+    struct eventpb_UdldParameter *Parameter_Udld;
+  } Parameter;
 };
 
 struct eventpb_TargetLogTypeUnion {
@@ -986,17 +1021,23 @@ struct eventpb_TargetSysLog {
   char *HostAddress;
 };
 
+enum eventpb_TargetLogOptionalParameter_OptionParam_Union_Options {
+  eventpb_TargetLogOptionalParameter_OptionParam_Union_Options_Snmp,
+  eventpb_TargetLogOptionalParameter_OptionParam_Union_Options_Cli,
+  eventpb_TargetLogOptionalParameter_OptionParam_Union_Options_SysLog,
+};
 struct eventpb_TargetLogOptionalParameter {
   enum eventpb_TargetLogTypeOptions Option;
+  enum eventpb_TargetLogOptionalParameter_OptionParam_Union_Options OptionParam_Union_Option;
   union {
-    struct eventpb_TargetSNMP *TargetLogOptionalParameter_OptionParam_Snmp;
-    struct eventpb_TargetCLI *TargetLogOptionalParameter_OptionParam_Cli;
-    struct eventpb_TargetSysLog *TargetLogOptionalParameter_OptionParam_SysLog;
-  };
+    struct eventpb_TargetSNMP *OptionParam_Snmp;
+    struct eventpb_TargetCLI *OptionParam_Cli;
+    struct eventpb_TargetSysLog *OptionParam_SysLog;
+  } OptionParam;
 };
 
 struct eventpb_TargetLog {
-  unsigned long long int LogID;
+  uint64_t LogID;
   struct timestamppb_Timestamp *Ts;
   enum eventpb_LoggingTypeOptions LoggingType;
   enum eventpb_LoggingSeverityTypeOptions LoggingSeverityType;

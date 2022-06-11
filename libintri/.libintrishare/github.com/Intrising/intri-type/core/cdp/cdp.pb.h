@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -63,9 +64,9 @@ struct cdppb_SystemConfig {
   // default: false
   bool Enabled;
   // default: 180, The unit of this field is second
-  long int TimeToLive;
+  int32_t TimeToLive;
   // default: 10, The unit of this field is second
-  long int MsgTxInterval;
+  int32_t MsgTxInterval;
   // enum to str for core configuartion
   enum cdppb_VersionTypeOptions CDPVersion;
 };
@@ -95,8 +96,8 @@ struct cdppb_NeighborInfoEntry {
   struct cdppb_RecvIdentifyInfo *IdentifyNo;
   struct cdppb_SystemInfo *SystemInfo;
   struct cdppb_PowerAvailable *PowerAvailable;
-  long long int TTL;
-  long int VoIPVlan;
+  int64_t TTL;
+  int32_t VoIPVlan;
 };
 
 struct cdppb_RecvIdentifyInfo {
@@ -119,7 +120,7 @@ struct cdppb_SystemInfo {
 
 struct cdppb_VoiceVLAN {
   unsigned char *Data;
-  long int VoiceVlan;
+  int32_t VoiceVlan;
 };
 
 struct cdppb_PortInfo {
@@ -127,14 +128,14 @@ struct cdppb_PortInfo {
 };
 
 struct cdppb_PowerAvailable {
-  long int RequestID;
-  long int ManagementID;
+  int32_t RequestID;
+  int32_t ManagementID;
   float Allocated;
   float Supported;
 };
 
 struct cdppb_NeighborPoe {
-  long int RequestId;
+  int32_t RequestId;
   float Allocated;
 };
 
@@ -146,11 +147,11 @@ struct cdppb_Statistic {
 struct cdppb_StatisticEntry {
   //  only support Physical port
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  unsigned long long int FramesOutV1;
-  unsigned long long int FramesOutV2;
-  unsigned long long int FramesInV1;
-  unsigned long long int FramesInV2;
-  unsigned long long int IllegalChecksum;
-  unsigned long long int OtherErrors;
+  uint64_t FramesOutV1;
+  uint64_t FramesOutV2;
+  uint64_t FramesInV1;
+  uint64_t FramesInV2;
+  uint64_t IllegalChecksum;
+  uint64_t OtherErrors;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_cdp_cdp

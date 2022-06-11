@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -116,7 +117,7 @@ struct dhcppb_ARPInspectionPortEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   bool Enabled;
   // 0 means to disable the rate limiting
-  long int RateLimiting;
+  int32_t RateLimiting;
   enum dhcppb_ARPInspectionDatabaseTypeOptions Database;
   struct dhcppb_ARPInspectionACLConfig *ACL;
   // Check the srcMAC is the senderMAC
@@ -139,7 +140,7 @@ struct dhcppb_ARPInspectionACLConfig {
 struct dhcppb_ARPInspectionACLRuleEntry {
   // The index for this entry is vid+srcMac+srcIP+srcIPMask
 // https://github.com/Intrising/test-switch/issues/2615
-  long int VID;
+  int32_t VID;
   char *SrcMAC;
   char *SrcIP;
   char *SrcIPMask;
@@ -193,14 +194,14 @@ struct dhcppb_SnoopingConfigPortEntry {
   bool AcceptIngressOption82;
   bool MACAddressVerification;
   // This field defines the amount that DHCP pkt could pass per second, set it to 0 to disable this function
-  long int DHCPRateLimiting;
+  int32_t DHCPRateLimiting;
 };
 
 struct dhcppb_SnoopingStatisticsEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   enum dhcppb_SnoopingPortSnoopingTrustTypeOptions TrustMode;
-  long int Processed;
-  long int Dropped;
+  int32_t Processed;
+  int32_t Dropped;
   enum dhcppb_SnoopingLastDropReasonTypeOptions LastDropReason;
 };
 
@@ -215,10 +216,10 @@ struct dhcppb_SnoopingBindingDatabaseEntry {
   char *IP;
   struct devicepb_InterfaceIdentify *IdentifyNo;
   // https://github.com/Intrising/test-switch/issues/2615
-  long int VID;
+  int32_t VID;
   char *LastUpdated;
   char *LastUpdatedEpoch;
-  long long int LeaseTime;
+  int64_t LeaseTime;
 };
 
 struct dhcppb_SnoopingBindingDatabaseList {

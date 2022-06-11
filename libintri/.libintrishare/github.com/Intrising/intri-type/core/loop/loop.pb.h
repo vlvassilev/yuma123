@@ -11,6 +11,7 @@
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/timestamp/timestamp.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -43,7 +44,7 @@ struct looppb_PortConfig {
 struct looppb_StatusEntry {
   struct devicepb_InterfaceIdentify *IdentifyNo;
   struct timestamppb_Timestamp *LastLoopTs;
-  long int LoopCount;
+  int32_t LoopCount;
   bool IsLoopCurrent;
 };
 

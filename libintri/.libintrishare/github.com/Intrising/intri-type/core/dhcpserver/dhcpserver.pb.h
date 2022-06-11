@@ -10,6 +10,7 @@
 #include "../../../../../github.com/Intrising/intri-type/device/device.pb.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -88,7 +89,7 @@ struct dhcpserverpb_Basic {
   char *PrimaryDNS;
   char *SecondaryDNS;
   // 120-86400
-  long int LeaseTime;
+  int32_t LeaseTime;
 };
 
 struct dhcpserverpb_MACBased {
@@ -99,7 +100,7 @@ struct dhcpserverpb_MACBased {
 
 struct dhcpserverpb_PortBased {
   // portNo should be pre-generated, no need to modify this field , [(validate.rules).int32 = {gte: 1, lte: 30}]
-  long int PortNo;
+  int32_t PortNo;
   // Server won't assign the IP to this port if ignore is true
   bool Ignore;
   // Server should assign basic IP to this port if the desiredIP is ""
@@ -111,10 +112,10 @@ struct dhcpserverpb_StatusEntry {
   char *Name;
   // internal use, not required to be visible on UI
   struct devicepb_InterfaceIdentify *Interface;
-  long int PortNo;
+  int32_t PortNo;
   char *MACAddress;
   char *IPAddress;
-  long int AvailableLeaseTime;
+  int32_t AvailableLeaseTime;
 };
 
 struct dhcpserverpb_Status {

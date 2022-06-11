@@ -13,6 +13,7 @@
 #include "../../../../../google.golang.org/genproto/googleapis/type/dayofweek/dayofweek.pb.h"
 #include "../../../../../google.golang.org/genproto/googleapis/type/timeofday/timeofday.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *

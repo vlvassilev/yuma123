@@ -9,6 +9,7 @@
  **************************************************************************************************** */
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/empty.pb.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /* ****************************************************************************************************
  *                                                                                                    *
@@ -24,7 +25,7 @@
 
 struct systempb_Status {
   char *LastBootTime;
-  long long int Uptime;
+  int64_t Uptime;
 };
 
 struct systempb_Config {

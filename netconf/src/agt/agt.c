@@ -1,16 +1,16 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 /*  FILE: agt.c
 
-                
+
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -95,7 +95,7 @@ static dlq_hdr_t          agt_dynlibQ;
 
 /********************************************************************
 * FUNCTION init_server_profile
-* 
+*
 * Hardwire the initial server profile variables
 *
 * OUTPUTS:
@@ -121,7 +121,7 @@ static void
     agt_profile.agt_log_acm_reads = FALSE;
     agt_profile.agt_log_acm_writes = TRUE;
 
-    /* T: <validate> op on candidate will call all SILs 
+    /* T: <validate> op on candidate will call all SILs
      * F: only SILs for nodes changed in the candidate will
      * be called; only affects <validate> command   */
     agt_profile.agt_validate_all = TRUE;
@@ -172,7 +172,7 @@ static void
 
 /********************************************************************
 * FUNCTION clean_server_profile
-* 
+*
 * Clean the server profile variables
 *
 * OUTPUTS:
@@ -200,12 +200,12 @@ static void
 
 /********************************************************************
 * FUNCTION load_running_config
-* 
+*
 * Load the NV startup config into the running config
-* 
+*
 * INPUTS:
 *   startup == startup filespec provided by the user
-*           == NULL if not set by user 
+*           == NULL if not set by user
 *              (use default name and specified search path instead)
 *   loaded == address of return config loaded flag
 *
@@ -263,7 +263,7 @@ static status_t
     } else if (LOGDEBUG2) {
         log_debug2("\nFound startup config: '%s'", fname);
     }
-    
+
     /* try to load the config file that was found or given */
     res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE, fname);
     if (res == ERR_XML_READER_START_FAILED) {
@@ -376,7 +376,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION new_dynlib_cb
-* 
+*
 * Malloc and init a new dynamic library control block
 *
 * RETURNS:
@@ -399,7 +399,7 @@ static agt_dynlib_cb_t *
 
 /********************************************************************
 * FUNCTION free_dynlib_cb
-* 
+*
 * Clean and free a new dynamic library control block
 *
 * INPUTS:
@@ -447,7 +447,7 @@ static status_t
     /* figure out which transaction ID file to use */
     if (profile->agt_startup_txid_file == NULL) {
         /* search for the default startup-cfg.xml filename */
-        xmlChar *fname = ncxmod_find_data_file(NCX_DEF_STARTUP_TXID_FILE, 
+        xmlChar *fname = ncxmod_find_data_file(NCX_DEF_STARTUP_TXID_FILE,
                                                FALSE, &res);
         if (fname == NULL || res != NO_ERR || *fname == 0) {
             /* need to set the default startup transaction ID file name */
@@ -515,9 +515,9 @@ static status_t
 
 /********************************************************************
 * FUNCTION agt_init1
-* 
+*
 * Initialize the Server Library: stage 1: CLI and profile
-* 
+*
 * TBD -- put platform-specific server init here
 *
 * INPUTS:
@@ -533,7 +533,7 @@ static status_t
 * RETURNS:
 *   status of the initialization procedure
 *********************************************************************/
-status_t 
+status_t
     agt_init1 (int argc,
                char *argv[],
                boolean *showver,
@@ -570,7 +570,7 @@ status_t
     }
 
     /* get the command line params and also any config file params */
-    res = agt_cli_process_input(argc, argv, &agt_profile, showver, 
+    res = agt_cli_process_input(argc, argv, &agt_profile, showver,
                                 showhelpmode);
     if (res != NO_ERR) {
         return res;
@@ -589,7 +589,7 @@ status_t
 
 /********************************************************************
 * FUNCTION agt_init2
-* 
+*
 * Initialize the Server Library
 * The agt_profile is set and the object database is
 * ready to have YANG modules loaded
@@ -601,7 +601,7 @@ status_t
 * RETURNS:
 *   status
 *********************************************************************/
-status_t 
+status_t
     agt_init2 (void)
 {
     val_value_t        *clivalset;
@@ -630,7 +630,7 @@ status_t
 
     /* initialize the server timer service */
     agt_timer_init();
-    
+
     /* initialize the RPC server callback structures */
     res = agt_rpc_init();
     if (res != NO_ERR) {
@@ -649,7 +649,7 @@ status_t
         return res;
     }
 
-    /* setup an empty <running> config 
+    /* setup an empty <running> config
      * The config state is still CFG_ST_INIT
      * so no user access can occur yet (except OP_LOAD by root)
      */
@@ -667,7 +667,7 @@ status_t
     /*** All Server profile parameters should be set by now ***/
 
     /* must set the server capabilities after the profile is set */
-    res = agt_cap_set_caps(agt_profile.agt_targ, 
+    res = agt_cap_set_caps(agt_profile.agt_targ,
                            agt_profile.agt_start,
                            agt_profile.agt_defaultStyle);
     if (res != NO_ERR) {
@@ -744,7 +744,7 @@ status_t
     }
 
     /* initialize the NCX server core callback functions.
-     * the schema (yuma-netconf.yang) for these callbacks was 
+     * the schema (yuma-netconf.yang) for these callbacks was
      * already loaded in the common ncx_init
      * */
     res = agt_ncx_init();
@@ -777,7 +777,7 @@ status_t
         /* first check if there are any deviations to load */
         val = val_find_child(clivalset, NCXMOD_NETCONFD, NCX_EL_DEVIATION);
         while (val) {
-            res = ncxmod_load_deviation(VAL_STR(val), 
+            res = ncxmod_load_deviation(VAL_STR(val),
                                         &agt_profile.agt_savedevQ);
             if (res != NO_ERR) {
                 return res;
@@ -818,7 +818,7 @@ status_t
                                      &agt_profile.agt_savedevQ,
                                      &retmod);
             }
-            
+
 #else
             /* load the SIL and it will load its own module */
             res = agt_load_sil_code(VAL_STR(val), revision, FALSE);
@@ -941,10 +941,10 @@ status_t
                  "to no-startup CLI option\n");
     }
 
-    /**  P H A S E   2   I N I T  ****  
+    /**  P H A S E   2   I N I T  ****
      **  add system-config and non-config data
      **  check existing startup config and add factory default
-     ** nodes as needed  
+     ** nodes as needed
      ** Note: if startup_loaded == TRUE then all the config nodes
      ** that may get added during init2 will not get checked
      ** by agt_val_root_check().  It is assumed that SIL modules
@@ -975,7 +975,7 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
-    
+
     /* load any server state monitoring data */
     res = agt_state_init2();
     if (res != NO_ERR) {
@@ -1009,7 +1009,7 @@ status_t
     }
 
 #ifdef STATIC_SERVER
-    /* init phase 2 for static modules should be 
+    /* init phase 2 for static modules should be
      * initialized here
      */
 #else
@@ -1068,14 +1068,14 @@ status_t
             log_debug3("\nFactory default running config contents");
         }
         cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-        val_dump_value_max(cfg->root, 
+        val_dump_value_max(cfg->root,
                            0,
                            NCX_DEF_INDENT,
                            DUMP_VAL_LOG,
                            NCX_DISPLAY_MODE_PREFIX,
                            FALSE,
                            TRUE);
-        
+
         log_debug3("\n");
     }
 
@@ -1084,16 +1084,16 @@ status_t
         /* TBD: run top-level mandatory object checks */
     } else {
         /* the factory default config was used;
-         * if so, then the root has not been checked at all 
+         * if so, then the root has not been checked at all
          * this is needed in case there are modules with top-level
          * mandatory nodes; if so, and init2 phase did not add them
          * then the running config will be invalid */
-        xml_msg_hdr_t  mhdr; 
+        xml_msg_hdr_t  mhdr;
         xml_msg_init_hdr(&mhdr);
         cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
 
         /* allocate a transaction control block */
-        agt_cfg_transaction_t *txcb = 
+        agt_cfg_transaction_t *txcb =
             agt_cfg_new_transaction(NCX_CFGID_RUNNING, AGT_CFG_EDIT_TYPE_FULL,
                                     FALSE, FALSE, &res);
         if (txcb == NULL || res != NO_ERR) {
@@ -1162,7 +1162,7 @@ status_t
     /* data modules can be accessed now, and still added
      * and deleted dynamically as well
      *
-     * No sessions can actually be started until the 
+     * No sessions can actually be started until the
      * agt_ncxserver_run function is called from netconfd_run
      */
 
@@ -1175,7 +1175,7 @@ status_t
 * FUNCTION agt_cleanup
 *
 * Cleanup the Server Library
-* 
+*
 * TBD -- put platform-specific server cleanup here
 *
 *********************************************************************/
@@ -1198,7 +1198,7 @@ void
 #endif
             free_dynlib_cb(dynlib);
         }
-                
+
 
         clean_server_profile();
         agt_acm_cleanup();
@@ -1234,9 +1234,9 @@ void
 
 /********************************************************************
 * FUNCTION agt_get_profile
-* 
+*
 * Get the server profile struct
-* 
+*
 * INPUTS:
 *   none
 * RETURNS:
@@ -1252,9 +1252,9 @@ agt_profile_t *
 
 /********************************************************************
 * FUNCTION agt_request_shutdown
-* 
+*
 * Request some sort of server shutdown
-* 
+*
 * INPUTS:
 *   mode == requested shutdown mode
 *
@@ -1283,9 +1283,9 @@ void
 
 /********************************************************************
 * FUNCTION agt_shutdown_requested
-* 
+*
 * Check if some sort of server shutdown is in progress
-* 
+*
 * RETURNS:
 *    TRUE if shutdown mode has been started
 *
@@ -1300,9 +1300,9 @@ boolean
 
 /********************************************************************
 * FUNCTION agt_shutdown_mode_requested
-* 
+*
 * Check what shutdown mode was requested
-* 
+*
 * RETURNS:
 *    shutdown mode
 *
@@ -1317,9 +1317,9 @@ ncx_shutdowntyp_t
 
 /********************************************************************
 * FUNCTION agt_cbtype_name
-* 
+*
 * Get the string for the server callback phase
-* 
+*
 * INPUTS:
 *   cbtyp == callback type enum
 *
@@ -1348,9 +1348,9 @@ const xmlChar *
 #ifndef STATIC_SERVER
 /********************************************************************
 * FUNCTION agt_load_sil_code
-* 
+*
 * Load the Server Instrumentation Library for the specified module
-* 
+*
 * INPUTS:
 *   modname == name of the module to load
 *   revision == revision date of the module to load (may be NULL)
@@ -1379,7 +1379,7 @@ status_t
 
     res = NO_ERR;
     handle = NULL;
-    
+
     /* create a buffer for the library name
      * and later for function names
      */
@@ -1390,7 +1390,7 @@ status_t
     }
 
     p = buffer;
-    p += xml_strcpy(p, (const xmlChar *)"lib");    
+    p += xml_strcpy(p, (const xmlChar *)"lib");
     p += xml_strcpy(p, modname);
     xml_strcpy(p, (const xmlChar *)".so");
 
@@ -1403,7 +1403,7 @@ status_t
 
     handle = dlopen((const char *)pathspec, RTLD_NOW);
     if (handle == NULL) {
-        log_error("\nError: could not open '%s' (%s)\n", 
+        log_error("\nError: could not open '%s' (%s)\n",
                   pathspec,
                   dlerror());
         m__free(buffer);
@@ -1424,7 +1424,7 @@ status_t
     initfn = dlsym(handle, (const char *)buffer);
     error = dlerror();
     if (error != NULL) {
-        log_error("\nError: could not open '%s' (%s)\n", 
+        log_error("\nError: could not open '%s' (%s)\n",
                   buffer,
                   dlerror());
         m__free(buffer);
@@ -1436,7 +1436,7 @@ status_t
     init2fn = dlsym(handle, (const char *)buffer);
     error = dlerror();
     if (error != NULL) {
-        log_error("\nError: could not open '%s' (%s)\n", 
+        log_error("\nError: could not open '%s' (%s)\n",
                   buffer,
                   dlerror());
         m__free(buffer);
@@ -1448,7 +1448,7 @@ status_t
     cleanupfn = dlsym(handle, (const char *)buffer);
     error = dlerror();
     if (error != NULL) {
-        log_error("\nError: could not open '%s' (%s)\n", 
+        log_error("\nError: could not open '%s' (%s)\n",
                   buffer,
                   dlerror());
         m__free(buffer);
@@ -1489,7 +1489,7 @@ status_t
             return ERR_INTERNAL_MEM;
         }
     }
-        
+
     dynlib->initfn = initfn;
     dynlib->init2fn = init2fn;
     dynlib->cleanupfn = cleanupfn;
@@ -1529,7 +1529,7 @@ status_t
     }
 
     return NO_ERR;
-            
+
 }  /* agt_load_sil_code */
 #endif
 

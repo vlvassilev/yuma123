@@ -452,7 +452,7 @@ struct lldppb_VoiceVlanEntry {
   bool PolicyDefined;
   bool TaggedVlan;
   int32_t VlanID;
-  enum lldppb_PoliciesLayer2PriorityTypeOptions Layer2Priority;
+  enum lldppb_PoliciesLayer2PriorityTypeOptions Layer_2Priority;
   int32_t DSCP;
 };
 #endif // _H_intri_pb_github_com_Intrising_intri_type_core_lldp_lldp

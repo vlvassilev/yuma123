@@ -873,9 +873,9 @@ struct eventpb_SFPInfo {
   char *TxPower;
   char *RxPower;
   char *Temperature;
-  char *MaxLength9Um;
-  char *MaxLength50Um;
-  char *MaxLength62Um;
+  char *MaxLength_9Um;
+  char *MaxLength_50Um;
+  char *MaxLength_62Um;
   char *MaxLengthCopper;
   char *TuningRange;
   char *PowerConsumption;

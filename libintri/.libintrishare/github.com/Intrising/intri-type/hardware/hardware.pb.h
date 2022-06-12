@@ -434,8 +434,8 @@ struct hardwarepb_PowerRedundantStateEntry {
 };
 
 struct hardwarepb_PowerGeneralState {
-  bool Power12V;
-  bool Power54V;
+  bool Power_12V;
+  bool Power_54V;
 };
 
 enum hardwarepb_PowerState_PowerType_Union_Options {

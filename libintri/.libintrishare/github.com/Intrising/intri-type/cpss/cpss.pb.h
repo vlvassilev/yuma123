@@ -983,12 +983,12 @@ struct cpsspb_PortCounterEntry {
   uint64_t BadPktsRecv;
   uint64_t BrdcPktsRecv;
   uint64_t McPktsRecv;
-  uint64_t Pkts64Octets;
-  uint64_t Pkts65To127Octets;
-  uint64_t Pkts128To255Octets;
-  uint64_t Pkts256To511Octets;
-  uint64_t Pkts512To1023Octets;
-  uint64_t Pkts1024ToMaxOctets;
+  uint64_t Pkts_64Octets;
+  uint64_t Pkts_65To_127Octets;
+  uint64_t Pkts_128To_255Octets;
+  uint64_t Pkts_256To_511Octets;
+  uint64_t Pkts_512To_1023Octets;
+  uint64_t Pkts_1024ToMaxOctets;
   uint64_t GoodOctetsSent;
   uint64_t GoodPktsSent;
   uint64_t ExcessiveCollisions;

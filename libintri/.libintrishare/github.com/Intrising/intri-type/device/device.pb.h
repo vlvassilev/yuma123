@@ -329,35 +329,35 @@ struct devicepb_PSUInfo {
 };
 
 struct devicepb_MCULedDevice {
-  int32_t I2cAddr;
+  int32_t I2CAddr;
   int32_t AddrRegister;
   enum devicepb_LedTypeOptions LedAction;
   int32_t ActiveBit;
 };
 
 struct devicepb_MCUMonitorDevice {
-  int32_t I2cAddr;
+  int32_t I2CAddr;
   int32_t AddrRegister;
   enum devicepb_MonitorTypeOptions MonitorAction;
   int32_t ActiveBit;
 };
 
 struct devicepb_MCUPSUDevice {
-  int32_t I2cAddr;
+  int32_t I2CAddr;
   int32_t AddrRegister;
   enum devicepb_PSUTypeOptions PSUAction;
   int32_t ActiveBit;
 };
 
 struct devicepb_MCUFanDevice {
-  int32_t I2cAddr;
+  int32_t I2CAddr;
   int32_t AddrRegister;
   enum devicepb_FanTypeOptions FANAction;
   int32_t ActiveBit;
 };
 
 struct devicepb_I2CDevice {
-  int32_t I2cAddr;
+  int32_t I2CAddr;
   int32_t AddrRegister;
   int32_t Action;
   int32_t ActiveBit;

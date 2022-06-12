@@ -87,12 +87,12 @@ struct rmonpb_Egress {
 struct rmonpb_HistogramEntry {
   // Only support INTERFACE_TYPE_PORT
   struct devicepb_InterfaceIdentify *IdentifyNo;
-  uint64_t In64Octets;
-  uint64_t In65To127Octets;
-  uint64_t In128To255Octets;
-  uint64_t In256To511Octets;
-  uint64_t In512To1023Octets;
-  uint64_t In1024ToMaxOctets;
+  uint64_t In_64Octets;
+  uint64_t In_65To_127Octets;
+  uint64_t In_128To_255Octets;
+  uint64_t In_256To_511Octets;
+  uint64_t In_512To_1023Octets;
+  uint64_t In_1024ToMaxOctets;
 };
 
 struct rmonpb_Histogram {

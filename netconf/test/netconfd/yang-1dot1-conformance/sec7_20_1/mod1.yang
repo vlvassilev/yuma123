@@ -1,0 +1,13 @@
+module mod1 {
+  namespace "http://yuma123.org/ns/sec7_20_1/mod1";
+  prefix m1;
+
+  feature "foo";
+
+  feature "bar";
+
+  container foobar {
+    if-feature "foo or bar";
+    presence "foo or bar is on";
+  }
+}

@@ -8993,8 +8993,8 @@ static status_t
     status_t  res;
 
     res = NO_ERR;
-    if (!ncx_find_iffeature(&ancestor->iffeatureQ, iff->prefix,
-                            iff->name, mod->prefix)) {
+    if (!ncx_find_iffeature_1dot1(&ancestor->iffeatureQ, iff->prefix,
+                            iff->name, iff->expr, mod->prefix)) {
 
         if (iserror) {
             res = ERR_NCX_INVALID_CONDITIONAL;
@@ -9191,9 +9191,10 @@ static status_t
                      iff != NULL;
                      iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-                    if (!ncx_find_iffeature(&testobj->iffeatureQ,
+                    if (!ncx_find_iffeature_1dot1(&testobj->iffeatureQ,
                                             iff->prefix,
                                             iff->name,
+                                            iff->expr,
                                             mod->prefix)) {
 
                         res = check_iffeature_mismatch(tkc, mod, ancestor,
@@ -9210,9 +9211,10 @@ static status_t
                      iff != NULL;
                      iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-                    if (!ncx_find_iffeature(&testobj->iffeatureQ,
+                    if (!ncx_find_iffeature_1dot1(&testobj->iffeatureQ,
                                             iff->prefix,
                                             iff->name,
+                                            iff->expr,
                                             mod->prefix)) {
 
                         res = check_iffeature_mismatch(tkc, mod, ancestor,

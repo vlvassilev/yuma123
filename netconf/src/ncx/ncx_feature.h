@@ -174,6 +174,29 @@ extern ncx_iffeature_t *
 			const xmlChar *modprefix);
 
 /********************************************************************
+* FUNCTION ncx_find_iffeature_1dot1
+* 
+* Search a Q of ncx_iffeature_t structs for a match
+* expr is an alternative introduced in YANG 1.1
+* with logical expression with or,and and not
+*
+* INPUTS:
+*    iffeatureQ == address of Q to search
+*    prefix == prefix to check for
+*              a NULL value indicates the current module
+*    name == feature name string to find
+*    expr == feature expr string to find
+*            a NULL value indicates simple if-feature without logical expression
+*            when not NULL prefix and name are NULL
+*********************************************************************/
+extern ncx_iffeature_t *
+    ncx_find_iffeature_1dot1 (dlq_hdr_t *iffeatureQ,
+			const xmlChar *prefix,
+			const xmlChar *name,
+			const xmlChar *expr,
+			const xmlChar *modprefix);
+
+/********************************************************************
 * FUNCTION ncx_resolve_iffeatureQ
 *
 * Check the Q of if-feature statements for the specified object

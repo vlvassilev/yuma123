@@ -792,6 +792,58 @@ status_t
     
 }  /* yang_consume_pid_string */
 
+/********************************************************************
+* FUNCTION yang_consume_iffeature_expr
+*********************************************************************/
+status_t 
+    yang_consume_iffeature_expr (tk_chain_t *tkc,
+                             ncx_module_t *mod,
+                             xmlChar **prefix,
+                             xmlChar **field,
+                             xmlChar **expr)
+{
+    const xmlChar *p;
+    tk_type_t      tktyp;
+    status_t       res;
+    uint32         plen, nlen;
+
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
+    }
+
+    if (prefix) {
+        *prefix = NULL;
+    }
+    if (field) {
+        *field = NULL;
+    }
+    if (expr) {
+        *expr = NULL;
+    }
+
+    tktyp = TK_CUR_TYP(tkc);
+
+
+    if (tktyp == TK_TT_QSTRING || 
+        tktyp == TK_TT_SQSTRING ||
+        tktyp == TK_TT_STRING) {
+        p = TK_CUR_VAL(tkc);
+
+
+        if(strpbrk (p, " ")) {
+            *expr = xml_strndup(p+1, nlen);
+            return res;
+        }
+    }
+
+    TK_BKUP(tkc);
+
+    return yang_consume_pid_string(tkc, mod, prefix, field);
+
+}  /* yang_consume_iffeature_expr */
+
 
 /********************************************************************
 * FUNCTION yang_consume_error_stmts
@@ -1814,6 +1866,7 @@ status_t
 {
     ncx_iffeature_t  *iff;
     xmlChar          *prefix, *name;
+    xmlChar          *expr;
     status_t          res, res2;
     
 #ifdef DEBUG
@@ -1822,23 +1875,31 @@ status_t
     }
 #endif
 
+
     prefix = NULL;
     name = NULL;
+    expr = NULL;
 
-    res = yang_consume_pid_string(tkc, mod, &prefix, &name);
+    if(mod->langver>=NCX_YANG_VERSION11) {
+        res = yang_consume_iffeature_expr(tkc, mod, &prefix, &name, &expr);
+    } else {
+        res = yang_consume_pid_string(tkc, mod, &prefix, &name);
+    }
     if (res == NO_ERR) {
         /* check if this if if-feature already entered warning */
-        iff = ncx_find_iffeature(iffeatureQ,
+        iff = ncx_find_iffeature_1dot1(iffeatureQ,
                                  prefix, 
                                  name,
+                                 expr,
                                  mod->prefix);
         if (iff) {
             if (ncx_warning_enabled(ERR_NCX_DUP_IF_FEATURE)) {
-                log_warn("\nWarning: if-feature '%s%s%s' "
+                log_warn("\nWarning: if-feature '%s%s%s%s' "
                          "already specified on line %u",
                          (prefix) ? prefix : EMPTY_STRING,
                          (prefix) ? ":" :  "", 
-                         name,
+                         (name) ? name : EMPTY_STRING,
+                         (expr) ? expr : EMPTY_STRING,
                          iff->tkerr.linenum);
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);
             } else {
@@ -1847,7 +1908,12 @@ status_t
             if (prefix) {
                 m__free(prefix);
             }
-            m__free(name);
+            if (name) {
+                m__free(name);
+            }
+            if (expr) {
+                m__free(expr);
+            }
         } else {
             /* not found so add it to the if-feature Q */
             iff = ncx_new_iffeature();
@@ -1857,11 +1923,17 @@ status_t
                 if (prefix) {
                     m__free(prefix);
                 }
-                m__free(name);
+                if (name) {
+                    m__free(name);
+                }
+                if (expr) {
+                    m__free(expr);
+                }
             } else {
                 /* transfer malloced fields */
                 iff->prefix = prefix;
                 iff->name = name;
+                iff->expr = expr;
                 ncx_set_error(&iff->tkerr,
                               mod,
                               TK_CUR_LNUM(tkc),

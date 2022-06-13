@@ -462,6 +462,9 @@ void
     if (iff->name) {
         m__free(iff->name);
     }
+    if (iff->expr) {
+        m__free(iff->expr);
+    }
 
     m__free(iff);
     
@@ -501,6 +504,14 @@ ncx_iffeature_t *
     if (srciff->name) {
         iff->name = xml_strdup(srciff->name);
         if (iff->name == NULL) {
+            ncx_free_iffeature(iff);
+            return NULL;
+        }
+    }
+
+    if (srciff->expr) {
+        iff->expr = xml_strdup(srciff->expr);
+        if (iff->expr == NULL) {
             ncx_free_iffeature(iff);
             return NULL;
         }
@@ -549,6 +560,65 @@ void
     
 } /* ncx_clean_iffeatureQ */
 
+/********************************************************************
+* FUNCTION ncx_find_iffeature_1dot1
+* 
+* Search a Q of ncx_iffeature_t structs for a match
+* expr is an alternative introduced in YANG 1.1
+* with logical expression with or,and and not
+*
+* INPUTS:
+*    iffeatureQ == address of Q to search
+*    prefix == prefix to check for
+*              a NULL value indicates the current module
+*    name == feature name string to find
+*    expr == feature expr string to find
+*            a NULL value indicates simple if-feature without logical expression
+*            when not NULL prefix and name are NULL
+*********************************************************************/
+
+ncx_iffeature_t *
+    ncx_find_iffeature_1dot1 (dlq_hdr_t *iffeatureQ,
+                        const xmlChar *prefix,
+                        const xmlChar *name,
+                        const xmlChar *expr,
+                        const xmlChar *modprefix)
+{
+    ncx_iffeature_t  *iff;
+
+#ifdef DEBUG
+    if (!iffeatureQ || (!name && !expr)) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    for (iff = (ncx_iffeature_t *)
+             dlq_firstEntry(iffeatureQ);
+         iff != NULL;
+         iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+
+        /* check if expr fields the same */
+        if (iff->expr && !xml_strcmp(iff->expr, expr)) {
+            return iff;
+        }
+
+        /* check if name fields the same */
+        if (iff->name && !xml_strcmp(iff->name, name)) {
+
+            /* check if prefix fields reference
+             * different modules, if set or implied
+             */
+            if (!ncx_prefix_different(prefix,
+                                      iff->prefix,
+                                      modprefix)) {
+                return iff;
+            }
+        }
+    }
+    return NULL;
+    
+} /* ncx_find_iffeature_1dot1 */
 
 /********************************************************************
 * FUNCTION ncx_find_iffeature
@@ -567,35 +637,7 @@ ncx_iffeature_t *
                         const xmlChar *name,
                         const xmlChar *modprefix)
 {
-    ncx_iffeature_t  *iff;
-
-#ifdef DEBUG
-    if (!iffeatureQ || !name) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    for (iff = (ncx_iffeature_t *)
-             dlq_firstEntry(iffeatureQ);
-         iff != NULL;
-         iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
-
-        /* check if name fields the same */
-        if (iff->name && !xml_strcmp(iff->name, name)) {
-
-            /* check if prefix fields reference
-             * different modules, if set or implied
-             */
-            if (!ncx_prefix_different(prefix,
-                                      iff->prefix,
-                                      modprefix)) {
-                return iff;
-            }
-        }
-    }
-    return NULL;
-    
+    return ncx_find_iffeature_1dot1(iffeatureQ, prefix, name, NULL, modprefix);
 } /* ncx_find_iffeature */
 
 
@@ -613,7 +655,7 @@ ncx_iffeature_t *
 *   mod == module in progress
 *   obj == object to check
 *
-* RETURNS:
+* RETURNS:for if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statementfor if-feature statement
 *   status of the operation
 *********************************************************************/
 status_t
@@ -641,6 +683,10 @@ status_t
         testfeature = NULL;
         errdone = FALSE;
         res = NO_ERR;
+
+        if (iff->expr) {
+            continue;
+        }
 
         if (iff->prefix &&
             xml_strcmp(iff->prefix, mod->prefix)) {

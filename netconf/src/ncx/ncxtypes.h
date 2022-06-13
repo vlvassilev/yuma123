@@ -535,6 +535,7 @@ typedef struct ncx_iffeature_t_ {
     dlq_hdr_t              qhdr;
     xmlChar               *prefix;
     xmlChar               *name;
+    xmlChar               *expr;
     struct ncx_feature_t_ *feature;
     ncx_error_t            tkerr;
     boolean                seen;          /* for yangdiff */

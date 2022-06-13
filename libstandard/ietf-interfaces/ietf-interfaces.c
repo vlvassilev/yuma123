@@ -476,17 +476,6 @@ static status_t
     char* buf;
     unsigned int line;
 
-    /* set the mac_addr var here, change EMPTY_STRING */
-    GoString in = {};
-    GoString out = {};
-    GoInt err_code = 0;
-
-    char in_char_arr[] = "{\"list\": []}";
-    in.p = in_char_arr;
-    in.n = sizeof(in_char_arr);
-    Rmon_RMON_GetIngress(&in, &out, &err_code);
-    printf("\n@@@@@@@@@@@@@@@@@@ %s\n", out.p);
-
     /* open /proc/net/dev for reading */
     f = fopen("/proc/net/dev", "r");
     if (f == NULL) {

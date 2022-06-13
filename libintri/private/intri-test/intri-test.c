@@ -178,16 +178,12 @@ static status_t intri_test_test_apis_test_mac_addr_mac_addr_get(
   }
 
   /* set the mac_addr var here, change EMPTY_STRING */
-  GoString in = {};
-  GoString out = {};
-  GoInt err_code = 0;
+  struct emptypb_Empty in = {};
+  struct commonpb_MACAddress out = {};
 
-  char in_char_arr[] = "{}";
-  in.p = in_char_arr;
-  in.n = sizeof(in_char_arr);
-  Device_Device_GetMACAddress(&in, &out, &err_code);
+  device_Device_GetMACAddress(&in, &out);
 
-  mac_addr = out.p;
+  mac_addr = out.MACAddr;
   res = val_set_simval_obj(
       dstval,
       dstval->obj,

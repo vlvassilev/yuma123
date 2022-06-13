@@ -18,15 +18,8 @@ $(XML_CPPFLAGS)
 libintri_device_la_LDFLAGS = \
 -module \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
-$(top_builddir)/netconf/src/ncx/libyumancx.la \
--L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
-
-
-# libintri_device_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/ncx -I${includedir}/yuma/platform $(XML_CPPFLAGS)
-
-# libintri_device_la_LDFLAGS = -module -lyumaagt -lyumancx -L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
+$(top_builddir)/netconf/src/ncx/libyumancx.la
 
 
 dist_intri_private_yang_DATA = \
 $(top_srcdir)/libintri/private/intri-device/intri-device.yang
-

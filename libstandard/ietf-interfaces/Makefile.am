@@ -14,8 +14,7 @@ $(XML_CPPFLAGS)
 libietf_interfaces_la_LDFLAGS = \
 -module \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
-$(top_builddir)/netconf/src/ncx/libyumancx.la \
--L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
+$(top_builddir)/netconf/src/ncx/libyumancx.la
 
 dist_examples_yang_DATA = \
 interfaces-notifications.yang

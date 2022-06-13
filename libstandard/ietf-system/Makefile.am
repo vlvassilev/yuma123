@@ -15,7 +15,6 @@ $(XML_CPPFLAGS)
 libietf_system_la_LDFLAGS = \
 -module \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
-$(top_builddir)/netconf/src/ncx/libyumancx.la \
--L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
+$(top_builddir)/netconf/src/ncx/libyumancx.la
 
 #yang_DATA = ietf-system.yang

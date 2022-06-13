@@ -574,6 +574,46 @@ static void
 
 
 /********************************************************************
+* FUNCTION add_sub_val_under_dir
+*
+* Add the node under the selected dir
+*
+* INPUTS:
+*   dir == the dir that will be added node
+*   modname == module name
+*   nodename == the node name that will be added
+*   cb == the callback that in charge of the real value of this node
+* RETURNS:
+*   none
+*********************************************************************/
+void
+    add_sub_val_under_dir(
+        val_value_t *dir,
+        const xmlChar *modname,
+        const xmlChar *nodename,
+        void *cbfn
+        )
+{
+    obj_template_t* obj;
+    val_value_t* tmp_val;
+
+    obj = obj_find_child(dir->obj,
+                         modname,
+                         nodename);
+    assert(obj != NULL);
+
+    tmp_val = val_new_value();
+    assert(tmp_val != NULL);
+
+    val_init_virtual(tmp_val,
+                     cbfn,
+                     obj);
+
+    val_add_child(tmp_val, dir);
+}
+
+
+/********************************************************************
 * FUNCTION init_static_vars
 *
 * Init the static vars
@@ -741,7 +781,7 @@ status_t
     /* Add /system */
     ietf_system_val = val_find_child(runningcfg->root,
                                           ietf_system,
-                                          "system");
+                                          ietf_system_N_system);
     if(ietf_system_val==NULL) {
         ietf_system_val = val_new_value();
         if (!ietf_system_val) {
@@ -832,46 +872,6 @@ status_t
 }  /* agt_sys_init2 */
 
 
-
-
-/********************************************************************
-* FUNCTION add_sub_val_under_dir
-*
-* Add the node under the selected dir
-*
-* INPUTS:
-*   dir == the dir that will be added node
-*   modname == module name
-*   nodename == the node name that will be added
-*   cb == the callback that in charge of the real value of this node
-* RETURNS:
-*   none
-*********************************************************************/
-void
-    add_sub_val_under_dir(
-        val_value_t *dir,
-        const xmlChar *modname,
-        const xmlChar *nodename,
-        void *cbfn
-        )
-{
-    obj_template_t* obj;
-    val_value_t* tmp_val;
-
-    obj = obj_find_child(dir->obj,
-                         modname,
-                         nodename);
-    assert(obj != NULL);
-
-    tmp_val = val_new_value();
-    assert(tmp_val != NULL);
-
-    val_init_virtual(tmp_val,
-                     cbfn,
-                     obj);
-
-    val_add_child(tmp_val, dir);
-}
 
 /********************************************************************
 * FUNCTION agt_sys_cleanup

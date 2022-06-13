@@ -125,6 +125,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 #define ietf_system_N_system_state (const xmlChar *)"system-state"
+#define ietf_system_N_system (const xmlChar *)"system"
 #define system_N_system (const xmlChar *)"yuma"
 #define system_N_sysName (const xmlChar *)"sysName"
 #define system_N_sysCurrentDateTime (const xmlChar *)"sysCurrentDateTime"
@@ -170,6 +171,24 @@ date         init     comment
 #define system_N_set_log_level (const xmlChar *)"set-log-level"
 #define system_N_log_level (const xmlChar *)"log-level"
 
+/** ietf-system system-state related CONST **/
+#define ietf_system (const xmlChar *)"ietf-system"
+#define ietf_system_state_clock (const xmlChar *)"clock"
+#define ietf_system_state_platform (const xmlChar *)"platform"
+#define ietf_system_state_os_name (const xmlChar *)"os-name"
+#define ietf_system_state_os_release (const xmlChar *)"os-release"
+#define ietf_system_state_os_version (const xmlChar *)"os-version"
+#define ietf_system_state_machine (const xmlChar *)"machine"
+#define ietf_system_state_current_datetime (const xmlChar *)"current-datetime"
+#define ietf_system_state_boot_datetime (const xmlChar *)"boot-datetime"
+
+/** ietf-system system related CONST **/
+#define ietf_system_hostname (const xmlChar *)"hostname"
+#define ietf_system_contact (const xmlChar *)"contact"
+#define ietf_system_location (const xmlChar *)"location"
+#define ietf_system_ntp (const xmlChar *)"ntp"
+#define ietf_system_radius (const xmlChar *)"radius"
+
 /********************************************************************
 *                                                                   *
 *                           T Y P E S                               *
@@ -194,6 +213,7 @@ static ncx_module_t         *ietf_netconf_notifications_mod;
 
 /* cached pointer to the <system> element template */
 static obj_template_t *ietf_system_state_obj;
+static obj_template_t *ietf_system_obj;
 static obj_template_t *yuma_system_obj;
 
 /* cached pointers to the eventType nodes for this module */
@@ -202,7 +222,8 @@ static obj_template_t *sysCapabilityChangeobj;
 static obj_template_t *sysSessionEndobj;
 static obj_template_t *sysConfirmedCommitobj;
 
-
+/* stored for being modifyed by fake function */
+static xmlChar *fake_string;
 
 /********************************************************************
 * FUNCTION payload_error
@@ -252,6 +273,48 @@ static status_t
         }
 
         tstamp_datetime(buff);
+        VAL_STR(dstval) = buff;
+        return NO_ERR;
+    } else {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* get_currentDateTime */
+
+/********************************************************************
+* FUNCTION get_fake_string
+*
+* copied from get_currentDateTime
+* <get> operation handler for the sysCurrentDateTime leaf
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    get_fake_string (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    xmlChar      *buff;
+
+    (void)scb;
+    (void)virval;
+
+    if (*fake_string == NULL || *fake_string=="") {
+        *fake_string ="init_value";
+    }
+
+    if (cbmode == GETCB_GET_VALUE) {
+        buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
+        if (!buff) {
+            return ERR_INTERNAL_MEM;
+        }
+
+        sprintf((char *)buff, *fake_string);
         VAL_STR(dstval) = buff;
         return NO_ERR;
     } else {
@@ -522,6 +585,7 @@ static void
     ietf_sysmod = NULL;
     sysmod = NULL;
     ietf_system_state_obj = NULL;
+    ietf_system_obj = NULL;
     yuma_system_obj = NULL;
     sysStartupobj = NULL;
     sysCapabilityChangeobj = NULL;
@@ -598,6 +662,14 @@ status_t
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
+    /* find the object definition for the system element */
+    ietf_system_obj = ncx_find_object(ietf_sysmod,
+                                ietf_system_N_system);
+
+    if (!ietf_system_obj) {
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
     yuma_system_obj =
         obj_find_child(ietf_system_state_obj,
                         AGT_SYS_MODULE,
@@ -642,7 +714,7 @@ status_t
 status_t
     agt_sys_init2 (void)
 {
-    val_value_t           *ietf_system_state_val, *yuma_system_val, *unameval, *childval, *tempval;
+    val_value_t           *ietf_system_val, *ietf_system_state_val, *yuma_system_val, *unameval, *childval, *tempval;
     cfg_template_t        *runningcfg;
     const xmlChar         *myhostname;
     obj_template_t        *unameobj;
@@ -650,10 +722,11 @@ status_t
     xmlChar               *buffer, *p, tstampbuff[TSTAMP_MIN_SIZE];
     struct utsname         utsbuff;
     int                    retval;
-    // add for adding /system/clock/current-datetime
+
+    // For adding /system-state/ and /system/ and link them to the private API
     obj_template_t*        obj;
-    val_value_t*           clock_val;
-    val_value_t*           current_datetime_val;
+    val_value_t*           tmp_sub_dir_val;
+    val_value_t*           tmp_val;
 
     if (!agt_sys_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -665,7 +738,22 @@ status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* add /system-state */
+    /* Add /system */
+    ietf_system_val = val_find_child(runningcfg->root,
+                                          ietf_system,
+                                          "system");
+    if(ietf_system_val==NULL) {
+        ietf_system_val = val_new_value();
+        if (!ietf_system_val) {
+            return ERR_INTERNAL_MEM;
+        }
+        val_init_from_template(ietf_system_val, ietf_system_obj);
+        val_add_child(ietf_system_val, runningcfg->root);
+    }
+
+    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_hostname , get_fake_string);
+
+    /* Add /system-state */
     ietf_system_state_val = val_new_value();
     if (!ietf_system_state_val) {
         return ERR_INTERNAL_MEM;
@@ -673,203 +761,68 @@ status_t
     val_init_from_template(ietf_system_state_val, ietf_system_state_obj);
 
 
-    ///////////@@ ietf-system/////////
-    /* /system-state/clock */
-    clock_val = val_find_child(ietf_system_state_val,
-                                          "ietf-system",
-                                          "clock");
-
-    if(clock_val==NULL) {
+    /* Start adding ietf-system and using private API*/
+    /* Add /system-state/clock */
+    tmp_sub_dir_val = val_find_child(ietf_system_state_val,
+                                          ietf_system,
+                                          ietf_system_state_clock);
+    if(tmp_sub_dir_val==NULL) {
+        printf("got null clock_val");
         obj = obj_find_child(ietf_system_state_val->obj,
-                                       "ietf-system",
-                                       "clock");
+                                       ietf_system,
+                                       ietf_system_state_clock);
         assert(obj != NULL);
 
-        clock_val = val_new_value();
-        assert(clock_val != NULL);
+        tmp_sub_dir_val = val_new_value();
+        assert(tmp_sub_dir_val != NULL);
 
-        val_init_from_template(clock_val,
+        val_init_from_template(tmp_sub_dir_val,
                                obj);
 
-        val_add_child(clock_val, ietf_system_state_val);
+        val_add_child(tmp_sub_dir_val, ietf_system_state_val);
 
     }
+    /* Add /system-state/clock/current-datetime */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_current_datetime, get_currentDateTime);
 
-    obj = obj_find_child(clock_val->obj,
-                         "ietf-system",
-                         "current-datetime");
-    assert(obj != NULL);
+    /* Add /system-state/clock/boot-datetime */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_boot_datetime, get_fake_string);
 
-    current_datetime_val = val_new_value();
-    assert(current_datetime_val != NULL);
+    /* Add /system-state/platform */
+    tmp_sub_dir_val = val_find_child(ietf_system_state_val,
+                                          ietf_system,
+                                          ietf_system_state_platform);
+    if(tmp_sub_dir_val==NULL) {
+        printf("got null platfoorm_val");
+        obj = obj_find_child(ietf_system_state_val->obj,
+                                       ietf_system,
+                                       ietf_system_state_platform);
+        assert(obj != NULL);
 
-    val_init_virtual(current_datetime_val,
-                     get_currentDateTime,
-                     obj);
+        tmp_sub_dir_val = val_new_value();
+        assert(tmp_sub_dir_val != NULL);
 
-    val_add_child(current_datetime_val, clock_val);
-    ///////////////////////
+        val_init_from_template(tmp_sub_dir_val,
+                               obj);
 
+        val_add_child(tmp_sub_dir_val, ietf_system_state_val);
+    }
+
+    /* Add /system-state/platform/os-name */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_name, get_fake_string);
+
+    /* Add /system-state/platform/os-release */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_release, get_fake_string);
+
+    /* Add /system-state/platform/os-version */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_version, get_fake_string);
+
+    /* Add /system-state/platform/machine */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_machine, get_fake_string);
+
+    /* [DONE] Start adding ietf-system and using private API*/
     /* handing off the malloced memory here */
     val_add_child_sorted(ietf_system_state_val, runningcfg->root);
-
-    // /* add /system-state/yuma */
-    // yuma_system_val = val_new_value();
-    // if (!yuma_system_val) {
-    //     return ERR_INTERNAL_MEM;
-    // }
-    // val_init_from_template(yuma_system_val, yuma_system_obj);
-
-    // /* handing off the malloced memory here */
-    // val_add_child_sorted(yuma_system_val, ietf_system_state_val);
-
-
-    // Remove the /system-state/yuma/*
-    //
-    // /* add /system-state/yuma/sysName */
-    // myhostname = (const xmlChar *)getenv("HOSTNAME");
-    // if (!myhostname) {
-    //     myhostname = (const xmlChar *)"localhost";
-    // }
-    // childval = agt_make_leaf(yuma_system_obj, system_N_sysName, myhostname, &res);
-    // if (childval) {
-    //     val_add_child(childval, yuma_system_val);
-    // } else {
-    //     return res;
-    // }
-
-    // /* add /system-state/yuma/sysCurrentDateTime */
-    // childval = agt_make_virtual_leaf(yuma_system_obj, system_N_sysCurrentDateTime,
-    //                                  get_currentDateTime, &res);
-    // if (childval) {
-    //     val_add_child(childval, yuma_system_val);
-    // } else {
-    //     return res;
-    // }
-
-    // /* add /system-state/yuma/sysBootDateTime */
-    // tstamp_datetime(tstampbuff);
-    // childval = agt_make_leaf(yuma_system_obj, system_N_sysBootDateTime,
-    //                          tstampbuff, &res);
-    // if (childval) {
-    //     val_add_child(childval, yuma_system_val);
-    // } else {
-    //     return res;
-    // }
-
-    // /* add /system-state/yuma/sysLogLevel */
-    // childval = agt_make_virtual_leaf(yuma_system_obj, system_N_sysLogLevel,
-    //                                  get_currentLogLevel, &res);
-    // if (childval) {
-    //     val_add_child(childval, yuma_system_val);
-    // } else {
-    //     return res;
-    // }
-
-    // /* add /system-state/yuma/sysNetconfServerId */
-    // buffer = m__getMem(256);
-    // if (buffer == NULL) {
-    //     return ERR_INTERNAL_MEM;
-    // }
-    // p = buffer;
-    // p += xml_strcpy(p, (const xmlChar *)"netconfd ");
-
-    // res = ncx_get_version(p, 247);
-    // if (res == NO_ERR) {
-    //     childval = agt_make_leaf(yuma_system_obj, system_N_sysNetconfServerId,
-    //                              buffer, &res);
-    //     m__free(buffer);
-    //     if (childval) {
-    //         val_add_child(childval, yuma_system_val);
-    //     } else {
-    //         return res;
-    //     }
-    // } else {
-    //     m__free(buffer);
-    //     log_error("\nError: could not get netconfd version");
-    // }
-    // buffer = NULL;
-
-    // /* add /system-state/yuma/sysNetconfServerCLI */
-    // tempval = val_clone(agt_cli_get_valset());
-    // if (tempval == NULL) {
-    //     return ERR_INTERNAL_MEM;
-    // }
-    // val_change_nsid(tempval, yuma_system_val->nsid);
-
-    // childval = agt_make_object(yuma_system_obj, system_N_sysNetconfServerCLI, &res);
-    // if (childval == NULL) {
-    //     val_free_value(tempval);
-    //     return ERR_INTERNAL_MEM;
-    // }
-    // val_move_children(tempval, childval);
-    // val_free_value(tempval);
-    // val_add_child(childval, yuma_system_val);
-
-    // /* get the system information */
-    // memset(&utsbuff, 0x0, sizeof(utsbuff));
-    // retval = uname(&utsbuff);
-    // if (retval) {
-    //     log_warn("\nWarning: <uname> data not available");
-    // } else {
-    //     unameobj = obj_find_child(yuma_system_obj, AGT_SYS_MODULE, system_N_uname);
-    //     if (!unameobj) {
-    //         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    //     }
-
-    //     /* add /system-state/yuma/uname */
-    //     unameval = val_new_value();
-    //     if (!unameval) {
-    //         return ERR_INTERNAL_MEM;
-    //     }
-    //     val_init_from_template(unameval, unameobj);
-    //     val_add_child(unameval, yuma_system_val);
-
-    //     /* add /system-state/yuma/uname/sysname */
-    //     childval = agt_make_leaf(unameobj, system_N_sysname,
-    //                              (const xmlChar *)utsbuff.sysname, &res);
-    //     if (childval) {
-    //         val_add_child(childval, unameval);
-    //     } else {
-    //         return res;
-    //     }
-
-    //     /* add /system-state/yuma/uname/release */
-    //     childval = agt_make_leaf(unameobj, system_N_release,
-    //                              (const xmlChar *)utsbuff.release, &res);
-    //     if (childval) {
-    //         val_add_child(childval, unameval);
-    //     } else {
-    //         return res;
-    //     }
-
-    //     /* add /system-state/yuma/uname/version */
-    //     childval = agt_make_leaf(unameobj, system_N_version,
-    //                              (const xmlChar *)utsbuff.version, &res);
-    //     if (childval) {
-    //         val_add_child(childval, unameval);
-    //     } else {
-    //         return res;
-    //     }
-
-    //     /* add /system-state/yuma/uname/machine */
-    //     childval = agt_make_leaf(unameobj, system_N_machine,
-    //                              (const xmlChar *)utsbuff.machine, &res);
-    //     if (childval) {
-    //         val_add_child(childval, unameval);
-    //     } else {
-    //         return res;
-    //     }
-
-    //     /* add /system-state/yuma/uname/nodename */
-    //     childval = agt_make_leaf(unameobj, system_N_nodename,
-    //                              (const xmlChar *)utsbuff.nodename, &res);
-    //     if (childval) {
-    //         val_add_child(childval, unameval);
-    //     } else {
-    //         return res;
-    //     }
-    // }
 
     /* add sysStartup to notificationQ */
     send_sysStartup();
@@ -878,6 +831,47 @@ status_t
 
 }  /* agt_sys_init2 */
 
+
+
+
+/********************************************************************
+* FUNCTION add_sub_val_under_dir
+*
+* Add the node under the selected dir
+*
+* INPUTS:
+*   dir == the dir that will be added node
+*   modname == module name
+*   nodename == the node name that will be added
+*   cb == the callback that in charge of the real value of this node
+* RETURNS:
+*   none
+*********************************************************************/
+void
+    add_sub_val_under_dir(
+        val_value_t *dir,
+        const xmlChar *modname,
+        const xmlChar *nodename,
+        void *cbfn
+        )
+{
+    obj_template_t* obj;
+    val_value_t* tmp_val;
+
+    obj = obj_find_child(dir->obj,
+                         modname,
+                         nodename);
+    assert(obj != NULL);
+
+    tmp_val = val_new_value();
+    assert(tmp_val != NULL);
+
+    val_init_virtual(tmp_val,
+                     cbfn,
+                     obj);
+
+    val_add_child(tmp_val, dir);
+}
 
 /********************************************************************
 * FUNCTION agt_sys_cleanup

@@ -223,7 +223,7 @@ static obj_template_t *sysSessionEndobj;
 static obj_template_t *sysConfirmedCommitobj;
 
 /* stored for being modifyed by fake function */
-static xmlChar *fake_string;
+// static xmlChar *fake_string;
 
 /********************************************************************
 * FUNCTION payload_error
@@ -304,9 +304,9 @@ static status_t
     (void)scb;
     (void)virval;
 
-    if (*fake_string == NULL || *fake_string=="") {
-        *fake_string ="init_value";
-    }
+    // if (*fake_string == NULL || *fake_string=="") {
+    //     *fake_string ="init_value";
+    // }
 
     if (cbmode == GETCB_GET_VALUE) {
         buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
@@ -314,7 +314,7 @@ static status_t
             return ERR_INTERNAL_MEM;
         }
 
-        sprintf((char *)buff, *fake_string);
+        sprintf((char *)buff, "what");
         VAL_STR(dstval) = buff;
         return NO_ERR;
     } else {

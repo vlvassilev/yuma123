@@ -11,8 +11,9 @@ netconf/man \
 netconf/src/yangdump \
 libstandard/ietf-interfaces \
 libstandard/ietf-system \
-libintri/private/intri-test \
-libintri/private/intri-device
+libintri/private/modules \
+libintri/private/src/intri-test \
+libintri/private/src/intri-device
 
 # libtoaster/src \
 # netconf/src/yangrpc/example \

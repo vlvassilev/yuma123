@@ -1,0 +1,12 @@
+module intri-gvrp {
+  namespace "intri:intri-gvrp";
+  prefix "intri-gvrp";
+  import gvrppb {
+    prefix "gvrppb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

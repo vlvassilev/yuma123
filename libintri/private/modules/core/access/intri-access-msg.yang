@@ -1,0 +1,285 @@
+submodule intri-access-msg {
+  belongs-to "intri-access" {
+    prefix "intri-access-msg";
+  }
+  include intri-access-enum;
+  import accesspb {
+    prefix "accesspb";
+  }
+  import eventpb {
+    prefix "eventpb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/access/authentication.proto
+  grouping AuthenticationMode {
+    leaf AuthenticationMode_Mode {
+      type accesspb:AuthenticationModeTypeOptions;
+    }
+  }
+  // core/access/authentication.proto
+  grouping AuthenticationConfig {
+    leaf AuthenticationConfig_Mode {
+      type accesspb:AuthenticationModeTypeOptions;
+    }
+    container AuthenticationConfig_RADIUS {
+      uses accesspb:AuthenticationRADIUS;
+    }
+    container AuthenticationConfig_TACACS {
+      uses accesspb:AuthenticationTACACS;
+    }
+  }
+  // core/access/authentication.proto
+  grouping AuthenticationTACACS {
+    leaf AuthenticationTACACS_PrimaryAuthServerName {
+      type string;
+    }
+    leaf AuthenticationTACACS_FallbackAuthServerName {
+      type string;
+    }
+    leaf AuthenticationTACACS_UserPrivilegeLevel0 {
+      type string;
+    }
+    leaf AuthenticationTACACS_UserPrivilegeLevel1 {
+      type string;
+    }
+    leaf AuthenticationTACACS_UserPrivilegeLevel15 {
+      type string;
+    }
+  }
+  // core/access/authentication.proto
+  grouping AuthenticationRADIUS {
+    leaf AuthenticationRADIUS_PrimaryAuthServerName {
+      type string;
+    }
+    leaf AuthenticationRADIUS_FallbackAuthServerName {
+      type string;
+    }
+    leaf AuthenticationRADIUS_UserPrivilegeLevel6 {
+      type string;
+    }
+    leaf AuthenticationRADIUS_UserPrivilegeLevel7 {
+      type string;
+    }
+  }
+  // core/access/authserver.proto
+  grouping AuthenticationServerEntry {
+    leaf AuthenticationServerEntry_Name {
+      type string;
+    }
+    leaf AuthenticationServerEntry_ServerType {
+      type accesspb:AuthenticationServerTypeOptions;
+    }
+    leaf AuthenticationServerEntry_HostAddress {
+      type string;
+    }
+    leaf AuthenticationServerEntry_PortNumber {
+      type int32;
+    }
+    leaf AuthenticationServerEntry_SharedSecret {
+      type string;
+    }
+    leaf AuthenticationServerEntry_InterimInterval {
+      type int64;
+    }
+  }
+  // core/access/authserver.proto
+  grouping AuthenticationServersConfig {
+    container AuthenticationServersConfig_List {
+      uses accesspb:AuthenticationServerEntry;
+    }
+  }
+  // core/access/login.proto
+  grouping LoginRequest {
+    leaf LoginRequest_Account {
+      type string;
+    }
+    leaf LoginRequest_Password {
+      type string;
+    }
+  }
+  // core/access/restriction.proto
+  grouping RestrictionEntry {
+    leaf RestrictionEntry_Name {
+      type string;
+    }
+    leaf RestrictionEntry_Mode {
+      type accesspb:RestrictionModeTypeOptions;
+    }
+    leaf RestrictionEntry_IPAddress {
+      type string;
+    }
+  }
+  // core/access/restriction.proto
+  grouping RestrictionsConfig {
+    container RestrictionsConfig_List {
+      uses accesspb:RestrictionEntry;
+    }
+  }
+  // core/access/user.proto
+  grouping UserEntry {
+    leaf UserEntry_Name {
+      type string;
+    }
+    leaf UserEntry_AssociatedGroups {
+      type string;
+    }
+    leaf UserEntry_GeneralAccessRights {
+      type accesspb:RightsTypeOptions;
+    }
+    leaf UserEntry_TelnetAccessEnabled {
+      type boolean;
+    }
+    leaf UserEntry_SSHAccessEnabled {
+      type boolean;
+    }
+    leaf UserEntry_WebAccessEnabled {
+      type boolean;
+    }
+    leaf UserEntry_SNMPAccessEnabled {
+      type boolean;
+    }
+    leaf UserEntry_EncryptedAuthPassword {
+      type string;
+    }
+    leaf UserEntry_SNMPV3SecurityLevel {
+      type accesspb:UserEntrySNMPV3SecurityLevelTypeOptions;
+    }
+    leaf UserEntry_SNMPV3AuthAlgorithm {
+      type accesspb:UserEntrySNMPV3AuthAlgorithmTypeOptions;
+    }
+    leaf UserEntry_SNMPV3PrivacyAlgorithm {
+      type accesspb:UserEntrySNMPV3PrivacyAlgorithmTypeOptions;
+    }
+    leaf UserEntry_EncryptedSNMPAuthPassword {
+      type string;
+    }
+    leaf UserEntry_EncryptedSNMPPrivacyPassword {
+      type string;
+    }
+  }
+  // core/access/user.proto
+  grouping PatternEntry {
+    leaf PatternEntry_Path {
+      type string;
+    }
+    leaf PatternEntry_AccessRight {
+      type accesspb:RightsTypeOptions;
+    }
+  }
+  // core/access/user.proto
+  grouping UsersConfig {
+    container UsersConfig_List {
+      uses accesspb:UserEntry;
+    }
+  }
+  // core/access/user.proto
+  grouping GroupEntry {
+    leaf GroupEntry_Name {
+      type string;
+    }
+    container GroupEntry_Patterns {
+      uses accesspb:PatternEntry;
+    }
+  }
+  // core/access/user.proto
+  grouping GroupsConfig {
+    container GroupsConfig_List {
+      uses accesspb:GroupEntry;
+    }
+  }
+  // core/access/access.proto
+  grouping Config {
+    container Config_Authentication {
+      uses accesspb:AuthenticationConfig;
+    }
+    container Config_Users {
+      uses accesspb:UsersConfig;
+    }
+    container Config_Groups {
+      uses accesspb:GroupsConfig;
+    }
+    container Config_Restrictions {
+      uses accesspb:RestrictionsConfig;
+    }
+    container Config_Servers {
+      uses accesspb:AuthenticationServersConfig;
+    }
+  }
+  // core/access/access.proto
+  grouping Password {
+    leaf Password_Password {
+      type string;
+    }
+    leaf Password_Irreversable {
+      type boolean;
+    }
+  }
+  // core/access/access.proto
+  grouping EncryptedPassword {
+    leaf EncryptedPassword_EncryptedPassword {
+      type string;
+    }
+  }
+  // core/access/access.proto
+  grouping UserPasswordEntry {
+    leaf UserPasswordEntry_Username {
+      type string;
+    }
+    leaf UserPasswordEntry_Password {
+      type string;
+    }
+  }
+  // core/access/access.proto
+  grouping UserPassword {
+    container UserPassword_List {
+      uses accesspb:UserPasswordEntry;
+    }
+  }
+  // core/access/access.proto
+  grouping NumberOfLogins {
+    leaf NumberOfLogins_NumberOfLogins {
+      type int32;
+    }
+  }
+  // core/access/access.proto
+  grouping LoginStatusEntry {
+    leaf LoginStatusEntry_State {
+      type string;
+    }
+    leaf LoginStatusEntry_Username {
+      type string;
+    }
+    leaf LoginStatusEntry_AuthName {
+      type string;
+    }
+    leaf LoginStatusEntry_LoginID {
+      type string;
+    }
+    leaf LoginStatusEntry_LoginTimeStamp {
+      type string;
+    }
+    leaf LoginStatusEntry_LoginEpoch {
+      type string;
+    }
+    leaf LoginStatusEntry_ConnectTime {
+      type int64;
+    }
+    leaf LoginStatusEntry_Service {
+      type eventpb:LoginInterfaceNameTypeOptions;
+    }
+  }
+  // core/access/access.proto
+  grouping LoginStatus {
+    container LoginStatus_List {
+      uses accesspb:LoginStatusEntry;
+    }
+  }
+  // core/access/access.proto
+  grouping Token {
+    leaf Token_Token {
+      type string;
+    }
+  }
+}

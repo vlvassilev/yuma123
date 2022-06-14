@@ -1,0 +1,336 @@
+submodule intri-lldp-msg {
+  belongs-to "intri-lldp" {
+    prefix "intri-lldp-msg";
+  }
+  include intri-lldp-enum;
+  import lldppb {
+    prefix "lldppb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/lldp/lldp.proto
+  grouping Config {
+    container Config_SystemConfig {
+      uses lldppb:SystemConfig;
+    }
+    container Config_PortConfig {
+      uses lldppb:PortConfig;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping SystemConfig {
+    leaf SystemConfig_Enabled {
+      type boolean;
+    }
+    leaf SystemConfig_TimeToLive {
+      type int32;
+    }
+    leaf SystemConfig_MsgTxInterval {
+      type int32;
+    }
+    leaf SystemConfig_VoiceDisableVlanTLV {
+      type boolean;
+    }
+    leaf SystemConfig_ForwardToLink {
+      type boolean;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping PortConfig {
+    container PortConfig_List {
+      uses lldppb:PortConfigEntry;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping PortConfigEntry {
+    container PortConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortConfigEntry_Mode {
+      type lldppb:PortModeTypeOptions;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping LocalInfo {
+    container LocalInfo_List {
+      uses lldppb:LocalInfoEntry;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping NeighborInfo {
+    container NeighborInfo_List {
+      uses lldppb:NeighborInfoEntry;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping LocalInfoEntry {
+    container LocalInfoEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    container LocalInfoEntry_MACPhy {
+      uses lldppb:MACPHYConfig;
+    }
+    container LocalInfoEntry_PortMgmt {
+      uses lldppb:PortManagementInfo;
+    }
+    container LocalInfoEntry_Aggr {
+      uses lldppb:LinkAggregation;
+    }
+    container LocalInfoEntry_ExtendPoe {
+      uses lldppb:ExtendedPowerViaMDI;
+    }
+    container LocalInfoEntry_Power {
+      uses lldppb:PowerViaMDI;
+    }
+    container LocalInfoEntry_MediaCap {
+      uses lldppb:MediaCapability;
+    }
+    container LocalInfoEntry_SystemInfo {
+      uses lldppb:SystemManagementInfo;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping NeighborInfoEntry {
+    container NeighborInfoEntry_RecvIdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf NeighborInfoEntry_TimeToLive {
+      type int32;
+    }
+    container NeighborInfoEntry_Chassis {
+      uses lldppb:ChassisInfo;
+    }
+    container NeighborInfoEntry_MgmtAddress {
+      uses lldppb:PortManagementAddressInfo;
+    }
+    leaf NeighborInfoEntry_Capabilities {
+      type lldppb:CapabilitiesTypeOptions;
+    }
+    leaf NeighborInfoEntry_CapabilitiesEnabled {
+      type lldppb:CapabilitiesTypeOptions;
+    }
+    leaf NeighborInfoEntry_MedCapabilities {
+      type lldppb:MedCapabilitiesTypeOptions;
+    }
+    container NeighborInfoEntry_PortSubtype {
+      uses lldppb:PortID;
+    }
+    container NeighborInfoEntry_VoiceVlan {
+      uses lldppb:VoiceVlanEntry;
+    }
+    container NeighborInfoEntry_SystemInfo {
+      uses lldppb:SystemManagementInfo;
+    }
+    container NeighborInfoEntry_ExtendPoe {
+      uses lldppb:ExtendedPowerViaMDI;
+    }
+    container NeighborInfoEntry_Power {
+      uses lldppb:PowerViaMDI;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping LinkAggregation {
+    leaf LinkAggregation_Capabilities {
+      type boolean;
+    }
+    leaf LinkAggregation_Status {
+      type boolean;
+    }
+    leaf LinkAggregation_AggregationPortNo {
+      type int32;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping ExtendedPowerViaMDI {
+    leaf ExtendedPowerViaMDI_Type {
+      type lldppb:PoeInfoTypeOptions;
+    }
+    leaf ExtendedPowerViaMDI_Source {
+      type lldppb:PoeInfoSourceTypeOptions;
+    }
+    leaf ExtendedPowerViaMDI_Priority {
+      type lldppb:PoeInfoPriorityTypeOptions;
+    }
+    leaf ExtendedPowerViaMDI_Value {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping MACPHYConfig {
+    leaf MACPHYConfig_AutoNegotiationConfig {
+      type boolean;
+    }
+    leaf MACPHYConfig_AutoNegotiationStatus {
+      type boolean;
+    }
+    leaf MACPHYConfig_AutoNegoAdvertisedCapability {
+      type lldppb:MACPHYAdvertisedCapabilityTypeOptions;
+    }
+    leaf MACPHYConfig_OperationalMAUType {
+      type lldppb:MACPHYAdvertisedCapabilityTypeOptions;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping MediaCapability {
+    leaf MediaCapability_Capabilities {
+      type lldppb:MedCapabilitiesTypeOptions;
+    }
+    leaf MediaCapability_ClassType {
+      type int32;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping SystemManagementInfo {
+    leaf SystemManagementInfo_Name {
+      type string;
+    }
+    leaf SystemManagementInfo_Description {
+      type string;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping PortManagementInfo {
+    leaf PortManagementInfo_Ip {
+      type string;
+    }
+    leaf PortManagementInfo_MACAddr {
+      type string;
+    }
+    leaf PortManagementInfo_Description {
+      type string;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping PowerViaMDI {
+    leaf PowerViaMDI_Type {
+      type lldppb:PoePortClassTypeOptions;
+    }
+    leaf PowerViaMDI_PoePowerSupported {
+      type boolean;
+    }
+    leaf PowerViaMDI_PoePowerEnabled {
+      type boolean;
+    }
+    leaf PowerViaMDI_PairControl {
+      type boolean;
+    }
+    leaf PowerViaMDI_PowerPairs {
+      type lldppb:PoeControlPowerPairsTypeOptions;
+    }
+    leaf PowerViaMDI_PowerClass {
+      type lldppb:PoeControlPowerClassTypeOptions;
+    }
+    leaf PowerViaMDI_DeviceType {
+      type lldppb:PoeInfoTypeOptions;
+    }
+    leaf PowerViaMDI_Source {
+      type lldppb:PoeInfoSourceTypeOptions;
+    }
+    leaf PowerViaMDI_Priority {
+      type lldppb:PoeInfoPriorityTypeOptions;
+    }
+    leaf PowerViaMDI_PdRequestedPower {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf PowerViaMDI_PseAllocatedPower {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping PortManagementAddressInfo {
+    leaf PortManagementAddressInfo_Ip {
+      type string;
+    }
+    leaf PortManagementAddressInfo_Subtype {
+      type lldppb:ManagementAddressIfSubTypeTypeOptions;
+    }
+    leaf PortManagementAddressInfo_ID {
+      type string;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping ManagementAddress {
+    leaf ManagementAddress_MACAddr {
+      type string;
+    }
+    leaf ManagementAddress_Ip {
+      type string;
+    }
+    leaf ManagementAddress_PortDsr {
+      type string;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping ChassisInfo {
+    leaf ChassisInfo_Type {
+      type lldppb:ChassisIdSubtypeTypeOptions;
+    }
+    leaf ChassisInfo_ID {
+      type string;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping PortID {
+    leaf PortID_Subtype {
+      type lldppb:PortIdSubtypeTypeOptions;
+    }
+    leaf PortID_VlanID {
+      type int32;
+    }
+    leaf PortID_ID {
+      type string;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping Statistic {
+    container Statistic_List {
+      uses lldppb:StatisticEntry;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping StatisticEntry {
+    container StatisticEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf StatisticEntry_FramesOut {
+      type int32;
+    }
+    leaf StatisticEntry_FramesIn {
+      type int32;
+    }
+    leaf StatisticEntry_FramesInErrors {
+      type int32;
+    }
+  }
+  // core/lldp/lldp.proto
+  grouping VoiceVlanEntry {
+    leaf VoiceVlanEntry_ApplicationType {
+      type lldppb:PoliciesApplicationTypeOptions;
+    }
+    leaf VoiceVlanEntry_PolicyDefined {
+      type boolean;
+    }
+    leaf VoiceVlanEntry_TaggedVlan {
+      type boolean;
+    }
+    leaf VoiceVlanEntry_VlanID {
+      type int32;
+    }
+    leaf VoiceVlanEntry_Layer2Priority {
+      type lldppb:PoliciesLayer2PriorityTypeOptions;
+    }
+    leaf VoiceVlanEntry_DSCP {
+      type int32;
+    }
+  }
+}

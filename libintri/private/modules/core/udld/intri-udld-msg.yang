@@ -1,0 +1,162 @@
+submodule intri-udld-msg {
+  belongs-to "intri-udld" {
+    prefix "intri-udld-msg";
+  }
+  include intri-udld-enum;
+  import udldpb {
+    prefix "udldpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/udld/udld.proto
+  grouping Config {
+    container Config_BasicConfig {
+      uses udldpb:BasicConfig;
+    }
+    container Config_PortConfig {
+      uses udldpb:PortConfig;
+    }
+  }
+  // core/udld/udld.proto
+  grouping BasicConfig {
+    leaf BasicConfig_IsEnabled {
+      type boolean;
+    }
+    leaf BasicConfig_ModeOption {
+      type udldpb:ModeTypeOptions;
+    }
+    leaf BasicConfig_MessageIntervalSeconds {
+      type int32;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PortConfig {
+    container PortConfig_List {
+      uses udldpb:PortConfigEntry;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PortConfigEntry {
+    container PortConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortConfigEntry_IsEnabled {
+      type boolean;
+    }
+    leaf PortConfigEntry_ModeOption {
+      type udldpb:ModeTypeOptions;
+    }
+  }
+  // core/udld/udld.proto
+  grouping Status {
+    container Status_PortStatus {
+      uses udldpb:PortStatus;
+    }
+    container Status_NeighborStatus {
+      uses udldpb:NeighborStatus;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PortStatus {
+    container PortStatus_List {
+      uses udldpb:PortStatusEntry;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PortStatusEntry {
+    container PortStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortStatusEntry_IsEnabled {
+      type boolean;
+    }
+    leaf PortStatusEntry_PortLinkUp {
+      type boolean;
+    }
+    leaf PortStatusEntry_FaultOption {
+      type udldpb:PortFaultTypeOptions;
+    }
+    leaf PortStatusEntry_StateOption {
+      type udldpb:PortStateTypeOptions;
+    }
+    leaf PortStatusEntry_ModeOption {
+      type udldpb:ModeTypeOptions;
+    }
+  }
+  // core/udld/udld.proto
+  grouping NeighborStatus {
+    container NeighborStatus_List {
+      uses udldpb:NeighborStatusEntry;
+    }
+  }
+  // core/udld/udld.proto
+  grouping NeighborStatusEntry {
+    container NeighborStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf NeighborStatusEntry_DeviceID {
+      type string;
+    }
+    leaf NeighborStatusEntry_PortID {
+      type string;
+    }
+    leaf NeighborStatusEntry_MacAddress {
+      type string;
+    }
+    leaf NeighborStatusEntry_DeviceName {
+      type string;
+    }
+    leaf NeighborStatusEntry_StateOption {
+      type udldpb:PortStateTypeOptions;
+    }
+    leaf NeighborStatusEntry_ExpirationTimeSeconds {
+      type int32;
+    }
+    leaf NeighborStatusEntry_MessageTimeSeconds {
+      type int32;
+    }
+  }
+  // core/udld/udld.proto
+  grouping Statistics {
+    container Statistics_Total {
+      uses udldpb:PacketStatistics;
+    }
+    container Statistics_Port {
+      uses udldpb:PortStatistics;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PortStatistics {
+    container PortStatistics_List {
+      uses udldpb:PortStatisticsEntry;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PortStatisticsEntry {
+    container PortStatisticsEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    container PortStatisticsEntry_Statistics {
+      uses udldpb:PacketStatistics;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PacketStatistics {
+    container PacketStatistics_List {
+      uses udldpb:PacketStatisticsEntry;
+    }
+  }
+  // core/udld/udld.proto
+  grouping PacketStatisticsEntry {
+    leaf PacketStatisticsEntry_OpcodeOption {
+      type udldpb:PacketOpcodeTypeOptions;
+    }
+    leaf PacketStatisticsEntry_Count {
+      type uint64;
+    }
+  }
+}

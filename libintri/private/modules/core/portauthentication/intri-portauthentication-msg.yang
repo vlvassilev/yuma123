@@ -1,0 +1,228 @@
+submodule intri-portauthentication-msg {
+  belongs-to "intri-portauthentication" {
+    prefix "intri-portauthentication-msg";
+  }
+  include intri-portauthentication-enum;
+  import portauthenticationpb {
+    prefix "portauthenticationpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping Config {
+    container Config_SystemConfig {
+      uses portauthenticationpb:SystemConfig;
+    }
+    container Config_PortConfig {
+      uses portauthenticationpb:PortConfig;
+    }
+    container Config_AuthorizedMACs {
+      uses portauthenticationpb:AuthorizedMACs;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping AuthorizedMACsEntry {
+    leaf AuthorizedMACsEntry_Name {
+      type string;
+    }
+    leaf AuthorizedMACsEntry_MACAddress {
+      type string;
+    }
+    container AuthorizedMACsEntry_PermittedPortList {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf AuthorizedMACsEntry_TreatAsVendorMAC {
+      type boolean;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping AuthorizedMACs {
+    container AuthorizedMACs_List {
+      uses portauthenticationpb:AuthorizedMACsEntry;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping SystemConfig {
+    leaf SystemConfig_PortAccessControlEnabled {
+      type boolean;
+    }
+    leaf SystemConfig_ReauthenticationPeriod {
+      type int32;
+    }
+    leaf SystemConfig_NASIdentifier {
+      type string;
+    }
+    leaf SystemConfig_MACSeparatorChar {
+      type string;
+    }
+    leaf SystemConfig_MACSpelling {
+      type portauthenticationpb:MACSpellingTypeOptions;
+    }
+    leaf SystemConfig_MACPasswordSource {
+      type portauthenticationpb:MACPasswordSourceTypeOptions;
+    }
+    leaf SystemConfig_MACPasswordString {
+      type string;
+    }
+    leaf SystemConfig_PrimaryAuthServerName {
+      type string;
+    }
+    leaf SystemConfig_PrimaryAcctServerName {
+      type string;
+    }
+    leaf SystemConfig_FallbackAuthServerName {
+      type string;
+    }
+    leaf SystemConfig_FallbackAcctServerName {
+      type string;
+    }
+    leaf SystemConfig_ServerDownTimeout {
+      type int32;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping PortConfig {
+    container PortConfig_List {
+      uses portauthenticationpb:PortConfigEntry;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping PortConfigEntry {
+    container PortConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortConfigEntry_AuthorizedMode {
+      type portauthenticationpb:AuthorizationModeTypeOptions;
+    }
+    leaf PortConfigEntry_UnAuthorizedMode {
+      type portauthenticationpb:UnAuthorizationModeTypeOptions;
+    }
+    leaf PortConfigEntry_AuthFailRetryInterval {
+      type int32;
+    }
+    leaf PortConfigEntry_LimitedNumberOfMACs {
+      type int32;
+    }
+    leaf PortConfigEntry_MACTimeout {
+      type portauthenticationpb:MACTimeoutTypeOptions;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping PortStatus {
+    container PortStatus_List {
+      uses portauthenticationpb:PortStatusEntry;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping PortStatusEntry {
+    container PortStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortStatusEntry_AuthorizationState {
+      type portauthenticationpb:AuthorizationStateTypeOptions;
+    }
+    leaf PortStatusEntry_AuthorizationMode {
+      type portauthenticationpb:AuthorizationModeTypeOptions;
+    }
+    leaf PortStatusEntry_LastStateChange {
+      type string;
+    }
+    leaf PortStatusEntry_NumberOfMACsToLearn {
+      type int32;
+    }
+    leaf PortStatusEntry_NumberOfLearnedMACs {
+      type int32;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping PortAuthorizationStatus {
+    container PortAuthorizationStatus_List {
+      uses portauthenticationpb:PortAuthorizationStatusEntry;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping PortAuthorizationStatusEntry {
+    container PortAuthorizationStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortAuthorizationStatusEntry_AuthorizationState {
+      type portauthenticationpb:AuthorizationStateTypeOptions;
+    }
+    leaf PortAuthorizationStatusEntry_UserMAC {
+      type string;
+    }
+    leaf PortAuthorizationStatusEntry_UserName {
+      type string;
+    }
+    leaf PortAuthorizationStatusEntry_IdleTimeout {
+      type int32;
+    }
+    leaf PortAuthorizationStatusEntry_SessionTimeout {
+      type int32;
+    }
+    leaf PortAuthorizationStatusEntry_LastStateChange {
+      type string;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping UserStatus {
+    container UserStatus_List {
+      uses portauthenticationpb:UserStatusEntry;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping UserStatusEntry {
+    leaf UserStatusEntry_EntryState {
+      type portauthenticationpb:EntryStateTypeOptions;
+    }
+    leaf UserStatusEntry_AuthorizationState {
+      type portauthenticationpb:AuthorizationStateTypeOptions;
+    }
+    leaf UserStatusEntry_AuthorizationMode {
+      type portauthenticationpb:AuthorizationModeTypeOptions;
+    }
+    container UserStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf UserStatusEntry_UserMAC {
+      type string;
+    }
+    leaf UserStatusEntry_UserName {
+      type string;
+    }
+    leaf UserStatusEntry_VlanID {
+      type int32;
+    }
+    leaf UserStatusEntry_IdleTimeout {
+      type int32;
+    }
+    leaf UserStatusEntry_SessionTimeout {
+      type int32;
+    }
+    leaf UserStatusEntry_LoginTimeStamp {
+      type string;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping LearnMACNowEntry {
+    container LearnMACNowEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf LearnMACNowEntry_Amount {
+      type int32;
+    }
+  }
+  // core/portauthentication/portauthentication.proto
+  grouping UnauthorizeMACEntry {
+    container UnauthorizeMACEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf UnauthorizeMACEntry_MACAddress {
+      type string;
+    }
+  }
+}

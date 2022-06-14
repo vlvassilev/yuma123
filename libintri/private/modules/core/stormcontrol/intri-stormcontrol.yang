@@ -1,0 +1,12 @@
+module intri-stormcontrol {
+  namespace "intri:intri-stormcontrol";
+  prefix "intri-stormcontrol";
+  import stormcontrolpb {
+    prefix "stormcontrolpb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

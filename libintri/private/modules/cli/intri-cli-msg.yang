@@ -1,0 +1,24 @@
+submodule intri-cli-msg {
+  belongs-to "intri-cli" {
+    prefix "intri-cli-msg";
+  }
+  include intri-cli-enum;
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // cli/cli.proto
+  grouping ScriptAction {
+    leaf ScriptAction_Token {
+      type string;
+    }
+    leaf ScriptAction_FileURL {
+      type string;
+    }
+    leaf ScriptAction_IsFTPS {
+      type boolean;
+    }
+    leaf ScriptAction_ForceTFTP {
+      type boolean;
+    }
+  }
+}

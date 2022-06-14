@@ -1,0 +1,132 @@
+submodule intri-qos-msg {
+  belongs-to "intri-qos" {
+    prefix "intri-qos-msg";
+  }
+  include intri-qos-enum;
+  import qospb {
+    prefix "qospb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/qos/qos.proto
+  grouping WeightedFairTrafficRatioQueueEntry {
+    leaf WeightedFairTrafficRatioQueueEntry_QueueNo {
+      type int32;
+    }
+    leaf WeightedFairTrafficRatioQueueEntry_Priority {
+      type int32;
+    }
+    leaf WeightedFairTrafficRatioQueueEntry_Scheme {
+      type qospb:PrioritySchemeTypeOptions;
+    }
+  }
+  // core/qos/qos.proto
+  grouping MappingCoSDot1PToQueueEntry {
+    leaf MappingCoSDot1PToQueueEntry_CosNo {
+      type int32;
+    }
+    leaf MappingCoSDot1PToQueueEntry_QueueNo {
+      type int32;
+    }
+  }
+  // core/qos/qos.proto
+  grouping MappingDSCPToQueueEntry {
+    leaf MappingDSCPToQueueEntry_DSCPNo {
+      type int32;
+    }
+    leaf MappingDSCPToQueueEntry_QueueNo {
+      type int32;
+    }
+  }
+  // core/qos/qos.proto
+  grouping InterfaceConfigEntry {
+    container InterfaceConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf InterfaceConfigEntry_IsEnabled {
+      type boolean;
+    }
+    leaf InterfaceConfigEntry_EgressBandwidth {
+      type int32;
+    }
+    leaf InterfaceConfigEntry_IngressBandwidth {
+      type int32;
+    }
+    leaf InterfaceConfigEntry_IngressUnicastEnabled {
+      type boolean;
+    }
+    leaf InterfaceConfigEntry_IngressMulticastEnabled {
+      type boolean;
+    }
+    leaf InterfaceConfigEntry_IngressBroadcastEnabled {
+      type boolean;
+    }
+  }
+  // core/qos/qos.proto
+  grouping Config {
+    leaf Config_ModeOption {
+      type qospb:ModeTypeOptions;
+    }
+    leaf Config_TrustModeOption {
+      type qospb:TrustModeTypeOptions;
+    }
+    container Config_QueueList {
+      uses qospb:WeightedFairTrafficRatioQueueEntry;
+    }
+    container Config_CoSList {
+      uses qospb:MappingCoSDot1PToQueueEntry;
+    }
+    container Config_DSCPList {
+      uses qospb:MappingDSCPToQueueEntry;
+    }
+    container Config_InterfaceList {
+      uses qospb:InterfaceConfigEntry;
+    }
+  }
+  // core/qos/qos.proto
+  grouping Mode {
+    leaf Mode_Option {
+      type qospb:ModeTypeOptions;
+    }
+  }
+  // core/qos/qos.proto
+  grouping TrustMode {
+    leaf TrustMode_Option {
+      type qospb:TrustModeTypeOptions;
+    }
+  }
+  // core/qos/qos.proto
+  grouping PriorityScheme {
+    leaf PriorityScheme_Option {
+      type qospb:PrioritySchemeTypeOptions;
+    }
+  }
+  // core/qos/qos.proto
+  grouping QueueList {
+    container QueueList_List {
+      uses qospb:WeightedFairTrafficRatioQueueEntry;
+    }
+  }
+  // core/qos/qos.proto
+  grouping CoSList {
+    container CoSList_List {
+      uses qospb:MappingCoSDot1PToQueueEntry;
+    }
+  }
+  // core/qos/qos.proto
+  grouping DSCPList {
+    container DSCPList_List {
+      uses qospb:MappingDSCPToQueueEntry;
+    }
+  }
+  // core/qos/qos.proto
+  grouping InterfaceList {
+    container InterfaceList_List {
+      uses qospb:InterfaceConfigEntry;
+    }
+  }
+}

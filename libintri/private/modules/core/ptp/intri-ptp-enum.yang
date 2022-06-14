@@ -1,0 +1,297 @@
+submodule intri-ptp-enum {
+  belongs-to "intri-ptp" {
+    prefix "intri-ptp-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/ptp/ptp.proto
+  typedef TimeStatusTypeOptions {
+    type enumeration {
+      enum TIME_STATUS_TYPE_DISABLE {
+        description "[Disable]";
+        value 0;
+      }
+      enum TIME_STATUS_TYPE_SYNC {
+        description "[Sync]";
+        value 1;
+      }
+      enum TIME_STATUS_TYPE_NOT_SYNC {
+        description "[Not Sync]";
+        value 2;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef EncapsulationTypeOptions {
+    type enumeration {
+      enum ENCAPSULATION_TYPE_ETHER {
+        description "[L2 Ether] PTP message transmit over ethertnet";
+        value 0;
+      }
+      enum ENCAPSULATION_TYPE_UDP_IPV4 {
+        description "[UDP IPv4] PTP message transmit over IPv4 UDP";
+        value 1;
+      }
+      enum ENCAPSULATION_TYPE_UDP_IPV6 {
+        description "*[UDP IPv6] PTP message transmit over IPv6 UDP";
+        value 2;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef TransmissionTypeOptions {
+    type enumeration {
+      enum TRANSMISSION_TYPE_UNICAST {
+        description "[Unicast] PTP message transmit by Unicast";
+        value 0;
+      }
+      enum TRANSMISSION_TYPE_MULTICAST {
+        description "[Multicast] PTP message transmit by Multicast";
+        value 1;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef ProfileTypeOptions {
+    type enumeration {
+      enum PROFILE_TYPE_IEEE_1588_V2 {
+        description "[IEEE 1588v2] PTP profile for IEEE 1588v2";
+        value 0;
+      }
+      enum PROFILE_TYPE_IEEE_802_DOT_1_AS {
+        description "*[IEEE 802.1AS] PTP profile for IEEE 802.1AS";
+        value 1;
+      }
+      enum PROFILE_TYPE_ITU_G8275_DOT_1 {
+        description "[ITU G8275.1] PTP profile for ITU G8275.1";
+        value 2;
+      }
+      enum PROFILE_TYPE_ITU_G8275_DOT_2 {
+        description "[ITU G8275.2] PTP profile for ITU G8275.2";
+        value 3;
+      }
+      enum PROFILE_TYPE_IEEE_C37_DOT_238_DASH_2017 {
+        description "*[IEEE C37.238-2017] PTP profile for IEEE C37.238-2017";
+        value 4;
+      }
+      enum PROFILE_TYPE_IEC_61850_DASH_9_DASH_3 {
+        description "*[IEC 61850-9-3] PTP profile for IEC 61850-9-3";
+        value 5;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef DelayMechanismTypeOptions {
+    type enumeration {
+      enum DELAY_MECHANISM_TYPE_E2E {
+        description "[End-to-End] PTP path delay calculation is end-to-end";
+        value 0;
+      }
+      enum DELAY_MECHANISM_TYPE_P2P {
+        description "[Peer-to-Peer]  PTP path delay calculation is peer-to-peer";
+        value 1;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef ClockTypeOptions {
+    type enumeration {
+      enum CLOCK_TYPE_BC {
+        description "[Boundary Clock] PTP clock type is Boundary Clock";
+        value 0;
+      }
+      enum CLOCK_TYPE_OC {
+        description "[Ordinary Clock] PTP clock type is Ordinary Clock";
+        value 1;
+      }
+      enum CLOCK_TYPE_TC {
+        description "[Transparent Clock] PTP clock type is Transparent Clock";
+        value 2;
+      }
+      enum CLOCK_TYPE_BRIDGE {
+        description "*[Bridge] PTP clock type is Time Aware Bridge";
+        value 3;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef ClockAccuracyTypeOptions {
+    type enumeration {
+      enum CLOCK_ACCURACY_RESERVED_00_1F {
+        description "*[reserved] reserved";
+        value 0;
+      }
+      enum CLOCK_ACCURACY_WITHIN_25_NS {
+        description "[within 25ns] The time is accurate to within 25 ns";
+        value 32;
+      }
+      enum CLOCK_ACCURACY_WITHIN_100_NS {
+        description "[within 100ns] The time is accurate to within 100 ns";
+        value 33;
+      }
+      enum CLOCK_ACCURACY_WITHIN_250_NS {
+        description "[within 250ns] The time is accurate to within 250 ns";
+        value 34;
+      }
+      enum CLOCK_ACCURACY_WITHIN_1_US {
+        description "[within 1us] The time is accurate to within 250 us";
+        value 35;
+      }
+      enum CLOCK_ACCURACY_WITHIN_2_DOT_5_US {
+        description "[within 2.5us] The time is accurate to within 2.5 us";
+        value 36;
+      }
+      enum CLOCK_ACCURACY_WITHIN_10_US {
+        description "[within 10us] The time is accurate to within 10 us";
+        value 37;
+      }
+      enum CLOCK_ACCURACY_WITHIN_25_US {
+        description "[within 25us] The time is accurate to within 25 us";
+        value 38;
+      }
+      enum CLOCK_ACCURACY_WITHIN_100_US {
+        description "[within 100us] The time is accurate to within 100 us";
+        value 39;
+      }
+      enum CLOCK_ACCURACY_WITHIN_250_US {
+        description "[within 250us] The time is accurate to within 250 us";
+        value 40;
+      }
+      enum CLOCK_ACCURACY_WITHIN_1_MS {
+        description "[within 1ms] The time is accurate to within 1 ms";
+        value 41;
+      }
+      enum CLOCK_ACCURACY_WITHIN_2_DOT_5_MS {
+        description "[within 2.5ms] The time is accurate to within 2.5 ms";
+        value 42;
+      }
+      enum CLOCK_ACCURACY_WITHIN_10_MS {
+        description "[within 10ms] The time is accurate to within 10 ms";
+        value 43;
+      }
+      enum CLOCK_ACCURACY_WITHIN_25_MS {
+        description "[within 25ms] The time is accurate to within 25 ms";
+        value 44;
+      }
+      enum CLOCK_ACCURACY_WITHIN_100_MS {
+        description "[within 100ms] The time is accurate to within 100 ms";
+        value 45;
+      }
+      enum CLOCK_ACCURACY_WITHIN_250_MS {
+        description "[within 250ms] The time is accurate to within 250 ms";
+        value 46;
+      }
+      enum CLOCK_ACCURACY_WITHIN_1_S {
+        description "[within 1s] The time is accurate to within 1 s";
+        value 47;
+      }
+      enum CLOCK_ACCURACY_WITHIN_10_S {
+        description "[within 10s] The time is accurate to within 10 s";
+        value 48;
+      }
+      enum CLOCK_ACCURACY_GREATER_THAN_10_S {
+        description "[greater than 10s] The time is accurate to greater than 10 s";
+        value 49;
+      }
+      enum CLOCK_ACCURACY_RESERVED_32_7F {
+        description "*[reserved] reserved";
+        value 50;
+      }
+      enum CLOCK_ACCURACY_RESERVED_80_FD {
+        description "*[reserved] reserved";
+        value 128;
+      }
+      enum CLOCK_ACCURACY_UNKNOWN {
+        description "[unknown] The time is accurate to unknown";
+        value 254;
+      }
+      enum CLOCK_ACCURACY_RESERVED_FF {
+        description "*[reserved] reserved";
+        value 255;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef PortStateTypeOptions {
+    type enumeration {
+      enum PORT_STATE_INITIALIZING {
+        description "[Initializing] PTP port status is initializing";
+        value 0;
+      }
+      enum PORT_STATE_FAULTY {
+        description "[Faulty] PTP port status is faulty";
+        value 1;
+      }
+      enum PORT_STATE_DISABLED {
+        description "[Disabled] PTP port status is disabled";
+        value 2;
+      }
+      enum PORT_STATE_LISTENING {
+        description "[Listening] PTP port status is listening";
+        value 3;
+      }
+      enum PORT_STATE_PRE_MASTER {
+        description "[Premaster] PTP port status is premaster";
+        value 4;
+      }
+      enum PORT_STATE_MASTER {
+        description "[Master] PTP port status is master";
+        value 5;
+      }
+      enum PORT_STATE_PASSIVE {
+        description "[Passive] PTP port status is passive";
+        value 6;
+      }
+      enum PORT_STATE_UNCALIBRATED {
+        description "[Uncalibrated] PTP port status is uncalibrated";
+        value 7;
+      }
+      enum PORT_STATE_SLAVE {
+        description "[Slave] PTP port status is slave";
+        value 8;
+      }
+    }
+  }
+  // core/ptp/ptp.proto
+  typedef TimeSourceTypeOptions {
+    type enumeration {
+      enum TIME_SOURCE_RESERVED {
+        description "*[reserved] reserved";
+        value 0;
+      }
+      enum TIME_SOURCE_ATOMIC_CLOCK {
+        description "[Atomic Clock] Time source is Atomic Clock";
+        value 16;
+      }
+      enum TIME_SOURCE_GPS {
+        description "[GPS] Time source is GPS";
+        value 32;
+      }
+      enum TIME_SOURCE_TERRESTRIAL_RADIO {
+        description "[Terrestrial Radio] Time source is Terrestrial Radio";
+        value 48;
+      }
+      enum TIME_SOURCE_PTP {
+        description "[PTP] Time source is PTP";
+        value 64;
+      }
+      enum TIME_SOURCE_NTP {
+        description "[NTP] Time source is NTP";
+        value 80;
+      }
+      enum TIME_SOURCE_HAND_SET {
+        description "[Hand Set] Time source is Hand Set";
+        value 96;
+      }
+      enum TIME_SOURCE_OTHER {
+        description "[Other] Time source is Other";
+        value 144;
+      }
+      enum TIME_SOURCE_INTERNAL_OSCILLATOR {
+        description "[Internal Oscillator] Time source is Internal Oscillator";
+        value 160;
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+submodule intri-fdb-enum {
+  belongs-to "intri-fdb" {
+    prefix "intri-fdb-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/fdb/common.proto
+  typedef MACTableStateTypeOptions {
+    type enumeration {
+      enum MAC_TABLE_STATE_TYPE_UNUSED {
+        description "[Unused] The field was not set";
+        value 0;
+      }
+      enum MAC_TABLE_STATE_TYPE_OTHER {
+        description "[Other] Unspecified entry state";
+        value 1;
+      }
+      enum MAC_TABLE_STATE_TYPE_INVALID {
+        description "[Invalid] This entry is not longer valid (aged)";
+        value 2;
+      }
+      enum MAC_TABLE_STATE_TYPE_LEARNED {
+        description "[Learned] This entry was learned and is valid";
+        value 3;
+      }
+      enum MAC_TABLE_STATE_TYPE_SELF {
+        description "[Self] This entry corresponds to the local MAC address";
+        value 4;
+      }
+      enum MAC_TABLE_STATE_TYPE_PACC {
+        description "[PACC] This entry was created by port access control";
+        value 5;
+      }
+      enum MAC_TABLE_STATE_TYPE_MULTICAST {
+        description "* This is an internal multicast address";
+        value 6;
+      }
+      enum MAC_TABLE_STATE_TYPE_REJECT {
+        description "[Reject] This entry was rejected because of dropping";
+        value 7;
+      }
+    }
+  }
+  // core/fdb/common.proto
+  typedef PortOccupiedTypeOptions {
+    type enumeration {
+      enum PORT_OCCUPIED_TYPE_NONE {
+        description "[None]";
+        value 0;
+      }
+      enum PORT_OCCUPIED_TYPE_PACC {
+        description "[PACC]";
+        value 1;
+      }
+      enum PORT_OCCUPIED_TYPE_PORT_SECURITY {
+        description "[Port Security]";
+        value 2;
+      }
+    }
+  }
+}

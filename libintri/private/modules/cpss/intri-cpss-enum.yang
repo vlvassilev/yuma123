@@ -1,0 +1,745 @@
+submodule intri-cpss-enum {
+  belongs-to "intri-cpss" {
+    prefix "intri-cpss-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // cpss/common.proto
+  typedef ActionTypeOptions {
+    type enumeration {
+      enum ACTION_TYPE_ADD {
+        description "[Add] Action type add";
+        value 0;
+      }
+      enum ACTION_TYPE_DELETE {
+        description "[Delete] Action type delete";
+        value 1;
+      }
+      enum ACTION_TYPE_UPDATE {
+        description "[Update] Action type update";
+        value 2;
+      }
+      enum ACTION_TYPE_GET {
+        description "[Get] Action type get";
+        value 3;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef InterfaceTypeOptions {
+    type enumeration {
+      enum INTERFACE_TYPE_VLAN {
+        description "[Vlan] Interface type vlan";
+        value 0;
+      }
+      enum INTERFACE_TYPE_PORT {
+        description "[Port] Interface type port";
+        value 1;
+      }
+      enum INTERFACE_TYPE_TRUNK {
+        description "[Trunk] Interface type trunk";
+        value 2;
+      }
+      enum INTERFACE_TYPE_VIDX {
+        description "[Vidx] Interface type vidx";
+        value 3;
+      }
+      enum INTERFACE_TYPE_MULTICAST {
+        description "[Multicast] Interface type multicast";
+        value 4;
+      }
+      enum INTERFACE_TYPE_VLAN_PORT {
+        description "[Vlan Port] Interface type vlan port";
+        value 5;
+      }
+      enum INTERFACE_TYPE_VLAN_TRUNK {
+        description "[Vlan Trunk] Interface type vlan trunk";
+        value 6;
+      }
+      enum INTERFACE_TYPE_PORT_TRUNK {
+        description "[Port Trunk] Interface type port trunk";
+        value 7;
+      }
+      enum INTERFACE_TYPE_ANY {
+        description "[Any] Interface type any";
+        value 8;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PacketCommandOptions {
+    type enumeration {
+      enum PACKET_COMMAND_FORWARD {
+        description "";
+        value 0;
+      }
+      enum PACKET_COMMAND_MIRROR {
+        description "";
+        value 1;
+      }
+      enum PACKET_COMMAND_TRAP {
+        description "";
+        value 2;
+      }
+      enum PACKET_COMMAND_DROP {
+        description "";
+        value 3;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PortSpeedDuplexOptions {
+    type enumeration {
+      enum PORT_SPEED_DUPLEX_AUTO {
+        description "";
+        value 0;
+      }
+      enum PORT_SPEED_DUPLEX_10M_FULL {
+        description "";
+        value 1;
+      }
+      enum PORT_SPEED_DUPLEX_100M_FULL {
+        description "";
+        value 3;
+      }
+      enum PORT_SPEED_DUPLEX_1000M_FULL {
+        description "";
+        value 5;
+      }
+      enum PORT_SPEED_DUPLEX_2500M_FULL {
+        description "";
+        value 6;
+      }
+      enum PORT_SPEED_DUPLEX_5G_FULL {
+        description "";
+        value 7;
+      }
+      enum PORT_SPEED_DUPLEX_10G_FULL {
+        description "";
+        value 8;
+      }
+      enum PORT_SPEED_DUPLEX_25G_FULL {
+        description "";
+        value 9;
+      }
+      enum PORT_SPEED_DUPLEX_40G_FULL {
+        description "";
+        value 10;
+      }
+      enum PORT_SPEED_DUPLEX_100G_FULL {
+        description "";
+        value 11;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PortTypeOptions {
+    type enumeration {
+      enum PORT_TYPE_10M_FULL {
+        description "[10 M Full] Port type 10 m full";
+        value 0;
+      }
+      enum PORT_TYPE_100M_FULL {
+        description "[100 M Full] Port type 100 m full";
+        value 2;
+      }
+      enum PORT_TYPE_1000M_FULL {
+        description "[1000 M Full] Port type 1000 m full";
+        value 4;
+      }
+      enum PORT_TYPE_2500M_FULL {
+        description "[2500 M Full] Port type 2500 m full";
+        value 5;
+      }
+      enum PORT_TYPE_5G_FULL {
+        description "[5 G Full] Port type 5 g full";
+        value 6;
+      }
+      enum PORT_TYPE_10G_FULL {
+        description "[10 G Full] Port type 10 g full";
+        value 7;
+      }
+      enum PORT_TYPE_25G_FULL {
+        description "[25 G Full] Port type 25 g full";
+        value 8;
+      }
+      enum PORT_TYPE_40G_FULL {
+        description "[40 G Full] Port type 40 g full";
+        value 9;
+      }
+      enum PORT_TYPE_100G_FULL {
+        description "[100 G Full] Port type 100 g full";
+        value 10;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PortMediaOptions {
+    type enumeration {
+      enum PORT_MEDIA_COPPER {
+        description "";
+        value 0;
+      }
+      enum PORT_MEDIA_RJ45 {
+        description "";
+        value 1;
+      }
+      enum PORT_MEDIA_SFP {
+        description "";
+        value 2;
+      }
+      enum PORT_MEDIA_STACKING {
+        description "";
+        value 3;
+      }
+      enum PORT_MEDIA_POE {
+        description "";
+        value 4;
+      }
+      enum PORT_MEDIA_POE_PLUS {
+        description "";
+        value 5;
+      }
+      enum PORT_MEDIA_POE_PLUS_PLUS {
+        description "";
+        value 6;
+      }
+      enum PORT_MEDIA_UP_LINK_PORT {
+        description "";
+        value 7;
+      }
+      enum PORT_MEDIA_DOWN_LINK_PORT {
+        description "";
+        value 8;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef STPProtocolTypeOptions {
+    type enumeration {
+      enum STP_PROTOCOL_TYPE_CPSS {
+        description "[Cpss] Stp protocol type cpss";
+        value 0;
+      }
+      enum STP_PROTOCOL_TYPE_DHCP {
+        description "[Dhcp] Stp protocol type dhcp";
+        value 10;
+      }
+      enum STP_PROTOCOL_TYPE_STORM_CONTROL {
+        description "[Dhcp] Stp protocol type storm control";
+        value 20;
+      }
+      enum STP_PROTOCOL_TYPE_LOOP {
+        description "[Loop] Stp protocol type loop";
+        value 30;
+      }
+      enum STP_PROTOCOL_TYPE_PORT {
+        description "[Core] Stp protocol type port";
+        value 40;
+      }
+      enum STP_PROTOCOL_TYPE_LACP {
+        description "[Lacp] Stp protocol type lacp";
+        value 70;
+      }
+      enum STP_PROTOCOL_TYPE_PACC {
+        description "[Stp] Stp protocol type PACC";
+        value 80;
+      }
+      enum STP_PROTOCOL_TYPE_STP {
+        description "[Stp] Stp protocol type stp";
+        value 90;
+      }
+      enum STP_PROTOCOL_TYPE_G8032 {
+        description "[G8032] Stp protocol type g8032";
+        value 100;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef STPPortStateTypeOptions {
+    type enumeration {
+      enum STP_PORT_STATE_TYPE_DISABLE {
+        description "[Disable] Stp port state type disable";
+        value 0;
+      }
+      enum STP_PORT_STATE_TYPE_BLOCKING {
+        description "[Blocking] Stp port state type blocking";
+        value 1;
+      }
+      enum STP_PORT_STATE_TYPE_LEARNING {
+        description "[Learning] Stp port state type learning";
+        value 2;
+      }
+      enum STP_PORT_STATE_TYPE_FORWARDING {
+        description "[Forwarding] Stp port state type forwarding";
+        value 3;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef ACLDirectionTypeOptions {
+    type enumeration {
+      enum ACL_DIRECTION_TYPE_INGRESS {
+        description "[Ingress] Acl direction type ingress";
+        value 0;
+      }
+      enum ACL_DIRECTION_TYPE_EGRESS {
+        description "[Egress] Acl direction type egress";
+        value 1;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef ACLRuleTypeOptions {
+    type enumeration {
+      enum ACL_RULE_TYPE_MAC {
+        description "[Mac] Acl rule type mac";
+        value 0;
+      }
+      enum ACL_RULE_TYPE_IPV4 {
+        description "[Ipv4] Acl rule type ipv4";
+        value 1;
+      }
+      enum ACL_RULE_TYPE_IPV6 {
+        description "[Ipv6] Acl rule type ipv6";
+        value 2;
+      }
+      enum ACL_RULE_TYPE_STP {
+        description "[Stp] Acl rule type stp";
+        value 3;
+      }
+      enum ACL_RULE_TYPE_LACP {
+        description "[Lacp] Acl rule type lacp";
+        value 4;
+      }
+      enum ACL_RULE_TYPE_DOT1X {
+        description "[Dot1 X] Acl rule type dot1 x";
+        value 5;
+      }
+      enum ACL_RULE_TYPE_ARP {
+        description "[Arp] Acl rule type arp";
+        value 6;
+      }
+      enum ACL_RULE_TYPE_DHCPV4_SRC_67_DST_68 {
+        description "[Dhcpv4 Src 67 Dst 68] Acl rule type dhcpv4 src 67 dst 68";
+        value 7;
+      }
+      enum ACL_RULE_TYPE_DHCPV4_SRC_68_DST_67 {
+        description "[Dhcpv4 Src 68 Dst 67] Acl rule type dhcpv4 src 68 dst 67";
+        value 8;
+      }
+      enum ACL_RULE_TYPE_LOOP {
+        description "[Loop] Acl rule type loop";
+        value 9;
+      }
+      enum ACL_RULE_TYPE_G8032 {
+        description "[G8032] Acl rule type g8032";
+        value 10;
+      }
+      enum ACL_RULE_TYPE_MAC_IP_BINDING {
+        description "[Mac Ip Binding] Acl rule type mac ip binding";
+        value 11;
+      }
+      enum ACL_RULE_TYPE_SUBNET_BASED {
+        description "[Subnet Based] Acl rule type subnet based";
+        value 12;
+      }
+      enum ACL_RULE_TYPE_MAC_BASED {
+        description "[Mac Based] Acl rule type mac based";
+        value 13;
+      }
+      enum ACL_RULE_TYPE_SELECTIVE_QINQ {
+        description "[Selective Qinq] Acl rule type selective qinq";
+        value 14;
+      }
+      enum ACL_RULE_TYPE_FLOW_MIRROR {
+        description "[Flow Mirror] Acl rule type flow mirror";
+        value 15;
+      }
+      enum ACL_RULE_TYPE_MAC_COUNTING {
+        description "[Mac Counting] Acl rule type mac counting";
+        value 16;
+      }
+      enum ACL_RULE_TYPE_PTP_MESSAGE {
+        description "[PTP Message] Acl rule type ptp message";
+        value 17;
+      }
+      enum ACL_RULE_TYPE_INCOMING_BLOCK {
+        description "[Icoming Deny] Acl rule for deny the incoming packets";
+        value 18;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef CNCCountingTypeOptions {
+    type enumeration {
+      enum CNC_COUNTING_TYPE_MAC_COUNTING {
+        description "[Mac Counting] Cnc counting type mac counting";
+        value 0;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef FDBLayerTypeOptions {
+    type enumeration {
+      enum FDB_LAYER_TYPE_2 {
+        description "[Layer 2] FDB layer type 2";
+        value 0;
+      }
+      enum FDB_LAYER_TYPE_3 {
+        description "[Layer 3] FDB layer type 3";
+        value 1;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef FDBEntryActionTypeOptions {
+    type enumeration {
+      enum FDB_ENTRY_ACTION_TYPE_ADD {
+        description "[Add] FDB entry action type add";
+        value 0;
+      }
+      enum FDB_ENTRY_ACTION_TYPE_DELETE {
+        description "[Delete] FDB entry action type delete";
+        value 1;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef MulticastEntryTypeOptions {
+    type enumeration {
+      enum MULTICAST_ENTRY_TYPE_MAC {
+        description "[MAC] Multicast entry type mac";
+        value 0;
+      }
+      enum MULTICAST_ENTRY_TYPE_IPV4 {
+        description "[IPv4] Multicast entry type i pv4";
+        value 1;
+      }
+      enum MULTICAST_ENTRY_TYPE_IPV6 {
+        description "[IPv6] Multicast entry type i pv6";
+        value 2;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef VIDXEntryTypeOptions {
+    type enumeration {
+      enum VIDX_ENTRY_TYPE_VLAN_FLOODING {
+        description "";
+        value 0;
+      }
+      enum VIDX_ENTRY_TYPE_BRIDGE_MULTICAST {
+        description "";
+        value 1;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef MirroringDirectionTypeOptions {
+    type enumeration {
+      enum MIRRORING_DIRECTION_TYPE_NONE {
+        description "[None] Mirroring direction type none";
+        value 0;
+      }
+      enum MIRRORING_DIRECTION_TYPE_TX_ONLY {
+        description "[Tx Only] Mirroring direction type tx only";
+        value 1;
+      }
+      enum MIRRORING_DIRECTION_TYPE_RX_ONLY {
+        description "[Rx Only] Mirroring direction type rx only";
+        value 2;
+      }
+      enum MIRRORING_DIRECTION_TYPE_BOTH {
+        description "[Both] Mirroring direction type both";
+        value 3;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef QoSTrustModeOptions {
+    type enumeration {
+      enum QOS_TRUST_MODE_DISABLED {
+        description "[Disabled] Qos trust mode disabled";
+        value 0;
+      }
+      enum QOS_TRUST_MODE_COS {
+        description "[CoS] Qos trust mode cos";
+        value 1;
+      }
+      enum QOS_TRUST_MODE_DSCP_ONLY {
+        description "[DSCP Only] Qos trust mode dscp only";
+        value 2;
+      }
+      enum QOS_TRUST_MODE_DSCP_FIRST {
+        description "[DSCP First] Qos trust mode dscp first";
+        value 3;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef QoSSchedulerTypeOptions {
+    type enumeration {
+      enum QOS_SCHEDULER_TYPE_WEIGHTED {
+        description "[Weighted] Qos scheduler type weighted";
+        value 0;
+      }
+      enum QOS_SCHEDULER_TYPE_STRICT {
+        description "[Strict] Qos scheduler type strict";
+        value 1;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef RateLimitingIngressFilterTypeOptions {
+    type enumeration {
+      enum RATE_LIMITING_INGRESS_FILTER_TYPE_UC_KNOWN {
+        description "[UC Known] Rate limiting ingress filter type uc known";
+        value 0;
+      }
+      enum RATE_LIMITING_INGRESS_FILTER_TYPE_UC_UNKNOWN {
+        description "[UC Unknown] Rate limiting ingress filter type uc unknown";
+        value 1;
+      }
+      enum RATE_LIMITING_INGRESS_FILTER_TYPE_MC_UNREGISTERED {
+        description "[MC Unregistered] Rate limiting ingress filter type mc unregistered";
+        value 2;
+      }
+      enum RATE_LIMITING_INGRESS_FILTER_TYPE_MC_REGISTERED {
+        description "[MC Registered] Rate limiting ingress filter type mc registered";
+        value 3;
+      }
+      enum RATE_LIMITING_INGRESS_FILTER_TYPE_BC {
+        description "[BC] Rate limiting ingress filter type bc";
+        value 4;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef TrunkingLoadBalanceModeOptions {
+    type enumeration {
+      enum TRUNKING_LOAD_BALANCE_MODE_SRC_DST_MAC {
+        description "[Source/Destination MAC] Trunking load balance mode src dst mac";
+        value 0;
+      }
+      enum TRUNKING_LOAD_BALANCE_MODE_SRC_DST_IP {
+        description "[Source/Destination IP] Trunking load balance mode src dst ip";
+        value 1;
+      }
+      enum TRUNKING_LOAD_BALANCE_MODE_SRC_DST_MAC_IP {
+        description "[Source/Destination MAC and IP] Trunking load balance mode src dst mac ip";
+        value 2;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef VlanTaggingCommandTypeOptions {
+    type enumeration {
+      enum VLAN_TAGGING_COMMAND_TYPE_UNTAGGED {
+        description "[Untagged] Vlan tagging command type untagged";
+        value 0;
+      }
+      enum VLAN_TAGGING_COMMAND_TYPE_TAGGED {
+        description "[Tagged] Vlan tagging command type tagged";
+        value 1;
+      }
+      enum VLAN_TAGGING_COMMAND_TYPE_QINQ_PROVIDER {
+        description "[QinQ Provider] Vlan tagging command type qinq provider";
+        value 2;
+      }
+      enum VLAN_TAGGING_COMMAND_TYPE_QINQ_CUSTOMER {
+        description "[QinQ Customer] Vlan tagging command type qinq customer";
+        value 3;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef VlanAcceptFrameTypeOptions {
+    type enumeration {
+      enum VLAN_ACCEPT_FRAME_TYPE_ALL {
+        description "[All] Vlan accept frame type all";
+        value 0;
+      }
+      enum VLAN_ACCEPT_FRAME_TYPE_UNTAGGED_ONLY {
+        description "[Untagged Only] Vlan accept frame type untagged only";
+        value 1;
+      }
+      enum VLAN_ACCEPT_FRAME_TYPE_TAGGED_ONLY {
+        description "[Tagged Only] Vlan accept frame type tagged only";
+        value 2;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef VlanTranslationMappingTypeOptions {
+    type enumeration {
+      enum VLAN_TRANSLATION_MAPPING_TYPE_ONE_TO_ONE {
+        description "[One To One] Vlan translation mapping type one to one";
+        value 0;
+      }
+      enum VLAN_TRANSLATION_MAPPING_TYPE_MANY_TO_ONE {
+        description "[Many To One] Vlan translation mapping type many to one";
+        value 1;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef VlanProtocolBasedEncapsulationTypeOptions {
+    type enumeration {
+      enum VLAN_PROTOCOL_BASED_ENCAPSULATION_ETHERNET_V2 {
+        description "[Ethernet V2] Vlan protocol based encapsulation ethernet v2";
+        value 0;
+      }
+      enum VLAN_PROTOCOL_BASED_ENCAPSULATION_NON_LLC_SNAP {
+        description "[None LLC Snap] Vlan protocol based encapsulation non llc snap";
+        value 1;
+      }
+      enum VLAN_PROTOCOL_BASED_ENCAPSULATION_LLC_SNAP {
+        description "[LLC Snap] Vlan protocol based encapsulation llc snap";
+        value 2;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PacketControlProtocolTypeOptions {
+    type enumeration {
+      enum PACKET_CONTROL_PROTOCOL_TYPE_STP {
+        description "[STP] Packet control protocol type stp";
+        value 0;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_LACP {
+        description "[LACP] Packet control protocol type lacp";
+        value 1;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_DOT1X {
+        description "[Dot1X] Packet control protocol type dot1 x";
+        value 2;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_LOOP {
+        description "[Loop] Packet control protocol type loop";
+        value 3;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_DLDP {
+        description "[DLDP] Packet control protocol type dldp";
+        value 4;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_DISCOVER {
+        description "[DHCP V4 Discover] Packet control protocol type dhcpv4 discover";
+        value 5;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_BROADCAST_OFFER {
+        description "[DHCP V4 Broadcast Offer] Packet control protocol type dhcpv4 broadcast offer";
+        value 6;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_67 {
+        description "[DHCP V4 UDP Destination 67] Packet control protocol type dhcpv4 udp dst 67";
+        value 7;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_68 {
+        description "[DHCP V4 UDP Destination 68] Packet control protocol type dhcpv4 udp dst 68";
+        value 8;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_ARP {
+        description "[ARP] Packet control protocol type arp";
+        value 9;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_GVRP {
+        description "[GVRP] Packet control protocol type gvrp";
+        value 10;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_IGMP {
+        description "[IGMP] Packet control protocol type igmp";
+        value 11;
+      }
+      enum PACKET_CONTROL_PROTOCOL_TYPE_MLD {
+        description "[MLD] Packet control protocol type mld";
+        value 12;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PHYInterfaceTypeOptions {
+    type enumeration {
+      enum PHY_INTERFACE_TYPE_SMI {
+        description "[SMI] Phy interface type smi";
+        value 0;
+      }
+      enum PHY_INTERFACE_TYPE_XSMI {
+        description "[XSMI] Phy interface type xsmi";
+        value 1;
+      }
+      enum PHY_INTERFACE_TYPE_UNUSED {
+        description "[Unused] Phy interface type unused";
+        value 2;
+      }
+    }
+  }
+  // cpss/common.proto
+  typedef PTPSyncERecoveryClockSelectTypeOptions {
+    type enumeration {
+      enum PTP_SYNC_E_RECOVERY_CLOCK_SELECT_TYPE_0 {
+        description "[Select Type 0] PTP sync e recovery clock select type 0";
+        value 0;
+      }
+      enum PTP_SYNC_E_RECOVERY_CLOCK_SELECT_TYPE_1 {
+        description "[Select Type 1] PTP sync e recovery clock select type 1";
+        value 1;
+      }
+    }
+  }
+  // cpss/ptp.proto
+  typedef PTPPortDelayTypeOptions {
+    type enumeration {
+      enum PTP_PORT_DELAY_INGRESS {
+        description "";
+        value 0;
+      }
+      enum PTP_PORT_DELAY_EGRESS {
+        description "";
+        value 1;
+      }
+    }
+  }
+  // cpss/ptp.proto
+  typedef PTPModeTypeOptions {
+    type enumeration {
+      enum PTP_MODE_DISABLE {
+        description "";
+        value 0;
+      }
+      enum PTP_MODE_E2E_TC {
+        description "";
+        value 1;
+      }
+      enum PTP_MODE_P2P_TC {
+        description "";
+        value 2;
+      }
+      enum PTP_MODE_MASTER_BC {
+        description "";
+        value 3;
+      }
+      enum PTP_MODE_SLAVE_BC {
+        description "";
+        value 4;
+      }
+      enum PTP_MODE_GPTP_MASTER {
+        description "";
+        value 5;
+      }
+      enum PTP_MODE_GPTP_SLAVE {
+        description "";
+        value 6;
+      }
+      enum PTP_MODE_PASSIVE {
+        description "";
+        value 7;
+      }
+      enum PTP_MODE_LISTENING {
+        description "";
+        value 8;
+      }
+    }
+  }
+}

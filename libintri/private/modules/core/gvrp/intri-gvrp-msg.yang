@@ -1,0 +1,54 @@
+submodule intri-gvrp-msg {
+  belongs-to "intri-gvrp" {
+    prefix "intri-gvrp-msg";
+  }
+  include intri-gvrp-enum;
+  import devicepb {
+    prefix "devicepb";
+  }
+  import gvrppb {
+    prefix "gvrppb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/gvrp/gvrp.proto
+  grouping PortConfigEntry {
+    container PortConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortConfigEntry_IsEnabled {
+      type boolean;
+    }
+    leaf PortConfigEntry_Mode {
+      type gvrppb:PortModeTypeOptions;
+    }
+    leaf PortConfigEntry_LeaveAllTimerInterval {
+      type int32;
+    }
+    leaf PortConfigEntry_JoinTimerInterval {
+      type int32;
+    }
+    leaf PortConfigEntry_HoldTimerInterval {
+      type int32;
+    }
+    leaf PortConfigEntry_LeaveTimerInterval {
+      type int32;
+    }
+  }
+  // core/gvrp/gvrp.proto
+  grouping PortsConfig {
+    container PortsConfig_List {
+      uses gvrppb:PortConfigEntry;
+    }
+  }
+  // core/gvrp/gvrp.proto
+  grouping Config {
+    leaf Config_IsEnabled {
+      type boolean;
+    }
+    container Config_PortsConfig {
+      uses gvrppb:PortsConfig;
+    }
+  }
+}

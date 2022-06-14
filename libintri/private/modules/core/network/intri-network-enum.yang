@@ -1,0 +1,38 @@
+submodule intri-network-enum {
+  belongs-to "intri-network" {
+    prefix "intri-network-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/network/network.proto
+  typedef IPv4DhcpModeTypeOptions {
+    type enumeration {
+      enum IPV4_DHCP_MODE_TYPE_DISABLED {
+        description "[Static]";
+        value 0;
+      }
+      enum IPV4_DHCP_MODE_TYPE_USE_DHCP {
+        description "[Use DHCP]";
+        value 1;
+      }
+      enum IPV4_DHCP_MODE_TYPE_DHCP_WITH_OPTION_66_67 {
+        description "[Use DHCP with Option 66/67]";
+        value 2;
+      }
+    }
+  }
+  // core/network/network.proto
+  typedef IPV4ConfigDefaultAddressSelectionTypeOptions {
+    type enumeration {
+      enum IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_PRIMARY {
+        description "[Primary]";
+        value 0;
+      }
+      enum IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_SECONDARY {
+        description "[Secondary]";
+        value 1;
+      }
+    }
+  }
+}

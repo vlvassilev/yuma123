@@ -1,0 +1,12 @@
+module intri-dhcp {
+  namespace "intri:intri-dhcp";
+  prefix "intri-dhcp";
+  import dhcppb {
+    prefix "dhcppb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

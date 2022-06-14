@@ -1,0 +1,12 @@
+module intri-portsecurity {
+  namespace "intri:intri-portsecurity";
+  prefix "intri-portsecurity";
+  import portsecuritypb {
+    prefix "portsecuritypb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

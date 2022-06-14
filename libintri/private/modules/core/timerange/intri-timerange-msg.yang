@@ -1,0 +1,72 @@
+submodule intri-timerange-msg {
+  belongs-to "intri-timerange" {
+    prefix "intri-timerange-msg";
+  }
+  include intri-timerange-enum;
+  import timerangepb {
+    prefix "timerangepb";
+  }
+  import typepb {
+    prefix "typepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/timerange/timerange.proto
+  grouping Config {
+    container Config_List {
+      uses timerangepb:ConfigEntry;
+    }
+  }
+  // core/timerange/timerange.proto
+  grouping ConfigEntry {
+    leaf ConfigEntry_Name {
+      type string;
+    }
+    leaf ConfigEntry_Enabled {
+      type boolean;
+    }
+    leaf ConfigEntry_Command {
+      type timerangepb:CommandTypeOptions;
+    }
+    container ConfigEntry_PeriodicDay {
+      uses timerangepb:DayTime;
+    }
+    container ConfigEntry_StartTime {
+      uses typepb:TimeOfDay;
+    }
+    container ConfigEntry_EndTime {
+      uses typepb:TimeOfDay;
+    }
+    container ConfigEntry_StartDate {
+      uses typepb:Date;
+    }
+    container ConfigEntry_EndDate {
+      uses typepb:Date;
+    }
+  }
+  // core/timerange/timerange.proto
+  grouping DayTime {
+    leaf DayTime_PeriodicType {
+      type timerangepb:PeriodicDayTypeOptions;
+    }
+    leaf DayTime_DayOfWeekLists {
+      type typepb:DayOfWeek;
+    }
+  }
+  // core/timerange/timerange.proto
+  grouping EntryStatus {
+    leaf EntryStatus_Name {
+      type string;
+    }
+    leaf EntryStatus_IsActive {
+      type boolean;
+    }
+  }
+  // core/timerange/timerange.proto
+  grouping Status {
+    container Status_List {
+      uses timerangepb:EntryStatus;
+    }
+  }
+}

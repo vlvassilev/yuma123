@@ -1,0 +1,63 @@
+submodule intri-stormcontrol-msg {
+  belongs-to "intri-stormcontrol" {
+    prefix "intri-stormcontrol-msg";
+  }
+  include intri-stormcontrol-enum;
+  import stormcontrolpb {
+    prefix "stormcontrolpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/stormcontrol/stormcontrol.proto
+  grouping SuppressionConfigEntry {
+    leaf SuppressionConfigEntry_SuppressionOption {
+      type stormcontrolpb:StormControlSuppressionTypeOptions;
+    }
+    leaf SuppressionConfigEntry_IsEnable {
+      type boolean;
+    }
+    leaf SuppressionConfigEntry_ActionOption {
+      type stormcontrolpb:StormControlActionTypeOptions;
+    }
+    leaf SuppressionConfigEntry_UnitOption {
+      type stormcontrolpb:StormControlSuppressionUnitTypeOptions;
+    }
+    leaf SuppressionConfigEntry_BpsUpperThreshold {
+      type uint64;
+    }
+    leaf SuppressionConfigEntry_PpsUpperThreshold {
+      type uint64;
+    }
+  }
+  // core/stormcontrol/stormcontrol.proto
+  grouping PortConfigEntry {
+    container PortConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortConfigEntry_IsEnable {
+      type boolean;
+    }
+    container PortConfigEntry_SuppressionList {
+      uses stormcontrolpb:SuppressionConfigEntry;
+    }
+  }
+  // core/stormcontrol/stormcontrol.proto
+  grouping PortConfig {
+    container PortConfig_List {
+      uses stormcontrolpb:PortConfigEntry;
+    }
+  }
+  // core/stormcontrol/stormcontrol.proto
+  grouping Config {
+    leaf Config_IsEnable {
+      type boolean;
+    }
+    container Config_PortConfig {
+      uses stormcontrolpb:PortConfig;
+    }
+  }
+}

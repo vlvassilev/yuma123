@@ -1,0 +1,48 @@
+submodule intri-system-msg {
+  belongs-to "intri-system" {
+    prefix "intri-system-msg";
+  }
+  include intri-system-enum;
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/system/system.proto
+  grouping Status {
+    leaf Status_LastBootTime {
+      type string;
+    }
+    leaf Status_Uptime {
+      type int64;
+    }
+  }
+  // core/system/system.proto
+  grouping Config {
+    leaf Config_SysName {
+      type string;
+    }
+    leaf Config_SysLocation {
+      type string;
+    }
+    leaf Config_SysGroup {
+      type string;
+    }
+    leaf Config_SysContact {
+      type string;
+    }
+  }
+  // core/system/identification.proto
+  grouping IdentificationConfig {
+    leaf IdentificationConfig_SysName {
+      type string;
+    }
+    leaf IdentificationConfig_SysLocation {
+      type string;
+    }
+    leaf IdentificationConfig_SysGroup {
+      type string;
+    }
+    leaf IdentificationConfig_SysContact {
+      type string;
+    }
+  }
+}

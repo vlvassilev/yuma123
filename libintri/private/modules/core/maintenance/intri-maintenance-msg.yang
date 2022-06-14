@@ -1,0 +1,33 @@
+submodule intri-maintenance-msg {
+  belongs-to "intri-maintenance" {
+    prefix "intri-maintenance-msg";
+  }
+  include intri-maintenance-enum;
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/maintenance/maintenance.proto
+  grouping FirmwareInfo {
+    leaf FirmwareInfo_Version {
+      type string;
+    }
+    leaf FirmwareInfo_BuildDate {
+      type string;
+    }
+    leaf FirmwareInfo_BuildNumber {
+      type string;
+    }
+  }
+  // core/maintenance/maintenance.proto
+  grouping UpgradePathRequest {
+    leaf UpgradePathRequest_Path {
+      type string;
+    }
+    leaf UpgradePathRequest_FTPSEnabled {
+      type boolean;
+    }
+    leaf UpgradePathRequest_RebootAfterAction {
+      type boolean;
+    }
+  }
+}

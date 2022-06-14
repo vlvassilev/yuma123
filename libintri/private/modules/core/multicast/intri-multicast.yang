@@ -1,0 +1,12 @@
+module intri-multicast {
+  namespace "intri:intri-multicast";
+  prefix "intri-multicast";
+  import multicastpb {
+    prefix "multicastpb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

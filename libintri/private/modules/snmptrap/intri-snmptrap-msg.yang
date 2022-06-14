@@ -1,0 +1,18 @@
+submodule intri-snmptrap-msg {
+  belongs-to "intri-snmptrap" {
+    prefix "intri-snmptrap-msg";
+  }
+  include intri-snmptrap-enum;
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // snmptrap/snmptrap.proto
+  grouping SNMPTrapCounter {
+    leaf SNMPTrapCounter_ErrorCounts {
+      type int32;
+    }
+    leaf SNMPTrapCounter_TrapCounts {
+      type int32;
+    }
+  }
+}

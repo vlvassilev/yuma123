@@ -1,0 +1,46 @@
+submodule intri-userinterface-enum {
+  belongs-to "intri-userinterface" {
+    prefix "intri-userinterface-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/userinterface/snmp.proto
+  typedef SNMPV3ConfigSecurityModelTypeOptions {
+    type enumeration {
+      enum SNMP_V3_CONFIG_SECURITY_MODEL_USM {
+        description "[USM] Assign the USM as the SNMPv3 security model";
+        value 0;
+      }
+      enum SNMP_V3_CONFIG_SECURITY_MODEL_VACM {
+        description "[VCAM] Assign the VACM as the SNMPv3 security model";
+        value 1;
+      }
+      enum SNMP_V3_CONFIG_SECURITY_MODEL_TSM {
+        description "[TSM] Assign the TSM as the SNMPv3 security model";
+        value 2;
+      }
+    }
+  }
+  // core/userinterface/web.proto
+  typedef WebProtocolTypeOptions {
+    type enumeration {
+      enum WEB_PROTOCOL_TYPE_DISABLED {
+        description "[Disabled] Web interface is disabled";
+        value 0;
+      }
+      enum WEB_PROTOCOL_TYPE_HTTP_UNSECURE {
+        description "[HTTP Only] Standard client interface";
+        value 1;
+      }
+      enum WEB_PROTOCOL_TYPE_HTTPS_SECURE {
+        description "[HTTPS Only] Secure client interface";
+        value 2;
+      }
+      enum WEB_PROTOCOL_TYPE_HTTP_AND_HTTPS {
+        description "[HTTP & HTTPS] Both Standard & Secure client interface";
+        value 3;
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+submodule intri-error-msg {
+  belongs-to "intri-error" {
+    prefix "intri-error-msg";
+  }
+  include intri-error-enum;
+  import errorpb {
+    prefix "errorpb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // error/message.proto
+  grouping Detail {
+    leaf Detail_Code {
+      type uint64;
+    }
+  }
+  // error/message.proto
+  grouping PreparingDetail {
+    leaf PreparingDetail_ErrorOption {
+      type errorpb:ErrorTypeOptions;
+    }
+  }
+}

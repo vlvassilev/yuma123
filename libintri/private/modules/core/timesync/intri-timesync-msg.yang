@@ -1,0 +1,111 @@
+submodule intri-timesync-msg {
+  belongs-to "intri-timesync" {
+    prefix "intri-timesync-msg";
+  }
+  include intri-timesync-enum;
+  import timesyncpb {
+    prefix "timesyncpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/timesync/timesync.proto
+  grouping Config {
+    container Config_GNSS {
+      uses timesyncpb:GNSSConfig;
+    }
+    container Config_SyncE {
+      uses timesyncpb:SyncEConfig;
+    }
+    container Config_SyncSource {
+      uses timesyncpb:SyncSourceConfig;
+    }
+    container Config_Reference {
+      uses timesyncpb:ReferenceOutput;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping GNSSConfig {
+    leaf GNSSConfig_Enabled {
+      type boolean;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping SyncEConfig {
+    leaf SyncEConfig_Mode {
+      type timesyncpb:SyncEModeTypeOptions;
+    }
+    container SyncEConfig_ReferenceIdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping SyncSourceConfig {
+    leaf SyncSourceConfig_Source {
+      type timesyncpb:SyncSourceTypeOptions;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping ReferenceOutput {
+    container ReferenceOutput_Tod {
+      uses timesyncpb:ToDConfig;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping ToDConfig {
+    leaf ToDConfig_Enabled {
+      type boolean;
+    }
+    leaf ToDConfig_MessageType {
+      type timesyncpb:ToDMessageTypeOptions;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping GNSStatus {
+    leaf GNSStatus_State {
+      type timesyncpb:GNSSStateTypeOptions;
+    }
+    leaf GNSStatus_Longitude {
+      type string;
+    }
+    leaf GNSStatus_Latitude {
+      type string;
+    }
+    leaf GNSStatus_DateTime {
+      type string;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping SyncEStatus {
+    container SyncEStatus_ReferenceIdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf SyncEStatus_Signal {
+      type timesyncpb:SignalTypeOptions;
+    }
+    leaf SyncEStatus_LockStatus {
+      type timesyncpb:LockStatusTypeOptions;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping SyncSourceStatus {
+    leaf SyncSourceStatus_LockStatus {
+      type timesyncpb:LockStatusTypeOptions;
+    }
+    container SyncSourceStatus_List {
+      uses timesyncpb:SyncSourceInputStatusEntry;
+    }
+  }
+  // core/timesync/timesync.proto
+  grouping SyncSourceInputStatusEntry {
+    leaf SyncSourceInputStatusEntry_Source {
+      type timesyncpb:SyncSourceTypeOptions;
+    }
+    leaf SyncSourceInputStatusEntry_Signal {
+      type timesyncpb:SignalTypeOptions;
+    }
+  }
+}

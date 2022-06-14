@@ -1,0 +1,55 @@
+submodule intri-qos-enum {
+  belongs-to "intri-qos" {
+    prefix "intri-qos-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/qos/qos.proto
+  typedef ModeTypeOptions {
+    type enumeration {
+      enum MODE_TYPE_DISABLED {
+        description "[Disable] this mode has no type of traffic prioritized over another queue";
+        value 0;
+      }
+      enum MODE_TYPE_BASIC {
+        description "[Basic] this mode allows the type of traffic prioritized with the trust mode to queue";
+        value 1;
+      }
+    }
+  }
+  // core/qos/qos.proto
+  typedef TrustModeTypeOptions {
+    type enumeration {
+      enum TRUST_MODE_TYPE_COS {
+        description "[CoS] this mode sets CoS/802.1p to queue prioritized";
+        value 0;
+      }
+      enum TRUST_MODE_TYPE_DSCP_ONLY {
+        description "[DSCP Only] this mode sets DSCP to queue prioritized";
+        value 1;
+      }
+      enum TRUST_MODE_TYPE_DSCP_FIRST {
+        description "[DSCP First] this mode sets DSCP to queue as the first priority, and then CoS to queue as the second";
+        value 2;
+      }
+    }
+  }
+  // core/qos/qos.proto
+  typedef PrioritySchemeTypeOptions {
+    type enumeration {
+      enum PRIORITY_SCHEME_TYPE_WRR {
+        description "[WRR] WRR(Weighted Round Robin) queuing schedules all the queues, which in turn ensures every queue served for a certain time";
+        value 0;
+      }
+      enum PRIORITY_SCHEME_TYPE_SP {
+        description "[SP] SP(Strict Priority) queuing allows queue priority to reduce the response delay when congestion occurs";
+        value 1;
+      }
+      enum PRIORITY_SCHEME_TYPE_WRR_AND_SP {
+        description "[WRR+SP] WRR+SP queuing";
+        value 2;
+      }
+    }
+  }
+}

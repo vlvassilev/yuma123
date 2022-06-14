@@ -1,0 +1,88 @@
+submodule intri-udld-enum {
+  belongs-to "intri-udld" {
+    prefix "intri-udld-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/udld/udld.proto
+  typedef ModeTypeOptions {
+    type enumeration {
+      enum MODE_TYPE_NORMAL {
+        description "[Normal] UDLD detects the unidirectional link, the state will change to `undetermined` and send event.";
+        value 0;
+      }
+      enum MODE_TYPE_AGGRESSIVE {
+        description "[Aggressive] UDLD detects the unidirectional link, and sends the `UDLD probe message` for `N` seconds continually, if has no receives the `UDLD echo message`, the state will change to `err-disable` to drop all packets.";
+        value 1;
+      }
+    }
+  }
+  // core/udld/udld.proto
+  typedef PortStateTypeOptions {
+    type enumeration {
+      enum PORT_STATE_TYPE_NONE {
+        description "[None] the UDLD is not enabled.";
+        value 0;
+      }
+      enum PORT_STATE_TYPE_DETECTION {
+        description "[Detection] the UDLD is detecting the link.";
+        value 1;
+      }
+      enum PORT_STATE_TYPE_BIDIRECTIONALITY {
+        description "[Bidirectionality] the UDLD detects bidirectional link.";
+        value 2;
+      }
+      enum PORT_STATE_TYPE_UNDETERMINED {
+        description "[Undetermined] the UDLD detects unidirectional link, will send event.";
+        value 3;
+      }
+      enum PORT_STATE_TYPE_ERROR_DISABLED {
+        description "[Error-Disabled] the UDLD detects unidirectional link, will drop all packet.";
+        value 4;
+      }
+    }
+  }
+  // core/udld/udld.proto
+  typedef PortFaultTypeOptions {
+    type enumeration {
+      enum PORT_FAULT_TYPE_NONE {
+        description "[None] failed get state";
+        value 0;
+      }
+      enum PORT_FAULT_TYPE_TX {
+        description "[Tx] the port is tx only";
+        value 1;
+      }
+      enum PORT_FAULT_TYPE_RX {
+        description "[Rx] the port is rx only";
+        value 2;
+      }
+      enum PORT_FAULT_TYPE_BOTH {
+        description "[Both] the port is tx+rx";
+        value 3;
+      }
+    }
+  }
+  // core/udld/udld.proto
+  typedef PacketOpcodeTypeOptions {
+    type enumeration {
+      enum PACKET_OPCODE_TYPE_OPTIONS_RESERVED {
+        description "[Reserved] Reserved, the hex is 0x00";
+        value 0;
+      }
+      enum PACKET_OPCODE_TYPE_OPTIONS_PROBE {
+        description "[Probe] Probe message, the hex is 0x01";
+        value 1;
+      }
+      enum PACKET_OPCODE_TYPE_OPTIONS_ECHO {
+        description "[Echo] Echo message, the hex is 0x02";
+        value 2;
+      }
+      enum PACKET_OPCODE_TYPE_OPTIONS_FLUSH {
+        description "[Flush] Flush message, the hex is 0x03";
+        value 3;
+      }
+    }
+  }
+}

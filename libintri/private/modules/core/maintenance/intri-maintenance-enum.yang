@@ -1,0 +1,8 @@
+submodule intri-maintenance-enum {
+  belongs-to "intri-maintenance" {
+    prefix "intri-maintenance-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

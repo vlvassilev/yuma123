@@ -1,0 +1,25 @@
+submodule intri-gvrp-enum {
+  belongs-to "intri-gvrp" {
+    prefix "intri-gvrp-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/gvrp/common.proto
+  typedef PortModeTypeOptions {
+    type enumeration {
+      enum PORT_MODE_NORMAL {
+        description "[Normal] this mode can register/deregister static/dynamic VLAN dynamically";
+        value 0;
+      }
+      enum PORT_MODE_FIXED {
+        description "[Fixed] this mode cannot register/deregister VLAN dynamically, only share static VLAN information";
+        value 1;
+      }
+      enum PORT_MODE_FORBIDDEN {
+        description "[Forbidden] this mode cannot register/deregister VLAN dynamically, onle share default VLAN information";
+        value 2;
+      }
+    }
+  }
+}

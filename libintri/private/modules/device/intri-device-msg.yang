@@ -1,0 +1,1023 @@
+submodule intri-device-msg {
+  belongs-to "intri-device" {
+    prefix "intri-device-msg";
+  }
+  include intri-device-enum;
+
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // device/board.proto
+  grouping LedInfo {
+    leaf LedInfo_Name {
+      type string;
+    }
+    leaf LedInfo_PortNo {
+      type int32;
+    }
+    leaf LedInfo_Type {
+      type DeviceTypeOptions;
+    }
+    leaf LedInfo_Direction {
+      type string;
+    }
+    container LedInfo_LEDDevice {
+      uses MCULedDevice;
+    }
+    container LedInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container LedInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping MonitorInfo {
+    leaf MonitorInfo_Name {
+      type string;
+    }
+    leaf MonitorInfo_Type {
+      type DeviceTypeOptions;
+    }
+    leaf MonitorInfo_Direction {
+      type string;
+    }
+    container MonitorInfo_MonitorDevice {
+      uses MCUMonitorDevice;
+    }
+    container MonitorInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container MonitorInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping PSUInfo {
+    leaf PSUInfo_Name {
+      type string;
+    }
+    leaf PSUInfo_Type {
+      type DeviceTypeOptions;
+    }
+    leaf PSUInfo_Direction {
+      type string;
+    }
+    container PSUInfo_PSUDevice {
+      uses MCUPSUDevice;
+    }
+    container PSUInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container PSUInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping MCULedDevice {
+    leaf MCULedDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCULedDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCULedDevice_LedAction {
+      type LedTypeOptions;
+    }
+    leaf MCULedDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping MCUMonitorDevice {
+    leaf MCUMonitorDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCUMonitorDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCUMonitorDevice_MonitorAction {
+      type MonitorTypeOptions;
+    }
+    leaf MCUMonitorDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping MCUPSUDevice {
+    leaf MCUPSUDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCUPSUDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCUPSUDevice_PSUAction {
+      type PSUTypeOptions;
+    }
+    leaf MCUPSUDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping MCUFanDevice {
+    leaf MCUFanDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCUFanDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCUFanDevice_FANAction {
+      type FanTypeOptions;
+    }
+    leaf MCUFanDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping I2CDevice {
+    leaf I2CDevice_I2cAddr {
+      type int32;
+    }
+    leaf I2CDevice_AddrRegister {
+      type int32;
+    }
+    leaf I2CDevice_Action {
+      type int32;
+    }
+    leaf I2CDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping GPIODevice {
+    leaf GPIODevice_Register {
+      type int32;
+    }
+    leaf GPIODevice_Pin {
+      type int32;
+    }
+    leaf GPIODevice_Action {
+      type boolean;
+    }
+    leaf GPIODevice_Enable {
+      type boolean;
+    }
+  }
+  // device/board.proto
+  grouping I2Cinfo {
+    leaf I2Cinfo_Name {
+      type string;
+    }
+    leaf I2Cinfo_Direction {
+      type string;
+    }
+    container I2Cinfo_Device {
+      uses I2CDevice;
+    }
+  }
+  // device/board.proto
+  grouping GPIOInfo {
+    leaf GPIOInfo_Name {
+      type string;
+    }
+    leaf GPIOInfo_Direction {
+      type string;
+    }
+    container GPIOInfo_Device {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping PTPClockSynchronizerInfo {
+    leaf PTPClockSynchronizerInfo_Name {
+      type string;
+    }
+    leaf PTPClockSynchronizerInfo_Direction {
+      type string;
+    }
+    container PTPClockSynchronizerInfo_Device {
+      uses I2CDevice;
+    }
+  }
+  // device/board.proto
+  grouping GPSInfo {
+    leaf GPSInfo_Name {
+      type string;
+    }
+    leaf GPSInfo_Path {
+      type string;
+    }
+    leaf GPSInfo_Direction {
+      type string;
+    }
+  }
+  // device/board.proto
+  grouping ToDInfo {
+    leaf ToDInfo_Name {
+      type string;
+    }
+    leaf ToDInfo_Path {
+      type string;
+    }
+    leaf ToDInfo_Direction {
+      type string;
+    }
+  }
+  // device/board.proto
+  grouping UARTDevice {
+    leaf UARTDevice_Name {
+      type string;
+    }
+    leaf UARTDevice_Path {
+      type string;
+    }
+    leaf UARTDevice_Direction {
+      type string;
+    }
+    leaf UARTDevice_Bandwidth {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping FanInfo {
+    leaf FanInfo_Name {
+      type string;
+    }
+    leaf FanInfo_Type {
+      type FanDeviceTypeOptions;
+    }
+    leaf FanInfo_FanNumber {
+      type int32;
+    }
+    container FanInfo_FANDevice {
+      uses MCUFanDevice;
+    }
+    container FanInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container FanInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping PoEInfo {
+    leaf PoEInfo_Name {
+      type string;
+    }
+    leaf PoEInfo_Type {
+      type PoEDeviceTypeOptions;
+    }
+    container PoEInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container PoEInfo_UartDevice {
+      uses UARTDevice;
+    }
+  }
+  // device/board.proto
+  grouping HardwareInfo {
+    container HardwareInfo_DeviceLed {
+      uses LedInfo;
+    }
+    container HardwareInfo_DeviceHWMonitor {
+      uses MonitorInfo;
+    }
+    container HardwareInfo_DevicePSU {
+      uses PSUInfo;
+    }
+    container HardwareInfo_DeviceI2C {
+      uses I2Cinfo;
+    }
+    container HardwareInfo_DeviceHW {
+      uses GPIOInfo;
+    }
+    container HardwareInfo_DevicePTP {
+      uses PTPClockSynchronizerInfo;
+    }
+    container HardwareInfo_DeviceGPS {
+      uses GPSInfo;
+    }
+    container HardwareInfo_DeviceToD {
+      uses ToDInfo;
+    }
+    container HardwareInfo_DeviceFan {
+      uses FanInfo;
+    }
+    container HardwareInfo_DevicePoE {
+      uses PoEInfo;
+    }
+  }
+  // device/board.proto
+  grouping HardwareTableSize {
+    leaf HardwareTableSize_TcamSize {
+      type int32;
+    }
+    leaf HardwareTableSize_BridgeFDBEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_VirtualPorts {
+      type int32;
+    }
+    leaf HardwareTableSize_VirtualBridgeDomains {
+      type int32;
+    }
+    leaf HardwareTableSize_ARPTableEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_RouterIPv4HostEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_RouterIPv6HostEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_RouterNextHopEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_MulticastPhysicalPortGroups {
+      type int32;
+    }
+    leaf HardwareTableSize_MulticastLinkedListEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_CentralizedCounters {
+      type int32;
+    }
+    leaf HardwareTableSize_SpanningTreeGroups {
+      type int32;
+    }
+    leaf HardwareTableSize_QoSProfiles {
+      type int32;
+    }
+    leaf HardwareTableSize_L2L3PortIsolation {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping PhyInterface {
+    leaf PhyInterface_Interface {
+      type int32;
+    }
+    leaf PhyInterface_Type {
+      type PhyInterfaceTypeOptions;
+    }
+  }
+  // device/board.proto
+  grouping PortInfo {
+    leaf PortInfo_PortNo {
+      type int32;
+    }
+    leaf PortInfo_MACChip {
+      type int32;
+    }
+    leaf PortInfo_MACNo {
+      type int32;
+    }
+    leaf PortInfo_PortGroup {
+      type int32;
+    }
+    leaf PortInfo_PhyID1 {
+      type int32;
+    }
+    leaf PortInfo_PhyID2 {
+      type int32;
+    }
+    container PortInfo_PhyInterface {
+      uses PhyInterface;
+    }
+    leaf PortInfo_PoENo {
+      type int32;
+    }
+    leaf PortInfo_PoEChannel {
+      type int32;
+    }
+    leaf PortInfo_PoEChipNo {
+      type int32;
+    }
+    leaf PortInfo_MacsecEncLen {
+      type int32;
+    }
+    leaf PortInfo_InterfaceType {
+      type PortInterfaceTypeOptions;
+    }
+    leaf PortInfo_Properties {
+      type PortPropertyTypeOptions;
+    }
+    leaf PortInfo_DeviceID {
+      type int32;
+    }
+    leaf PortInfo_SpeedProperties {
+      type DevicePortSpeedDuplexTypeOptions;
+    }
+  }
+  // device/board.proto
+  grouping BoardInfo {
+    leaf BoardInfo_SystemDescription {
+      type string;
+    }
+    container BoardInfo_PortLists {
+      uses PortInfo;
+    }
+    leaf BoardInfo_HwFeatures {
+      type FactoryHwFeatureTypeOptions;
+    }
+    container BoardInfo_HwSize {
+      uses HardwareTableSize;
+    }
+    leaf BoardInfo_CPUPort {
+      type int32;
+    }
+    container BoardInfo_BoardDevice {
+      uses HardwareInfo;
+    }
+    container BoardInfo_TimeControl {
+      uses TimeControlInfo;
+    }
+    leaf BoardInfo_EnterpriseOID {
+      type string;
+    }
+  }
+  // device/board.proto
+  grouping TimeControlSpeedFrequencyEntry {
+    leaf TimeControlSpeedFrequencyEntry_Speed {
+      type PortPropertyTypeOptions;
+    }
+    leaf TimeControlSpeedFrequencyEntry_Frequency {
+      type int64;
+    }
+    leaf TimeControlSpeedFrequencyEntry_M {
+      type int64;
+    }
+    leaf TimeControlSpeedFrequencyEntry_N {
+      type int64;
+    }
+    leaf TimeControlSpeedFrequencyEntry_Div {
+      type int64;
+    }
+  }
+  // device/board.proto
+  grouping TimeControlPortInfoEntry {
+    leaf TimeControlPortInfoEntry_PortNo {
+      type int32;
+    }
+    leaf TimeControlPortInfoEntry_RCLKPin {
+      type RCLKTypeOptions;
+    }
+    leaf TimeControlPortInfoEntry_Frequency {
+      type int64;
+    }
+    leaf TimeControlPortInfoEntry_InputClock {
+      type InputClockIndexTypeOptions;
+    }
+  }
+  // device/board.proto
+  grouping TimeControlInfo {
+    list TimeControlInfo_InputClockMapping {
+      key "name";
+      unique "name";
+      leaf name {
+        type string;
+      }
+      leaf value {
+        type InputClockIndexTypeOptions;
+      }
+    }
+    // container TimeControlInfo_InputClockMapping {
+    //   uses TimeControlInfo_InputClockMappingEntry;
+    // }
+    container TimeControlInfo_PortInfoList {
+      uses TimeControlPortInfoEntry;
+    }
+    container TimeControlInfo_SpeedFrequencyList {
+      uses TimeControlSpeedFrequencyEntry;
+    }
+  }
+  // device/boundary.proto
+  grouping Boundary {
+    leaf Boundary_Type {
+      type BoundaryTypeOptions;
+    }
+    leaf Boundary_Max {
+      type int32;
+    }
+    leaf Boundary_Min {
+      type int32;
+    }
+    leaf Boundary_Lower {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Boundary_Upper {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryAll {
+    container BoundaryAll_VLAN {
+      uses BoundaryVLAN;
+    }
+    container BoundaryAll_Access {
+      uses BoundaryAccess;
+    }
+    container BoundaryAll_DDM {
+      uses BoundaryDDM;
+    }
+    container BoundaryAll_ACL {
+      uses BoundaryACL;
+    }
+    container BoundaryAll_Log {
+      uses BoundaryLog;
+    }
+    container BoundaryAll_Mirroring {
+      uses BoundaryMirroring;
+    }
+    container BoundaryAll_Trunk {
+      uses BoundaryTRUNK;
+    }
+    container BoundaryAll_FDB {
+      uses BoundaryFDB;
+    }
+    container BoundaryAll_QoS {
+      uses BoundaryQoS;
+    }
+    container BoundaryAll_Multicast {
+      uses BoundaryMulticast;
+    }
+    container BoundaryAll_PoE {
+      uses BoundaryPoE;
+    }
+    container BoundaryAll_Files {
+      uses BoundaryFiles;
+    }
+    container BoundaryAll_TimeRange {
+      uses BoundaryTimeRange;
+    }
+    container BoundaryAll_DHCPServer {
+      uses BoundaryDHCPServer;
+    }
+    container BoundaryAll_Monitor {
+      uses BoundaryMonitor;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryDHCPServer {
+    container BoundaryDHCPServer_MACBased {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryVLAN {
+    container BoundaryVLAN_VlanID {
+      uses Boundary;
+    }
+    container BoundaryVLAN_VlanFilter {
+      uses Boundary;
+    }
+    container BoundaryVLAN_ProtocolBased {
+      uses Boundary;
+    }
+    container BoundaryVLAN_MACBased {
+      uses Boundary;
+    }
+    container BoundaryVLAN_SubnetBased {
+      uses Boundary;
+    }
+    container BoundaryVLAN_TPIDsRange {
+      uses Boundary;
+    }
+    container BoundaryVLAN_ProtocolClasses {
+      uses Boundary;
+    }
+    container BoundaryVLAN_SelectiveQinQ {
+      uses Boundary;
+    }
+    container BoundaryVLAN_Mapping {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryDDM {
+    container BoundaryDDM_DdmTemperature {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmVoltage {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmTxBias {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmRxPower {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmTxPower {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryACL {
+    container BoundaryACL_ACLs {
+      uses Boundary;
+    }
+    container BoundaryACL_ACEs {
+      uses Boundary;
+    }
+    container BoundaryACL_Binding {
+      uses Boundary;
+    }
+    container BoundaryACL_Flow {
+      uses Boundary;
+    }
+    container BoundaryACL_FlowRules {
+      uses Boundary;
+    }
+    container BoundaryACL_Rules {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryLog {
+    container BoundaryLog_LogRotateSize {
+      uses Boundary;
+    }
+    container BoundaryLog_LogRotateFileCount {
+      uses Boundary;
+    }
+    container BoundaryLog_LogTargetList {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryAccess {
+    container BoundaryAccess_Users {
+      uses Boundary;
+    }
+    container BoundaryAccess_UsersAssociatedGroups {
+      uses Boundary;
+    }
+    container BoundaryAccess_Groups {
+      uses Boundary;
+    }
+    container BoundaryAccess_GroupsPattern {
+      uses Boundary;
+    }
+    container BoundaryAccess_Restrictions {
+      uses Boundary;
+    }
+    container BoundaryAccess_Servers {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryMirroring {
+    container BoundaryMirroring_Session {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryFDB {
+    container BoundaryFDB_FDBSize {
+      uses Boundary;
+    }
+    container BoundaryFDB_AgeTime {
+      uses Boundary;
+    }
+    container BoundaryFDB_PortLearningLimit {
+      uses Boundary;
+    }
+    container BoundaryFDB_PortSecurityLearningLimit {
+      uses Boundary;
+    }
+    container BoundaryFDB_ForwardLimit {
+      uses Boundary;
+    }
+    container BoundaryFDB_DropLimit {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryTRUNK {
+    container BoundaryTRUNK_IDRange {
+      uses Boundary;
+    }
+    container BoundaryTRUNK_PriorityRange {
+      uses Boundary;
+    }
+    container BoundaryTRUNK_MemberRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryMulticast {
+    container BoundaryMulticast_VIDXRange {
+      uses Boundary;
+    }
+    container BoundaryMulticast_StaticEntries {
+      uses Boundary;
+    }
+    container BoundaryMulticast_DynamicEntries {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryQoS {
+    container BoundaryQoS_QueueListRange {
+      uses Boundary;
+    }
+    container BoundaryQoS_CoSRange {
+      uses Boundary;
+    }
+    container BoundaryQoS_DSCPRange {
+      uses Boundary;
+    }
+    container BoundaryQoS_WRRRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryPoE {
+    container BoundaryPoE_BudgetRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryFiles {
+    container BoundaryFiles_CertificatedRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryTimeRange {
+    container BoundaryTimeRange_EntryRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryMonitor {
+    container BoundaryMonitor_Temperature {
+      uses Boundary;
+    }
+    container BoundaryMonitor_Power {
+      uses Boundary;
+    }
+    container BoundaryMonitor_Cpu {
+      uses Boundary;
+    }
+    container BoundaryMonitor_Memory {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantConsumption {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantTemperature {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantVoltage {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantCurrent {
+      uses Boundary;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlAll {
+    container FunctionControlAll_VLAN {
+      uses FunctionControlVLAN;
+    }
+    container FunctionControlAll_Acl {
+      uses FunctionControlACL;
+    }
+    container FunctionControlAll_Mirroring {
+      uses FunctionControlMirroring;
+    }
+    container FunctionControlAll_FDB {
+      uses FunctionControlFDB;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlVLAN {
+    leaf FunctionControlVLAN_Voice {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_SelectiveQinq {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_MACBased {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_SubnetBased {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_ProtocolBased {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_Translation {
+      type boolean;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlACL {
+    leaf FunctionControlACL_TimeRange {
+      type boolean;
+    }
+    leaf FunctionControlACL_Binding {
+      type boolean;
+    }
+    leaf FunctionControlACL_FlowMirroring {
+      type boolean;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlMirroring {
+    leaf FunctionControlMirroring_RSPAN {
+      type boolean;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlFDB {
+    leaf FunctionControlFDB_PortSecurity {
+      type boolean;
+    }
+    leaf FunctionControlFDB_LearningLimit {
+      type boolean;
+    }
+    leaf FunctionControlFDB_Forward {
+      type boolean;
+    }
+    leaf FunctionControlFDB_Drop {
+      type boolean;
+    }
+  }
+  // device/path.proto
+  grouping PathAll {
+    leaf PathAll_LogRamDisk {
+      type string;
+    }
+    leaf PathAll_LogFlash {
+      type string;
+    }
+    leaf PathAll_ConfigDefault {
+      type string;
+    }
+    leaf PathAll_ConfigSaved {
+      type string;
+    }
+    leaf PathAll_User {
+      type string;
+    }
+    leaf PathAll_IPTables {
+      type string;
+    }
+    leaf PathAll_CoreReboot {
+      type string;
+    }
+    leaf PathAll_WarmStart {
+      type string;
+    }
+    leaf PathAll_VlanMgmt {
+      type string;
+    }
+    leaf PathAll_TimeCfg {
+      type string;
+    }
+    leaf PathAll_BootReady {
+      type string;
+    }
+    leaf PathAll_IPv6LinkLocal {
+      type string;
+    }
+    leaf PathAll_TimeZone {
+      type string;
+    }
+    leaf PathAll_Resolv {
+      type string;
+    }
+    leaf PathAll_DropbearProc {
+      type string;
+    }
+    leaf PathAll_TelnetProc {
+      type string;
+    }
+    leaf PathAll_FTPProc {
+      type string;
+    }
+    leaf PathAll_LocalUser {
+      type string;
+    }
+    leaf PathAll_Certificates {
+      type string;
+    }
+    leaf PathAll_OpenSSLCertificates {
+      type string;
+    }
+    leaf PathAll_SNMPdCertificates {
+      type string;
+    }
+    leaf PathAll_SNMPdCertificatesKey {
+      type string;
+    }
+    leaf PathAll_NetCfg {
+      type string;
+    }
+    leaf PathAll_IPv4Script {
+      type string;
+    }
+    leaf PathAll_IPv6Script {
+      type string;
+    }
+    leaf PathAll_LastSaveTime {
+      type string;
+    }
+    leaf PathAll_Image {
+      type string;
+    }
+    leaf PathAll_AltVersion {
+      type string;
+    }
+    leaf PathAll_AltBuildDateTime {
+      type string;
+    }
+    leaf PathAll_Version {
+      type string;
+    }
+    leaf PathAll_BuildDateTime {
+      type string;
+    }
+    leaf PathAll_DhcpServerDnsmasqLeasePath {
+      type string;
+    }
+    leaf PathAll_DhcpServerDnsmasqCfgPath {
+      type string;
+    }
+    leaf PathAll_DhcpServerPortBasedInfo {
+      type string;
+    }
+  }
+  // device/device.proto
+  grouping InterfaceIdentify {
+    leaf InterfaceIdentify_Type {
+      type InterfaceTypeOptions;
+    }
+    leaf InterfaceIdentify_DeviceID {
+      type int32;
+    }
+    leaf InterfaceIdentify_PortNo {
+      type int32;
+    }
+    leaf InterfaceIdentify_LAGNo {
+      type int32;
+    }
+    leaf InterfaceIdentify_VlanID {
+      type int32;
+    }
+  }
+  // device/device.proto
+  grouping Info {
+    leaf Info_Model {
+      type string;
+    }
+    leaf Info_MACAddr {
+      type string;
+    }
+    leaf Info_MACAddrFactory {
+      type string;
+    }
+    leaf Info_SerialNo {
+      type string;
+    }
+    leaf Info_Vendor {
+      type string;
+    }
+    leaf Info_AltBuildDateTime {
+      type string;
+    }
+    leaf Info_CurrentBuildDateTime {
+      type string;
+    }
+    leaf Info_AltSwVersion {
+      type string;
+    }
+    leaf Info_CurrentSwVersion {
+      type string;
+    }
+    leaf Info_HwVersion {
+      type string;
+    }
+    leaf Info_CurrentImage {
+      type string;
+    }
+    leaf Info_Board {
+      type string;
+    }
+    leaf Info_Layer {
+      type LayerTypeOptions;
+    }
+  }
+  // device/common.proto
+  grouping PortList {
+    container PortList_List {
+      uses InterfaceIdentify;
+    }
+  }
+}

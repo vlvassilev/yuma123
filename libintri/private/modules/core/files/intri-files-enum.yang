@@ -1,0 +1,21 @@
+submodule intri-files-enum {
+  belongs-to "intri-files" {
+    prefix "intri-files-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/files/files.proto
+  typedef CertificateTypeOptions {
+    type enumeration {
+      enum CERTIFICATE_TYPE_WEB {
+        description "[Web]";
+        value 0;
+      }
+      enum CERTIFICATE_TYPE_SNMP {
+        description "[SNMP]";
+        value 1;
+      }
+    }
+  }
+}

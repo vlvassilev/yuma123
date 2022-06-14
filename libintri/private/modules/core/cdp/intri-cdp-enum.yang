@@ -1,0 +1,70 @@
+submodule intri-cdp-enum {
+  belongs-to "intri-cdp" {
+    prefix "intri-cdp-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/cdp/common.proto
+  typedef VersionTypeOptions {
+    type enumeration {
+      enum VERSION_TYPE_V1 {
+        description "[V1] Use the CDP V1";
+        value 0;
+      }
+      enum VERSION_TYPE_V2 {
+        description "[V2] Use the CDP V2";
+        value 1;
+      }
+    }
+  }
+  // core/cdp/common.proto
+  typedef CapabilityTypeOptions {
+    type enumeration {
+      enum CAPABILITY_TYPE_ROUTER {
+        description "[Router] Show the capability as a router";
+        value 0;
+      }
+      enum CAPABILITY_TYPE_TRANSPARENT_BRIDGE {
+        description "[Transparent Bridge] Show the capability as a transparent bridge";
+        value 1;
+      }
+      enum CAPABILITY_TYPE_SOURCE_ROUTE_BRIDGE {
+        description "[Route Bridge] Show the capability as a route bridge";
+        value 2;
+      }
+      enum CAPABILITY_TYPE_SWITCH {
+        description "[Switch] Show the capability as a switch";
+        value 3;
+      }
+      enum CAPABILITY_TYPE_HOST {
+        description "[Host] Show the capability as a host";
+        value 4;
+      }
+      enum CAPABILITY_TYPE_IGMP_CAPABLE {
+        description "[IGMP] Show the capability as an IGMP capable device";
+        value 5;
+      }
+      enum CAPABILITY_TYPE_REPEATER {
+        description "[Repeater] Show the capability as a repeater";
+        value 6;
+      }
+      enum CAPABILITY_TYPE_VOIP_PHONE {
+        description "[VoIP Phone] Show the capability as a VoIP Phone";
+        value 7;
+      }
+      enum CAPABILITY_TYPE_REMOTELY_MANAGED_DEVICE {
+        description "[Remotely Managed Device] Show the capability as a remotely managed device";
+        value 8;
+      }
+      enum CAPABILITY_TYPE_CVTA_STP_DISPUTE_RESOLUTION_CISCO_VT_CAMERA {
+        description "[Camara] Show the capability as a camera";
+        value 9;
+      }
+      enum CAPABILITY_TYPE_TWO_PORT_MAC_REPLY {
+        description "[Two Port MAC Replay] Show the capability as a two port MAC reply";
+        value 10;
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+submodule intri-portsecurity-enum {
+  belongs-to "intri-portsecurity" {
+    prefix "intri-portsecurity-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/portsecurity/common.proto
+  typedef PortSecurityModeTypeOptions {
+    type enumeration {
+      enum PORT_SECURITY_MODE_TYPE_STATIC {
+        description "[Static]";
+        value 0;
+      }
+      enum PORT_SECURITY_MODE_TYPE_STICKY {
+        description "[Sticky]";
+        value 1;
+      }
+      enum PORT_SECURITY_MODE_TYPE_DYNAMIC {
+        description "[Dynamic]";
+        value 2;
+      }
+    }
+  }
+  // core/portsecurity/common.proto
+  typedef PortSecurityAgeModeTypeOptions {
+    type enumeration {
+      enum PORT_SECURITY_AGE_MODE_TYPE_ABSOULTE {
+        description "[Absolute] Absolute aging";
+        value 0;
+      }
+      enum PORT_SECURITY_AGE_MODE_TYPE_INACTIVITY {
+        description "[Inactivity] Aging based on inactivity time period";
+        value 1;
+      }
+    }
+  }
+  // core/portsecurity/common.proto
+  typedef PortSecurityViolationTypeOptions {
+    type enumeration {
+      enum PORT_SECURITY_VIOLATION_TYPE_SHUTDOWN {
+        description "[Shutdown] Security violation shutdown mode";
+        value 0;
+      }
+      enum PORT_SECURITY_VIOLATION_TYPE_DISCARD {
+        description "[Discard] Security violation discard mode";
+        value 1;
+      }
+      enum PORT_SECURITY_VIOLATION_TYPE_RESTRICT {
+        description "[Restrict] Security violation restrict mode";
+        value 2;
+      }
+    }
+  }
+  // core/portsecurity/common.proto
+  typedef PortSecurityStatusTypeOptions {
+    type enumeration {
+      enum PORT_SECURITY_STATUS_TYPE_SECURE_DOWN {
+        description "[Secure-Down]";
+        value 0;
+      }
+      enum PORT_SECURITY_STATUS_TYPE_SECURE_UP {
+        description "[Secure-Up]";
+        value 1;
+      }
+      enum PORT_SECURITY_STATUS_TYPE_SECURE_SHUTDOWN {
+        description "[Secure-Shutdown]";
+        value 2;
+      }
+    }
+  }
+}

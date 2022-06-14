@@ -1,0 +1,19 @@
+module intri-device {
+  namespace "intri:intri-device";
+  prefix "intri-device";
+
+  include intri-device-enum;
+  include intri-device-msg;
+
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+
+  // container intri-device {
+  //   container MACAddress {
+
+  //   }
+  // }
+}

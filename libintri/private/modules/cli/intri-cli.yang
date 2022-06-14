@@ -1,0 +1,9 @@
+module intri-cli {
+  namespace "intri:intri-cli";
+  prefix "intri-cli";
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

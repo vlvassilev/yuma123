@@ -1,0 +1,18 @@
+submodule intri-snmp-msg {
+  belongs-to "intri-snmp" {
+    prefix "intri-snmp-msg";
+  }
+  include intri-snmp-enum;
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // snmp/snmp.proto
+  grouping EngineInfo {
+    leaf EngineInfo_Boots {
+      type int32;
+    }
+    leaf EngineInfo_RunTime {
+      type int64;
+    }
+  }
+}

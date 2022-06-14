@@ -1,0 +1,93 @@
+submodule intri-userinterface-msg {
+  belongs-to "intri-userinterface" {
+    prefix "intri-userinterface-msg";
+  }
+  include intri-userinterface-enum;
+  import userinterfacepb {
+    prefix "userinterfacepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/userinterface/cli.proto
+  grouping CLIConfig {
+    leaf CLIConfig_TelnetEnabled {
+      type boolean;
+    }
+    leaf CLIConfig_SSHEnabled {
+      type boolean;
+    }
+    leaf CLIConfig_WelcomeMessage {
+      type string;
+    }
+    leaf CLIConfig_InactivityTimeout {
+      type int32;
+    }
+  }
+  // core/userinterface/snmp.proto
+  grouping SNMPConfig {
+    leaf SNMPConfig_SNMPV1Enabled {
+      type boolean;
+    }
+    leaf SNMPConfig_SNMPV2CEnabled {
+      type boolean;
+    }
+    leaf SNMPConfig_GetCommunity {
+      type string;
+    }
+    leaf SNMPConfig_SetCommunity {
+      type string;
+    }
+    leaf SNMPConfig_SNMPV1V2Username {
+      type string;
+    }
+    leaf SNMPConfig_PermitV1V2SetCommands {
+      type boolean;
+    }
+    leaf SNMPConfig_SNMPV3Enabled {
+      type boolean;
+    }
+    leaf SNMPConfig_SecurityModel {
+      type userinterfacepb:SNMPV3ConfigSecurityModelTypeOptions;
+    }
+    leaf SNMPConfig_SNMPEngineID {
+      type string;
+    }
+    leaf SNMPConfig_TrapEngineID {
+      type string;
+    }
+  }
+  // core/userinterface/web.proto
+  grouping WebConfig {
+    leaf WebConfig_Protocol {
+      type userinterfacepb:WebProtocolTypeOptions;
+    }
+    leaf WebConfig_WebTimeout {
+      type int32;
+    }
+    leaf WebConfig_HTTPPort {
+      type int32;
+    }
+    leaf WebConfig_HTTPSPort {
+      type int32;
+    }
+    leaf WebConfig_EncryptedCertPassphrase {
+      type string;
+    }
+    leaf WebConfig_LoginMessage {
+      type string;
+    }
+  }
+  // core/userinterface/userinterface.proto
+  grouping Config {
+    container Config_Cli {
+      uses userinterfacepb:CLIConfig;
+    }
+    container Config_Snmp {
+      uses userinterfacepb:SNMPConfig;
+    }
+    container Config_Web {
+      uses userinterfacepb:WebConfig;
+    }
+  }
+}

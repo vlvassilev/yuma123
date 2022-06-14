@@ -1,0 +1,207 @@
+submodule intri-dhcp-msg {
+  belongs-to "intri-dhcp" {
+    prefix "intri-dhcp-msg";
+  }
+  include intri-dhcp-enum;
+  import dhcppb {
+    prefix "dhcppb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/dhcp/arp.proto
+  grouping ARPInspectionConfig {
+    leaf ARPInspectionConfig_Enabled {
+      type boolean;
+    }
+    container ARPInspectionConfig_Ports {
+      uses dhcppb:ARPInspectionPortEntry;
+    }
+  }
+  // core/dhcp/arp.proto
+  grouping ARPInspectionPortEntry {
+    container ARPInspectionPortEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf ARPInspectionPortEntry_Enabled {
+      type boolean;
+    }
+    leaf ARPInspectionPortEntry_RateLimiting {
+      type int32;
+    }
+    leaf ARPInspectionPortEntry_Database {
+      type dhcppb:ARPInspectionDatabaseTypeOptions;
+    }
+    container ARPInspectionPortEntry_ACL {
+      uses dhcppb:ARPInspectionACLConfig;
+    }
+    leaf ARPInspectionPortEntry_SrcMACValid {
+      type boolean;
+    }
+    leaf ARPInspectionPortEntry_DstMACValid {
+      type boolean;
+    }
+    leaf ARPInspectionPortEntry_IPRangeValid {
+      type boolean;
+    }
+  }
+  // core/dhcp/arp.proto
+  grouping ARPInspectionACLConfig {
+    leaf ARPInspectionACLConfig_ACLRuleUnmatchedAction {
+      type dhcppb:ARPInspectionACLRuleUnmatchedActionTypeOptions;
+    }
+    leaf ARPInspectionACLConfig_Rules {
+      type string;
+    }
+  }
+  // core/dhcp/arp.proto
+  grouping ARPInspectionACLRuleEntry {
+    leaf ARPInspectionACLRuleEntry_VID {
+      type int32;
+    }
+    leaf ARPInspectionACLRuleEntry_SrcMAC {
+      type string;
+    }
+    leaf ARPInspectionACLRuleEntry_SrcIP {
+      type string;
+    }
+    leaf ARPInspectionACLRuleEntry_SrcIPMask {
+      type string;
+    }
+    leaf ARPInspectionACLRuleEntry_Mode {
+      type dhcppb:ARPInspectionACLRuleModeTypeOptions;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping Config {
+    container Config_Relay {
+      uses dhcppb:RelayConfig;
+    }
+    container Config_Snooping {
+      uses dhcppb:SnoopingConfig;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping RelayConfig {
+    leaf RelayConfig_Enabled {
+      type boolean;
+    }
+    container RelayConfig_RelayPorts {
+      uses dhcppb:ConfigRelayPortEntry;
+    }
+    leaf RelayConfig_DHCPServerAddress {
+      type string;
+    }
+    leaf RelayConfig_RemoteIDSource {
+      type dhcppb:RemoteIDSourceTypeOptions;
+    }
+    leaf RelayConfig_CustomRemoteID {
+      type string;
+    }
+    leaf RelayConfig_CircuitIDSource {
+      type dhcppb:CircuitIDSourceTypeOptions;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping ConfigRelayPortEntry {
+    container ConfigRelayPortEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf ConfigRelayPortEntry_Enabled {
+      type boolean;
+    }
+    leaf ConfigRelayPortEntry_Option82Enabled {
+      type boolean;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping SnoopingConfig {
+    leaf SnoopingConfig_Enabled {
+      type boolean;
+    }
+    container SnoopingConfig_Ports {
+      uses dhcppb:SnoopingConfigPortEntry;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping SnoopingConfigPortEntry {
+    container SnoopingConfigPortEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf SnoopingConfigPortEntry_Enabled {
+      type boolean;
+    }
+    leaf SnoopingConfigPortEntry_DHCPFiltering {
+      type dhcppb:SnoopingPortDHCPFilteringTypeOptions;
+    }
+    leaf SnoopingConfigPortEntry_SnoopingTrust {
+      type dhcppb:SnoopingPortSnoopingTrustTypeOptions;
+    }
+    leaf SnoopingConfigPortEntry_AcceptIngressOption82 {
+      type boolean;
+    }
+    leaf SnoopingConfigPortEntry_MACAddressVerification {
+      type boolean;
+    }
+    leaf SnoopingConfigPortEntry_DHCPRateLimiting {
+      type int32;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping SnoopingStatisticsEntry {
+    container SnoopingStatisticsEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf SnoopingStatisticsEntry_TrustMode {
+      type dhcppb:SnoopingPortSnoopingTrustTypeOptions;
+    }
+    leaf SnoopingStatisticsEntry_Processed {
+      type int32;
+    }
+    leaf SnoopingStatisticsEntry_Dropped {
+      type int32;
+    }
+    leaf SnoopingStatisticsEntry_LastDropReason {
+      type dhcppb:SnoopingLastDropReasonTypeOptions;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping SnoopingStatisticsList {
+    container SnoopingStatisticsList_List {
+      uses dhcppb:SnoopingStatisticsEntry;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping SnoopingBindingDatabaseEntry {
+    leaf SnoopingBindingDatabaseEntry_MACAddress {
+      type string;
+    }
+    leaf SnoopingBindingDatabaseEntry_IP {
+      type string;
+    }
+    container SnoopingBindingDatabaseEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf SnoopingBindingDatabaseEntry_VID {
+      type int32;
+    }
+    leaf SnoopingBindingDatabaseEntry_LastUpdated {
+      type string;
+    }
+    leaf SnoopingBindingDatabaseEntry_LastUpdatedEpoch {
+      type string;
+    }
+    leaf SnoopingBindingDatabaseEntry_LeaseTime {
+      type int64;
+    }
+  }
+  // core/dhcp/dhcp.proto
+  grouping SnoopingBindingDatabaseList {
+    container SnoopingBindingDatabaseList_List {
+      uses dhcppb:SnoopingBindingDatabaseEntry;
+    }
+  }
+}

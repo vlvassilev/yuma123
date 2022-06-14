@@ -1,0 +1,8 @@
+submodule intri-isolation-enum {
+  belongs-to "intri-isolation" {
+    prefix "intri-isolation-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

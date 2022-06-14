@@ -1,0 +1,180 @@
+submodule intri-port-msg {
+  belongs-to "intri-port" {
+    prefix "intri-port-msg";
+  }
+  include intri-port-enum;
+  import devicepb {
+    prefix "devicepb";
+  }
+  import eventpb {
+    prefix "eventpb";
+  }
+  import portpb {
+    prefix "portpb";
+  }
+  import stppb {
+    prefix "stppb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/port/port.proto
+  grouping ConfigEntry {
+    container ConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf ConfigEntry_Alias {
+      type string;
+    }
+    leaf ConfigEntry_PortOperation {
+      type boolean;
+    }
+    leaf ConfigEntry_SpeedDuplex {
+      type eventpb:PortSpeedDuplexTypeOptions;
+    }
+    leaf ConfigEntry_FlowControl {
+      type boolean;
+    }
+    leaf ConfigEntry_EnergyEfficiency {
+      type boolean;
+    }
+  }
+  // core/port/port.proto
+  grouping Config {
+    container Config_List {
+      uses portpb:ConfigEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping AliasEntry {
+    container AliasEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf AliasEntry_Alias {
+      type string;
+    }
+  }
+  // core/port/port.proto
+  grouping AliasConfig {
+    container AliasConfig_List {
+      uses portpb:AliasEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping OperationEntry {
+    container OperationEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf OperationEntry_PortOperation {
+      type boolean;
+    }
+  }
+  // core/port/port.proto
+  grouping OperationConfig {
+    container OperationConfig_List {
+      uses portpb:OperationEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping SpeedDuplexEntry {
+    container SpeedDuplexEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf SpeedDuplexEntry_SpeedDuplex {
+      type eventpb:PortSpeedDuplexTypeOptions;
+    }
+  }
+  // core/port/port.proto
+  grouping SpeedDuplexConfig {
+    container SpeedDuplexConfig_List {
+      uses portpb:SpeedDuplexEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping FlowControlEntry {
+    container FlowControlEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf FlowControlEntry_FlowControl {
+      type boolean;
+    }
+  }
+  // core/port/port.proto
+  grouping FlowControlConfig {
+    container FlowControlConfig_List {
+      uses portpb:FlowControlEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping EnergyEfficiencyEntry {
+    container EnergyEfficiencyEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf EnergyEfficiencyEntry_EnergyEfficiency {
+      type boolean;
+    }
+  }
+  // core/port/port.proto
+  grouping EnergyEfficiencyConfig {
+    container EnergyEfficiencyConfig_List {
+      uses portpb:EnergyEfficiencyEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping StatusEntry {
+    container StatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf StatusEntry_Enabled {
+      type boolean;
+    }
+    leaf StatusEntry_LinkUp {
+      type boolean;
+    }
+    leaf StatusEntry_LastLinkChange {
+      type string;
+    }
+    leaf StatusEntry_SpeedDuplexUsed {
+      type eventpb:PortSpeedDuplexTypeOptions;
+    }
+    leaf StatusEntry_FlowControlUsed {
+      type boolean;
+    }
+    leaf StatusEntry_EEEActive {
+      type boolean;
+    }
+    leaf StatusEntry_LinkState {
+      type stppb:PortStatusStateTypeOptions;
+    }
+  }
+  // core/port/port.proto
+  grouping Status {
+    container Status_List {
+      uses portpb:StatusEntry;
+    }
+  }
+  // core/port/port.proto
+  grouping LgPortStatusEntry {
+    container LgPortStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf LgPortStatusEntry_LinkUp {
+      type boolean;
+    }
+    leaf LgPortStatusEntry_Existed {
+      type boolean;
+    }
+    container LgPortStatusEntry_ActiveNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    container LgPortStatusEntry_Members {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/port/port.proto
+  grouping LgPortStatus {
+    container LgPortStatus_List {
+      uses portpb:LgPortStatusEntry;
+    }
+  }
+}

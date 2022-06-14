@@ -1,0 +1,15 @@
+module intri-lacp {
+  namespace "intri:intri-lacp";
+  prefix "intri-lacp";
+  import devicepb {
+    prefix "devicepb";
+  }
+  import lacppb {
+    prefix "lacppb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

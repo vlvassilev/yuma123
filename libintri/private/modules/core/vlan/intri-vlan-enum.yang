@@ -1,0 +1,126 @@
+submodule intri-vlan-enum {
+  belongs-to "intri-vlan" {
+    prefix "intri-vlan-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/vlan/common.proto
+  typedef StatusUsedTypeOptions {
+    type enumeration {
+      enum STATUS_USED_TYPE_CONFIG {
+        description "[Config Usage] the VLAN is using by configuration";
+        value 0;
+      }
+      enum STATUS_USED_TYPE_GVRP {
+        description "[GVRP Usage] the VLAN is using by GVRP";
+        value 1;
+      }
+      enum STATUS_USED_TYPE_VIA_MAC_TABLE {
+        description "[Via MAC Table]";
+        value 2;
+      }
+      enum STATUS_USED_TYPE_MAC_VIA_RADIUS {
+        description "[MAC Via Radius]";
+        value 3;
+      }
+      enum STATUS_USED_TYPE_802_1X_VIA_RADIUS {
+        description "[802.1x Via Radius]";
+        value 4;
+      }
+      enum STATUS_USED_TYPE_UNAUTHORIZED {
+        description "[UnAuthorized]";
+        value 5;
+      }
+    }
+  }
+  // core/vlan/common.proto
+  typedef PortConfigVLANModeTypeOptions {
+    type enumeration {
+      enum PORT_CONFIG_VLAN_MODE_TYPE_ACCESS {
+        description "[Access] the port interface is untagged port";
+        value 0;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_HYBRID {
+        description "[Hybrid] the port interface is tagged/untagged port";
+        value 1;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_TRUNK {
+        description "[Trunk] the port interface is tagged port";
+        value 2;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_QINQ_CUSTOMER {
+        description "[Q-in-Q Customer] the port interface is tagged port, the overlapping VLAN IDs will be allow in Layer 2 Ethernet connection";
+        value 3;
+      }
+      enum PORT_CONFIG_VLAN_MODE_TYPE_QINQ_PROVIDER {
+        description "[Q-in-Q Provider] the port interface is tagged port, the overlapping VLAN IDs will be allow in Layer 2 Ethernet connection";
+        value 4;
+      }
+    }
+  }
+  // core/vlan/common.proto
+  typedef PortConfigQinQEtherTypeOptions {
+    type enumeration {
+      enum PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_8100 {
+        description "[0x8100] Normal VLAN tag usually not used for double tagged application. (801.1q)";
+        value 0;
+      }
+      enum PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_88A8 {
+        description "[0x88A8] Standard value for 802.1ad";
+        value 1;
+      }
+      enum PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_9100 {
+        description "[0x9100] Cisco standard value for 802.1ad";
+        value 2;
+      }
+    }
+  }
+  // core/vlan/common.proto
+  typedef ProtocolBasedEncapsulationTypeOptions {
+    type enumeration {
+      enum PROTOCOL_BASED_ENCAPSULATION_TYPE_ETHERNET_V2 {
+        description "[Ethernet V2]";
+        value 0;
+      }
+      enum PROTOCOL_BASED_ENCAPSULATION_TYPE_LLC {
+        description "[LLC]";
+        value 1;
+      }
+      enum PROTOCOL_BASED_ENCAPSULATION_TYPE_LLCSNAP {
+        description "[LLC SNAP]";
+        value 2;
+      }
+    }
+  }
+  // core/vlan/common.proto
+  typedef IPVersionTypeOptions {
+    type enumeration {
+      enum IP_VERSION_TYPE_V4 {
+        description "[IPv4]";
+        value 0;
+      }
+      enum IP_VERSION_TYPE_V6 {
+        description "[IPv6]";
+        value 1;
+      }
+    }
+  }
+  // core/vlan/common.proto
+  typedef AcceptFrameTypeOptions {
+    type enumeration {
+      enum ACCEPT_FRAME_TYPE_ALL {
+        description "[ALL]";
+        value 0;
+      }
+      enum ACCEPT_FRAME_TYPE_UNTAGGED_ONLY {
+        description "[Untagged Only]";
+        value 1;
+      }
+      enum ACCEPT_FRAME_TYPE_TAGGED_ONLY {
+        description "[Tagged Only]";
+        value 2;
+      }
+    }
+  }
+}

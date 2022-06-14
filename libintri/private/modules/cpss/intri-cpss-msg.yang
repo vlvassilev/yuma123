@@ -1,0 +1,1494 @@
+submodule intri-cpss-msg {
+  belongs-to "intri-cpss" {
+    prefix "intri-cpss-msg";
+  }
+  include intri-cpss-enum;
+  import cpsspb {
+    prefix "cpsspb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // cpss/common.proto
+  grouping Enabled {
+    leaf Enabled_IsEnabled {
+      type boolean;
+    }
+  }
+  // cpss/common.proto
+  grouping IndexList {
+    leaf IndexList_List {
+      type int32;
+    }
+  }
+  // cpss/common.proto
+  grouping MACAddress {
+    leaf MACAddress_Value {
+      type string;
+    }
+  }
+  // cpss/device.proto
+  grouping DeviceArchitecture {
+    container DeviceArchitecture_Information {
+      uses cpsspb:DeviceInformation;
+    }
+    container DeviceArchitecture_PortAllocationTable {
+      uses cpsspb:DevicePortAllocationTable;
+    }
+  }
+  // cpss/device.proto
+  grouping DeviceInformation {
+    leaf DeviceInformation_Model {
+      type string;
+    }
+    leaf DeviceInformation_MACAddress {
+      type string;
+    }
+    leaf DeviceInformation_Description {
+      type string;
+    }
+    leaf DeviceInformation_EnterpriseOID {
+      type string;
+    }
+    leaf DeviceInformation_Vendor {
+      type string;
+    }
+    leaf DeviceInformation_HardwareVersion {
+      type string;
+    }
+    leaf DeviceInformation_SoftwareVersion {
+      type string;
+    }
+  }
+  // cpss/device.proto
+  grouping DevicePortProperty {
+    leaf DevicePortProperty_PortNo {
+      type int32;
+    }
+    leaf DevicePortProperty_Type {
+      type cpsspb:PortTypeOptions;
+    }
+    leaf DevicePortProperty_MACNo {
+      type int32;
+    }
+    container DevicePortProperty_PHYInterface {
+      uses cpsspb:PHYInterface;
+    }
+    leaf DevicePortProperty_PHYID1 {
+      type int32;
+    }
+    leaf DevicePortProperty_PHYID2 {
+      type int32;
+    }
+    leaf DevicePortProperty_PHYChipID {
+      type int32;
+    }
+    leaf DevicePortProperty_PoENo {
+      type int32;
+    }
+    leaf DevicePortProperty_PoEChipNo {
+      type int32;
+    }
+    leaf DevicePortProperty_PoELEDNo {
+      type int32;
+    }
+    leaf DevicePortProperty_SupportedTypeList {
+      type cpsspb:PortTypeOptions;
+    }
+    leaf DevicePortProperty_SupportedMediaList {
+      type cpsspb:PortMediaOptions;
+    }
+  }
+  // cpss/device.proto
+  grouping PHYInterface {
+    leaf PHYInterface_Interface {
+      type int32;
+    }
+    leaf PHYInterface_Type {
+      type cpsspb:PHYInterfaceTypeOptions;
+    }
+  }
+  // cpss/device.proto
+  grouping DevicePortAllocationTable {
+    leaf DevicePortAllocationTable_CPUPortNo {
+      type int32;
+    }
+    container DevicePortAllocationTable_PortPropertyList {
+      uses cpsspb:DevicePortProperty;
+    }
+    leaf DevicePortAllocationTable_PortList {
+      type int32;
+    }
+    leaf DevicePortAllocationTable_MACNoList {
+      type int32;
+    }
+    leaf DevicePortAllocationTable_PoEList {
+      type int32;
+    }
+    leaf DevicePortAllocationTable_SFPList {
+      type int32;
+    }
+    leaf DevicePortAllocationTable_LAGList {
+      type int32;
+    }
+  }
+  // cpss/device.proto
+  grouping DevicePortEntry {
+    leaf DevicePortEntry_DeviceID {
+      type int32;
+    }
+    leaf DevicePortEntry_PortNo {
+      type int32;
+    }
+  }
+  // cpss/device.proto
+  grouping DevicePortList {
+    container DevicePortList_List {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/device.proto
+  grouping DeviceTrunkEntry {
+    leaf DeviceTrunkEntry_DeviceID {
+      type int32;
+    }
+    leaf DeviceTrunkEntry_TrunkID {
+      type int32;
+    }
+  }
+  // cpss/device.proto
+  grouping DeviceTrunkList {
+    container DeviceTrunkList_List {
+      uses cpsspb:DeviceTrunkEntry;
+    }
+  }
+  // cpss/device.proto
+  grouping DeviceInterfaceEntry {
+    leaf DeviceInterfaceEntry_Type {
+      type cpsspb:InterfaceTypeOptions;
+    }
+    leaf DeviceInterfaceEntry_DeviceID {
+      type int32;
+    }
+    leaf DeviceInterfaceEntry_PortNo {
+      type int32;
+    }
+    leaf DeviceInterfaceEntry_LAGNo {
+      type int32;
+    }
+  }
+  // cpss/device.proto
+  grouping DeviceInterfaceList {
+    container DeviceInterfaceList_List {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+  }
+  // cpss/trunking.proto
+  grouping TrunkingGroupMemberEntry {
+    leaf TrunkingGroupMemberEntry_LAGNo {
+      type int32;
+    }
+    container TrunkingGroupMemberEntry_EnableMemberList {
+      uses cpsspb:DevicePortList;
+    }
+    container TrunkingGroupMemberEntry_DisableMemberList {
+      uses cpsspb:DevicePortList;
+    }
+  }
+  // cpss/trunking.proto
+  grouping TrunkingMemberEntry {
+    leaf TrunkingMemberEntry_LAGNo {
+      type int32;
+    }
+    container TrunkingMemberEntry_MemberList {
+      uses cpsspb:DevicePortList;
+    }
+  }
+  // cpss/trunking.proto
+  grouping TrunkingGroupID {
+    leaf TrunkingGroupID_LAGNo {
+      type int32;
+    }
+  }
+  // cpss/trunking.proto
+  grouping TrunkingLoadBalanceMode {
+    leaf TrunkingLoadBalanceMode_Mode {
+      type cpsspb:TrunkingLoadBalanceModeOptions;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLIndexList {
+    leaf ACLIndexList_List {
+      type int32;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLUserDefinedRuleList {
+    container ACLUserDefinedRuleList_List {
+      uses cpsspb:ACLUserDefinedRuleEntry;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLUserDefinedRuleEntry {
+    leaf ACLUserDefinedRuleEntry_Index {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_UniqueID {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_DirectionType {
+      type cpsspb:ACLDirectionTypeOptions;
+    }
+    leaf ACLUserDefinedRuleEntry_Type {
+      type cpsspb:ACLRuleTypeOptions;
+    }
+    leaf ACLUserDefinedRuleEntry_SourceMAC {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_SourceMACMask {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_DestinationMAC {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_DestinationMACMask {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_EtherType {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_EtherTypeMask {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_SourceIPAddr {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_SourceIPMask {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_DestinationIPAddr {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_DestinationIPMask {
+      type string;
+    }
+    leaf ACLUserDefinedRuleEntry_IPProtocol {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_IPProtocolMask {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_L4SourcePort {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_L4SourcePortMask {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_L4DestinationPort {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_L4DestinationPortMask {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleEntry_VlanID {
+      type int32;
+    }
+    container ACLUserDefinedRuleEntry_SourceInterface {
+      uses cpsspb:ACLSourceInterfaceEntry;
+    }
+    container ACLUserDefinedRuleEntry_Action {
+      uses cpsspb:ACLActionEntry;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLUserDefinedRuleRemovalList {
+    container ACLUserDefinedRuleRemovalList_List {
+      uses cpsspb:ACLUserDefinedRuleRemovalEntry;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLUserDefinedRuleRemovalEntry {
+    leaf ACLUserDefinedRuleRemovalEntry_Index {
+      type int32;
+    }
+    leaf ACLUserDefinedRuleRemovalEntry_UniqueID {
+      type string;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLControlRuleEntry {
+    leaf ACLControlRuleEntry_Type {
+      type cpsspb:ACLRuleTypeOptions;
+    }
+    leaf ACLControlRuleEntry_Index {
+      type int32;
+    }
+    container ACLControlRuleEntry_MACIPBindingRule {
+      uses cpsspb:ACLMACIPBindingRuleEntry;
+    }
+    container ACLControlRuleEntry_SubnetBasedRule {
+      uses cpsspb:ACLSubnetBasedRuleEntry;
+    }
+    container ACLControlRuleEntry_MACBasedRule {
+      uses cpsspb:ACLMACBasedRuleEntry;
+    }
+    container ACLControlRuleEntry_SelectiveQinQRule {
+      uses cpsspb:ACLSelectiveQinQRuleEntry;
+    }
+    container ACLControlRuleEntry_FlowMirrorRule {
+      uses cpsspb:ACLFlowMirrorRuleEntry;
+    }
+    container ACLControlRuleEntry_MACCountingRule {
+      uses cpsspb:ACLMACCountingRuleEntry;
+    }
+    container ACLControlRuleEntry_PTPMessageRule {
+      uses cpsspb:ACLPTPMessageRuleEntry;
+    }
+    container ACLControlRuleEntry_SourceInterface {
+      uses cpsspb:ACLSourceInterfaceEntry;
+    }
+    container ACLControlRuleEntry_Action {
+      uses cpsspb:ACLActionEntry;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLSourceInterfaceEntry {
+    leaf ACLSourceInterfaceEntry_Type {
+      type cpsspb:InterfaceTypeOptions;
+    }
+    leaf ACLSourceInterfaceEntry_VlanID {
+      type int32;
+    }
+    container ACLSourceInterfaceEntry_PortList {
+      uses cpsspb:DevicePortEntry;
+    }
+    container ACLSourceInterfaceEntry_LAGList {
+      uses cpsspb:TrunkingGroupID;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLActionEntry {
+    leaf ACLActionEntry_PacketCommand {
+      type cpsspb:PacketCommandOptions;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLG8032RuleEntry {
+    leaf ACLG8032RuleEntry_RingID {
+      type int32;
+    }
+    leaf ACLG8032RuleEntry_VlanID {
+      type int32;
+    }
+    leaf ACLG8032RuleEntry_DestinationRingPort {
+      type int32;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLMACIPBindingRuleEntry {
+    leaf ACLMACIPBindingRuleEntry_SourceMAC {
+      type string;
+    }
+    leaf ACLMACIPBindingRuleEntry_SourceIPAddr {
+      type string;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLSubnetBasedRuleEntry {
+    leaf ACLSubnetBasedRuleEntry_SourceIPAddr {
+      type string;
+    }
+    leaf ACLSubnetBasedRuleEntry_SourceIPMask {
+      type string;
+    }
+    leaf ACLSubnetBasedRuleEntry_ModifyVlanID {
+      type int32;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLMACBasedRuleEntry {
+    leaf ACLMACBasedRuleEntry_SourceMAC {
+      type string;
+    }
+    leaf ACLMACBasedRuleEntry_SourceMACMask {
+      type string;
+    }
+    leaf ACLMACBasedRuleEntry_ModifyVlanID {
+      type int32;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLSelectiveQinQRuleEntry {
+    leaf ACLSelectiveQinQRuleEntry_VlanFrom {
+      type int32;
+    }
+    leaf ACLSelectiveQinQRuleEntry_VlanTo {
+      type int32;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLFlowMirrorRuleEntry {
+    leaf ACLFlowMirrorRuleEntry_IsMirrorEnabled {
+      type boolean;
+    }
+    container ACLFlowMirrorRuleEntry_Flow {
+      uses cpsspb:ACLUserDefinedRuleEntry;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLMACCountingRuleEntry {
+    leaf ACLMACCountingRuleEntry_CNCCounterIndex {
+      type int32;
+    }
+    leaf ACLMACCountingRuleEntry_SourceMAC {
+      type string;
+    }
+  }
+  // cpss/acl.proto
+  grouping ACLPTPMessageRuleEntry {
+    leaf ACLPTPMessageRuleEntry_EtherType {
+      type int32;
+    }
+  }
+  // cpss/cnc.proto
+  grouping CNCCountingEntry {
+    leaf CNCCountingEntry_Type {
+      type cpsspb:CNCCountingTypeOptions;
+    }
+    container CNCCountingEntry_MACAddressCountingEntry {
+      uses cpsspb:CNCMACAddressCountingEntry;
+    }
+  }
+  // cpss/cnc.proto
+  grouping CNCMACAddressCountingEntry {
+    container CNCMACAddressCountingEntry_Address {
+      uses cpsspb:MACAddress;
+    }
+  }
+  // cpss/cnc.proto
+  grouping CNCCounter {
+    leaf CNCCounter_ByteCount {
+      type uint64;
+    }
+    leaf CNCCounter_PktCount {
+      type uint64;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBAutoLearningEnable {
+    leaf FDBAutoLearningEnable_Enable {
+      type boolean;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBIdentifyEntry {
+    leaf FDBIdentifyEntry_VlanID {
+      type int32;
+    }
+    leaf FDBIdentifyEntry_Address {
+      type string;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBSecureBreachEntry {
+    container FDBSecureBreachEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf FDBSecureBreachEntry_Enable {
+      type boolean;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBMACEntry {
+    leaf FDBMACEntry_InterfaceType {
+      type cpsspb:InterfaceTypeOptions;
+    }
+    leaf FDBMACEntry_IsStatic {
+      type boolean;
+    }
+    leaf FDBMACEntry_IsForward {
+      type boolean;
+    }
+    leaf FDBMACEntry_VlanID {
+      type int32;
+    }
+    leaf FDBMACEntry_Address {
+      type string;
+    }
+    container FDBMACEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    container FDBMACEntry_Trunk {
+      uses cpsspb:DeviceTrunkEntry;
+    }
+    container FDBMACEntry_Multicast {
+      uses cpsspb:FDBMulticastEntry;
+    }
+    leaf FDBMACEntry_Action {
+      type cpsspb:FDBEntryActionTypeOptions;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBDumpEntry {
+    container FDBDumpEntry_List {
+      uses cpsspb:FDBMACEntry;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBHashEntry {
+    leaf FDBHashEntry_LayerType {
+      type cpsspb:FDBLayerTypeOptions;
+    }
+    leaf FDBHashEntry_VlanID {
+      type int32;
+    }
+    leaf FDBHashEntry_Address {
+      type string;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBAgingTime {
+    leaf FDBAgingTime_Time {
+      type int32;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBFlushEntry {
+    leaf FDBFlushEntry_InterfaceType {
+      type cpsspb:InterfaceTypeOptions;
+    }
+    leaf FDBFlushEntry_IsUnicastDynamic {
+      type boolean;
+    }
+    leaf FDBFlushEntry_IsUnicastAll {
+      type boolean;
+    }
+    leaf FDBFlushEntry_IsMulticast {
+      type boolean;
+    }
+    leaf FDBFlushEntry_VlanList {
+      type int32;
+    }
+    container FDBFlushEntry_PortList {
+      uses cpsspb:DevicePortList;
+    }
+    container FDBFlushEntry_TrunkList {
+      uses cpsspb:DeviceTrunkList;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBMulticastEntry {
+    leaf FDBMulticastEntry_EntryType {
+      type cpsspb:MulticastEntryTypeOptions;
+    }
+    leaf FDBMulticastEntry_VIDX {
+      type int32;
+    }
+  }
+  // cpss/fdb.proto
+  grouping FDBCounters {
+    leaf FDBCounters_NumberOfFreeEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfUsedEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfMacUnicastDynamicEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfMacUnicastStaticEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfMacMulticastDynamicEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfMacMulticastStaticEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfIpv4MulticastEntries {
+      type int32;
+    }
+    leaf FDBCounters_NumberOfIpv6MulticastEntries {
+      type int32;
+    }
+  }
+  // cpss/mirroring.proto
+  grouping MirroringSessionEntry {
+    leaf MirroringSessionEntry_SourceType {
+      type cpsspb:InterfaceTypeOptions;
+    }
+    container MirroringSessionEntry_SourcePortList {
+      uses cpsspb:MirroringSourcePortEntry;
+    }
+    container MirroringSessionEntry_SourceVlanList {
+      uses cpsspb:MirroringSourceVlanEntry;
+    }
+    container MirroringSessionEntry_DestinationPort {
+      uses cpsspb:DevicePortEntry;
+    }
+    container MirroringSessionEntry_RSPAN {
+      uses cpsspb:MirroringRSPANEntry;
+    }
+  }
+  // cpss/mirroring.proto
+  grouping MirroringSourcePortEntry {
+    leaf MirroringSourcePortEntry_Direction {
+      type cpsspb:MirroringDirectionTypeOptions;
+    }
+    container MirroringSourcePortEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/mirroring.proto
+  grouping MirroringSourceVlanEntry {
+    leaf MirroringSourceVlanEntry_Direction {
+      type cpsspb:MirroringDirectionTypeOptions;
+    }
+    leaf MirroringSourceVlanEntry_VlanID {
+      type int32;
+    }
+  }
+  // cpss/mirroring.proto
+  grouping MirroringSessionList {
+    container MirroringSessionList_List {
+      uses cpsspb:MirroringSessionEntry;
+    }
+  }
+  // cpss/mirroring.proto
+  grouping MirroringPolicyBased {
+    leaf MirroringPolicyBased_IsEnabled {
+      type boolean;
+    }
+    container MirroringPolicyBased_DestinationPort {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/mirroring.proto
+  grouping MirroringRSPANEntry {
+    leaf MirroringRSPANEntry_IsLocalEnabled {
+      type boolean;
+    }
+    leaf MirroringRSPANEntry_IsRemoteEnabled {
+      type boolean;
+    }
+    leaf MirroringRSPANEntry_AnalyzerVlanID {
+      type int32;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscMACRegisterEntry {
+    leaf MiscMACRegisterEntry_Address {
+      type uint32;
+    }
+    leaf MiscMACRegisterEntry_Data {
+      type uint32;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscSMIRegisterEntry {
+    leaf MiscSMIRegisterEntry_PHYInterface {
+      type uint32;
+    }
+    leaf MiscSMIRegisterEntry_PHYID {
+      type uint32;
+    }
+    leaf MiscSMIRegisterEntry_Address {
+      type uint32;
+    }
+    leaf MiscSMIRegisterEntry_Data {
+      type uint32;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscXSMIRegisterEntry {
+    leaf MiscXSMIRegisterEntry_PHYInterface {
+      type uint32;
+    }
+    leaf MiscXSMIRegisterEntry_PHYID {
+      type uint32;
+    }
+    leaf MiscXSMIRegisterEntry_PHYDev {
+      type uint32;
+    }
+    leaf MiscXSMIRegisterEntry_Address {
+      type uint32;
+    }
+    leaf MiscXSMIRegisterEntry_Data {
+      type uint32;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscRegisterData {
+    leaf MiscRegisterData_Data {
+      type uint32;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscTemperature {
+    leaf MiscTemperature_Temperature {
+      type int32;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscPHYPortModel {
+    leaf MiscPHYPortModel_Interface {
+      type string;
+    }
+    leaf MiscPHYPortModel_Model {
+      type string;
+    }
+  }
+  // cpss/misc.proto
+  grouping MiscModel {
+    leaf MiscModel_Model {
+      type string;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanID {
+    leaf VlanID_VlanID {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanList {
+    leaf VlanList_List {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanMemberTaggingList {
+    leaf VlanMemberTaggingList_VlanID {
+      type int32;
+    }
+    container VlanMemberTaggingList_List {
+      uses cpsspb:VlanMemeberTaggingEntry;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanMemeberTaggingEntry {
+    container VlanMemeberTaggingEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf VlanMemeberTaggingEntry_Command {
+      type cpsspb:VlanTaggingCommandTypeOptions;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanDefaultVIDEntry {
+    leaf VlanDefaultVIDEntry_VlanID {
+      type int32;
+    }
+    container VlanDefaultVIDEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanAcceptFrameTypeEntry {
+    container VlanAcceptFrameTypeEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf VlanAcceptFrameTypeEntry_Type {
+      type cpsspb:VlanAcceptFrameTypeOptions;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanTPIDIndexEntry {
+    container VlanTPIDIndexEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf VlanTPIDIndexEntry_Index {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanTPIDEntry {
+    leaf VlanTPIDEntry_Index {
+      type int32;
+    }
+    leaf VlanTPIDEntry_TPID {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanTPIDList {
+    container VlanTPIDList_List {
+      uses cpsspb:VlanTPIDEntry;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanStatusEntry {
+    leaf VlanStatusEntry_VlanID {
+      type int32;
+    }
+    leaf VlanStatusEntry_UntaggedList {
+      type int32;
+    }
+    leaf VlanStatusEntry_TaggedList {
+      type int32;
+    }
+    leaf VlanStatusEntry_ProviderList {
+      type int32;
+    }
+    leaf VlanStatusEntry_CustomerList {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanStatusList {
+    container VlanStatusList_List {
+      uses cpsspb:VlanStatusEntry;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanFlushEntry {
+    leaf VlanFlushEntry_IsFlushAll {
+      type boolean;
+    }
+    leaf VlanFlushEntry_VlanID {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanTunnelEntry {
+    container VlanTunnelEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf VlanTunnelEntry_IsEnabled {
+      type boolean;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanProtocolClassID {
+    leaf VlanProtocolClassID_ClassID {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanProtocolClassEntry {
+    leaf VlanProtocolClassEntry_ClassID {
+      type int32;
+    }
+    leaf VlanProtocolClassEntry_EtherType {
+      type int32;
+    }
+    leaf VlanProtocolClassEntry_Encapsulation {
+      type cpsspb:VlanProtocolBasedEncapsulationTypeOptions;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanProtocolEntry {
+    container VlanProtocolEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf VlanProtocolEntry_ClassID {
+      type int32;
+    }
+    leaf VlanProtocolEntry_VlanID {
+      type int32;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanTranslationEntry {
+    container VlanTranslationEntry_Interface {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf VlanTranslationEntry_IsEnabled {
+      type boolean;
+    }
+  }
+  // cpss/vlan.proto
+  grouping VlanTranslationMappingEntry {
+    leaf VlanTranslationMappingEntry_SourceVlanID {
+      type int32;
+    }
+    leaf VlanTranslationMappingEntry_TranslatedVlanID {
+      type int32;
+    }
+  }
+  // cpss/multicast.proto
+  grouping MulticastBridgeGroupEntry {
+    container MulticastBridgeGroupEntry_Identify {
+      uses cpsspb:FDBIdentifyEntry;
+    }
+    container MulticastBridgeGroupEntry_InterfaceList {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+  }
+  // cpss/multicast.proto
+  grouping MulticastUnregisteredFloodingEntry {
+    leaf MulticastUnregisteredFloodingEntry_VlanID {
+      type int32;
+    }
+    container MulticastUnregisteredFloodingEntry_InterfaceList {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+  }
+  // cpss/multicast.proto
+  grouping MulticastTableVlanFloodingEntry {
+    leaf MulticastTableVlanFloodingEntry_VlanID {
+      type int32;
+    }
+    leaf MulticastTableVlanFloodingEntry_VIDX {
+      type int32;
+    }
+    container MulticastTableVlanFloodingEntry_PortList {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/multicast.proto
+  grouping MulticastTableBridgeGroupEntry {
+    leaf MulticastTableBridgeGroupEntry_VlanID {
+      type int32;
+    }
+    leaf MulticastTableBridgeGroupEntry_VIDX {
+      type int32;
+    }
+    leaf MulticastTableBridgeGroupEntry_Address {
+      type string;
+    }
+    container MulticastTableBridgeGroupEntry_PortList {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/multicast.proto
+  grouping MulticastTable {
+    container MulticastTable_VlanFloodingList {
+      uses cpsspb:MulticastTableVlanFloodingEntry;
+    }
+    container MulticastTable_BridgeGroupList {
+      uses cpsspb:MulticastTableBridgeGroupEntry;
+    }
+  }
+  // cpss/packetControl.proto
+  grouping PacketControlActionEntry {
+    leaf PacketControlActionEntry_Enable {
+      type boolean;
+    }
+    leaf PacketControlActionEntry_VlanID {
+      type int32;
+    }
+    container PacketControlActionEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/packetControl.proto
+  grouping PacketControlGeneralStatusEntry {
+    leaf PacketControlGeneralStatusEntry_Protocol {
+      type cpsspb:PacketControlProtocolTypeOptions;
+    }
+    leaf PacketControlGeneralStatusEntry_IsEnabled {
+      type boolean;
+    }
+    leaf PacketControlGeneralStatusEntry_PacketCommand {
+      type cpsspb:PacketCommandOptions;
+    }
+  }
+  // cpss/packetControl.proto
+  grouping PacketControlInterfaceStatusEntry {
+    leaf PacketControlInterfaceStatusEntry_Protocol {
+      type cpsspb:PacketControlProtocolTypeOptions;
+    }
+    leaf PacketControlInterfaceStatusEntry_Type {
+      type cpsspb:InterfaceTypeOptions;
+    }
+    leaf PacketControlInterfaceStatusEntry_EnabledList {
+      type int32;
+    }
+    leaf PacketControlInterfaceStatusEntry_PacketCommand {
+      type cpsspb:PacketCommandOptions;
+    }
+  }
+  // cpss/packetControl.proto
+  grouping PacketControlStatusList {
+    container PacketControlStatusList_GeneralList {
+      uses cpsspb:PacketControlGeneralStatusEntry;
+    }
+    container PacketControlStatusList_InterfaceList {
+      uses cpsspb:PacketControlInterfaceStatusEntry;
+    }
+  }
+  // cpss/policer.proto
+  grouping PolicerStormCountingEnableEntry {
+    leaf PolicerStormCountingEnableEntry_IsEnable {
+      type boolean;
+    }
+    container PolicerStormCountingEnableEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/policer.proto
+  grouping PolicerStormCountingCounterEntry {
+    leaf PolicerStormCountingCounterEntry_UnknownUnicastByteCount {
+      type uint64;
+    }
+    leaf PolicerStormCountingCounterEntry_UnknownUnicastPktCount {
+      type uint64;
+    }
+    leaf PolicerStormCountingCounterEntry_MulticastByteCount {
+      type uint64;
+    }
+    leaf PolicerStormCountingCounterEntry_MulticastPktCount {
+      type uint64;
+    }
+    leaf PolicerStormCountingCounterEntry_BroadcastByteCount {
+      type uint64;
+    }
+    leaf PolicerStormCountingCounterEntry_BroadcastPktCount {
+      type uint64;
+    }
+  }
+  // cpss/port.proto
+  grouping PortEnableEntry {
+    container PortEnableEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PortEnableEntry_Enable {
+      type boolean;
+    }
+    leaf PortEnableEntry_Speed {
+      type cpsspb:PortSpeedDuplexOptions;
+    }
+  }
+  // cpss/port.proto
+  grouping PortSpeedDuplexEntry {
+    container PortSpeedDuplexEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PortSpeedDuplexEntry_Speed {
+      type cpsspb:PortSpeedDuplexOptions;
+    }
+  }
+  // cpss/port.proto
+  grouping PortSpeedDuplexList {
+    container PortSpeedDuplexList_List {
+      uses cpsspb:PortSpeedDuplexEntry;
+    }
+  }
+  // cpss/port.proto
+  grouping PortFlowControlEntry {
+    container PortFlowControlEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PortFlowControlEntry_Enable {
+      type boolean;
+    }
+  }
+  // cpss/port.proto
+  grouping PortEEEEntry {
+    container PortEEEEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PortEEEEntry_Enable {
+      type boolean;
+    }
+  }
+  // cpss/port.proto
+  grouping PortCounterEntry {
+    container PortCounterEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PortCounterEntry_GoodOctetsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_BadOctetsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_MACTransmitErr {
+      type uint64;
+    }
+    leaf PortCounterEntry_GoodPktsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_BadPktsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_BrdcPktsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_McPktsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_Pkts64Octets {
+      type uint64;
+    }
+    leaf PortCounterEntry_Pkts65To127Octets {
+      type uint64;
+    }
+    leaf PortCounterEntry_Pkts128To255Octets {
+      type uint64;
+    }
+    leaf PortCounterEntry_Pkts256To511Octets {
+      type uint64;
+    }
+    leaf PortCounterEntry_Pkts512To1023Octets {
+      type uint64;
+    }
+    leaf PortCounterEntry_Pkts1024ToMaxOctets {
+      type uint64;
+    }
+    leaf PortCounterEntry_GoodOctetsSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_GoodPktsSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_ExcessiveCollisions {
+      type uint64;
+    }
+    leaf PortCounterEntry_McPktsSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_BrdcPktsSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_UnrecogMACCntrRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_FCSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_GoodFCRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_DropEvents {
+      type uint64;
+    }
+    leaf PortCounterEntry_UndersizePkts {
+      type uint64;
+    }
+    leaf PortCounterEntry_FragmentsPkts {
+      type uint64;
+    }
+    leaf PortCounterEntry_OversizePkts {
+      type uint64;
+    }
+    leaf PortCounterEntry_JabberPkts {
+      type uint64;
+    }
+    leaf PortCounterEntry_MACRecvError {
+      type uint64;
+    }
+    leaf PortCounterEntry_BadCrc {
+      type uint64;
+    }
+    leaf PortCounterEntry_Collisions {
+      type uint64;
+    }
+    leaf PortCounterEntry_LateCollisions {
+      type uint64;
+    }
+    leaf PortCounterEntry_BadFcRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_UcPktsRecv {
+      type uint64;
+    }
+    leaf PortCounterEntry_UcPktsSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_MultiplePktsSent {
+      type uint64;
+    }
+    leaf PortCounterEntry_DeferredPktsSent {
+      type uint64;
+    }
+  }
+  // cpss/port.proto
+  grouping PortCounterList {
+    container PortCounterList_List {
+      uses cpsspb:PortCounterEntry;
+    }
+  }
+  // cpss/port.proto
+  grouping PortIsolationEntry {
+    container PortIsolationEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    container PortIsolationEntry_OutgoingList {
+      uses cpsspb:DevicePortEntry;
+    }
+  }
+  // cpss/port.proto
+  grouping PortIsolationList {
+    container PortIsolationList_List {
+      uses cpsspb:PortIsolationEntry;
+    }
+  }
+  // cpss/port.proto
+  grouping PortIPGSize {
+    leaf PortIPGSize_Size {
+      type int32;
+    }
+  }
+  // cpss/port.proto
+  grouping PortFaultStatusEntry {
+    leaf PortFaultStatusEntry_IsRxFault {
+      type boolean;
+    }
+    leaf PortFaultStatusEntry_IsTxFault {
+      type boolean;
+    }
+  }
+  // cpss/port.proto
+  grouping PortStatusEntry {
+    container PortStatusEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PortStatusEntry_IsEnabled {
+      type boolean;
+    }
+    leaf PortStatusEntry_IsLinkUp {
+      type boolean;
+    }
+    leaf PortStatusEntry_IsFlowControlEnabled {
+      type boolean;
+    }
+    leaf PortStatusEntry_LinkSpeed {
+      type cpsspb:PortSpeedDuplexOptions;
+    }
+    leaf PortStatusEntry_EEEActive {
+      type boolean;
+    }
+    leaf PortStatusEntry_PMState {
+      type string;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPToD {
+    leaf PTPToD_Sec {
+      type uint64;
+    }
+    leaf PTPToD_Ns {
+      type uint32;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPToDFrequency {
+    leaf PTPToDFrequency_FractionalNs {
+      type uint32;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPQueueInfo {
+    leaf PTPQueueInfo_Sec {
+      type uint64;
+    }
+    leaf PTPQueueInfo_Ns {
+      type uint32;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPMessageInfo {
+    container PTPMessageInfo_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PTPMessageInfo_SeqID {
+      type uint32;
+    }
+    leaf PTPMessageInfo_MessageType {
+      type uint32;
+    }
+    leaf PTPMessageInfo_QueueNo {
+      type uint32;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPLinkDelay {
+    container PTPLinkDelay_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PTPLinkDelay_Delay {
+      type int32;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPPortDelay {
+    container PTPPortDelay_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PTPPortDelay_Direction {
+      type cpsspb:PTPPortDelayTypeOptions;
+    }
+    leaf PTPPortDelay_Delay {
+      type int32;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPMode {
+    container PTPMode_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PTPMode_DomainIndex {
+      type uint32;
+    }
+    leaf PTPMode_DomainNumber {
+      type uint32;
+    }
+    leaf PTPMode_Mode {
+      type cpsspb:PTPModeTypeOptions;
+    }
+  }
+  // cpss/ptp.proto
+  grouping PTPSyncE {
+    container PTPSyncE_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf PTPSyncE_IsEnable {
+      type boolean;
+    }
+    leaf PTPSyncE_Speed {
+      type cpsspb:PortSpeedDuplexOptions;
+    }
+    leaf PTPSyncE_ClockSelect {
+      type cpsspb:PTPSyncERecoveryClockSelectTypeOptions;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSPortProfileEntry {
+    container QoSPortProfileEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf QoSPortProfileEntry_Mode {
+      type cpsspb:QoSTrustModeOptions;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSPortProfileList {
+    container QoSPortProfileList_List {
+      uses cpsspb:QoSPortProfileEntry;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSPortQueueList {
+    container QoSPortQueueList_List {
+      uses cpsspb:QoSPortQueueEntry;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSPortQueueEntry {
+    leaf QoSPortQueueEntry_QueueNo {
+      type int32;
+    }
+    leaf QoSPortQueueEntry_Ratio {
+      type int32;
+    }
+    leaf QoSPortQueueEntry_Scheduler {
+      type cpsspb:QoSSchedulerTypeOptions;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSCoSProfile {
+    leaf QoSCoSProfile_CoSNo {
+      type int32;
+    }
+    leaf QoSCoSProfile_QueueNo {
+      type int32;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSCoSProfileList {
+    container QoSCoSProfileList_CoSList {
+      uses cpsspb:QoSCoSProfile;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSDSCPProfile {
+    leaf QoSDSCPProfile_DSCPNo {
+      type int32;
+    }
+    leaf QoSDSCPProfile_QueueNo {
+      type int32;
+    }
+  }
+  // cpss/qos.proto
+  grouping QoSDSCPProfileList {
+    container QoSDSCPProfileList_DSCPList {
+      uses cpsspb:QoSDSCPProfile;
+    }
+  }
+  // cpss/ratelimiting.proto
+  grouping RateLimitingIngressEntry {
+    leaf RateLimitingIngressEntry_FilterTypes {
+      type cpsspb:RateLimitingIngressFilterTypeOptions;
+    }
+    container RateLimitingIngressEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf RateLimitingIngressEntry_Rate {
+      type int32;
+    }
+  }
+  // cpss/ratelimiting.proto
+  grouping RateLimitingIngressList {
+    container RateLimitingIngressList_List {
+      uses cpsspb:RateLimitingIngressEntry;
+    }
+  }
+  // cpss/ratelimiting.proto
+  grouping RateLimitingEgressEntry {
+    container RateLimitingEgressEntry_Port {
+      uses cpsspb:DevicePortEntry;
+    }
+    leaf RateLimitingEgressEntry_Rate {
+      type int32;
+    }
+  }
+  // cpss/ratelimiting.proto
+  grouping RateLimitingEgressList {
+    container RateLimitingEgressList_List {
+      uses cpsspb:RateLimitingEgressEntry;
+    }
+  }
+  // cpss/stp.proto
+  grouping STPID {
+    leaf STPID_ID {
+      type int32;
+    }
+    leaf STPID_Proto {
+      type cpsspb:STPProtocolTypeOptions;
+    }
+  }
+  // cpss/stp.proto
+  grouping STPPortState {
+    leaf STPPortState_ID {
+      type int32;
+    }
+    container STPPortState_IdentifyNo {
+      uses cpsspb:DeviceInterfaceEntry;
+    }
+    leaf STPPortState_State {
+      type cpsspb:STPPortStateTypeOptions;
+    }
+    leaf STPPortState_InActive {
+      type boolean;
+    }
+    leaf STPPortState_Proto {
+      type cpsspb:STPProtocolTypeOptions;
+    }
+  }
+  // cpss/stp.proto
+  grouping STPVlanBinding {
+    leaf STPVlanBinding_ID {
+      type int32;
+    }
+    leaf STPVlanBinding_Proto {
+      type cpsspb:STPProtocolTypeOptions;
+    }
+    leaf STPVlanBinding_VlanList {
+      type int32;
+    }
+  }
+  // cpss/stp.proto
+  grouping STPIDState {
+    leaf STPIDState_ID {
+      type int32;
+    }
+    leaf STPIDState_State {
+      type cpsspb:STPPortStateTypeOptions;
+    }
+    leaf STPIDState_Proto {
+      type cpsspb:STPProtocolTypeOptions;
+    }
+  }
+}

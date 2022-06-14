@@ -1,0 +1,237 @@
+submodule intri-timecontrol-msg {
+  belongs-to "intri-timecontrol" {
+    prefix "intri-timecontrol-msg";
+  }
+  include intri-timecontrol-enum;
+  import timecontrolpb {
+    prefix "timecontrolpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  import protobufpb {
+    prefix "protobufpb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // timecontrol/timecontrol.proto
+  grouping InputClockManage {
+    container InputClockManage_List {
+      uses timecontrolpb:InputClockManageEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping InputClockManageEntry {
+    leaf InputClockManageEntry_InputCLK {
+      type devicepb:InputClockTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping MonitorStatus {
+    container MonitorStatus_List {
+      uses timecontrolpb:MonitorStatusEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping MonitorStatusEntry {
+    leaf MonitorStatusEntry_InputCLK {
+      type devicepb:InputClockTypeOptions;
+    }
+    container MonitorStatusEntry_StatusList {
+      uses timecontrolpb:StatusInputBit;
+    }
+    leaf MonitorStatusEntry_Valid {
+      type boolean;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping StatusInputBit {
+    leaf StatusInputBit_Type {
+      type timecontrolpb:StatusInputBitTypeOptions;
+    }
+    leaf StatusInputBit_Valid {
+      type boolean;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLManage {
+    container DPLLManage_List {
+      uses timecontrolpb:DPLLManageEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLManageEntry {
+    leaf DPLLManageEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLStatus {
+    container DPLLStatus_List {
+      uses timecontrolpb:DPLLStatusEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLStatusEntry {
+    leaf DPLLStatusEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    leaf DPLLStatusEntry_StatusType {
+      type timecontrolpb:DPLLStatusBitTypeOptions;
+    }
+    leaf DPLLStatusEntry_InputCLK {
+      type devicepb:InputClockTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLRefPriorityManage {
+    container DPLLRefPriorityManage_List {
+      uses timecontrolpb:DPLLRefPriorityManageEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLRefPriorityManageEntry {
+    leaf DPLLRefPriorityManageEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    leaf DPLLRefPriorityManageEntry_PriorityList {
+      type timecontrolpb:DPLLRefPriorityBitTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLRefPriority {
+    container DPLLRefPriority_List {
+      uses timecontrolpb:DPLLRefPriorityEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLRefPriorityEntry {
+    leaf DPLLRefPriorityEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    container DPLLRefPriorityEntry_PrioritList {
+      uses timecontrolpb:PriorityList;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping PriorityList {
+    leaf PriorityList_Priority {
+      type timecontrolpb:DPLLRefPriorityBitTypeOptions;
+    }
+    leaf PriorityList_InputCLK {
+      type devicepb:InputClockTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping SyncEInputClockSpeed {
+    container SyncEInputClockSpeed_List {
+      uses timecontrolpb:SyncEInputClockSpeedEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping SyncEInputClockSpeedEntry {
+    leaf SyncEInputClockSpeedEntry_InputCLK {
+      type devicepb:InputClockTypeOptions;
+    }
+    leaf SyncEInputClockSpeedEntry_Speed {
+      type devicepb:PortPropertyTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping ToDSource {
+    leaf ToDSource_Enable {
+      type boolean;
+    }
+    leaf ToDSource_Source {
+      type timecontrolpb:ToDSourceTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLToDManage {
+    container DPLLToDManage_List {
+      uses timecontrolpb:DPLLToDManageEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLToDManageEntry {
+    leaf DPLLToDManageEntry_Index {
+      type timecontrolpb:DPLLToDTypeOptions;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping ToDTime {
+    container ToDTime_List {
+      uses timecontrolpb:ToDTimeEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping ToDTimeEntry {
+    leaf ToDTimeEntry_Index {
+      type timecontrolpb:DPLLToDTypeOptions;
+    }
+    container ToDTimeEntry_DateTime {
+      uses protobufpb:Timestamp;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLFrequencyControl {
+    container DPLLFrequencyControl_List {
+      uses timecontrolpb:DPLLFrequencyControlEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLFrequencyControlEntry {
+    leaf DPLLFrequencyControlEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    leaf DPLLFrequencyControlEntry_FreqOffset {
+      type int64;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLPhaseControl {
+    container DPLLPhaseControl_List {
+      uses timecontrolpb:DPLLPhaseControlEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLPhaseControlEntry {
+    leaf DPLLPhaseControlEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    leaf DPLLPhaseControlEntry_PhOffset {
+      type int32;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLPhaseSlopeLimit {
+    container DPLLPhaseSlopeLimit_List {
+      uses timecontrolpb:DPLLPhaseSlopeLimitEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLPhaseSlopeLimitEntry {
+    leaf DPLLPhaseSlopeLimitEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    leaf DPLLPhaseSlopeLimitEntry_Limit {
+      type int32;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLPhaseControlTimer {
+    container DPLLPhaseControlTimer_List {
+      uses timecontrolpb:DPLLPhaseControlTimerEntry;
+    }
+  }
+  // timecontrol/timecontrol.proto
+  grouping DPLLPhaseControlTimerEntry {
+    leaf DPLLPhaseControlTimerEntry_Index {
+      type timecontrolpb:DPLLManageIndexTypeOptions;
+    }
+    leaf DPLLPhaseControlTimerEntry_Timeout {
+      type int32;
+    }
+  }
+}

@@ -1,0 +1,47 @@
+submodule intri-lacp-enum {
+  belongs-to "intri-lacp" {
+    prefix "intri-lacp-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/lacp/common.proto
+  typedef ConfigLinkAggregationTypeOptions {
+    type enumeration {
+      enum CONFIG_LINK_AGGREGATION_STATIC {
+        description "[Static]";
+        value 0;
+      }
+      enum CONFIG_LINK_AGGREGATION_DYNAMIC {
+        description "[Dyanmic]";
+        value 1;
+      }
+    }
+  }
+  // core/lacp/common.proto
+  typedef ModeTypeOptions {
+    type enumeration {
+      enum MODE_TYPE_PASSIVE {
+        description "[Passive]";
+        value 0;
+      }
+      enum MODE_TYPE_ACTIVE {
+        description "[Active]";
+        value 1;
+      }
+    }
+  }
+  // core/lacp/common.proto
+  typedef IntervalTypeOptions {
+    type enumeration {
+      enum INTERVAL_TYPE_SLOW {
+        description "[Slow]";
+        value 0;
+      }
+      enum INTERVAL_TYPE_FAST {
+        description "[Fast]";
+        value 1;
+      }
+    }
+  }
+}

@@ -1,0 +1,231 @@
+submodule intri-ptp-msg {
+  belongs-to "intri-ptp" {
+    prefix "intri-ptp-msg";
+  }
+  include intri-ptp-enum;
+  import protobufpb {
+    prefix "protobufpb";
+  }
+  import ptppb {
+    prefix "ptppb";
+  }
+  import commonpb {
+    prefix "commonpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/ptp/ptp.proto
+  grouping Config {
+    container Config_System {
+      uses ptppb:SystemConfig;
+    }
+    container Config_Port {
+      uses ptppb:PortConfig;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping SystemConfig {
+    container SystemConfig_Mode {
+      uses ptppb:SystemModeConfig;
+    }
+    container SystemConfig_Timer {
+      uses ptppb:SystemTimerConfig;
+    }
+    container SystemConfig_Clock {
+      uses ptppb:SystemClockConfig;
+    }
+    leaf SystemConfig_Encapsulation {
+      type ptppb:EncapsulationTypeOptions;
+    }
+    leaf SystemConfig_Transmission {
+      type ptppb:TransmissionTypeOptions;
+    }
+    container SystemConfig_IPAddressList {
+      uses commonpb:IPAddress;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping SystemModeConfig {
+    leaf SystemModeConfig_Enabled {
+      type boolean;
+    }
+    leaf SystemModeConfig_Profile {
+      type ptppb:ProfileTypeOptions;
+    }
+    leaf SystemModeConfig_ClockType {
+      type ptppb:ClockTypeOptions;
+    }
+    leaf SystemModeConfig_DomainNumber {
+      type int32;
+    }
+    leaf SystemModeConfig_DelayMechanism {
+      type ptppb:DelayMechanismTypeOptions;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping SystemTimerConfig {
+    leaf SystemTimerConfig_PdelayReq {
+      type int32;
+    }
+    leaf SystemTimerConfig_Announce {
+      type int32;
+    }
+    leaf SystemTimerConfig_AnnounceTimeOut {
+      type int32;
+    }
+    leaf SystemTimerConfig_Sync {
+      type int32;
+    }
+    leaf SystemTimerConfig_SyncLimit {
+      type int32;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping SystemClockConfig {
+    leaf SystemClockConfig_Priority1 {
+      type int32;
+    }
+    leaf SystemClockConfig_Priority2 {
+      type int32;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping PortConfig {
+    container PortConfig_List {
+      uses ptppb:PortConfigEntry;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping PortConfigEntry {
+    container PortConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortConfigEntry_Enabled {
+      type boolean;
+    }
+    leaf PortConfigEntry_MasterOnly {
+      type boolean;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping Status {
+    container Status_PortStatusList {
+      uses ptppb:PortStatusEntry;
+    }
+    container Status_PortCounterList {
+      uses ptppb:PortCounterEntry;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping ClockStatus {
+    container ClockStatus_ParentList {
+      uses ptppb:ClockInfo;
+    }
+    container ClockStatus_Grandmaster {
+      uses ptppb:GrandmasterInfo;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping ClockInfo {
+    leaf ClockInfo_DomainNumber {
+      type int32;
+    }
+    leaf ClockInfo_ClockIdentity {
+      type uint8;
+    }
+    leaf ClockInfo_PortIdentity {
+      type uint8;
+    }
+    leaf ClockInfo_NumberOfPorts {
+      type int32;
+    }
+    leaf ClockInfo_Priority1 {
+      type int32;
+    }
+    leaf ClockInfo_Priority2 {
+      type int32;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping GrandmasterInfo {
+    container GrandmasterInfo_ClockInfo {
+      uses ptppb:ClockInfo;
+    }
+    container GrandmasterInfo_ClockQuality {
+      uses ptppb:ClockQuality;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping ClockQuality {
+    leaf ClockQuality_Class {
+      type int32;
+    }
+    leaf ClockQuality_Accuracy {
+      type ptppb:ClockAccuracyTypeOptions;
+    }
+    leaf ClockQuality_TimeSource {
+      type ptppb:TimeSourceTypeOptions;
+    }
+    leaf ClockQuality_OffsetScaledLogVariance {
+      type int32;
+    }
+    leaf ClockQuality_Offset {
+      type int32;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping PortStatusEntry {
+    container PortStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortStatusEntry_ClockIdentity {
+      type uint8;
+    }
+    leaf PortStatusEntry_PortIdentity {
+      type uint8;
+    }
+    leaf PortStatusEntry_State {
+      type ptppb:PortStateTypeOptions;
+    }
+    leaf PortStatusEntry_PathDelay {
+      type int32;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping PortCounterEntry {
+    container PortCounterEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortCounterEntry_RxPdelayReq {
+      type uint64;
+    }
+    leaf PortCounterEntry_RxPdelayResp {
+      type uint64;
+    }
+    leaf PortCounterEntry_RxPdelayRespFollow {
+      type uint64;
+    }
+    leaf PortCounterEntry_TxPdelayReq {
+      type uint64;
+    }
+    leaf PortCounterEntry_TxPdelayResp {
+      type uint64;
+    }
+    leaf PortCounterEntry_TxPdelayRespFollow {
+      type uint64;
+    }
+  }
+  // core/ptp/ptp.proto
+  grouping TimeStatus {
+    leaf TimeStatus_State {
+      type ptppb:TimeStatusTypeOptions;
+    }
+    container TimeStatus_DateTime {
+      uses protobufpb:Timestamp;
+    }
+  }
+}

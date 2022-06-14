@@ -1,0 +1,114 @@
+submodule intri-timesync-enum {
+  belongs-to "intri-timesync" {
+    prefix "intri-timesync-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/timesync/timesync.proto
+  typedef SyncEModeTypeOptions {
+    type enumeration {
+      enum SYNCE_MODE_TYPE_DISABLED {
+        description "[Disabled]";
+        value 0;
+      }
+      enum SYNCE_MODE_TYPE_STATIC {
+        description "[Static]";
+        value 1;
+      }
+      enum SYNCE_MODE_TYPE_ESMC {
+        description "[ESMC]";
+        value 2;
+      }
+    }
+  }
+  // core/timesync/timesync.proto
+  typedef SyncSourceTypeOptions {
+    type enumeration {
+      enum SYNC_SOURCE_TYPE_GNSS {
+        description "[GNSS]";
+        value 0;
+      }
+      enum SYNC_SOURCE_TYPE_SYNCE {
+        description "[SyncE]";
+        value 1;
+      }
+      enum SYNC_SOURCE_TYPE_10MHZ_INPUT {
+        description "[10MHz Input]";
+        value 2;
+      }
+      enum SYNC_SOURCE_TYPE_1PPS_INPUT {
+        description "[1PPS Input]";
+        value 3;
+      }
+      enum SYNC_SOURCE_TYPE_BITS_INPUT {
+        description "[BITS Input]";
+        value 4;
+      }
+      enum SYNC_SOURCE_TYPE_PTP {
+        description "[PTP]";
+        value 5;
+      }
+    }
+  }
+  // core/timesync/timesync.proto
+  typedef LockStatusTypeOptions {
+    type enumeration {
+      enum LOCK_STATUS_TYPE_FREERUN {
+        description "[FreeRun]";
+        value 0;
+      }
+      enum LOCK_STATUS_TYPE_LOCK_ACQUISITION {
+        description "[Lock Acquisition]";
+        value 1;
+      }
+      enum LOCK_STATUS_TYPE_LOCKED {
+        description "[Locked]";
+        value 2;
+      }
+      enum LOCK_STATUS_TYPE_HOLDOVER {
+        description "[Holdover]";
+        value 3;
+      }
+    }
+  }
+  // core/timesync/timesync.proto
+  typedef SignalTypeOptions {
+    type enumeration {
+      enum SIGNAL_TYPE_OK {
+        description "[OK]";
+        value 0;
+      }
+      enum SIGNAL_TYPE_LOSS {
+        description "[Loss]";
+        value 1;
+      }
+    }
+  }
+  // core/timesync/timesync.proto
+  typedef ToDMessageTypeOptions {
+    type enumeration {
+      enum TOD_MESSAGE_TYPE_NMEA_GPZDA {
+        description "[NMEA GPZDA]";
+        value 0;
+      }
+    }
+  }
+  // core/timesync/timesync.proto
+  typedef GNSSStateTypeOptions {
+    type enumeration {
+      enum GNSS_STATE_TYPE_DISABLE {
+        description "[Disable]";
+        value 0;
+      }
+      enum GNSS_STATE_TYPE_SYNC {
+        description "[Sync]";
+        value 1;
+      }
+      enum GNSS_STATE_TYPE_TRACKING {
+        description "[Tracking]";
+        value 2;
+      }
+    }
+  }
+}

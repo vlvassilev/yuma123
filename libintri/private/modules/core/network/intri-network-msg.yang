@@ -1,0 +1,144 @@
+submodule intri-network-msg {
+  belongs-to "intri-network" {
+    prefix "intri-network-msg";
+  }
+  include intri-network-enum;
+  import networkpb {
+    prefix "networkpb";
+  }
+  import commonpb {
+    prefix "commonpb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/network/network.proto
+  grouping Config {
+    container Config_Basic {
+      uses networkpb:BasicConfig;
+    }
+    container Config_IP {
+      uses networkpb:IPConfig;
+    }
+  }
+  // core/network/network.proto
+  grouping BasicConfig {
+    leaf BasicConfig_HostName {
+      type string;
+    }
+    leaf BasicConfig_DomainName {
+      type string;
+    }
+    leaf BasicConfig_LocalMTU {
+      type int32;
+    }
+  }
+  // core/network/network.proto
+  grouping IPConfig {
+    container IPConfig_V4 {
+      uses networkpb:IPv4Config;
+    }
+    container IPConfig_V6 {
+      uses networkpb:IPv6Config;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv4Config {
+    leaf IPv4Config_DHCPMode {
+      type networkpb:IPv4DhcpModeTypeOptions;
+    }
+    container IPv4Config_Static {
+      uses networkpb:IPv4Static;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv4Static {
+    leaf IPv4Static_IPAddress {
+      type string;
+    }
+    leaf IPv4Static_SubnetMask {
+      type string;
+    }
+    leaf IPv4Static_Gateway {
+      type string;
+    }
+    leaf IPv4Static_DNSServer {
+      type string;
+    }
+    leaf IPv4Static_SecondaryDeviceIP {
+      type string;
+    }
+    leaf IPv4Static_SecondarySubnetMask {
+      type string;
+    }
+    leaf IPv4Static_DefaultAddressSelection {
+      type networkpb:IPV4ConfigDefaultAddressSelectionTypeOptions;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv6Config {
+    leaf IPv6Config_Enabled {
+      type boolean;
+    }
+    leaf IPv6Config_IcmpAutoAddressEnabled {
+      type boolean;
+    }
+    leaf IPv6Config_AutoConfigurationEnabled {
+      type boolean;
+    }
+    container IPv6Config_Static {
+      uses networkpb:IPv6Static;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv6Static {
+    leaf IPv6Static_DNSServer {
+      type string;
+    }
+    leaf IPv6Static_IPAddress {
+      type string;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv4Status {
+    leaf IPv4Status_DynamicDeviceIP {
+      type string;
+    }
+    leaf IPv4Status_DynamicSubnetMask {
+      type string;
+    }
+    leaf IPv4Status_DynamicGateway {
+      type string;
+    }
+    leaf IPv4Status_DynamicDNSServer1 {
+      type string;
+    }
+    leaf IPv4Status_DynamicDNSServer2 {
+      type string;
+    }
+    leaf IPv4Status_DynamicDNSServer3 {
+      type string;
+    }
+    leaf IPv4Status_DynamicDNSServer4 {
+      type string;
+    }
+    leaf IPv4Status_OutgoingDeviceIP {
+      type string;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv6StatusEntry {
+    leaf IPv6StatusEntry_IPAddress {
+      type string;
+    }
+    leaf IPv6StatusEntry_Scope {
+      type commonpb:IPv6ScopeTypeOptions;
+    }
+  }
+  // core/network/network.proto
+  grouping IPv6Status {
+    container IPv6Status_List {
+      uses networkpb:IPv6StatusEntry;
+    }
+  }
+}

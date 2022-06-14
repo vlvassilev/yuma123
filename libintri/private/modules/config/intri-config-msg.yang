@@ -1,0 +1,267 @@
+submodule intri-config-msg {
+  belongs-to "intri-config" {
+    prefix "intri-config-msg";
+  }
+  include intri-config-enum;
+  import looppb {
+    prefix "looppb";
+  }
+  import logpb {
+    prefix "logpb";
+  }
+  import portpb {
+    prefix "portpb";
+  }
+  import stormcontrolpb {
+    prefix "stormcontrolpb";
+  }
+  import dhcppb {
+    prefix "dhcppb";
+  }
+  import dhcpserverpb {
+    prefix "dhcpserverpb";
+  }
+  import udldpb {
+    prefix "udldpb";
+  }
+  import portauthenticationpb {
+    prefix "portauthenticationpb";
+  }
+  import gvrppb {
+    prefix "gvrppb";
+  }
+  import systempb {
+    prefix "systempb";
+  }
+  import portsecuritypb {
+    prefix "portsecuritypb";
+  }
+  import timesyncpb {
+    prefix "timesyncpb";
+  }
+  import filespb {
+    prefix "filespb";
+  }
+  import poepb {
+    prefix "poepb";
+  }
+  import cdppb {
+    prefix "cdppb";
+  }
+  import timepb {
+    prefix "timepb";
+  }
+  import isolationpb {
+    prefix "isolationpb";
+  }
+  import fdbpb {
+    prefix "fdbpb";
+  }
+  import lacppb {
+    prefix "lacppb";
+  }
+  import multicastpb {
+    prefix "multicastpb";
+  }
+  import accesspb {
+    prefix "accesspb";
+  }
+  import userinterfacepb {
+    prefix "userinterfacepb";
+  }
+  import networkpb {
+    prefix "networkpb";
+  }
+  import timerangepb {
+    prefix "timerangepb";
+  }
+  import configpb {
+    prefix "configpb";
+  }
+  import monitorpb {
+    prefix "monitorpb";
+  }
+  import vlanpb {
+    prefix "vlanpb";
+  }
+  import sfppb {
+    prefix "sfppb";
+  }
+  import stppb {
+    prefix "stppb";
+  }
+  import lldppb {
+    prefix "lldppb";
+  }
+  import ptppb {
+    prefix "ptppb";
+  }
+  import aclpb {
+    prefix "aclpb";
+  }
+  import mirroringpb {
+    prefix "mirroringpb";
+  }
+  import qospb {
+    prefix "qospb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // config/config.proto
+  grouping ImportAction {
+    leaf ImportAction_FileURL {
+      type string;
+    }
+    leaf ImportAction_RebootAfterAction {
+      type boolean;
+    }
+  }
+  // config/config.proto
+  grouping ExportAction {
+    leaf ExportAction_FileURL {
+      type string;
+    }
+    leaf ExportAction_IsFTPS {
+      type boolean;
+    }
+    leaf ExportAction_ForceTFTP {
+      type boolean;
+    }
+  }
+  // config/config.proto
+  grouping SaveModeStatus {
+    leaf SaveModeStatus_SaveStorageOption {
+      type configpb:StorageTypeOptions;
+    }
+    leaf SaveModeStatus_SaveModeOption {
+      type configpb:SaveModeTypeOptions;
+    }
+    leaf SaveModeStatus_ConfigStateOption {
+      type configpb:ConfigStateTypeOptions;
+    }
+    leaf SaveModeStatus_ConfigLastUpdated {
+      type string;
+    }
+  }
+  // config/config.proto
+  grouping RestoreDefaultType {
+    leaf RestoreDefaultType_Type {
+      type configpb:FactoryDefaultModeTypeOptions;
+    }
+  }
+  // config/config.proto
+  grouping AllServicesConfig {
+    container AllServicesConfig_Acl {
+      uses aclpb:Config;
+    }
+    container AllServicesConfig_Vlan {
+      uses vlanpb:Config;
+    }
+    container AllServicesConfig_Gvrp {
+      uses gvrppb:Config;
+    }
+    container AllServicesConfig_Access {
+      uses accesspb:Config;
+    }
+    container AllServicesConfig_UserInterface {
+      uses userinterfacepb:Config;
+    }
+    container AllServicesConfig_System {
+      uses systempb:Config;
+    }
+    container AllServicesConfig_Network {
+      uses networkpb:Config;
+    }
+    container AllServicesConfig_Time {
+      uses timepb:Config;
+    }
+    container AllServicesConfig_Port {
+      uses portpb:Config;
+    }
+    container AllServicesConfig_Sfp {
+      uses sfppb:Config;
+    }
+    container AllServicesConfig_Mirroring {
+      uses mirroringpb:Config;
+    }
+    container AllServicesConfig_Isolation {
+      uses isolationpb:Config;
+    }
+    container AllServicesConfig_Fdb {
+      uses fdbpb:Config;
+    }
+    container AllServicesConfig_PortSecurity {
+      uses portsecuritypb:Config;
+    }
+    container AllServicesConfig_Files {
+      uses filespb:Config;
+    }
+    container AllServicesConfig_Lacp {
+      uses lacppb:Config;
+    }
+    container AllServicesConfig_Multicast {
+      uses multicastpb:Config;
+    }
+    container AllServicesConfig_StormControl {
+      uses stormcontrolpb:Config;
+    }
+    container AllServicesConfig_Dhcp {
+      uses dhcppb:Config;
+    }
+    container AllServicesConfig_QoS {
+      uses qospb:Config;
+    }
+    container AllServicesConfig_Loop {
+      uses looppb:Config;
+    }
+    container AllServicesConfig_Lldp {
+      uses lldppb:Config;
+    }
+    container AllServicesConfig_Poe {
+      uses poepb:Config;
+    }
+    container AllServicesConfig_Cdp {
+      uses cdppb:Config;
+    }
+    container AllServicesConfig_DhcpServer {
+      uses dhcpserverpb:Config;
+    }
+    container AllServicesConfig_Stp {
+      uses stppb:STPConfig;
+    }
+    container AllServicesConfig_Mstp {
+      uses stppb:MSTPConfig;
+    }
+    container AllServicesConfig_TimeRange {
+      uses timerangepb:Config;
+    }
+    container AllServicesConfig_ArpInspection {
+      uses dhcppb:ARPInspectionConfig;
+    }
+    container AllServicesConfig_Ptp {
+      uses ptppb:Config;
+    }
+    container AllServicesConfig_Monitor {
+      uses monitorpb:Config;
+    }
+    container AllServicesConfig_TimeSync {
+      uses timesyncpb:Config;
+    }
+    container AllServicesConfig_Udld {
+      uses udldpb:Config;
+    }
+    container AllServicesConfig_PortAuthentication {
+      uses portauthenticationpb:Config;
+    }
+    container AllServicesConfig_Log {
+      uses logpb:Config;
+    }
+  }
+  // config/config.proto
+  grouping ValidateConfigResult {
+    leaf ValidateConfigResult_List {
+      type string;
+    }
+  }
+}

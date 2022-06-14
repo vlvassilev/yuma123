@@ -1,0 +1,99 @@
+submodule intri-files-msg {
+  belongs-to "intri-files" {
+    prefix "intri-files-msg";
+  }
+  include intri-files-enum;
+  import filespb {
+    prefix "filespb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/files/files.proto
+  grouping Config {
+    leaf Config_FTPEnabled {
+      type boolean;
+    }
+    container Config_Certificate {
+      uses filespb:ActivateCertificate;
+    }
+  }
+  // core/files/files.proto
+  grouping ActivateCertificate {
+    container ActivateCertificate_Web {
+      uses filespb:CertificateID;
+    }
+    container ActivateCertificate_SnmpAgent {
+      uses filespb:CertificateID;
+    }
+    container ActivateCertificate_SnmpManager {
+      uses filespb:CertificateUserIDList;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateID {
+    leaf CertificateID_ID {
+      type string;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateIDList {
+    leaf CertificateIDList_List {
+      type string;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateData {
+    leaf CertificateData_ID {
+      type string;
+    }
+    leaf CertificateData_CrtPath {
+      type string;
+    }
+    leaf CertificateData_KeyPath {
+      type string;
+    }
+    leaf CertificateData_FTPSEnabled {
+      type boolean;
+    }
+    leaf CertificateData_AuthCrtPath {
+      type string;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateUserID {
+    leaf CertificateUserID_ID {
+      type string;
+    }
+    leaf CertificateUserID_Username {
+      type string;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateUserIDList {
+    container CertificateUserIDList_List {
+      uses filespb:CertificateUserID;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateType {
+    leaf CertificateType_Type {
+      type filespb:CertificateTypeOptions;
+    }
+  }
+  // core/files/files.proto
+  grouping CertificateInfo {
+    leaf CertificateInfo_CrtPath {
+      type string;
+    }
+    leaf CertificateInfo_KeyPath {
+      type string;
+    }
+    leaf CertificateInfo_Passphrase {
+      type string;
+    }
+    leaf CertificateInfo_AuthCrtPath {
+      type string;
+    }
+  }
+}

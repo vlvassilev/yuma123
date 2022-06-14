@@ -1,0 +1,37 @@
+submodule intri-poe-enum {
+  belongs-to "intri-poe" {
+    prefix "intri-poe-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/poe/common.proto
+  typedef LLDPDeliverUsageTypeOptions {
+    type enumeration {
+      enum LLDP_L2_USAGE_TYPE_L1 {
+        description "";
+        value 0;
+      }
+      enum LLDP_L2_USAGE_TYPE_L1_AUTO {
+        description "";
+        value 1;
+      }
+      enum LLDP_L2_USAGE_TYPE_LLDP {
+        description "";
+        value 2;
+      }
+      enum LLDP_L2_USAGE_TYPE_LLDP_AUTO {
+        description "";
+        value 3;
+      }
+      enum LLDP_L2_USAGE_TYPE_CDP {
+        description "";
+        value 4;
+      }
+      enum LLDP_L2_USAGE_TYPE_CDP_AUTO {
+        description "";
+        value 5;
+      }
+    }
+  }
+}

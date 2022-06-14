@@ -1,0 +1,129 @@
+submodule intri-lacp-msg {
+  belongs-to "intri-lacp" {
+    prefix "intri-lacp-msg";
+  }
+  include intri-lacp-enum;
+  import devicepb {
+    prefix "devicepb";
+  }
+  import lacppb {
+    prefix "lacppb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/lacp/lacp.proto
+  grouping Config {
+    container Config_System {
+      uses lacppb:SystemConfig;
+    }
+    container Config_LAG {
+      uses lacppb:LAGConfig;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping SystemConfig {
+    leaf SystemConfig_SystemPriority {
+      type int32;
+    }
+    leaf SystemConfig_Mode {
+      type lacppb:ModeTypeOptions;
+    }
+    leaf SystemConfig_TransmitInterval {
+      type lacppb:IntervalTypeOptions;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping LAGConfig {
+    container LAGConfig_Lists {
+      uses lacppb:LAGConfigEntry;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping LAGConfigEntry {
+    leaf LAGConfigEntry_TrunkID {
+      type int32;
+    }
+    leaf LAGConfigEntry_LacpEnable {
+      type lacppb:ConfigLinkAggregationTypeOptions;
+    }
+    container LAGConfigEntry_Identify {
+      uses devicepb:PortList;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping Status {
+    container Status_PortLists {
+      uses lacppb:StatusEntry;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping StatusEntry {
+    leaf StatusEntry_TrunkID {
+      type int32;
+    }
+    container StatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf StatusEntry_LacpEnable {
+      type lacppb:ConfigLinkAggregationTypeOptions;
+    }
+    container StatusEntry_Actor {
+      uses lacppb:ActorPartnerInfo;
+    }
+    container StatusEntry_Partner {
+      uses lacppb:ActorPartnerInfo;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping ActorPartnerInfo {
+    container ActorPartnerInfo_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf ActorPartnerInfo_PortPriority {
+      type int32;
+    }
+    leaf ActorPartnerInfo_SystemPriority {
+      type int32;
+    }
+    leaf ActorPartnerInfo_MACAddress {
+      type uint8;
+    }
+    leaf ActorPartnerInfo_AdminKey {
+      type int32;
+    }
+    leaf ActorPartnerInfo_OperKey {
+      type int32;
+    }
+    container ActorPartnerInfo_Status {
+      uses lacppb:State;
+    }
+  }
+  // core/lacp/lacp.proto
+  grouping State {
+    leaf State_Activity {
+      type boolean;
+    }
+    leaf State_Timeout {
+      type boolean;
+    }
+    leaf State_Aggr {
+      type boolean;
+    }
+    leaf State_Sync {
+      type boolean;
+    }
+    leaf State_Collect {
+      type boolean;
+    }
+    leaf State_Distribute {
+      type boolean;
+    }
+    leaf State_Defaulted {
+      type boolean;
+    }
+    leaf State_Expired {
+      type boolean;
+    }
+  }
+}

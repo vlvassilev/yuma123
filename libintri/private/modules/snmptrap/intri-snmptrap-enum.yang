@@ -1,0 +1,8 @@
+submodule intri-snmptrap-enum {
+  belongs-to "intri-snmptrap" {
+    prefix "intri-snmptrap-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

@@ -1,0 +1,12 @@
+module intri-lldp {
+  namespace "intri:intri-lldp";
+  prefix "intri-lldp";
+  import lldppb {
+    prefix "lldppb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

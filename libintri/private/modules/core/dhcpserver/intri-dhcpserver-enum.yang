@@ -1,0 +1,38 @@
+submodule intri-dhcpserver-enum {
+  belongs-to "intri-dhcpserver" {
+    prefix "intri-dhcpserver-enum";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/dhcpserver/common.proto
+  typedef PoolTypeOptions {
+    type enumeration {
+      enum POOL_TYPE_BASIC {
+        description "";
+        value 0;
+      }
+      enum POOL_TYPE_MAC_BASED {
+        description "";
+        value 1;
+      }
+      enum POOL_TYPE_PORT_BASED {
+        description "";
+        value 2;
+      }
+    }
+  }
+  // core/dhcpserver/common.proto
+  typedef InterfaceType {
+    type enumeration {
+      enum INTERFACE_TYPE_PORT {
+        description "[Port] Select a port as the interface";
+        value 0;
+      }
+      enum INTERFACE_TYPE_VLAN {
+        description "[VLAN] Select a VLAN as the interface";
+        value 1;
+      }
+    }
+  }
+}

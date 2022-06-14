@@ -1,0 +1,15 @@
+module intri-hardware {
+  namespace "intri:intri-hardware";
+  prefix "intri-hardware";
+  import hardwarepb {
+    prefix "hardwarepb";
+  }
+  import protobufpb {
+    prefix "protobufpb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

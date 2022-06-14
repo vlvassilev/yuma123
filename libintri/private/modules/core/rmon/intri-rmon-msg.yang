@@ -1,0 +1,183 @@
+submodule intri-rmon-msg {
+  belongs-to "intri-rmon" {
+    prefix "intri-rmon-msg";
+  }
+  include intri-rmon-enum;
+  import devicepb {
+    prefix "devicepb";
+  }
+  import rmonpb {
+    prefix "rmonpb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/rmon/rmon.proto
+  grouping IngressEntry {
+    container IngressEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf IngressEntry_InGoodOctets {
+      type uint64;
+    }
+    leaf IngressEntry_InBadOctets {
+      type uint64;
+    }
+    leaf IngressEntry_InTotalPackets {
+      type uint64;
+    }
+    leaf IngressEntry_InUnicasts {
+      type uint64;
+    }
+    leaf IngressEntry_InNonUnicasts {
+      type uint64;
+    }
+    leaf IngressEntry_InBroadcasts {
+      type uint64;
+    }
+    leaf IngressEntry_InMulticasts {
+      type uint64;
+    }
+    leaf IngressEntry_InPause {
+      type uint64;
+    }
+    leaf IngressEntry_InTotalReceiveErrors {
+      type uint64;
+    }
+    leaf IngressEntry_InUndersize {
+      type uint64;
+    }
+    leaf IngressEntry_InOversize {
+      type uint64;
+    }
+    leaf IngressEntry_InFragments {
+      type uint64;
+    }
+    leaf IngressEntry_InJabber {
+      type uint64;
+    }
+    leaf IngressEntry_InFcsErrors {
+      type uint64;
+    }
+    leaf IngressEntry_InDiscarded {
+      type uint64;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping Ingress {
+    container Ingress_List {
+      uses rmonpb:IngressEntry;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping EgressEntry {
+    container EgressEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf EgressEntry_OutGoodOctets {
+      type uint64;
+    }
+    leaf EgressEntry_OutUnicasts {
+      type uint64;
+    }
+    leaf EgressEntry_OutNonUnicasts {
+      type uint64;
+    }
+    leaf EgressEntry_OutBroadcasts {
+      type uint64;
+    }
+    leaf EgressEntry_OutMulticasts {
+      type uint64;
+    }
+    leaf EgressEntry_OutPause {
+      type uint64;
+    }
+    leaf EgressEntry_OutDeferred {
+      type uint64;
+    }
+    leaf EgressEntry_OutTotalCollisions {
+      type uint64;
+    }
+    leaf EgressEntry_OutTotalPackets {
+      type uint64;
+    }
+    leaf EgressEntry_OutExcessiveCollisions {
+      type uint64;
+    }
+    leaf EgressEntry_OutLateCollisions {
+      type uint64;
+    }
+    leaf EgressEntry_OutFcsErrors {
+      type uint64;
+    }
+    leaf EgressEntry_OutDroppedPackets {
+      type uint64;
+    }
+    leaf EgressEntry_OutMultipleCollisions {
+      type uint64;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping Egress {
+    container Egress_List {
+      uses rmonpb:EgressEntry;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping HistogramEntry {
+    container HistogramEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf HistogramEntry_In64Octets {
+      type uint64;
+    }
+    leaf HistogramEntry_In65To127Octets {
+      type uint64;
+    }
+    leaf HistogramEntry_In128To255Octets {
+      type uint64;
+    }
+    leaf HistogramEntry_In256To511Octets {
+      type uint64;
+    }
+    leaf HistogramEntry_In512To1023Octets {
+      type uint64;
+    }
+    leaf HistogramEntry_In1024ToMaxOctets {
+      type uint64;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping Histogram {
+    container Histogram_List {
+      uses rmonpb:HistogramEntry;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping UtilizationRate {
+    leaf UtilizationRate_Type {
+      type rmonpb:UtilizationIntervalTypeOptions;
+    }
+    leaf UtilizationRate_Rate {
+      type int32;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping UtilizationEntry {
+    container UtilizationEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    container UtilizationEntry_Ingress {
+      uses rmonpb:UtilizationRate;
+    }
+    container UtilizationEntry_Egress {
+      uses rmonpb:UtilizationRate;
+    }
+  }
+  // core/rmon/rmon.proto
+  grouping Utilization {
+    container Utilization_List {
+      uses rmonpb:UtilizationEntry;
+    }
+  }
+}

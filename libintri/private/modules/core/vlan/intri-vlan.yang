@@ -1,0 +1,15 @@
+module intri-vlan {
+  namespace "intri:intri-vlan";
+  prefix "intri-vlan";
+  import vlanpb {
+    prefix "vlanpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

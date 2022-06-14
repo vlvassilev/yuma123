@@ -1,0 +1,12 @@
+module intri-timecontrol {
+  namespace "intri:intri-timecontrol";
+  prefix "intri-timecontrol";
+  import timecontrolpb {
+    prefix "timecontrolpb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

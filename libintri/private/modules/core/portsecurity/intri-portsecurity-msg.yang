@@ -1,0 +1,102 @@
+submodule intri-portsecurity-msg {
+  belongs-to "intri-portsecurity" {
+    prefix "intri-portsecurity-msg";
+  }
+  include intri-portsecurity-enum;
+  import devicepb {
+    prefix "devicepb";
+  }
+  import portsecuritypb {
+    prefix "portsecuritypb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping Config {
+    container Config_List {
+      uses portsecuritypb:PortSecurityConfigEntry;
+    }
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping PortSecurityConfigEntry {
+    container PortSecurityConfigEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortSecurityConfigEntry_Enabled {
+      type boolean;
+    }
+    leaf PortSecurityConfigEntry_Mode {
+      type portsecuritypb:PortSecurityModeTypeOptions;
+    }
+    leaf PortSecurityConfigEntry_MaxMACCount {
+      type int32;
+    }
+    container PortSecurityConfigEntry_SecureAddressList {
+      uses portsecuritypb:SecureEntry;
+    }
+    leaf PortSecurityConfigEntry_ViolationMode {
+      type portsecuritypb:PortSecurityViolationTypeOptions;
+    }
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping SecureEntry {
+    leaf SecureEntry_VlanID {
+      type int32;
+    }
+    leaf SecureEntry_MACAddress {
+      type string;
+    }
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping PortSecureEntry {
+    container PortSecureEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    container PortSecureEntry_Entry {
+      uses portsecuritypb:SecureEntry;
+    }
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping Status {
+    container Status_List {
+      uses portsecuritypb:PortSecurityStatusEntry;
+    }
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping PortSecurityStatusEntry {
+    container PortSecurityStatusEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortSecurityStatusEntry_Enabled {
+      type boolean;
+    }
+    leaf PortSecurityStatusEntry_Status {
+      type portsecuritypb:PortSecurityStatusTypeOptions;
+    }
+    leaf PortSecurityStatusEntry_ViolationMode {
+      type portsecuritypb:PortSecurityViolationTypeOptions;
+    }
+    leaf PortSecurityStatusEntry_MaxMACCount {
+      type int32;
+    }
+    leaf PortSecurityStatusEntry_SecureMACCount {
+      type int32;
+    }
+    leaf PortSecurityStatusEntry_LastSourceMACaddressVlan {
+      type string;
+    }
+  }
+  // core/portsecurity/portsecurity.proto
+  grouping PortSecurityAge {
+    leaf PortSecurityAge_StaticAging {
+      type boolean;
+    }
+    leaf PortSecurityAge_Type {
+      type portsecuritypb:PortSecurityAgeModeTypeOptions;
+    }
+    leaf PortSecurityAge_Time {
+      type int32;
+    }
+  }
+}

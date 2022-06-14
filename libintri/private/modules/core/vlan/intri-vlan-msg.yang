@@ -1,0 +1,321 @@
+submodule intri-vlan-msg {
+  belongs-to "intri-vlan" {
+    prefix "intri-vlan-msg";
+  }
+  include intri-vlan-enum;
+  import devicepb {
+    prefix "devicepb";
+  }
+  import vlanpb {
+    prefix "vlanpb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/vlan/mac_based.proto
+  grouping MACBasedGroupEntry {
+    leaf MACBasedGroupEntry_MACAddress {
+      type string;
+    }
+    leaf MACBasedGroupEntry_MACAddressMask {
+      type string;
+    }
+    leaf MACBasedGroupEntry_GroupID {
+      type int32;
+    }
+  }
+  // core/vlan/mac_based.proto
+  grouping MACBasedGroupMemberEntry {
+    leaf MACBasedGroupMemberEntry_VlanID {
+      type int32;
+    }
+    leaf MACBasedGroupMemberEntry_GroupID {
+      type int32;
+    }
+    container MACBasedGroupMemberEntry_IdentifyList {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/vlan/mac_based.proto
+  grouping MACBasedConfig {
+    container MACBasedConfig_GroupList {
+      uses vlanpb:MACBasedGroupEntry;
+    }
+    container MACBasedConfig_GroupMemberList {
+      uses vlanpb:MACBasedGroupMemberEntry;
+    }
+  }
+  // core/vlan/proto_based.proto
+  grouping ProtocolBasedGroupEntry {
+    leaf ProtocolBasedGroupEntry_GroupID {
+      type int32;
+    }
+    leaf ProtocolBasedGroupEntry_Encapsulation {
+      type vlanpb:ProtocolBasedEncapsulationTypeOptions;
+    }
+    leaf ProtocolBasedGroupEntry_Protocol {
+      type string;
+    }
+  }
+  // core/vlan/proto_based.proto
+  grouping ProtocolBasedGroupMemberEntry {
+    leaf ProtocolBasedGroupMemberEntry_VlanID {
+      type int32;
+    }
+    leaf ProtocolBasedGroupMemberEntry_GroupID {
+      type int32;
+    }
+    container ProtocolBasedGroupMemberEntry_IdentifyList {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/vlan/proto_based.proto
+  grouping ProtocolBasedConfig {
+    container ProtocolBasedConfig_GroupList {
+      uses vlanpb:ProtocolBasedGroupEntry;
+    }
+    container ProtocolBasedConfig_GroupMemberList {
+      uses vlanpb:ProtocolBasedGroupMemberEntry;
+    }
+  }
+  // core/vlan/selective_qinq.proto
+  grouping SelectiveQinQConfig {
+    container SelectiveQinQConfig_List {
+      uses vlanpb:SelectiveQinQTranslatedEntry;
+    }
+  }
+  // core/vlan/selective_qinq.proto
+  grouping SelectiveQinQTranslatedEntry {
+    leaf SelectiveQinQTranslatedEntry_SourceVlanID {
+      type int32;
+    }
+    leaf SelectiveQinQTranslatedEntry_TranslatedVlanID {
+      type int32;
+    }
+  }
+  // core/vlan/subnet_based.proto
+  grouping SubnetBasedGroupEntry {
+    leaf SubnetBasedGroupEntry_IPAddress {
+      type string;
+    }
+    leaf SubnetBasedGroupEntry_IPAddressMask {
+      type string;
+    }
+    leaf SubnetBasedGroupEntry_IPVersion {
+      type vlanpb:IPVersionTypeOptions;
+    }
+    leaf SubnetBasedGroupEntry_GroupID {
+      type int32;
+    }
+  }
+  // core/vlan/subnet_based.proto
+  grouping SubnetBasedGroupMemberEntry {
+    leaf SubnetBasedGroupMemberEntry_VlanID {
+      type int32;
+    }
+    leaf SubnetBasedGroupMemberEntry_GroupID {
+      type int32;
+    }
+    container SubnetBasedGroupMemberEntry_IdentifyList {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/vlan/subnet_based.proto
+  grouping SubnetBasedConfig {
+    container SubnetBasedConfig_GroupList {
+      uses vlanpb:SubnetBasedGroupEntry;
+    }
+    container SubnetBasedConfig_GroupMemberList {
+      uses vlanpb:SubnetBasedGroupMemberEntry;
+    }
+  }
+  // core/vlan/translation.proto
+  grouping MappingPort {
+    container MappingPort_List {
+      uses vlanpb:MappingPortEntry;
+    }
+  }
+  // core/vlan/translation.proto
+  grouping MappingPortEntry {
+    container MappingPortEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf MappingPortEntry_Enabled {
+      type boolean;
+    }
+  }
+  // core/vlan/translation.proto
+  grouping MappingConfig {
+    container MappingConfig_List {
+      uses vlanpb:MappingEntry;
+    }
+    container MappingConfig_PortList {
+      uses vlanpb:MappingPortEntry;
+    }
+  }
+  // core/vlan/translation.proto
+  grouping MappingEntry {
+    leaf MappingEntry_SourceVlanID {
+      type int32;
+    }
+    leaf MappingEntry_TranslatedVlanID {
+      type int32;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping Config {
+    container Config_Management {
+      uses vlanpb:ManagementConfig;
+    }
+    container Config_Voice {
+      uses vlanpb:VoiceConfig;
+    }
+    container Config_Ports {
+      uses vlanpb:PortsConfig;
+    }
+    container Config_Filters {
+      uses vlanpb:FiltersConfig;
+    }
+    container Config_MACBased {
+      uses vlanpb:MACBasedConfig;
+    }
+    container Config_SubnetBased {
+      uses vlanpb:SubnetBasedConfig;
+    }
+    container Config_ProtocolBased {
+      uses vlanpb:ProtocolBasedConfig;
+    }
+    container Config_Translation {
+      uses vlanpb:MappingConfig;
+    }
+    container Config_SelectiveQinQ {
+      uses vlanpb:SelectiveQinQConfig;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping ManagementConfig {
+    leaf ManagementConfig_ManagementVlanID {
+      type int32;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping VoiceConfig {
+    leaf VoiceConfig_VlanID {
+      type int32;
+    }
+    leaf VoiceConfig_Prio {
+      type int32;
+    }
+    leaf VoiceConfig_SignalPrio {
+      type int32;
+    }
+    leaf VoiceConfig_DSCP {
+      type int32;
+    }
+    leaf VoiceConfig_SignalDSCP {
+      type int32;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping PortsConfig {
+    container PortsConfig_List {
+      uses vlanpb:PortEntry;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping PortEntry {
+    container PortEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf PortEntry_Mode {
+      type vlanpb:PortConfigVLANModeTypeOptions;
+    }
+    leaf PortEntry_DefaultVlanID {
+      type int32;
+    }
+    leaf PortEntry_UnauthorizedVlanID {
+      type int32;
+    }
+    leaf PortEntry_FallBackVlanID {
+      type int32;
+    }
+    leaf PortEntry_QinQEthertype {
+      type vlanpb:PortConfigQinQEtherTypeOptions;
+    }
+    leaf PortEntry_AcceptableFrametype {
+      type vlanpb:AcceptFrameTypeOptions;
+    }
+    leaf PortEntry_TaggedList {
+      type int32;
+    }
+    leaf PortEntry_UntaggedList {
+      type int32;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping FiltersConfig {
+    container FiltersConfig_List {
+      uses vlanpb:FilterEntry;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping FilterEntry {
+    leaf FilterEntry_VlanID {
+      type int32;
+    }
+    leaf FilterEntry_Enabled {
+      type boolean;
+    }
+    leaf FilterEntry_Name {
+      type string;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping Used {
+    leaf Used_Used {
+      type vlanpb:StatusUsedTypeOptions;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping VlanPortVlanEntry {
+    container VlanPortVlanEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf VlanPortVlanEntry_VlanID {
+      type int32;
+    }
+    leaf VlanPortVlanEntry_Used {
+      type vlanpb:StatusUsedTypeOptions;
+    }
+  }
+  // core/vlan/vlan.proto
+  grouping DefaultPortVlanEntry {
+    container DefaultPortVlanEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf DefaultPortVlanEntry_DefaultVlanID {
+      type int32;
+    }
+    leaf DefaultPortVlanEntry_LastUpdateMethod {
+      type vlanpb:StatusUsedTypeOptions;
+    }
+  }
+  // core/vlan/status.proto
+  grouping StatusEntry {
+    leaf StatusEntry_VlanID {
+      type int32;
+    }
+    container StatusEntry_TaggedList {
+      uses devicepb:InterfaceIdentify;
+    }
+    container StatusEntry_UntaggedList {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/vlan/status.proto
+  grouping StatusMapping {
+    container StatusMapping_Mapping {
+      uses vlanpb:StatusMapping_MappingEntry;
+    }
+  }
+}

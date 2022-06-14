@@ -1,0 +1,282 @@
+submodule intri-acl-msg {
+  belongs-to "intri-acl" {
+    prefix "intri-acl-msg";
+  }
+  include intri-acl-enum;
+  import aclpb {
+    prefix "aclpb";
+  }
+  import devicepb {
+    prefix "devicepb";
+  }
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+  // core/acl/acl.proto
+  grouping Config {
+    container Config_Interfaces {
+      uses aclpb:InterfaceList;
+    }
+    container Config_AclList {
+      uses aclpb:ACLList;
+    }
+    container Config_AceList {
+      uses aclpb:ACEList;
+    }
+    container Config_Binding {
+      uses aclpb:BindingList;
+    }
+    container Config_Flow {
+      uses aclpb:FlowMirroringList;
+    }
+  }
+  // core/acl/acl.proto
+  grouping InterfaceList {
+    container InterfaceList_List {
+      uses aclpb:InterfaceEntry;
+    }
+  }
+  // core/acl/acl.proto
+  grouping InterfaceEntry {
+    container InterfaceEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf InterfaceEntry_IngressAclName {
+      type string;
+    }
+    leaf InterfaceEntry_EgressAclName {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping ACLList {
+    container ACLList_List {
+      uses aclpb:ACLEntry;
+    }
+  }
+  // core/acl/acl.proto
+  grouping ACLEntry {
+    leaf ACLEntry_Name {
+      type string;
+    }
+    leaf ACLEntry_RuleList {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping ACEList {
+    container ACEList_List {
+      uses aclpb:ACEEntry;
+    }
+  }
+  // core/acl/acl.proto
+  grouping ACEEntry {
+    leaf ACEEntry_Name {
+      type string;
+    }
+    leaf ACEEntry_Action {
+      type aclpb:RuleActionTypeOptions;
+    }
+    leaf ACEEntry_Priority {
+      type int32;
+    }
+    leaf ACEEntry_TimeRangeName {
+      type string;
+    }
+    leaf ACEEntry_ParamType {
+      type aclpb:RuleParamTypeOptions;
+    }
+    container ACEEntry_Mac {
+      uses aclpb:RuleMAC;
+    }
+    container ACEEntry_IPv4 {
+      uses aclpb:RuleIPv4;
+    }
+    container ACEEntry_IPv6 {
+      uses aclpb:RuleIPv6;
+    }
+    container ACEEntry_MacIPv4 {
+      uses aclpb:RuleMACIPv4;
+    }
+    container ACEEntry_MacIPv6 {
+      uses aclpb:RuleMACIPv6;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleVlan {
+    leaf RuleVlan_VlanID {
+      type int32;
+    }
+    leaf RuleVlan_VlanIDMask {
+      type int32;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleMACIPv4 {
+    container RuleMACIPv4_Mac {
+      uses aclpb:RuleMAC;
+    }
+    container RuleMACIPv4_IPv4 {
+      uses aclpb:RuleIPv4;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleMACIPv6 {
+    container RuleMACIPv6_Mac {
+      uses aclpb:RuleMAC;
+    }
+    container RuleMACIPv6_IPv6 {
+      uses aclpb:RuleIPv6;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleMAC {
+    container RuleMAC_EtherType {
+      uses aclpb:EtherTypeConfig;
+    }
+    container RuleMAC_Source {
+      uses aclpb:MACConfig;
+    }
+    container RuleMAC_Destination {
+      uses aclpb:MACConfig;
+    }
+    leaf RuleMAC_VlanId {
+      type int32;
+    }
+  }
+  // core/acl/acl.proto
+  grouping MACConfig {
+    leaf MACConfig_Address {
+      type string;
+    }
+    leaf MACConfig_AddressMask {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping EtherTypeConfig {
+    leaf EtherTypeConfig_Type {
+      type string;
+    }
+    leaf EtherTypeConfig_EtherTypeMask {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping IPProtocolConfig {
+    leaf IPProtocolConfig_Protocol {
+      type string;
+    }
+    leaf IPProtocolConfig_ProtocolMask {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleIPv4 {
+    container RuleIPv4_Protocol {
+      uses aclpb:IPProtocolConfig;
+    }
+    container RuleIPv4_Source {
+      uses aclpb:IPv4Config;
+    }
+    container RuleIPv4_Destination {
+      uses aclpb:IPv4Config;
+    }
+    container RuleIPv4_Layer4Port {
+      uses aclpb:RuleLayer4Port;
+    }
+  }
+  // core/acl/acl.proto
+  grouping IPv4Config {
+    leaf IPv4Config_Address {
+      type string;
+    }
+    leaf IPv4Config_AddressMask {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleIPv6 {
+    container RuleIPv6_NextHeader {
+      uses aclpb:IPProtocolConfig;
+    }
+    container RuleIPv6_Source {
+      uses aclpb:IPv6Config;
+    }
+    container RuleIPv6_Destination {
+      uses aclpb:IPv6Config;
+    }
+    container RuleIPv6_Layer4Port {
+      uses aclpb:RuleLayer4Port;
+    }
+  }
+  // core/acl/acl.proto
+  grouping IPv6Config {
+    leaf IPv6Config_Address {
+      type string;
+    }
+    leaf IPv6Config_AddressMask {
+      type string;
+    }
+  }
+  // core/acl/acl.proto
+  grouping RuleLayer4Port {
+    container RuleLayer4Port_Source {
+      uses aclpb:IPWithLayer4PortConfig;
+    }
+    container RuleLayer4Port_Destination {
+      uses aclpb:IPWithLayer4PortConfig;
+    }
+  }
+  // core/acl/acl.proto
+  grouping IPWithLayer4PortConfig {
+    leaf IPWithLayer4PortConfig_PortNumber {
+      type int32;
+    }
+    leaf IPWithLayer4PortConfig_PortNumberMask {
+      type int32;
+    }
+  }
+  // core/acl/acl.proto
+  grouping BindingList {
+    container BindingList_List {
+      uses aclpb:BindingEntry;
+    }
+  }
+  // core/acl/acl.proto
+  grouping BindingEntry {
+    leaf BindingEntry_Name {
+      type string;
+    }
+    container BindingEntry_IdentifyNo {
+      uses devicepb:InterfaceIdentify;
+    }
+    leaf BindingEntry_Mac {
+      type string;
+    }
+    leaf BindingEntry_ParamType {
+      type aclpb:RuleParamTypeOptions;
+    }
+  }
+  // core/acl/acl.proto
+  grouping FlowMirroringEntry {
+    leaf FlowMirroringEntry_Name {
+      type string;
+    }
+    leaf FlowMirroringEntry_ACLNameList {
+      type string;
+    }
+    container FlowMirroringEntry_SourceList {
+      uses devicepb:InterfaceIdentify;
+    }
+    container FlowMirroringEntry_Destination {
+      uses devicepb:InterfaceIdentify;
+    }
+  }
+  // core/acl/acl.proto
+  grouping FlowMirroringList {
+    container FlowMirroringList_List {
+      uses aclpb:FlowMirroringEntry;
+    }
+  }
+}

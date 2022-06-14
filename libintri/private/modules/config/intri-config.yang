@@ -1,0 +1,111 @@
+module intri-config {
+  namespace "intri:intri-config";
+  prefix "intri-config";
+  import systempb {
+    prefix "systempb";
+  }
+  import qospb {
+    prefix "qospb";
+  }
+  import gvrppb {
+    prefix "gvrppb";
+  }
+  import userinterfacepb {
+    prefix "userinterfacepb";
+  }
+  import multicastpb {
+    prefix "multicastpb";
+  }
+  import configpb {
+    prefix "configpb";
+  }
+  import timepb {
+    prefix "timepb";
+  }
+  import looppb {
+    prefix "looppb";
+  }
+  import dhcpserverpb {
+    prefix "dhcpserverpb";
+  }
+  import stppb {
+    prefix "stppb";
+  }
+  import sfppb {
+    prefix "sfppb";
+  }
+  import lacppb {
+    prefix "lacppb";
+  }
+  import portsecuritypb {
+    prefix "portsecuritypb";
+  }
+  import poepb {
+    prefix "poepb";
+  }
+  import monitorpb {
+    prefix "monitorpb";
+  }
+  import isolationpb {
+    prefix "isolationpb";
+  }
+  import cdppb {
+    prefix "cdppb";
+  }
+  import accesspb {
+    prefix "accesspb";
+  }
+  import portpb {
+    prefix "portpb";
+  }
+  import mirroringpb {
+    prefix "mirroringpb";
+  }
+  import timesyncpb {
+    prefix "timesyncpb";
+  }
+  import portauthenticationpb {
+    prefix "portauthenticationpb";
+  }
+  import aclpb {
+    prefix "aclpb";
+  }
+  import vlanpb {
+    prefix "vlanpb";
+  }
+  import lldppb {
+    prefix "lldppb";
+  }
+  import timerangepb {
+    prefix "timerangepb";
+  }
+  import udldpb {
+    prefix "udldpb";
+  }
+  import logpb {
+    prefix "logpb";
+  }
+  import fdbpb {
+    prefix "fdbpb";
+  }
+  import stormcontrolpb {
+    prefix "stormcontrolpb";
+  }
+  import dhcppb {
+    prefix "dhcppb";
+  }
+  import ptppb {
+    prefix "ptppb";
+  }
+  import networkpb {
+    prefix "networkpb";
+  }
+  import filespb {
+    prefix "filespb";
+  }
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+}

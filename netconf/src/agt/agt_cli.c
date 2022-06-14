@@ -233,6 +233,9 @@ static void
         if (!xml_strcmp(VAL_ENUM_NAME(val),
                         AGT_CLI_STARTUP_STOP)) {
             agt_profile->agt_running_error = TRUE;
+        } else if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        AGT_CLI_STARTUP_CONTINUE)) {
+            agt_profile->agt_running_error = FALSE;
         }
     }
 

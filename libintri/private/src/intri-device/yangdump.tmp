@@ -1,11 +1,11 @@
 yangdump \
 		--format=h \
-		--versionnames=false \
+		--versionnames=true \
 		--subtree=. \
-		--unified=true \
 		--output=.
+
 yangdump \
 		--format=c \
-		--versionnames=false \
+		--versionnames=true \
 		--subtree=. \
 		--output=.

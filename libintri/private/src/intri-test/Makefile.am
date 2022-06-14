@@ -1,10 +1,10 @@
 netconfmodule_LTLIBRARIES = libintri-test.la
 
 noinst_HEADERS=\
-$(top_srcdir)/libintri/private/intri-test/intri-test.h
+$(top_srcdir)/libintri/private/src/intri-test/intri-test.h
 
 libintri_test_la_SOURCES = \
-$(top_srcdir)/libintri/private/intri-test/intri-test.c
+$(top_srcdir)/libintri/private/src/intri-test/intri-test.c
 
 libintri_test_la_CPPFLAGS = \
 -I$(top_srcdir)/netconf/src/agt \
@@ -27,5 +27,5 @@ $(top_builddir)/netconf/src/ncx/libyumancx.la
 
 
 dist_intri_private_yang_DATA = \
-$(top_srcdir)/libintri/private/intri-test/intri-test.yang
+$(top_srcdir)/libintri/private/src/intri-test/intri-test.yang
 

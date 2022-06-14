@@ -1,0 +1,1559 @@
+module intri-device {
+
+  namespace "http://intri.com.tw";
+
+  prefix intri-device;
+
+  organization 
+    "Intrising Inc.";
+
+  contact 
+    "xxx <xxx@intrising.com.tw>";
+
+  description 
+    "test APIs";
+
+  revision 2022-05-24 {
+    description "Test progress.";
+  }
+
+
+  /*
+   * enum
+   */ 
+
+  // device/board.proto
+  typedef RCLKTypeOptions {
+    type enumeration {
+      enum RCLK_TYPE_0 {
+        description "[RCLK 0] RCLK 0";
+        value 0;
+      }
+      enum RCLK_TYPE_1 {
+        description "[RCLK 1] RCLK 1";
+        value 1;
+      }
+    }
+  }
+  // device/board.proto
+  typedef InputClockIndexTypeOptions {
+    type enumeration {
+      enum INPUT_CLOCK_INDEX_TYPE_0 {
+        description "[Clock Index 0] Clock Index 0";
+        value 0;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_1 {
+        description "[Clock Index 1] Clock Index 1";
+        value 1;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_2 {
+        description "[Clock Index 2] Clock Index 2";
+        value 2;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_3 {
+        description "[Clock Index 3] Clock Index 3";
+        value 3;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_4 {
+        description "[Clock Index 4] Clock Index 4";
+        value 4;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_5 {
+        description "[Clock Index 5] Clock Index 5";
+        value 5;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_6 {
+        description "[Clock Index 6] Clock Index 6";
+        value 6;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_7 {
+        description "[Clock Index 7] Clock Index 7";
+        value 7;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_8 {
+        description "[Clock Index 8] Clock Index 8";
+        value 8;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_9 {
+        description "[Clock Index 9] Clock Index 9";
+        value 9;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_10 {
+        description "[Clock Index 10] Clock Index 10";
+        value 10;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_11 {
+        description "[Clock Index 11] Clock Index 11";
+        value 11;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_12 {
+        description "[Clock Index 12] Clock Index 12";
+        value 12;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_13 {
+        description "[Clock Index 13] Clock Index 13";
+        value 13;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_14 {
+        description "[Clock Index 14] Clock Index 14";
+        value 14;
+      }
+      enum INPUT_CLOCK_INDEX_TYPE_15 {
+        description "[Clock Index 15] Clock Index 15";
+        value 15;
+      }
+    }
+  }
+  // device/board.proto
+  typedef InputClockTypeOptions {
+    type enumeration {
+      enum INPUT_CLOCK_TYPE_MAC_CLOCK_0 {
+        description "[MAC Clock 0] MAC Clock 0";
+        value 0;
+      }
+      enum INPUT_CLOCK_TYPE_MAC_CLOCK_1 {
+        description "[MAC Clock 1] MAC Clock 1";
+        value 1;
+      }
+      enum INPUT_CLOCK_TYPE_PHY_A_CLOCK_0 {
+        description "[PHY A Clock 0] PHY A Clock 0";
+        value 2;
+      }
+      enum INPUT_CLOCK_TYPE_PHY_A_CLOCK_1 {
+        description "[PHY A Clock 1] PHY A Clock 1";
+        value 3;
+      }
+      enum INPUT_CLOCK_TYPE_PHY_B_CLOCK_0 {
+        description "[PHY B Clock 0] PHY B Clock 0";
+        value 4;
+      }
+      enum INPUT_CLOCK_TYPE_PHY_B_CLOCK_1 {
+        description "[PHY B Clock 1] PHY B Clock 1";
+        value 5;
+      }
+      enum INPUT_CLOCK_TYPE_PHY_C_CLOCK_0 {
+        description "[PHY C Clock 0] PHY C Clock 0";
+        value 6;
+      }
+      enum INPUT_CLOCK_TYPE_PHY_C_CLOCK_1 {
+        description "[PHY C Clock 1] PHY C Clock 1";
+        value 7;
+      }
+      enum INPUT_CLOCK_TYPE_BITS_IN {
+        description "[Bits In] Bits In";
+        value 8;
+      }
+      enum INPUT_CLOCK_TYPE_1PPS_GPS {
+        description "[1pps GPS] 1pps GPS";
+        value 10;
+      }
+      enum INPUT_CLOCK_TYPE_1PPS_IN {
+        description "[1pps In] 1pps In";
+        value 11;
+      }
+      enum INPUT_CLOCK_TYPE_10MHZ_IN {
+        description "[10Mhz In] 10Mhz In";
+        value 12;
+      }
+      enum INPUT_CLOCK_TYPE_1PPS_FEEDBACK {
+        description "[1pps Feedback] 1pps Feedback";
+        value 13;
+      }
+    }
+  }
+  // device/board.proto
+  typedef LedTypeOptions {
+    type enumeration {
+      enum LED_TYPE_OFF {
+        description "[Off]";
+        value 0;
+      }
+      enum LED_TYPE_ON {
+        description "[On]";
+        value 1;
+      }
+      enum LED_TYPE_ORANGE {
+        description "[Orange]";
+        value 2;
+      }
+      enum LED_TYPE_GREEN {
+        description "[Green]";
+        value 3;
+      }
+    }
+  }
+  // device/board.proto
+  typedef PhyInterfaceTypeOptions {
+    type enumeration {
+      enum PHY_INTERFACE_TYPE_SMI {
+        description "[Smi]";
+        value 0;
+      }
+      enum PHY_INTERFACE_TYPE_XSMI {
+        description "[Xsmi]";
+        value 1;
+      }
+      enum PHY_INTERFACE_TYPE_UNUSED {
+        description "[Unused]";
+        value 2;
+      }
+    }
+  }
+  // device/board.proto
+  typedef FactoryHwFeatureTypeOptions {
+    type enumeration {
+      enum FACTORY_HW_FEATURE_TYPE_POE_PLUS_PLUS {
+        description "[PoE++] Power over Ethernet plus (30W ports) supported";
+        value 0;
+      }
+      enum FACTORY_HW_FEATURE_TYPE_POE_PLUS {
+        description "[PoE+] Power over Ethernet plus (30W ports) supported";
+        value 1;
+      }
+      enum FACTORY_HW_FEATURE_TYPE_EEE {
+        description "[EEE] Energy Efficient Ethernet";
+        value 2;
+      }
+      enum FACTORY_HW_FEATURE_TYPE_RTC {
+        description "[RTC] Local real time clock";
+        value 3;
+      }
+      enum FACTORY_HW_FEATURE_TYPE_SFP {
+        description "[SFP] Pluggable optical port";
+        value 4;
+      }
+    }
+  }
+  // device/board.proto
+  typedef PortPropertyTypeOptions {
+    type enumeration {
+      enum PORT_PROPERTIES_TYPE_10M_FULL {
+        description "[10M FULL] This port is capable of running at 10Mbit/s";
+        value 0;
+      }
+      enum PORT_PROPERTIES_TYPE_10M_HALF {
+        description "[10M HALF] This port is capable of running at 10Mbit/s";
+        value 1;
+      }
+      enum PORT_PROPERTIES_TYPE_100M_FULL {
+        description "[100M FULL] This port is capable of running at 100Mbit/s";
+        value 2;
+      }
+      enum PORT_PROPERTIES_TYPE_100M_HALF {
+        description "[100M HALF] This port is capable of running at 100Mbit/s";
+        value 3;
+      }
+      enum PORT_PROPERTIES_TYPE_1000M_FULL {
+        description "[1G FULL] This port is capable of running at 1000Mbit/s";
+        value 4;
+      }
+      enum PORT_PROPERTIES_TYPE_2500M_FULL {
+        description "[2.5G FULL] This port is capable of running at 2500Mbit/s";
+        value 5;
+      }
+      enum PORT_PROPERTIES_TYPE_5G_FULL {
+        description "[5G FULL] This port is capable of running at 5Gbit/s";
+        value 6;
+      }
+      enum PORT_PROPERTIES_TYPE_10G_FULL {
+        description "[10G FULL] This port is capable of running at 10Gbit/s";
+        value 7;
+      }
+      enum PORT_PROPERTIES_TYPE_25G_FULL {
+        description "[25G FULL] This port is capable of running at 25Gbit/s";
+        value 8;
+      }
+      enum PORT_PROPERTIES_TYPE_RJ45 {
+        description "[RJ45] This port uses as RJ45 connector";
+        value 9;
+      }
+      enum PORT_PROPERTIES_TYPE_SFP {
+        description "[SFP] This port uses a pluggable SFP";
+        value 10;
+      }
+      enum PORT_PROPERTIES_TYPE_POE {
+        description "[PoE] This port is capable to supply Power over Ethernet (PoE)";
+        value 11;
+      }
+      enum PORT_PROPERTIES_TYPE_POE_PLUS {
+        description "[PoE+] This port is capable to supply Power over Ethernet Extended (PoE+)";
+        value 12;
+      }
+      enum PORT_PROPERTIES_TYPE_POE_PLUS_PLUS {
+        description "[PoE++] This port is capable to supply Power over Ethernet Extended (PoE+)";
+        value 13;
+      }
+      enum PORT_PROPERTIES_TYPE_LINK_PORT {
+        description "[Link Port] This port is capable to supply Power over Ethernet Extended (PoE+)";
+        value 14;
+      }
+    }
+  }
+  // device/board.proto
+  typedef DevicePortSpeedDuplexTypeOptions {
+    type enumeration {
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_AUTO {
+        description "[Auto]";
+        value 0;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_10M_FULL {
+        description "[10 Mbps / Full]";
+        value 1;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_10M_HALF {
+        description "[10 Mbps / Half]";
+        value 2;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_100M_FULL {
+        description "[100 Mbps / Full]";
+        value 3;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_100M_HALF {
+        description "[100 Mbps / Half]";
+        value 4;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_1000M_FULL {
+        description "[1 Gbps  / Full]";
+        value 5;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_2500M_FULL {
+        description "[2.5 Gbps / Full]";
+        value 6;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_5G_FULL {
+        description "[5 Gbps / Full]";
+        value 7;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_10G_FULL {
+        description "[10 Gbps / Full]";
+        value 8;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_25G_FULL {
+        description "[25 Gbps / Full]";
+        value 9;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_40G_FULL {
+        description "[40 Gbps / Full]";
+        value 10;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_100G_FULL {
+        description "[100 Gbps / Full]";
+        value 11;
+      }
+      enum DEVICE_PORT_SPEED_DUPLEX_TYPE_NA {
+        description "[NA]";
+        value 12;
+      }
+    }
+  }
+  // device/board.proto
+  typedef PortInterfaceTypeOptions {
+    type enumeration {
+      enum PORT_INTERFACE_TYPE_COPPER {
+        description "[Copper] Normal copper interface";
+        value 0;
+      }
+      enum PORT_INTERFACE_TYPE_OPTICAL {
+        description "[Optical] Optical interface";
+        value 1;
+      }
+    }
+  }
+  // device/board.proto
+  typedef DeviceTypeOptions {
+    type enumeration {
+      enum DEVICE_TYPE_MCU {
+        description "[MCU] MCU";
+        value 0;
+      }
+      enum DEVICE_TYPE_I2C {
+        description "[I2C] I2C";
+        value 1;
+      }
+      enum DEVICE_TYPE_GPIO {
+        description "[GPIO] GPIO";
+        value 2;
+      }
+    }
+  }
+  // device/board.proto
+  typedef MonitorTypeOptions {
+    type enumeration {
+      enum MONITOR_TYPE_TEMP_OK {
+        description "[Temperature Normal] Temperature Normal";
+        value 0;
+      }
+      enum MONITOR_TYPE_TEMP_WARN {
+        description "[Temperature Warning] Temperature Warning";
+        value 1;
+      }
+      enum MONITOR_TYPE_FAN_OK {
+        description "[Fan Speed Ok] Fan Speed Ok";
+        value 2;
+      }
+      enum MONITOR_TYPE_FAN_WARN {
+        description "[Fan Speed Warn] Fan Speed Warn";
+        value 3;
+      }
+    }
+  }
+  // device/board.proto
+  typedef PSUTypeOptions {
+    type enumeration {
+      enum PSU_TYPE_LOCATION_OK {
+        description "[Location Ok] Location Ok";
+        value 0;
+      }
+      enum PSU_TYPE_LOCATION_WARN {
+        description "[Location Warn] Location Warn";
+        value 1;
+      }
+      enum PSU_TYPE_AC_OK {
+        description "[AC Ok] AC Ok";
+        value 2;
+      }
+      enum PSU_TYPE_AC_WARN {
+        description "[AC Warning] AC Warning";
+        value 3;
+      }
+      enum PSU_TYPE_PW_OK {
+        description "[Power Ok] Power Ok";
+        value 4;
+      }
+      enum PSU_TYPE_PW_WARN {
+        description "[Power Warning] Power Warning";
+        value 5;
+      }
+      enum PSU_TYPE_FAIL {
+        description "[PSU Failed] Failed";
+        value 6;
+      }
+    }
+  }
+  // device/board.proto
+  typedef FanTypeOptions {
+    type enumeration {
+      enum FAN_TYPE_RPM {
+        description "[RPM] RPM";
+        value 0;
+      }
+    }
+  }
+  // device/board.proto
+  typedef FanDeviceTypeOptions {
+    type enumeration {
+      enum FAN_DEVICE_TYPE_RPM {
+        description "[RPM] RPM";
+        value 0;
+      }
+    }
+  }
+  // device/board.proto
+  typedef PoEDeviceTypeOptions {
+    type enumeration {
+      enum POE_DEVICE_TYPE_I2C {
+        description "[I2C] I2C";
+        value 0;
+      }
+      enum POE_DEVICE_TYPE_UART {
+        description "[UART] UART";
+        value 1;
+      }
+    }
+  }
+  // device/boundary.proto
+  typedef BoundaryTypeOptions {
+    type enumeration {
+      enum BOUNDARY_TYPE_INT {
+        description "[Int]";
+        value 0;
+      }
+      enum BOUNDARY_TYPE_DOUBLE {
+        description "[Double]";
+        value 1;
+      }
+    }
+  }
+  // device/device.proto
+  typedef LayerTypeOptions {
+    type enumeration {
+      enum LAYER_TYPE_L2 {
+        description "[L2]";
+        value 0;
+      }
+      enum LAYER_TYPE_L3 {
+        description "[L3]";
+        value 1;
+      }
+    }
+  }
+  // device/device.proto
+  typedef InterfaceTypeOptions {
+    type enumeration {
+      enum INTERFACE_TYPE_VLAN {
+        description "[VLAN]";
+        value 0;
+      }
+      enum INTERFACE_TYPE_PORT {
+        description "[Port]";
+        value 1;
+      }
+      enum INTERFACE_TYPE_TRUNK {
+        description "[LAG]";
+        value 2;
+      }
+      enum INTERFACE_TYPE_MULTICAST {
+        description "[Multicast]";
+        value 3;
+      }
+    }
+  }
+
+
+  /*
+   * message
+   */ 
+
+    // device/board.proto
+  grouping LedInfo {
+    leaf LedInfo_Name {
+      type string;
+    }
+    leaf LedInfo_PortNo {
+      type int32;
+    }
+    leaf LedInfo_Type {
+      type DeviceTypeOptions;
+    }
+    leaf LedInfo_Direction {
+      type string;
+    }
+    container LedInfo_LEDDevice {
+      uses MCULedDevice;
+    }
+    container LedInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container LedInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping MonitorInfo {
+    leaf MonitorInfo_Name {
+      type string;
+    }
+    leaf MonitorInfo_Type {
+      type DeviceTypeOptions;
+    }
+    leaf MonitorInfo_Direction {
+      type string;
+    }
+    container MonitorInfo_MonitorDevice {
+      uses MCUMonitorDevice;
+    }
+    container MonitorInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container MonitorInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping PSUInfo {
+    leaf PSUInfo_Name {
+      type string;
+    }
+    leaf PSUInfo_Type {
+      type DeviceTypeOptions;
+    }
+    leaf PSUInfo_Direction {
+      type string;
+    }
+    container PSUInfo_PSUDevice {
+      uses MCUPSUDevice;
+    }
+    container PSUInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container PSUInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping MCULedDevice {
+    leaf MCULedDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCULedDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCULedDevice_LedAction {
+      type LedTypeOptions;
+    }
+    leaf MCULedDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping MCUMonitorDevice {
+    leaf MCUMonitorDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCUMonitorDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCUMonitorDevice_MonitorAction {
+      type MonitorTypeOptions;
+    }
+    leaf MCUMonitorDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping MCUPSUDevice {
+    leaf MCUPSUDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCUPSUDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCUPSUDevice_PSUAction {
+      type PSUTypeOptions;
+    }
+    leaf MCUPSUDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping MCUFanDevice {
+    leaf MCUFanDevice_I2cAddr {
+      type int32;
+    }
+    leaf MCUFanDevice_AddrRegister {
+      type int32;
+    }
+    leaf MCUFanDevice_FANAction {
+      type FanTypeOptions;
+    }
+    leaf MCUFanDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping I2CDevice {
+    leaf I2CDevice_I2cAddr {
+      type int32;
+    }
+    leaf I2CDevice_AddrRegister {
+      type int32;
+    }
+    leaf I2CDevice_Action {
+      type int32;
+    }
+    leaf I2CDevice_ActiveBit {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping GPIODevice {
+    leaf GPIODevice_Register {
+      type int32;
+    }
+    leaf GPIODevice_Pin {
+      type int32;
+    }
+    leaf GPIODevice_Action {
+      type boolean;
+    }
+    leaf GPIODevice_Enable {
+      type boolean;
+    }
+  }
+  // device/board.proto
+  grouping I2Cinfo {
+    leaf I2Cinfo_Name {
+      type string;
+    }
+    leaf I2Cinfo_Direction {
+      type string;
+    }
+    container I2Cinfo_Device {
+      uses I2CDevice;
+    }
+  }
+  // device/board.proto
+  grouping GPIOInfo {
+    leaf GPIOInfo_Name {
+      type string;
+    }
+    leaf GPIOInfo_Direction {
+      type string;
+    }
+    container GPIOInfo_Device {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping PTPClockSynchronizerInfo {
+    leaf PTPClockSynchronizerInfo_Name {
+      type string;
+    }
+    leaf PTPClockSynchronizerInfo_Direction {
+      type string;
+    }
+    container PTPClockSynchronizerInfo_Device {
+      uses I2CDevice;
+    }
+  }
+  // device/board.proto
+  grouping GPSInfo {
+    leaf GPSInfo_Name {
+      type string;
+    }
+    leaf GPSInfo_Path {
+      type string;
+    }
+    leaf GPSInfo_Direction {
+      type string;
+    }
+  }
+  // device/board.proto
+  grouping ToDInfo {
+    leaf ToDInfo_Name {
+      type string;
+    }
+    leaf ToDInfo_Path {
+      type string;
+    }
+    leaf ToDInfo_Direction {
+      type string;
+    }
+  }
+  // device/board.proto
+  grouping UARTDevice {
+    leaf UARTDevice_Name {
+      type string;
+    }
+    leaf UARTDevice_Path {
+      type string;
+    }
+    leaf UARTDevice_Direction {
+      type string;
+    }
+    leaf UARTDevice_Bandwidth {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping FanInfo {
+    leaf FanInfo_Name {
+      type string;
+    }
+    leaf FanInfo_Type {
+      type FanDeviceTypeOptions;
+    }
+    leaf FanInfo_FanNumber {
+      type int32;
+    }
+    container FanInfo_FANDevice {
+      uses MCUFanDevice;
+    }
+    container FanInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container FanInfo_GPIODevice {
+      uses GPIODevice;
+    }
+  }
+  // device/board.proto
+  grouping PoEInfo {
+    leaf PoEInfo_Name {
+      type string;
+    }
+    leaf PoEInfo_Type {
+      type PoEDeviceTypeOptions;
+    }
+    container PoEInfo_I2CDevice {
+      uses I2CDevice;
+    }
+    container PoEInfo_UartDevice {
+      uses UARTDevice;
+    }
+  }
+  // device/board.proto
+  grouping HardwareInfo {
+    container HardwareInfo_DeviceLed {
+      uses LedInfo;
+    }
+    container HardwareInfo_DeviceHWMonitor {
+      uses MonitorInfo;
+    }
+    container HardwareInfo_DevicePSU {
+      uses PSUInfo;
+    }
+    container HardwareInfo_DeviceI2C {
+      uses I2Cinfo;
+    }
+    container HardwareInfo_DeviceHW {
+      uses GPIOInfo;
+    }
+    container HardwareInfo_DevicePTP {
+      uses PTPClockSynchronizerInfo;
+    }
+    container HardwareInfo_DeviceGPS {
+      uses GPSInfo;
+    }
+    container HardwareInfo_DeviceToD {
+      uses ToDInfo;
+    }
+    container HardwareInfo_DeviceFan {
+      uses FanInfo;
+    }
+    container HardwareInfo_DevicePoE {
+      uses PoEInfo;
+    }
+  }
+  // device/board.proto
+  grouping HardwareTableSize {
+    leaf HardwareTableSize_TcamSize {
+      type int32;
+    }
+    leaf HardwareTableSize_BridgeFDBEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_VirtualPorts {
+      type int32;
+    }
+    leaf HardwareTableSize_VirtualBridgeDomains {
+      type int32;
+    }
+    leaf HardwareTableSize_ARPTableEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_RouterIPv4HostEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_RouterIPv6HostEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_RouterNextHopEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_MulticastPhysicalPortGroups {
+      type int32;
+    }
+    leaf HardwareTableSize_MulticastLinkedListEntries {
+      type int32;
+    }
+    leaf HardwareTableSize_CentralizedCounters {
+      type int32;
+    }
+    leaf HardwareTableSize_SpanningTreeGroups {
+      type int32;
+    }
+    leaf HardwareTableSize_QoSProfiles {
+      type int32;
+    }
+    leaf HardwareTableSize_L2L3PortIsolation {
+      type int32;
+    }
+  }
+  // device/board.proto
+  grouping PhyInterface {
+    leaf PhyInterface_Interface {
+      type int32;
+    }
+    leaf PhyInterface_Type {
+      type PhyInterfaceTypeOptions;
+    }
+  }
+  // device/board.proto
+  grouping PortInfo {
+    leaf PortInfo_PortNo {
+      type int32;
+    }
+    leaf PortInfo_MACChip {
+      type int32;
+    }
+    leaf PortInfo_MACNo {
+      type int32;
+    }
+    leaf PortInfo_PortGroup {
+      type int32;
+    }
+    leaf PortInfo_PhyID1 {
+      type int32;
+    }
+    leaf PortInfo_PhyID2 {
+      type int32;
+    }
+    container PortInfo_PhyInterface {
+      uses PhyInterface;
+    }
+    leaf PortInfo_PoENo {
+      type int32;
+    }
+    leaf PortInfo_PoEChannel {
+      type int32;
+    }
+    leaf PortInfo_PoEChipNo {
+      type int32;
+    }
+    leaf PortInfo_MacsecEncLen {
+      type int32;
+    }
+    leaf PortInfo_InterfaceType {
+      type PortInterfaceTypeOptions;
+    }
+    leaf PortInfo_Properties {
+      type PortPropertyTypeOptions;
+    }
+    leaf PortInfo_DeviceID {
+      type int32;
+    }
+    leaf PortInfo_SpeedProperties {
+      type DevicePortSpeedDuplexTypeOptions;
+    }
+  }
+  // device/board.proto
+  grouping BoardInfo {
+    leaf BoardInfo_SystemDescription {
+      type string;
+    }
+    container BoardInfo_PortLists {
+      uses PortInfo;
+    }
+    leaf BoardInfo_HwFeatures {
+      type FactoryHwFeatureTypeOptions;
+    }
+    container BoardInfo_HwSize {
+      uses HardwareTableSize;
+    }
+    leaf BoardInfo_CPUPort {
+      type int32;
+    }
+    container BoardInfo_BoardDevice {
+      uses HardwareInfo;
+    }
+    container BoardInfo_TimeControl {
+      uses TimeControlInfo;
+    }
+    leaf BoardInfo_EnterpriseOID {
+      type string;
+    }
+  }
+  // device/board.proto
+  grouping TimeControlSpeedFrequencyEntry {
+    leaf TimeControlSpeedFrequencyEntry_Speed {
+      type PortPropertyTypeOptions;
+    }
+    leaf TimeControlSpeedFrequencyEntry_Frequency {
+      type int64;
+    }
+    leaf TimeControlSpeedFrequencyEntry_M {
+      type int64;
+    }
+    leaf TimeControlSpeedFrequencyEntry_N {
+      type int64;
+    }
+    leaf TimeControlSpeedFrequencyEntry_Div {
+      type int64;
+    }
+  }
+  // device/board.proto
+  grouping TimeControlPortInfoEntry {
+    leaf TimeControlPortInfoEntry_PortNo {
+      type int32;
+    }
+    leaf TimeControlPortInfoEntry_RCLKPin {
+      type RCLKTypeOptions;
+    }
+    leaf TimeControlPortInfoEntry_Frequency {
+      type int64;
+    }
+    leaf TimeControlPortInfoEntry_InputClock {
+      type InputClockIndexTypeOptions;
+    }
+  }
+  // device/board.proto
+  grouping TimeControlInfo {
+    list TimeControlInfo_InputClockMapping {
+      key "name";
+      unique "name";
+      leaf name {
+        type string;
+      }
+      leaf value {
+        type InputClockIndexTypeOptions;
+      }
+    }
+    // container TimeControlInfo_InputClockMapping {
+    //   uses TimeControlInfo_InputClockMappingEntry;
+    // }
+    container TimeControlInfo_PortInfoList {
+      uses TimeControlPortInfoEntry;
+    }
+    container TimeControlInfo_SpeedFrequencyList {
+      uses TimeControlSpeedFrequencyEntry;
+    }
+  }
+  // device/boundary.proto
+  grouping Boundary {
+    leaf Boundary_Type {
+      type BoundaryTypeOptions;
+    }
+    leaf Boundary_Max {
+      type int32;
+    }
+    leaf Boundary_Min {
+      type int32;
+    }
+    leaf Boundary_Lower {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+    leaf Boundary_Upper {
+      type decimal64 {
+        fraction-digits 2;
+      }
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryAll {
+    container BoundaryAll_VLAN {
+      uses BoundaryVLAN;
+    }
+    container BoundaryAll_Access {
+      uses BoundaryAccess;
+    }
+    container BoundaryAll_DDM {
+      uses BoundaryDDM;
+    }
+    container BoundaryAll_ACL {
+      uses BoundaryACL;
+    }
+    container BoundaryAll_Log {
+      uses BoundaryLog;
+    }
+    container BoundaryAll_Mirroring {
+      uses BoundaryMirroring;
+    }
+    container BoundaryAll_Trunk {
+      uses BoundaryTRUNK;
+    }
+    container BoundaryAll_FDB {
+      uses BoundaryFDB;
+    }
+    container BoundaryAll_QoS {
+      uses BoundaryQoS;
+    }
+    container BoundaryAll_Multicast {
+      uses BoundaryMulticast;
+    }
+    container BoundaryAll_PoE {
+      uses BoundaryPoE;
+    }
+    container BoundaryAll_Files {
+      uses BoundaryFiles;
+    }
+    container BoundaryAll_TimeRange {
+      uses BoundaryTimeRange;
+    }
+    container BoundaryAll_DHCPServer {
+      uses BoundaryDHCPServer;
+    }
+    container BoundaryAll_Monitor {
+      uses BoundaryMonitor;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryDHCPServer {
+    container BoundaryDHCPServer_MACBased {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryVLAN {
+    container BoundaryVLAN_VlanID {
+      uses Boundary;
+    }
+    container BoundaryVLAN_VlanFilter {
+      uses Boundary;
+    }
+    container BoundaryVLAN_ProtocolBased {
+      uses Boundary;
+    }
+    container BoundaryVLAN_MACBased {
+      uses Boundary;
+    }
+    container BoundaryVLAN_SubnetBased {
+      uses Boundary;
+    }
+    container BoundaryVLAN_TPIDsRange {
+      uses Boundary;
+    }
+    container BoundaryVLAN_ProtocolClasses {
+      uses Boundary;
+    }
+    container BoundaryVLAN_SelectiveQinQ {
+      uses Boundary;
+    }
+    container BoundaryVLAN_Mapping {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryDDM {
+    container BoundaryDDM_DdmTemperature {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmVoltage {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmTxBias {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmRxPower {
+      uses Boundary;
+    }
+    container BoundaryDDM_DdmTxPower {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryACL {
+    container BoundaryACL_ACLs {
+      uses Boundary;
+    }
+    container BoundaryACL_ACEs {
+      uses Boundary;
+    }
+    container BoundaryACL_Binding {
+      uses Boundary;
+    }
+    container BoundaryACL_Flow {
+      uses Boundary;
+    }
+    container BoundaryACL_FlowRules {
+      uses Boundary;
+    }
+    container BoundaryACL_Rules {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryLog {
+    container BoundaryLog_LogRotateSize {
+      uses Boundary;
+    }
+    container BoundaryLog_LogRotateFileCount {
+      uses Boundary;
+    }
+    container BoundaryLog_LogTargetList {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryAccess {
+    container BoundaryAccess_Users {
+      uses Boundary;
+    }
+    container BoundaryAccess_UsersAssociatedGroups {
+      uses Boundary;
+    }
+    container BoundaryAccess_Groups {
+      uses Boundary;
+    }
+    container BoundaryAccess_GroupsPattern {
+      uses Boundary;
+    }
+    container BoundaryAccess_Restrictions {
+      uses Boundary;
+    }
+    container BoundaryAccess_Servers {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryMirroring {
+    container BoundaryMirroring_Session {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryFDB {
+    container BoundaryFDB_FDBSize {
+      uses Boundary;
+    }
+    container BoundaryFDB_AgeTime {
+      uses Boundary;
+    }
+    container BoundaryFDB_PortLearningLimit {
+      uses Boundary;
+    }
+    container BoundaryFDB_PortSecurityLearningLimit {
+      uses Boundary;
+    }
+    container BoundaryFDB_ForwardLimit {
+      uses Boundary;
+    }
+    container BoundaryFDB_DropLimit {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryTRUNK {
+    container BoundaryTRUNK_IDRange {
+      uses Boundary;
+    }
+    container BoundaryTRUNK_PriorityRange {
+      uses Boundary;
+    }
+    container BoundaryTRUNK_MemberRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryMulticast {
+    container BoundaryMulticast_VIDXRange {
+      uses Boundary;
+    }
+    container BoundaryMulticast_StaticEntries {
+      uses Boundary;
+    }
+    container BoundaryMulticast_DynamicEntries {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryQoS {
+    container BoundaryQoS_QueueListRange {
+      uses Boundary;
+    }
+    container BoundaryQoS_CoSRange {
+      uses Boundary;
+    }
+    container BoundaryQoS_DSCPRange {
+      uses Boundary;
+    }
+    container BoundaryQoS_WRRRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryPoE {
+    container BoundaryPoE_BudgetRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryFiles {
+    container BoundaryFiles_CertificatedRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryTimeRange {
+    container BoundaryTimeRange_EntryRange {
+      uses Boundary;
+    }
+  }
+  // device/boundary.proto
+  grouping BoundaryMonitor {
+    container BoundaryMonitor_Temperature {
+      uses Boundary;
+    }
+    container BoundaryMonitor_Power {
+      uses Boundary;
+    }
+    container BoundaryMonitor_Cpu {
+      uses Boundary;
+    }
+    container BoundaryMonitor_Memory {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantConsumption {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantTemperature {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantVoltage {
+      uses Boundary;
+    }
+    container BoundaryMonitor_PowerRedundantCurrent {
+      uses Boundary;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlAll {
+    container FunctionControlAll_VLAN {
+      uses FunctionControlVLAN;
+    }
+    container FunctionControlAll_Acl {
+      uses FunctionControlACL;
+    }
+    container FunctionControlAll_Mirroring {
+      uses FunctionControlMirroring;
+    }
+    container FunctionControlAll_FDB {
+      uses FunctionControlFDB;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlVLAN {
+    leaf FunctionControlVLAN_Voice {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_SelectiveQinq {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_MACBased {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_SubnetBased {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_ProtocolBased {
+      type boolean;
+    }
+    leaf FunctionControlVLAN_Translation {
+      type boolean;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlACL {
+    leaf FunctionControlACL_TimeRange {
+      type boolean;
+    }
+    leaf FunctionControlACL_Binding {
+      type boolean;
+    }
+    leaf FunctionControlACL_FlowMirroring {
+      type boolean;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlMirroring {
+    leaf FunctionControlMirroring_RSPAN {
+      type boolean;
+    }
+  }
+  // device/fcl.proto
+  grouping FunctionControlFDB {
+    leaf FunctionControlFDB_PortSecurity {
+      type boolean;
+    }
+    leaf FunctionControlFDB_LearningLimit {
+      type boolean;
+    }
+    leaf FunctionControlFDB_Forward {
+      type boolean;
+    }
+    leaf FunctionControlFDB_Drop {
+      type boolean;
+    }
+  }
+  // device/path.proto
+  grouping PathAll {
+    leaf PathAll_LogRamDisk {
+      type string;
+    }
+    leaf PathAll_LogFlash {
+      type string;
+    }
+    leaf PathAll_ConfigDefault {
+      type string;
+    }
+    leaf PathAll_ConfigSaved {
+      type string;
+    }
+    leaf PathAll_User {
+      type string;
+    }
+    leaf PathAll_IPTables {
+      type string;
+    }
+    leaf PathAll_CoreReboot {
+      type string;
+    }
+    leaf PathAll_WarmStart {
+      type string;
+    }
+    leaf PathAll_VlanMgmt {
+      type string;
+    }
+    leaf PathAll_TimeCfg {
+      type string;
+    }
+    leaf PathAll_BootReady {
+      type string;
+    }
+    leaf PathAll_IPv6LinkLocal {
+      type string;
+    }
+    leaf PathAll_TimeZone {
+      type string;
+    }
+    leaf PathAll_Resolv {
+      type string;
+    }
+    leaf PathAll_DropbearProc {
+      type string;
+    }
+    leaf PathAll_TelnetProc {
+      type string;
+    }
+    leaf PathAll_FTPProc {
+      type string;
+    }
+    leaf PathAll_LocalUser {
+      type string;
+    }
+    leaf PathAll_Certificates {
+      type string;
+    }
+    leaf PathAll_OpenSSLCertificates {
+      type string;
+    }
+    leaf PathAll_SNMPdCertificates {
+      type string;
+    }
+    leaf PathAll_SNMPdCertificatesKey {
+      type string;
+    }
+    leaf PathAll_NetCfg {
+      type string;
+    }
+    leaf PathAll_IPv4Script {
+      type string;
+    }
+    leaf PathAll_IPv6Script {
+      type string;
+    }
+    leaf PathAll_LastSaveTime {
+      type string;
+    }
+    leaf PathAll_Image {
+      type string;
+    }
+    leaf PathAll_AltVersion {
+      type string;
+    }
+    leaf PathAll_AltBuildDateTime {
+      type string;
+    }
+    leaf PathAll_Version {
+      type string;
+    }
+    leaf PathAll_BuildDateTime {
+      type string;
+    }
+    leaf PathAll_DhcpServerDnsmasqLeasePath {
+      type string;
+    }
+    leaf PathAll_DhcpServerDnsmasqCfgPath {
+      type string;
+    }
+    leaf PathAll_DhcpServerPortBasedInfo {
+      type string;
+    }
+  }
+  // device/device.proto
+  grouping InterfaceIdentify {
+    leaf InterfaceIdentify_Type {
+      type InterfaceTypeOptions;
+    }
+    leaf InterfaceIdentify_DeviceID {
+      type int32;
+    }
+    leaf InterfaceIdentify_PortNo {
+      type int32;
+    }
+    leaf InterfaceIdentify_LAGNo {
+      type int32;
+    }
+    leaf InterfaceIdentify_VlanID {
+      type int32;
+    }
+  }
+  // device/device.proto
+  grouping Info {
+    leaf Info_Model {
+      type string;
+    }
+    leaf Info_MACAddr {
+      type string;
+    }
+    leaf Info_MACAddrFactory {
+      type string;
+    }
+    leaf Info_SerialNo {
+      type string;
+    }
+    leaf Info_Vendor {
+      type string;
+    }
+    leaf Info_AltBuildDateTime {
+      type string;
+    }
+    leaf Info_CurrentBuildDateTime {
+      type string;
+    }
+    leaf Info_AltSwVersion {
+      type string;
+    }
+    leaf Info_CurrentSwVersion {
+      type string;
+    }
+    leaf Info_HwVersion {
+      type string;
+    }
+    leaf Info_CurrentImage {
+      type string;
+    }
+    leaf Info_Board {
+      type string;
+    }
+    leaf Info_Layer {
+      type LayerTypeOptions;
+    }
+  }
+  // device/common.proto
+  grouping PortList {
+    list List {
+      container IdentifyNo {
+        uses InterfaceIdentify;
+      }
+    }
+  }
+
+  container intri-device {
+    config false;
+
+    // GetMACAddress
+    container mac-addr {
+      leaf mac-addr {
+        type string;
+      }
+    }
+
+    // GetPortLists
+    container port-list {
+      uses PortList;
+    }
+
+    // GetLAGPortLists
+    container lag-port-list {
+      uses PortList;
+    }
+
+    // GetPoEPortLists
+    container poe-port-list {
+      uses PortList;
+    }
+
+  }
+}

@@ -34,7 +34,9 @@
 #include "ncxtypes.h"
 #include "status.h"
 #include "intri-test.h"
-#include "../../.libintrishare/libintrishare.h"
+
+/* ian: add head files */
+#include "../../../.libintrishare/libintrishare.h"
 
 /* module static variables */
 static ncx_module_t *intri_test_mod;

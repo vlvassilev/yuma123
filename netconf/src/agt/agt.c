@@ -115,7 +115,11 @@ static void
     /* Set the default values for the user parameters
      * these may be overridden from the command line;
      */
-    agt_profile.agt_targ = NCX_AGT_TARG_CANDIDATE;
+
+    /* Our Switch doesn't have candidate config, so
+     * make it support running config only
+    */
+    agt_profile.agt_targ = NCX_AGT_TARG_RUNNING;
     agt_profile.agt_start = NCX_AGT_START_MIRROR;
     agt_profile.agt_loglevel = log_get_debug_level();
     agt_profile.agt_log_acm_reads = FALSE;

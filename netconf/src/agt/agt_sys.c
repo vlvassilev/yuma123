@@ -174,7 +174,7 @@ date         init     comment
 
 /** ietf-system system-state related CONST **/
 #define ietf_system (const xmlChar *)"ietf-system"
-#define ietf_system_state_clock (const xmlChar *)"clock"
+#define ietf_system_clock (const xmlChar *)"clock"
 #define ietf_system_state_platform (const xmlChar *)"platform"
 #define ietf_system_state_os_name (const xmlChar *)"os-name"
 #define ietf_system_state_os_release (const xmlChar *)"os-release"
@@ -187,7 +187,14 @@ date         init     comment
 #define ietf_system_hostname (const xmlChar *)"hostname"
 #define ietf_system_contact (const xmlChar *)"contact"
 #define ietf_system_location (const xmlChar *)"location"
+#define ietf_system_clock_timezone_name (const xmlChar *)"timezone-name"
 #define ietf_system_ntp (const xmlChar *)"ntp"
+#define ietf_system_ntp_enabled (const xmlChar *)"enabled"
+#define ietf_system_ntp_server (const xmlChar *)"server"
+#define ietf_system_ntp_server_name (const xmlChar *)"name"
+#define ietf_system_ntp_server_udp (const xmlChar *)"udp"
+#define ietf_system_ntp_server_udp_address (const xmlChar *)"address"
+#define ietf_system_ntp_server_prefer (const xmlChar *)"prefer"
 #define ietf_system_radius (const xmlChar *)"radius"
 
 /********************************************************************
@@ -321,7 +328,81 @@ static status_t
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
-} /* get_currentDateTime */
+} /* get_fake_string */
+
+/********************************************************************
+* FUNCTION get_fake_int
+*
+* copied from get_currentDateTime
+* <get> operation handler for the sysCurrentDateTime leaf
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    get_fake_int (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    int32      *buff;
+
+    (void)scb;
+    (void)virval;
+
+
+    if (cbmode == GETCB_GET_VALUE) {
+        buff = (int *)m__getMem(TSTAMP_MIN_SIZE);
+        // if (!buff) {
+        //     return ERR_INTERNAL_MEM;
+        // }
+
+        // sprintf((int32 *)buff, int32(16));
+        buff = (int32 *)16;
+        VAL_INT(dstval) = buff;
+        return NO_ERR;
+    } else {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* get_fake_int */
+
+/********************************************************************
+* FUNCTION get_fake_bool
+*
+* copied from get_currentDateTime
+* <get> operation handler for the sysCurrentDateTime leaf
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    get_fake_bool (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    boolean      *buff;
+
+    (void)scb;
+    (void)virval;
+
+
+    if (cbmode == GETCB_GET_VALUE) {
+        buff = FALSE;
+        VAL_BOOL(dstval) = buff;
+        return NO_ERR;
+    } else {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* get_fake_bool */
 
 
 
@@ -350,7 +431,6 @@ static status_t
         /* description-stmt validation here */
         if(newval!=NULL) {
             printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
-            printf("Setting /system/hostname, curval %s\n", VAL_STRING(curval));
             xmlChar* buf;
             buf=malloc(strlen(VAL_STRING(newval)));
             sprintf(buf, VAL_STRING(newval));
@@ -370,14 +450,12 @@ static status_t
         case OP_EDITOP_CREATE:
         case OP_EDITOP_DELETE:
             if(newval!=NULL) {
-                printf("Setting /system/hostname to %s - cmd=%s\n", VAL_STRING(newval));
-                fake_string = VAL_STRING(newval);
-                // ret=system(buf);
-                // if(ret != 0) {
-                //     errorval=newval;
-                //     errorstr="Can't set hostname. Are you sure your server is running as root?"; /* strdup(strerror(errno)); */
-                //     res = SET_ERROR(ERR_INTERNAL_VAL);
-                // }
+                printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
+                xmlChar* buf;
+                buf=malloc(strlen(VAL_STRING(newval)));
+                sprintf(buf, VAL_STRING(newval));
+                fake_string = buf;
+                printf("final fake_string%s\n",fake_string);
             }
             break;
         default:
@@ -859,6 +937,7 @@ status_t
     // For adding /system-state/ and /system/ and link them to the private API
     obj_template_t*        obj;
     val_value_t*           tmp_sub_dir_val;
+    val_value_t*           ntp_sub_dir_val;
     val_value_t*           tmp_val;
 
     printf("\n@@@@@ agt_sys_init2\n");
@@ -894,6 +973,52 @@ status_t
     /* Add /system/loaction */
     add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_location , get_fake_string);
 
+    /* Add /system/clock/ */
+    tmp_sub_dir_val = val_find_child(ietf_system_val,
+                                          ietf_system,
+                                          ietf_system_clock);
+    if(tmp_sub_dir_val==NULL) {
+        printf("\ngot null clock_val\n");
+        obj = obj_find_child(ietf_system_val->obj,
+                                       ietf_system,
+                                       ietf_system_clock);
+        assert(obj != NULL);
+
+        tmp_sub_dir_val = val_new_value();
+        assert(tmp_sub_dir_val != NULL);
+
+        val_init_from_template(tmp_sub_dir_val,
+                               obj);
+
+        val_add_child(tmp_sub_dir_val, ietf_system_val);
+
+    }
+    /* Add /system/clock/timezone-name */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_clock_timezone_name , get_fake_string);
+
+     /* Add /system/ntp/ */
+    tmp_sub_dir_val = val_find_child(ietf_system_val,
+                                          ietf_system,
+                                          ietf_system_ntp);
+    if(tmp_sub_dir_val==NULL) {
+        printf("\ngot null clock_val\n");
+        obj = obj_find_child(ietf_system_val->obj,
+                                       ietf_system,
+                                       ietf_system_ntp);
+        assert(obj != NULL);
+
+        tmp_sub_dir_val = val_new_value();
+        assert(tmp_sub_dir_val != NULL);
+
+        val_init_from_template(tmp_sub_dir_val,
+                               obj);
+
+        val_add_child(tmp_sub_dir_val, ietf_system_val);
+    }
+    /* Add /system/ntp/enabled */
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_ntp_enabled , get_fake_bool);
+
+
     /* Add /system-state */
     ietf_system_state_val = val_new_value();
     if (!ietf_system_state_val) {
@@ -902,16 +1027,15 @@ status_t
     val_init_from_template(ietf_system_state_val, ietf_system_state_obj);
 
 
-    /* Start adding ietf-system and using private API*/
     /* Add /system-state/clock */
     tmp_sub_dir_val = val_find_child(ietf_system_state_val,
                                           ietf_system,
-                                          ietf_system_state_clock);
+                                          ietf_system_clock);
     if(tmp_sub_dir_val==NULL) {
         printf("\ngot null clock_val\n");
         obj = obj_find_child(ietf_system_state_val->obj,
                                        ietf_system,
-                                       ietf_system_state_clock);
+                                       ietf_system_clock);
         assert(obj != NULL);
 
         tmp_sub_dir_val = val_new_value();
@@ -934,7 +1058,7 @@ status_t
                                           ietf_system,
                                           ietf_system_state_platform);
     if(tmp_sub_dir_val==NULL) {
-        printf("\ngot null platfoorm_val\n");
+        printf("\ngot null platform_val\n");
         obj = obj_find_child(ietf_system_state_val->obj,
                                        ietf_system,
                                        ietf_system_state_platform);

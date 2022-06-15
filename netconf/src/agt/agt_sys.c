@@ -191,10 +191,9 @@ date         init     comment
 #define ietf_system_ntp (const xmlChar *)"ntp"
 #define ietf_system_ntp_enabled (const xmlChar *)"enabled"
 #define ietf_system_ntp_server (const xmlChar *)"server"
-#define ietf_system_ntp_server_name (const xmlChar *)"name"
-#define ietf_system_ntp_server_udp (const xmlChar *)"udp"
-#define ietf_system_ntp_server_udp_address (const xmlChar *)"address"
-#define ietf_system_ntp_server_prefer (const xmlChar *)"prefer"
+#define ietf_system_ntp_server_name (const xmlChar *)"server/name"
+#define ietf_system_ntp_server_udp_address (const xmlChar *)"server/udp/address"
+#define ietf_system_ntp_server_prefer (const xmlChar *)"server/prefer"
 #define ietf_system_radius (const xmlChar *)"radius"
 
 /********************************************************************
@@ -280,7 +279,7 @@ static status_t
         }
 
         tstamp_datetime(buff);
-        VAL_STR(dstval) = buff;
+        VAL_STRING(dstval) = buff;
         return NO_ERR;
     } else {
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
@@ -322,7 +321,7 @@ static status_t
         }
 
         sprintf((char *)buff, fake_string);
-        VAL_STR(dstval) = buff;
+        VAL_STRING(dstval) = buff;
         return NO_ERR;
     } else {
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
@@ -348,21 +347,12 @@ static status_t
                          const val_value_t *virval,
                          val_value_t  *dstval)
 {
-    int32      *buff;
-
     (void)scb;
     (void)virval;
 
 
     if (cbmode == GETCB_GET_VALUE) {
-        buff = (int *)m__getMem(TSTAMP_MIN_SIZE);
-        // if (!buff) {
-        //     return ERR_INTERNAL_MEM;
-        // }
-
-        // sprintf((int32 *)buff, int32(16));
-        buff = (int32 *)16;
-        VAL_INT(dstval) = buff;
+        VAL_INT(dstval) = 16;
         return NO_ERR;
     } else {
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
@@ -404,8 +394,104 @@ static status_t
 
 } /* get_fake_bool */
 
+/********************************************************************
+* FUNCTION get_fake_list
+*
+* copied from get_currentDateTime
+* <get> operation handler for the sysCurrentDateTime leaf
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    get_fake_list (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    boolean      *buff;
+
+    (void)scb;
+    (void)virval;
 
 
+    if (cbmode == GETCB_GET_VALUE) {
+        buff = FALSE;
+        VAL_BOOL(dstval) = buff;
+        return NO_ERR;
+    } else {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* get_fake_list */
+
+
+
+// set_no_delete_func is used disable the delete on the assigned path
+// so this function will return res when editop is delete
+static status_t
+    set_no_delete_func (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        /* description-stmt validation here */
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+        case OP_EDITOP_CREATE:
+        case OP_EDITOP_DELETE:
+            return res;
+        default:
+            assert(0);
+        }
+
+        break;
+    case AGT_CB_ROLLBACK:
+        /* undo device instrumentation here */
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+
+    return res;
+}
 
 static status_t
     set_fake_string (
@@ -428,15 +514,6 @@ static status_t
     printf("Setting /system/hostname to %s - editop=%d\n", VAL_STRING(newval), editop);
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
-        /* description-stmt validation here */
-        if(newval!=NULL) {
-            printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
-            xmlChar* buf;
-            buf=malloc(strlen(VAL_STRING(newval)));
-            sprintf(buf, VAL_STRING(newval));
-            fake_string = buf;
-            printf("final fake_string%s\n",fake_string);
-        }
         break;
     case AGT_CB_APPLY:
         /* database manipulation done here */
@@ -448,24 +525,20 @@ static status_t
         case OP_EDITOP_MERGE:
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_CREATE:
-        case OP_EDITOP_DELETE:
             if(newval!=NULL) {
                 printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
                 xmlChar* buf;
                 buf=malloc(strlen(VAL_STRING(newval)));
                 sprintf(buf, VAL_STRING(newval));
                 fake_string = buf;
-                printf("final fake_string%s\n",fake_string);
             }
             break;
+        case OP_EDITOP_DELETE:
+            return res;
         default:
             assert(0);
         }
 
-        break;
-    case AGT_CB_ROLLBACK:
-        /* undo device instrumentation here */
-        break;
     default:
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -877,9 +950,6 @@ status_t
         (const xmlChar *)"/system/hostname",
         (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
         set_fake_string);
-    if (res != NO_ERR) {
-        return res;
-    }
     printf("register callback end\n");
 
     yuma_system_obj =

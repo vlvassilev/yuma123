@@ -1,5 +1,5 @@
 
-/* 
+/*
  * Copyright (c) 2008-2012, Andy Bierman, All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,
@@ -33,7 +33,7 @@
 #include "ncxmod.h"
 #include "ncxtypes.h"
 #include "status.h"
-#include "intri-device.h"
+#include "intri-device@2022-05-24.h"
 
 /* module static variables */
 static ncx_module_t *intri_device_mod;
@@ -43,9 +43,9 @@ static obj_template_t *intri_device_obj;
 
 /********************************************************************
 * FUNCTION y_intri_device_init_static_vars
-* 
+*
 * initialize module static variables
-* 
+*
 ********************************************************************/
 static void y_intri_device_init_static_vars (void)
 {
@@ -58,14 +58,14 @@ static void y_intri_device_init_static_vars (void)
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_mac_addr_mac_addr_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/mac-addr/mac-addr
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -106,13 +106,13 @@ static status_t intri_device_intri_device_mac_addr_mac_addr_get (
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_mac_addr_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/mac-addr
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -121,7 +121,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
 
   /* add /intri-device/mac-addr/mac-addr */
   childval = agt_make_virtual_leaf(
@@ -141,14 +141,14 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIdentify_Type_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/port-list/List/IdentifyNo/InterfaceIdentify_Type
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -189,14 +189,14 @@ static status_t intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIde
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIdentify_DeviceID_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/port-list/List/IdentifyNo/InterfaceIdentify_DeviceID
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -234,14 +234,14 @@ static status_t intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIde
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIdentify_PortNo_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/port-list/List/IdentifyNo/InterfaceIdentify_PortNo
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -279,14 +279,14 @@ static status_t intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIde
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIdentify_LAGNo_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/port-list/List/IdentifyNo/InterfaceIdentify_LAGNo
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -324,14 +324,14 @@ static status_t intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIde
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIdentify_VlanID_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/port-list/List/IdentifyNo/InterfaceIdentify_VlanID
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -369,13 +369,13 @@ static status_t intri_device_intri_device_port_list_List_IdentifyNo_InterfaceIde
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_List_IdentifyNo_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/port-list/List/IdentifyNo
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -384,7 +384,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
 
   /* add /intri-device/port-list/List/IdentifyNo/InterfaceIdentify_Type */
   childval = agt_make_virtual_leaf(
@@ -452,13 +452,13 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_port_list_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/port-list
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -467,7 +467,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
   /* container port-list not handled!!! */
 
   return res;
@@ -476,14 +476,14 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_List_IdentifyNo_InterfaceIdentify_Type_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/lag-port-list/List/IdentifyNo/InterfaceIdentify_Type
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -524,14 +524,14 @@ static status_t intri_device_intri_device_lag_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_List_IdentifyNo_InterfaceIdentify_DeviceID_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/lag-port-list/List/IdentifyNo/InterfaceIdentify_DeviceID
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -569,14 +569,14 @@ static status_t intri_device_intri_device_lag_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_List_IdentifyNo_InterfaceIdentify_PortNo_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/lag-port-list/List/IdentifyNo/InterfaceIdentify_PortNo
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -614,14 +614,14 @@ static status_t intri_device_intri_device_lag_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_List_IdentifyNo_InterfaceIdentify_LAGNo_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/lag-port-list/List/IdentifyNo/InterfaceIdentify_LAGNo
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -659,14 +659,14 @@ static status_t intri_device_intri_device_lag_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_List_IdentifyNo_InterfaceIdentify_VlanID_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/lag-port-list/List/IdentifyNo/InterfaceIdentify_VlanID
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -704,13 +704,13 @@ static status_t intri_device_intri_device_lag_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_List_IdentifyNo_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/lag-port-list/List/IdentifyNo
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -719,7 +719,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
 
   /* add /intri-device/lag-port-list/List/IdentifyNo/InterfaceIdentify_Type */
   childval = agt_make_virtual_leaf(
@@ -787,13 +787,13 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_lag_port_list_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/lag-port-list
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -802,7 +802,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
   /* container lag-port-list not handled!!! */
 
   return res;
@@ -811,14 +811,14 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_List_IdentifyNo_InterfaceIdentify_Type_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/poe-port-list/List/IdentifyNo/InterfaceIdentify_Type
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -859,14 +859,14 @@ static status_t intri_device_intri_device_poe_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_List_IdentifyNo_InterfaceIdentify_DeviceID_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/poe-port-list/List/IdentifyNo/InterfaceIdentify_DeviceID
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -904,14 +904,14 @@ static status_t intri_device_intri_device_poe_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_List_IdentifyNo_InterfaceIdentify_PortNo_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/poe-port-list/List/IdentifyNo/InterfaceIdentify_PortNo
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -949,14 +949,14 @@ static status_t intri_device_intri_device_poe_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_List_IdentifyNo_InterfaceIdentify_LAGNo_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/poe-port-list/List/IdentifyNo/InterfaceIdentify_LAGNo
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -994,14 +994,14 @@ static status_t intri_device_intri_device_poe_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_List_IdentifyNo_InterfaceIdentify_VlanID_get
-* 
+*
 * Get database object callback
 * Path: /intri-device/poe-port-list/List/IdentifyNo/InterfaceIdentify_VlanID
 * Fill in 'dstval' contents
-* 
+*
 * INPUTS:
 *     see ncx/getcb.h for details
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -1039,13 +1039,13 @@ static status_t intri_device_intri_device_poe_port_list_List_IdentifyNo_Interfac
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_List_IdentifyNo_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/poe-port-list/List/IdentifyNo
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -1054,7 +1054,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
 
   /* add /intri-device/poe-port-list/List/IdentifyNo/InterfaceIdentify_Type */
   childval = agt_make_virtual_leaf(
@@ -1122,13 +1122,13 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_poe_port_list_mro
-* 
+*
 * Make read-only child nodes
 * Path: /intri-device/poe-port-list
-* 
+*
 * INPUTS:
 *     parentval == the parent struct to use for new child nodes
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -1137,7 +1137,7 @@ static status_t
 {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  
+
   /* container poe-port-list not handled!!! */
 
   return res;
@@ -1147,10 +1147,10 @@ static status_t
 
 /********************************************************************
 * FUNCTION intri_device_intri_device_mro
-* 
+*
 * Make read-only top-level node
 * Path: /intri-device
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -1229,13 +1229,13 @@ static status_t
 
 /********************************************************************
 * FUNCTION y_intri_device_init
-* 
+*
 * initialize the intri-device server instrumentation library
-* 
+*
 * INPUTS:
 *    modname == requested module name
 *    revision == requested version (NULL for any)
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -1272,16 +1272,16 @@ status_t y_intri_device_init (
     return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
   }
   /* put your module initialization code here */
-  
+
   return res;
 } /* y_intri_device_init */
 
 /********************************************************************
 * FUNCTION y_intri_device_init2
-* 
+*
 * SIL init phase 2: non-config data structures
 * Called after running config is loaded
-* 
+*
 * RETURNS:
 *     error status
 ********************************************************************/
@@ -1302,12 +1302,12 @@ status_t y_intri_device_init2 (void)
 /********************************************************************
 * FUNCTION y_intri_device_cleanup
 *    cleanup the server instrumentation library
-* 
+*
 ********************************************************************/
 void y_intri_device_cleanup (void)
 {
   /* put your cleanup code here */
-  
+
 } /* y_intri_device_cleanup */
 
 /* END intri_device.c */

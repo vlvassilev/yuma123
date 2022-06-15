@@ -107,6 +107,7 @@ AC_CONFIG_FILES([
         libintri/private/modules/Makefile
         libintri/private/src/intri-test/Makefile
         libintri/private/src/intri-device/Makefile
+        libintri/private/src/intri-core/intri-system/Makefile
 
         libstandard/ietf-interfaces/Makefile
         libstandard/ietf-system/Makefile

@@ -13,7 +13,8 @@ libstandard/ietf-interfaces \
 libstandard/ietf-system \
 libintri/private/modules \
 libintri/private/src/intri-test \
-libintri/private/src/intri-device
+libintri/private/src/intri-device \
+libintri/private/src/intri-core/intri-system
 
 # libtoaster/src \
 # netconf/src/yangrpc/example \

@@ -1,0 +1,2 @@
+yangdump --format=h --versionnames=false --subtree=. --output=.
+yangdump --format=c --versionnames=true --subtree=. --output=.

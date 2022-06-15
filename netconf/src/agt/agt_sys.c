@@ -117,6 +117,7 @@ date         init     comment
 #include "xml_util.h"
 #include "xml_wr.h"
 #include "yangconst.h"
+#include "../../../libintri/.libintrishare/libintrishare.h"
 
 
 /********************************************************************
@@ -222,8 +223,7 @@ static obj_template_t *sysCapabilityChangeobj;
 static obj_template_t *sysSessionEndobj;
 static obj_template_t *sysConfirmedCommitobj;
 
-/* stored for being modifyed by fake function */
-// static xmlChar *fake_string;
+static xmlChar *fake_string;
 
 /********************************************************************
 * FUNCTION payload_error
@@ -304,17 +304,17 @@ static status_t
     (void)scb;
     (void)virval;
 
-    // if (*fake_string == NULL || *fake_string=="") {
-    //     *fake_string ="init_value";
-    // }
 
     if (cbmode == GETCB_GET_VALUE) {
         buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
         if (!buff) {
             return ERR_INTERNAL_MEM;
         }
+        if (fake_string==NULL) {
+            fake_string = (xmlChar *)"init_value";
+        }
 
-        sprintf((char *)buff, "what");
+        sprintf((char *)buff, fake_string);
         VAL_STR(dstval) = buff;
         return NO_ERR;
     } else {
@@ -323,6 +323,90 @@ static status_t
 
 } /* get_currentDateTime */
 
+
+
+
+static status_t
+    set_fake_string (
+        ses_cb_t *scb,
+        rpc_msg_t *msg,
+        agt_cbtyp_t cbtyp,
+        op_editop_t editop,
+        val_value_t *newval,
+        val_value_t *curval)
+{
+    status_t res;
+    val_value_t *errorval;
+    const xmlChar *errorstr;
+
+    res = NO_ERR;
+    errorval = NULL;
+    errorstr = NULL;
+
+    printf("Setting /system/hostname to %s - cbtype=%d\n", VAL_STRING(newval), cbtyp);
+    printf("Setting /system/hostname to %s - editop=%d\n", VAL_STRING(newval), editop);
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        /* description-stmt validation here */
+        if(newval!=NULL) {
+            printf("Setting /system/hostname, newval %s\n", VAL_STRING(newval));
+            printf("Setting /system/hostname, curval %s\n", VAL_STRING(curval));
+            xmlChar* buf;
+            buf=malloc(strlen(VAL_STRING(newval)));
+            sprintf(buf, VAL_STRING(newval));
+            fake_string = buf;
+            printf("final fake_string%s\n",fake_string);
+        }
+        break;
+    case AGT_CB_APPLY:
+        /* database manipulation done here */
+        break;
+    case AGT_CB_COMMIT:
+        /* device instrumentation done here */
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+        case OP_EDITOP_CREATE:
+        case OP_EDITOP_DELETE:
+            if(newval!=NULL) {
+                printf("Setting /system/hostname to %s - cmd=%s\n", VAL_STRING(newval));
+                fake_string = VAL_STRING(newval);
+                // ret=system(buf);
+                // if(ret != 0) {
+                //     errorval=newval;
+                //     errorstr="Can't set hostname. Are you sure your server is running as root?"; /* strdup(strerror(errno)); */
+                //     res = SET_ERROR(ERR_INTERNAL_VAL);
+                // }
+            }
+            break;
+        default:
+            assert(0);
+        }
+
+        break;
+    case AGT_CB_ROLLBACK:
+        /* undo device instrumentation here */
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    /* if error: set the res, errorstr, and errorval parms */
+    if (res != NO_ERR) {
+        agt_record_error(
+            scb,
+            &msg->mhdr,
+            NCX_LAYER_CONTENT,
+            res,
+            NULL,
+            NCX_NT_STRING,
+            errorstr,
+            NCX_NT_VAL,
+            errorval);
+    }
+
+    return res;
+}
 
 /********************************************************************
 * FUNCTION get_currentLogLevel
@@ -654,7 +738,7 @@ status_t
 {
     agt_profile_t  *agt_profile;
     status_t        res;
-
+    printf("\n@@@@@ agt_sys_init\n");
     if (agt_sys_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
@@ -709,6 +793,16 @@ status_t
     if (!ietf_system_obj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
+    printf("start register callback\n");
+    res = agt_cb_register_callback(
+        "ietf-system",
+        (const xmlChar *)"/system/hostname",
+        (const xmlChar *)NULL /*"YYYY-MM-DD"*/,
+        set_fake_string);
+    if (res != NO_ERR) {
+        return res;
+    }
+    printf("register callback end\n");
 
     yuma_system_obj =
         obj_find_child(ietf_system_state_obj,
@@ -733,7 +827,6 @@ status_t
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }
-
     return NO_ERR;
 
 }  /* agt_sys_init */
@@ -768,6 +861,7 @@ status_t
     val_value_t*           tmp_sub_dir_val;
     val_value_t*           tmp_val;
 
+    printf("\n@@@@@ agt_sys_init2\n");
     if (!agt_sys_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
@@ -791,7 +885,14 @@ status_t
         val_add_child(ietf_system_val, runningcfg->root);
     }
 
+    /* Add /system/hostname */
     add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_hostname , get_fake_string);
+
+    /* Add /system/contact */
+    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_contact , get_fake_string);
+
+    /* Add /system/loaction */
+    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_location , get_fake_string);
 
     /* Add /system-state */
     ietf_system_state_val = val_new_value();
@@ -807,7 +908,7 @@ status_t
                                           ietf_system,
                                           ietf_system_state_clock);
     if(tmp_sub_dir_val==NULL) {
-        printf("got null clock_val");
+        printf("\ngot null clock_val\n");
         obj = obj_find_child(ietf_system_state_val->obj,
                                        ietf_system,
                                        ietf_system_state_clock);
@@ -833,7 +934,7 @@ status_t
                                           ietf_system,
                                           ietf_system_state_platform);
     if(tmp_sub_dir_val==NULL) {
-        printf("got null platfoorm_val");
+        printf("\ngot null platfoorm_val\n");
         obj = obj_find_child(ietf_system_state_val->obj,
                                        ietf_system,
                                        ietf_system_state_platform);

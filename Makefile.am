@@ -9,6 +9,7 @@ netconf/modules \
 netconf/src/yangrpc \
 netconf/man \
 netconf/src/yangdump \
+libintri/.libintrishare \
 libstandard/ietf-interfaces \
 libstandard/ietf-system \
 libintri/private/modules \

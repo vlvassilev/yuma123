@@ -1,0 +1,2 @@
+
+dist_netconfmodule_DATA=libintrishare.so

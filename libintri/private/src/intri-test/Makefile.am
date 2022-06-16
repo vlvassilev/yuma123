@@ -20,6 +20,9 @@ libintri_test_la_LDFLAGS = \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
 $(top_builddir)/netconf/src/ncx/libyumancx.la
 
+libintri_test_la_LIBADD = \
+-L$(top_builddir)/libintri/.libintrishare/ -lintrishare
+
 
 # libintri_test_la_CPPFLAGS = -I${includedir}/yuma/agt -I${includedir}/yuma/ncx -I${includedir}/yuma/platform $(XML_CPPFLAGS)
 

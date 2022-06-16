@@ -104,6 +104,7 @@ AC_CONFIG_FILES([
         netconf/man/Makefile
         rpm/yuma123.spec
 
+        libintri/.libintrishare/Makefile
         libintri/private/modules/Makefile
         libintri/private/src/intri-test/Makefile
         libintri/private/src/intri-device/Makefile

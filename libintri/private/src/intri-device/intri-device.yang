@@ -1,20 +1,11 @@
+
 module intri-device {
-
-  namespace "http://intri.com.tw";
-
-  prefix intri-device;
-
-  organization 
-    "Intrising Inc.";
-
-  contact 
-    "xxx <xxx@intrising.com.tw>";
-
-  description 
-    "test APIs";
-
-  revision 2022-05-24 {
-    description "Test progress.";
+  namespace "intri:intri-device";
+  prefix "intri-device";
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
   }
 
 
@@ -1555,5 +1546,19 @@ module intri-device {
       uses PortList;
     }
 
+    // GetDeviceInfo
+    container device-info {
+      uses Info;
+    }
+
+    // GetBoardInfo 
+    container board-info {
+      uses BoardInfo;
+    }
+
+    // GetHardwareInfo 
+    container hardware-info {
+      uses HardwareInfo;
+    }
   }
 }

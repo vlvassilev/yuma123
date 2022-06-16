@@ -1,10 +1,10 @@
 netconfmodule_LTLIBRARIES = libintri-device.la
 
 noinst_HEADERS=\
-$(top_srcdir)/libintri/private/src/intri-device/intri-device@2022-05-24.h
+$(top_srcdir)/libintri/private/src/intri-device/intri-device.h
 
 libintri_device_la_SOURCES = \
-$(top_srcdir)/libintri/private/src/intri-device/intri-device@2022-05-24.c
+$(top_srcdir)/libintri/private/src/intri-device/intri-device@2022-06-14.c
 
 libintri_device_la_CPPFLAGS = \
 -I$(top_srcdir)/netconf/src/agt \

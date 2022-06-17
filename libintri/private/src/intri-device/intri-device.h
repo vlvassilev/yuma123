@@ -334,224 +334,284 @@ typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_HwSize_ {
   int32 HardwareTableSize_L2L3PortIsolation;
 } y_intri_device_T_intri_device_board_info_BoardInfo_HwSize;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/LedInfo_LEDDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_LEDDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/Entry/LedInfo_LEDDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_LEDDevice_ {
   int32 MCULedDevice_I2cAddr;
   int32 MCULedDevice_AddrRegister;
   xmlChar *MCULedDevice_LedAction;
   int32 MCULedDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_LEDDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_LEDDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/LedInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_I2CDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/Entry/LedInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_I2CDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_I2CDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/LedInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_GPIODevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/Entry/LedInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_GPIODevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_ {
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *LedInfo_Name;
   int32 LedInfo_PortNo;
   xmlChar *LedInfo_Type;
   xmlChar *LedInfo_Direction;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_LEDDevice LedInfo_LEDDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_I2CDevice LedInfo_I2CDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_LedInfo_GPIODevice LedInfo_GPIODevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_LEDDevice LedInfo_LEDDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_I2CDevice LedInfo_I2CDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry_LedInfo_GPIODevice LedInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_Entry;
+
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceLed */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceLed;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/MonitorInfo_MonitorDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_MonitorDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/Entry/MonitorInfo_MonitorDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_MonitorDevice_ {
   int32 MCUMonitorDevice_I2cAddr;
   int32 MCUMonitorDevice_AddrRegister;
   xmlChar *MCUMonitorDevice_MonitorAction;
   int32 MCUMonitorDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_MonitorDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_MonitorDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/MonitorInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_I2CDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/Entry/MonitorInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_I2CDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_I2CDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/MonitorInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_GPIODevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/Entry/MonitorInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_GPIODevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_ {
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *MonitorInfo_Name;
   xmlChar *MonitorInfo_Type;
   xmlChar *MonitorInfo_Direction;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_MonitorDevice MonitorInfo_MonitorDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_I2CDevice MonitorInfo_I2CDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_MonitorInfo_GPIODevice MonitorInfo_GPIODevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_MonitorDevice MonitorInfo_MonitorDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_I2CDevice MonitorInfo_I2CDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_GPIODevice MonitorInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_Entry;
+
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHWMonitor */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHWMonitor;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/PSUInfo_PSUDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_PSUDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/Entry/PSUInfo_PSUDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_PSUDevice_ {
   int32 MCUPSUDevice_I2cAddr;
   int32 MCUPSUDevice_AddrRegister;
   xmlChar *MCUPSUDevice_PSUAction;
   int32 MCUPSUDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_PSUDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_PSUDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/PSUInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_I2CDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/Entry/PSUInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_I2CDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_I2CDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/PSUInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_GPIODevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/Entry/PSUInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_GPIODevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_ {
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *PSUInfo_Name;
   xmlChar *PSUInfo_Type;
   xmlChar *PSUInfo_Direction;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_PSUDevice PSUInfo_PSUDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_I2CDevice PSUInfo_I2CDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_PSUInfo_GPIODevice PSUInfo_GPIODevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_PSUDevice PSUInfo_PSUDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_I2CDevice PSUInfo_I2CDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry_PSUInfo_GPIODevice PSUInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_Entry;
+
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePSU */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePSU;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceI2C/I2Cinfo_Device */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_I2Cinfo_Device_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceI2C/Entry/I2Cinfo_Device */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_Entry_I2Cinfo_Device_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_I2Cinfo_Device;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_Entry_I2Cinfo_Device;
+
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceI2C/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *I2Cinfo_Name;
+  xmlChar *I2Cinfo_Direction;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_Entry_I2Cinfo_Device I2Cinfo_Device;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_Entry;
 
 /* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceI2C */
 typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_ {
-  xmlChar *I2Cinfo_Name;
-  xmlChar *I2Cinfo_Direction;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C_I2Cinfo_Device I2Cinfo_Device;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceI2C;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHW/GPIOInfo_Device */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_GPIOInfo_Device_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHW/Entry/GPIOInfo_Device */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_Entry_GPIOInfo_Device_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_GPIOInfo_Device;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_Entry_GPIOInfo_Device;
+
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHW/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *GPIOInfo_Name;
+  xmlChar *GPIOInfo_Direction;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_Entry_GPIOInfo_Device GPIOInfo_Device;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_Entry;
 
 /* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceHW */
 typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_ {
-  xmlChar *GPIOInfo_Name;
-  xmlChar *GPIOInfo_Direction;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW_GPIOInfo_Device GPIOInfo_Device;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceHW;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePTP/PTPClockSynchronizerInfo_Device */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_PTPClockSynchronizerInfo_Device_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePTP/Entry/PTPClockSynchronizerInfo_Device */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_Entry_PTPClockSynchronizerInfo_Device_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_PTPClockSynchronizerInfo_Device;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_Entry_PTPClockSynchronizerInfo_Device;
+
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePTP/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *PTPClockSynchronizerInfo_Name;
+  xmlChar *PTPClockSynchronizerInfo_Direction;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_Entry_PTPClockSynchronizerInfo_Device PTPClockSynchronizerInfo_Device;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_Entry;
 
 /* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePTP */
 typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_ {
-  xmlChar *PTPClockSynchronizerInfo_Name;
-  xmlChar *PTPClockSynchronizerInfo_Direction;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP_PTPClockSynchronizerInfo_Device PTPClockSynchronizerInfo_Device;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePTP;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceGPS */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceGPS_ {
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceGPS/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceGPS_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *GPSInfo_Name;
   xmlChar *GPSInfo_Path;
   xmlChar *GPSInfo_Direction;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceGPS_Entry;
+
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceGPS */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceGPS_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceGPS;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceToD */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceToD_ {
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceToD/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceToD_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *ToDInfo_Name;
   xmlChar *ToDInfo_Path;
   xmlChar *ToDInfo_Direction;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceToD_Entry;
+
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceToD */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceToD_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceToD;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/FanInfo_FANDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_FANDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/Entry/FanInfo_FANDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_FANDevice_ {
   int32 MCUFanDevice_I2cAddr;
   int32 MCUFanDevice_AddrRegister;
   xmlChar *MCUFanDevice_FANAction;
   int32 MCUFanDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_FANDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_FANDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/FanInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_I2CDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/Entry/FanInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_I2CDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_I2CDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/FanInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_GPIODevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/Entry/FanInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_GPIODevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_ {
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *FanInfo_Name;
   xmlChar *FanInfo_Type;
   int32 FanInfo_FanNumber;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_FANDevice FanInfo_FANDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_I2CDevice FanInfo_I2CDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_FanInfo_GPIODevice FanInfo_GPIODevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_FANDevice FanInfo_FANDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_I2CDevice FanInfo_I2CDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry_FanInfo_GPIODevice FanInfo_GPIODevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_Entry;
+
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DeviceFan */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DeviceFan;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePoE/PoEInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_PoEInfo_I2CDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePoE/Entry/PoEInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_PoEInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_PoEInfo_I2CDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_PoEInfo_I2CDevice;
 
-/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePoE/PoEInfo_UartDevice */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_PoEInfo_UartDevice_ {
+/* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePoE/Entry/PoEInfo_UartDevice */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_PoEInfo_UartDevice_ {
   xmlChar *UARTDevice_Name;
   xmlChar *UARTDevice_Path;
   xmlChar *UARTDevice_Direction;
   int32 UARTDevice_Bandwidth;
-} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_PoEInfo_UartDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_PoEInfo_UartDevice;
+
+/* list /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePoE/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *PoEInfo_Name;
+  xmlChar *PoEInfo_Type;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_PoEInfo_I2CDevice PoEInfo_I2CDevice;
+  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry_PoEInfo_UartDevice PoEInfo_UartDevice;
+} y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_Entry;
 
 /* container /intri-device/board-info/BoardInfo_BoardDevice/HardwareInfo_DevicePoE */
 typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_ {
-  xmlChar *PoEInfo_Name;
-  xmlChar *PoEInfo_Type;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_PoEInfo_I2CDevice PoEInfo_I2CDevice;
-  y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE_PoEInfo_UartDevice PoEInfo_UartDevice;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_BoardDevice_HardwareInfo_DevicePoE;
 
 /* container /intri-device/board-info/BoardInfo_BoardDevice */
@@ -611,224 +671,284 @@ typedef struct y_intri_device_T_intri_device_board_info_ {
   xmlChar *BoardInfo_EnterpriseOID;
 } y_intri_device_T_intri_device_board_info;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceLed/LedInfo_LEDDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_LEDDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceLed/Entry/LedInfo_LEDDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_LEDDevice_ {
   int32 MCULedDevice_I2cAddr;
   int32 MCULedDevice_AddrRegister;
   xmlChar *MCULedDevice_LedAction;
   int32 MCULedDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_LEDDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_LEDDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceLed/LedInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_I2CDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceLed/Entry/LedInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_I2CDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_I2CDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceLed/LedInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_GPIODevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceLed/Entry/LedInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_GPIODevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceLed */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_ {
+/* list /intri-device/hardware-info/HardwareInfo_DeviceLed/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *LedInfo_Name;
   int32 LedInfo_PortNo;
   xmlChar *LedInfo_Type;
   xmlChar *LedInfo_Direction;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_LEDDevice LedInfo_LEDDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_I2CDevice LedInfo_I2CDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_LedInfo_GPIODevice LedInfo_GPIODevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_LEDDevice LedInfo_LEDDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_I2CDevice LedInfo_I2CDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry_LedInfo_GPIODevice LedInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_Entry;
+
+/* container /intri-device/hardware-info/HardwareInfo_DeviceLed */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceLed;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/MonitorInfo_MonitorDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_MonitorDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/Entry/MonitorInfo_MonitorDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_MonitorDevice_ {
   int32 MCUMonitorDevice_I2cAddr;
   int32 MCUMonitorDevice_AddrRegister;
   xmlChar *MCUMonitorDevice_MonitorAction;
   int32 MCUMonitorDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_MonitorDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_MonitorDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/MonitorInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_I2CDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/Entry/MonitorInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_I2CDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_I2CDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/MonitorInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_GPIODevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/Entry/MonitorInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_GPIODevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_ {
+/* list /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *MonitorInfo_Name;
   xmlChar *MonitorInfo_Type;
   xmlChar *MonitorInfo_Direction;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_MonitorDevice MonitorInfo_MonitorDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_I2CDevice MonitorInfo_I2CDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_MonitorInfo_GPIODevice MonitorInfo_GPIODevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_MonitorDevice MonitorInfo_MonitorDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_I2CDevice MonitorInfo_I2CDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry_MonitorInfo_GPIODevice MonitorInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_Entry;
+
+/* container /intri-device/hardware-info/HardwareInfo_DeviceHWMonitor */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHWMonitor;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePSU/PSUInfo_PSUDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_PSUDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DevicePSU/Entry/PSUInfo_PSUDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_PSUDevice_ {
   int32 MCUPSUDevice_I2cAddr;
   int32 MCUPSUDevice_AddrRegister;
   xmlChar *MCUPSUDevice_PSUAction;
   int32 MCUPSUDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_PSUDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_PSUDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePSU/PSUInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_I2CDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DevicePSU/Entry/PSUInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_I2CDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_I2CDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePSU/PSUInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_GPIODevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DevicePSU/Entry/PSUInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_GPIODevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePSU */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_ {
+/* list /intri-device/hardware-info/HardwareInfo_DevicePSU/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *PSUInfo_Name;
   xmlChar *PSUInfo_Type;
   xmlChar *PSUInfo_Direction;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_PSUDevice PSUInfo_PSUDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_I2CDevice PSUInfo_I2CDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_PSUInfo_GPIODevice PSUInfo_GPIODevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_PSUDevice PSUInfo_PSUDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_I2CDevice PSUInfo_I2CDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry_PSUInfo_GPIODevice PSUInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_Entry;
+
+/* container /intri-device/hardware-info/HardwareInfo_DevicePSU */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePSU;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceI2C/I2Cinfo_Device */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_I2Cinfo_Device_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceI2C/Entry/I2Cinfo_Device */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_Entry_I2Cinfo_Device_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_I2Cinfo_Device;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_Entry_I2Cinfo_Device;
+
+/* list /intri-device/hardware-info/HardwareInfo_DeviceI2C/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *I2Cinfo_Name;
+  xmlChar *I2Cinfo_Direction;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_Entry_I2Cinfo_Device I2Cinfo_Device;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_Entry;
 
 /* container /intri-device/hardware-info/HardwareInfo_DeviceI2C */
 typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_ {
-  xmlChar *I2Cinfo_Name;
-  xmlChar *I2Cinfo_Direction;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C_I2Cinfo_Device I2Cinfo_Device;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceI2C;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceHW/GPIOInfo_Device */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_GPIOInfo_Device_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceHW/Entry/GPIOInfo_Device */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_Entry_GPIOInfo_Device_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_GPIOInfo_Device;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_Entry_GPIOInfo_Device;
+
+/* list /intri-device/hardware-info/HardwareInfo_DeviceHW/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *GPIOInfo_Name;
+  xmlChar *GPIOInfo_Direction;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_Entry_GPIOInfo_Device GPIOInfo_Device;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_Entry;
 
 /* container /intri-device/hardware-info/HardwareInfo_DeviceHW */
 typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_ {
-  xmlChar *GPIOInfo_Name;
-  xmlChar *GPIOInfo_Direction;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW_GPIOInfo_Device GPIOInfo_Device;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceHW;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePTP/PTPClockSynchronizerInfo_Device */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_PTPClockSynchronizerInfo_Device_ {
+/* container /intri-device/hardware-info/HardwareInfo_DevicePTP/Entry/PTPClockSynchronizerInfo_Device */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_Entry_PTPClockSynchronizerInfo_Device_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_PTPClockSynchronizerInfo_Device;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_Entry_PTPClockSynchronizerInfo_Device;
+
+/* list /intri-device/hardware-info/HardwareInfo_DevicePTP/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *PTPClockSynchronizerInfo_Name;
+  xmlChar *PTPClockSynchronizerInfo_Direction;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_Entry_PTPClockSynchronizerInfo_Device PTPClockSynchronizerInfo_Device;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_Entry;
 
 /* container /intri-device/hardware-info/HardwareInfo_DevicePTP */
 typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_ {
-  xmlChar *PTPClockSynchronizerInfo_Name;
-  xmlChar *PTPClockSynchronizerInfo_Direction;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP_PTPClockSynchronizerInfo_Device PTPClockSynchronizerInfo_Device;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePTP;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceGPS */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceGPS_ {
+/* list /intri-device/hardware-info/HardwareInfo_DeviceGPS/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceGPS_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *GPSInfo_Name;
   xmlChar *GPSInfo_Path;
   xmlChar *GPSInfo_Direction;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceGPS_Entry;
+
+/* container /intri-device/hardware-info/HardwareInfo_DeviceGPS */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceGPS_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceGPS;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceToD */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceToD_ {
+/* list /intri-device/hardware-info/HardwareInfo_DeviceToD/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceToD_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *ToDInfo_Name;
   xmlChar *ToDInfo_Path;
   xmlChar *ToDInfo_Direction;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceToD_Entry;
+
+/* container /intri-device/hardware-info/HardwareInfo_DeviceToD */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceToD_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceToD;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceFan/FanInfo_FANDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_FANDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceFan/Entry/FanInfo_FANDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_FANDevice_ {
   int32 MCUFanDevice_I2cAddr;
   int32 MCUFanDevice_AddrRegister;
   xmlChar *MCUFanDevice_FANAction;
   int32 MCUFanDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_FANDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_FANDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceFan/FanInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_I2CDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceFan/Entry/FanInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_I2CDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_I2CDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceFan/FanInfo_GPIODevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_GPIODevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DeviceFan/Entry/FanInfo_GPIODevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_GPIODevice_ {
   int32 GPIODevice_Register;
   int32 GPIODevice_Pin;
   boolean GPIODevice_Action;
   boolean GPIODevice_Enable;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_GPIODevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DeviceFan */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_ {
+/* list /intri-device/hardware-info/HardwareInfo_DeviceFan/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *FanInfo_Name;
   xmlChar *FanInfo_Type;
   int32 FanInfo_FanNumber;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_FANDevice FanInfo_FANDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_I2CDevice FanInfo_I2CDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_FanInfo_GPIODevice FanInfo_GPIODevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_FANDevice FanInfo_FANDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_I2CDevice FanInfo_I2CDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry_FanInfo_GPIODevice FanInfo_GPIODevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_Entry;
+
+/* container /intri-device/hardware-info/HardwareInfo_DeviceFan */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DeviceFan;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePoE/PoEInfo_I2CDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_PoEInfo_I2CDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DevicePoE/Entry/PoEInfo_I2CDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_PoEInfo_I2CDevice_ {
   int32 I2CDevice_I2cAddr;
   int32 I2CDevice_AddrRegister;
   int32 I2CDevice_Action;
   int32 I2CDevice_ActiveBit;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_PoEInfo_I2CDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_PoEInfo_I2CDevice;
 
-/* container /intri-device/hardware-info/HardwareInfo_DevicePoE/PoEInfo_UartDevice */
-typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_PoEInfo_UartDevice_ {
+/* container /intri-device/hardware-info/HardwareInfo_DevicePoE/Entry/PoEInfo_UartDevice */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_PoEInfo_UartDevice_ {
   xmlChar *UARTDevice_Name;
   xmlChar *UARTDevice_Path;
   xmlChar *UARTDevice_Direction;
   int32 UARTDevice_Bandwidth;
-} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_PoEInfo_UartDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_PoEInfo_UartDevice;
+
+/* list /intri-device/hardware-info/HardwareInfo_DevicePoE/Entry */
+typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_ {
+  dlq_hdr_t qhdr;
+  xmlChar *PoEInfo_Name;
+  xmlChar *PoEInfo_Type;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_PoEInfo_I2CDevice PoEInfo_I2CDevice;
+  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry_PoEInfo_UartDevice PoEInfo_UartDevice;
+} y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_Entry;
 
 /* container /intri-device/hardware-info/HardwareInfo_DevicePoE */
 typedef struct y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_ {
-  xmlChar *PoEInfo_Name;
-  xmlChar *PoEInfo_Type;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_PoEInfo_I2CDevice PoEInfo_I2CDevice;
-  y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE_PoEInfo_UartDevice PoEInfo_UartDevice;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_hardware_info_HardwareInfo_DevicePoE;
 
 /* container /intri-device/hardware-info */

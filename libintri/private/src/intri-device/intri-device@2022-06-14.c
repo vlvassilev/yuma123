@@ -50,16 +50,6 @@ status_t build_InterfaceIdentify(
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
 
-  childval = agt_make_object(
-      parentval->obj,
-      y_intri_device_N_InterfaceIdentify_Type,
-      &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-
   const xmlChar *enum_str = EMPTY_STRING;
   switch (ifno->Type) {
     case devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
@@ -114,6 +104,15 @@ status_t build_InterfaceIdentify(
     case devicepb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
       enum_str = "INTERFACE_TYPE_MULTICAST";
       break;
+  }
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_InterfaceIdentify_Type,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
   }
   res = val_set_simval_obj(
       childval,
@@ -686,7 +685,7 @@ status_t build_LedInfo(
     return SET_ERROR(res);
   }
 
-  childval = agt_make_int_leaf(
+  childval = agt_make_leaf(
       parentval->obj,
       y_intri_device_N_LedInfo_Direction,
       led_info->Direction,
@@ -740,11 +739,11 @@ status_t build_HardwareInfo(
   for (int i = 0; i < hw_info->DeviceLed_Len; i++) {
     val_value_t *entry_val = NULL;
     entry_val = agt_make_list(
-        child_val->obj,
+        childval->obj,
         y_intri_device_N_Entry,
         &res);
     if (entry_val != NULL) {
-      val_add_child(entry_val, child_val);
+      val_add_child(entry_val, childval);
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
@@ -1563,7 +1562,8 @@ intri_device_intri_device_board_info_get(
   child_val = agt_make_int_leaf(
       dstval->obj,
       y_intri_device_N_BoardInfo_CPUPort,
-      board_info->CPUPort & res);
+      board_info->CPUPort,
+      &res);
   if (child_val != NULL) {
     val_add_child(child_val, dstval);
   } else if (res != NO_ERR) {

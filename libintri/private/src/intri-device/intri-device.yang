@@ -775,34 +775,54 @@ module intri-device {
   // device/board.proto
   grouping HardwareInfo {
     container HardwareInfo_DeviceLed {
-      uses LedInfo;
+      list Entry {
+        uses LedInfo;
+      }
     }
     container HardwareInfo_DeviceHWMonitor {
-      uses MonitorInfo;
+      list Entry {
+        uses MonitorInfo;
+      }
     }
     container HardwareInfo_DevicePSU {
-      uses PSUInfo;
+      list Entry {
+        uses PSUInfo;
+      }
     }
     container HardwareInfo_DeviceI2C {
-      uses I2Cinfo;
+      list Entry {
+        uses I2Cinfo;
+      }
     }
     container HardwareInfo_DeviceHW {
-      uses GPIOInfo;
+      list Entry {
+        uses GPIOInfo;
+      }
     }
     container HardwareInfo_DevicePTP {
-      uses PTPClockSynchronizerInfo;
+      list Entry {
+        uses PTPClockSynchronizerInfo;
+      }
     }
     container HardwareInfo_DeviceGPS {
-      uses GPSInfo;
+      list Entry {
+        uses GPSInfo;
+      }
     }
     container HardwareInfo_DeviceToD {
-      uses ToDInfo;
+      list Entry {
+        uses ToDInfo;
+      }
     }
     container HardwareInfo_DeviceFan {
-      uses FanInfo;
+      list Entry {
+        uses FanInfo;
+      }
     }
     container HardwareInfo_DevicePoE {
-      uses PoEInfo;
+      list Entry {
+        uses PoEInfo;
+      }
     }
   }
   // device/board.proto

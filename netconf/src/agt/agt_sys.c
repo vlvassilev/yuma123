@@ -195,6 +195,17 @@ date         init     comment
 #define ietf_system_ntp_server_udp_address (const xmlChar *)"server/udp/address"
 #define ietf_system_ntp_server_prefer (const xmlChar *)"server/prefer"
 #define ietf_system_radius (const xmlChar *)"radius"
+#define private_api_get_network_hostname (int) 0
+#define private_api_get_system_location (int) 1
+#define private_api_get_system_contact (int) 2
+#define private_api_get_ntp_timezone (int) 3
+#define private_api_get_system_boot_datetime (int) 4
+#define private_api_get_system_current_datetime (int) 5
+#define private_api_get_system_software_version (int) 6
+#define private_api_get_system_hardware_version (int) 7
+#define private_api_get_system_os_name (int) 9
+#define private_api_get_system_model_name (int) 8
+#define fixed_os_name (const xmlChar *)"Linux"
 
 /********************************************************************
 *                                                                   *
@@ -231,84 +242,36 @@ static obj_template_t *sysConfirmedCommitobj;
 
 static xmlChar *fake_string;
 
-/********************************************************************
-* FUNCTION payload_error
-*
-* Generate an error for a payload leaf that failed
-*
-* INPUTS:
-*    name == leaf name that failed
-*    res == error status
-*********************************************************************/
-static void
-    payload_error (const xmlChar *name,
-                        status_t res)
-{
-    log_error( "\nError: cannot make payload leaf '%s' (%s)",
-               name, get_error_string(res) );
-
-}  /* payload_error */
-
 
 /********************************************************************
-* FUNCTION get_currentDateTime
+* FUNCTION get_api_string
 *
-* <get> operation handler for the sysCurrentDateTime leaf
+*
+* This function is a router to return different field of different APi
+* following the diffent api_indicator
 *
 * INPUTS:
+*    api_indicator == indicator which field of which api to return
 *    see ncx/getcb.h getcb_fn_t for details
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    get_currentDateTime (ses_cb_t *scb,
+    get_api_string (int api_indicator, ses_cb_t *scb,
                          getcb_mode_t cbmode,
                          const val_value_t *virval,
                          val_value_t  *dstval)
 {
     xmlChar      *buff;
-
     (void)scb;
     (void)virval;
-
-    if (cbmode == GETCB_GET_VALUE) {
-        buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
-        if (!buff) {
-            return ERR_INTERNAL_MEM;
-        }
-
-        tstamp_datetime(buff);
-        VAL_STRING(dstval) = buff;
-        return NO_ERR;
-    } else {
-        return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_currentDateTime */
-
-/********************************************************************
-* FUNCTION get_fake_string
-*
-* copied from get_currentDateTime
-* <get> operation handler for the sysCurrentDateTime leaf
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    get_fake_string (ses_cb_t *scb,
-                         getcb_mode_t cbmode,
-                         const val_value_t *virval,
-                         val_value_t  *dstval)
-{
-    xmlChar      *buff;
-
-    (void)scb;
-    (void)virval;
+    struct networkpb_Config *network_out;
+    struct systempb_Config *sys_out;
+    struct timepb_Config *time_out;
+    struct systempb_Status *sys_status_out;
+    struct timepb_Status *time_status_out;
+    struct devicepb_Info *dev_info_out;
 
 
     if (cbmode == GETCB_GET_VALUE) {
@@ -316,18 +279,177 @@ static status_t
         if (!buff) {
             return ERR_INTERNAL_MEM;
         }
-        if (fake_string==NULL) {
-            fake_string = (xmlChar *)"init_value";
-        }
+        struct emptypb_Empty *epty = malloc(sizeof(*(epty)));
 
-        sprintf((char *)buff, fake_string);
+        switch (api_indicator) {
+        case private_api_get_network_hostname:
+            network_out = malloc(sizeof(*(network_out)));
+            network_Network_GetConfig(epty, network_out);
+            sprintf((char *)buff, network_out->Basic->HostName);
+            free(network_out);
+            break;
+        case private_api_get_system_contact:
+        case private_api_get_system_location:
+            sys_out = malloc(sizeof(*(sys_out)));
+            system_System_GetConfig(epty, sys_out);
+            switch (api_indicator) {
+                case private_api_get_system_contact:
+                    sprintf((char *)buff, sys_out->SysContact);
+                    break;
+                case private_api_get_system_location:
+                    sprintf((char *)buff, sys_out->SysLocation);
+                    break;
+            }
+            free(sys_out);
+            break;
+        case private_api_get_ntp_timezone:
+            time_out = malloc(sizeof(*(time_out)));
+            time_Time_GetConfig(epty, time_out);
+            sprintf((char *)buff, time_out->TimeZone);
+            free(time_out);
+            break;
+        case private_api_get_system_boot_datetime:
+            sys_status_out = malloc(sizeof(*(sys_status_out)));
+            system_System_GetStatus(epty, sys_status_out);
+            sprintf((char *)buff, sys_status_out->LastBootTime);
+            free(sys_status_out);
+            break;
+        case private_api_get_system_current_datetime:
+            time_status_out = malloc(sizeof(*(time_status_out)));
+            time_Time_GetStatus(epty, time_status_out);
+            sprintf((char *)buff, time_status_out->LocalDate);
+            sprintf((char *)buff, " ");
+            sprintf((char *)buff, time_status_out->LocalTime);
+            free(time_status_out);
+            break;
+        case private_api_get_system_os_name:
+            sprintf((char *)buff, fixed_os_name);
+            break;
+        case private_api_get_system_software_version:
+        case private_api_get_system_hardware_version:
+        case private_api_get_system_model_name:
+            dev_info_out = malloc(sizeof(*(dev_info_out)));
+            device_Device_GetDeviceInfo(epty, dev_info_out);
+            switch (api_indicator) {
+                case private_api_get_system_software_version:
+                    sprintf((char *)buff, dev_info_out->CurrentSwVersion);
+                    break;
+                case private_api_get_system_hardware_version:
+                    sprintf((char *)buff, dev_info_out->HwVersion);
+                    break;
+                case private_api_get_system_model_name:
+                    sprintf((char *)buff, dev_info_out->Model);
+                    break;
+            }
+            free(dev_info_out);
+            break;
+        }
         VAL_STRING(dstval) = buff;
         return NO_ERR;
+        // return val_set_simval_obj(
+        //     dstval,
+        //     dstval->obj,
+        //     buff);
+
     } else {
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
-} /* get_fake_string */
+} /* get_api_string */
+
+
+static status_t
+    get_system_hostname (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_network_hostname, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_system_contact (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_contact, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_system_location (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_location, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_clock_timezone (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_ntp_timezone, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_clock_boot_datetime (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_boot_datetime, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_clock_current_datetime (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_current_datetime, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_platform_os_name (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_os_name, scb, cbmode, virval, dstval);
+}
+
+
+static status_t
+    get_platform_os_release (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_software_version, scb, cbmode, virval, dstval);
+}
+
+static status_t
+    get_platform_os_version (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_software_version, scb, cbmode, virval, dstval);
+}
+
+
+static status_t
+    get_platform_machine (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    return get_api_string(private_api_get_system_hardware_version, scb, cbmode, virval, dstval);
+}
+
 
 /********************************************************************
 * FUNCTION get_fake_int
@@ -558,6 +680,63 @@ static status_t
 
     return res;
 }
+
+
+/********************************************************************
+* FUNCTION payload_error
+*
+* Generate an error for a payload leaf that failed
+*
+* INPUTS:
+*    name == leaf name that failed
+*    res == error status
+*********************************************************************/
+static void
+    payload_error (const xmlChar *name,
+                        status_t res)
+{
+    log_error( "\nError: cannot make payload leaf '%s' (%s)",
+               name, get_error_string(res) );
+
+}  /* payload_error */
+
+
+/********************************************************************
+* FUNCTION get_currentDateTime
+*
+* <get> operation handler for the sysCurrentDateTime leaf
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    get_currentDateTime (ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         const val_value_t *virval,
+                         val_value_t  *dstval)
+{
+    xmlChar      *buff;
+
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+        buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
+        if (!buff) {
+            return ERR_INTERNAL_MEM;
+        }
+
+        tstamp_datetime(buff);
+        VAL_STRING(dstval) = buff;
+        return NO_ERR;
+    } else {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* get_currentDateTime */
 
 /********************************************************************
 * FUNCTION get_currentLogLevel
@@ -1035,13 +1214,13 @@ status_t
     }
 
     /* Add /system/hostname */
-    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_hostname , get_fake_string);
+    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_hostname , get_system_hostname);
 
     /* Add /system/contact */
-    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_contact , get_fake_string);
+    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_contact , get_system_contact);
 
     /* Add /system/loaction */
-    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_location , get_fake_string);
+    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_location , get_system_location);
 
     /* Add /system/clock/ */
     tmp_sub_dir_val = val_find_child(ietf_system_val,
@@ -1064,7 +1243,7 @@ status_t
 
     }
     /* Add /system/clock/timezone-name */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_clock_timezone_name , get_fake_string);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_clock_timezone_name , get_clock_timezone);
 
      /* Add /system/ntp/ */
     tmp_sub_dir_val = val_find_child(ietf_system_val,
@@ -1118,10 +1297,10 @@ status_t
 
     }
     /* Add /system-state/clock/current-datetime */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_current_datetime, get_currentDateTime);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_current_datetime, get_clock_current_datetime);
 
     /* Add /system-state/clock/boot-datetime */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_boot_datetime, get_fake_string);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_boot_datetime, get_clock_boot_datetime);
 
     /* Add /system-state/platform */
     tmp_sub_dir_val = val_find_child(ietf_system_state_val,
@@ -1144,16 +1323,16 @@ status_t
     }
 
     /* Add /system-state/platform/os-name */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_name, get_fake_string);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_name, get_platform_os_name);
 
     /* Add /system-state/platform/os-release */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_release, get_fake_string);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_release, get_platform_os_release);
 
     /* Add /system-state/platform/os-version */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_version, get_fake_string);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_version, get_platform_os_version);
 
     /* Add /system-state/platform/machine */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_machine, get_fake_string);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_machine, get_platform_machine);
 
     /* [DONE] Start adding ietf-system and using private API*/
     /* handing off the malloced memory here */

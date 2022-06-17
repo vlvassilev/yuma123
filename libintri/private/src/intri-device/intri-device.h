@@ -45,6 +45,7 @@ extern "C" {
 #define y_intri_device_N_BoardInfo_PortLists (const xmlChar *)"BoardInfo_PortLists"
 #define y_intri_device_N_BoardInfo_SystemDescription (const xmlChar *)"BoardInfo_SystemDescription"
 #define y_intri_device_N_BoardInfo_TimeControl (const xmlChar *)"BoardInfo_TimeControl"
+#define y_intri_device_N_Entry (const xmlChar *)"Entry"
 #define y_intri_device_N_FanInfo_FANDevice (const xmlChar *)"FanInfo_FANDevice"
 #define y_intri_device_N_FanInfo_FanNumber (const xmlChar *)"FanInfo_FanNumber"
 #define y_intri_device_N_FanInfo_GPIODevice (const xmlChar *)"FanInfo_GPIODevice"
@@ -92,7 +93,6 @@ extern "C" {
 #define y_intri_device_N_I2Cinfo_Device (const xmlChar *)"I2Cinfo_Device"
 #define y_intri_device_N_I2Cinfo_Direction (const xmlChar *)"I2Cinfo_Direction"
 #define y_intri_device_N_I2Cinfo_Name (const xmlChar *)"I2Cinfo_Name"
-#define y_intri_device_N_IdentifyNo (const xmlChar *)"IdentifyNo"
 #define y_intri_device_N_Info_AltBuildDateTime (const xmlChar *)"Info_AltBuildDateTime"
 #define y_intri_device_N_Info_AltSwVersion (const xmlChar *)"Info_AltSwVersion"
 #define y_intri_device_N_Info_Board (const xmlChar *)"Info_Board"
@@ -118,7 +118,6 @@ extern "C" {
 #define y_intri_device_N_LedInfo_Name (const xmlChar *)"LedInfo_Name"
 #define y_intri_device_N_LedInfo_PortNo (const xmlChar *)"LedInfo_PortNo"
 #define y_intri_device_N_LedInfo_Type (const xmlChar *)"LedInfo_Type"
-#define y_intri_device_N_List (const xmlChar *)"List"
 #define y_intri_device_N_MCUFanDevice_ActiveBit (const xmlChar *)"MCUFanDevice_ActiveBit"
 #define y_intri_device_N_MCUFanDevice_AddrRegister (const xmlChar *)"MCUFanDevice_AddrRegister"
 #define y_intri_device_N_MCUFanDevice_FANAction (const xmlChar *)"MCUFanDevice_FANAction"
@@ -206,64 +205,49 @@ typedef struct y_intri_device_T_intri_device_mac_addr_ {
   xmlChar *mac_addr;
 } y_intri_device_T_intri_device_mac_addr;
 
-/* container /intri-device/port-list/List/IdentifyNo */
-typedef struct y_intri_device_T_intri_device_port_list_List_IdentifyNo_ {
+/* list /intri-device/port-list/Entry */
+typedef struct y_intri_device_T_intri_device_port_list_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *InterfaceIdentify_Type;
   int32 InterfaceIdentify_DeviceID;
   int32 InterfaceIdentify_PortNo;
   int32 InterfaceIdentify_LAGNo;
   int32 InterfaceIdentify_VlanID;
-} y_intri_device_T_intri_device_port_list_List_IdentifyNo;
-
-/* list /intri-device/port-list/List */
-typedef struct y_intri_device_T_intri_device_port_list_List_ {
-  dlq_hdr_t qhdr;
-  y_intri_device_T_intri_device_port_list_List_IdentifyNo IdentifyNo;
-} y_intri_device_T_intri_device_port_list_List;
+} y_intri_device_T_intri_device_port_list_Entry;
 
 /* container /intri-device/port-list */
 typedef struct y_intri_device_T_intri_device_port_list_ {
-  dlq_hdr_t List;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_port_list;
 
-/* container /intri-device/lag-port-list/List/IdentifyNo */
-typedef struct y_intri_device_T_intri_device_lag_port_list_List_IdentifyNo_ {
+/* list /intri-device/lag-port-list/Entry */
+typedef struct y_intri_device_T_intri_device_lag_port_list_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *InterfaceIdentify_Type;
   int32 InterfaceIdentify_DeviceID;
   int32 InterfaceIdentify_PortNo;
   int32 InterfaceIdentify_LAGNo;
   int32 InterfaceIdentify_VlanID;
-} y_intri_device_T_intri_device_lag_port_list_List_IdentifyNo;
-
-/* list /intri-device/lag-port-list/List */
-typedef struct y_intri_device_T_intri_device_lag_port_list_List_ {
-  dlq_hdr_t qhdr;
-  y_intri_device_T_intri_device_lag_port_list_List_IdentifyNo IdentifyNo;
-} y_intri_device_T_intri_device_lag_port_list_List;
+} y_intri_device_T_intri_device_lag_port_list_Entry;
 
 /* container /intri-device/lag-port-list */
 typedef struct y_intri_device_T_intri_device_lag_port_list_ {
-  dlq_hdr_t List;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_lag_port_list;
 
-/* container /intri-device/poe-port-list/List/IdentifyNo */
-typedef struct y_intri_device_T_intri_device_poe_port_list_List_IdentifyNo_ {
+/* list /intri-device/poe-port-list/Entry */
+typedef struct y_intri_device_T_intri_device_poe_port_list_Entry_ {
+  dlq_hdr_t qhdr;
   xmlChar *InterfaceIdentify_Type;
   int32 InterfaceIdentify_DeviceID;
   int32 InterfaceIdentify_PortNo;
   int32 InterfaceIdentify_LAGNo;
   int32 InterfaceIdentify_VlanID;
-} y_intri_device_T_intri_device_poe_port_list_List_IdentifyNo;
-
-/* list /intri-device/poe-port-list/List */
-typedef struct y_intri_device_T_intri_device_poe_port_list_List_ {
-  dlq_hdr_t qhdr;
-  y_intri_device_T_intri_device_poe_port_list_List_IdentifyNo IdentifyNo;
-} y_intri_device_T_intri_device_poe_port_list_List;
+} y_intri_device_T_intri_device_poe_port_list_Entry;
 
 /* container /intri-device/poe-port-list */
 typedef struct y_intri_device_T_intri_device_poe_port_list_ {
-  dlq_hdr_t List;
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_poe_port_list;
 
 /* container /intri-device/device-info */
@@ -283,29 +267,53 @@ typedef struct y_intri_device_T_intri_device_device_info_ {
   xmlChar *Info_Layer;
 } y_intri_device_T_intri_device_device_info;
 
-/* container /intri-device/board-info/BoardInfo_PortLists/PortInfo_PhyInterface */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_PortInfo_PhyInterface_ {
+/* container /intri-device/board-info/BoardInfo_PortLists/Entry/PortInfo_PhyInterface */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_PhyInterface_ {
   int32 PhyInterface_Interface;
   xmlChar *PhyInterface_Type;
-} y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_PortInfo_PhyInterface;
+} y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_PhyInterface;
 
-/* container /intri-device/board-info/BoardInfo_PortLists */
-typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_ {
+/* leaf-list /intri-device/board-info/BoardInfo_PortLists/Entry/PortInfo_PoEChannel */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_PoEChannel_ {
+  dlq_hdr_t qhdr;
+  int32 PortInfo_PoEChannel;
+} y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_PoEChannel;
+
+/* leaf-list /intri-device/board-info/BoardInfo_PortLists/Entry/PortInfo_Properties */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_Properties_ {
+  dlq_hdr_t qhdr;
+  xmlChar *PortInfo_Properties;
+} y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_Properties;
+
+/* leaf-list /intri-device/board-info/BoardInfo_PortLists/Entry/PortInfo_SpeedProperties */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_SpeedProperties_ {
+  dlq_hdr_t qhdr;
+  xmlChar *PortInfo_SpeedProperties;
+} y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_SpeedProperties;
+
+/* list /intri-device/board-info/BoardInfo_PortLists/Entry */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_ {
+  dlq_hdr_t qhdr;
   int32 PortInfo_PortNo;
   int32 PortInfo_MACChip;
   int32 PortInfo_MACNo;
   int32 PortInfo_PortGroup;
   int32 PortInfo_PhyID1;
   int32 PortInfo_PhyID2;
-  y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_PortInfo_PhyInterface PortInfo_PhyInterface;
+  y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry_PortInfo_PhyInterface PortInfo_PhyInterface;
   int32 PortInfo_PoENo;
-  int32 PortInfo_PoEChannel;
+  dlq_hdr_t PortInfo_PoEChannel;
   int32 PortInfo_PoEChipNo;
   int32 PortInfo_MacsecEncLen;
   xmlChar *PortInfo_InterfaceType;
-  xmlChar *PortInfo_Properties;
+  dlq_hdr_t PortInfo_Properties;
   int32 PortInfo_DeviceID;
-  xmlChar *PortInfo_SpeedProperties;
+  dlq_hdr_t PortInfo_SpeedProperties;
+} y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_Entry;
+
+/* container /intri-device/board-info/BoardInfo_PortLists */
+typedef struct y_intri_device_T_intri_device_board_info_BoardInfo_PortLists_ {
+  dlq_hdr_t Entry;
 } y_intri_device_T_intri_device_board_info_BoardInfo_PortLists;
 
 /* container /intri-device/board-info/BoardInfo_HwSize */

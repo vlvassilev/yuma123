@@ -885,7 +885,7 @@ module intri-device {
     leaf PortInfo_PoENo {
       type int32;
     }
-    leaf PortInfo_PoEChannel {
+    leaf-list PortInfo_PoEChannel {
       type int32;
     }
     leaf PortInfo_PoEChipNo {
@@ -897,13 +897,13 @@ module intri-device {
     leaf PortInfo_InterfaceType {
       type PortInterfaceTypeOptions;
     }
-    leaf PortInfo_Properties {
+    leaf-list PortInfo_Properties {
       type PortPropertyTypeOptions;
     }
     leaf PortInfo_DeviceID {
       type int32;
     }
-    leaf PortInfo_SpeedProperties {
+    leaf-list PortInfo_SpeedProperties {
       type DevicePortSpeedDuplexTypeOptions;
     }
   }
@@ -913,7 +913,9 @@ module intri-device {
       type string;
     }
     container BoardInfo_PortLists {
-      uses PortInfo;
+      list Entry {
+        uses PortInfo;
+      }
     }
     leaf BoardInfo_HwFeatures {
       type FactoryHwFeatureTypeOptions;
@@ -1514,10 +1516,8 @@ module intri-device {
   }
   // device/common.proto
   grouping PortList {
-    list List {
-      container IdentifyNo {
-        uses InterfaceIdentify;
-      }
+    list Entry {
+      uses InterfaceIdentify;
     }
   }
 

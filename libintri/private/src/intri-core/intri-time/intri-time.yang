@@ -1,0 +1,240 @@
+
+module intri-time {
+  namespace "intri:intri-time";
+  prefix "intri-time";
+  organization "Intrising Inc.";
+  contact "xxx@intrising.com.tw";
+  revision 2022-06-14 {
+    description "Build date.";
+  }
+
+  /*
+   * enum
+   */
+
+  // core/time/time.proto
+  typedef StatusTypeOptions {
+    type enumeration {
+      enum STATUS_TYPE_UNSET {
+        description "[Unset]";
+        value 0;
+      }
+      enum STATUS_TYPE_MANUALLY_SET {
+        description "[Manually Set]";
+        value 1;
+      }
+      enum STATUS_TYPE_SYNCHRONIZED {
+        description "[Synchronized]";
+        value 2;
+      }
+      enum STATUS_TYPE_SYNC_FAILED {
+        description "[Sync Failed]";
+        value 3;
+      }
+      enum STATUS_TYPE_DAY_LIGHT_SAVING_TIME {
+        description "[Day Light Saving Time]";
+        value 4;
+      }
+      enum STATUS_TYPE_GNSS_SET {
+        description "[GNSS Set]";
+        value 5;
+      }
+      enum STATUS_TYPE_GNSS_FAILED {
+        description "[GNSS Failed]";
+        value 6;
+      }
+      enum STATUS_TYPE_PTP_SET {
+        description "[PTP Set]";
+        value 7;
+      }
+      enum STATUS_TYPE_PTP_FAILED {
+        description "[PTP Failed]";
+        value 8;
+      }
+    }
+  }
+  // core/time/time.proto
+  typedef ModeTypeOptions {
+    type enumeration {
+      enum MODE_TYPE_MANUAL {
+        description "[Manual]";
+        value 0;
+      }
+      enum MODE_TYPE_AUTO {
+        description "[Auto (Use NTP)] Time mode auto requires Internet access and will get the time from the given main NTP server";
+        value 1;
+      }
+      enum MODE_TYPE_GNSS {
+        description "[GNSS]";
+        value 2;
+      }
+      enum MODE_TYPE_PTP {
+        description "[PTP]";
+        value 3;
+      }
+    }
+  }
+
+  /*
+   * message
+   */
+
+  // core/time/time.proto
+  grouping Config {
+    leaf Config_Mode {
+      type ModeTypeOptions;
+    }
+    leaf Config_MainNTPServer {
+      type string;
+    }
+    leaf Config_BackupNTPServer {
+      type string;
+    }
+    leaf Config_TrustedServerEnabled {
+      type boolean;
+    }
+    leaf Config_SyncInterval {
+      type int32;
+    }
+    leaf Config_TimeZone {
+      type string;
+    }
+    leaf Config_TimeFormat {
+      type string;
+    }
+    leaf Config_DateFormat {
+      type string;
+    }
+    leaf Config_Manual {
+      type string;
+    }
+  }
+  // core/time/time.proto
+  grouping ListTimeZones {
+    leaf ListTimeZones_List {
+      type string;
+    }
+  }
+  // core/time/time.proto
+  grouping Status {
+    leaf Status_Status {
+      type StatusTypeOptions;
+    }
+    leaf Status_LocalTime {
+      type string;
+    }
+    leaf Status_LocalDate {
+      type string;
+    }
+    leaf Status_UsedNTPServer {
+      type string;
+    }
+  }
+  // core/time/time.proto
+  grouping RequestWithTimestamp {
+    container RequestWithTimestamp_Ts {
+      uses Timestamp;
+    }
+  }
+  // core/time/time.proto
+  grouping RequestWithInt64 {
+    leaf RequestWithInt64_Ts {
+      type int64;
+    }
+  }
+  // core/time/time.proto
+  grouping Response {
+    leaf Response_Ts {
+      type string;
+    }
+  }
+
+
+  grouping Timestamp {
+    leaf Seconds {
+      type int64;
+    }
+    leaf Nanos {
+      type int32;
+    }
+  }
+  grouping DateTime {
+    leaf Ts {
+      type string;
+    }
+  }
+
+  // container intri-time {
+  //   container config {
+  //     uses Config;
+  //   }
+  //   container status {
+  //     uses Status;
+  //   }
+  //   container date-time {
+  //     uses DateTime;
+  //   }
+
+  // }
+
+  rpc intri-time-get-config {
+    description 
+      "get config";
+    output {
+      uses Config;
+    }
+  }
+  rpc intri-time-set-config {
+    description 
+      "set config";
+    input {
+      uses Config;
+    }
+  }
+  rpc intri-time-get-status {
+    description 
+      "get status";
+    output {
+      uses Status;
+    }
+  }
+  rpc intri-time-run-sync-now {
+    description 
+      "sync now";
+  }
+  rpc intri-time-run-list-timezone {
+    description 
+      "list timezone";
+    output {
+      uses ListTimeZones;
+    }
+  }
+  rpc intri-time-get-correction-time {
+    description 
+      "get correction time";
+    input {
+      uses RequestWithTimestamp;
+    }
+    output {
+      uses Response;
+    }
+  }
+  rpc intri-time-get-correction-time-with-int64 {
+    description 
+      "get correction time";
+    input {
+      uses RequestWithInt64;
+    }
+    output {
+      uses Response;
+    }
+  }
+  rpc intri-time-get-utc {
+    description 
+      "get utc";
+    output {
+      uses Response;
+    }
+  }
+
+}

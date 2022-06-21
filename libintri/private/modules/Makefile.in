@@ -265,6 +265,7 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+usrlibdir = @usrlibdir@
 yangdir = @yangdir@
 yangrpc_netconf_includedir = @yangrpc_netconf_includedir@
 yuma123_yangdir = @yuma123_yangdir@

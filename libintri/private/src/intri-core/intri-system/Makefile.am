@@ -20,8 +20,8 @@ libintri_system_la_LDFLAGS = \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
 $(top_builddir)/netconf/src/ncx/libyumancx.la
 
-libintri_system_la_LIBADD = \
--L$(top_builddir)/libintri/.libintrishare/ -lintrishare
+# libintri_system_la_LIBADD = \
+# -L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
 
 dist_intri_private_yang_DATA = \
 $(top_srcdir)/libintri/private/src/intri-core/intri-system/intri-system.yang

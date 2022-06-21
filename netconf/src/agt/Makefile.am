@@ -36,6 +36,9 @@ $(top_srcdir)/netconf/src/agt/agt_commit_validate.c \
 $(top_srcdir)/netconf/src/agt/agt_not_queue_notification_cb.c
 
 libyumaagt_la_CPPFLAGS = -DDISABLE_YUMA_INTERFACES -I$(top_srcdir)/netconf/src/agt -I$(top_srcdir)/netconf/src/mgr -I$(top_srcdir)/netconf/src/ncx -I$(top_srcdir)/netconf/src/platform -I$(top_srcdir)/netconf/src/ydump $(XML_CPPFLAGS)
-libyumaagt_la_LDFLAGS = -version-info 2:0:0 $(top_builddir)/netconf/src/ncx/libyumancx.la $(XML_LIBS) -lcrypto -lrt $(LIBS)
-libyumaagt_la_LIBADD = \
--L$(top_builddir)/libintri/.libintrishare/ -lintrishare
+
+libyumaagt_la_LDFLAGS = -version-info 2:0:0 \
+$(top_builddir)/netconf/src/ncx/libyumancx.la \
+$(XML_LIBS) -lcrypto -lrt $(LIBS)
+
+# libyumaagt_la_LIBADD = 

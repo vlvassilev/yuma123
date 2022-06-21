@@ -16,8 +16,8 @@ libietf_interfaces_la_LDFLAGS = \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
 $(top_builddir)/netconf/src/ncx/libyumancx.la
 
-libietf_interfaces_la_LIBADD = \
--L$(top_builddir)/libintri/.libintrishare/ -lintrishare
+# libietf_interfaces_la_LIBADD = \
+# -L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
 
 dist_examples_yang_DATA = \
 interfaces-notifications.yang

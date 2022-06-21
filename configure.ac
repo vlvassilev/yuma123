@@ -12,6 +12,9 @@ AC_SEARCH_LIBS([dlopen], [dl dld], [], [
   AC_MSG_ERROR([unable to find the dlopen() function])
 ])
 
+usrlibdir="$libdir"
+AC_SUBST(usrlibdir)
+
 netconfmoduledir="$libdir/yuma"
 AC_SUBST(netconfmoduledir)
 

@@ -720,7 +720,248 @@ status_t build_LedInfo(
   return res;
 }
 
-status_t build_HardwareInfo(
+status_t build_MonitorInfo(
+    val_value_t *parentval,
+    struct devicepb_MonitorInfo *monitor_info) {
+  status_t res = NO_ERR;
+
+  val_value_t *childval = NULL;
+  const xmlChar *enum_str = EMPTY_STRING;
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_MonitorInfo_Name,
+      monitor_info->Name,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_MonitorInfo_Type,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+  switch (monitor_info->Type) {
+    case devicepb_DeviceTypeOptions_DEVICE_TYPE_MCU:
+      enum_str = "DEVICE_TYPE_MCU";
+      break;
+    case devicepb_DeviceTypeOptions_DEVICE_TYPE_I2C:
+      enum_str = "DEVICE_TYPE_I2C";
+      break;
+    case devicepb_DeviceTypeOptions_DEVICE_TYPE_GPIO:
+      enum_str = "DEVICE_TYPE_GPIO";
+      break;
+  }
+  res = val_set_simval_obj(
+      childval,
+      childval->obj,
+      enum_str);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_MonitorInfo_Direction,
+      monitor_info->Direction,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  switch (monitor_info->Device_Union_Option) {
+    case devicepb_LedInfo_Device_Union_Options_LEDDevice:
+      childval = agt_make_object(
+          parentval->obj,
+          y_intri_device_N_MonitorInfo_MonitorDevice,
+          &res);
+      // monitor_info->Device.Device_MonitorDevice;
+    case devicepb_LedInfo_Device_Union_Options_I2CDevice:
+      childval = agt_make_object(
+          parentval->obj,
+          y_intri_device_N_MonitorInfo_I2CDevice,
+          &res);
+    // monitor_info->Device.Device_I2CDevice;
+    case devicepb_LedInfo_Device_Union_Options_GPIODevice:
+      childval = agt_make_object(
+          parentval->obj,
+          y_intri_device_N_MonitorInfo_GPIODevice,
+          &res);
+      // monitor_info->Device.Device_GPIODevice;
+  }
+
+  return res;
+}
+
+status_t build_PSUInfo(
+    val_value_t *parentval,
+    struct devicepb_PSUInfo *psu_info) {
+  status_t res = NO_ERR;
+
+  val_value_t *childval = NULL;
+  const xmlChar *enum_str = EMPTY_STRING;
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_PSUInfo_Name,
+      psu_info->Name,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_PSUInfo_Type,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+  switch (psu_info->Type) {
+    case devicepb_DeviceTypeOptions_DEVICE_TYPE_MCU:
+      enum_str = "DEVICE_TYPE_MCU";
+      break;
+    case devicepb_DeviceTypeOptions_DEVICE_TYPE_I2C:
+      enum_str = "DEVICE_TYPE_I2C";
+      break;
+    case devicepb_DeviceTypeOptions_DEVICE_TYPE_GPIO:
+      enum_str = "DEVICE_TYPE_GPIO";
+      break;
+  }
+  res = val_set_simval_obj(
+      childval,
+      childval->obj,
+      enum_str);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_PSUInfo_Direction,
+      psu_info->Direction,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  switch (psu_info->Device_Union_Option) {
+    case devicepb_LedInfo_Device_Union_Options_LEDDevice:
+      childval = agt_make_object(
+          parentval->obj,
+          y_intri_device_N_PSUInfo_PSUDevice,
+          &res);
+      // psu_info->Device.Device_PSUDevice;
+    case devicepb_LedInfo_Device_Union_Options_I2CDevice:
+      childval = agt_make_object(
+          parentval->obj,
+          y_intri_device_N_PSUInfo_I2CDevice,
+          &res);
+    // psu_info->Device.Device_I2CDevice;
+    case devicepb_LedInfo_Device_Union_Options_GPIODevice:
+      childval = agt_make_object(
+          parentval->obj,
+          y_intri_device_N_PSUInfo_GPIODevice,
+          &res);
+      // psu_info->Device.Device_GPIODevice;
+  }
+
+  return res;
+}
+
+status_t build_I2CInfo(
+    val_value_t *parentval,
+    struct devicepb_I2Cinfo *i2c_info) {
+  status_t res = NO_ERR;
+
+  val_value_t *childval = NULL;
+  const xmlChar *enum_str = EMPTY_STRING;
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_I2Cinfo_Name,
+      i2c_info->Name,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_I2Cinfo_Direction,
+      i2c_info->Direction,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_I2Cinfo_Device,
+      &res);
+  // i2c_info->Device;
+  return res;
+}
+
+status_t build_GPIOInfo(
+    val_value_t *parentval,
+    struct devicepb_GPIOInfo *gpio_info) {
+  status_t res = NO_ERR;
+
+  val_value_t *childval = NULL;
+  const xmlChar *enum_str = EMPTY_STRING;
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_GPIOInfo_Name,
+      gpio_info->Name,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  childval = agt_make_leaf(
+      parentval->obj,
+      y_intri_device_N_GPIOInfo_Direction,
+      gpio_info->Direction,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  // childval = agt_make_object(
+  //     parentval->obj,
+  //     y_intri_device_N_GPIOInfo_Device,
+  //     &res);
+  // // gpio_info->Device;
+  return res;
+}
+
+status_t
+build_HardwareInfo(
     val_value_t *parentval,
     struct devicepb_HardwareInfo *hw_info) {
   status_t res = NO_ERR;
@@ -747,44 +988,116 @@ status_t build_HardwareInfo(
     } else if (res != NO_ERR) {
       return SET_ERROR(res);
     }
+    res = build_LedInfo(entry_val, hw_info->DeviceLed[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
 
-  // childval = agt_make_object(
-  //     parentval->obj,
-  //     y_intri_device_N_HardwareInfo_DeviceHWMonitor,
-  //     &res);
-  // if (childval != NULL) {
-  //   val_add_child(childval, parentval);
-  // } else if (res != NO_ERR) {
-  //   return SET_ERROR(res);
-  // }
-  // childval = agt_make_object(
-  //     parentval->obj,
-  //     y_intri_device_N_HardwareInfo_DevicePSU,
-  //     &res);
-  // if (childval != NULL) {
-  //   val_add_child(childval, parentval);
-  // } else if (res != NO_ERR) {
-  //   return SET_ERROR(res);
-  // }
-  // childval = agt_make_object(
-  //     parentval->obj,
-  //     y_intri_device_N_HardwareInfo_DeviceI2C,
-  //     &res);
-  // if (childval != NULL) {
-  //   val_add_child(childval, parentval);
-  // } else if (res != NO_ERR) {
-  //   return SET_ERROR(res);
-  // }
-  // childval = agt_make_object(
-  //     parentval->obj,
-  //     y_intri_device_N_HardwareInfo_DeviceHW,
-  //     &res);
-  // if (childval != NULL) {
-  //   val_add_child(childval, parentval);
-  // } else if (res != NO_ERR) {
-  //   return SET_ERROR(res);
-  // }
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_HardwareInfo_DeviceHWMonitor,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+  for (int i = 0; i < hw_info->DeviceHWMonitor_Len; i++) {
+    val_value_t *entry_val = NULL;
+    entry_val = agt_make_list(
+        childval->obj,
+        y_intri_device_N_Entry,
+        &res);
+    if (entry_val != NULL) {
+      val_add_child(entry_val, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    res = build_MonitorInfo(entry_val, hw_info->DeviceHWMonitor[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_HardwareInfo_DevicePSU,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+  for (int i = 0; i < hw_info->DevicePSU_Len; i++) {
+    val_value_t *entry_val = NULL;
+    entry_val = agt_make_list(
+        childval->obj,
+        y_intri_device_N_Entry,
+        &res);
+    if (entry_val != NULL) {
+      val_add_child(entry_val, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    res = build_PSUInfo(entry_val, hw_info->DevicePSU[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_HardwareInfo_DeviceI2C,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+  for (int i = 0; i < hw_info->DeviceI2C_Len; i++) {
+    val_value_t *entry_val = NULL;
+    entry_val = agt_make_list(
+        childval->obj,
+        y_intri_device_N_Entry,
+        &res);
+    if (entry_val != NULL) {
+      val_add_child(entry_val, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    res = build_I2CInfo(entry_val, hw_info->DeviceI2C[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+
+  childval = agt_make_object(
+      parentval->obj,
+      y_intri_device_N_HardwareInfo_DeviceHW,
+      &res);
+  if (childval != NULL) {
+    val_add_child(childval, parentval);
+  } else if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+  for (int i = 0; i < hw_info->DeviceHW_Len; i++) {
+    val_value_t *entry_val = NULL;
+    entry_val = agt_make_list(
+        childval->obj,
+        y_intri_device_N_Entry,
+        &res);
+    if (entry_val != NULL) {
+      val_add_child(entry_val, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    res = build_GPIOInfo(entry_val, hw_info->DeviceHW[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+
   // childval = agt_make_object(
   //     parentval->obj,
   //     y_intri_device_N_HardwareInfo_DevicePTP,
@@ -793,6 +1106,8 @@ status_t build_HardwareInfo(
   //   val_add_child(childval, parentval);
   // } else if (res != NO_ERR) {
   //   return SET_ERROR(res);
+  // }
+  // for (int i = 0; i < hw_info->DevicePTP_Len; i++) {
   // }
   // childval = agt_make_object(
   //     parentval->obj,
@@ -803,6 +1118,8 @@ status_t build_HardwareInfo(
   // } else if (res != NO_ERR) {
   //   return SET_ERROR(res);
   // }
+  // for (int i = 0; i < hw_info->DeviceGPS_Len; i++) {
+  // }
   // childval = agt_make_object(
   //     parentval->obj,
   //     y_intri_device_N_HardwareInfo_DeviceToD,
@@ -811,6 +1128,8 @@ status_t build_HardwareInfo(
   //   val_add_child(childval, parentval);
   // } else if (res != NO_ERR) {
   //   return SET_ERROR(res);
+  // }
+  // for (int i = 0; i < hw_info->DeviceToD_Len; i++) {
   // }
   // childval = agt_make_object(
   //     parentval->obj,
@@ -821,6 +1140,8 @@ status_t build_HardwareInfo(
   // } else if (res != NO_ERR) {
   //   return SET_ERROR(res);
   // }
+  // for (int i = 0; i < hw_info->DeviceFan_Len; i++) {
+  // }
   // childval = agt_make_object(
   //     parentval->obj,
   //     y_intri_device_N_HardwareInfo_DevicePoE,
@@ -829,23 +1150,6 @@ status_t build_HardwareInfo(
   //   val_add_child(childval, parentval);
   // } else if (res != NO_ERR) {
   //   return SET_ERROR(res);
-  // }
-
-  // for (int i = 0; i < hw_info->DeviceHWMonitor_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DevicePSU_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DeviceI2C_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DeviceHW_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DevicePTP_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DeviceGPS_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DeviceToD_Len; i++) {
-  // }
-  // for (int i = 0; i < hw_info->DeviceFan_Len; i++) {
   // }
   // for (int i = 0; i < hw_info->DevicePoE_Len; i++) {
   // }

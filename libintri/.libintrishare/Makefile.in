@@ -94,7 +94,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-DIST_COMMON = $(srcdir)/Makefile.am $(dist_netconfmodule_DATA) \
+DIST_COMMON = $(srcdir)/Makefile.am $(dist_usrlib_DATA) \
 	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
@@ -145,8 +145,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(netconfmoduledir)"
-DATA = $(dist_netconfmodule_DATA)
+am__installdirs = "$(DESTDIR)$(usrlibdir)"
+DATA = $(dist_usrlib_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -296,11 +296,12 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+usrlibdir = @usrlibdir@
 yangdir = @yangdir@
 yangrpc_netconf_includedir = @yangrpc_netconf_includedir@
 yuma123_yangdir = @yuma123_yangdir@
 yuma_datarootdir = @yuma_datarootdir@
-dist_netconfmodule_DATA = libintrishare.so
+dist_usrlib_DATA = libintrishare.so
 all: all-am
 
 .SUFFIXES:
@@ -339,27 +340,27 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-dist_netconfmoduleDATA: $(dist_netconfmodule_DATA)
+install-dist_usrlibDATA: $(dist_usrlib_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(dist_netconfmodule_DATA)'; test -n "$(netconfmoduledir)" || list=; \
+	@list='$(dist_usrlib_DATA)'; test -n "$(usrlibdir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(netconfmoduledir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(netconfmoduledir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(usrlibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(usrlibdir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(netconfmoduledir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(netconfmoduledir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(usrlibdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(usrlibdir)" || exit $$?; \
 	done
 
-uninstall-dist_netconfmoduleDATA:
+uninstall-dist_usrlibDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_netconfmodule_DATA)'; test -n "$(netconfmoduledir)" || list=; \
+	@list='$(dist_usrlib_DATA)'; test -n "$(usrlibdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(netconfmoduledir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(usrlibdir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -404,7 +405,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(netconfmoduledir)"; do \
+	for dir in "$(DESTDIR)$(usrlibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -457,7 +458,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_netconfmoduleDATA
+install-data-am: install-dist_usrlibDATA
 
 install-dvi: install-dvi-am
 
@@ -501,7 +502,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_netconfmoduleDATA
+uninstall-am: uninstall-dist_usrlibDATA
 
 .MAKE: install-am install-strip
 
@@ -509,14 +510,14 @@ uninstall-am: uninstall-dist_netconfmoduleDATA
 	cscopelist-am ctags-am distclean distclean-generic \
 	distclean-libtool distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dist_netconfmoduleDATA install-dvi install-dvi-am \
+	install-dist_usrlibDATA install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-dist_netconfmoduleDATA
+	uninstall-am uninstall-dist_usrlibDATA
 
 .PRECIOUS: Makefile
 

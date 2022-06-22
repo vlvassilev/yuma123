@@ -275,7 +275,7 @@ static status_t
     struct timepb_Status *time_status_out;
     struct devicepb_Info *dev_info_out;
 
-
+    printf("\n@@@@@@@@@@@@@@@@@@@@@@ get_api_string %d\n", api_indicator);
     if (cbmode == GETCB_GET_VALUE) {
         buff = (xmlChar *)m__getMem(TSTAMP_MIN_SIZE);
         if (!buff) {
@@ -483,7 +483,6 @@ static status_t
         buff = time_out->Mode==timepb_ModeTypeOptions_MODE_TYPE_AUTO;
         free(time_out);
         free(epty);
-        // buff = FALSE;
         VAL_BOOL(dstval) = buff;
         return NO_ERR;
     } else {
@@ -597,10 +596,12 @@ static status_t
     time_out = malloc(sizeof(*(time_out)));
 
     time_Time_GetConfig(epty, time_out);
-    if (time_out->Mode!=timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
+    if(time_out->Mode!=timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
+        free(epty);
+        free(time_out);
         return res;
     }
-    name_buf = (char*)malloc(16);
+    name_buf = (char*)malloc(512);
     if (name_buf == NULL) {
         return ERR_INTERNAL_MEM;
     }
@@ -614,7 +615,18 @@ static status_t
     printf("\n@@@ adding primary ntp %s\n", time_out->MainNTPServer);
     res = add_ntp_entry(name_buf, address_buf, dst_val);
 
+    if(time_out->BackupNTPServer==NULL || strlen(time_out->BackupNTPServer)==0) {
+        free(name_buf);
+        free(address_buf);
+        free(time_out);
+        free(epty);
+        printf("###### res %d\n", res);
+        return res;
+    }
     sprintf((char *)name_buf, "secondary");
+    // printf("@@@@@@@ %s\n", time_out->BackupNTPServer);
+    // printf("@@@@@@@ %s\n", time_out->BackupNTPServer==NULL ? "true" : "false");
+    // printf("@@@@@@@ size %d\n", strlen(time_out->BackupNTPServer));
     sprintf((char *)address_buf, time_out->BackupNTPServer);
 
     printf("\n@@@ adding secondary ntp %s\n", time_out->BackupNTPServer);
@@ -1235,6 +1247,44 @@ void
     val_add_child(tmp_val, dir);
 }
 
+/********************************************************************
+* FUNCTION add_child_val_under_parent
+*
+* Add the node under the selected dir
+*
+* INPUTS:
+*   dir == the dir that will be added node
+*   modname == module name
+*   nodename == the node name that will be added
+*   cb == the callback that in charge of the real value of this node
+* RETURNS:
+*   none
+*********************************************************************/
+status_t
+    add_child_val_under_parent(
+        val_value_t *parent_val,
+        const xmlChar *leafname,
+        status_t *cbfn
+        )
+{
+    status_t res = NO_ERR;
+    val_value_t *child_val = NULL;
+    printf("\n @@@@ b4 make_virtual_leaf\n");
+    child_val = agt_make_virtual_leaf(
+        parent_val->obj,
+        leafname,
+        cbfn,
+        &res);
+    printf("\n @@@@ after make_virtual_leaf\n");
+    if (child_val != NULL) {
+        printf("\n @@@@ b4 add child\n");
+        val_add_child_sorted(child_val, parent_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    return res;
+}
+
 
 /********************************************************************
 * FUNCTION init_static_vars
@@ -1368,6 +1418,144 @@ status_t
 }  /* agt_sys_init */
 
 
+status_t ietf_system_state_mro(val_value_t *parent_val) {
+    status_t res = NO_ERR;
+    val_value_t *clock_val = NULL;
+    val_value_t *platform_val = NULL;
+
+    /* Add /system-state/clock */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_clock,
+        parent_val,
+        &clock_val);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/clock/current-datetime */
+    res = add_child_val_under_parent(clock_val, ietf_system_state_current_datetime, get_clock_current_datetime);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/clock/boot-datetime */
+    res = add_child_val_under_parent(clock_val, ietf_system_state_boot_datetime, get_clock_boot_datetime);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/platform */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_state_platform,
+        parent_val,
+        &platform_val);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/platform/os-name */
+    res = add_child_val_under_parent(platform_val, ietf_system_state_os_name, get_platform_os_name);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/platform/os-release */
+    res = add_child_val_under_parent(platform_val, ietf_system_state_os_release, get_platform_os_release);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/platform/os-version */
+    res = add_child_val_under_parent(platform_val, ietf_system_state_os_version, get_platform_os_version);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system-state/platform/machine */
+    res = add_child_val_under_parent(platform_val, ietf_system_state_machine, get_platform_machine);
+
+    return res;
+}
+
+status_t ietf_system_mro(val_value_t *parent_val) {
+    status_t res = NO_ERR;
+    val_value_t *authentication_val = NULL;
+    val_value_t *clock_val = NULL;
+    val_value_t *ntp_val = NULL;
+
+    /* Add /system/hostname */
+    res = add_child_val_under_parent(parent_val, ietf_system_hostname, get_system_hostname);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system/location */
+    res = add_child_val_under_parent(parent_val, ietf_system_location, get_system_location);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system/contact */
+    res = add_child_val_under_parent(parent_val, ietf_system_contact, get_system_contact);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system/clock */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_clock,
+        parent_val,
+        &clock_val);
+
+    /* Add /system/clock/timezone-name */
+    res = add_child_val_under_parent(clock_val, ietf_system_clock_timezone_name, get_clock_timezone);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system/ntp */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_ntp,
+        parent_val,
+        &ntp_val);
+
+    /* Add /system/ntp/enabled */
+    res = add_child_val_under_parent(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* Add /system/ntp/server */
+    /* Add /system/ntp/server/name */
+    /* Add /system/ntp/server/udp/address */
+    // res = add_child_val_under_parent(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
+    // if (res != NO_ERR) {
+    //     return res;
+    // }
+
+
+
+    /* Add /system/authentication */
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_authentication,
+        parent_val,
+        &authentication_val);
+
+    /* Add /system/authentication/user/name */
+    // res = add_child_val_under_parent(authentication_val, ietf_system_ntp_enabled, get_ntp_enabled);
+    // if (res != NO_ERR) {
+    //     return res;
+    // }
+
+    return res;
+}
+
+
 /********************************************************************
 * FUNCTION agt_sys_init2
 *
@@ -1383,205 +1571,40 @@ status_t
 status_t
     agt_sys_init2 (void)
 {
-    val_value_t           *ietf_system_val, *ietf_system_state_val, *yuma_system_val, *unameval, *childval, *tempval;
+    val_value_t           *ietf_system_val, *ietf_system_state_val;
     cfg_template_t        *runningcfg;
-    const xmlChar         *myhostname;
-    obj_template_t        *unameobj;
     status_t               res;
-    xmlChar               *buffer, *p, tstampbuff[TSTAMP_MIN_SIZE];
-    struct utsname         utsbuff;
-    int                    retval;
-
-    // For adding /system-state/ and /system/ and link them to the private API
-    obj_template_t*        obj;
-    val_value_t*           tmp_sub_dir_val;
-    val_value_t*           ntp_sub_dir_val;
-    val_value_t*           tmp_val;
-    val_value_t*           ntp_val;
-    val_value_t*           user_val;
 
     printf("\n@@@@@ agt_sys_init2\n");
     if (!agt_sys_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-    /* get the running config to add some static data into */
-    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-    if (!runningcfg || !runningcfg->root) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
+    ietf_system_val = agt_init_cache(
+        ietf_system,
+        ietf_system_N_system,
+        &res);
+
+    if (res != NO_ERR) {
+        return res;
     }
 
     /* Add /system */
-    ietf_system_val = val_find_child(runningcfg->root,
-                                          ietf_system,
-                                          ietf_system_N_system);
-    if(ietf_system_val==NULL) {
-        ietf_system_val = val_new_value();
-        if (!ietf_system_val) {
-            return ERR_INTERNAL_MEM;
-        }
-        val_init_from_template(ietf_system_val, ietf_system_obj);
-        val_add_child(ietf_system_val, runningcfg->root);
+    res = agt_add_top_container(ietf_system_obj, &ietf_system_val);
+    if (res != NO_ERR) {
+        return res;
     }
-
-    /* Add /system/hostname */
-    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_hostname , get_system_hostname);
-
-    /* Add /system/contact */
-    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_contact , get_system_contact);
-
-    /* Add /system/loaction */
-    add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_location , get_system_location);
-
-    /* Add /system/clock */
-    tmp_sub_dir_val = val_find_child(ietf_system_val,
-                                          ietf_system,
-                                          ietf_system_clock);
-    if(tmp_sub_dir_val==NULL) {
-        printf("\ngot null clock_val\n");
-        obj = obj_find_child(ietf_system_val->obj,
-                                       ietf_system,
-                                       ietf_system_clock);
-        assert(obj != NULL);
-
-        tmp_sub_dir_val = val_new_value();
-        assert(tmp_sub_dir_val != NULL);
-
-        val_init_from_template(tmp_sub_dir_val,
-                               obj);
-
-        val_add_child(tmp_sub_dir_val, ietf_system_val);
-
-    }
-    /* Add /system/clock/timezone-name */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_clock_timezone_name , get_clock_timezone);
-
-     /* Add /system/ntp/ */
-    tmp_sub_dir_val = val_find_child(ietf_system_val,
-                                          ietf_system,
-                                          ietf_system_ntp);
-    printf("\n@@@@@ finding NTP @@@@@\n");
-    if(tmp_sub_dir_val==NULL) {
-        printf("\n@@@@@ got null ntp_val @@@@@\n");
-        obj = obj_find_child(ietf_system_val->obj,
-                                       ietf_system,
-                                       ietf_system_ntp);
-        assert(obj != NULL);
-
-        tmp_sub_dir_val = val_new_value();
-        assert(tmp_sub_dir_val != NULL);
-
-        val_init_from_template(tmp_sub_dir_val,
-                               obj);
-
-        val_add_child(tmp_sub_dir_val, ietf_system_val);
-    }
-    /* Add /system/ntp/enabled */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_ntp_enabled , get_ntp_enabled);
-
-    // /* Add /system/ntp/server */
-    // printf("\n@@@@@ adding ntp@@@@\n");
-    ntp_val = val_new_value();
-    assert(ntp_val);
-    val_init_virtual(ntp_val, get_ntp, obj);
-    val_add_child(ntp_val, tmp_sub_dir_val);
+    res = ietf_system_mro(ietf_system_val);
 
 
-
-    // /* Add /system/authentication*/
-    // tmp_sub_dir_val = val_find_child(ietf_system_val,
-    //                                       ietf_system,
-    //                                       ietf_system_authentication);
-    // if(tmp_sub_dir_val==NULL) {
-    //     printf("\n@@@@@ got null authentication_val @@@@@\n");
-    //     obj = obj_find_child(ietf_system_val->obj,
-    //                                    ietf_system,
-    //                                    ietf_system_authentication);
-    //     assert(obj != NULL);
-
-    //     tmp_sub_dir_val = val_new_value();
-    //     assert(tmp_sub_dir_val != NULL);
-
-    //     val_init_from_template(tmp_sub_dir_val,
-    //                            obj);
-
-    //     val_add_child(tmp_sub_dir_val, ietf_system_val);
-    // }
-
-    // user_val = val_new_value();
-    // assert(user_val);
-    // val_init_virtual(user_val, get_user, obj);
-    // val_add_child(user_val, tmp_sub_dir_val);
-
+    printf("\n @@@@@@ what b4 add system-state\n");
     /* Add /system-state */
-    ietf_system_state_val = val_new_value();
-    if (!ietf_system_state_val) {
-        return ERR_INTERNAL_MEM;
+    res = agt_add_top_container(ietf_system_state_obj, &ietf_system_state_val);
+    if (res != NO_ERR) {
+        return res;
     }
-    val_init_from_template(ietf_system_state_val, ietf_system_state_obj);
-
-
-    /* Add /system-state/clock */
-    tmp_sub_dir_val = val_find_child(ietf_system_state_val,
-                                          ietf_system,
-                                          ietf_system_clock);
-    if(tmp_sub_dir_val==NULL) {
-        printf("\ngot null clock val\n");
-        obj = obj_find_child(ietf_system_state_val->obj,
-                                       ietf_system,
-                                       ietf_system_clock);
-        assert(obj != NULL);
-
-        tmp_sub_dir_val = val_new_value();
-        assert(tmp_sub_dir_val != NULL);
-
-        val_init_from_template(tmp_sub_dir_val,
-                               obj);
-
-        val_add_child(tmp_sub_dir_val, ietf_system_state_val);
-
-    }
-    /* Add /system-state/clock/current-datetime */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_current_datetime, get_clock_current_datetime);
-
-    /* Add /system-state/clock/boot-datetime */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_boot_datetime, get_clock_boot_datetime);
-
-    /* Add /system-state/platform */
-    tmp_sub_dir_val = val_find_child(ietf_system_state_val,
-                                          ietf_system,
-                                          ietf_system_state_platform);
-    if(tmp_sub_dir_val==NULL) {
-        printf("\ngot null platform_val\n");
-        obj = obj_find_child(ietf_system_state_val->obj,
-                                       ietf_system,
-                                       ietf_system_state_platform);
-        assert(obj != NULL);
-
-        tmp_sub_dir_val = val_new_value();
-        assert(tmp_sub_dir_val != NULL);
-
-        val_init_from_template(tmp_sub_dir_val,
-                               obj);
-
-        val_add_child(tmp_sub_dir_val, ietf_system_state_val);
-    }
-
-    /* Add /system-state/platform/os-name */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_name, get_platform_os_name);
-
-    /* Add /system-state/platform/os-release */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_release, get_platform_os_release);
-
-    /* Add /system-state/platform/os-version */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_os_version, get_platform_os_version);
-
-    /* Add /system-state/platform/machine */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_state_machine, get_platform_machine);
-
-    /* [DONE] Start adding ietf-system and using private API*/
-    /* handing off the malloced memory here */
-    val_add_child_sorted(ietf_system_state_val, runningcfg->root);
+    res = ietf_system_state_mro(ietf_system_state_val);
+    printf("\n @@@@@@ done adding system-state\n");
 
     /* add sysStartup to notificationQ */
     printf("\n@@@ send sysStartup @@@\n");

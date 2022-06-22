@@ -1,17 +1,17 @@
 /*
  * Copyright (c) 2008 - 2012, Andy Bierman, All Rights Reserved.
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 /*  FILE: val_util.c
 
    val_value_t struct utilities for object validateion support
-                
+
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -67,13 +67,13 @@ date         init     comment
 
 /********************************************************************
 * FUNCTION new_index
-* 
+*
 * Malloc and initialize the fields in a val_index_t
 *
 * RETURNS:
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
-static val_index_t * 
+static val_index_t *
     new_index (val_value_t *valnode)
 {
     val_index_t  *in;
@@ -90,11 +90,11 @@ static val_index_t *
 
 /********************************************************************
 * FUNCTION choice_check
-* 
+*
 * Check a val_value_t struct against its expected OBJ
 * for instance validation:
 *
-*    - choice validation: 
+*    - choice validation:
 *      only one case allowed if the data type is choice
 *      Only issue errors based on the instance test qualifiers
 *
@@ -110,7 +110,7 @@ static val_index_t *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
-static status_t 
+static status_t
     choice_check (val_value_t *val,
                   obj_template_t *choicobj)
 {
@@ -120,7 +120,7 @@ static status_t
     retres = NO_ERR;
 
     /* Go through all the child nodes for this object
-     * and look for choices against the value set to see if each 
+     * and look for choices against the value set to see if each
      * a choice case is present in the correct number of instances.
      *
      * The current value could never be a OBJ_TYP_CHOICE since
@@ -143,7 +143,7 @@ static status_t
     }
 
     /* else a choice was selected
-     * first make sure all the mandatory case 
+     * first make sure all the mandatory case
      * objects are present
      */
     res = val_instance_check(val, chval->casobj);
@@ -158,7 +158,7 @@ static status_t
             /* error: extra case object in this choice */
             retres = ERR_NCX_EXTRA_CHOICE;
             log_error("\nError: Extra object '%s' "
-                      "in choice '%s'; Case '%s' already selected", 
+                      "in choice '%s'; Case '%s' already selected",
                       testval->name,
                       obj_get_name(choicobj),
                       obj_get_name(chval->casobj));
@@ -173,7 +173,7 @@ static status_t
 
 /********************************************************************
  * FUNCTION add_defaults
- * 
+ *
  * Go through the specified value struct and add in any defaults
  * for missing leaf and choice nodes, that have defaults.
  *
@@ -209,7 +209,7 @@ static status_t
  * RETURNS:
  *   status
  *********************************************************************/
-static status_t 
+static status_t
     add_defaults (val_value_t *val,
                   val_value_t *rootval,
                   val_value_t *cxtval,
@@ -276,7 +276,7 @@ static status_t
              * with it; skip this leaf if when FALSE
              */
             if (rootval) {
-                res = val_check_obj_when((cxtval) ? cxtval : val, 
+                res = val_check_obj_when((cxtval) ? cxtval : val,
                                          rootval, NULL, chobj,
                                          &condresult, &whencount);
                 if (res != NO_ERR) {
@@ -318,7 +318,7 @@ static status_t
         case OBJ_TYP_CHOICE:
             /* if the choice is not set, and it has a default
              * case, then add that case to the val struct
-             * If a partial case is present, then try to fill in 
+             * If a partial case is present, then try to fill in
              * any of the nodes with defaults
              */
             if (obj_is_mandatory(chobj)) {
@@ -339,7 +339,7 @@ static status_t
             }
             if (casobj) {
                 /* add all the default nodes in the default case
-                 * or selected case 
+                 * or selected case
                  */
                 res = add_defaults(val, rootval, cxtval, scriptmode, casobj);
             }
@@ -358,7 +358,7 @@ static status_t
             /* add defaults to the subtrees of existing
              * complex nodes, but do not add any new ones
              */
-            chval = val_find_child(val, 
+            chval = val_find_child(val,
                                    obj_get_mod_name(chobj),
                                    obj_get_name(chobj));
             if (chval) {
@@ -379,7 +379,7 @@ static status_t
                             chcxtval = val_next_child_match(cxtval, chval,
                                                             chcxtval);
                         }
-                        res = add_defaults(chval, rootval, chcxtval, 
+                        res = add_defaults(chval, rootval, chcxtval,
                                            scriptmode, NULL);
                     }
                 }
@@ -398,9 +398,9 @@ static status_t
 
 /********************************************************************
 * FUNCTION get_index_comp
-* 
+*
 * Get the index component string for the specified value
-* 
+*
 * USAGE:
 *  call 1st time with a NULL buffer to get the length
 *  call the 2nd time with a buffer of the returned length
@@ -413,11 +413,11 @@ static status_t
 *   format == desired output format
 *   val == val_value_t for table or container
 *   buff = buffer to hold result; NULL == get length only
-*   
+*
 * OUTPUTS:
 *   mhdr.pmap may have entries added if prefixes used
 *      in the instance identifier which are not already in the pmap
-*   *len = number of bytes that were (or would have been) written 
+*   *len = number of bytes that were (or would have been) written
 *          to buff
 * RETURNS:
 *   status
@@ -502,7 +502,7 @@ static status_t
             *buff++ = (xmlChar)((format==NCX_IFMT_XPATH1) ?
                                 VAL_QUOTE_CH : VAL_DBLQUOTE_CH);
         }
-        total++;  
+        total++;
     }
 
     res = val_sprintf_simval_nc(buff, val, &cnt);
@@ -519,7 +519,7 @@ static status_t
             *buff++ = (xmlChar)((format==NCX_IFMT_XPATH1) ?
                                 VAL_QUOTE_CH : VAL_DBLQUOTE_CH);
         }
-        total++;  
+        total++;
     }
 
     /* end the string */
@@ -535,9 +535,9 @@ static status_t
 
 /********************************************************************
 * FUNCTION get_instance_string
-* 
+*
 * Get the instance ID string for the specified value
-* 
+*
 * USAGE:
 *  call 1st time with a NULL buffer to get the length
 *  call the 2nd time with a buffer of the returned length
@@ -550,14 +550,14 @@ static status_t
 *   format == desired output format
 *   val == value node to generate instance string for
 *   stop_at_root == TRUE to stop if a 'root' node is encountered
-*                == FALSE to keep recursing all the way to 
+*                == FALSE to keep recursing all the way to
 *   buff = buffer to hold result; NULL == get length only
 *   len == address of return length
 *
 * OUTPUTS:
 *   mhdr.pmap may have entries added if prefixes used
 *      in the instance identifier which are not already in the pmap
-*   *len = number of bytes that were (or would have been) written 
+*   *len = number of bytes that were (or would have been) written
 *          to buff
 *
 * RETURNS:
@@ -578,7 +578,7 @@ static status_t
     boolean             root = FALSE, skiproot = FALSE;
     xmlns_id_t          rpcid = 0;
 
-    /* process the specific node type 
+    /* process the specific node type
      * Recurively find the top node and start there
      */
     if (stop_at_root && val->obj && obj_is_root(val->obj)) {
@@ -613,7 +613,7 @@ static status_t
     }
 
     if (val->obj->objtype == OBJ_TYP_RPCIO) {
-        /* get the prefix and name of the RPC method 
+        /* get the prefix and name of the RPC method
          * instead of this node named 'input'
          */
         rpcid = obj_get_nsid(val->obj->parent);
@@ -687,7 +687,7 @@ static status_t
 
         /* add another path sep char */
         if (buff) {
-            *buff++ = (xmlChar)((format==NCX_IFMT_C) ? 
+            *buff++ = (xmlChar)((format==NCX_IFMT_C) ?
                                 VAL_INST_SEPCH : VAL_XPATH_SEPCH);
         }
         cnt++;
@@ -758,7 +758,7 @@ static status_t
 
 /********************************************************************
 * FUNCTION purge_errors
-* 
+*
 * Remove any error nodes recursively
 * Need to use raw Q access to find nodes marked deleted
 * INPUTS:
@@ -798,7 +798,7 @@ static void
 
 /********************************************************************
 * FUNCTION check_when_stmt
-* 
+*
 * Check if the specified when-stmt for the specified node
 *
 * INPUTS:
@@ -807,7 +807,7 @@ static void
 *   context == value node to use for context node
 *   whenstmt == XPath PCB to use
 *   condresult == address of conditional test result
-*   
+*
 * OUTPUTS:
 *   *condresult == TRUE if conditional is true or there are none
 *                  FALSE if conditional test failed
@@ -823,8 +823,8 @@ static status_t
                      boolean *condresult)
 {
     status_t res = NO_ERR;
-    xpath_result_t *result = 
-        xpath1_eval_expr(whenstmt, context, valroot, FALSE /* logerrors */, 
+    xpath_result_t *result =
+        xpath1_eval_expr(whenstmt, context, valroot, FALSE /* logerrors */,
                          TRUE /* configonly */, &res);
     if (result == NULL || res != NO_ERR) {
         *condresult = FALSE;
@@ -837,11 +837,11 @@ static status_t
             res = val_gen_instance_id(NULL, val, NCX_IFMT_XPATH1, (xmlChar **) &pathbuff);
             if (whentest) {
                 log_debug3("\nval: when test '%s' OK for node '%s' with "
-                           "context '%s'", whenstmt->exprstr, 
+                           "context '%s'", whenstmt->exprstr,
                            pathbuff, context->name);
             } else {
                 log_debug3("\nval: when test '%s' failed for node '%s' "
-                           "with context '%s'", whenstmt->exprstr, 
+                           "with context '%s'", whenstmt->exprstr,
                            pathbuff, context->name);
             }
             free(pathbuff);
@@ -859,14 +859,14 @@ static status_t
 
 /********************************************************************
  * FUNCTION val_set_canonical_order
- * 
+ *
  * Change the child XML nodes throughout an entire subtree
  * to the canonical order defined in the object template
  *
  * >>> IT IS ASSUMED THAT ONLY VALID NODES ARE PRESENT
  * >>> AND ALL ERROR NODES HAVE BEEN PURGED ALREADY
  *
- * There is no canonical order defined for 
+ * There is no canonical order defined for
  * the contents of the following nodes:
  *    - anyxml leaf
  *    - ordered-by user leaf-list
@@ -874,9 +874,9 @@ static status_t
  * These nodes are not ordered, but their child nodes are ordered
  *    - ncx:root container
  *    - ordered-by user list
- *      
+ *
  * Leaf objects will not be processed, if val is OBJ_TYP_LEAF
- * Leaf-list objects will not be processed, if val is 
+ * Leaf-list objects will not be processed, if val is
  * OBJ_TYP_LEAF_LIST.  These object types must be processed
  * within the context of the parent object.
  *
@@ -1058,7 +1058,7 @@ void
 
 /********************************************************************
  * FUNCTION val_gen_index_comp
- * 
+ *
  * Create an index component
  *
  * INPUTS:
@@ -1072,7 +1072,7 @@ void
  * RETURNS:
  *   status
  *********************************************************************/
-status_t 
+status_t
     val_gen_index_comp  (const obj_key_t *in,
                          val_value_t *val)
 {
@@ -1098,7 +1098,7 @@ status_t
             continue;
         } else if (val_get_nsid(chval) != obj_get_nsid(in->keyobj)) {
             continue;
-        } else if (!xml_strcmp(obj_get_name(in->keyobj), 
+        } else if (!xml_strcmp(obj_get_name(in->keyobj),
                                chval->name)) {
             res = val_gen_key_entry(chval);
             if (res == NO_ERR) {
@@ -1118,7 +1118,7 @@ status_t
 
 /********************************************************************
  * FUNCTION val_gen_key_entry
- * 
+ *
  * Create a key record within an index comp
  *
  * INPUTS:
@@ -1132,7 +1132,7 @@ status_t
  * RETURNS:
  *   status
  *********************************************************************/
-status_t 
+status_t
     val_gen_key_entry  (val_value_t *keyval)
 {
     val_index_t       *valin;
@@ -1161,7 +1161,7 @@ status_t
 
 /********************************************************************
  * FUNCTION val_gen_index_chain
- * 
+ *
  * Create an index chain for the just-parsed table or container struct
  *
  * INPUTS:
@@ -1175,7 +1175,7 @@ status_t
  * RETURNS:
  *   status
  *********************************************************************/
-status_t 
+status_t
     val_gen_index_chain (const obj_template_t *obj,
                          val_value_t *val)
 {
@@ -1208,7 +1208,7 @@ status_t
 
 /********************************************************************
  * FUNCTION val_add_defaults
- * 
+ *
  * add defaults to an initialized complex value
  * Go through the specified value struct and add in any defaults
  * for missing leaf and choice nodes, that have defaults.
@@ -1243,7 +1243,7 @@ status_t
  * RETURNS:
  *   status
  *********************************************************************/
-status_t 
+status_t
     val_add_defaults (val_value_t *val,
                       val_value_t *rootval,
                       val_value_t *cxtval,
@@ -1256,11 +1256,11 @@ status_t
 
 /********************************************************************
 * FUNCTION val_instance_check
-* 
+*
 * Check for the proper number of object instances for
 * the specified value struct. Checks the direct accessible
 * children of 'val' only!!!
-* 
+*
 * The 'obj' parameter is usually the val->obj field
 * except for choice/case processing
 *
@@ -1324,7 +1324,7 @@ status_t
             retres = SET_ERROR(ERR_INTERNAL_VAL);
             continue;
         default:
-            cnt = val_instance_count(val, 
+            cnt = val_instance_count(val,
                                      obj_get_mod_name(chobj),
                                      obj_get_name(chobj));
         }
@@ -1336,8 +1336,8 @@ status_t
                 retres = ERR_NCX_MISSING_VAL_INST;
                 log_error("\nError: Not enough instances of object '%s' "
                           "Got '%u', needed '%u'",
-                          obj_get_name(chobj), 
-                          cnt, 
+                          obj_get_name(chobj),
+                          cnt,
                           minelems);
                 ncx_print_errormsg(NULL, NULL, retres);
             }
@@ -1350,8 +1350,8 @@ status_t
                 retres = ERR_NCX_EXTRA_VAL_INST;
                 log_error("\nError: Too many instances of object '%s' entered "
                           "Got '%u', allowed '%u'",
-                          obj_get_name(chobj), 
-                          cnt, 
+                          obj_get_name(chobj),
+                          cnt,
                           maxelems);
                 ncx_print_errormsg(NULL, NULL, retres);
             }
@@ -1400,13 +1400,13 @@ status_t
     }
 
     return retres;
-    
+
 }  /* val_instance_check */
 
 
 /********************************************************************
 * FUNCTION val_get_choice_first_set
-* 
+*
 * Check a val_value_t struct against its expected OBJ
 * to determine if a specific choice has already been set
 * Get the value struct for the first value set for
@@ -1438,7 +1438,7 @@ val_value_t *
 
         if (chval->casobj != NULL) {
             boolean done2 = FALSE;
-            const obj_template_t 
+            const obj_template_t
                 *testobj = chval->casobj->parent;
 
             while (!done2) {
@@ -1462,7 +1462,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_get_choice_next_set
-* 
+*
 * Check a val_value_t struct against its expected OBJ
 * to determine if a specific choice has already been set
 * Get the value struct for the next value set from the
@@ -1504,7 +1504,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_choice_is_set
-* 
+*
 * Check a val_value_t struct against its expected OBJ
 * to determine if a specific choice has already been set
 * Check that all the mandatory config fields in the selected
@@ -1540,7 +1540,7 @@ boolean
 
         if (testval->casobj != NULL) {
             boolean done2 = FALSE;
-            const obj_template_t 
+            const obj_template_t
                 *testobj = testval->casobj->parent;
 
             while (!done2) {
@@ -1590,7 +1590,7 @@ boolean
 
 /********************************************************************
 * FUNCTION val_purge_errors_from_root
-* 
+*
 * Remove any error nodes under a root container
 * that were saved for error recording purposes
 *
@@ -1612,7 +1612,7 @@ void
 
 /********************************************************************
  * FUNCTION val_new_child_val
- * 
+ *
  * INPUTS:
  *   nsid == namespace ID of name
  *   name == name string (direct or strdup, based on copyname)
@@ -1664,9 +1664,9 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_gen_instance_id
-* 
-* Malloc and Generate the instance ID string for this value node, 
-* 
+*
+* Malloc and Generate the instance ID string for this value node,
+*
 * INPUTS:
 *   mhdr == message hdr w/ prefix map or NULL to just use
 *           the internal prefix mappings
@@ -1684,7 +1684,7 @@ val_value_t *
 *********************************************************************/
 status_t
     val_gen_instance_id (xml_msg_hdr_t *mhdr,
-                         const val_value_t  *val, 
+                         const val_value_t  *val,
                          ncx_instfmt_t format,
                          xmlChar  **buff)
 {
@@ -1695,16 +1695,16 @@ status_t
 
 /********************************************************************
 * FUNCTION val_gen_instance_id_ex
-* 
-* Malloc and Generate the instance ID string for this value node, 
-* 
+*
+* Malloc and Generate the instance ID string for this value node,
+*
 * INPUTS:
 *   mhdr == message hdr w/ prefix map or NULL to just use
 *           the internal prefix mappings
 *   val == node to generate the instance ID for
 *   format == desired output format (NCX or Xpath)
 *   stop_at_root == TRUE to stop if a 'root' node is encountered
-*                == FALSE to keep recursing all the way to 
+*                == FALSE to keep recursing all the way to
 *   buff == pointer to address of buffer to use
 *
 * OUTPUTS
@@ -1717,7 +1717,7 @@ status_t
 *********************************************************************/
 status_t
     val_gen_instance_id_ex (xml_msg_hdr_t *mhdr,
-                            const val_value_t  *val, 
+                            const val_value_t  *val,
                             ncx_instfmt_t format,
                             boolean stop_at_root,
                             xmlChar  **buff)
@@ -1757,7 +1757,7 @@ status_t
         len2 = 1;
     } else {
         /* get the instance ID string for real this time */
-        res = get_instance_string(mhdr, format, val, stop_at_root, 
+        res = get_instance_string(mhdr, format, val, stop_at_root,
                                   *buff, &len2);
         if (res != NO_ERR) {
             m__free(*buff);
@@ -1776,8 +1776,8 @@ status_t
 
 /********************************************************************
 * FUNCTION val_gen_split_instance_id
-* 
-* Malloc and Generate the instance ID string for this value node, 
+*
+* Malloc and Generate the instance ID string for this value node,
 * Add the last node from the parameters, not the value node
 *
 * INPUTS:
@@ -1788,7 +1788,7 @@ status_t
 *   leaf_pfix == namespace prefix string of the leaf to add
 *   leaf_name ==  name string of the leaf to add
 *   stop_at_root == TRUE to stop if a 'root' node is encountered
-*                == FALSE to keep recursing all the way to 
+*                == FALSE to keep recursing all the way to
 *   buff == pointer to address of buffer to use
 *
 * OUTPUTS
@@ -1801,7 +1801,7 @@ status_t
 *********************************************************************/
 status_t
     val_gen_split_instance_id (xml_msg_hdr_t *mhdr,
-                               const val_value_t  *val, 
+                               const val_value_t  *val,
                                ncx_instfmt_t format,
                                xmlns_id_t leaf_nsid,
                                const xmlChar *leaf_name,
@@ -1813,7 +1813,7 @@ status_t
     uint32    len = 0, leaf_len = 0;
     status_t  res = NO_ERR;
 
-#ifdef DEBUG 
+#ifdef DEBUG
     if (!val || !leaf_name || !buff) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
@@ -1841,7 +1841,7 @@ status_t
     }
 
     /* get the length of the extra leaf '/pfix:name' */
-    leaf_len = 1 + xml_strlen(leaf_pfix) + 1 + 
+    leaf_len = 1 + xml_strlen(leaf_pfix) + 1 +
         xml_strlen(leaf_name);
 
     /* get a buffer to fit the instance ID string */
@@ -1875,21 +1875,21 @@ status_t
 
 /********************************************************************
 * FUNCTION val_get_index_string
-* 
+*
 * Get the index string for the specified table or container entry
-* 
+*
 * INPUTS:
 *   mhdr == message hdr w/ prefix map or NULL to just use
 *           the internal prefix mappings
 *   format == desired output format
 *   val == val_value_t for table or container
-*   buff == buffer to hold result; 
+*   buff == buffer to hold result;
          == NULL means get length only
-*   
+*
 * OUTPUTS:
 *   mhdr.pmap may have entries added if prefixes used
 *      in the instance identifier which are not already in the pmap
-*   *len = number of bytes that were (or would have been) written 
+*   *len = number of bytes that were (or would have been) written
 *          to buff
 *
 * RETURNS:
@@ -1952,7 +1952,7 @@ status_t
         valin = (const val_index_t *)dlq_nextEntry(valin);
         if (valin) {
             nextival = valin->val;
-        } 
+        }
 
         /* check if an index separator string is needed */
         if (nextival) {
@@ -1966,8 +1966,8 @@ status_t
                 break;
             case NCX_IFMT_XPATH1:
             case NCX_IFMT_XPATH2:
-                /* format is one of the Xpath variants 
-                 * add the index separator string ' and ' 
+                /* format is one of the Xpath variants
+                 * add the index separator string ' and '
                  */
                 if (buff) {
                     buff += xml_strcpy(buff, VAL_XPATH_INDEX_SEPSTR);
@@ -2008,7 +2008,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_check_obj_when
-* 
+*
 * checks when-stmt only
 * Check if the specified object node is
 * conditionally TRUE or FALSE, based on any
@@ -2103,7 +2103,7 @@ status_t
     obj_xpath_ptr_t *xptr = obj_first_xpath_ptr(obj);
     for (; xptr; xptr = obj_next_xpath_ptr(xptr)) {
         cnt++;
-        res = check_when_stmt(val, valroot, val, 
+        res = check_when_stmt(val, valroot, val,
                               xptr->xpath, condresult);
         if (res != NO_ERR || !*condresult) {
             if (whencount) {
@@ -2116,13 +2116,13 @@ status_t
     obj_template_t *testobj = obj->parent;
     boolean done = FALSE;
     while (!done) {
-        if (testobj && 
+        if (testobj &&
             (testobj->objtype == OBJ_TYP_CHOICE ||
              testobj->objtype == OBJ_TYP_CASE)) {
 
             if (testobj->when) {
                 cnt++;
-                res = check_when_stmt(val, valroot, val, 
+                res = check_when_stmt(val, valroot, val,
                                       testobj->when, condresult);
                 if (res != NO_ERR || !*condresult) {
                     if (whencount) {
@@ -2131,7 +2131,7 @@ status_t
                     return res;
                 }
             }
-            
+
             for (xptr = obj_first_xpath_ptr(testobj);
                  xptr; xptr = obj_next_xpath_ptr(xptr)) {
                 cnt++;
@@ -2163,9 +2163,9 @@ status_t
 
 /********************************************************************
 * FUNCTION val_get_xpathpcb
-* 
+*
 * Get the XPath parser control block in the specified value struct
-* 
+*
 * INPUTS:
 *   val == value struct to check
 *
@@ -2190,9 +2190,9 @@ xpath_pcb_t *
 
 /********************************************************************
 * FUNCTION val_get_const_xpathpcb
-* 
+*
 * Get the XPath parser control block in the specified value struct
-* 
+*
 * INPUTS:
 *   val == value struct to check
 *
@@ -2217,7 +2217,7 @@ const xpath_pcb_t *
 
 /********************************************************************
 * FUNCTION val_make_simval_obj
-* 
+*
 * Create and set a val_value_t as a simple type
 * from an object template instead of individual fields
 * Calls val_make_simval with the object settings
@@ -2274,7 +2274,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_set_simval_obj
-* 
+*
 * Set an initialized val_value_t as a simple type
 
 * Set a pre-initialized val_value_t as a simple type
@@ -2289,7 +2289,7 @@ val_value_t *
 * RETURNS:
 *   status
 *********************************************************************/
-status_t 
+status_t
     val_set_simval_obj (val_value_t  *val,
                         obj_template_t *obj,
                         const xmlChar *valstr)
@@ -2311,7 +2311,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_warning_parms
-* 
+*
 * Check the parent value struct (expected to be a container or list)
 * for the common warning control parameters.
 * invoke the warning parms that are present
@@ -2339,7 +2339,7 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -2386,7 +2386,7 @@ status_t
 
 /********************************************************************
 * FUNCTION val_set_logging_parms
-* 
+*
 * Check the parent value struct (expected to be a container or list)
 * for the common warning control parameters.
 * invoke the warning parms that are present
@@ -2416,7 +2416,7 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -2425,7 +2425,7 @@ status_t
     logappend = FALSE;
 
     /* get the log-level parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_LOGLEVEL);
     if (val && val->res == NO_ERR) {
@@ -2446,7 +2446,7 @@ status_t
     }
 
     /* get the log file name parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_LOG);
     if (val && val->res == NO_ERR && VAL_STR(val)) {
@@ -2497,14 +2497,14 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     /* get the modpath parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_MODPATH);
     if (val && val->res == NO_ERR) {
@@ -2512,7 +2512,7 @@ status_t
     }
 
     /* get the datapath parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_DATAPATH);
     if (val && val->res == NO_ERR) {
@@ -2520,7 +2520,7 @@ status_t
     }
 
     /* get the runpath parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_RUNPATH);
     if (val && val->res == NO_ERR) {
@@ -2553,14 +2553,14 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     /* get the subdirs parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_SUBDIRS);
     if (val && val->res == NO_ERR) {
@@ -2602,14 +2602,14 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     /* get the feature-code-default parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_FEATURE_CODE_DEFAULT);
     if (val && val->res == NO_ERR) {
@@ -2625,7 +2625,7 @@ status_t
     }
 
     /* get the feature-enable-default parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_FEATURE_ENABLE_DEFAULT);
     if (val && val->res == NO_ERR) {
@@ -2633,7 +2633,7 @@ status_t
     }
 
     /* process the feature-static leaf-list */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_FEATURE_STATIC);
     while (val && val->res == NO_ERR) {
@@ -2643,14 +2643,14 @@ status_t
             return res;
         }
 
-        val = val_find_next_child(parentval, 
+        val = val_find_next_child(parentval,
                                   val_get_mod_name(parentval),
                                   NCX_EL_FEATURE_STATIC,
                                   val);
     }
 
     /* process the feature-dynamic leaf-list */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_FEATURE_DYNAMIC);
     while (val && val->res == NO_ERR) {
@@ -2660,7 +2660,7 @@ status_t
             return res;
         }
 
-        val = val_find_next_child(parentval, 
+        val = val_find_next_child(parentval,
                                   val_get_mod_name(parentval),
                                   NCX_EL_FEATURE_DYNAMIC,
                                   val);
@@ -2668,7 +2668,7 @@ status_t
 
 
     /* process the feature-enable leaf-list */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_FEATURE_ENABLE);
     while (val && val->res == NO_ERR) {
@@ -2677,14 +2677,14 @@ status_t
             return res;
         }
 
-        val = val_find_next_child(parentval, 
+        val = val_find_next_child(parentval,
                                   val_get_mod_name(parentval),
                                   NCX_EL_FEATURE_ENABLE,
                                   val);
     }
 
     /* process the feature-disable leaf-list */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_FEATURE_DISABLE);
     while (val && val->res == NO_ERR) {
@@ -2693,7 +2693,7 @@ status_t
             return res;
         }
 
-        val = val_find_next_child(parentval, 
+        val = val_find_next_child(parentval,
                                   val_get_mod_name(parentval),
                                   NCX_EL_FEATURE_DISABLE,
                                   val);
@@ -2727,14 +2727,14 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     /* get the protocols parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_PROTOCOLS);
     if (val && val->res == NO_ERR) {
@@ -2755,7 +2755,7 @@ status_t
         ncx_set_protocol_enabled(NCX_PROTO_NETCONF10);
         ncx_set_protocol_enabled(NCX_PROTO_NETCONF11);
     }
-    
+
     return (anyset) ? NO_ERR : ERR_NCX_MISSING_PARM;
 
 }  /* val_set_protocols_parm */
@@ -2786,14 +2786,14 @@ status_t
     if (!parentval) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+    if (!(parentval->btyp == NCX_BT_CONTAINER ||
           parentval->btyp == NCX_BT_LIST)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     /* get the protocols parameter */
-    val = val_find_child(parentval, 
+    val = val_find_child(parentval,
                          val_get_mod_name(parentval),
                          NCX_EL_PROTOCOLS);
     if (val && val->res == NO_ERR) {
@@ -2818,7 +2818,7 @@ status_t
             ses_set_protocols_requested(scb, NCX_PROTO_NETCONF11);
         }
     }
-    
+
     return (anyset) ? NO_ERR : ERR_NCX_MISSING_PARM;
 
 }  /* val_set_ses_protocols_parm */
@@ -2842,7 +2842,7 @@ status_t
 *   status:  if any error, then val_clear_partial_lock
 *   MUST be called with the start root, to back out any
 *   partial operations.  This can happen if the max number
-*   of 
+*   of
 *********************************************************************/
 status_t
     val_ok_to_partial_lock (val_value_t *val,
@@ -2861,7 +2861,7 @@ status_t
     }
     if (sesid == 0) {
         return SET_ERROR(ERR_INTERNAL_VAL);
-    }        
+    }
 #endif
 
     if (!val_is_config_data(val)) {
@@ -2897,8 +2897,8 @@ status_t
             continue;
         }
 
-        res = val_ok_to_partial_lock(childval, 
-                                     sesid, 
+        res = val_ok_to_partial_lock(childval,
+                                     sesid,
                                      lockowner);
         if (res != NO_ERR) {
             return res;
@@ -3322,13 +3322,13 @@ void
     if (val->v.intbuff) {
         ses_putstr(scb, val->v.intbuff);
     }
-    
+
 }  /* val_write_intern */
 
 
 /********************************************************************
 * FUNCTION val_get_value
-* 
+*
 * Get the value node for output to a session
 * Checks access control if enabled
 * Checks filtering via testfn if non-NULL
@@ -3343,12 +3343,12 @@ void
 *   res == address of return status
 *
 * OUTPUTS:
-*   *malloced == TRUE if the 
+*   *malloced == TRUE if the
 *   *res == return status
 *
 * RETURNS:
 *   value node to use; this is malloced if *malloced is TRUE
-*   NULL if some error; check *res; 
+*   NULL if some error; check *res;
 *   !!!! check for ERR_NCX_SKIPPED !!!
 *********************************************************************/
 val_value_t *
@@ -3389,7 +3389,7 @@ val_value_t *
             return NULL;
         }
     }
-                                   
+
     if (val_is_virtual(val)) {
         v_val = val_get_virtual_value(scb, val, res);
         if (!v_val) {
@@ -3416,7 +3416,7 @@ val_value_t *
                                           res);
                 if (realval) {
                     *malloced = TRUE;
-                    val_move_fields_for_xml(val, 
+                    val_move_fields_for_xml(val,
                                             realval,
                                             msg->acm_cbfn == NULL);
                     return realval;
@@ -3437,7 +3437,7 @@ val_value_t *
 
 /********************************************************************
 * FUNCTION val_traverse_keys
-* 
+*
 * Check ancestor-or-self nodes until root reached
 * Find all lists; For each list, starting with the
 * closest to root, invoke the callback function
@@ -3489,13 +3489,13 @@ void
             }
         } // else some error; skip this key!!!
     }
-    
+
 }  /* val_traverse_keys */
 
 
 /********************************************************************
 * FUNCTION val_build_index_chains
-* 
+*
 * Check descendant-or-self nodes for lists
 * Check if they have index chains built already
 * If not, then try to add one
@@ -3547,7 +3547,7 @@ status_t
     /* 0 or more index components expected */
     res = val_gen_index_chain(val->obj, val);
     return res;
-    
+
 }  /* val_build_index_chains */
 
 

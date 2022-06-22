@@ -194,7 +194,9 @@ date         init     comment
 #define ietf_system_ntp_server_name (const xmlChar *)"server/name"
 #define ietf_system_ntp_server_udp_address (const xmlChar *)"server/udp/address"
 #define ietf_system_ntp_server_prefer (const xmlChar *)"server/prefer"
-#define ietf_system_radius (const xmlChar *)"radius"
+#define ietf_system_authentication (const xmlChar *)"authentication"
+#define ietf_system_authentication_user (const xmlChar *)"user"
+
 #define private_api_get_network_hostname (int) 0
 #define private_api_get_system_location (int) 1
 #define private_api_get_system_contact (int) 2
@@ -344,12 +346,9 @@ static status_t
             free(dev_info_out);
             break;
         }
+        free(epty);
         VAL_STRING(dstval) = buff;
         return NO_ERR;
-        // return val_set_simval_obj(
-        //     dstval,
-        //     dstval->obj,
-        //     buff);
 
     } else {
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
@@ -451,36 +450,6 @@ static status_t
 }
 
 
-/********************************************************************
-* FUNCTION get_fake_int
-*
-* copied from get_currentDateTime
-* <get> operation handler for the sysCurrentDateTime leaf
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    get_fake_int (ses_cb_t *scb,
-                         getcb_mode_t cbmode,
-                         const val_value_t *virval,
-                         val_value_t  *dstval)
-{
-    (void)scb;
-    (void)virval;
-
-
-    if (cbmode == GETCB_GET_VALUE) {
-        VAL_INT(dstval) = 16;
-        return NO_ERR;
-    } else {
-        return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_fake_int */
 
 /********************************************************************
 * FUNCTION get_fake_bool
@@ -495,7 +464,7 @@ static status_t
 *    status
 *********************************************************************/
 static status_t
-    get_fake_bool (ses_cb_t *scb,
+    get_ntp_enabled (ses_cb_t *scb,
                          getcb_mode_t cbmode,
                          const val_value_t *virval,
                          val_value_t  *dstval)
@@ -505,16 +474,256 @@ static status_t
     (void)scb;
     (void)virval;
 
-
     if (cbmode == GETCB_GET_VALUE) {
-        buff = FALSE;
+        struct timepb_Config *time_out;
+        struct emptypb_Empty *epty = malloc(sizeof(*(epty)));
+        time_out = malloc(sizeof(*(time_out)));
+
+        time_Time_GetConfig(epty, time_out);
+        buff = time_out->Mode==timepb_ModeTypeOptions_MODE_TYPE_AUTO;
+        free(time_out);
+        free(epty);
+        // buff = FALSE;
         VAL_BOOL(dstval) = buff;
         return NO_ERR;
     } else {
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
-} /* get_fake_bool */
+} /* get_ntp_enabled */
+
+
+static status_t
+    add_ntp_entry(char* name, char* addr, val_value_t* ntp_val)
+{
+    /*objs*/
+    obj_template_t* server_obj;
+    obj_template_t* name_obj;
+    obj_template_t* addr_obj;
+    obj_template_t* udp_obj;
+    obj_template_t* prefer_obj;
+
+    /*vals*/
+    val_value_t* server_val;
+    val_value_t* name_val;
+    val_value_t* addr_val;
+    val_value_t* udp_val;
+    val_value_t* prefer_val;
+
+    status_t res=NO_ERR;
+    int ret;
+
+    /* ntp */
+    server_obj = obj_find_child(ntp_val->obj,
+                                   "ietf-system",
+                                   "server");
+    assert(server_obj != NULL);
+
+    server_val = val_new_value();
+    if (server_val == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(server_val, server_obj);
+
+    val_add_child(server_val, ntp_val);
+
+    /* ntp/name */
+    name_obj = obj_find_child(server_obj,
+                              ietf_system,
+                              "name");
+    assert(name_obj != NULL);
+
+
+    name_val = val_new_value();
+    if (name_val == NULL) {
+                return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(name_val, name_obj);
+    res = val_set_simval_obj(name_val, name_obj, name);
+
+    val_add_child(name_val, server_val);
+
+    res = val_gen_index_chain(server_obj, server_val);
+    assert(res == NO_ERR);
+
+
+    udp_obj = obj_find_child(server_obj,
+                            ietf_system,
+                            "udp");
+    assert(udp_obj!=NULL);
+    /* ntp/udp/address */
+    udp_val = val_find_child(server_val,
+                            ietf_system,
+                            "udp");
+    if (udp_val == NULL) {
+        udp_val= val_new_value();
+        assert(udp_val != NULL);
+
+        val_init_from_template(udp_val,
+                               udp_obj);
+
+        val_add_child(udp_val, server_val);
+    }
+
+    addr_obj = obj_find_child(udp_obj,
+                         ietf_system,
+                         "address");
+    assert(addr_obj!= NULL);
+
+    addr_val = val_new_value();
+    assert(addr_val);
+    val_set_simval_obj(addr_val, addr_obj, addr);
+
+    val_add_child(addr_val, udp_val);
+
+    return res;
+}
+
+static status_t
+    get_ntp(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val)
+{
+    status_t res;
+    res = NO_ERR;
+    char* name_buf;
+    char* address_buf;
+
+    struct timepb_Config *time_out;
+    struct emptypb_Empty *epty = malloc(sizeof(*(epty)));
+    time_out = malloc(sizeof(*(time_out)));
+
+    time_Time_GetConfig(epty, time_out);
+    if (time_out->Mode!=timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
+        return res;
+    }
+    name_buf = (char*)malloc(16);
+    if (name_buf == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    address_buf = (char*)malloc(512);
+    if (address_buf == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    sprintf((char *)name_buf, "primary");
+    sprintf((char *)address_buf, time_out->MainNTPServer);
+    printf("\n@@@ adding primary ntp %s\n", time_out->MainNTPServer);
+    res = add_ntp_entry(name_buf, address_buf, dst_val);
+
+    sprintf((char *)name_buf, "secondary");
+    sprintf((char *)address_buf, time_out->BackupNTPServer);
+
+    printf("\n@@@ adding secondary ntp %s\n", time_out->BackupNTPServer);
+    res = add_ntp_entry(name_buf, address_buf, dst_val);
+
+    free(name_buf);
+    free(address_buf);
+    free(time_out);
+    free(epty);
+    printf("###### res %d\n", res);
+    return res;
+}
+
+
+static status_t
+    add_user_entry(char* name, val_value_t* user_val)
+{
+    /*objs*/
+    obj_template_t* auth_obj;
+    obj_template_t* name_obj;
+
+    /*vals*/
+    val_value_t* auth_val;
+    val_value_t* name_val;
+
+    status_t res=NO_ERR;
+    int ret;
+
+    /* authentication */
+    auth_obj = obj_find_child(user_val->obj,
+                                   ietf_system,
+                                   ietf_system_authentication);
+    assert(auth_obj != NULL);
+
+    auth_val = val_new_value();
+    if (auth_val == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(auth_val, auth_obj);
+
+    val_add_child(auth_val, user_val);
+
+    /* authentication/user */
+    name_obj = obj_find_child(auth_obj,
+                              ietf_system,
+                              "user");
+    assert(name_obj != NULL);
+
+
+    name_val = val_new_value();
+    if (name_val == NULL) {
+                return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(name_val, name_obj);
+    res = val_set_simval_obj(name_val, name_obj, name);
+
+    val_add_child(name_val, auth_val);
+
+    return res;
+}
+
+static status_t
+    get_user(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val)
+{
+    status_t res;
+    res = NO_ERR;
+    char* name_buf;
+    char* address_buf;
+    unsigned int i;
+    boolean done;
+
+    done = FALSE;
+
+    struct accesspb_UsersConfig *access_user_out;
+    struct emptypb_Empty *epty = malloc(sizeof(*(epty)));
+    access_user_out = malloc(sizeof(*(access_user_out)));
+
+    access_Access_GetUsers(epty, access_user_out);
+    /* get a file read line buffer */
+    name_buf = (char*)malloc(512);
+    if (name_buf == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    for(i=0;i<sizeof(access_user_out->List)-1;i++) {
+        if (done) {
+            break;
+        }
+        printf("\n@@@ adding primary ntp\n");
+        sprintf((char *)name_buf, access_user_out->List[i]->Name);
+        res = add_user_entry(name_buf, dst_val);
+        if (res!=NO_ERR) {
+            done = TRUE;
+        }
+    }
+    free(epty);
+    free(access_user_out);
+    free(name_buf);
+    printf("###### res %d\n", res);
+    return res;
+}
+
+
+
+
 
 /********************************************************************
 * FUNCTION get_fake_list
@@ -1068,7 +1277,7 @@ status_t
 {
     agt_profile_t  *agt_profile;
     status_t        res;
-    printf("\n@@@@@ agt_sys_init\n");
+    printf("\n@@@@@ agt_sys_init @@@\n");
     if (agt_sys_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
@@ -1188,6 +1397,8 @@ status_t
     val_value_t*           tmp_sub_dir_val;
     val_value_t*           ntp_sub_dir_val;
     val_value_t*           tmp_val;
+    val_value_t*           ntp_val;
+    val_value_t*           user_val;
 
     printf("\n@@@@@ agt_sys_init2\n");
     if (!agt_sys_init_done) {
@@ -1222,7 +1433,7 @@ status_t
     /* Add /system/loaction */
     add_sub_val_under_dir(ietf_system_val, ietf_system, ietf_system_location , get_system_location);
 
-    /* Add /system/clock/ */
+    /* Add /system/clock */
     tmp_sub_dir_val = val_find_child(ietf_system_val,
                                           ietf_system,
                                           ietf_system_clock);
@@ -1249,8 +1460,9 @@ status_t
     tmp_sub_dir_val = val_find_child(ietf_system_val,
                                           ietf_system,
                                           ietf_system_ntp);
+    printf("\n@@@@@ finding NTP @@@@@\n");
     if(tmp_sub_dir_val==NULL) {
-        printf("\ngot null clock_val\n");
+        printf("\n@@@@@ got null ntp_val @@@@@\n");
         obj = obj_find_child(ietf_system_val->obj,
                                        ietf_system,
                                        ietf_system_ntp);
@@ -1265,8 +1477,41 @@ status_t
         val_add_child(tmp_sub_dir_val, ietf_system_val);
     }
     /* Add /system/ntp/enabled */
-    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_ntp_enabled , get_fake_bool);
+    add_sub_val_under_dir(tmp_sub_dir_val, ietf_system, ietf_system_ntp_enabled , get_ntp_enabled);
 
+    // /* Add /system/ntp/server */
+    // printf("\n@@@@@ adding ntp@@@@\n");
+    ntp_val = val_new_value();
+    assert(ntp_val);
+    val_init_virtual(ntp_val, get_ntp, obj);
+    val_add_child(ntp_val, tmp_sub_dir_val);
+
+
+
+    // /* Add /system/authentication*/
+    // tmp_sub_dir_val = val_find_child(ietf_system_val,
+    //                                       ietf_system,
+    //                                       ietf_system_authentication);
+    // if(tmp_sub_dir_val==NULL) {
+    //     printf("\n@@@@@ got null authentication_val @@@@@\n");
+    //     obj = obj_find_child(ietf_system_val->obj,
+    //                                    ietf_system,
+    //                                    ietf_system_authentication);
+    //     assert(obj != NULL);
+
+    //     tmp_sub_dir_val = val_new_value();
+    //     assert(tmp_sub_dir_val != NULL);
+
+    //     val_init_from_template(tmp_sub_dir_val,
+    //                            obj);
+
+    //     val_add_child(tmp_sub_dir_val, ietf_system_val);
+    // }
+
+    // user_val = val_new_value();
+    // assert(user_val);
+    // val_init_virtual(user_val, get_user, obj);
+    // val_add_child(user_val, tmp_sub_dir_val);
 
     /* Add /system-state */
     ietf_system_state_val = val_new_value();
@@ -1281,7 +1526,7 @@ status_t
                                           ietf_system,
                                           ietf_system_clock);
     if(tmp_sub_dir_val==NULL) {
-        printf("\ngot null clock_val\n");
+        printf("\ngot null clock val\n");
         obj = obj_find_child(ietf_system_state_val->obj,
                                        ietf_system,
                                        ietf_system_clock);
@@ -1339,6 +1584,7 @@ status_t
     val_add_child_sorted(ietf_system_state_val, runningcfg->root);
 
     /* add sysStartup to notificationQ */
+    printf("\n@@@ send sysStartup @@@\n");
     send_sysStartup();
 
     return NO_ERR;

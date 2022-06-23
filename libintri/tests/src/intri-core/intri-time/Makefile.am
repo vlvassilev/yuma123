@@ -1,10 +1,10 @@
 netconfmodule_LTLIBRARIES = libintri-time.la
 
 noinst_HEADERS=\
-$(top_srcdir)/libintri/private/src/intri-core/intri-time/intri-time.h
+$(top_srcdir)/libintri/tests/src/intri-core/intri-time/intri-time.h
 
 libintri_time_la_SOURCES = \
-$(top_srcdir)/libintri/private/src/intri-core/intri-time/intri-time@2022-06-14.c
+$(top_srcdir)/libintri/tests/src/intri-core/intri-time/intri-time@2022-06-14.c
 
 libintri_time_la_CPPFLAGS = \
 -I$(top_srcdir)/netconf/src/agt \
@@ -24,4 +24,4 @@ $(top_builddir)/netconf/src/ncx/libyumancx.la
 # -L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
 
 dist_intri_private_yang_DATA = \
-$(top_srcdir)/libintri/private/src/intri-core/intri-time/intri-time.yang
+$(top_srcdir)/libintri/tests/src/intri-core/intri-time/intri-time.yang

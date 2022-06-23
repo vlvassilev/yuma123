@@ -1,10 +1,10 @@
 netconfmodule_LTLIBRARIES = libintri-device.la
 
 noinst_HEADERS=\
-$(top_srcdir)/libintri/private/src/intri-device/intri-device.h
+$(top_srcdir)/libintri/tests/src/intri-device/intri-device.h
 
 libintri_device_la_SOURCES = \
-$(top_srcdir)/libintri/private/src/intri-device/intri-device@2022-06-14.c
+$(top_srcdir)/libintri/tests/src/intri-device/intri-device@2022-06-14.c
 
 libintri_device_la_CPPFLAGS = \
 -I$(top_srcdir)/netconf/src/agt \
@@ -24,4 +24,4 @@ $(top_builddir)/netconf/src/ncx/libyumancx.la
 # -L$(top_srcdir)/libintri/.libintrishare/ -lintrishare
 
 dist_intri_private_yang_DATA = \
-$(top_srcdir)/libintri/private/src/intri-device/intri-device.yang
+$(top_srcdir)/libintri/tests/src/intri-device/intri-device.yang

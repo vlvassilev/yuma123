@@ -164,159 +164,159 @@ module intri-event {
   typedef LoggingTypeOptions {
     type enumeration {
       enum LOGGING_TYPE_NONE {
-        description "[None] logging type "None"";
+        description "[None] logging type 'None'";
         value 0;
       }
       enum LOGGING_TYPE_ALIVE_TEST_EVENT {
-        description "[Alive Test Event] logging type "Alive Test Event"";
+        description "[Alive Test Event] logging type 'Alive Test Event'";
         value 1;
       }
       enum LOGGING_TYPE_SELF_TEST {
-        description "[Self Test] logging type "Self Test"";
+        description "[Self Test] logging type 'Self Test'";
         value 2;
       }
       enum LOGGING_TYPE_FIRMWARE_UPDATE_OK {
-        description "[Firmware Update Ok] logging type "Firmware Update Ok"";
+        description "[Firmware Update Ok] logging type 'Firmware Update Ok'";
         value 10;
       }
       enum LOGGING_TYPE_FIRMWARE_UPDATE_FAIL {
-        description "[Firmware Update Fail] logging type "Firmware Update Fail"";
+        description "[Firmware Update Fail] logging type 'Firmware Update Fail'";
         value 11;
       }
       enum LOGGING_TYPE_COLD_START {
-        description "[Cold Start] logging type "Cold Start"";
+        description "[Cold Start] logging type 'Cold Start'";
         value 20;
       }
       enum LOGGING_TYPE_WARM_START {
-        description "[Warm Start] logging type "Warm Start"";
+        description "[Warm Start] logging type 'Warm Start'";
         value 21;
       }
       enum LOGGING_TYPE_FACTORY_RESET {
-        description "[Factory Reset] logging type "Factory Reset"";
+        description "[Factory Reset] logging type 'Factory Reset'";
         value 30;
       }
       enum LOGGING_TYPE_CONFIGURATION_LOADED {
-        description "[Configuration Loaded] logging type "Configuration Loaded"";
+        description "[Configuration Loaded] logging type 'Configuration Loaded'";
         value 31;
       }
       enum LOGGING_TYPE_CHANGE_CONFIG {
-        description "[Change Config] logging type "Change Config"";
+        description "[Change Config] logging type 'Change Config'";
         value 32;
       }
       enum LOGGING_TYPE_CHANGE_OFFLINE_CONFIG {
-        description "[Change Offline Config] logging type "Change Offline Config"";
+        description "[Change Offline Config] logging type 'Change Offline Config'";
         value 33;
       }
       enum LOGGING_TYPE_LOGIN_SUCCESS {
-        description "[Login Success] logging type "Login Success"";
+        description "[Login Success] logging type 'Login Success'";
         value 40;
       }
       enum LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL {
-        description "[Login Password Attempt Fail] logging type "Login Password Attempt Fail"";
+        description "[Login Password Attempt Fail] logging type 'Login Password Attempt Fail'";
         value 41;
       }
       enum LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED {
-        description "[Login Interface Access Denied] logging type "Login Interface Access Denied"";
+        description "[Login Interface Access Denied] logging type 'Login Interface Access Denied'";
         value 42;
       }
       enum LOGGING_TYPE_LOGIN_OUT {
-        description "[Login Out] logging type "Login Out"";
+        description "[Login Out] logging type 'Login Out'";
         value 43;
       }
       enum LOGGING_TYPE_LINK_UP {
-        description "[Link Up] logging type "Link Up"";
+        description "[Link Up] logging type 'Link Up'";
         value 50;
       }
       enum LOGGING_TYPE_LINK_DOWN {
-        description "[Link Down] logging type "Link Down"";
+        description "[Link Down] logging type 'Link Down'";
         value 51;
       }
       enum LOGGING_TYPE_LINK_STATE_CHANGE {
-        description "[Link State Change] logging type "Link State Change"";
+        description "[Link State Change] logging type 'Link State Change'";
         value 52;
       }
       enum LOGGING_TYPE_MAC_ACCEPTED {
-        description "[MAC Accepted] logging type "MAC Accepted"";
+        description "[MAC Accepted] logging type 'MAC Accepted'";
         value 60;
       }
       enum LOGGING_TYPE_MAC_AUTH_ERROR {
-        description "[MAC Auth Error] logging type "MAC Auth Error"";
+        description "[MAC Auth Error] logging type 'MAC Auth Error'";
         value 61;
       }
       enum LOGGING_TYPE_MAC_BLOCKED {
-        description "[MAC Blocked] logging type "MAC Blocked"";
+        description "[MAC Blocked] logging type 'MAC Blocked'";
         value 62;
       }
       enum LOGGING_TYPE_MAC_BLOCKED_VLAN {
-        description "[MAC Blocked Vlan] logging type "MAC Blocked Vlan"";
+        description "[MAC Blocked Vlan] logging type 'MAC Blocked Vlan'";
         value 63;
       }
       enum LOGGING_TYPE_MAC_TABLE_CHANGE {
-        description "[MAC Table Change] logging type "MAC Table Change"";
+        description "[MAC Table Change] logging type 'MAC Table Change'";
         value 64;
       }
       enum LOGGING_TYPE_MAC_AUTH_REQUEST {
-        description "[MAC Auth Request] logging type "MAC Auth Request"";
+        description "[MAC Auth Request] logging type 'MAC Auth Request'";
         value 65;
       }
       enum LOGGING_TYPE_MAC_CONFLICT {
-        description "[MAC Conflict] logging type "MAC Conflict"";
+        description "[MAC Conflict] logging type 'MAC Conflict'";
         value 66;
       }
       enum LOGGING_TYPE_MAC_SECURITY_VIOLATION {
-        description "[MAC Security Violation] logging type "MAC Security Violation"";
+        description "[MAC Security Violation] logging type 'MAC Security Violation'";
         value 67;
       }
       enum LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT {
-        description "[MAC Learning Over Limit] logging type "MAC Learning Over Limit"";
+        description "[MAC Learning Over Limit] logging type 'MAC Learning Over Limit'";
         value 68;
       }
       enum LOGGING_TYPE_MAC_TABLE_FULL {
-        description "[MAC Table Full] logging type "MAC Table Full"";
+        description "[MAC Table Full] logging type 'MAC Table Full'";
         value 69;
       }
       enum LOGGING_TYPE_LOOP_REMOVED {
-        description "[Loop Removed] logging type "Loop Removed"";
+        description "[Loop Removed] logging type 'Loop Removed'";
         value 80;
       }
       enum LOGGING_TYPE_LOOP_DETECTED {
-        description "[Loop Detected] logging type "Loop Detected"";
+        description "[Loop Detected] logging type 'Loop Detected'";
         value 81;
       }
       enum LOGGING_TYPE_LACP_CONNECT {
-        description "[Lacp Connect] logging type "Lacp Connect"";
+        description "[Lacp Connect] logging type 'Lacp Connect'";
         value 90;
       }
       enum LOGGING_TYPE_LACP_DISCONNECT {
-        description "[Lacp Disconnect] logging type "Lacp Disconnect"";
+        description "[Lacp Disconnect] logging type 'Lacp Disconnect'";
         value 91;
       }
       enum LOGGING_TYPE_NTP_FAIL {
-        description "[Ntp Fail] logging type "Ntp Fail"";
+        description "[Ntp Fail] logging type 'Ntp Fail'";
         value 100;
       }
       enum LOGGING_TYPE_NTP_SYNC {
-        description "[Ntp Sync] logging type "Ntp Sync"";
+        description "[Ntp Sync] logging type 'Ntp Sync'";
         value 101;
       }
       enum LOGGING_TYPE_LLDP_POE_REQUEST {
-        description "[Lldp PoE Request] logging type "Lldp PoE Request"";
+        description "[Lldp PoE Request] logging type 'Lldp PoE Request'";
         value 110;
       }
       enum LOGGING_TYPE_PACKET_INTERCEPTED {
-        description "[Packet Intercepted] logging type "Packet Intercepted"";
+        description "[Packet Intercepted] logging type 'Packet Intercepted'";
         value 120;
       }
       enum LOGGING_TYPE_NETWORK_ATTACK {
-        description "[Network Attack] logging type "Network Attack"";
+        description "[Network Attack] logging type 'Network Attack'";
         value 121;
       }
       enum LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS {
-        description "[CLI Script Execute Success] logging type "CLI Script Execute Success"";
+        description "[CLI Script Execute Success] logging type 'CLI Script Execute Success'";
         value 130;
       }
       enum LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL {
-        description "[CLI Script Execute Fail] logging type "CLI Script Execute Fail"";
+        description "[CLI Script Execute Fail] logging type 'CLI Script Execute Fail'";
         value 131;
       }
       enum LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT {
@@ -324,107 +324,107 @@ module intri-event {
         value 140;
       }
       enum LOGGING_TYPE_SFP_INSERTED {
-        description "[SFP Inserted] logging type "SFP Inserted"";
+        description "[SFP Inserted] logging type 'SFP Inserted'";
         value 200;
       }
       enum LOGGING_TYPE_SFP_REMOVED {
-        description "[SFP Removed] logging type "SFP Removed"";
+        description "[SFP Removed] logging type 'SFP Removed'";
         value 201;
       }
       enum LOGGING_TYPE_SFP_SIGNAL_PRESENT {
-        description "[SFP Signal Present] logging type "SFP Signal Present"";
+        description "[SFP Signal Present] logging type 'SFP Signal Present'";
         value 202;
       }
       enum LOGGING_TYPE_SFP_SIGNAL_LOSS {
-        description "[SFP Signal Loss] logging type "SFP Signal Loss"";
+        description "[SFP Signal Loss] logging type 'SFP Signal Loss'";
         value 203;
       }
       enum LOGGING_TYPE_SFP_SIGNAL_CHANGE {
-        description "[SFP Signal Change] logging type "SFP Signal Change"";
+        description "[SFP Signal Change] logging type 'SFP Signal Change'";
         value 204;
       }
       enum LOGGING_TYPE_POE_CONNECT {
-        description "[PoE Connect] logging type "PoE Connect"";
+        description "[PoE Connect] logging type 'PoE Connect'";
         value 210;
       }
       enum LOGGING_TYPE_POE_VOLTAGE {
-        description "[PoE Voltage] logging type "PoE Voltage"";
+        description "[PoE Voltage] logging type 'PoE Voltage'";
         value 211;
       }
       enum LOGGING_TYPE_POE_ERROR {
-        description "[PoE Error] logging type "PoE Error"";
+        description "[PoE Error] logging type 'PoE Error'";
         value 212;
       }
       enum LOGGING_TYPE_POE_DISCONNECT {
-        description "[PoE Disconnect] logging type "PoE Disconnect"";
+        description "[PoE Disconnect] logging type 'PoE Disconnect'";
         value 213;
       }
       enum LOGGING_TYPE_POE_EMERGENCY_MODE_ON {
-        description "[PoE Emergency Mode On] logging type "PoE Emergency Mode On"";
+        description "[PoE Emergency Mode On] logging type 'PoE Emergency Mode On'";
         value 214;
       }
       enum LOGGING_TYPE_POE_EMERGENCY_MODE_OFF {
-        description "[PoE Emergency Mode Off] logging type "PoE Emergency Mode Off"";
+        description "[PoE Emergency Mode Off] logging type 'PoE Emergency Mode Off'";
         value 215;
       }
       enum LOGGING_TYPE_LED_CONTROL {
-        description "[Led Control] logging type "Led Control"";
+        description "[Led Control] logging type 'Led Control'";
         value 220;
       }
       enum LOGGING_TYPE_BUTTON_PRESSED {
-        description "[Button Pressed] logging type "Button Pressed"";
+        description "[Button Pressed] logging type 'Button Pressed'";
         value 221;
       }
       enum LOGGING_TYPE_HARDWARE_ERROR {
-        description "[Hardware Error] logging type "Hardware Error"";
+        description "[Hardware Error] logging type 'Hardware Error'";
         value 222;
       }
       enum LOGGING_TYPE_TEMPERATURE_OK {
-        description "[Temperature Ok] logging type "Temperature Ok"";
+        description "[Temperature Ok] logging type 'Temperature Ok'";
         value 230;
       }
       enum LOGGING_TYPE_TEMPERATURE_WARNING {
-        description "[Temperature Warning] logging type "Temperature Warning"";
+        description "[Temperature Warning] logging type 'Temperature Warning'";
         value 231;
       }
       enum LOGGING_TYPE_TEMPERATURE_FAILURE {
-        description "[Temperature Failure] logging type "Temperature Failure"";
+        description "[Temperature Failure] logging type 'Temperature Failure'";
         value 232;
       }
       enum LOGGING_TYPE_CPU_OK {
-        description "[CPU Ok] logging type "CPU Ok"";
+        description "[CPU Ok] logging type 'CPU Ok'";
         value 233;
       }
       enum LOGGING_TYPE_CPU_WARNING {
-        description "[CPU Warning] logging type "CPU Warning"";
+        description "[CPU Warning] logging type 'CPU Warning'";
         value 234;
       }
       enum LOGGING_TYPE_CPU_FAILURE {
-        description "[CPU Failure] logging type "CPU Failure"";
+        description "[CPU Failure] logging type 'CPU Failure'";
         value 235;
       }
       enum LOGGING_TYPE_MEMORY_OK {
-        description "[Memory Ok] logging type "Memory Ok"";
+        description "[Memory Ok] logging type 'Memory Ok'";
         value 236;
       }
       enum LOGGING_TYPE_MEMORY_WARNING {
-        description "[Memory Warning] logging type "Memory Warning"";
+        description "[Memory Warning] logging type 'Memory Warning'";
         value 237;
       }
       enum LOGGING_TYPE_MEMORY_FAILURE {
-        description "[Memory Failure] logging type "Memory Failure"";
+        description "[Memory Failure] logging type 'Memory Failure'";
         value 238;
       }
       enum LOGGING_TYPE_CABLE_CHANGE_DETECTED {
-        description "[Cable Change Detected] logging type "Cable Change Detected"";
+        description "[Cable Change Detected] logging type 'Cable Change Detected'";
         value 240;
       }
       enum LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED {
-        description "[Cable Connection Established] logging type "Cable Connection Established"";
+        description "[Cable Connection Established] logging type 'Cable Connection Established'";
         value 241;
       }
       enum LOGGING_TYPE_CABLE_CONNECTION_LOST {
-        description "[Cable Connection Lost] logging type "Cable Connection Lost"";
+        description "[Cable Connection Lost] logging type 'Cable Connection Lost'";
         value 242;
       }
     }

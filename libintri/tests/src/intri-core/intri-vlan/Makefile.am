@@ -1,12 +1,12 @@
 netconfmodule_LTLIBRARIES = libintri-vlan.la
 
 noinst_HEADERS=\
-$(top_srcdir)/libintri/private/src/intri-core/intri-vlan/intri-vlan-trans.h \
-$(top_srcdir)/libintri/private/src/intri-core/intri-vlan/intri-vlan.h
+$(top_srcdir)/libintri/tests/src/intri-core/intri-vlan/intri-vlan-trans.h \
+$(top_srcdir)/libintri/tests/src/intri-core/intri-vlan/intri-vlan.h
 
 libintri_vlan_la_SOURCES = \
-$(top_srcdir)/libintri/private/src/intri-core/intri-vlan/intri-vlan-trans.c \
-$(top_srcdir)/libintri/private/src/intri-core/intri-vlan/intri-vlan@2022-06-23.c
+$(top_srcdir)/libintri/tests/src/intri-core/intri-vlan/intri-vlan-trans.c \
+$(top_srcdir)/libintri/tests/src/intri-core/intri-vlan/intri-vlan@2022-06-23.c
 
 libintri_vlan_la_CPPFLAGS = \
 -I$(top_srcdir)/netconf/src/agt \

@@ -62,6 +62,10 @@ module intri-fdb {
         description "[PACC] This entry was created by port access control";
         value 5;
       }
+      enum MAC_TABLE_STATE_TYPE_MULTICAST {
+        description "* This is an internal multicast address";
+        value 6;
+      }
       enum MAC_TABLE_STATE_TYPE_REJECT {
         description "[Reject] This entry was rejected because of dropping";
         value 7;

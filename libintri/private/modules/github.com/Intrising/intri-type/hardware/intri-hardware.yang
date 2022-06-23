@@ -33,6 +33,9 @@ module intri-hardware {
   import intri-empty {
     prefix intri-empty;
   }
+  import intri-common {
+    prefix intri-common;
+  }
 
 
   /* **************************************************************************************************
@@ -77,6 +80,148 @@ module intri-hardware {
     }
   }
   /* hardware/common.proto */
+  typedef LEDBehaviorModeTypeOptions {
+    type enumeration {
+      enum LED_BEHAVIOR_MODE_TYPE_LINK1G {
+        description "* internal";
+        value 0;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_LINK5G10G {
+        description "* internal";
+        value 1;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLOCKED {
+        description "* internal";
+        value 2;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_REJECT {
+        description "* internal";
+        value 3;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_IDLE {
+        description "* internal";
+        value 4;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_POE {
+        description "* internal";
+        value 5;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_POEPLUS {
+        description "* internal";
+        value 6;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS {
+        description "* internal";
+        value 7;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_OFF {
+        description "* internal";
+        value 8;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL {
+        description "* internal";
+        value 9;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM {
+        description "* internal";
+        value 10;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM {
+        description "* internal";
+        value 11;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_USER_DEF1 {
+        description "* internal";
+        value 12;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_USER_DEF2 {
+        description "* internal";
+        value 13;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN {
+        description "* internal";
+        value 14;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE {
+        description "* internal";
+        value 15;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_RED {
+        description "* internal";
+        value 16;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE {
+        description "* internal";
+        value 17;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA {
+        description "* internal";
+        value 18;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP {
+        description "* internal";
+        value 19;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK {
+        description "* internal";
+        value 20;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE {
+        description "* internal";
+        value 21;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION {
+        description "* internal";
+        value 22;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL {
+        description "* internal blink 1 time a 200 milliseconds.";
+        value 23;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW {
+        description "* internal blink 1 time a 500 milliseconds.";
+        value 24;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST {
+        description "* internal blink 1 time a 100 milliseconds.";
+        value 25;
+      }
+      enum LED_BEHAVIOR_MODE_TYPE_NA {
+        description "* internal This LED is not support";
+        value 9999;
+      }
+    }
+  }
+  /* hardware/common.proto */
+  typedef LEDTypeOptions {
+    type enumeration {
+      enum LED_TYPE_SYSTEM {
+        description "";
+        value 0;
+      }
+      enum LED_TYPE_GPS {
+        description "";
+        value 1;
+      }
+      enum LED_TYPE_POEMAX {
+        description "";
+        value 2;
+      }
+      enum LED_TYPE_FAN {
+        description "";
+        value 3;
+      }
+      enum LED_TYPE_POE {
+        description "";
+        value 4;
+      }
+      enum LED_TYPE_SFP {
+        description "";
+        value 5;
+      }
+    }
+  }
+  /* hardware/common.proto */
   typedef PoEPriorityLevelTypeOptions {
     type enumeration {
       enum POE_PRIORITY_LEVEL_TYPE_UNKNOWN {
@@ -111,6 +256,10 @@ module intri-hardware {
       enum POE_PORT_MODE_TYPE_POE_PLUS_PLUS {
         description "[PoE++] 802.3bt PoE++";
         value 2;
+      }
+      enum POE_PORT_MODE_TYPE_POE_LLDP {
+        description "*[PoE LLDP Control] PoE mode is controlled by LLDP";
+        value 3;
       }
     }
   }

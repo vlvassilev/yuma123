@@ -55,6 +55,10 @@ module intri-mirroring {
         description "[Local] to set SPAN(Local Switched Port Analyzer) source port interface";
         value 0;
       }
+      enum SOURCE_INTERFACE_TYPE_VLAN {
+        description "*[Internal] to set source port interface";
+        value 1;
+      }
       enum SOURCE_INTERFACE_TYPE_REMOTE {
         description "[Remote] to set RSPAN(Remote SPAN) VLAN";
         value 2;

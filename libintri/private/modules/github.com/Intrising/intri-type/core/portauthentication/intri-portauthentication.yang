@@ -98,6 +98,10 @@ module intri-portauthentication {
         description "[802.1X MAC via RADIUS]";
         value 6;
       }
+      enum AUTHORIZATION_MODE_TYPE_NONE {
+        description "*internal";
+        value 9;
+      }
     }
   }
   /* core/portauthentication/common.proto */
@@ -507,6 +511,12 @@ module intri-portauthentication {
   rpc intri-portauthentication-RunPortConfigUnauthorizeMAC {
     input  {
       uses UnauthorizeMACEntry;
+    }
+  }
+  /* core/portauthentication/service.proto */
+  rpc intri-portauthentication-SetAuthenticationServers {
+    input  {
+      uses intri-access:AuthenticationServersConfig;
     }
   }
 

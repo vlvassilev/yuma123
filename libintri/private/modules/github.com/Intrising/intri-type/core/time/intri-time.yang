@@ -27,6 +27,9 @@ module intri-time {
   import intri-empty {
     prefix intri-empty;
   }
+  import intri-common {
+    prefix intri-common;
+  }
 
 
   /* **************************************************************************************************

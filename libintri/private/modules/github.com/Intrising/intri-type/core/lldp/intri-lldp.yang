@@ -266,6 +266,10 @@ module intri-lldp {
   /* core/lldp/common.proto */
   typedef ManagementAddressIfSubTypeTypeOptions {
     type enumeration {
+      enum MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_DONT_USE {
+        description "*[dont use]";
+        value 0;
+      }
       enum MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_UNKNOWN {
         description "[Unknown]";
         value 1;

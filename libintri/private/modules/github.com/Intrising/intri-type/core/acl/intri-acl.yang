@@ -50,6 +50,10 @@ module intri-acl {
         description "[Deny] this rule action will deny packet";
         value 2;
       }
+      enum RULE_ACTION_TYPE_MIRROR {
+        description "*internal usage";
+        value 3;
+      }
     }
   }
   /* core/acl/common.proto */
@@ -66,6 +70,19 @@ module intri-acl {
       enum RULE_PARAM_TYPE_IP_V_6 {
         description "[IPv6] this rule param is IPv6 address specification";
         value 2;
+      }
+    }
+  }
+  /* core/acl/common.proto */
+  typedef RuleDirectionTypeOptions {
+    type enumeration {
+      enum RULE_DIRECTION_TYPE_INGRESS {
+        description "*internal usage";
+        value 0;
+      }
+      enum RULE_DIRECTION_TYPE_EGRESS {
+        description "*internal usage";
+        value 1;
       }
     }
   }

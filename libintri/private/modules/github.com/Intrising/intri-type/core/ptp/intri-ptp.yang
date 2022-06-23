@@ -66,6 +66,10 @@ module intri-ptp {
         description "[UDP IPv4] PTP message transmit over IPv4 UDP";
         value 1;
       }
+      enum ENCAPSULATION_TYPE_UDP_IPV6 {
+        description "*[UDP IPv6] PTP message transmit over IPv6 UDP";
+        value 2;
+      }
     }
   }
   /* core/ptp/ptp.proto */
@@ -88,6 +92,10 @@ module intri-ptp {
         description "[IEEE 1588v2] PTP profile for IEEE 1588v2";
         value 0;
       }
+      enum PROFILE_TYPE_IEEE_802_DOT_1_AS {
+        description "*[IEEE 802.1AS] PTP profile for IEEE 802.1AS";
+        value 1;
+      }
       enum PROFILE_TYPE_ITU_G8275_DOT_1 {
         description "[ITU G8275.1] PTP profile for ITU G8275.1";
         value 2;
@@ -95,6 +103,14 @@ module intri-ptp {
       enum PROFILE_TYPE_ITU_G8275_DOT_2 {
         description "[ITU G8275.2] PTP profile for ITU G8275.2";
         value 3;
+      }
+      enum PROFILE_TYPE_IEEE_C37_DOT_238_DASH_2017 {
+        description "*[IEEE C37.238-2017] PTP profile for IEEE C37.238-2017";
+        value 4;
+      }
+      enum PROFILE_TYPE_IEC_61850_DASH_9_DASH_3 {
+        description "*[IEC 61850-9-3] PTP profile for IEC 61850-9-3";
+        value 5;
       }
     }
   }
@@ -126,11 +142,19 @@ module intri-ptp {
         description "[Transparent Clock] PTP clock type is Transparent Clock";
         value 2;
       }
+      enum CLOCK_TYPE_BRIDGE {
+        description "*[Bridge] PTP clock type is Time Aware Bridge";
+        value 3;
+      }
     }
   }
   /* core/ptp/ptp.proto */
   typedef ClockAccuracyTypeOptions {
     type enumeration {
+      enum CLOCK_ACCURACY_RESERVED_00_1F {
+        description "*[reserved] reserved";
+        value 0;
+      }
       enum CLOCK_ACCURACY_WITHIN_25_NS {
         description "[within 25ns] The time is accurate to within 25 ns";
         value 32;
@@ -203,9 +227,21 @@ module intri-ptp {
         description "[greater than 10s] The time is accurate to greater than 10 s";
         value 49;
       }
+      enum CLOCK_ACCURACY_RESERVED_32_7F {
+        description "*[reserved] reserved";
+        value 50;
+      }
+      enum CLOCK_ACCURACY_RESERVED_80_FD {
+        description "*[reserved] reserved";
+        value 128;
+      }
       enum CLOCK_ACCURACY_UNKNOWN {
         description "[unknown] The time is accurate to unknown";
         value 254;
+      }
+      enum CLOCK_ACCURACY_RESERVED_FF {
+        description "*[reserved] reserved";
+        value 255;
       }
     }
   }
@@ -253,6 +289,10 @@ module intri-ptp {
   /* core/ptp/ptp.proto */
   typedef TimeSourceTypeOptions {
     type enumeration {
+      enum TIME_SOURCE_RESERVED {
+        description "*[reserved] reserved";
+        value 0;
+      }
       enum TIME_SOURCE_ATOMIC_CLOCK {
         description "[Atomic Clock] Time source is Atomic Clock";
         value 16;

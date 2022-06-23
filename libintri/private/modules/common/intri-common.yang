@@ -1,9 +1,0 @@
-module intri-common {
-  namespace "intri:intri-common";
-  prefix "intri-common";
-  organization "Intrising Inc.";
-  contact "xxx@intrising.com.tw";
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

@@ -1,8 +1,0 @@
-submodule intri-snmp-enum {
-  belongs-to "intri-snmp" {
-    prefix "intri-snmp-enum";
-  }
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

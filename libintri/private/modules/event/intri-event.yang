@@ -1,9 +1,0 @@
-module intri-event {
-  namespace "intri:intri-event";
-  prefix "intri-event";
-  organization "Intrising Inc.";
-  contact "xxx@intrising.com.tw";
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

@@ -1,8 +1,0 @@
-submodule intri-loop-enum {
-  belongs-to "intri-loop" {
-    prefix "intri-loop-enum";
-  }
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

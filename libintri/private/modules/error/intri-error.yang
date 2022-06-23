@@ -1,9 +1,0 @@
-module intri-error {
-  namespace "intri:intri-error";
-  prefix "intri-error";
-  organization "Intrising Inc.";
-  contact "xxx@intrising.com.tw";
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

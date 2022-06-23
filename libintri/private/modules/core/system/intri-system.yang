@@ -1,9 +1,0 @@
-module intri-system {
-  namespace "intri:intri-system";
-  prefix "intri-system";
-  organization "Intrising Inc.";
-  contact "xxx@intrising.com.tw";
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

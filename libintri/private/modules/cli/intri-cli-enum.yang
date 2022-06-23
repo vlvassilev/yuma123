@@ -1,8 +1,0 @@
-submodule intri-cli-enum {
-  belongs-to "intri-cli" {
-    prefix "intri-cli-enum";
-  }
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

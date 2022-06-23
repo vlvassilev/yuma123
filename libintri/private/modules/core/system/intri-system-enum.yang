@@ -1,8 +1,0 @@
-submodule intri-system-enum {
-  belongs-to "intri-system" {
-    prefix "intri-system-enum";
-  }
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

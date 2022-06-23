@@ -1,8 +1,0 @@
-submodule intri-diagnostic-enum {
-  belongs-to "intri-diagnostic" {
-    prefix "intri-diagnostic-enum";
-  }
-  revision 2022-06-14 {
-    description "Build date.";
-  }
-}

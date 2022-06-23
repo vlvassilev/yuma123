@@ -1,0 +1,2 @@
+yangdump --format=h --versionnames=false --modpath=../../../modules --module=intri-vlan --output=.
+yangdump --format=c --versionnames=true --modpath=../../../modules --module=intri-vlan --output=.

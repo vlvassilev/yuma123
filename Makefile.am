@@ -13,10 +13,11 @@ libintri/.libintrishare \
 libstandard/ietf-interfaces \
 libstandard/ietf-system \
 libintri/private/modules \
-libintri/private/src/intri-test \
-libintri/private/src/intri-device \
-libintri/private/src/intri-core/intri-system \
-libintri/private/src/intri-core/intri-time
+libintri/tests/src/intri-test \
+libintri/tests/src/intri-device \
+libintri/tests/src/intri-core/intri-system \
+libintri/tests/src/intri-core/intri-time \
+libintri/tests/src/intri-core/intri-vlan
 
 # libtoaster/src \
 # netconf/src/yangrpc/example \

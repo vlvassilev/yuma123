@@ -191,11 +191,18 @@ date         init     comment
 #define ietf_system_ntp (const xmlChar *)"ntp"
 #define ietf_system_ntp_enabled (const xmlChar *)"enabled"
 #define ietf_system_ntp_server (const xmlChar *)"server"
-#define ietf_system_ntp_server_name (const xmlChar *)"server/name"
-#define ietf_system_ntp_server_udp_address (const xmlChar *)"server/udp/address"
-#define ietf_system_ntp_server_prefer (const xmlChar *)"server/prefer"
+#define ietf_system_ntp_server_name (const xmlChar *)"name"
+#define ietf_system_ntp_server_udp (const xmlChar *)"udp"
+#define ietf_system_ntp_server_udp_address (const xmlChar *)"address"
+#define ietf_system_ntp_server_prefer (const xmlChar *)"prefer"
 #define ietf_system_authentication (const xmlChar *)"authentication"
 #define ietf_system_authentication_user (const xmlChar *)"user"
+#define ietf_system_radius (const xmlChar *)"radius"
+#define ietf_system_radius_server_name (const xmlChar *)"name"
+#define ietf_system_radius_server_udp (const xmlChar *)"udp"
+#define ietf_system_radius_server_udp_address (const xmlChar *)"address"
+#define ietf_system_radius_server_udp_authentication_port (const xmlChar *)"authentication-port"
+#define ietf_system_radius_server_udp_shared_secret (const xmlChar *)"shared-secret"
 
 #define private_api_get_network_hostname (int) 0
 #define private_api_get_system_location (int) 1
@@ -1264,20 +1271,16 @@ status_t
     add_child_val_under_parent(
         val_value_t *parent_val,
         const xmlChar *leafname,
-        status_t *cbfn
-        )
+        getcb_fn_t cbfn)
 {
     status_t res = NO_ERR;
     val_value_t *child_val = NULL;
-    printf("\n @@@@ b4 make_virtual_leaf\n");
     child_val = agt_make_virtual_leaf(
         parent_val->obj,
         leafname,
         cbfn,
         &res);
-    printf("\n @@@@ after make_virtual_leaf\n");
     if (child_val != NULL) {
-        printf("\n @@@@ b4 add child\n");
         val_add_child_sorted(child_val, parent_val);
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
@@ -1479,11 +1482,143 @@ status_t ietf_system_state_mro(val_value_t *parent_val) {
     return res;
 }
 
+status_t build_ntp_server (val_value_t *parent_val, char *name, char *address) {
+    status_t res = NO_ERR;
+    val_value_t *child_val = NULL;
+    val_value_t *udp_val = NULL;
+
+    child_val = agt_make_leaf(
+        parent_val->obj,
+        ietf_system_ntp_server_name,
+        name,
+        &res);
+    if (child_val != NULL) {
+        val_add_child(child_val, parent_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = agt_add_container(
+        ietf_system,
+        ietf_system_ntp_server_udp,
+        parent_val,
+        &udp_val);
+
+    child_val = agt_make_leaf(
+        udp_val->obj,
+        ietf_system_ntp_server_udp_address,
+        address,
+        &res);
+
+    if (child_val != NULL) {
+        val_add_child(child_val, udp_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+    return res;
+}
+
+/********************************************************************
+ * FUNCTION ietf_system_ntp_server_get
+ *
+ * Get database object callback
+ * Path: /system/ntp
+ * Fill in 'dstval' contents
+ *
+ * INPUTS:
+ *     see ncx/getcb.h for details
+ *
+ * RETURNS:
+ *     error status
+ ********************************************************************/
+
+static status_t
+ietf_system_ntp_server_get (
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+
+    status_t res = NO_ERR;
+    if (LOGDEBUG) {
+        log_debug("\nEnter ietf_system_ntp_server_get");
+    }
+    /* calls the private api */
+    struct emptypb_Empty in;
+    struct timepb_Config out;
+    time_Time_GetConfig(&in, &out);
+
+    if(out.Mode==timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
+        val_value_t *primary_val = NULL;
+        val_value_t *seconday_val = NULL;
+        val_value_t *ntp_val = NULL;
+         /* Add /system/ntp */
+        res = agt_add_container(
+            ietf_system,
+            ietf_system_ntp,
+            dstval,
+            &ntp_val);
+
+        /* Add /system/ntp/enabled */
+        res = add_child_val_under_parent(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
+        if (res != NO_ERR) {
+            return res;
+        }
+
+        /* Add /system/ntp/server */
+        primary_val = agt_make_list(
+            ntp_val->obj,
+            ietf_system_ntp_server,
+            &res);
+        if (primary_val != NULL) {
+            val_add_child(primary_val, dstval);
+        } else if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+        res = build_ntp_server(primary_val, "primary", out.MainNTPServer);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        // support secondary later
+        // seconday_val = agt_make_list(
+        //     ntp_val->obj,
+        //     ietf_system_ntp_server,
+        //     &res);
+        // if (seconday_val != NULL) {
+        //     val_add_child(seconday_val, dstval);
+        // } else if (res != NO_ERR) {
+        //     return SET_ERROR(res);
+        // }
+
+        // res = build_ntp_server(seconday_val, "secondary", out.BackupNTPServer);
+        // if (res != NO_ERR) {
+        //     return SET_ERROR(res);
+        // }
+        // return res;
+    }
+    return res;
+
+
+}
+
+status_t ietf_system_ntp_server_mro(val_value_t *parent_val) {
+    status_t res = NO_ERR;
+
+    /* init /system/ntp/server */
+    val_init_virtual(
+        parent_val,
+        ietf_system_ntp_server_get,
+        parent_val->obj);
+    return res;
+}
+
 status_t ietf_system_mro(val_value_t *parent_val) {
     status_t res = NO_ERR;
     val_value_t *authentication_val = NULL;
     val_value_t *clock_val = NULL;
     val_value_t *ntp_val = NULL;
+    val_value_t *server_val = NULL;
 
     /* Add /system/hostname */
     res = add_child_val_under_parent(parent_val, ietf_system_hostname, get_system_hostname);
@@ -1516,35 +1651,32 @@ status_t ietf_system_mro(val_value_t *parent_val) {
         return res;
     }
 
-    /* Add /system/ntp */
-    res = agt_add_container(
-        ietf_system,
-        ietf_system_ntp,
-        parent_val,
-        &ntp_val);
-
-    /* Add /system/ntp/enabled */
-    res = add_child_val_under_parent(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
+    // If ntp is enabled, add the ntp container, else rm it
+    res = ietf_system_ntp_server_mro(parent_val);
     if (res != NO_ERR) {
         return res;
     }
 
-    /* Add /system/ntp/server */
-    /* Add /system/ntp/server/name */
-    /* Add /system/ntp/server/udp/address */
-    // res = add_child_val_under_parent(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
-    // if (res != NO_ERR) {
-    //     return res;
-    // }
 
 
-
-    /* Add /system/authentication */
+    // /* Add /system/radius */
     res = agt_add_container(
         ietf_system,
         ietf_system_authentication,
         parent_val,
         &authentication_val);
+
+    /* Add /system/radius/server/name */
+    // res = add_child_val_under_parent(authentication_val, ietf_system_ntp_enabled, get_ntp_enabled);
+    // if (res != NO_ERR) {
+    //     return res;
+    // }
+    // /* Add /system/authentication */
+    // res = agt_add_container(
+    //     ietf_system,
+    //     ietf_system_authentication,
+    //     parent_val,
+    //     &authentication_val);
 
     /* Add /system/authentication/user/name */
     // res = add_child_val_under_parent(authentication_val, ietf_system_ntp_enabled, get_ntp_enabled);

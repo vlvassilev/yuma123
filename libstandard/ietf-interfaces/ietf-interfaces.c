@@ -249,15 +249,209 @@ static status_t
     return NO_ERR;
 }
 
-/*
 
-Inter-|   Receive                                                |  Transmit
- face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
-    lo: 4307500   49739    0    0    0     0          0         0  4307500   49739    0    0    0     0       0          0
- wlan0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
-  eth0: 604474858 23680030    0    0    0     0          0    357073 701580994 6935958    0    0    0     0       1          0
- */
+static status_t
+    add_interface_state_entry(char* buf, val_value_t* interfaces_val)
+{
+    /*objs*/
+    obj_template_t* interface_obj;
+    obj_template_t* name_obj;
+    obj_template_t* oper_status_obj;
+    obj_template_t* last_change_obj;
+    obj_template_t* statistics_obj;
+    obj_template_t* obj;
 
+    /*vals*/
+    val_value_t* interface_val;
+    val_value_t* name_val;
+    val_value_t* oper_status_val;
+    val_value_t* last_change_val;
+    val_value_t* statistics_val;
+    val_value_t* val;
+
+    status_t res=NO_ERR;
+    boolean done;
+    char* name;
+    char* str;
+    char* endptr;
+    unsigned int i;
+    uint64_t counter;
+    int ret;
+
+    char* counter_names_array[] = {
+        "in-octets",
+        "in-unicast-pkts",
+        "in-errors",
+        "in-discards",
+        NULL/*"in-fifo"*/,
+        NULL/*"in-frames"*/,
+        NULL/*in-compressed*/,
+        "in-multicast-pkts",
+        "out-octets",
+        "out-unicast-pkts",
+        "out-errors",
+        "out-discards",
+        NULL/*"out-fifo"*/,
+        NULL/*out-collisions*/,
+        NULL/*out-carrier*/,
+        NULL/*out-compressed*/
+    };
+    /* get the start of the interface name */
+    str = buf;
+    while (*str && isspace(*str)) {
+        str++;
+    }
+    if (*str == '\0') {
+        /* not expecting a line with just whitespace on it */
+        return ERR_NCX_SKIPPED;
+    } else {
+        name = str++;
+    }
+
+    /* get the end of the interface name */
+    while (*str && *str != ':') {
+        str++;
+    }
+
+    if (*str != ':') {
+        /* expected e.g. eth0: ...*/
+        return ERR_NCX_SKIPPED;
+    } else {
+    	*str=0;
+    	str++;
+    }
+
+    if(NULL!=getenv("INTERFACE_NAME_PREFIX")) {
+        char* prefix=getenv("INTERFACE_NAME_PREFIX");
+        if(strlen(name)<strlen(prefix) || 0!=memcmp(prefix,name,strlen(prefix))) {
+            return NO_ERR; /*skip*/
+        }
+    }
+
+    /* interface */
+    interface_obj = obj_find_child(interfaces_val->obj,
+                                   "ietf-interfaces",
+                                   "interface");
+    assert(interface_obj != NULL);
+
+    interface_val = val_new_value();
+    if (interface_val == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(interface_val, interface_obj);
+
+    val_add_child(interface_val, interfaces_val);
+
+    /* interface/name */
+    name_obj = obj_find_child(interface_obj,
+                              "ietf-interfaces",
+                              "name");
+    assert(name_obj != NULL);
+
+
+    name_val = val_new_value();
+    if (name_val == NULL) {
+                return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(name_val, name_obj);
+
+    res = val_set_simval_obj(name_val, name_obj, name);
+
+    val_add_child(name_val, interface_val);
+
+    res = val_gen_index_chain(interface_obj, interface_val);
+    assert(res == NO_ERR);
+
+    /* interface/oper-state */
+    oper_status_obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "oper-status");
+
+    oper_status_val = val_new_value();
+    assert(oper_status_val);
+
+    val_init_virtual(oper_status_val,
+                     get_oper_status,
+                     oper_status_obj);
+
+    val_add_child(oper_status_val, interface_val);
+
+    /* interface/last-change */
+    last_change_obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "last-change");
+
+    last_change_val = val_new_value();
+    assert(last_change_val);
+
+    val_init_virtual(last_change_val,
+                     get_last_change,
+                     last_change_obj);
+
+    val_add_child(last_change_val, interface_val);
+
+    /* interface/speed */
+    obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "speed");
+
+    val = val_new_value();
+    assert(val);
+
+    val_init_virtual(val,
+                     get_speed,
+                     obj);
+
+    val_add_child(val, interface_val);
+
+    /* interface/statistics */
+    statistics_obj = obj_find_child(interface_obj,
+                         "ietf-interfaces",
+                         "statistics");
+    assert(statistics_obj != NULL);
+    statistics_val = val_new_value();
+    if (statistics_val == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_init_from_template(statistics_val, statistics_obj);
+
+    val_add_child(statistics_val, interface_val);
+
+    done = FALSE;
+    for(i=0;i<(sizeof(counter_names_array)/sizeof(char*));i++) {
+        endptr = NULL;
+        counter = strtoull((const char *)str, &endptr, 10);
+        if (counter == 0 && str == endptr) {
+            /* number conversion failed */
+            log_error("Error: /proc/net/dev number conversion failed.");
+            return ERR_NCX_OPERATION_FAILED;
+        }
+
+        if(counter_names_array[i]!=NULL) {
+            obj = obj_find_child(statistics_obj,
+                                 "ietf-interfaces",
+                                 counter_names_array[i]);
+    	    assert(obj != NULL);
+
+            val = val_new_value();
+            if (val == NULL) {
+                return ERR_INTERNAL_MEM;
+            }
+            val_init_from_template(val, obj);
+            VAL_UINT64(val) = counter;
+            val_add_child(val, statistics_val);
+        }
+
+        str = (xmlChar *)endptr;
+        if (*str == '\0' || *str == '\n') {
+            break;
+        }
+    }
+    return res;
+}
 static status_t
     add_interface_entry(char* buf, val_value_t* interfaces_val)
 {
@@ -521,6 +715,64 @@ static status_t
     return res;
 }
 
+static status_t
+    get_interfaces_state(ses_cb_t *scb,
+                         getcb_mode_t cbmode,
+                         val_value_t *vir_val,
+                         val_value_t *dst_val)
+{
+    FILE* f;
+    status_t res;
+    res = NO_ERR;
+    boolean done;
+    char* buf;
+    unsigned int line;
+
+    /* open /proc/net/dev for reading */
+    f = fopen("/proc/net/dev", "r");
+    if (f == NULL) {
+        return ERR_INTERNAL_VAL;
+    }
+
+    /* get a file read line buffer */
+    buf = (char*)malloc(NCX_MAX_LINELEN);
+    if (buf == NULL) {
+        fclose(f);
+        return ERR_INTERNAL_MEM;
+    }
+
+    done = FALSE;
+    line = 0;
+
+    while (!done) {
+
+        if (NULL == fgets((char *)buf, NCX_MAX_LINELEN, f)) {
+            done = TRUE;
+            continue;
+        } else {
+            line++;
+        }
+
+        if (line < 3) {
+            /* skip the first 2 lines */
+            printf("first 2 is %s\n", buf);
+            continue;
+        }
+
+        printf("buf is %s\n", buf);
+
+        res = add_interfac_state_entry(buf, dst_val);
+        if (res != NO_ERR) {
+             done = TRUE;
+        }
+    }
+
+    fclose(f);
+    free(buf);
+    printf("###### res %d\n", res);
+    return res;
+}
+
 int my_timer_fn(uint32 timer_id, void *cookie)
 {
     /*
@@ -706,7 +958,9 @@ status_t
     assert(res == NO_ERR);
 
     if(with_nmda_param_val && VAL_BOOL(with_nmda_param_val)) {
+        printf("\n Not support nmda \n");
         assert(0==strcmp(mod->version,"2018-02-20"));
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     } else {
         assert(0==strcmp(mod->version,"2014-05-08"));
     }
@@ -737,7 +991,9 @@ status_t y_ietf_interfaces_init2(void)
     status_t res;
     ncx_module_t* mod;
     obj_template_t* interfaces_obj;
+    obj_template_t* interfaces_state_obj;
     val_value_t* interfaces_val;
+    val_value_t* interfaces_state_val;
     val_value_t* root_val;
 
     res = NO_ERR;
@@ -745,33 +1001,43 @@ status_t y_ietf_interfaces_init2(void)
     mod = ncx_find_module("ietf-interfaces", NULL);
     assert(mod);
 
-    if(with_nmda_param_val && VAL_BOOL(with_nmda_param_val)) {
-        root_val = agt_nmda_get_root_system();
-        assert(root_val);
+    cfg_template_t* runningcfg;
 
-        interfaces_obj = ncx_find_object(
-            mod,
-            "interfaces");
-        assert(interfaces_obj);
+    runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    assert(runningcfg && runningcfg->root);
+    root_val = runningcfg->root;
+    /* Add /interfaces-state */
+    interfaces_state_obj = ncx_find_object(
+        mod,
+        "interfaces-state");
+    assert(interfaces_state_obj);
+    interfaces_state_val = val_find_child(root_val,
+                                    "ietf-interfaces",
+                                    "interfaces-state");
 
-        interfaces_val = val_find_child(root_val,
-                                        "ietf-interfaces",
-                                        "interfaces");
-    } else {
-        cfg_template_t* runningcfg;
 
-        runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
-        assert(runningcfg && runningcfg->root);
-        root_val = runningcfg->root;
-        interfaces_obj = ncx_find_object(
-            mod,
-            "interfaces-state");
-        assert(interfaces_obj);
-        interfaces_val = val_find_child(root_val,
-                                        "ietf-interfaces",
-                                        "interfaces-state");
+    /* not designed to coexist with other implementations */
+    assert(interfaces_state_val==NULL);
 
-    }
+    interfaces_state_val = val_new_value();
+    assert(interfaces_state_val);
+
+    val_init_virtual(interfaces_state_val,
+                     get_interfaces_state,
+                     interfaces_state_obj);
+
+
+    val_add_child(interfaces_state_val, root_val);
+
+    /* Add /interfaces */
+    interfaces_obj = ncx_find_object(
+        mod,
+        "interfaces");
+    assert(interfaces_obj);
+    interfaces_val = val_find_child(root_val,
+                                    "ietf-interfaces",
+                                    "interfaces");
+
 
     /* not designed to coexist with other implementations */
     assert(interfaces_val==NULL);
@@ -783,7 +1049,10 @@ status_t y_ietf_interfaces_init2(void)
                      get_interfaces,
                      interfaces_obj);
 
-    val_add_child(interfaces_val, root_val);
+
+    val_add_child(interfaces_state_val, root_val);
+
+
 
     /* init a root value to store copies of prev state data values */
     root_prev_val = val_new_value();

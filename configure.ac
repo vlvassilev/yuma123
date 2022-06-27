@@ -109,6 +109,8 @@ AC_CONFIG_FILES([
 
         libintri/.libintrishare/Makefile
         libintri/private/modules/Makefile
+        libintri/private/src/genc-trans/Makefile
+        libintri/private/src/realize/Makefile
         libintri/tests/src/intri-test/Makefile
         libintri/tests/src/intri-device/Makefile
         libintri/tests/src/intri-core/intri-system/Makefile

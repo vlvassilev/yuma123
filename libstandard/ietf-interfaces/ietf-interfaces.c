@@ -34,18 +34,21 @@
 *                                                                   *
 *********************************************************************/
 #define ietf_interfaces (const xmlChar *)"ietf-interfaces"
-#define ietf_interfaces_interfaces (const xmlChar *)"interfaces"
+#define ietf_interfaces_interfaces_container (const xmlChar *)"interfaces"
+/* /interfaces/interface or /interfaces-state/interface */
+#define ietf_interfaces_interface (const xmlChar *)"interface"
 #define ietf_interfaces_interfaces_name (const xmlChar *)"name"
 #define ietf_interfaces_interfaces_description (const xmlChar *)"description"
 #define ietf_interfaces_interfaces_type (const xmlChar *)"type"
 #define ietf_interfaces_interfaces_enabled (const xmlChar *)"enabled"
 #define ietf_interfaces_interfaces_link_trap (const xmlChar *)"link-up-down-trap-enable"
 
-#define ietf_interfaces_interfaces_state (const xmlChar *)"interfaces-state"
+#define ietf_interfaces_interfaces_state_container (const xmlChar *)"interfaces-state"
 #define ietf_interfaces_interfaces_state_name (const xmlChar *)"name"
 #define ietf_interfaces_interfaces_state_type (const xmlChar *)"type"
 #define ietf_interfaces_interfaces_state_oper_status (const xmlChar *)"oper-status"
 #define ietf_interfaces_interfaces_state_admin_status (const xmlChar *)"admin-status"
+#define ietf_interfaces_interfaces_state_last_change (const xmlChar *)"last-change"
 #define ietf_interfaces_interfaces_state_if_index (const xmlChar *)"if-index"
 #define ietf_interfaces_interfaces_state_phy_address (const xmlChar *)"phys-address"
 #define ietf_interfaces_interfaces_state_speed (const xmlChar *)"speed"
@@ -191,25 +194,24 @@ static status_t
     assert(name_val);
 
     struct emptypb_Empty *in;
-    struct emptypb_Empty *in2;
     struct portpb_Config *out;
-    struct portpb_Status *out_status;
+    // struct portpb_Status *out_status;
 
-    port_Port_GetConfig(in, out);
-    port_Port_GetStatus(in2, out_status);
-    for (int i = 0; i< out->List_Len; i++) {
-        char *name_as_index[6];
-        sprintf(name_as_index, "Port %d", out->List[i]->IdentifyNo->PortNo);
-        if (name_as_index==VAL_STRING(name_val) && out_status->List[i]->IdentifyNo->PortNo==out->List[i]->IdentifyNo->PortNo) {
-            res = val_set_simval_obj(dst_val,
-                                    dst_val->obj,
-                                    (const char *)out_status->List[i]->LastLinkChange);
-            if (res!=NO_ERR) {
-                return SET_ERROR(res);
-            }
-        }
+    // port_Port_GetConfig(in, out);
+    // port_Port_GetStatus(in2, out_status);
+    // for (int i = 0; i< out->List_Len; i++) {
+    //     char *name_as_index[6];
+    //     sprintf(name_as_index, "Port%d", out->List[i]->IdentifyNo->PortNo);
+    //     if (name_as_index==VAL_STRING(name_val) && out_status->List[i]->IdentifyNo->PortNo==out->List[i]->IdentifyNo->PortNo) {
+    //         res = val_set_simval_obj(dst_val,
+    //                                 dst_val->obj,
+    //                                 (const char *)out_status->List[i]->LastLinkChange);
+    //         if (res!=NO_ERR) {
+    //             return SET_ERROR(res);
+    //         }
+    //     }
 
-    }
+    // }
     return NO_ERR;
 }
 
@@ -219,7 +221,7 @@ static status_t
                        val_value_t *vir_val,
                        val_value_t  *dst_val)
 {
-    status_t res;
+    status_t res = NO_ERR;
     int oper_status = 0;
     val_value_t *interface_val;
     val_value_t *name_val;
@@ -239,25 +241,52 @@ static status_t
                               "name");
     assert(name_val);
 
-    struct emptypb_Empty *in;
-    struct emptypb_Empty *in2;
-    struct portpb_Config *out;
-    struct portpb_Status *out_status;
-    printf("[debug] b4 calling API in get_oper_status");
-    port_Port_GetConfig(in, out);
-    port_Port_GetStatus(in2, out_status);
-    for (int i = 0; i< out->List_Len; i++) {
-        char *name_as_index = "";
-        sprintf(name_as_index, "Port %d", out->List[i]->IdentifyNo->PortNo);
-        if (name_as_index==VAL_STRING(name_val) && out_status->List[i]->IdentifyNo->PortNo==out->List[i]->IdentifyNo->PortNo) {
-            res = val_set_simval_obj(dst_val,
-                                    dst_val->obj,
-                                    (const char *)out_status->List[i]->LinkUp?"up":"down");
-        }
+    printf("\n[debug] after calling API in get_oper_status\n");
+    struct portpb_StatusEntry out_status;
+    struct devicepb_InterfaceIdentify dev_infy;
+    printf("[debug] b4 port no\n");
+    const char *a = strtok(VAL_STRING(name_val), "Port");
+    printf("[debug] portNO is %d\n", atoi(a));
+    dev_infy.PortNo = atoi(a);
+    dev_infy.Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
+    port_Port_GetPortStatus(&dev_infy, &out_status);
 
+    printf("\n[debug] got port status in get_oper_status %s\n", out_status.LinkUp ? "true" : "false");
+    printf("\n[debug] got port enabled in get_oper_status %s\n", out_status.Enabled ? "true" : "false");
+
+    /* check if we have corresponding entry in the oper-status enum */
+    strcpy(status_buf,"down");
+    sleep(1);
+    printf("stats is %s", status_buf);
+    // btyp = obj_get_basetype(dst_val->obj);
+    // typdef = obj_get_typdef(dst_val->obj);
+    // basetypdef = typ_get_base_typdef(typdef);
+    // assert(btyp==NCX_BT_ENUM);
+    // printf("\n0.1");
+    // for (typenum = typ_first_enumdef(basetypdef);
+    //      typenum != NULL;
+    //      typenum = typ_next_enumdef(typenum)) {
+    //         printf("\n0.2");
+    //         printf("\ntypeenum %s", typenum->descr);
+    //     if(0==strcmp((const char *)typenum->name, status_buf)) {
+    //         break;
+    //     }
+    // }
+    printf("\n0.3");
+    if(typenum==NULL) {
+        printf("Warning: unknown oper-status %s, reporting \"unknown\" instead.\n", status_buf);
+        strcpy(status_buf, "unknown");
     }
 
-
+    printf("\n1");
+    res = val_set_simval_obj(dst_val,
+                            dst_val->obj,
+                            status_buf);
+    printf("\n2");
+    if (res != NO_ERR) {
+        printf("\n3");
+        return SET_ERROR(res);
+    }
     // oper_status_update(dst_val);
 
     return res;
@@ -313,7 +342,10 @@ Inter-|   Receive                                                |  Transmit
  */
 
 static status_t
-    add_interface_state_entry(val_value_t* interfaces_val, struct portpb_ConfigEntry *entry)
+    add_interface_state_entry(val_value_t *parentval,
+        struct portpb_ConfigEntry *entry,
+        struct portpb_StatusEntry *status_entry,
+        struct devicepb_Info *device_entry)
 {
     /*objs*/
     obj_template_t* interface_state_obj;
@@ -332,8 +364,9 @@ static status_t
     val_value_t* val;
 
     status_t res=NO_ERR;
+    val_value_t *childval = NULL;
     boolean done;
-    char* name[6];
+    char name[6];
     char* str;
     char* endptr;
     unsigned int i;
@@ -361,90 +394,162 @@ static status_t
 
     printf("\n[debug] in add_interface_state_entry\n");
     assert(entry != NULL);
+    assert(status_entry != NULL);
+    printf("\n[debug] in add_interface_state_entry, portNo of status is %d\n", status_entry->IdentifyNo->PortNo);
 
-    /* interface */
-    interface_state_obj = obj_find_child(interfaces_val->obj,
-                                   "ietf-interfaces",
-                                   "interface");
-    assert(interface_state_obj != NULL);
-
-    interface_state_val = val_new_value();
-    if (interface_state_val == NULL) {
-        return ERR_INTERNAL_MEM;
-    }
-
-    val_init_from_template(interface_state_val, interface_state_obj);
-
-    val_add_child(interface_state_val, interfaces_val);
 
     /* interface/name */
-    name_obj = obj_find_child(interface_state_obj,
-                              "ietf-interfaces",
-                              "name");
-    assert(name_obj != NULL);
+    char *name_as_index[6];
+    sprintf(name_as_index, "Port%d", entry->IdentifyNo->PortNo);
 
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_name,
+        name_as_index,
+        &res);
 
-    name_val = val_new_value();
-    if (name_val == NULL) {
-                return ERR_INTERNAL_MEM;
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
     }
-    sprintf(name, "Port %d", entry->IdentifyNo->PortNo);
 
-    val_init_from_template(name_val, name_obj);
-    res = val_set_simval_obj(name_val, name_obj, name);
-    assert(res == NO_ERR);
-    printf("\n[debug] in add_interface_state_entry6\n");
-
-    val_add_child(name_val, interface_state_val);
-
-    res = val_gen_index_chain(interface_state_obj, interface_state_val);
-    assert(res == NO_ERR);
-    printf("\n[debug] in add_interface_state_entry7\n");
+    // [FIXME] open this will get Error 258 invalid value, check it later
+    // /* interface/type */
+    // int32_t *if_type = 6; // ethernetCsmacd(6)
+    // childval = agt_make_int_leaf(
+    //     parentval->obj,
+    //     ietf_interfaces_interfaces_state_type,
+    //     if_type,
+    //     &res);
+    // if (childval != NULL) {
+    //     val_add_child_sorted(childval, parentval);
+    // } else if (res != NO_ERR) {
+    //     return SET_ERROR(res);
+    // }
 
     /* interface/oper-state */
-    oper_status_obj = obj_find_child(interface_state_obj,
-                         "ietf-interfaces",
-                         "oper-status");
-    printf("\n[debug] in add_interface_state_entry8\n");
+    const xmlChar *link_up = "down";
+    if (status_entry->LinkUp) {
+        link_up = "up";
+    }
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_oper_status,
+        link_up,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    oper_status_val = val_new_value();
-    assert(oper_status_val);
+    /* interface/admin-state */
+    const xmlChar * enabled = "down";
+    if (status_entry->Enabled) {
+        enabled = "up";
+    }
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_admin_status,
+        link_up,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    val_init_virtual(oper_status_val,
-                     get_oper_status,
-                     oper_status_obj);
-    printf("\n[debug] in add_interface_state_entry9\n");
 
-    val_add_child(oper_status_val, interface_state_val);
 
-    printf("\n[debug] in add_interface_state_entry10\n");
-    // /* interface/last-change */
-    // last_change_obj = obj_find_child(interface_state_obj,
-    //                      "ietf-interfaces",
-    //                      "last-change");
+    /** interface/last-change
+        required pattern is
+        `\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})`
+    **/
+    xmlChar *time[20];
+    memset(time, 0, 20);
+    xmlChar *tmp = strtok(status_entry->LastLinkChange, " ");
+    strcat(time, tmp);
+    strcat(time, "T");
+    tmp = strtok(NULL, " ");
+    strcat(time, tmp);
+    strcat(time, "Z");
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_last_change,
+        time,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    // last_change_val = val_new_value();
-    // assert(last_change_val);
+    /* interface/phys-address */
+    printf("[debug] mac address is %s\n", device_entry->MACAddr);
+    printf("[debug] mac address is %d\n", sizeof(device_entry->MACAddr));
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_phy_address,
+        device_entry->MACAddr,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    // val_init_virtual(last_change_val,
-    //                  get_last_change,
-    //                  last_change_obj);
+    /* interface/if-index */
+    childval = agt_make_int_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_if_index,
+        status_entry->IdentifyNo->PortNo,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    // val_add_child(last_change_val, interface_state_val);
+    int32 speed_int = 0;
+    switch (status_entry->SpeedDuplexUsed) {
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_NA:
+            speed_int = 0;
+            break;
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_10M_FULL:
+            speed_int = 10000000;
+            break;
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_100M_FULL:
+            speed_int = 100000000;
+            break;
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_1000M_FULL:
+            speed_int = 1000000000;
+            break;
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_2500M_FULL:
+            speed_int = 2500000000;
+            break;
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_5G_FULL:
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_10G_FULL:
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_25G_FULL:
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_40G_FULL:
+        case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_100G_FULL:
+            speed_int = 4294967295;
+            break;
+    }
+
 
     // /* interface/speed */
-    // obj = obj_find_child(interface_obj,
-    //                      "ietf-interfaces",
-    //                      "speed");
+     childval = agt_make_int_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_state_speed,
+        speed_int,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    // val = val_new_value();
-    // assert(val);
-
-    // val_init_virtual(val,
-    //                  get_speed,
-    //                  obj);
-
-    // val_add_child(val, interface_val);
 
     // /* interface/statistics */
     // statistics_obj = obj_find_child(interface_obj,
@@ -490,36 +595,6 @@ static status_t
     //         break;
     //     }
     // }
-    return res;
-}
-
-/* Registered callback functions: get_interfaces_state */
-
-static status_t
-    get_interfaces_state(ses_cb_t *scb,
-                         getcb_mode_t cbmode,
-                         val_value_t *vir_val,
-                         val_value_t *dst_val)
-{
-    status_t res;
-    res = NO_ERR;
-    boolean done;
-
-
-    printf("\n[debug] in get_interfaces_state\n");
-    struct emptypb_Empty in;
-    struct portpb_Config out;
-    port_Port_GetConfig(&in, &out);
-    printf("\n@@@@ after port_Port_GetConfig() \n");
-    for (int i = 0; i< out.List_Len; i++) {
-        res = add_interface_state_entry(dst_val, out.List[i]);
-        if (res != NO_ERR) {
-            SET_ERROR(res);
-            break;
-        }
-    }
-    printf("[debug] done get_interfaces_state");
-
     return res;
 }
 
@@ -656,6 +731,62 @@ static status_t y_commit_complete(void)
     return NO_ERR;
 }
 
+static status_t
+ietf_interfaces_state_list_get(
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+    status_t res = NO_ERR;
+
+    if (LOGDEBUG) {
+        log_debug("\nEnter intri_device_intri_device_port_list_get");
+    }
+
+    struct emptypb_Empty in;
+    struct portpb_Config out;
+    port_Port_GetConfig(&in, &out);
+
+    struct emptypb_Empty in2;
+    struct portpb_Status status_out;
+    port_Port_GetStatus(&in2, &status_out);
+
+    struct emptypb_Empty in3;
+    struct devicepb_Info device_out;
+    device_Device_GetDeviceInfo(&in2, &device_out);
+
+    for (int i =0; i < out.List_Len; i++) {
+        val_value_t *entry_val = NULL;
+        entry_val = agt_make_list(
+            dstval->obj,
+            ietf_interfaces_interface,
+            &res);
+        if (entry_val != NULL) {
+            val_add_child(entry_val, dstval);
+        } else if (res!=NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        res = add_interface_state_entry(entry_val, out.List[i], status_out.List[i], &device_out);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+    return res;
+}
+
+static status_t
+ietf_interfaces_interface_state_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+
+    val_init_virtual(
+        parentval,
+        ietf_interfaces_state_list_get,
+        parentval->obj);
+    return res;
+}
+
+
 /* The 3 mandatory callback functions: y_ietf_interfaces_init, y_ietf_interfaces_init2, y_ietf_interfaces_cleanup */
 
 status_t
@@ -677,7 +808,7 @@ status_t
     agt_profile = agt_get_profile();
 
     res = ncxmod_load_module(
-        "ietf-interfaces",
+        ietf_interfaces,
         NULL,
         &agt_profile->agt_savedevQ,
         &mod);
@@ -723,7 +854,7 @@ status_t y_ietf_interfaces_init2(void)
     res = NO_ERR;
     printf("@@@@ y_ietf_interfaces_init2 \n");
 
-    mod = ncx_find_module("ietf-interfaces", NULL);
+    mod = ncx_find_module(ietf_interfaces, NULL);
     assert(mod);
 
     if(with_nmda_param_val && VAL_BOOL(with_nmda_param_val)) {
@@ -738,31 +869,25 @@ status_t y_ietf_interfaces_init2(void)
 
     interfaces_state_obj = ncx_find_object(
         mod,
-        "interfaces-state");
+        ietf_interfaces_interfaces_state_container);
     assert(interfaces_state_obj);
     interfaces_state_val = val_find_child(root_val,
-                                    "ietf-interfaces",
-                                    "interfaces-state");
+                                    ietf_interfaces,
+                                    ietf_interfaces_interfaces_state_container);
 
 
     /* not designed to coexist with other implementations */
     assert(interfaces_state_val==NULL);
+    res = agt_add_top_container(interfaces_state_obj, &interfaces_state_val);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
-    interfaces_state_val = val_new_value();
-    assert(interfaces_state_val);
 
-    printf("@@@@ val_init_virtual with get_interface_state \n");
-    val_init_virtual(interfaces_state_val,
-                     get_interfaces_state,
-                     interfaces_state_obj);
-
-    val_add_child(interfaces_state_val, root_val);
-
-    printf("@@@@ done adding all interface state \n");
-    /* init a root value to store copies of prev state data values */
-    root_prev_val = val_new_value();
-    val_init_from_template(root_prev_val, root_val->obj);
-
+    res = ietf_interfaces_interface_state_mro(interfaces_state_val);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
     y_commit_complete();
 

@@ -1748,7 +1748,11 @@ static status_t
     } else if (rpc->objtype == OBJ_TYP_RPC) {
         /* called by RPC invocation or fill data fn */
         server_cb->cli_fn = obj_get_name(rpc);
-        target = valset->obj;
+        if(valset->obj->objtype == OBJ_TYP_RPC) {
+            target = obj_find_child(valset->obj, NULL, YANG_K_INPUT);
+        } else {
+            target = valset->obj;
+        }
     } else {
         /* called by fill data fn */
         target = valset->obj;

@@ -11,4 +11,5 @@ test-unversioned-module-imports \
 test-identical-node-names \
 test-identical-identity-names \
 test-external-file-vars \
-test-mgrload
+test-mgrload \
+test-fill

@@ -1,0 +1,21 @@
+module mod1 {
+  namespace "http://yuma123.org/ns/test/yangcli/fill/mod1";
+  prefix m1;
+  grouping test-list {
+    container list {
+      list list-entry {
+        leaf a {
+          type string;
+        }
+        leaf b {
+          type string;
+        }
+      }
+    }
+  }
+  rpc test-module-list-input {
+    input  {
+      uses test-list;
+    }
+  }
+}

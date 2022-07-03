@@ -53,7 +53,7 @@
 #define ietf_interfaces_interfaces_state_phy_address (const xmlChar *)"phys-address"
 #define ietf_interfaces_interfaces_state_speed (const xmlChar *)"speed"
 
-#define ietf_interfaces_interfaces_state_statistic (const xmlChar *)"statistic"
+#define ietf_interfaces_interfaces_state_statistic (const xmlChar *)"statistics"
 
 #define ietf_interfaces_interfaces_state_statistic_in_octets (const xmlChar *)"in-octets"
 #define ietf_interfaces_interfaces_state_statistic_in_unicast_pkts (const xmlChar *)"in-unicast-pkts"
@@ -76,276 +76,19 @@
 *                                                                   *
 *********************************************************************/
 /* module static variables */
-static val_value_t* root_prev_val;
 static val_value_t* with_nmda_param_val;
 
 
-static void my_send_link_state_notification(char* new_state, char* if_name)
-{
-    status_t res;
-    obj_template_t* notification_obj;
-    obj_template_t* link_up_obj;
-    obj_template_t* link_down_obj;
-    obj_template_t* if_name_obj;
-    val_value_t* if_name_val;
-    agt_not_msg_t *notif;
-    ncx_module_t *mod;
 
-    mod = ncx_find_module("interfaces-notifications", NULL);
-    if(mod==NULL) {
-        /* only send notification if the model is loaded */
-        return;
-    }
 
-    link_down_obj = ncx_find_object(mod,"link-down");
-    assert(link_down_obj);
-
-    link_up_obj = ncx_find_object(mod,"link-up");
-    assert(link_up_obj);
-
-    if(0==strcmp(new_state, "down")) {
-        notification_obj = link_down_obj;
-    } else if(0==strcmp(new_state, "up")) {
-        notification_obj = link_up_obj;
-    } else {
-        notification_obj = link_up_obj; /* work around */
-    }
-
-    notif = agt_not_new_notification(notification_obj);
-    assert (notif != NULL);
-
-    /* add params to payload */
-    if_name_obj = obj_find_child(notification_obj,
-                      "interfaces-notifications",
-                      "if-name");
-    assert(if_name_obj != NULL);
-    if_name_val = val_new_value();
-    assert(if_name_val != NULL);
-
-    val_init_from_template(if_name_val, if_name_obj);
-    res = val_set_simval_obj(if_name_val,
-                         if_name_val->obj,
-                         if_name);
-    agt_not_add_to_payload(notif, if_name_val);
-
-    agt_not_queue_notification(notif);
-}
-
-void oper_status_update(val_value_t* cur_val)
-{
-    status_t res;
-    val_value_t* prev_val;
-    val_value_t* val;
-    val_value_t* last_change_prev_val;
-    val_value_t* dummy_val;
-    val_value_t* name_val;
-
-    /* compare the oper-status with the corresponding value in the prev root */
-    prev_val = val123_find_match(root_prev_val, cur_val);
-    if(prev_val==NULL) {
-        res=val123_clone_instance(root_prev_val, cur_val, &prev_val);
-        assert(res==NO_ERR);
-    }
-
-    if(0!=strcmp(VAL_STRING(cur_val),VAL_STRING(prev_val))) {
-        obj_template_t* last_change_obj;
-        val_value_t* last_change_val;
-        char tstamp_buf[32];
-        tstamp_datetime(tstamp_buf);
-        last_change_val = val_new_value();
-        assert(last_change_val);
-        last_change_obj = obj_find_child(cur_val->parent->obj,"ietf-interfaces","last-change");
-        assert(last_change_obj);
-        val_init_from_template(last_change_val, last_change_obj);
-        val_set_simval_obj(last_change_val, last_change_obj, tstamp_buf);
-
-        last_change_prev_val = val_find_child(prev_val->parent, "ietf-interfaces", "last-change");
-        if(last_change_prev_val) {
-            val_remove_child(last_change_prev_val);
-            val_free_value(last_change_prev_val);
-        }
-        val_add_child(last_change_val, prev_val->parent);
-
-        /* notify */
-        name_val=val_find_child(cur_val->parent,"ietf-interfaces","name");
-        assert(name_val);
-        printf("Notification /interfaces/interface[name=%s]: oper-status changes from %s to %s at %s\n", VAL_STRING(name_val), VAL_STRING(prev_val),VAL_STRING(cur_val), VAL_STRING(last_change_val));
-        my_send_link_state_notification(VAL_STRING(cur_val), VAL_STRING(name_val));
-        val_set_simval_obj(prev_val, prev_val->obj, VAL_STRING(cur_val));
-
-    }
-}
-
-static status_t
-    get_last_change(ses_cb_t *scb,
-                       getcb_mode_t cbmode,
-                       val_value_t *vir_val,
-                       val_value_t  *dst_val)
-{
-    status_t res;
-    val_value_t *interface_val;
-    val_value_t *name_val;
-    interface_val = vir_val->parent;
-    assert(interface_val);
-
-    name_val = val_find_child(interface_val,
-                              "ietf-interfaces",
-                              "name");
-    assert(name_val);
-
-    struct emptypb_Empty *in;
-    struct portpb_Config *out;
-    // struct portpb_Status *out_status;
-
-    // port_Port_GetConfig(in, out);
-    // port_Port_GetStatus(in2, out_status);
-    // for (int i = 0; i< out->List_Len; i++) {
-    //     char *name_as_index[6];
-    //     sprintf(name_as_index, "Port%d", out->List[i]->IdentifyNo->PortNo);
-    //     if (name_as_index==VAL_STRING(name_val) && out_status->List[i]->IdentifyNo->PortNo==out->List[i]->IdentifyNo->PortNo) {
-    //         res = val_set_simval_obj(dst_val,
-    //                                 dst_val->obj,
-    //                                 (const char *)out_status->List[i]->LastLinkChange);
-    //         if (res!=NO_ERR) {
-    //             return SET_ERROR(res);
-    //         }
-    //     }
-
-    // }
-    return NO_ERR;
-}
-
-static status_t
-    get_oper_status(ses_cb_t *scb,
-                       getcb_mode_t cbmode,
-                       val_value_t *vir_val,
-                       val_value_t  *dst_val)
-{
-    status_t res = NO_ERR;
-    int oper_status = 0;
-    val_value_t *interface_val;
-    val_value_t *name_val;
-    ncx_btype_t btyp;
-    typ_def_t *typdef, *basetypdef;
-    typ_enum_t  *typenum;
-    FILE* f;
-    char cmd_buf[NCX_MAX_LINELEN];
-    char status_buf[NCX_MAX_LINELEN];
-    char* fgets_ret;
-
-    interface_val = vir_val->parent;
-    assert(interface_val);
-
-    name_val = val_find_child(interface_val,
-                              "ietf-interfaces",
-                              "name");
-    assert(name_val);
-
-    printf("\n[debug] after calling API in get_oper_status\n");
-    struct portpb_StatusEntry out_status;
-    struct devicepb_InterfaceIdentify dev_infy;
-    printf("[debug] b4 port no\n");
-    const char *a = strtok(VAL_STRING(name_val), "Port");
-    printf("[debug] portNO is %d\n", atoi(a));
-    dev_infy.PortNo = atoi(a);
-    dev_infy.Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
-    port_Port_GetPortStatus(&dev_infy, &out_status);
-
-    printf("\n[debug] got port status in get_oper_status %s\n", out_status.LinkUp ? "true" : "false");
-    printf("\n[debug] got port enabled in get_oper_status %s\n", out_status.Enabled ? "true" : "false");
-
-    /* check if we have corresponding entry in the oper-status enum */
-    strcpy(status_buf,"down");
-    sleep(1);
-    printf("stats is %s", status_buf);
-    // btyp = obj_get_basetype(dst_val->obj);
-    // typdef = obj_get_typdef(dst_val->obj);
-    // basetypdef = typ_get_base_typdef(typdef);
-    // assert(btyp==NCX_BT_ENUM);
-    // printf("\n0.1");
-    // for (typenum = typ_first_enumdef(basetypdef);
-    //      typenum != NULL;
-    //      typenum = typ_next_enumdef(typenum)) {
-    //         printf("\n0.2");
-    //         printf("\ntypeenum %s", typenum->descr);
-    //     if(0==strcmp((const char *)typenum->name, status_buf)) {
-    //         break;
-    //     }
-    // }
-    printf("\n0.3");
-    if(typenum==NULL) {
-        printf("Warning: unknown oper-status %s, reporting \"unknown\" instead.\n", status_buf);
-        strcpy(status_buf, "unknown");
-    }
-
-    printf("\n1");
-    res = val_set_simval_obj(dst_val,
-                            dst_val->obj,
-                            status_buf);
-    printf("\n2");
-    if (res != NO_ERR) {
-        printf("\n3");
-        return SET_ERROR(res);
-    }
-    // oper_status_update(dst_val);
-
-    return res;
-}
-
-static status_t
-    get_speed(ses_cb_t *scb,
-                       getcb_mode_t cbmode,
-                       val_value_t *vir_val,
-                       val_value_t  *dst_val)
-{
-    status_t res;
-    val_value_t *interface_val;
-    val_value_t *name_val;
-    FILE* f;
-    char filename[NCX_MAX_LINELEN];
-    char status_buf[NCX_MAX_LINELEN];
-    char* fgets_ret;
-
-    interface_val = vir_val->parent;
-    assert(interface_val);
-
-    name_val = val_find_child(interface_val,
-                              "ietf-interfaces",
-                              "name");
-    assert(name_val);
-
-    /* open the /proc/net/dev file for reading */
-    sprintf(filename, "/sys/class/net/%s/speed", VAL_STRING(name_val));
-    f = fopen(filename, "r");
-    if (f == NULL) {
-        return ERR_NCX_SKIPPED;
-    }
-    fgets_ret = fgets((char *)status_buf, NCX_MAX_LINELEN, f);
-    fclose(f);
-    if(fgets_ret==NULL) {
-        return ERR_NCX_SKIPPED;
-    }
-    strtok(status_buf,"\n");
-
-    VAL_UINT64(dst_val) = (uint64_t)1000000*atoi(status_buf);
-
-    return NO_ERR;
-}
-
-/*
-
-Inter-|   Receive                                                |  Transmit
- face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
-    lo: 4307500   49739    0    0    0     0          0         0  4307500   49739    0    0    0     0       0          0
- wlan0:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
-  eth0: 604474858 23680030    0    0    0     0          0    357073 701580994 6935958    0    0    0     0       1          0
- */
 
 static status_t
     add_interface_state_entry(val_value_t *parentval,
         struct portpb_ConfigEntry *entry,
         struct portpb_StatusEntry *status_entry,
-        struct devicepb_Info *device_entry)
+        struct devicepb_Info *device_entry,
+        struct rmonpb_IngressEntry *ingress_entry,
+        struct rmonpb_EgressEntry *egress_entry)
 {
     /*objs*/
     obj_template_t* interface_state_obj;
@@ -373,33 +116,42 @@ static status_t
     uint64_t counter;
     int ret;
 
-    char* counter_names_array[] = {
-        "in-octets",
-        "in-unicast-pkts",
-        "in-errors",
-        "in-discards",
-        NULL/*"in-fifo"*/,
-        NULL/*"in-frames"*/,
-        NULL/*in-compressed*/,
-        "in-multicast-pkts",
-        "out-octets",
-        "out-unicast-pkts",
-        "out-errors",
-        "out-discards",
-        NULL/*"out-fifo"*/,
-        NULL/*out-collisions*/,
-        NULL/*out-carrier*/,
-        NULL/*out-compressed*/
-    };
 
-    printf("\n[debug] in add_interface_state_entry\n");
+// #define ietf_interfaces_interfaces_state_statistic_in_octets (const xmlChar *)"in-octets"
+// #define ietf_interfaces_interfaces_state_statistic_in_unicast_pkts (const xmlChar *)"in-unicast-pkts"
+// #define ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts (const xmlChar *)"in-broadcast-pkts"
+// #define ietf_interfaces_interfaces_state_statistic_in_multicast_pkts (const xmlChar *)"in-multicast-pkts"
+// #define ietf_interfaces_interfaces_state_statistic_in_discards (const xmlChar *)"in-discards"
+// #define ietf_interfaces_interfaces_state_statistic_in_errors (const xmlChar *)"in-errors"
+// #define ietf_interfaces_interfaces_state_statistic_in_unknown_protos (const xmlChar *)"in-unknown-protos"
+
+// #define ietf_interfaces_interfaces_state_statistic_out_octets (const xmlChar *)"out-octets"
+// #define ietf_interfaces_interfaces_state_statistic_out_unicast_pkts (const xmlChar *)"out-unicast-pkts"
+// #define ietf_interfaces_interfaces_state_statistic_out_broadcast_pkts (const xmlChar *)"out-broadcast-pkts"
+// #define ietf_interfaces_interfaces_state_statistic_out_multicast_pkts (const xmlChar *)"out-multicast-pkts"
+// #define ietf_interfaces_interfaces_state_statistic_out_discards (const xmlChar *)"out-discards"
+// #define ietf_interfaces_interfaces_state_statistic_out_errors (const xmlChar *)"out-errors"
+
+    char* counter_names_array[12] = {
+        ietf_interfaces_interfaces_state_statistic_in_octets,
+        ietf_interfaces_interfaces_state_statistic_in_unicast_pkts,
+        ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts,
+        ietf_interfaces_interfaces_state_statistic_in_multicast_pkts,
+        ietf_interfaces_interfaces_state_statistic_in_discards,
+        ietf_interfaces_interfaces_state_statistic_in_errors,
+        ietf_interfaces_interfaces_state_statistic_out_octets,
+        ietf_interfaces_interfaces_state_statistic_out_unicast_pkts,
+        ietf_interfaces_interfaces_state_statistic_out_broadcast_pkts,
+        ietf_interfaces_interfaces_state_statistic_out_multicast_pkts,
+        ietf_interfaces_interfaces_state_statistic_out_discards,
+        ietf_interfaces_interfaces_state_statistic_out_errors,
+    };
     assert(entry != NULL);
     assert(status_entry != NULL);
-    printf("\n[debug] in add_interface_state_entry, portNo of status is %d\n", status_entry->IdentifyNo->PortNo);
 
 
     /* interface/name */
-    char *name_as_index[6];
+    xmlChar *name_as_index[10];
     sprintf(name_as_index, "Port%d", entry->IdentifyNo->PortNo);
 
     childval = agt_make_leaf(
@@ -486,8 +238,6 @@ static status_t
     }
 
     /* interface/phys-address */
-    printf("[debug] mac address is %s\n", device_entry->MACAddr);
-    printf("[debug] mac address is %d\n", sizeof(device_entry->MACAddr));
     childval = agt_make_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_phy_address,
@@ -550,23 +300,76 @@ static status_t
         return SET_ERROR(res);
     }
 
-
     // /* interface/statistics */
-    // statistics_obj = obj_find_child(interface_obj,
-    //                      "ietf-interfaces",
-    //                      "statistics");
-    // assert(statistics_obj != NULL);
-    // statistics_val = val_new_value();
-    // if (statistics_val == NULL) {
-    //     return ERR_INTERNAL_MEM;
-    // }
-
-    // val_init_from_template(statistics_val, statistics_obj);
-
-    // val_add_child(statistics_val, interface_val);
+    res = agt_add_container(
+        ietf_interfaces,
+        ietf_interfaces_interfaces_state_statistic,
+        parentval,
+        &childval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
 
     // done = FALSE;
-    // for(i=0;i<(sizeof(counter_names_array)/sizeof(char*));i++) {
+    log_debug("\nchildval name: %s", childval->name);
+    for(int i=0;i<(sizeof(counter_names_array)/sizeof(char*));i++) {
+        val_value_t *stats_val = NULL;
+        uint64_t target_val;
+        xmlChar *counter = counter_names_array[i];
+
+        log_debug("\nidx: %d", i);
+        log_debug("\n port number is %d", &ingress_entry->IdentifyNo->PortNo);
+        log_debug("\n port number is %d", ingress_entry->IdentifyNo->PortNo);
+        log_debug("\nchildval name: %s", childval->name);
+        log_debug("\ncounter name: %s", counter_names_array[i]);
+        log_debug("\ncounter equal %s\n", counter == ietf_interfaces_interfaces_state_statistic_in_octets ? "true": "false");
+        log_debug("\ncounter goodOctets %d\n", ingress_entry->InGoodOctets);
+        log_debug("\ncounter badOctets %d\n", ingress_entry->InBadOctets);
+        log_debug("\ncounter badOctets %d\n", ingress_entry->InBroadcasts);
+        if (counter == ietf_interfaces_interfaces_state_statistic_in_octets) {
+            target_val = ingress_entry->InGoodOctets + ingress_entry->InBadOctets;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts) {
+            target_val = ingress_entry->InBroadcasts;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_in_discards) {
+            target_val = ingress_entry->InDiscarded;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_in_errors) {
+            target_val = ingress_entry->InTotalReceiveErrors;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_in_multicast_pkts) {
+            target_val = ingress_entry->InMulticasts;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_in_unicast_pkts) {
+            target_val = ingress_entry->InUnicasts;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_out_broadcast_pkts) {
+            target_val = egress_entry->OutBroadcasts;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_out_errors) {
+            target_val = egress_entry->OutDeferred+egress_entry->OutTotalCollisions;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_out_multicast_pkts) {
+            target_val = egress_entry->OutMulticasts;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_out_octets) {
+            target_val = egress_entry->OutGoodOctets;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_out_unicast_pkts) {
+            target_val = egress_entry->OutUnicasts;
+        } else if (counter == ietf_interfaces_interfaces_state_statistic_out_discards) {
+            target_val = egress_entry->OutDroppedPackets;
+        }
+        log_debug("\ncounter equal4 %s\n", counter == ietf_interfaces_interfaces_state_statistic_in_octets ? "true": "false");
+
+        stats_val = agt_make_uint64_leaf(
+            childval->obj,
+            counter_names_array[i],
+            target_val,
+            &res);
+        log_debug("\nstats_val name2: %s", stats_val->name);
+        if (stats_val != NULL) {
+            val_add_child(stats_val, childval);
+        } else if (res != NO_ERR) {
+            if (LOGDEBUG) {
+                log_debug("\n[debug] parent name: %s", stats_val->name);
+                log_debug("\n[debug] err idx is %d\n", i);
+                log_debug("\n[debug] errr counter name is  %s\n", counter_names_array[i]);
+            }
+            return SET_ERROR(res);
+        }
+    }
     //     endptr = NULL;
     //     counter = strtoull((const char *)str, &endptr, 10);
     //     if (counter == 0 && str == endptr) {
@@ -648,7 +451,6 @@ static void interface_create(val_value_t* interface_val)
 
 static int update_config(val_value_t* config_cur_val, val_value_t* config_new_val)
 {
-    printf("\n[debug] in update_config\n");
     status_t res;
 
     val_value_t *interfaces_cur_val, *interface_cur_val;
@@ -755,6 +557,40 @@ ietf_interfaces_state_list_get(
     struct devicepb_Info device_out;
     device_Device_GetDeviceInfo(&in2, &device_out);
 
+    struct devicepb_PortList in4;
+    struct rmonpb_Ingress ingress_out;
+    struct devicepb_PortList in5;
+    struct rmonpb_Egress egress_out;
+    in4.List_Len = 30;
+    in5.List_Len = 30;
+    in4.List = malloc(in4.List_Len * sizeof(*(in4.List)));
+    in5.List = malloc(in5.List_Len * sizeof(*(in5.List)));
+
+    for (int i = 0; i< in4.List_Len;i++) {
+        struct devicepb_InterfaceIdentify *tmp = malloc(sizeof(*(tmp)));
+        struct devicepb_InterfaceIdentify *tmp2 = malloc(sizeof(*(tmp2)));
+        tmp->PortNo = i+1;
+        tmp->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
+        tmp->DeviceID = 0;
+        tmp->LAGNo = 0;
+
+        tmp2->PortNo = i+1;
+        tmp2->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
+        tmp2->DeviceID = 0;
+        tmp2->LAGNo = 0;
+        log_debug("\nprinting list1 %d\n", i);
+        in4.List[i] = tmp;
+        log_debug("\nprinting list2 %d\n", i);
+        in5.List[i] = tmp2;
+        free(tmp);
+        free(tmp2);
+    }
+
+    rmon_RMON_GetIngress(&in4, &ingress_out);
+    rmon_RMON_GetEgress(&in5, &egress_out);
+
+    log_debug("\nlen of ingeress_out %d\n", ingress_out.List_Len);
+    log_debug("\nlen of out_list_len %d\n", out.List_Len);
     for (int i =0; i < out.List_Len; i++) {
         val_value_t *entry_val = NULL;
         entry_val = agt_make_list(
@@ -766,8 +602,7 @@ ietf_interfaces_state_list_get(
         } else if (res!=NO_ERR) {
             return SET_ERROR(res);
         }
-
-        res = add_interface_state_entry(entry_val, out.List[i], status_out.List[i], &device_out);
+        res = add_interface_state_entry(entry_val, out.List[i], status_out.List[i], &device_out, ingress_out.List[i], egress_out.List[i]);
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
@@ -799,8 +634,9 @@ status_t
     status_t res;
 
     val_value_t *clivalset;
-
-    printf("@@@@ y_ietf_interfaces_init\n");
+    if (LOGDEBUG) {
+        log_debug("@@@@ y_ietf_interfaces_init\n");
+    }
     /* check for --with-nmda=true (param defined in netconfd-ex.yang) */
     clivalset = agt_cli_get_valset();
     with_nmda_param_val = val_find_child(clivalset, "netconfd-ex", "with-nmda");
@@ -852,13 +688,17 @@ status_t y_ietf_interfaces_init2(void)
     val_value_t* root_val;
 
     res = NO_ERR;
-    printf("@@@@ y_ietf_interfaces_init2 \n");
+    if (LOGDEBUG) {
+        log_debug("@@@@ y_ietf_interfaces_init2 \n");
+    }
 
     mod = ncx_find_module(ietf_interfaces, NULL);
     assert(mod);
 
     if(with_nmda_param_val && VAL_BOOL(with_nmda_param_val)) {
-        printf("@@@@ not support nmda\n");
+        if (LOGDEBUG) {
+            log_debug("@@@@ not support nmda\n");
+        }
         return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
     cfg_template_t* runningcfg;

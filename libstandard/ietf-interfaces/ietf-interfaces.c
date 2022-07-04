@@ -83,6 +83,98 @@ static val_value_t* with_nmda_param_val;
 
 
 static status_t
+    add_interface_entry(val_value_t *parentval,
+        struct portpb_ConfigEntry *entry)
+{
+    /*objs*/
+    obj_template_t* name_obj;
+    obj_template_t* oper_status_obj;
+    obj_template_t* last_change_obj;
+    obj_template_t* statistics_obj;
+    obj_template_t* obj;
+
+    /*vals*/
+    val_value_t* interface_state_val;
+    val_value_t* name_val;
+    val_value_t* oper_status_val;
+    val_value_t* last_change_val;
+    val_value_t* statistics_val;
+    val_value_t* val;
+
+    status_t res=NO_ERR;
+    val_value_t *childval = NULL;
+    boolean done;
+    char name[6];
+    char* str;
+    char* endptr;
+    unsigned int i;
+    uint64_t counter;
+    int ret;
+
+
+    assert(entry != NULL);
+
+    /* interface/name */
+    xmlChar *name_as_index[10];
+    sprintf(name_as_index, "Port%d", entry->IdentifyNo->PortNo);
+
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_name,
+        name_as_index,
+        &res);
+
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* interface/description */
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_description,
+        entry->Alias,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    // [FIXME] open this will get Error 258 invalid value, check it later
+    // /* interface/type */
+    // int32_t *if_type = 6; // ethernetCsmacd(6)
+    // childval = agt_make_int_leaf(
+    //     parentval->obj,
+    //     ietf_interfaces_interfaces_type,
+    //     if_type,
+    //     &res);
+    // if (childval != NULL) {
+    //     val_add_child_sorted(childval, parentval);
+    // } else if (res != NO_ERR) {
+    //     return SET_ERROR(res);
+    // }
+
+    /* interface/enabled */
+    const xmlChar * enabled = "false";
+    if (entry->PortOperation) {
+        enabled = "true";
+    }
+    childval = agt_make_leaf(
+        parentval->obj,
+        ietf_interfaces_interfaces_enabled,
+        enabled,
+        &res);
+    if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    return res;
+}
+static status_t
     add_interface_state_entry(val_value_t *parentval,
         struct portpb_ConfigEntry *entry,
         struct portpb_StatusEntry *status_entry,
@@ -534,6 +626,43 @@ static status_t y_commit_complete(void)
 }
 
 static status_t
+ietf_interfaces_list_get(
+    ses_cb_t *scb,
+    getcb_mode_t cbmode,
+    const val_value_t *virval,
+    val_value_t *dstval) {
+    status_t res = NO_ERR;
+
+    if (LOGDEBUG) {
+        log_debug("\nEnter intri_device_intri_device_port_list_get");
+    }
+
+    struct emptypb_Empty *in = malloc(sizeof(*(in)));
+    struct portpb_Config *out= malloc(sizeof(*(out)));
+    port_Port_GetConfig(in, out);
+
+    for (int i =0; i < out->List_Len; i++) {
+        val_value_t *entry_val = NULL;
+        entry_val = agt_make_list(
+            dstval->obj,
+            ietf_interfaces_interface,
+            &res);
+        if (entry_val != NULL) {
+            val_add_child(entry_val, dstval);
+        } else if (res!=NO_ERR) {
+            return SET_ERROR(res);
+        }
+        res = add_interface_entry(entry_val, out->List[i]);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+    }
+
+    free(out);
+    return res;
+}
+
+static status_t
 ietf_interfaces_state_list_get(
     ses_cb_t *scb,
     getcb_mode_t cbmode,
@@ -613,6 +742,17 @@ ietf_interfaces_state_list_get(
     free(in3);
     free(in4);
     free(in5);
+    return res;
+}
+
+static status_t
+ietf_interfaces_interfaces_mro(val_value_t *parentval) {
+    status_t res = NO_ERR;
+
+    val_init_virtual(
+        parentval,
+        ietf_interfaces_list_get,
+        parentval->obj);
     return res;
 }
 
@@ -721,9 +861,16 @@ status_t y_ietf_interfaces_init2(void)
                                     ietf_interfaces,
                                     ietf_interfaces_interfaces_state_container);
 
+    interfaces_obj = ncx_find_object(
+        mod,
+        ietf_interfaces_interfaces_container);
+    interfaces_val = val_find_child(root_val,
+                                    ietf_interfaces,
+                                    ietf_interfaces_interfaces_container);
 
     /* not designed to coexist with other implementations */
     assert(interfaces_state_val==NULL);
+    assert(interfaces_val==NULL);
     res = agt_add_top_container(interfaces_state_obj, &interfaces_state_val);
     if (res != NO_ERR) {
         return SET_ERROR(res);
@@ -731,6 +878,16 @@ status_t y_ietf_interfaces_init2(void)
 
 
     res = ietf_interfaces_interface_state_mro(interfaces_state_val);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = agt_add_top_container(interfaces_obj, &interfaces_val);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = ietf_interfaces_interfaces_mro(interfaces_val);
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }

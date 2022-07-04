@@ -1,5 +1,8 @@
 
 
+t-msg:
+	gcc ./go.msg.sample.c -lintrishare -lpthread -o go.msg.sample.o; ./go.msg.sample.o
+
 t-list:
 	gcc ./go.list.sample.c -lintrishare -lpthread -o go.list.sample.o; ./go.list.sample.o
 

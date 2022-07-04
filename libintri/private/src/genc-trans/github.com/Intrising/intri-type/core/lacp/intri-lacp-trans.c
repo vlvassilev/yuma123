@@ -32,496 +32,524 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_lacp_Config (
+
+status_t build_to_xml_lacp_Config(
     val_value_t *parentval,
     struct lacppb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "System",
-    &res);
+      "System",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lacp_SystemConfig(
+  res = build_to_xml_lacp_SystemConfig(
       childval,
-    entry->System);
+      entry->System);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LAG",
-    &res);
+      "LAG",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lacp_LAGConfig(
+  res = build_to_xml_lacp_LAGConfig(
       childval,
-    entry->LAG);
+      entry->LAG);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lacp_SystemConfig (
+status_t build_to_xml_lacp_SystemConfig(
     val_value_t *parentval,
     struct lacppb_SystemConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SystemPriority",
-    &res);
+      "SystemPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SystemPriority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case lacppb_ModeTypeOptions_MODE_TYPE_PASSIVE:
+      enum_str = "MODE_TYPE_PASSIVE";
+      break;
+    case lacppb_ModeTypeOptions_MODE_TYPE_ACTIVE:
+      enum_str = "MODE_TYPE_ACTIVE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "TransmitInterval",
-    &res);
+      "TransmitInterval",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->TransmitInterval;
+  switch (entry->TransmitInterval) {
+    case lacppb_IntervalTypeOptions_INTERVAL_TYPE_SLOW:
+      enum_str = "INTERVAL_TYPE_SLOW";
+      break;
+    case lacppb_IntervalTypeOptions_INTERVAL_TYPE_FAST:
+      enum_str = "INTERVAL_TYPE_FAST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_lacp_LAGConfig (
+status_t build_to_xml_lacp_LAGConfig(
     val_value_t *parentval,
     struct lacppb_LAGConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Lists",
-    &res);
+      "Lists",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Lists_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Lists_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lacp_LAGConfigEntry(
-    listval,
-    entry->Lists[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Lists_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lacp_LAGConfigEntry(
+        listval,
+        entry->Lists[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_lacp_LAGConfigEntry (
+status_t build_to_xml_lacp_LAGConfigEntry(
     val_value_t *parentval,
     struct lacppb_LAGConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "TrunkID",
-    &res);
+      "TrunkID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TrunkID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LacpEnable",
-    &res);
+      "LacpEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LacpEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LacpEnable) {
+    case lacppb_ConfigLinkAggregationTypeOptions_CONFIG_LINK_AGGREGATION_STATIC:
+      enum_str = "CONFIG_LINK_AGGREGATION_STATIC";
+      break;
+    case lacppb_ConfigLinkAggregationTypeOptions_CONFIG_LINK_AGGREGATION_DYNAMIC:
+      enum_str = "CONFIG_LINK_AGGREGATION_DYNAMIC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Identify",
-    &res);
+      "Identify",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_PortList(
+  res = build_to_xml_device_PortList(
       childval,
-    entry->Identify);
+      entry->Identify);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lacp_Status (
+status_t build_to_xml_lacp_Status(
     val_value_t *parentval,
     struct lacppb_Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortLists",
-    &res);
+      "PortLists",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortLists_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortLists_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lacp_StatusEntry(
-    listval,
-    entry->PortLists[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortLists_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lacp_StatusEntry(
+        listval,
+        entry->PortLists[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_lacp_StatusEntry (
+status_t build_to_xml_lacp_StatusEntry(
     val_value_t *parentval,
     struct lacppb_StatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "TrunkID",
-    &res);
+      "TrunkID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TrunkID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LacpEnable",
-    &res);
+      "LacpEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LacpEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LacpEnable) {
+    case lacppb_ConfigLinkAggregationTypeOptions_CONFIG_LINK_AGGREGATION_STATIC:
+      enum_str = "CONFIG_LINK_AGGREGATION_STATIC";
+      break;
+    case lacppb_ConfigLinkAggregationTypeOptions_CONFIG_LINK_AGGREGATION_DYNAMIC:
+      enum_str = "CONFIG_LINK_AGGREGATION_DYNAMIC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Actor",
-    &res);
+      "Actor",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lacp_ActorPartnerInfo(
+  res = build_to_xml_lacp_ActorPartnerInfo(
       childval,
-    entry->Actor);
+      entry->Actor);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Partner",
-    &res);
+      "Partner",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lacp_ActorPartnerInfo(
+  res = build_to_xml_lacp_ActorPartnerInfo(
       childval,
-    entry->Partner);
+      entry->Partner);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lacp_ActorPartnerInfo (
+status_t build_to_xml_lacp_ActorPartnerInfo(
     val_value_t *parentval,
     struct lacppb_ActorPartnerInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortPriority",
-    &res);
+      "PortPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortPriority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SystemPriority",
-    &res);
+      "SystemPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SystemPriority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bytes */
   VAL_STRING(childval) = entry->MACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdminKey",
-    &res);
+      "AdminKey",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->AdminKey;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OperKey",
-    &res);
+      "OperKey",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->OperKey;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Status",
-    &res);
+      "Status",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lacp_State(
+  res = build_to_xml_lacp_State(
       childval,
-    entry->Status);
+      entry->Status);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lacp_State (
+status_t build_to_xml_lacp_State(
     val_value_t *parentval,
     struct lacppb_State *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Activity",
-    &res);
+      "Activity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Activity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Timeout",
-    &res);
+      "Timeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Timeout;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Aggr",
-    &res);
+      "Aggr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Aggr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Sync",
-    &res);
+      "Sync",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Sync;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Collect",
-    &res);
+      "Collect",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Collect;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Distribute",
-    &res);
+      "Distribute",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Distribute;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Defaulted",
-    &res);
+      "Defaulted",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Defaulted;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Expired",
-    &res);
+      "Expired",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -530,3 +558,347 @@ status_t build_to_xml_lacp_State (
   return res;
 }
 
+status_t build_to_priv_lacp_Config(
+    val_value_t *parentval,
+    struct lacppb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "System");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->System = malloc(sizeof(*(entry->System)));
+    res = build_to_priv_lacp_SystemConfig(
+        childval,
+        entry->System);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LAG");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->LAG = malloc(sizeof(*(entry->LAG)));
+    res = build_to_priv_lacp_LAGConfig(
+        childval,
+        entry->LAG);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lacp_SystemConfig(
+    val_value_t *parentval,
+    struct lacppb_SystemConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SystemPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SystemPriority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TransmitInterval");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->TransmitInterval = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lacp_LAGConfig(
+    val_value_t *parentval,
+    struct lacppb_LAGConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Lists");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Lists_Len = dlq_count(&childval->v.childQ);
+    entry->Lists = malloc((entry->Lists_Len + 1) * sizeof(*entry->Lists));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Lists[cnt] = malloc(sizeof(*(entry->Lists[cnt])));
+      res = build_to_priv_lacp_LAGConfigEntry(
+          listval,
+          entry->Lists[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lacp_LAGConfigEntry(
+    val_value_t *parentval,
+    struct lacppb_LAGConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "TrunkID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TrunkID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LacpEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LacpEnable = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Identify");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Identify = malloc(sizeof(*(entry->Identify)));
+    res = build_to_priv_device_PortList(
+        childval,
+        entry->Identify);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lacp_Status(
+    val_value_t *parentval,
+    struct lacppb_Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortLists");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortLists_Len = dlq_count(&childval->v.childQ);
+    entry->PortLists = malloc((entry->PortLists_Len + 1) * sizeof(*entry->PortLists));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortLists[cnt] = malloc(sizeof(*(entry->PortLists[cnt])));
+      res = build_to_priv_lacp_StatusEntry(
+          listval,
+          entry->PortLists[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lacp_StatusEntry(
+    val_value_t *parentval,
+    struct lacppb_StatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "TrunkID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TrunkID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LacpEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LacpEnable = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Actor");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Actor = malloc(sizeof(*(entry->Actor)));
+    res = build_to_priv_lacp_ActorPartnerInfo(
+        childval,
+        entry->Actor);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Partner");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Partner = malloc(sizeof(*(entry->Partner)));
+    res = build_to_priv_lacp_ActorPartnerInfo(
+        childval,
+        entry->Partner);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lacp_ActorPartnerInfo(
+    val_value_t *parentval,
+    struct lacppb_ActorPartnerInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortPriority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SystemPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SystemPriority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bytes */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminKey");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AdminKey = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OperKey");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->OperKey = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Status");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Status = malloc(sizeof(*(entry->Status)));
+    res = build_to_priv_lacp_State(
+        childval,
+        entry->Status);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lacp_State(
+    val_value_t *parentval,
+    struct lacppb_State *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Activity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Activity = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Timeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Timeout = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Aggr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Aggr = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Sync");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Sync = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Collect");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Collect = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Distribute");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Distribute = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Defaulted");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Defaulted = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Expired");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Expired = VAL_BOOL(childval);
+  }
+  return res;
+}

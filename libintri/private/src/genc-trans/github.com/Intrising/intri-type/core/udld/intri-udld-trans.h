@@ -21,62 +21,91 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_udld_Config (
+extern status_t build_to_xml_udld_Config(
     val_value_t *parentval,
     struct udldpb_Config *entry);
-
-extern status_t build_to_xml_udld_BasicConfig (
+extern status_t build_to_xml_udld_BasicConfig(
     val_value_t *parentval,
     struct udldpb_BasicConfig *entry);
-
-extern status_t build_to_xml_udld_PortConfig (
+extern status_t build_to_xml_udld_PortConfig(
     val_value_t *parentval,
     struct udldpb_PortConfig *entry);
-
-extern status_t build_to_xml_udld_PortConfigEntry (
+extern status_t build_to_xml_udld_PortConfigEntry(
     val_value_t *parentval,
     struct udldpb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_udld_Status (
+extern status_t build_to_xml_udld_Status(
     val_value_t *parentval,
     struct udldpb_Status *entry);
-
-extern status_t build_to_xml_udld_PortStatus (
+extern status_t build_to_xml_udld_PortStatus(
     val_value_t *parentval,
     struct udldpb_PortStatus *entry);
-
-extern status_t build_to_xml_udld_PortStatusEntry (
+extern status_t build_to_xml_udld_PortStatusEntry(
     val_value_t *parentval,
     struct udldpb_PortStatusEntry *entry);
-
-extern status_t build_to_xml_udld_NeighborStatus (
+extern status_t build_to_xml_udld_NeighborStatus(
     val_value_t *parentval,
     struct udldpb_NeighborStatus *entry);
-
-extern status_t build_to_xml_udld_NeighborStatusEntry (
+extern status_t build_to_xml_udld_NeighborStatusEntry(
     val_value_t *parentval,
     struct udldpb_NeighborStatusEntry *entry);
-
-extern status_t build_to_xml_udld_Statistics (
+extern status_t build_to_xml_udld_Statistics(
     val_value_t *parentval,
     struct udldpb_Statistics *entry);
-
-extern status_t build_to_xml_udld_PortStatistics (
+extern status_t build_to_xml_udld_PortStatistics(
     val_value_t *parentval,
     struct udldpb_PortStatistics *entry);
-
-extern status_t build_to_xml_udld_PortStatisticsEntry (
+extern status_t build_to_xml_udld_PortStatisticsEntry(
     val_value_t *parentval,
     struct udldpb_PortStatisticsEntry *entry);
-
-extern status_t build_to_xml_udld_PacketStatistics (
+extern status_t build_to_xml_udld_PacketStatistics(
     val_value_t *parentval,
     struct udldpb_PacketStatistics *entry);
-
-extern status_t build_to_xml_udld_PacketStatisticsEntry (
+extern status_t build_to_xml_udld_PacketStatisticsEntry(
     val_value_t *parentval,
     struct udldpb_PacketStatisticsEntry *entry);
 
+extern status_t build_to_priv_udld_Config(
+    val_value_t *parentval,
+    struct udldpb_Config *entry);
+extern status_t build_to_priv_udld_BasicConfig(
+    val_value_t *parentval,
+    struct udldpb_BasicConfig *entry);
+extern status_t build_to_priv_udld_PortConfig(
+    val_value_t *parentval,
+    struct udldpb_PortConfig *entry);
+extern status_t build_to_priv_udld_PortConfigEntry(
+    val_value_t *parentval,
+    struct udldpb_PortConfigEntry *entry);
+extern status_t build_to_priv_udld_Status(
+    val_value_t *parentval,
+    struct udldpb_Status *entry);
+extern status_t build_to_priv_udld_PortStatus(
+    val_value_t *parentval,
+    struct udldpb_PortStatus *entry);
+extern status_t build_to_priv_udld_PortStatusEntry(
+    val_value_t *parentval,
+    struct udldpb_PortStatusEntry *entry);
+extern status_t build_to_priv_udld_NeighborStatus(
+    val_value_t *parentval,
+    struct udldpb_NeighborStatus *entry);
+extern status_t build_to_priv_udld_NeighborStatusEntry(
+    val_value_t *parentval,
+    struct udldpb_NeighborStatusEntry *entry);
+extern status_t build_to_priv_udld_Statistics(
+    val_value_t *parentval,
+    struct udldpb_Statistics *entry);
+extern status_t build_to_priv_udld_PortStatistics(
+    val_value_t *parentval,
+    struct udldpb_PortStatistics *entry);
+extern status_t build_to_priv_udld_PortStatisticsEntry(
+    val_value_t *parentval,
+    struct udldpb_PortStatisticsEntry *entry);
+extern status_t build_to_priv_udld_PacketStatistics(
+    val_value_t *parentval,
+    struct udldpb_PacketStatistics *entry);
+extern status_t build_to_priv_udld_PacketStatisticsEntry(
+    val_value_t *parentval,
+    struct udldpb_PacketStatisticsEntry *entry);
 
 #endif /* _H_intri_udld_trans */
 

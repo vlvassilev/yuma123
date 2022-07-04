@@ -21,14 +21,19 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_diagnostic_ARPEntry (
+extern status_t build_to_xml_diagnostic_ARPEntry(
     val_value_t *parentval,
     struct diagnosticpb_ARPEntry *entry);
-
-extern status_t build_to_xml_diagnostic_ARPTables (
+extern status_t build_to_xml_diagnostic_ARPTables(
     val_value_t *parentval,
     struct diagnosticpb_ARPTables *entry);
 
+extern status_t build_to_priv_diagnostic_ARPEntry(
+    val_value_t *parentval,
+    struct diagnosticpb_ARPEntry *entry);
+extern status_t build_to_priv_diagnostic_ARPTables(
+    val_value_t *parentval,
+    struct diagnosticpb_ARPTables *entry);
 
 #endif /* _H_intri_diagnostic_trans */
 

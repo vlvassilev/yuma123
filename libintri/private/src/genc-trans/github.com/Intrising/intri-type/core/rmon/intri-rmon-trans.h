@@ -21,42 +21,61 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_rmon_IngressEntry (
+extern status_t build_to_xml_rmon_IngressEntry(
     val_value_t *parentval,
     struct rmonpb_IngressEntry *entry);
-
-extern status_t build_to_xml_rmon_Ingress (
+extern status_t build_to_xml_rmon_Ingress(
     val_value_t *parentval,
     struct rmonpb_Ingress *entry);
-
-extern status_t build_to_xml_rmon_EgressEntry (
+extern status_t build_to_xml_rmon_EgressEntry(
     val_value_t *parentval,
     struct rmonpb_EgressEntry *entry);
-
-extern status_t build_to_xml_rmon_Egress (
+extern status_t build_to_xml_rmon_Egress(
     val_value_t *parentval,
     struct rmonpb_Egress *entry);
-
-extern status_t build_to_xml_rmon_HistogramEntry (
+extern status_t build_to_xml_rmon_HistogramEntry(
     val_value_t *parentval,
     struct rmonpb_HistogramEntry *entry);
-
-extern status_t build_to_xml_rmon_Histogram (
+extern status_t build_to_xml_rmon_Histogram(
     val_value_t *parentval,
     struct rmonpb_Histogram *entry);
-
-extern status_t build_to_xml_rmon_UtilizationRate (
+extern status_t build_to_xml_rmon_UtilizationRate(
     val_value_t *parentval,
     struct rmonpb_UtilizationRate *entry);
-
-extern status_t build_to_xml_rmon_UtilizationEntry (
+extern status_t build_to_xml_rmon_UtilizationEntry(
     val_value_t *parentval,
     struct rmonpb_UtilizationEntry *entry);
-
-extern status_t build_to_xml_rmon_Utilization (
+extern status_t build_to_xml_rmon_Utilization(
     val_value_t *parentval,
     struct rmonpb_Utilization *entry);
 
+extern status_t build_to_priv_rmon_IngressEntry(
+    val_value_t *parentval,
+    struct rmonpb_IngressEntry *entry);
+extern status_t build_to_priv_rmon_Ingress(
+    val_value_t *parentval,
+    struct rmonpb_Ingress *entry);
+extern status_t build_to_priv_rmon_EgressEntry(
+    val_value_t *parentval,
+    struct rmonpb_EgressEntry *entry);
+extern status_t build_to_priv_rmon_Egress(
+    val_value_t *parentval,
+    struct rmonpb_Egress *entry);
+extern status_t build_to_priv_rmon_HistogramEntry(
+    val_value_t *parentval,
+    struct rmonpb_HistogramEntry *entry);
+extern status_t build_to_priv_rmon_Histogram(
+    val_value_t *parentval,
+    struct rmonpb_Histogram *entry);
+extern status_t build_to_priv_rmon_UtilizationRate(
+    val_value_t *parentval,
+    struct rmonpb_UtilizationRate *entry);
+extern status_t build_to_priv_rmon_UtilizationEntry(
+    val_value_t *parentval,
+    struct rmonpb_UtilizationEntry *entry);
+extern status_t build_to_priv_rmon_Utilization(
+    val_value_t *parentval,
+    struct rmonpb_Utilization *entry);
 
 #endif /* _H_intri_rmon_trans */
 

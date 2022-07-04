@@ -32,84 +32,87 @@
 
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_network_Config (
+
+status_t build_to_xml_network_Config(
     val_value_t *parentval,
     struct networkpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Basic",
-    &res);
+      "Basic",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_BasicConfig(
+  res = build_to_xml_network_BasicConfig(
       childval,
-    entry->Basic);
+      entry->Basic);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IP",
-    &res);
+      "IP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_IPConfig(
+  res = build_to_xml_network_IPConfig(
       childval,
-    entry->IP);
+      entry->IP);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_network_BasicConfig (
+status_t build_to_xml_network_BasicConfig(
     val_value_t *parentval,
     struct networkpb_BasicConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "HostName",
-    &res);
+      "HostName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->HostName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DomainName",
-    &res);
+      "DomainName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DomainName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LocalMTU",
-    &res);
+      "LocalMTU",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -117,263 +120,280 @@ status_t build_to_xml_network_BasicConfig (
   VAL_INT(childval) = entry->LocalMTU;
   return res;
 }
-
-status_t build_to_xml_network_IPConfig (
+status_t build_to_xml_network_IPConfig(
     val_value_t *parentval,
     struct networkpb_IPConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "V4",
-    &res);
+      "V4",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_IPv4Config(
+  res = build_to_xml_network_IPv4Config(
       childval,
-    entry->V4);
+      entry->V4);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "V6",
-    &res);
+      "V6",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_IPv6Config(
+  res = build_to_xml_network_IPv6Config(
       childval,
-    entry->V6);
+      entry->V6);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_network_IPv4Config (
+status_t build_to_xml_network_IPv4Config(
     val_value_t *parentval,
     struct networkpb_IPv4Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DHCPMode",
-    &res);
+      "DHCPMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DHCPMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->DHCPMode) {
+    case networkpb_IPv4DhcpModeTypeOptions_IPV4_DHCP_MODE_TYPE_DISABLED:
+      enum_str = "IPV4_DHCP_MODE_TYPE_DISABLED";
+      break;
+    case networkpb_IPv4DhcpModeTypeOptions_IPV4_DHCP_MODE_TYPE_USE_DHCP:
+      enum_str = "IPV4_DHCP_MODE_TYPE_USE_DHCP";
+      break;
+    case networkpb_IPv4DhcpModeTypeOptions_IPV4_DHCP_MODE_TYPE_DHCP_WITH_OPTION_66_67:
+      enum_str = "IPV4_DHCP_MODE_TYPE_DHCP_WITH_OPTION_66_67";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Static",
-    &res);
+      "Static",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_IPv4Static(
+  res = build_to_xml_network_IPv4Static(
       childval,
-    entry->Static);
+      entry->Static);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_network_IPv4Static (
+status_t build_to_xml_network_IPv4Static(
     val_value_t *parentval,
     struct networkpb_IPv4Static *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddress",
-    &res);
+      "IPAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IPAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SubnetMask",
-    &res);
+      "SubnetMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SubnetMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Gateway",
-    &res);
+      "Gateway",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Gateway;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DNSServer",
-    &res);
+      "DNSServer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DNSServer;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SecondaryDeviceIP",
-    &res);
+      "SecondaryDeviceIP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SecondaryDeviceIP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SecondarySubnetMask",
-    &res);
+      "SecondarySubnetMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SecondarySubnetMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DefaultAddressSelection",
-    &res);
+      "DefaultAddressSelection",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DefaultAddressSelection;
+  switch (entry->DefaultAddressSelection) {
+    case networkpb_IPV4ConfigDefaultAddressSelectionTypeOptions_IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_PRIMARY:
+      enum_str = "IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_PRIMARY";
+      break;
+    case networkpb_IPV4ConfigDefaultAddressSelectionTypeOptions_IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_SECONDARY:
+      enum_str = "IPV4_CONFIG_DEFAULT_ADDRESS_SELECTION_TYPE_SECONDARY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_network_IPv6Config (
+status_t build_to_xml_network_IPv6Config(
     val_value_t *parentval,
     struct networkpb_IPv6Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IcmpAutoAddressEnabled",
-    &res);
+      "IcmpAutoAddressEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IcmpAutoAddressEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AutoConfigurationEnabled",
-    &res);
+      "AutoConfigurationEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->AutoConfigurationEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Static",
-    &res);
+      "Static",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_IPv6Static(
+  res = build_to_xml_network_IPv6Static(
       childval,
-    entry->Static);
+      entry->Static);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_network_IPv6Static (
+status_t build_to_xml_network_IPv6Static(
     val_value_t *parentval,
     struct networkpb_IPv6Static *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DNSServer",
-    &res);
+      "DNSServer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DNSServer;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddress",
-    &res);
+      "IPAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -381,103 +401,98 @@ status_t build_to_xml_network_IPv6Static (
   VAL_STRING(childval) = entry->IPAddress;
   return res;
 }
-
-status_t build_to_xml_network_IPv4Status (
+status_t build_to_xml_network_IPv4Status(
     val_value_t *parentval,
     struct networkpb_IPv4Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicDeviceIP",
-    &res);
+      "DynamicDeviceIP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicDeviceIP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicSubnetMask",
-    &res);
+      "DynamicSubnetMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicSubnetMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicGateway",
-    &res);
+      "DynamicGateway",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicGateway;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicDNSServer1",
-    &res);
+      "DynamicDNSServer1",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicDNSServer1;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicDNSServer2",
-    &res);
+      "DynamicDNSServer2",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicDNSServer2;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicDNSServer3",
-    &res);
+      "DynamicDNSServer3",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicDNSServer3;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DynamicDNSServer4",
-    &res);
+      "DynamicDNSServer4",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DynamicDNSServer4;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OutgoingDeviceIP",
-    &res);
+      "OutgoingDeviceIP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -485,73 +500,442 @@ status_t build_to_xml_network_IPv4Status (
   VAL_STRING(childval) = entry->OutgoingDeviceIP;
   return res;
 }
-
-status_t build_to_xml_network_IPv6StatusEntry (
+status_t build_to_xml_network_IPv6StatusEntry(
     val_value_t *parentval,
     struct networkpb_IPv6StatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddress",
-    &res);
+      "IPAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IPAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Scope",
-    &res);
+      "Scope",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Scope;
+  switch (entry->Scope) {
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_LINK:
+      enum_str = "IPV6_SCOPE_TYPE_LINK";
+      break;
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_SITE:
+      enum_str = "IPV6_SCOPE_TYPE_SITE";
+      break;
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_GLOBAL:
+      enum_str = "IPV6_SCOPE_TYPE_GLOBAL";
+      break;
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_OTHER:
+      enum_str = "IPV6_SCOPE_TYPE_OTHER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_network_IPv6Status (
+status_t build_to_xml_network_IPv6Status(
     val_value_t *parentval,
     struct networkpb_IPv6Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_network_IPv6StatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_network_IPv6StatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_network_Config(
+    val_value_t *parentval,
+    struct networkpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Basic");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Basic = malloc(sizeof(*(entry->Basic)));
+    res = build_to_priv_network_BasicConfig(
+        childval,
+        entry->Basic);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IP = malloc(sizeof(*(entry->IP)));
+    res = build_to_priv_network_IPConfig(
+        childval,
+        entry->IP);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_network_BasicConfig(
+    val_value_t *parentval,
+    struct networkpb_BasicConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "HostName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->HostName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DomainName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DomainName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LocalMTU");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->LocalMTU = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_network_IPConfig(
+    val_value_t *parentval,
+    struct networkpb_IPConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "V4");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->V4 = malloc(sizeof(*(entry->V4)));
+    res = build_to_priv_network_IPv4Config(
+        childval,
+        entry->V4);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "V6");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->V6 = malloc(sizeof(*(entry->V6)));
+    res = build_to_priv_network_IPv6Config(
+        childval,
+        entry->V6);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv4Config(
+    val_value_t *parentval,
+    struct networkpb_IPv4Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DHCPMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DHCPMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Static");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Static = malloc(sizeof(*(entry->Static)));
+    res = build_to_priv_network_IPv4Static(
+        childval,
+        entry->Static);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv4Static(
+    val_value_t *parentval,
+    struct networkpb_IPv4Static *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IPAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SubnetMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SubnetMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Gateway");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Gateway = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DNSServer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DNSServer = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SecondaryDeviceIP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SecondaryDeviceIP = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SecondarySubnetMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SecondarySubnetMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DefaultAddressSelection");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DefaultAddressSelection = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv6Config(
+    val_value_t *parentval,
+    struct networkpb_IPv6Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IcmpAutoAddressEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IcmpAutoAddressEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AutoConfigurationEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->AutoConfigurationEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Static");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Static = malloc(sizeof(*(entry->Static)));
+    res = build_to_priv_network_IPv6Static(
+        childval,
+        entry->Static);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv6Static(
+    val_value_t *parentval,
+    struct networkpb_IPv6Static *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DNSServer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DNSServer = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddress = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv4Status(
+    val_value_t *parentval,
+    struct networkpb_IPv4Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DynamicDeviceIP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicDeviceIP = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DynamicSubnetMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicSubnetMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DynamicGateway");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicGateway = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DynamicDNSServer1");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicDNSServer1 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DynamicDNSServer2");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicDNSServer2 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DynamicDNSServer3");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicDNSServer3 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DynamicDNSServer4");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DynamicDNSServer4 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OutgoingDeviceIP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->OutgoingDeviceIP = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv6StatusEntry(
+    val_value_t *parentval,
+    struct networkpb_IPv6StatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IPAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Scope");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Scope = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_network_IPv6Status(
+    val_value_t *parentval,
+    struct networkpb_IPv6Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_network_IPv6StatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

@@ -33,140 +33,188 @@
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/Intrising/intri-type/event/intri-event-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_access_AuthenticationMode (
+
+status_t build_to_xml_access_AuthenticationMode(
     val_value_t *parentval,
     struct accesspb_AuthenticationMode *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_LOCAL:
+      enum_str = "AUTHENTICATION_MODE_TYPE_LOCAL";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_LOCAL_THEN_RADIUS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_LOCAL_THEN_RADIUS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_RADIUS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_RADIUS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_LOCAL_THEN_TACACS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_LOCAL_THEN_TACACS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_TACACS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_TACACS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_RADIUS_THEN_LOCAL:
+      enum_str = "AUTHENTICATION_MODE_TYPE_RADIUS_THEN_LOCAL";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_TACACS_THEN_LOCAL:
+      enum_str = "AUTHENTICATION_MODE_TYPE_TACACS_THEN_LOCAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_access_AuthenticationConfig (
+status_t build_to_xml_access_AuthenticationConfig(
     val_value_t *parentval,
     struct accesspb_AuthenticationConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_LOCAL:
+      enum_str = "AUTHENTICATION_MODE_TYPE_LOCAL";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_LOCAL_THEN_RADIUS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_LOCAL_THEN_RADIUS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_RADIUS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_RADIUS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_LOCAL_THEN_TACACS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_LOCAL_THEN_TACACS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_TACACS:
+      enum_str = "AUTHENTICATION_MODE_TYPE_TACACS";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_RADIUS_THEN_LOCAL:
+      enum_str = "AUTHENTICATION_MODE_TYPE_RADIUS_THEN_LOCAL";
+      break;
+    case accesspb_AuthenticationModeTypeOptions_AUTHENTICATION_MODE_TYPE_TACACS_THEN_LOCAL:
+      enum_str = "AUTHENTICATION_MODE_TYPE_TACACS_THEN_LOCAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "RADIUS",
-    &res);
+      "RADIUS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_AuthenticationRADIUS(
+  res = build_to_xml_access_AuthenticationRADIUS(
       childval,
-    entry->RADIUS);
+      entry->RADIUS);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TACACS",
-    &res);
+      "TACACS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_AuthenticationTACACS(
+  res = build_to_xml_access_AuthenticationTACACS(
       childval,
-    entry->TACACS);
+      entry->TACACS);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_access_AuthenticationTACACS (
+status_t build_to_xml_access_AuthenticationTACACS(
     val_value_t *parentval,
     struct accesspb_AuthenticationTACACS *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PrimaryAuthServerName",
-    &res);
+      "PrimaryAuthServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->PrimaryAuthServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FallbackAuthServerName",
-    &res);
+      "FallbackAuthServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FallbackAuthServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserPrivilegeLevel0",
-    &res);
+      "UserPrivilegeLevel0",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserPrivilegeLevel0;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserPrivilegeLevel1",
-    &res);
+      "UserPrivilegeLevel1",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserPrivilegeLevel1;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserPrivilegeLevel15",
-    &res);
+      "UserPrivilegeLevel15",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -174,55 +222,54 @@ status_t build_to_xml_access_AuthenticationTACACS (
   VAL_STRING(childval) = entry->UserPrivilegeLevel15;
   return res;
 }
-
-status_t build_to_xml_access_AuthenticationRADIUS (
+status_t build_to_xml_access_AuthenticationRADIUS(
     val_value_t *parentval,
     struct accesspb_AuthenticationRADIUS *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PrimaryAuthServerName",
-    &res);
+      "PrimaryAuthServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->PrimaryAuthServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FallbackAuthServerName",
-    &res);
+      "FallbackAuthServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FallbackAuthServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserPrivilegeLevel6",
-    &res);
+      "UserPrivilegeLevel6",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserPrivilegeLevel6;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserPrivilegeLevel7",
-    &res);
+      "UserPrivilegeLevel7",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -230,79 +277,84 @@ status_t build_to_xml_access_AuthenticationRADIUS (
   VAL_STRING(childval) = entry->UserPrivilegeLevel7;
   return res;
 }
-
-status_t build_to_xml_access_AuthenticationServerEntry (
+status_t build_to_xml_access_AuthenticationServerEntry(
     val_value_t *parentval,
     struct accesspb_AuthenticationServerEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ServerType",
-    &res);
+      "ServerType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ServerType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ServerType) {
+    case accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_RADIUS:
+      enum_str = "AUTHENTICATION_SERVER_TYPE_RADIUS";
+      break;
+    case accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_TACACS:
+      enum_str = "AUTHENTICATION_SERVER_TYPE_TACACS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "HostAddress",
-    &res);
+      "HostAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->HostAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortNumber",
-    &res);
+      "PortNumber",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNumber;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SharedSecret",
-    &res);
+      "SharedSecret",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SharedSecret;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InterimInterval",
-    &res);
+      "InterimInterval",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -310,68 +362,71 @@ status_t build_to_xml_access_AuthenticationServerEntry (
   VAL_LONG(childval) = entry->InterimInterval;
   return res;
 }
-
-status_t build_to_xml_access_AuthenticationServersConfig (
+status_t build_to_xml_access_AuthenticationServersConfig(
     val_value_t *parentval,
     struct accesspb_AuthenticationServersConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_AuthenticationServerEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_AuthenticationServerEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_LoginRequest (
+status_t build_to_xml_access_LoginRequest(
     val_value_t *parentval,
     struct accesspb_LoginRequest *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Account",
-    &res);
+      "Account",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Account;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Password",
-    &res);
+      "Password",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -379,43 +434,54 @@ status_t build_to_xml_access_LoginRequest (
   VAL_STRING(childval) = entry->Password;
   return res;
 }
-
-status_t build_to_xml_access_RestrictionEntry (
+status_t build_to_xml_access_RestrictionEntry(
     val_value_t *parentval,
     struct accesspb_RestrictionEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case accesspb_RestrictionModeTypeOptions_RESTRICTION_MODE_TYPE_UNUSED:
+      enum_str = "RESTRICTION_MODE_TYPE_UNUSED";
+      break;
+    case accesspb_RestrictionModeTypeOptions_RESTRICTION_MODE_TYPE_PERMIT:
+      enum_str = "RESTRICTION_MODE_TYPE_PERMIT";
+      break;
+    case accesspb_RestrictionModeTypeOptions_RESTRICTION_MODE_TYPE_DENY:
+      enum_str = "RESTRICTION_MODE_TYPE_DENY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddress",
-    &res);
+      "IPAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -423,212 +489,266 @@ status_t build_to_xml_access_RestrictionEntry (
   VAL_STRING(childval) = entry->IPAddress;
   return res;
 }
-
-status_t build_to_xml_access_RestrictionsConfig (
+status_t build_to_xml_access_RestrictionsConfig(
     val_value_t *parentval,
     struct accesspb_RestrictionsConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_RestrictionEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_RestrictionEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_UserEntry (
+status_t build_to_xml_access_UserEntry(
     val_value_t *parentval,
     struct accesspb_UserEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AssociatedGroups",
-    &res);
+      "AssociatedGroups",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->AssociatedGroups_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "AssociatedGroups_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->AssociatedGroups[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "AssociatedGroups_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->AssociatedGroups[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GeneralAccessRights",
-    &res);
+      "GeneralAccessRights",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->GeneralAccessRights;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->GeneralAccessRights) {
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_NO_ACCESS:
+      enum_str = "RIGHTS_TYPE_NO_ACCESS";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_EXECUTE_ONLY:
+      enum_str = "RIGHTS_TYPE_EXECUTE_ONLY";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_ONLY:
+      enum_str = "RIGHTS_TYPE_READ_ONLY";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_WRITE:
+      enum_str = "RIGHTS_TYPE_READ_WRITE";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_EXECUTE:
+      enum_str = "RIGHTS_TYPE_READ_EXECUTE";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_WRITE_EXECUTE:
+      enum_str = "RIGHTS_TYPE_READ_WRITE_EXECUTE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "TelnetAccessEnabled",
-    &res);
+      "TelnetAccessEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->TelnetAccessEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SSHAccessEnabled",
-    &res);
+      "SSHAccessEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SSHAccessEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "WebAccessEnabled",
-    &res);
+      "WebAccessEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->WebAccessEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPAccessEnabled",
-    &res);
+      "SNMPAccessEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SNMPAccessEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EncryptedAuthPassword",
-    &res);
+      "EncryptedAuthPassword",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->EncryptedAuthPassword;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV3SecurityLevel",
-    &res);
+      "SNMPV3SecurityLevel",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SNMPV3SecurityLevel;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SNMPV3SecurityLevel) {
+    case accesspb_UserEntrySNMPV3SecurityLevelTypeOptions_USER_ENTRY_SNMP_V3_SECURITY_LEVEL_TYPE_NO_AUTH_NO_PRIV:
+      enum_str = "USER_ENTRY_SNMP_V3_SECURITY_LEVEL_TYPE_NO_AUTH_NO_PRIV";
+      break;
+    case accesspb_UserEntrySNMPV3SecurityLevelTypeOptions_USER_ENTRY_SNMP_V3_SECURITY_LEVEL_TYPE_AUTH_NO_PRIV:
+      enum_str = "USER_ENTRY_SNMP_V3_SECURITY_LEVEL_TYPE_AUTH_NO_PRIV";
+      break;
+    case accesspb_UserEntrySNMPV3SecurityLevelTypeOptions_USER_ENTRY_SNMP_V3_SECURITY_LEVEL_TYPE_AUTH_PRIV:
+      enum_str = "USER_ENTRY_SNMP_V3_SECURITY_LEVEL_TYPE_AUTH_PRIV";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV3AuthAlgorithm",
-    &res);
+      "SNMPV3AuthAlgorithm",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SNMPV3AuthAlgorithm;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SNMPV3AuthAlgorithm) {
+    case accesspb_UserEntrySNMPV3AuthAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_NO_AUTHENTICATION:
+      enum_str = "USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_NO_AUTHENTICATION";
+      break;
+    case accesspb_UserEntrySNMPV3AuthAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_MD5:
+      enum_str = "USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_MD5";
+      break;
+    case accesspb_UserEntrySNMPV3AuthAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_SHA_1:
+      enum_str = "USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_SHA_1";
+      break;
+    case accesspb_UserEntrySNMPV3AuthAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_SHA_256:
+      enum_str = "USER_ENTRY_SNMP_V3_AUTH_ALGORITHM_TYPE_SHA_256";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV3PrivacyAlgorithm",
-    &res);
+      "SNMPV3PrivacyAlgorithm",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SNMPV3PrivacyAlgorithm;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SNMPV3PrivacyAlgorithm) {
+    case accesspb_UserEntrySNMPV3PrivacyAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_NO_PRIVACY:
+      enum_str = "USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_NO_PRIVACY";
+      break;
+    case accesspb_UserEntrySNMPV3PrivacyAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_DES:
+      enum_str = "USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_DES";
+      break;
+    case accesspb_UserEntrySNMPV3PrivacyAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_AES:
+      enum_str = "USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_AES";
+      break;
+    case accesspb_UserEntrySNMPV3PrivacyAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_AES_192:
+      enum_str = "USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_AES_192";
+      break;
+    case accesspb_UserEntrySNMPV3PrivacyAlgorithmTypeOptions_USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_AES_256:
+      enum_str = "USER_ENTRY_SNMP_V3_PRIVACY_ALGORITHM_TYPE_AES_256";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "EncryptedSNMPAuthPassword",
-    &res);
+      "EncryptedSNMPAuthPassword",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->EncryptedSNMPAuthPassword;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EncryptedSNMPPrivacyPassword",
-    &res);
+      "EncryptedSNMPPrivacyPassword",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -636,279 +756,304 @@ VAL_STRING(listval) = entry->AssociatedGroups[i];
   VAL_STRING(childval) = entry->EncryptedSNMPPrivacyPassword;
   return res;
 }
-
-status_t build_to_xml_access_PatternEntry (
+status_t build_to_xml_access_PatternEntry(
     val_value_t *parentval,
     struct accesspb_PatternEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Path",
-    &res);
+      "Path",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Path;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AccessRight",
-    &res);
+      "AccessRight",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AccessRight;
+  switch (entry->AccessRight) {
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_NO_ACCESS:
+      enum_str = "RIGHTS_TYPE_NO_ACCESS";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_EXECUTE_ONLY:
+      enum_str = "RIGHTS_TYPE_EXECUTE_ONLY";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_ONLY:
+      enum_str = "RIGHTS_TYPE_READ_ONLY";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_WRITE:
+      enum_str = "RIGHTS_TYPE_READ_WRITE";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_EXECUTE:
+      enum_str = "RIGHTS_TYPE_READ_EXECUTE";
+      break;
+    case accesspb_RightsTypeOptions_RIGHTS_TYPE_READ_WRITE_EXECUTE:
+      enum_str = "RIGHTS_TYPE_READ_WRITE_EXECUTE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_access_UsersConfig (
+status_t build_to_xml_access_UsersConfig(
     val_value_t *parentval,
     struct accesspb_UsersConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_UserEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_UserEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_GroupEntry (
+status_t build_to_xml_access_GroupEntry(
     val_value_t *parentval,
     struct accesspb_GroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Patterns",
-    &res);
+      "Patterns",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Patterns_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Patterns_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_PatternEntry(
-    listval,
-    entry->Patterns[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Patterns_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_PatternEntry(
+        listval,
+        entry->Patterns[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_GroupsConfig (
+status_t build_to_xml_access_GroupsConfig(
     val_value_t *parentval,
     struct accesspb_GroupsConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_GroupEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_GroupEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_Config (
+status_t build_to_xml_access_Config(
     val_value_t *parentval,
     struct accesspb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Authentication",
-    &res);
+      "Authentication",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_AuthenticationConfig(
+  res = build_to_xml_access_AuthenticationConfig(
       childval,
-    entry->Authentication);
+      entry->Authentication);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Users",
-    &res);
+      "Users",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_UsersConfig(
+  res = build_to_xml_access_UsersConfig(
       childval,
-    entry->Users);
+      entry->Users);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Groups",
-    &res);
+      "Groups",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_GroupsConfig(
+  res = build_to_xml_access_GroupsConfig(
       childval,
-    entry->Groups);
+      entry->Groups);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Restrictions",
-    &res);
+      "Restrictions",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_RestrictionsConfig(
+  res = build_to_xml_access_RestrictionsConfig(
       childval,
-    entry->Restrictions);
+      entry->Restrictions);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Servers",
-    &res);
+      "Servers",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_AuthenticationServersConfig(
+  res = build_to_xml_access_AuthenticationServersConfig(
       childval,
-    entry->Servers);
+      entry->Servers);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_access_Password (
+status_t build_to_xml_access_Password(
     val_value_t *parentval,
     struct accesspb_Password *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Password",
-    &res);
+      "Password",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Password;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Irreversable",
-    &res);
+      "Irreversable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -916,19 +1061,21 @@ status_t build_to_xml_access_Password (
   VAL_BOOL(childval) = entry->Irreversable;
   return res;
 }
-
-status_t build_to_xml_access_EncryptedPassword (
+status_t build_to_xml_access_EncryptedPassword(
     val_value_t *parentval,
     struct accesspb_EncryptedPassword *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "EncryptedPassword",
-    &res);
+      "EncryptedPassword",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -936,31 +1083,32 @@ status_t build_to_xml_access_EncryptedPassword (
   VAL_STRING(childval) = entry->EncryptedPassword;
   return res;
 }
-
-status_t build_to_xml_access_UserPasswordEntry (
+status_t build_to_xml_access_UserPasswordEntry(
     val_value_t *parentval,
     struct accesspb_UserPasswordEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Username",
-    &res);
+      "Username",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Username;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Password",
-    &res);
+      "Password",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -968,56 +1116,60 @@ status_t build_to_xml_access_UserPasswordEntry (
   VAL_STRING(childval) = entry->Password;
   return res;
 }
-
-status_t build_to_xml_access_UserPassword (
+status_t build_to_xml_access_UserPassword(
     val_value_t *parentval,
     struct accesspb_UserPassword *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_UserPasswordEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_UserPasswordEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_NumberOfLogins (
+status_t build_to_xml_access_NumberOfLogins(
     val_value_t *parentval,
     struct accesspb_NumberOfLogins *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfLogins",
-    &res);
+      "NumberOfLogins",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1025,160 +1177,179 @@ status_t build_to_xml_access_NumberOfLogins (
   VAL_INT(childval) = entry->NumberOfLogins;
   return res;
 }
-
-status_t build_to_xml_access_LoginStatusEntry (
+status_t build_to_xml_access_LoginStatusEntry(
     val_value_t *parentval,
     struct accesspb_LoginStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Username",
-    &res);
+      "Username",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Username;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthName",
-    &res);
+      "AuthName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->AuthName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoginID",
-    &res);
+      "LoginID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LoginID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoginTimeStamp",
-    &res);
+      "LoginTimeStamp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LoginTimeStamp;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoginEpoch",
-    &res);
+      "LoginEpoch",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LoginEpoch;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ConnectTime",
-    &res);
+      "ConnectTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int64 */
   VAL_LONG(childval) = entry->ConnectTime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Service",
-    &res);
+      "Service",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Service;
+  switch (entry->Service) {
+    case eventpb_LoginInterfaceNameTypeOptions_LOGIN_INTERFACE_NAME_TYPE_SSH:
+      enum_str = "LOGIN_INTERFACE_NAME_TYPE_SSH";
+      break;
+    case eventpb_LoginInterfaceNameTypeOptions_LOGIN_INTERFACE_NAME_TYPE_TELNET:
+      enum_str = "LOGIN_INTERFACE_NAME_TYPE_TELNET";
+      break;
+    case eventpb_LoginInterfaceNameTypeOptions_LOGIN_INTERFACE_NAME_TYPE_WEB:
+      enum_str = "LOGIN_INTERFACE_NAME_TYPE_WEB";
+      break;
+    case eventpb_LoginInterfaceNameTypeOptions_LOGIN_INTERFACE_NAME_TYPE_SNMP:
+      enum_str = "LOGIN_INTERFACE_NAME_TYPE_SNMP";
+      break;
+    case eventpb_LoginInterfaceNameTypeOptions_LOGIN_INTERFACE_NAME_TYPE_FTP:
+      enum_str = "LOGIN_INTERFACE_NAME_TYPE_FTP";
+      break;
+    case eventpb_LoginInterfaceNameTypeOptions_LOGIN_INTERFACE_NAME_TYPE_CONSOLE:
+      enum_str = "LOGIN_INTERFACE_NAME_TYPE_CONSOLE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_access_LoginStatus (
+status_t build_to_xml_access_LoginStatus(
     val_value_t *parentval,
     struct accesspb_LoginStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_access_LoginStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_access_LoginStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_access_Token (
+status_t build_to_xml_access_Token(
     val_value_t *parentval,
     struct accesspb_Token *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Token",
-    &res);
+      "Token",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1187,3 +1358,789 @@ status_t build_to_xml_access_Token (
   return res;
 }
 
+status_t build_to_priv_access_AuthenticationMode(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationMode *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_AuthenticationConfig(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RADIUS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->RADIUS = malloc(sizeof(*(entry->RADIUS)));
+    res = build_to_priv_access_AuthenticationRADIUS(
+        childval,
+        entry->RADIUS);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TACACS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->TACACS = malloc(sizeof(*(entry->TACACS)));
+    res = build_to_priv_access_AuthenticationTACACS(
+        childval,
+        entry->TACACS);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_AuthenticationTACACS(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationTACACS *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PrimaryAuthServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->PrimaryAuthServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FallbackAuthServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FallbackAuthServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserPrivilegeLevel0");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserPrivilegeLevel0 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserPrivilegeLevel1");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserPrivilegeLevel1 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserPrivilegeLevel15");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserPrivilegeLevel15 = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_AuthenticationRADIUS(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationRADIUS *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PrimaryAuthServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->PrimaryAuthServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FallbackAuthServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FallbackAuthServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserPrivilegeLevel6");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserPrivilegeLevel6 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserPrivilegeLevel7");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserPrivilegeLevel7 = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_AuthenticationServerEntry(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationServerEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ServerType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ServerType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HostAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->HostAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortNumber");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNumber = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SharedSecret");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SharedSecret = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InterimInterval");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->InterimInterval = VAL_LONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_AuthenticationServersConfig(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationServersConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_access_AuthenticationServerEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_LoginRequest(
+    val_value_t *parentval,
+    struct accesspb_LoginRequest *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Account");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Account = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Password");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Password = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_RestrictionEntry(
+    val_value_t *parentval,
+    struct accesspb_RestrictionEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddress = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_RestrictionsConfig(
+    val_value_t *parentval,
+    struct accesspb_RestrictionsConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_access_RestrictionEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_UserEntry(
+    val_value_t *parentval,
+    struct accesspb_UserEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AssociatedGroups");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->AssociatedGroups_Len = dlq_count(&childval->v.childQ);
+    entry->AssociatedGroups = malloc((entry->AssociatedGroups_Len + 1) * sizeof(*entry->AssociatedGroups));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->AssociatedGroups[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GeneralAccessRights");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->GeneralAccessRights = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TelnetAccessEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TelnetAccessEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SSHAccessEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SSHAccessEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "WebAccessEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->WebAccessEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPAccessEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SNMPAccessEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EncryptedAuthPassword");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EncryptedAuthPassword = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV3SecurityLevel");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SNMPV3SecurityLevel = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV3AuthAlgorithm");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SNMPV3AuthAlgorithm = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV3PrivacyAlgorithm");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SNMPV3PrivacyAlgorithm = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EncryptedSNMPAuthPassword");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EncryptedSNMPAuthPassword = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EncryptedSNMPPrivacyPassword");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EncryptedSNMPPrivacyPassword = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_PatternEntry(
+    val_value_t *parentval,
+    struct accesspb_PatternEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Path");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Path = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AccessRight");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AccessRight = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_UsersConfig(
+    val_value_t *parentval,
+    struct accesspb_UsersConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_access_UserEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_GroupEntry(
+    val_value_t *parentval,
+    struct accesspb_GroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Patterns");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Patterns_Len = dlq_count(&childval->v.childQ);
+    entry->Patterns = malloc((entry->Patterns_Len + 1) * sizeof(*entry->Patterns));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Patterns[cnt] = malloc(sizeof(*(entry->Patterns[cnt])));
+      res = build_to_priv_access_PatternEntry(
+          listval,
+          entry->Patterns[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_GroupsConfig(
+    val_value_t *parentval,
+    struct accesspb_GroupsConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_access_GroupEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_Config(
+    val_value_t *parentval,
+    struct accesspb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Authentication");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Authentication = malloc(sizeof(*(entry->Authentication)));
+    res = build_to_priv_access_AuthenticationConfig(
+        childval,
+        entry->Authentication);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Users");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Users = malloc(sizeof(*(entry->Users)));
+    res = build_to_priv_access_UsersConfig(
+        childval,
+        entry->Users);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Groups");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Groups = malloc(sizeof(*(entry->Groups)));
+    res = build_to_priv_access_GroupsConfig(
+        childval,
+        entry->Groups);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Restrictions");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Restrictions = malloc(sizeof(*(entry->Restrictions)));
+    res = build_to_priv_access_RestrictionsConfig(
+        childval,
+        entry->Restrictions);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Servers");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Servers = malloc(sizeof(*(entry->Servers)));
+    res = build_to_priv_access_AuthenticationServersConfig(
+        childval,
+        entry->Servers);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_Password(
+    val_value_t *parentval,
+    struct accesspb_Password *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Password");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Password = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Irreversable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Irreversable = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_EncryptedPassword(
+    val_value_t *parentval,
+    struct accesspb_EncryptedPassword *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "EncryptedPassword");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EncryptedPassword = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_UserPasswordEntry(
+    val_value_t *parentval,
+    struct accesspb_UserPasswordEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Username");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Username = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Password");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Password = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_UserPassword(
+    val_value_t *parentval,
+    struct accesspb_UserPassword *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_access_UserPasswordEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_NumberOfLogins(
+    val_value_t *parentval,
+    struct accesspb_NumberOfLogins *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfLogins");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfLogins = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_LoginStatusEntry(
+    val_value_t *parentval,
+    struct accesspb_LoginStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->State = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Username");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Username = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->AuthName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoginID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LoginID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoginTimeStamp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LoginTimeStamp = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoginEpoch");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LoginEpoch = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ConnectTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->ConnectTime = VAL_LONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Service");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Service = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_access_LoginStatus(
+    val_value_t *parentval,
+    struct accesspb_LoginStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_access_LoginStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_access_Token(
+    val_value_t *parentval,
+    struct accesspb_Token *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Token");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Token = VAL_STRING(childval);
+  }
+  return res;
+}

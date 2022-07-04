@@ -21,14 +21,19 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_isolation_ConfigEntry (
+extern status_t build_to_xml_isolation_ConfigEntry(
     val_value_t *parentval,
     struct isolationpb_ConfigEntry *entry);
-
-extern status_t build_to_xml_isolation_Config (
+extern status_t build_to_xml_isolation_Config(
     val_value_t *parentval,
     struct isolationpb_Config *entry);
 
+extern status_t build_to_priv_isolation_ConfigEntry(
+    val_value_t *parentval,
+    struct isolationpb_ConfigEntry *entry);
+extern status_t build_to_priv_isolation_Config(
+    val_value_t *parentval,
+    struct isolationpb_Config *entry);
 
 #endif /* _H_intri_isolation_trans */
 

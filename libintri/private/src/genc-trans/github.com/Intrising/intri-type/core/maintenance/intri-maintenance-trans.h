@@ -21,14 +21,19 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_maintenance_FirmwareInfo (
+extern status_t build_to_xml_maintenance_FirmwareInfo(
     val_value_t *parentval,
     struct maintenancepb_FirmwareInfo *entry);
-
-extern status_t build_to_xml_maintenance_UpgradePathRequest (
+extern status_t build_to_xml_maintenance_UpgradePathRequest(
     val_value_t *parentval,
     struct maintenancepb_UpgradePathRequest *entry);
 
+extern status_t build_to_priv_maintenance_FirmwareInfo(
+    val_value_t *parentval,
+    struct maintenancepb_FirmwareInfo *entry);
+extern status_t build_to_priv_maintenance_UpgradePathRequest(
+    val_value_t *parentval,
+    struct maintenancepb_UpgradePathRequest *entry);
 
 #endif /* _H_intri_maintenance_trans */
 

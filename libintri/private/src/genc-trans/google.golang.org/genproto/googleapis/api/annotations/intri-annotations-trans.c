@@ -30,47 +30,50 @@
 #include "intri-annotations-trans.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-status_t build_to_xml_annotations_Http (
+
+status_t build_to_xml_annotations_Http(
     val_value_t *parentval,
     struct annotationspb_Http *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Rules",
-    &res);
+      "Rules",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Rules_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Rules_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_annotations_HttpRule(
-    listval,
-    entry->Rules[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Rules_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_annotations_HttpRule(
+        listval,
+        entry->Rules[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FullyDecodeReservedExpansion",
-    &res);
+      "FullyDecodeReservedExpansion",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -78,164 +81,189 @@ if (res != NO_ERR) {
   VAL_BOOL(childval) = entry->FullyDecodeReservedExpansion;
   return res;
 }
-
-status_t build_to_xml_annotations_HttpRule (
+status_t build_to_xml_annotations_HttpRule(
     val_value_t *parentval,
     struct annotationspb_HttpRule *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Selector",
-    &res);
+      "Selector",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Selector;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Get",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  switch (entry->Pattern_Union_Option) {
+    case annotationspb_HttpRule_Pattern_Union_Options_Get:
+      childval = agt_make_object(
+          parentval->obj,
+          "Get",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Pattern.Pattern_Get;
+      break;
+    case annotationspb_HttpRule_Pattern_Union_Options_Put:
+      childval = agt_make_object(
+          parentval->obj,
+          "Put",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Pattern.Pattern_Put;
+      break;
+    case annotationspb_HttpRule_Pattern_Union_Options_Post:
+      childval = agt_make_object(
+          parentval->obj,
+          "Post",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Pattern.Pattern_Post;
+      break;
+    case annotationspb_HttpRule_Pattern_Union_Options_Delete:
+      childval = agt_make_object(
+          parentval->obj,
+          "Delete",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Pattern.Pattern_Delete;
+      break;
+    case annotationspb_HttpRule_Pattern_Union_Options_Patch:
+      childval = agt_make_object(
+          parentval->obj,
+          "Patch",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Pattern.Pattern_Patch;
+      break;
+    case annotationspb_HttpRule_Pattern_Union_Options_Custom:
+      childval = agt_make_object(
+          parentval->obj,
+          "Custom",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_annotations_CustomHttpPattern(
+          childval,
+          entry->Pattern.Pattern_Custom);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Put",
-    &res);
+      "Body",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Post",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Delete",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Patch",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Custom",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Body",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Body;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ResponseBody",
-    &res);
+      "ResponseBody",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->ResponseBody;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdditionalBindings",
-    &res);
+      "AdditionalBindings",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->AdditionalBindings_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "AdditionalBindings_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_annotations_HttpRule(
-    listval,
-    entry->AdditionalBindings[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "AdditionalBindings_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_annotations_HttpRule(
+        listval,
+        entry->AdditionalBindings[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_annotations_CustomHttpPattern (
+status_t build_to_xml_annotations_CustomHttpPattern(
     val_value_t *parentval,
     struct annotationspb_CustomHttpPattern *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Kind",
-    &res);
+      "Kind",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Kind;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Path",
-    &res);
+      "Path",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -244,3 +272,164 @@ status_t build_to_xml_annotations_CustomHttpPattern (
   return res;
 }
 
+status_t build_to_priv_annotations_Http(
+    val_value_t *parentval,
+    struct annotationspb_Http *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Rules");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rules_Len = dlq_count(&childval->v.childQ);
+    entry->Rules = malloc((entry->Rules_Len + 1) * sizeof(*entry->Rules));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Rules[cnt] = malloc(sizeof(*(entry->Rules[cnt])));
+      res = build_to_priv_annotations_HttpRule(
+          listval,
+          entry->Rules[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FullyDecodeReservedExpansion");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->FullyDecodeReservedExpansion = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_annotations_HttpRule(
+    val_value_t *parentval,
+    struct annotationspb_HttpRule *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Selector");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Selector = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Get");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Pattern_Union_Option = annotationspb_HttpRule_Pattern_Union_Options_Get;
+    /* string */
+    entry->Pattern.Pattern_Get = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Put");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Pattern_Union_Option = annotationspb_HttpRule_Pattern_Union_Options_Put;
+    /* string */
+    entry->Pattern.Pattern_Put = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Post");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Pattern_Union_Option = annotationspb_HttpRule_Pattern_Union_Options_Post;
+    /* string */
+    entry->Pattern.Pattern_Post = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Delete");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Pattern_Union_Option = annotationspb_HttpRule_Pattern_Union_Options_Delete;
+    /* string */
+    entry->Pattern.Pattern_Delete = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Patch");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Pattern_Union_Option = annotationspb_HttpRule_Pattern_Union_Options_Patch;
+    /* string */
+    entry->Pattern.Pattern_Patch = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Custom");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Pattern_Union_Option = annotationspb_HttpRule_Pattern_Union_Options_Custom;
+    /* message */
+    entry->Pattern.Pattern_Custom = malloc(sizeof(*(entry->Pattern.Pattern_Custom)));
+    res = build_to_priv_annotations_CustomHttpPattern(
+        childval,
+        entry->Pattern.Pattern_Custom);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Body");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Body = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ResponseBody");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ResponseBody = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdditionalBindings");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->AdditionalBindings_Len = dlq_count(&childval->v.childQ);
+    entry->AdditionalBindings = malloc((entry->AdditionalBindings_Len + 1) * sizeof(*entry->AdditionalBindings));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->AdditionalBindings[cnt] = malloc(sizeof(*(entry->AdditionalBindings[cnt])));
+      res = build_to_priv_annotations_HttpRule(
+          listval,
+          entry->AdditionalBindings[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_annotations_CustomHttpPattern(
+    val_value_t *parentval,
+    struct annotationspb_CustomHttpPattern *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Kind");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Kind = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Path");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Path = VAL_STRING(childval);
+  }
+  return res;
+}

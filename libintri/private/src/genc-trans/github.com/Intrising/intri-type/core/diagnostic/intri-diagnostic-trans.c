@@ -32,30 +32,33 @@
 
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_diagnostic_ARPEntry (
+
+status_t build_to_xml_diagnostic_ARPEntry(
     val_value_t *parentval,
     struct diagnosticpb_ARPEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddr",
-    &res);
+      "IPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IPAddr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddr",
-    &res);
+      "MACAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -63,41 +66,93 @@ status_t build_to_xml_diagnostic_ARPEntry (
   VAL_STRING(childval) = entry->MACAddr;
   return res;
 }
-
-status_t build_to_xml_diagnostic_ARPTables (
+status_t build_to_xml_diagnostic_ARPTables(
     val_value_t *parentval,
     struct diagnosticpb_ARPTables *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_diagnostic_ARPEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_diagnostic_ARPEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_diagnostic_ARPEntry(
+    val_value_t *parentval,
+    struct diagnosticpb_ARPEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddr = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddr = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_diagnostic_ARPTables(
+    val_value_t *parentval,
+    struct diagnosticpb_ARPTables *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_diagnostic_ARPEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

@@ -21,30 +21,43 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_time_Config (
+extern status_t build_to_xml_time_Config(
     val_value_t *parentval,
     struct timepb_Config *entry);
-
-extern status_t build_to_xml_time_ListTimeZones (
+extern status_t build_to_xml_time_ListTimeZones(
     val_value_t *parentval,
     struct timepb_ListTimeZones *entry);
-
-extern status_t build_to_xml_time_Status (
+extern status_t build_to_xml_time_Status(
     val_value_t *parentval,
     struct timepb_Status *entry);
-
-extern status_t build_to_xml_time_RequestWithTimestamp (
+extern status_t build_to_xml_time_RequestWithTimestamp(
     val_value_t *parentval,
     struct timepb_RequestWithTimestamp *entry);
-
-extern status_t build_to_xml_time_RequestWithInt64 (
+extern status_t build_to_xml_time_RequestWithInt64(
     val_value_t *parentval,
     struct timepb_RequestWithInt64 *entry);
-
-extern status_t build_to_xml_time_Response (
+extern status_t build_to_xml_time_Response(
     val_value_t *parentval,
     struct timepb_Response *entry);
 
+extern status_t build_to_priv_time_Config(
+    val_value_t *parentval,
+    struct timepb_Config *entry);
+extern status_t build_to_priv_time_ListTimeZones(
+    val_value_t *parentval,
+    struct timepb_ListTimeZones *entry);
+extern status_t build_to_priv_time_Status(
+    val_value_t *parentval,
+    struct timepb_Status *entry);
+extern status_t build_to_priv_time_RequestWithTimestamp(
+    val_value_t *parentval,
+    struct timepb_RequestWithTimestamp *entry);
+extern status_t build_to_priv_time_RequestWithInt64(
+    val_value_t *parentval,
+    struct timepb_RequestWithInt64 *entry);
+extern status_t build_to_priv_time_Response(
+    val_value_t *parentval,
+    struct timepb_Response *entry);
 
 #endif /* _H_intri_time_trans */
 

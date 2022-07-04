@@ -32,161 +32,173 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_dhcp_ARPInspectionConfig (
+
+status_t build_to_xml_dhcp_ARPInspectionConfig(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_dhcp_ARPInspectionPortEntry(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_dhcp_ARPInspectionPortEntry(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_dhcp_ARPInspectionPortEntry (
+status_t build_to_xml_dhcp_ARPInspectionPortEntry(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RateLimiting",
-    &res);
+      "RateLimiting",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RateLimiting;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Database",
-    &res);
+      "Database",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Database;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Database) {
+    case dhcppb_ARPInspectionDatabaseTypeOptions_ARP_INSPECTION_DATABASE_TYPE_NONE:
+      enum_str = "ARP_INSPECTION_DATABASE_TYPE_NONE";
+      break;
+    case dhcppb_ARPInspectionDatabaseTypeOptions_ARP_INSPECTION_DATABASE_TYPE_DHCP:
+      enum_str = "ARP_INSPECTION_DATABASE_TYPE_DHCP";
+      break;
+    case dhcppb_ARPInspectionDatabaseTypeOptions_ARP_INSPECTION_DATABASE_TYPE_ARP_ACL:
+      enum_str = "ARP_INSPECTION_DATABASE_TYPE_ARP_ACL";
+      break;
+    case dhcppb_ARPInspectionDatabaseTypeOptions_ARP_INSPECTION_DATABASE_TYPE_BOTH:
+      enum_str = "ARP_INSPECTION_DATABASE_TYPE_BOTH";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ACL",
-    &res);
+      "ACL",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_dhcp_ARPInspectionACLConfig(
+  res = build_to_xml_dhcp_ARPInspectionACLConfig(
       childval,
-    entry->ACL);
+      entry->ACL);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SrcMACValid",
-    &res);
+      "SrcMACValid",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SrcMACValid;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DstMACValid",
-    &res);
+      "DstMACValid",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->DstMACValid;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPRangeValid",
-    &res);
+      "IPRangeValid",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -194,299 +206,340 @@ status_t build_to_xml_dhcp_ARPInspectionPortEntry (
   VAL_BOOL(childval) = entry->IPRangeValid;
   return res;
 }
-
-status_t build_to_xml_dhcp_ARPInspectionACLConfig (
+status_t build_to_xml_dhcp_ARPInspectionACLConfig(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionACLConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ACLRuleUnmatchedAction",
-    &res);
+      "ACLRuleUnmatchedAction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ACLRuleUnmatchedAction;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ACLRuleUnmatchedAction) {
+    case dhcppb_ARPInspectionACLRuleUnmatchedActionTypeOptions_ARP_INSPECTION_ACL_RULE_UNMATCHED_ACTION_TYPE_DENY:
+      enum_str = "ARP_INSPECTION_ACL_RULE_UNMATCHED_ACTION_TYPE_DENY";
+      break;
+    case dhcppb_ARPInspectionACLRuleUnmatchedActionTypeOptions_ARP_INSPECTION_ACL_RULE_UNMATCHED_ACTION_TYPE_PERMIT:
+      enum_str = "ARP_INSPECTION_ACL_RULE_UNMATCHED_ACTION_TYPE_PERMIT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Rules",
-    &res);
+      "Rules",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Rules_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Rules_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Rules[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Rules_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Rules[i];
   }
   return res;
 }
-
-status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry (
+status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionACLRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VID",
-    &res);
+      "VID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SrcMAC",
-    &res);
+      "SrcMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SrcMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SrcIP",
-    &res);
+      "SrcIP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SrcIP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SrcIPMask",
-    &res);
+      "SrcIPMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SrcIPMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case dhcppb_ARPInspectionACLRuleModeTypeOptions_ARP_INSPECTION_RULE_MODE_TYPE_UNUSED:
+      enum_str = "ARP_INSPECTION_RULE_MODE_TYPE_UNUSED";
+      break;
+    case dhcppb_ARPInspectionACLRuleModeTypeOptions_ARP_INSPECTION_RULE_MODE_TYPE_PERMIT:
+      enum_str = "ARP_INSPECTION_RULE_MODE_TYPE_PERMIT";
+      break;
+    case dhcppb_ARPInspectionACLRuleModeTypeOptions_ARP_INSPECTION_RULE_MODE_TYPE_DENY:
+      enum_str = "ARP_INSPECTION_RULE_MODE_TYPE_DENY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_dhcp_Config (
+status_t build_to_xml_dhcp_Config(
     val_value_t *parentval,
     struct dhcppb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Relay",
-    &res);
+      "Relay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_dhcp_RelayConfig(
+  res = build_to_xml_dhcp_RelayConfig(
       childval,
-    entry->Relay);
+      entry->Relay);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Snooping",
-    &res);
+      "Snooping",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_dhcp_SnoopingConfig(
+  res = build_to_xml_dhcp_SnoopingConfig(
       childval,
-    entry->Snooping);
+      entry->Snooping);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_dhcp_RelayConfig (
+status_t build_to_xml_dhcp_RelayConfig(
     val_value_t *parentval,
     struct dhcppb_RelayConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RelayPorts",
-    &res);
+      "RelayPorts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->RelayPorts_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "RelayPorts_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_dhcp_ConfigRelayPortEntry(
-    listval,
-    entry->RelayPorts[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "RelayPorts_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_dhcp_ConfigRelayPortEntry(
+        listval,
+        entry->RelayPorts[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DHCPServerAddress",
-    &res);
+      "DHCPServerAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DHCPServerAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RemoteIDSource",
-    &res);
+      "RemoteIDSource",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->RemoteIDSource;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->RemoteIDSource) {
+    case dhcppb_RemoteIDSourceTypeOptions_REMOTE_ID_SOURCE_TYPE_HOSTNAME:
+      enum_str = "REMOTE_ID_SOURCE_TYPE_HOSTNAME";
+      break;
+    case dhcppb_RemoteIDSourceTypeOptions_REMOTE_ID_SOURCE_TYPE_MAC_ADDRESS:
+      enum_str = "REMOTE_ID_SOURCE_TYPE_MAC_ADDRESS";
+      break;
+    case dhcppb_RemoteIDSourceTypeOptions_REMOTE_ID_SOURCE_TYPE_SYS_NAME:
+      enum_str = "REMOTE_ID_SOURCE_TYPE_SYS_NAME";
+      break;
+    case dhcppb_RemoteIDSourceTypeOptions_REMOTE_ID_SOURCE_TYPE_USER_DEFINED:
+      enum_str = "REMOTE_ID_SOURCE_TYPE_USER_DEFINED";
+      break;
+    case dhcppb_RemoteIDSourceTypeOptions_REMOTE_ID_SOURCE_TYPE_PORT_ALIAS:
+      enum_str = "REMOTE_ID_SOURCE_TYPE_PORT_ALIAS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "CustomRemoteID",
-    &res);
+      "CustomRemoteID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->CustomRemoteID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "CircuitIDSource",
-    &res);
+      "CircuitIDSource",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->CircuitIDSource;
+  switch (entry->CircuitIDSource) {
+    case dhcppb_CircuitIDSourceTypeOptions_CIRCUIT_ID_SOURCE_TYPE_PORT_ALIAS:
+      enum_str = "CIRCUIT_ID_SOURCE_TYPE_PORT_ALIAS";
+      break;
+    case dhcppb_CircuitIDSourceTypeOptions_CIRCUIT_ID_SOURCE_TYPE_IP_PORT_VLAN:
+      enum_str = "CIRCUIT_ID_SOURCE_TYPE_IP_PORT_VLAN";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_dhcp_ConfigRelayPortEntry (
+status_t build_to_xml_dhcp_ConfigRelayPortEntry(
     val_value_t *parentval,
     struct dhcppb_ConfigRelayPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Option82Enabled",
-    &res);
+      "Option82Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -494,145 +547,161 @@ status_t build_to_xml_dhcp_ConfigRelayPortEntry (
   VAL_BOOL(childval) = entry->Option82Enabled;
   return res;
 }
-
-status_t build_to_xml_dhcp_SnoopingConfig (
+status_t build_to_xml_dhcp_SnoopingConfig(
     val_value_t *parentval,
     struct dhcppb_SnoopingConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_dhcp_SnoopingConfigPortEntry(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_dhcp_SnoopingConfigPortEntry(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_dhcp_SnoopingConfigPortEntry (
+status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
     val_value_t *parentval,
     struct dhcppb_SnoopingConfigPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DHCPFiltering",
-    &res);
+      "DHCPFiltering",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DHCPFiltering;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->DHCPFiltering) {
+    case dhcppb_SnoopingPortDHCPFilteringTypeOptions_SNOOPING_PORT_DHCP_FILTERING_TYPE_DISABLED:
+      enum_str = "SNOOPING_PORT_DHCP_FILTERING_TYPE_DISABLED";
+      break;
+    case dhcppb_SnoopingPortDHCPFilteringTypeOptions_SNOOPING_PORT_DHCP_FILTERING_TYPE_DROP_AND_EVENT:
+      enum_str = "SNOOPING_PORT_DHCP_FILTERING_TYPE_DROP_AND_EVENT";
+      break;
+    case dhcppb_SnoopingPortDHCPFilteringTypeOptions_SNOOPING_PORT_DHCP_FILTERING_BLOCK_AND_EVENT:
+      enum_str = "SNOOPING_PORT_DHCP_FILTERING_BLOCK_AND_EVENT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SnoopingTrust",
-    &res);
+      "SnoopingTrust",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SnoopingTrust;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SnoopingTrust) {
+    case dhcppb_SnoopingPortSnoopingTrustTypeOptions_SNOOPING_PORT_SNOOPING_TYPE_TRUST_UNTRUSTED:
+      enum_str = "SNOOPING_PORT_SNOOPING_TYPE_TRUST_UNTRUSTED";
+      break;
+    case dhcppb_SnoopingPortSnoopingTrustTypeOptions_SNOOPING_PORT_SNOOPING_TYPE_TRUST_TRUSTED:
+      enum_str = "SNOOPING_PORT_SNOOPING_TYPE_TRUST_TRUSTED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AcceptIngressOption82",
-    &res);
+      "AcceptIngressOption82",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->AcceptIngressOption82;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddressVerification",
-    &res);
+      "MACAddressVerification",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->MACAddressVerification;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DHCPRateLimiting",
-    &res);
+      "DHCPRateLimiting",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -640,206 +709,233 @@ status_t build_to_xml_dhcp_SnoopingConfigPortEntry (
   VAL_INT(childval) = entry->DHCPRateLimiting;
   return res;
 }
-
-status_t build_to_xml_dhcp_SnoopingStatisticsEntry (
+status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
     val_value_t *parentval,
     struct dhcppb_SnoopingStatisticsEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TrustMode",
-    &res);
+      "TrustMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->TrustMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->TrustMode) {
+    case dhcppb_SnoopingPortSnoopingTrustTypeOptions_SNOOPING_PORT_SNOOPING_TYPE_TRUST_UNTRUSTED:
+      enum_str = "SNOOPING_PORT_SNOOPING_TYPE_TRUST_UNTRUSTED";
+      break;
+    case dhcppb_SnoopingPortSnoopingTrustTypeOptions_SNOOPING_PORT_SNOOPING_TYPE_TRUST_TRUSTED:
+      enum_str = "SNOOPING_PORT_SNOOPING_TYPE_TRUST_TRUSTED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Processed",
-    &res);
+      "Processed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Processed;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Dropped",
-    &res);
+      "Dropped",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Dropped;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LastDropReason",
-    &res);
+      "LastDropReason",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LastDropReason;
+  switch (entry->LastDropReason) {
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_OK:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_OK";
+      break;
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_ILLEGAL_DHCP_SERVER:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_ILLEGAL_DHCP_SERVER";
+      break;
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_DHCP_SERVER_SPOOFED:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_DHCP_SERVER_SPOOFED";
+      break;
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_ILLEGAL_RELAY_AGENT:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_ILLEGAL_RELAY_AGENT";
+      break;
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_BINDING_MISMATCH:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_BINDING_MISMATCH";
+      break;
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_FLOODING:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_FLOODING";
+      break;
+    case dhcppb_SnoopingLastDropReasonTypeOptions_SNOOPING_LAST_DROP_REASON_TYPE_DHCP_FILTERING:
+      enum_str = "SNOOPING_LAST_DROP_REASON_TYPE_DHCP_FILTERING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_dhcp_SnoopingStatisticsList (
+status_t build_to_xml_dhcp_SnoopingStatisticsList(
     val_value_t *parentval,
     struct dhcppb_SnoopingStatisticsList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_dhcp_SnoopingStatisticsEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_dhcp_SnoopingStatisticsEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry (
+status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
     val_value_t *parentval,
     struct dhcppb_SnoopingBindingDatabaseEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IP",
-    &res);
+      "IP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VID",
-    &res);
+      "VID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LastUpdated",
-    &res);
+      "LastUpdated",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LastUpdated;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LastUpdatedEpoch",
-    &res);
+      "LastUpdatedEpoch",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LastUpdatedEpoch;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LeaseTime",
-    &res);
+      "LeaseTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -847,41 +943,623 @@ status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry (
   VAL_LONG(childval) = entry->LeaseTime;
   return res;
 }
-
-status_t build_to_xml_dhcp_SnoopingBindingDatabaseList (
+status_t build_to_xml_dhcp_SnoopingBindingDatabaseList(
     val_value_t *parentval,
     struct dhcppb_SnoopingBindingDatabaseList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_dhcp_ARPInspectionConfig(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_dhcp_ARPInspectionPortEntry(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_ARPInspectionPortEntry(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RateLimiting");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RateLimiting = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Database");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Database = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ACL");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ACL = malloc(sizeof(*(entry->ACL)));
+    res = build_to_priv_dhcp_ARPInspectionACLConfig(
+        childval,
+        entry->ACL);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SrcMACValid");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SrcMACValid = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DstMACValid");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->DstMACValid = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPRangeValid");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IPRangeValid = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_ARPInspectionACLConfig(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionACLConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ACLRuleUnmatchedAction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ACLRuleUnmatchedAction = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Rules");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rules_Len = dlq_count(&childval->v.childQ);
+    entry->Rules = malloc((entry->Rules_Len + 1) * sizeof(*entry->Rules));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Rules[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_ARPInspectionACLRuleEntry(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionACLRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SrcMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SrcMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SrcIP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SrcIP = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SrcIPMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SrcIPMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_Config(
+    val_value_t *parentval,
+    struct dhcppb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Relay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Relay = malloc(sizeof(*(entry->Relay)));
+    res = build_to_priv_dhcp_RelayConfig(
+        childval,
+        entry->Relay);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Snooping");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Snooping = malloc(sizeof(*(entry->Snooping)));
+    res = build_to_priv_dhcp_SnoopingConfig(
+        childval,
+        entry->Snooping);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_RelayConfig(
+    val_value_t *parentval,
+    struct dhcppb_RelayConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RelayPorts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->RelayPorts_Len = dlq_count(&childval->v.childQ);
+    entry->RelayPorts = malloc((entry->RelayPorts_Len + 1) * sizeof(*entry->RelayPorts));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->RelayPorts[cnt] = malloc(sizeof(*(entry->RelayPorts[cnt])));
+      res = build_to_priv_dhcp_ConfigRelayPortEntry(
+          listval,
+          entry->RelayPorts[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DHCPServerAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DHCPServerAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RemoteIDSource");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->RemoteIDSource = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "CustomRemoteID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->CustomRemoteID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "CircuitIDSource");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->CircuitIDSource = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_ConfigRelayPortEntry(
+    val_value_t *parentval,
+    struct dhcppb_ConfigRelayPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Option82Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Option82Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_SnoopingConfig(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_dhcp_SnoopingConfigPortEntry(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_SnoopingConfigPortEntry(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingConfigPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DHCPFiltering");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DHCPFiltering = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnoopingTrust");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SnoopingTrust = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AcceptIngressOption82");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->AcceptIngressOption82 = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddressVerification");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->MACAddressVerification = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DHCPRateLimiting");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DHCPRateLimiting = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_SnoopingStatisticsEntry(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingStatisticsEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrustMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->TrustMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Processed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Processed = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Dropped");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Dropped = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastDropReason");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LastDropReason = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_SnoopingStatisticsList(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingStatisticsList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_dhcp_SnoopingStatisticsEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingBindingDatabaseEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IP = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastUpdated");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LastUpdated = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastUpdatedEpoch");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LastUpdatedEpoch = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LeaseTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->LeaseTime = VAL_LONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_dhcp_SnoopingBindingDatabaseList(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingBindingDatabaseList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

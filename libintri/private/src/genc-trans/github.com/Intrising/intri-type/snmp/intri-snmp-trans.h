@@ -21,10 +21,13 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_snmp_EngineInfo (
+extern status_t build_to_xml_snmp_EngineInfo(
     val_value_t *parentval,
     struct snmppb_EngineInfo *entry);
 
+extern status_t build_to_priv_snmp_EngineInfo(
+    val_value_t *parentval,
+    struct snmppb_EngineInfo *entry);
 
 #endif /* _H_intri_snmp_trans */
 

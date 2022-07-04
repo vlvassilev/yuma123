@@ -35,30 +35,33 @@
 #include "../../../../github.com/Intrising/intri-type/core/files/intri-files-trans.h"
 #include "../../../../github.com/Intrising/intri-type/core/userinterface/intri-userinterface-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_snmp_EngineInfo (
+
+status_t build_to_xml_snmp_EngineInfo(
     val_value_t *parentval,
     struct snmppb_EngineInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Boots",
-    &res);
+      "Boots",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Boots;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RunTime",
-    &res);
+      "RunTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -67,3 +70,24 @@ status_t build_to_xml_snmp_EngineInfo (
   return res;
 }
 
+status_t build_to_priv_snmp_EngineInfo(
+    val_value_t *parentval,
+    struct snmppb_EngineInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Boots");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Boots = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RunTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->RunTime = VAL_LONG(childval);
+  }
+  return res;
+}

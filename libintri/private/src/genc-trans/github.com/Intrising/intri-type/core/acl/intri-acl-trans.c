@@ -33,177 +33,179 @@
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_acl_Config (
+
+status_t build_to_xml_acl_Config(
     val_value_t *parentval,
     struct aclpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interfaces",
-    &res);
+      "Interfaces",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_InterfaceList(
+  res = build_to_xml_acl_InterfaceList(
       childval,
-    entry->Interfaces);
+      entry->Interfaces);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AclList",
-    &res);
+      "AclList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_ACLList(
+  res = build_to_xml_acl_ACLList(
       childval,
-    entry->AclList);
+      entry->AclList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AceList",
-    &res);
+      "AceList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_ACEList(
+  res = build_to_xml_acl_ACEList(
       childval,
-    entry->AceList);
+      entry->AceList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Binding",
-    &res);
+      "Binding",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_BindingList(
+  res = build_to_xml_acl_BindingList(
       childval,
-    entry->Binding);
+      entry->Binding);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Flow",
-    &res);
+      "Flow",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_FlowMirroringList(
+  res = build_to_xml_acl_FlowMirroringList(
       childval,
-    entry->Flow);
+      entry->Flow);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_InterfaceList (
+status_t build_to_xml_acl_InterfaceList(
     val_value_t *parentval,
     struct aclpb_InterfaceList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_acl_InterfaceEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_acl_InterfaceEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_acl_InterfaceEntry (
+status_t build_to_xml_acl_InterfaceEntry(
     val_value_t *parentval,
     struct aclpb_InterfaceEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IngressAclName",
-    &res);
+      "IngressAclName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IngressAclName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EgressAclName",
-    &res);
+      "EgressAclName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -211,267 +213,338 @@ status_t build_to_xml_acl_InterfaceEntry (
   VAL_STRING(childval) = entry->EgressAclName;
   return res;
 }
-
-status_t build_to_xml_acl_ACLList (
+status_t build_to_xml_acl_ACLList(
     val_value_t *parentval,
     struct aclpb_ACLList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_acl_ACLEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_acl_ACLEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_acl_ACLEntry (
+status_t build_to_xml_acl_ACLEntry(
     val_value_t *parentval,
     struct aclpb_ACLEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RuleList",
-    &res);
+      "RuleList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->RuleList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "RuleList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->RuleList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "RuleList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->RuleList[i];
   }
   return res;
 }
-
-status_t build_to_xml_acl_ACEList (
+status_t build_to_xml_acl_ACEList(
     val_value_t *parentval,
     struct aclpb_ACEList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_acl_ACEEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_acl_ACEEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_acl_ACEEntry (
+status_t build_to_xml_acl_ACEEntry(
     val_value_t *parentval,
     struct aclpb_ACEEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Action",
-    &res);
+      "Action",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Action;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Action) {
+    case aclpb_RuleActionTypeOptions_RULE_ACTION_TYPE_UNUSED:
+      enum_str = "RULE_ACTION_TYPE_UNUSED";
+      break;
+    case aclpb_RuleActionTypeOptions_RULE_ACTION_TYPE_PERMIT:
+      enum_str = "RULE_ACTION_TYPE_PERMIT";
+      break;
+    case aclpb_RuleActionTypeOptions_RULE_ACTION_TYPE_DENY:
+      enum_str = "RULE_ACTION_TYPE_DENY";
+      break;
+    case aclpb_RuleActionTypeOptions_RULE_ACTION_TYPE_MIRROR:
+      enum_str = "RULE_ACTION_TYPE_MIRROR";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeRangeName",
-    &res);
+      "TimeRangeName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->TimeRangeName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ParamType",
-    &res);
+      "ParamType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ParamType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "Mac",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  switch (entry->ParamType) {
+    case aclpb_RuleParamTypeOptions_RULE_PARAM_TYPE_MAC:
+      enum_str = "RULE_PARAM_TYPE_MAC";
+      break;
+    case aclpb_RuleParamTypeOptions_RULE_PARAM_TYPE_IP_V_4:
+      enum_str = "RULE_PARAM_TYPE_IP_V_4";
+      break;
+    case aclpb_RuleParamTypeOptions_RULE_PARAM_TYPE_IP_V_6:
+      enum_str = "RULE_PARAM_TYPE_IP_V_6";
+      break;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "IPv4",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "IPv6",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "MacIPv4",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "MacIPv6",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  VAL_ENUM_NAME(childval) = enum_str;
+  switch (entry->Param_Union_Option) {
+    case aclpb_ACEEntry_Param_Union_Options_Mac:
+      childval = agt_make_object(
+          parentval->obj,
+          "Mac",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_acl_RuleMAC(
+          childval,
+          entry->Param.Param_Mac);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case aclpb_ACEEntry_Param_Union_Options_IPv4:
+      childval = agt_make_object(
+          parentval->obj,
+          "IPv4",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_acl_RuleIPv4(
+          childval,
+          entry->Param.Param_IPv4);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case aclpb_ACEEntry_Param_Union_Options_IPv6:
+      childval = agt_make_object(
+          parentval->obj,
+          "IPv6",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_acl_RuleIPv6(
+          childval,
+          entry->Param.Param_IPv6);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case aclpb_ACEEntry_Param_Union_Options_MacIPv4:
+      childval = agt_make_object(
+          parentval->obj,
+          "MacIPv4",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_acl_RuleMACIPv4(
+          childval,
+          entry->Param.Param_MacIPv4);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case aclpb_ACEEntry_Param_Union_Options_MacIPv6:
+      childval = agt_make_object(
+          parentval->obj,
+          "MacIPv6",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_acl_RuleMACIPv6(
+          childval,
+          entry->Param.Param_MacIPv6);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
   }
   return res;
 }
-
-status_t build_to_xml_acl_RuleVlan (
+status_t build_to_xml_acl_RuleVlan(
     val_value_t *parentval,
     struct aclpb_RuleVlan *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanIDMask",
-    &res);
+      "VlanIDMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -479,154 +552,155 @@ status_t build_to_xml_acl_RuleVlan (
   VAL_INT(childval) = entry->VlanIDMask;
   return res;
 }
-
-status_t build_to_xml_acl_RuleMACIPv4 (
+status_t build_to_xml_acl_RuleMACIPv4(
     val_value_t *parentval,
     struct aclpb_RuleMACIPv4 *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mac",
-    &res);
+      "Mac",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_RuleMAC(
+  res = build_to_xml_acl_RuleMAC(
       childval,
-    entry->Mac);
+      entry->Mac);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPv4",
-    &res);
+      "IPv4",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_RuleIPv4(
+  res = build_to_xml_acl_RuleIPv4(
       childval,
-    entry->IPv4);
+      entry->IPv4);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_RuleMACIPv6 (
+status_t build_to_xml_acl_RuleMACIPv6(
     val_value_t *parentval,
     struct aclpb_RuleMACIPv6 *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mac",
-    &res);
+      "Mac",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_RuleMAC(
+  res = build_to_xml_acl_RuleMAC(
       childval,
-    entry->Mac);
+      entry->Mac);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPv6",
-    &res);
+      "IPv6",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_RuleIPv6(
+  res = build_to_xml_acl_RuleIPv6(
       childval,
-    entry->IPv6);
+      entry->IPv6);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_RuleMAC (
+status_t build_to_xml_acl_RuleMAC(
     val_value_t *parentval,
     struct aclpb_RuleMAC *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "EtherType",
-    &res);
+      "EtherType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_EtherTypeConfig(
+  res = build_to_xml_acl_EtherTypeConfig(
       childval,
-    entry->EtherType);
+      entry->EtherType);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_MACConfig(
+  res = build_to_xml_acl_MACConfig(
       childval,
-    entry->Source);
+      entry->Source);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Destination",
-    &res);
+      "Destination",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_MACConfig(
+  res = build_to_xml_acl_MACConfig(
       childval,
-    entry->Destination);
+      entry->Destination);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanId",
-    &res);
+      "VlanId",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -634,31 +708,32 @@ status_t build_to_xml_acl_RuleMAC (
   VAL_INT(childval) = entry->VlanId;
   return res;
 }
-
-status_t build_to_xml_acl_MACConfig (
+status_t build_to_xml_acl_MACConfig(
     val_value_t *parentval,
     struct aclpb_MACConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AddressMask",
-    &res);
+      "AddressMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -666,31 +741,32 @@ status_t build_to_xml_acl_MACConfig (
   VAL_STRING(childval) = entry->AddressMask;
   return res;
 }
-
-status_t build_to_xml_acl_EtherTypeConfig (
+status_t build_to_xml_acl_EtherTypeConfig(
     val_value_t *parentval,
     struct aclpb_EtherTypeConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EtherTypeMask",
-    &res);
+      "EtherTypeMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -698,31 +774,32 @@ status_t build_to_xml_acl_EtherTypeConfig (
   VAL_STRING(childval) = entry->EtherTypeMask;
   return res;
 }
-
-status_t build_to_xml_acl_IPProtocolConfig (
+status_t build_to_xml_acl_IPProtocolConfig(
     val_value_t *parentval,
     struct aclpb_IPProtocolConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Protocol",
-    &res);
+      "Protocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Protocol;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ProtocolMask",
-    &res);
+      "ProtocolMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -730,107 +807,107 @@ status_t build_to_xml_acl_IPProtocolConfig (
   VAL_STRING(childval) = entry->ProtocolMask;
   return res;
 }
-
-status_t build_to_xml_acl_RuleIPv4 (
+status_t build_to_xml_acl_RuleIPv4(
     val_value_t *parentval,
     struct aclpb_RuleIPv4 *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Protocol",
-    &res);
+      "Protocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPProtocolConfig(
+  res = build_to_xml_acl_IPProtocolConfig(
       childval,
-    entry->Protocol);
+      entry->Protocol);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPv4Config(
+  res = build_to_xml_acl_IPv4Config(
       childval,
-    entry->Source);
+      entry->Source);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Destination",
-    &res);
+      "Destination",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPv4Config(
+  res = build_to_xml_acl_IPv4Config(
       childval,
-    entry->Destination);
+      entry->Destination);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Layer4Port",
-    &res);
+      "Layer4Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_RuleLayer4Port(
+  res = build_to_xml_acl_RuleLayer4Port(
       childval,
-    entry->Layer4Port);
+      entry->Layer4Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_IPv4Config (
+status_t build_to_xml_acl_IPv4Config(
     val_value_t *parentval,
     struct aclpb_IPv4Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AddressMask",
-    &res);
+      "AddressMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -838,107 +915,107 @@ status_t build_to_xml_acl_IPv4Config (
   VAL_STRING(childval) = entry->AddressMask;
   return res;
 }
-
-status_t build_to_xml_acl_RuleIPv6 (
+status_t build_to_xml_acl_RuleIPv6(
     val_value_t *parentval,
     struct aclpb_RuleIPv6 *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "NextHeader",
-    &res);
+      "NextHeader",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPProtocolConfig(
+  res = build_to_xml_acl_IPProtocolConfig(
       childval,
-    entry->NextHeader);
+      entry->NextHeader);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPv6Config(
+  res = build_to_xml_acl_IPv6Config(
       childval,
-    entry->Source);
+      entry->Source);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Destination",
-    &res);
+      "Destination",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPv6Config(
+  res = build_to_xml_acl_IPv6Config(
       childval,
-    entry->Destination);
+      entry->Destination);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Layer4Port",
-    &res);
+      "Layer4Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_RuleLayer4Port(
+  res = build_to_xml_acl_RuleLayer4Port(
       childval,
-    entry->Layer4Port);
+      entry->Layer4Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_IPv6Config (
+status_t build_to_xml_acl_IPv6Config(
     val_value_t *parentval,
     struct aclpb_IPv6Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AddressMask",
-    &res);
+      "AddressMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -946,73 +1023,75 @@ status_t build_to_xml_acl_IPv6Config (
   VAL_STRING(childval) = entry->AddressMask;
   return res;
 }
-
-status_t build_to_xml_acl_RuleLayer4Port (
+status_t build_to_xml_acl_RuleLayer4Port(
     val_value_t *parentval,
     struct aclpb_RuleLayer4Port *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPWithLayer4PortConfig(
+  res = build_to_xml_acl_IPWithLayer4PortConfig(
       childval,
-    entry->Source);
+      entry->Source);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Destination",
-    &res);
+      "Destination",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_IPWithLayer4PortConfig(
+  res = build_to_xml_acl_IPWithLayer4PortConfig(
       childval,
-    entry->Destination);
+      entry->Destination);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_IPWithLayer4PortConfig (
+status_t build_to_xml_acl_IPWithLayer4PortConfig(
     val_value_t *parentval,
     struct aclpb_IPWithLayer4PortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNumber",
-    &res);
+      "PortNumber",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNumber;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortNumberMask",
-    &res);
+      "PortNumberMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1020,249 +1099,1202 @@ status_t build_to_xml_acl_IPWithLayer4PortConfig (
   VAL_INT(childval) = entry->PortNumberMask;
   return res;
 }
-
-status_t build_to_xml_acl_BindingList (
+status_t build_to_xml_acl_BindingList(
     val_value_t *parentval,
     struct aclpb_BindingList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_acl_BindingEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_acl_BindingEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_acl_BindingEntry (
+status_t build_to_xml_acl_BindingEntry(
     val_value_t *parentval,
     struct aclpb_BindingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mac",
-    &res);
+      "Mac",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Mac;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ParamType",
-    &res);
+      "ParamType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ParamType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "IPv4",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  switch (entry->ParamType) {
+    case aclpb_RuleParamTypeOptions_RULE_PARAM_TYPE_MAC:
+      enum_str = "RULE_PARAM_TYPE_MAC";
+      break;
+    case aclpb_RuleParamTypeOptions_RULE_PARAM_TYPE_IP_V_4:
+      enum_str = "RULE_PARAM_TYPE_IP_V_4";
+      break;
+    case aclpb_RuleParamTypeOptions_RULE_PARAM_TYPE_IP_V_6:
+      enum_str = "RULE_PARAM_TYPE_IP_V_6";
+      break;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "IPv6",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  VAL_ENUM_NAME(childval) = enum_str;
+  switch (entry->Param_Union_Option) {
+    case aclpb_BindingEntry_Param_Union_Options_IPv4:
+      childval = agt_make_object(
+          parentval->obj,
+          "IPv4",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Param.Param_IPv4;
+      break;
+    case aclpb_BindingEntry_Param_Union_Options_IPv6:
+      childval = agt_make_object(
+          parentval->obj,
+          "IPv6",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* string */
+      VAL_STRING(childval) = entry->Param.Param_IPv6;
+      break;
   }
   return res;
 }
-
-status_t build_to_xml_acl_FlowMirroringEntry (
+status_t build_to_xml_acl_FlowMirroringEntry(
     val_value_t *parentval,
     struct aclpb_FlowMirroringEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ACLNameList",
-    &res);
+      "ACLNameList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->ACLNameList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "ACLNameList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->ACLNameList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "ACLNameList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->ACLNameList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceList",
-    &res);
+      "SourceList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SourceList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SourceList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->SourceList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SourceList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->SourceList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Destination",
-    &res);
+      "Destination",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->Destination);
+      entry->Destination);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_acl_FlowMirroringList (
+status_t build_to_xml_acl_FlowMirroringList(
     val_value_t *parentval,
     struct aclpb_FlowMirroringList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_acl_FlowMirroringEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_acl_FlowMirroringEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_acl_Config(
+    val_value_t *parentval,
+    struct aclpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interfaces");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interfaces = malloc(sizeof(*(entry->Interfaces)));
+    res = build_to_priv_acl_InterfaceList(
+        childval,
+        entry->Interfaces);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AclList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->AclList = malloc(sizeof(*(entry->AclList)));
+    res = build_to_priv_acl_ACLList(
+        childval,
+        entry->AclList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AceList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->AceList = malloc(sizeof(*(entry->AceList)));
+    res = build_to_priv_acl_ACEList(
+        childval,
+        entry->AceList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Binding");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Binding = malloc(sizeof(*(entry->Binding)));
+    res = build_to_priv_acl_BindingList(
+        childval,
+        entry->Binding);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Flow");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Flow = malloc(sizeof(*(entry->Flow)));
+    res = build_to_priv_acl_FlowMirroringList(
+        childval,
+        entry->Flow);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_InterfaceList(
+    val_value_t *parentval,
+    struct aclpb_InterfaceList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_acl_InterfaceEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_InterfaceEntry(
+    val_value_t *parentval,
+    struct aclpb_InterfaceEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IngressAclName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IngressAclName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EgressAclName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EgressAclName = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_ACLList(
+    val_value_t *parentval,
+    struct aclpb_ACLList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_acl_ACLEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_ACLEntry(
+    val_value_t *parentval,
+    struct aclpb_ACLEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RuleList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->RuleList_Len = dlq_count(&childval->v.childQ);
+    entry->RuleList = malloc((entry->RuleList_Len + 1) * sizeof(*entry->RuleList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->RuleList[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_ACEList(
+    val_value_t *parentval,
+    struct aclpb_ACEList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_acl_ACEEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_ACEEntry(
+    val_value_t *parentval,
+    struct aclpb_ACEEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Action");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Action = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeRangeName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->TimeRangeName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ParamType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ParamType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mac");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_ACEEntry_Param_Union_Options_Mac;
+    /* message */
+    entry->Param.Param_Mac = malloc(sizeof(*(entry->Param.Param_Mac)));
+    res = build_to_priv_acl_RuleMAC(
+        childval,
+        entry->Param.Param_Mac);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPv4");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_ACEEntry_Param_Union_Options_IPv4;
+    /* message */
+    entry->Param.Param_IPv4 = malloc(sizeof(*(entry->Param.Param_IPv4)));
+    res = build_to_priv_acl_RuleIPv4(
+        childval,
+        entry->Param.Param_IPv4);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPv6");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_ACEEntry_Param_Union_Options_IPv6;
+    /* message */
+    entry->Param.Param_IPv6 = malloc(sizeof(*(entry->Param.Param_IPv6)));
+    res = build_to_priv_acl_RuleIPv6(
+        childval,
+        entry->Param.Param_IPv6);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MacIPv4");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_ACEEntry_Param_Union_Options_MacIPv4;
+    /* message */
+    entry->Param.Param_MacIPv4 = malloc(sizeof(*(entry->Param.Param_MacIPv4)));
+    res = build_to_priv_acl_RuleMACIPv4(
+        childval,
+        entry->Param.Param_MacIPv4);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MacIPv6");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_ACEEntry_Param_Union_Options_MacIPv6;
+    /* message */
+    entry->Param.Param_MacIPv6 = malloc(sizeof(*(entry->Param.Param_MacIPv6)));
+    res = build_to_priv_acl_RuleMACIPv6(
+        childval,
+        entry->Param.Param_MacIPv6);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleVlan(
+    val_value_t *parentval,
+    struct aclpb_RuleVlan *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanIDMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanIDMask = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleMACIPv4(
+    val_value_t *parentval,
+    struct aclpb_RuleMACIPv4 *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mac");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Mac = malloc(sizeof(*(entry->Mac)));
+    res = build_to_priv_acl_RuleMAC(
+        childval,
+        entry->Mac);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPv4");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IPv4 = malloc(sizeof(*(entry->IPv4)));
+    res = build_to_priv_acl_RuleIPv4(
+        childval,
+        entry->IPv4);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleMACIPv6(
+    val_value_t *parentval,
+    struct aclpb_RuleMACIPv6 *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mac");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Mac = malloc(sizeof(*(entry->Mac)));
+    res = build_to_priv_acl_RuleMAC(
+        childval,
+        entry->Mac);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPv6");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IPv6 = malloc(sizeof(*(entry->IPv6)));
+    res = build_to_priv_acl_RuleIPv6(
+        childval,
+        entry->IPv6);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleMAC(
+    val_value_t *parentval,
+    struct aclpb_RuleMAC *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "EtherType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->EtherType = malloc(sizeof(*(entry->EtherType)));
+    res = build_to_priv_acl_EtherTypeConfig(
+        childval,
+        entry->EtherType);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Source = malloc(sizeof(*(entry->Source)));
+    res = build_to_priv_acl_MACConfig(
+        childval,
+        entry->Source);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Destination");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Destination = malloc(sizeof(*(entry->Destination)));
+    res = build_to_priv_acl_MACConfig(
+        childval,
+        entry->Destination);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanId");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanId = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_MACConfig(
+    val_value_t *parentval,
+    struct aclpb_MACConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AddressMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->AddressMask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_EtherTypeConfig(
+    val_value_t *parentval,
+    struct aclpb_EtherTypeConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Type = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EtherTypeMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EtherTypeMask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_IPProtocolConfig(
+    val_value_t *parentval,
+    struct aclpb_IPProtocolConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Protocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Protocol = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ProtocolMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ProtocolMask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleIPv4(
+    val_value_t *parentval,
+    struct aclpb_RuleIPv4 *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Protocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Protocol = malloc(sizeof(*(entry->Protocol)));
+    res = build_to_priv_acl_IPProtocolConfig(
+        childval,
+        entry->Protocol);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Source = malloc(sizeof(*(entry->Source)));
+    res = build_to_priv_acl_IPv4Config(
+        childval,
+        entry->Source);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Destination");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Destination = malloc(sizeof(*(entry->Destination)));
+    res = build_to_priv_acl_IPv4Config(
+        childval,
+        entry->Destination);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Layer4Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Layer4Port = malloc(sizeof(*(entry->Layer4Port)));
+    res = build_to_priv_acl_RuleLayer4Port(
+        childval,
+        entry->Layer4Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_IPv4Config(
+    val_value_t *parentval,
+    struct aclpb_IPv4Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AddressMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->AddressMask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleIPv6(
+    val_value_t *parentval,
+    struct aclpb_RuleIPv6 *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "NextHeader");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->NextHeader = malloc(sizeof(*(entry->NextHeader)));
+    res = build_to_priv_acl_IPProtocolConfig(
+        childval,
+        entry->NextHeader);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Source = malloc(sizeof(*(entry->Source)));
+    res = build_to_priv_acl_IPv6Config(
+        childval,
+        entry->Source);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Destination");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Destination = malloc(sizeof(*(entry->Destination)));
+    res = build_to_priv_acl_IPv6Config(
+        childval,
+        entry->Destination);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Layer4Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Layer4Port = malloc(sizeof(*(entry->Layer4Port)));
+    res = build_to_priv_acl_RuleLayer4Port(
+        childval,
+        entry->Layer4Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_IPv6Config(
+    val_value_t *parentval,
+    struct aclpb_IPv6Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AddressMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->AddressMask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_RuleLayer4Port(
+    val_value_t *parentval,
+    struct aclpb_RuleLayer4Port *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Source = malloc(sizeof(*(entry->Source)));
+    res = build_to_priv_acl_IPWithLayer4PortConfig(
+        childval,
+        entry->Source);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Destination");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Destination = malloc(sizeof(*(entry->Destination)));
+    res = build_to_priv_acl_IPWithLayer4PortConfig(
+        childval,
+        entry->Destination);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_IPWithLayer4PortConfig(
+    val_value_t *parentval,
+    struct aclpb_IPWithLayer4PortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNumber");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNumber = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortNumberMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNumberMask = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_BindingList(
+    val_value_t *parentval,
+    struct aclpb_BindingList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_acl_BindingEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_BindingEntry(
+    val_value_t *parentval,
+    struct aclpb_BindingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mac");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Mac = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ParamType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ParamType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPv4");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_BindingEntry_Param_Union_Options_IPv4;
+    /* string */
+    entry->Param.Param_IPv4 = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPv6");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Param_Union_Option = aclpb_BindingEntry_Param_Union_Options_IPv6;
+    /* string */
+    entry->Param.Param_IPv6 = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_acl_FlowMirroringEntry(
+    val_value_t *parentval,
+    struct aclpb_FlowMirroringEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ACLNameList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->ACLNameList_Len = dlq_count(&childval->v.childQ);
+    entry->ACLNameList = malloc((entry->ACLNameList_Len + 1) * sizeof(*entry->ACLNameList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->ACLNameList[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SourceList_Len = dlq_count(&childval->v.childQ);
+    entry->SourceList = malloc((entry->SourceList_Len + 1) * sizeof(*entry->SourceList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->SourceList[cnt] = malloc(sizeof(*(entry->SourceList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->SourceList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Destination");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Destination = malloc(sizeof(*(entry->Destination)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->Destination);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_acl_FlowMirroringList(
+    val_value_t *parentval,
+    struct aclpb_FlowMirroringList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_acl_FlowMirroringEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

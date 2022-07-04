@@ -21,26 +21,37 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_timerange_Config (
+extern status_t build_to_xml_timerange_Config(
     val_value_t *parentval,
     struct timerangepb_Config *entry);
-
-extern status_t build_to_xml_timerange_ConfigEntry (
+extern status_t build_to_xml_timerange_ConfigEntry(
     val_value_t *parentval,
     struct timerangepb_ConfigEntry *entry);
-
-extern status_t build_to_xml_timerange_DayTime (
+extern status_t build_to_xml_timerange_DayTime(
     val_value_t *parentval,
     struct timerangepb_DayTime *entry);
-
-extern status_t build_to_xml_timerange_EntryStatus (
+extern status_t build_to_xml_timerange_EntryStatus(
     val_value_t *parentval,
     struct timerangepb_EntryStatus *entry);
-
-extern status_t build_to_xml_timerange_Status (
+extern status_t build_to_xml_timerange_Status(
     val_value_t *parentval,
     struct timerangepb_Status *entry);
 
+extern status_t build_to_priv_timerange_Config(
+    val_value_t *parentval,
+    struct timerangepb_Config *entry);
+extern status_t build_to_priv_timerange_ConfigEntry(
+    val_value_t *parentval,
+    struct timerangepb_ConfigEntry *entry);
+extern status_t build_to_priv_timerange_DayTime(
+    val_value_t *parentval,
+    struct timerangepb_DayTime *entry);
+extern status_t build_to_priv_timerange_EntryStatus(
+    val_value_t *parentval,
+    struct timerangepb_EntryStatus *entry);
+extern status_t build_to_priv_timerange_Status(
+    val_value_t *parentval,
+    struct timerangepb_Status *entry);
 
 #endif /* _H_intri_timerange_trans */
 

@@ -21,54 +21,79 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry (
+extern status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
     val_value_t *parentval,
     struct qospb_WeightedFairTrafficRatioQueueEntry *entry);
-
-extern status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry (
+extern status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry(
     val_value_t *parentval,
     struct qospb_MappingCoSDot1PToQueueEntry *entry);
-
-extern status_t build_to_xml_qos_MappingDSCPToQueueEntry (
+extern status_t build_to_xml_qos_MappingDSCPToQueueEntry(
     val_value_t *parentval,
     struct qospb_MappingDSCPToQueueEntry *entry);
-
-extern status_t build_to_xml_qos_InterfaceConfigEntry (
+extern status_t build_to_xml_qos_InterfaceConfigEntry(
     val_value_t *parentval,
     struct qospb_InterfaceConfigEntry *entry);
-
-extern status_t build_to_xml_qos_Config (
+extern status_t build_to_xml_qos_Config(
     val_value_t *parentval,
     struct qospb_Config *entry);
-
-extern status_t build_to_xml_qos_Mode (
+extern status_t build_to_xml_qos_Mode(
     val_value_t *parentval,
     struct qospb_Mode *entry);
-
-extern status_t build_to_xml_qos_TrustMode (
+extern status_t build_to_xml_qos_TrustMode(
     val_value_t *parentval,
     struct qospb_TrustMode *entry);
-
-extern status_t build_to_xml_qos_PriorityScheme (
+extern status_t build_to_xml_qos_PriorityScheme(
     val_value_t *parentval,
     struct qospb_PriorityScheme *entry);
-
-extern status_t build_to_xml_qos_QueueList (
+extern status_t build_to_xml_qos_QueueList(
     val_value_t *parentval,
     struct qospb_QueueList *entry);
-
-extern status_t build_to_xml_qos_CoSList (
+extern status_t build_to_xml_qos_CoSList(
     val_value_t *parentval,
     struct qospb_CoSList *entry);
-
-extern status_t build_to_xml_qos_DSCPList (
+extern status_t build_to_xml_qos_DSCPList(
     val_value_t *parentval,
     struct qospb_DSCPList *entry);
-
-extern status_t build_to_xml_qos_InterfaceList (
+extern status_t build_to_xml_qos_InterfaceList(
     val_value_t *parentval,
     struct qospb_InterfaceList *entry);
 
+extern status_t build_to_priv_qos_WeightedFairTrafficRatioQueueEntry(
+    val_value_t *parentval,
+    struct qospb_WeightedFairTrafficRatioQueueEntry *entry);
+extern status_t build_to_priv_qos_MappingCoSDot1PToQueueEntry(
+    val_value_t *parentval,
+    struct qospb_MappingCoSDot1PToQueueEntry *entry);
+extern status_t build_to_priv_qos_MappingDSCPToQueueEntry(
+    val_value_t *parentval,
+    struct qospb_MappingDSCPToQueueEntry *entry);
+extern status_t build_to_priv_qos_InterfaceConfigEntry(
+    val_value_t *parentval,
+    struct qospb_InterfaceConfigEntry *entry);
+extern status_t build_to_priv_qos_Config(
+    val_value_t *parentval,
+    struct qospb_Config *entry);
+extern status_t build_to_priv_qos_Mode(
+    val_value_t *parentval,
+    struct qospb_Mode *entry);
+extern status_t build_to_priv_qos_TrustMode(
+    val_value_t *parentval,
+    struct qospb_TrustMode *entry);
+extern status_t build_to_priv_qos_PriorityScheme(
+    val_value_t *parentval,
+    struct qospb_PriorityScheme *entry);
+extern status_t build_to_priv_qos_QueueList(
+    val_value_t *parentval,
+    struct qospb_QueueList *entry);
+extern status_t build_to_priv_qos_CoSList(
+    val_value_t *parentval,
+    struct qospb_CoSList *entry);
+extern status_t build_to_priv_qos_DSCPList(
+    val_value_t *parentval,
+    struct qospb_DSCPList *entry);
+extern status_t build_to_priv_qos_InterfaceList(
+    val_value_t *parentval,
+    struct qospb_InterfaceList *entry);
 
 #endif /* _H_intri_qos_trans */
 

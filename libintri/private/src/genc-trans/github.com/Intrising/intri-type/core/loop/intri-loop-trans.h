@@ -21,26 +21,37 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_loop_Config (
+extern status_t build_to_xml_loop_Config(
     val_value_t *parentval,
     struct looppb_Config *entry);
-
-extern status_t build_to_xml_loop_PortConfigEntry (
+extern status_t build_to_xml_loop_PortConfigEntry(
     val_value_t *parentval,
     struct looppb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_loop_PortConfig (
+extern status_t build_to_xml_loop_PortConfig(
     val_value_t *parentval,
     struct looppb_PortConfig *entry);
-
-extern status_t build_to_xml_loop_StatusEntry (
+extern status_t build_to_xml_loop_StatusEntry(
     val_value_t *parentval,
     struct looppb_StatusEntry *entry);
-
-extern status_t build_to_xml_loop_Status (
+extern status_t build_to_xml_loop_Status(
     val_value_t *parentval,
     struct looppb_Status *entry);
 
+extern status_t build_to_priv_loop_Config(
+    val_value_t *parentval,
+    struct looppb_Config *entry);
+extern status_t build_to_priv_loop_PortConfigEntry(
+    val_value_t *parentval,
+    struct looppb_PortConfigEntry *entry);
+extern status_t build_to_priv_loop_PortConfig(
+    val_value_t *parentval,
+    struct looppb_PortConfig *entry);
+extern status_t build_to_priv_loop_StatusEntry(
+    val_value_t *parentval,
+    struct looppb_StatusEntry *entry);
+extern status_t build_to_priv_loop_Status(
+    val_value_t *parentval,
+    struct looppb_Status *entry);
 
 #endif /* _H_intri_loop_trans */
 

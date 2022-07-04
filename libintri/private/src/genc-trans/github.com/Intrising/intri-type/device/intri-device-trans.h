@@ -21,210 +21,313 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_device_LedInfo (
+extern status_t build_to_xml_device_LedInfo(
     val_value_t *parentval,
     struct devicepb_LedInfo *entry);
-
-extern status_t build_to_xml_device_MonitorInfo (
+extern status_t build_to_xml_device_MonitorInfo(
     val_value_t *parentval,
     struct devicepb_MonitorInfo *entry);
-
-extern status_t build_to_xml_device_PSUInfo (
+extern status_t build_to_xml_device_PSUInfo(
     val_value_t *parentval,
     struct devicepb_PSUInfo *entry);
-
-extern status_t build_to_xml_device_MCULedDevice (
+extern status_t build_to_xml_device_MCULedDevice(
     val_value_t *parentval,
     struct devicepb_MCULedDevice *entry);
-
-extern status_t build_to_xml_device_MCUMonitorDevice (
+extern status_t build_to_xml_device_MCUMonitorDevice(
     val_value_t *parentval,
     struct devicepb_MCUMonitorDevice *entry);
-
-extern status_t build_to_xml_device_MCUPSUDevice (
+extern status_t build_to_xml_device_MCUPSUDevice(
     val_value_t *parentval,
     struct devicepb_MCUPSUDevice *entry);
-
-extern status_t build_to_xml_device_MCUFanDevice (
+extern status_t build_to_xml_device_MCUFanDevice(
     val_value_t *parentval,
     struct devicepb_MCUFanDevice *entry);
-
-extern status_t build_to_xml_device_I2CDevice (
+extern status_t build_to_xml_device_I2CDevice(
     val_value_t *parentval,
     struct devicepb_I2CDevice *entry);
-
-extern status_t build_to_xml_device_GPIODevice (
+extern status_t build_to_xml_device_GPIODevice(
     val_value_t *parentval,
     struct devicepb_GPIODevice *entry);
-
-extern status_t build_to_xml_device_I2Cinfo (
+extern status_t build_to_xml_device_I2Cinfo(
     val_value_t *parentval,
     struct devicepb_I2Cinfo *entry);
-
-extern status_t build_to_xml_device_GPIOInfo (
+extern status_t build_to_xml_device_GPIOInfo(
     val_value_t *parentval,
     struct devicepb_GPIOInfo *entry);
-
-extern status_t build_to_xml_device_PTPClockSynchronizerInfo (
+extern status_t build_to_xml_device_PTPClockSynchronizerInfo(
     val_value_t *parentval,
     struct devicepb_PTPClockSynchronizerInfo *entry);
-
-extern status_t build_to_xml_device_GPSInfo (
+extern status_t build_to_xml_device_GPSInfo(
     val_value_t *parentval,
     struct devicepb_GPSInfo *entry);
-
-extern status_t build_to_xml_device_ToDInfo (
+extern status_t build_to_xml_device_ToDInfo(
     val_value_t *parentval,
     struct devicepb_ToDInfo *entry);
-
-extern status_t build_to_xml_device_UARTDevice (
+extern status_t build_to_xml_device_UARTDevice(
     val_value_t *parentval,
     struct devicepb_UARTDevice *entry);
-
-extern status_t build_to_xml_device_FanInfo (
+extern status_t build_to_xml_device_FanInfo(
     val_value_t *parentval,
     struct devicepb_FanInfo *entry);
-
-extern status_t build_to_xml_device_PoEInfo (
+extern status_t build_to_xml_device_PoEInfo(
     val_value_t *parentval,
     struct devicepb_PoEInfo *entry);
-
-extern status_t build_to_xml_device_HardwareInfo (
+extern status_t build_to_xml_device_HardwareInfo(
     val_value_t *parentval,
     struct devicepb_HardwareInfo *entry);
-
-extern status_t build_to_xml_device_HardwareTableSize (
+extern status_t build_to_xml_device_HardwareTableSize(
     val_value_t *parentval,
     struct devicepb_HardwareTableSize *entry);
-
-extern status_t build_to_xml_device_PhyInterface (
+extern status_t build_to_xml_device_PhyInterface(
     val_value_t *parentval,
     struct devicepb_PhyInterface *entry);
-
-extern status_t build_to_xml_device_PortInfo (
+extern status_t build_to_xml_device_PortInfo(
     val_value_t *parentval,
     struct devicepb_PortInfo *entry);
-
-extern status_t build_to_xml_device_BoardInfo (
+extern status_t build_to_xml_device_BoardInfo(
     val_value_t *parentval,
     struct devicepb_BoardInfo *entry);
-
-extern status_t build_to_xml_device_TimeControlSpeedFrequencyEntry (
+extern status_t build_to_xml_device_TimeControlSpeedFrequencyEntry(
     val_value_t *parentval,
     struct devicepb_TimeControlSpeedFrequencyEntry *entry);
-
-extern status_t build_to_xml_device_TimeControlPortInfoEntry (
+extern status_t build_to_xml_device_TimeControlPortInfoEntry(
     val_value_t *parentval,
     struct devicepb_TimeControlPortInfoEntry *entry);
-
-extern status_t build_to_xml_device_TimeControlInfo (
+extern status_t build_to_xml_device_TimeControlInfo(
     val_value_t *parentval,
     struct devicepb_TimeControlInfo *entry);
-
-extern status_t build_to_xml_device_Boundary (
+extern status_t build_to_xml_device_Boundary(
     val_value_t *parentval,
     struct devicepb_Boundary *entry);
-
-extern status_t build_to_xml_device_BoundaryAll (
+extern status_t build_to_xml_device_BoundaryAll(
     val_value_t *parentval,
     struct devicepb_BoundaryAll *entry);
-
-extern status_t build_to_xml_device_BoundaryDHCPServer (
+extern status_t build_to_xml_device_BoundaryDHCPServer(
     val_value_t *parentval,
     struct devicepb_BoundaryDHCPServer *entry);
-
-extern status_t build_to_xml_device_BoundaryVLAN (
+extern status_t build_to_xml_device_BoundaryVLAN(
     val_value_t *parentval,
     struct devicepb_BoundaryVLAN *entry);
-
-extern status_t build_to_xml_device_BoundaryDDM (
+extern status_t build_to_xml_device_BoundaryDDM(
     val_value_t *parentval,
     struct devicepb_BoundaryDDM *entry);
-
-extern status_t build_to_xml_device_BoundaryACL (
+extern status_t build_to_xml_device_BoundaryACL(
     val_value_t *parentval,
     struct devicepb_BoundaryACL *entry);
-
-extern status_t build_to_xml_device_BoundaryLog (
+extern status_t build_to_xml_device_BoundaryLog(
     val_value_t *parentval,
     struct devicepb_BoundaryLog *entry);
-
-extern status_t build_to_xml_device_BoundaryAccess (
+extern status_t build_to_xml_device_BoundaryAccess(
     val_value_t *parentval,
     struct devicepb_BoundaryAccess *entry);
-
-extern status_t build_to_xml_device_BoundaryMirroring (
+extern status_t build_to_xml_device_BoundaryMirroring(
     val_value_t *parentval,
     struct devicepb_BoundaryMirroring *entry);
-
-extern status_t build_to_xml_device_BoundaryFDB (
+extern status_t build_to_xml_device_BoundaryFDB(
     val_value_t *parentval,
     struct devicepb_BoundaryFDB *entry);
-
-extern status_t build_to_xml_device_BoundaryTRUNK (
+extern status_t build_to_xml_device_BoundaryTRUNK(
     val_value_t *parentval,
     struct devicepb_BoundaryTRUNK *entry);
-
-extern status_t build_to_xml_device_BoundaryMulticast (
+extern status_t build_to_xml_device_BoundaryMulticast(
     val_value_t *parentval,
     struct devicepb_BoundaryMulticast *entry);
-
-extern status_t build_to_xml_device_BoundaryQoS (
+extern status_t build_to_xml_device_BoundaryQoS(
     val_value_t *parentval,
     struct devicepb_BoundaryQoS *entry);
-
-extern status_t build_to_xml_device_BoundaryPoE (
+extern status_t build_to_xml_device_BoundaryPoE(
     val_value_t *parentval,
     struct devicepb_BoundaryPoE *entry);
-
-extern status_t build_to_xml_device_BoundaryFiles (
+extern status_t build_to_xml_device_BoundaryFiles(
     val_value_t *parentval,
     struct devicepb_BoundaryFiles *entry);
-
-extern status_t build_to_xml_device_BoundaryTimeRange (
+extern status_t build_to_xml_device_BoundaryTimeRange(
     val_value_t *parentval,
     struct devicepb_BoundaryTimeRange *entry);
-
-extern status_t build_to_xml_device_BoundaryMonitor (
+extern status_t build_to_xml_device_BoundaryMonitor(
     val_value_t *parentval,
     struct devicepb_BoundaryMonitor *entry);
-
-extern status_t build_to_xml_device_FunctionControlAll (
+extern status_t build_to_xml_device_FunctionControlAll(
     val_value_t *parentval,
     struct devicepb_FunctionControlAll *entry);
-
-extern status_t build_to_xml_device_FunctionControlVLAN (
+extern status_t build_to_xml_device_FunctionControlVLAN(
     val_value_t *parentval,
     struct devicepb_FunctionControlVLAN *entry);
-
-extern status_t build_to_xml_device_FunctionControlACL (
+extern status_t build_to_xml_device_FunctionControlACL(
     val_value_t *parentval,
     struct devicepb_FunctionControlACL *entry);
-
-extern status_t build_to_xml_device_FunctionControlMirroring (
+extern status_t build_to_xml_device_FunctionControlMirroring(
     val_value_t *parentval,
     struct devicepb_FunctionControlMirroring *entry);
-
-extern status_t build_to_xml_device_FunctionControlFDB (
+extern status_t build_to_xml_device_FunctionControlFDB(
     val_value_t *parentval,
     struct devicepb_FunctionControlFDB *entry);
-
-extern status_t build_to_xml_device_PathAll (
+extern status_t build_to_xml_device_PathAll(
     val_value_t *parentval,
     struct devicepb_PathAll *entry);
-
-extern status_t build_to_xml_device_InterfaceIdentify (
+extern status_t build_to_xml_device_InterfaceIdentify(
     val_value_t *parentval,
     struct devicepb_InterfaceIdentify *entry);
-
-extern status_t build_to_xml_device_Info (
+extern status_t build_to_xml_device_Info(
     val_value_t *parentval,
     struct devicepb_Info *entry);
-
-extern status_t build_to_xml_device_PortList (
+extern status_t build_to_xml_device_PortList(
     val_value_t *parentval,
     struct devicepb_PortList *entry);
 
+extern status_t build_to_priv_device_LedInfo(
+    val_value_t *parentval,
+    struct devicepb_LedInfo *entry);
+extern status_t build_to_priv_device_MonitorInfo(
+    val_value_t *parentval,
+    struct devicepb_MonitorInfo *entry);
+extern status_t build_to_priv_device_PSUInfo(
+    val_value_t *parentval,
+    struct devicepb_PSUInfo *entry);
+extern status_t build_to_priv_device_MCULedDevice(
+    val_value_t *parentval,
+    struct devicepb_MCULedDevice *entry);
+extern status_t build_to_priv_device_MCUMonitorDevice(
+    val_value_t *parentval,
+    struct devicepb_MCUMonitorDevice *entry);
+extern status_t build_to_priv_device_MCUPSUDevice(
+    val_value_t *parentval,
+    struct devicepb_MCUPSUDevice *entry);
+extern status_t build_to_priv_device_MCUFanDevice(
+    val_value_t *parentval,
+    struct devicepb_MCUFanDevice *entry);
+extern status_t build_to_priv_device_I2CDevice(
+    val_value_t *parentval,
+    struct devicepb_I2CDevice *entry);
+extern status_t build_to_priv_device_GPIODevice(
+    val_value_t *parentval,
+    struct devicepb_GPIODevice *entry);
+extern status_t build_to_priv_device_I2Cinfo(
+    val_value_t *parentval,
+    struct devicepb_I2Cinfo *entry);
+extern status_t build_to_priv_device_GPIOInfo(
+    val_value_t *parentval,
+    struct devicepb_GPIOInfo *entry);
+extern status_t build_to_priv_device_PTPClockSynchronizerInfo(
+    val_value_t *parentval,
+    struct devicepb_PTPClockSynchronizerInfo *entry);
+extern status_t build_to_priv_device_GPSInfo(
+    val_value_t *parentval,
+    struct devicepb_GPSInfo *entry);
+extern status_t build_to_priv_device_ToDInfo(
+    val_value_t *parentval,
+    struct devicepb_ToDInfo *entry);
+extern status_t build_to_priv_device_UARTDevice(
+    val_value_t *parentval,
+    struct devicepb_UARTDevice *entry);
+extern status_t build_to_priv_device_FanInfo(
+    val_value_t *parentval,
+    struct devicepb_FanInfo *entry);
+extern status_t build_to_priv_device_PoEInfo(
+    val_value_t *parentval,
+    struct devicepb_PoEInfo *entry);
+extern status_t build_to_priv_device_HardwareInfo(
+    val_value_t *parentval,
+    struct devicepb_HardwareInfo *entry);
+extern status_t build_to_priv_device_HardwareTableSize(
+    val_value_t *parentval,
+    struct devicepb_HardwareTableSize *entry);
+extern status_t build_to_priv_device_PhyInterface(
+    val_value_t *parentval,
+    struct devicepb_PhyInterface *entry);
+extern status_t build_to_priv_device_PortInfo(
+    val_value_t *parentval,
+    struct devicepb_PortInfo *entry);
+extern status_t build_to_priv_device_BoardInfo(
+    val_value_t *parentval,
+    struct devicepb_BoardInfo *entry);
+extern status_t build_to_priv_device_TimeControlSpeedFrequencyEntry(
+    val_value_t *parentval,
+    struct devicepb_TimeControlSpeedFrequencyEntry *entry);
+extern status_t build_to_priv_device_TimeControlPortInfoEntry(
+    val_value_t *parentval,
+    struct devicepb_TimeControlPortInfoEntry *entry);
+extern status_t build_to_priv_device_TimeControlInfo(
+    val_value_t *parentval,
+    struct devicepb_TimeControlInfo *entry);
+extern status_t build_to_priv_device_Boundary(
+    val_value_t *parentval,
+    struct devicepb_Boundary *entry);
+extern status_t build_to_priv_device_BoundaryAll(
+    val_value_t *parentval,
+    struct devicepb_BoundaryAll *entry);
+extern status_t build_to_priv_device_BoundaryDHCPServer(
+    val_value_t *parentval,
+    struct devicepb_BoundaryDHCPServer *entry);
+extern status_t build_to_priv_device_BoundaryVLAN(
+    val_value_t *parentval,
+    struct devicepb_BoundaryVLAN *entry);
+extern status_t build_to_priv_device_BoundaryDDM(
+    val_value_t *parentval,
+    struct devicepb_BoundaryDDM *entry);
+extern status_t build_to_priv_device_BoundaryACL(
+    val_value_t *parentval,
+    struct devicepb_BoundaryACL *entry);
+extern status_t build_to_priv_device_BoundaryLog(
+    val_value_t *parentval,
+    struct devicepb_BoundaryLog *entry);
+extern status_t build_to_priv_device_BoundaryAccess(
+    val_value_t *parentval,
+    struct devicepb_BoundaryAccess *entry);
+extern status_t build_to_priv_device_BoundaryMirroring(
+    val_value_t *parentval,
+    struct devicepb_BoundaryMirroring *entry);
+extern status_t build_to_priv_device_BoundaryFDB(
+    val_value_t *parentval,
+    struct devicepb_BoundaryFDB *entry);
+extern status_t build_to_priv_device_BoundaryTRUNK(
+    val_value_t *parentval,
+    struct devicepb_BoundaryTRUNK *entry);
+extern status_t build_to_priv_device_BoundaryMulticast(
+    val_value_t *parentval,
+    struct devicepb_BoundaryMulticast *entry);
+extern status_t build_to_priv_device_BoundaryQoS(
+    val_value_t *parentval,
+    struct devicepb_BoundaryQoS *entry);
+extern status_t build_to_priv_device_BoundaryPoE(
+    val_value_t *parentval,
+    struct devicepb_BoundaryPoE *entry);
+extern status_t build_to_priv_device_BoundaryFiles(
+    val_value_t *parentval,
+    struct devicepb_BoundaryFiles *entry);
+extern status_t build_to_priv_device_BoundaryTimeRange(
+    val_value_t *parentval,
+    struct devicepb_BoundaryTimeRange *entry);
+extern status_t build_to_priv_device_BoundaryMonitor(
+    val_value_t *parentval,
+    struct devicepb_BoundaryMonitor *entry);
+extern status_t build_to_priv_device_FunctionControlAll(
+    val_value_t *parentval,
+    struct devicepb_FunctionControlAll *entry);
+extern status_t build_to_priv_device_FunctionControlVLAN(
+    val_value_t *parentval,
+    struct devicepb_FunctionControlVLAN *entry);
+extern status_t build_to_priv_device_FunctionControlACL(
+    val_value_t *parentval,
+    struct devicepb_FunctionControlACL *entry);
+extern status_t build_to_priv_device_FunctionControlMirroring(
+    val_value_t *parentval,
+    struct devicepb_FunctionControlMirroring *entry);
+extern status_t build_to_priv_device_FunctionControlFDB(
+    val_value_t *parentval,
+    struct devicepb_FunctionControlFDB *entry);
+extern status_t build_to_priv_device_PathAll(
+    val_value_t *parentval,
+    struct devicepb_PathAll *entry);
+extern status_t build_to_priv_device_InterfaceIdentify(
+    val_value_t *parentval,
+    struct devicepb_InterfaceIdentify *entry);
+extern status_t build_to_priv_device_Info(
+    val_value_t *parentval,
+    struct devicepb_Info *entry);
+extern status_t build_to_priv_device_PortList(
+    val_value_t *parentval,
+    struct devicepb_PortList *entry);
 
 #endif /* _H_intri_device_trans */
 

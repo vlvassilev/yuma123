@@ -32,74 +32,88 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry (
+
+status_t build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
     val_value_t *parentval,
     struct qospb_WeightedFairTrafficRatioQueueEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->QueueNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Scheme",
-    &res);
+      "Scheme",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Scheme;
+  switch (entry->Scheme) {
+    case qospb_PrioritySchemeTypeOptions_PRIORITY_SCHEME_TYPE_WRR:
+      enum_str = "PRIORITY_SCHEME_TYPE_WRR";
+      break;
+    case qospb_PrioritySchemeTypeOptions_PRIORITY_SCHEME_TYPE_SP:
+      enum_str = "PRIORITY_SCHEME_TYPE_SP";
+      break;
+    case qospb_PrioritySchemeTypeOptions_PRIORITY_SCHEME_TYPE_WRR_AND_SP:
+      enum_str = "PRIORITY_SCHEME_TYPE_WRR_AND_SP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry (
+status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry(
     val_value_t *parentval,
     struct qospb_MappingCoSDot1PToQueueEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "CosNo",
-    &res);
+      "CosNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->CosNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -107,31 +121,32 @@ status_t build_to_xml_qos_MappingCoSDot1PToQueueEntry (
   VAL_INT(childval) = entry->QueueNo;
   return res;
 }
-
-status_t build_to_xml_qos_MappingDSCPToQueueEntry (
+status_t build_to_xml_qos_MappingDSCPToQueueEntry(
     val_value_t *parentval,
     struct qospb_MappingDSCPToQueueEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DSCPNo",
-    &res);
+      "DSCPNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DSCPNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -139,96 +154,92 @@ status_t build_to_xml_qos_MappingDSCPToQueueEntry (
   VAL_INT(childval) = entry->QueueNo;
   return res;
 }
-
-status_t build_to_xml_qos_InterfaceConfigEntry (
+status_t build_to_xml_qos_InterfaceConfigEntry(
     val_value_t *parentval,
     struct qospb_InterfaceConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EgressBandwidth",
-    &res);
+      "EgressBandwidth",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->EgressBandwidth;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IngressBandwidth",
-    &res);
+      "IngressBandwidth",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IngressBandwidth;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IngressUnicastEnabled",
-    &res);
+      "IngressUnicastEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IngressUnicastEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IngressMulticastEnabled",
-    &res);
+      "IngressMulticastEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IngressMulticastEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IngressBroadcastEnabled",
-    &res);
+      "IngressBroadcastEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -236,360 +247,819 @@ status_t build_to_xml_qos_InterfaceConfigEntry (
   VAL_BOOL(childval) = entry->IngressBroadcastEnabled;
   return res;
 }
-
-status_t build_to_xml_qos_Config (
+status_t build_to_xml_qos_Config(
     val_value_t *parentval,
     struct qospb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ModeOption",
-    &res);
+      "ModeOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ModeOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ModeOption) {
+    case qospb_ModeTypeOptions_MODE_TYPE_DISABLED:
+      enum_str = "MODE_TYPE_DISABLED";
+      break;
+    case qospb_ModeTypeOptions_MODE_TYPE_BASIC:
+      enum_str = "MODE_TYPE_BASIC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "TrustModeOption",
-    &res);
+      "TrustModeOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->TrustModeOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->TrustModeOption) {
+    case qospb_TrustModeTypeOptions_TRUST_MODE_TYPE_COS:
+      enum_str = "TRUST_MODE_TYPE_COS";
+      break;
+    case qospb_TrustModeTypeOptions_TRUST_MODE_TYPE_DSCP_ONLY:
+      enum_str = "TRUST_MODE_TYPE_DSCP_ONLY";
+      break;
+    case qospb_TrustModeTypeOptions_TRUST_MODE_TYPE_DSCP_FIRST:
+      enum_str = "TRUST_MODE_TYPE_DSCP_FIRST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "QueueList",
-    &res);
+      "QueueList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->QueueList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "QueueList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
-    listval,
-    entry->QueueList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "QueueList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
+        listval,
+        entry->QueueList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "CoSList",
-    &res);
+      "CoSList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->CoSList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "CoSList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_MappingCoSDot1PToQueueEntry(
-    listval,
-    entry->CoSList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "CoSList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_MappingCoSDot1PToQueueEntry(
+        listval,
+        entry->CoSList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DSCPList",
-    &res);
+      "DSCPList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->DSCPList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "DSCPList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_MappingDSCPToQueueEntry(
-    listval,
-    entry->DSCPList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "DSCPList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_MappingDSCPToQueueEntry(
+        listval,
+        entry->DSCPList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceList",
-    &res);
+      "InterfaceList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->InterfaceList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "InterfaceList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_InterfaceConfigEntry(
-    listval,
-    entry->InterfaceList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "InterfaceList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_InterfaceConfigEntry(
+        listval,
+        entry->InterfaceList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_qos_Mode (
+status_t build_to_xml_qos_Mode(
     val_value_t *parentval,
     struct qospb_Mode *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Option",
-    &res);
+      "Option",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Option;
+  switch (entry->Option) {
+    case qospb_ModeTypeOptions_MODE_TYPE_DISABLED:
+      enum_str = "MODE_TYPE_DISABLED";
+      break;
+    case qospb_ModeTypeOptions_MODE_TYPE_BASIC:
+      enum_str = "MODE_TYPE_BASIC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_qos_TrustMode (
+status_t build_to_xml_qos_TrustMode(
     val_value_t *parentval,
     struct qospb_TrustMode *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Option",
-    &res);
+      "Option",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Option;
+  switch (entry->Option) {
+    case qospb_TrustModeTypeOptions_TRUST_MODE_TYPE_COS:
+      enum_str = "TRUST_MODE_TYPE_COS";
+      break;
+    case qospb_TrustModeTypeOptions_TRUST_MODE_TYPE_DSCP_ONLY:
+      enum_str = "TRUST_MODE_TYPE_DSCP_ONLY";
+      break;
+    case qospb_TrustModeTypeOptions_TRUST_MODE_TYPE_DSCP_FIRST:
+      enum_str = "TRUST_MODE_TYPE_DSCP_FIRST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_qos_PriorityScheme (
+status_t build_to_xml_qos_PriorityScheme(
     val_value_t *parentval,
     struct qospb_PriorityScheme *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Option",
-    &res);
+      "Option",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Option;
+  switch (entry->Option) {
+    case qospb_PrioritySchemeTypeOptions_PRIORITY_SCHEME_TYPE_WRR:
+      enum_str = "PRIORITY_SCHEME_TYPE_WRR";
+      break;
+    case qospb_PrioritySchemeTypeOptions_PRIORITY_SCHEME_TYPE_SP:
+      enum_str = "PRIORITY_SCHEME_TYPE_SP";
+      break;
+    case qospb_PrioritySchemeTypeOptions_PRIORITY_SCHEME_TYPE_WRR_AND_SP:
+      enum_str = "PRIORITY_SCHEME_TYPE_WRR_AND_SP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_qos_QueueList (
+status_t build_to_xml_qos_QueueList(
     val_value_t *parentval,
     struct qospb_QueueList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_WeightedFairTrafficRatioQueueEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_qos_CoSList (
+status_t build_to_xml_qos_CoSList(
     val_value_t *parentval,
     struct qospb_CoSList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_MappingCoSDot1PToQueueEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_MappingCoSDot1PToQueueEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_qos_DSCPList (
+status_t build_to_xml_qos_DSCPList(
     val_value_t *parentval,
     struct qospb_DSCPList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_MappingDSCPToQueueEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_MappingDSCPToQueueEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_qos_InterfaceList (
+status_t build_to_xml_qos_InterfaceList(
     val_value_t *parentval,
     struct qospb_InterfaceList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_qos_InterfaceConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_qos_InterfaceConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_qos_WeightedFairTrafficRatioQueueEntry(
+    val_value_t *parentval,
+    struct qospb_WeightedFairTrafficRatioQueueEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->QueueNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Scheme");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Scheme = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_MappingCoSDot1PToQueueEntry(
+    val_value_t *parentval,
+    struct qospb_MappingCoSDot1PToQueueEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "CosNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->CosNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->QueueNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_MappingDSCPToQueueEntry(
+    val_value_t *parentval,
+    struct qospb_MappingDSCPToQueueEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DSCPNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DSCPNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->QueueNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_InterfaceConfigEntry(
+    val_value_t *parentval,
+    struct qospb_InterfaceConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EgressBandwidth");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->EgressBandwidth = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IngressBandwidth");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IngressBandwidth = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IngressUnicastEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IngressUnicastEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IngressMulticastEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IngressMulticastEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IngressBroadcastEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IngressBroadcastEnabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_Config(
+    val_value_t *parentval,
+    struct qospb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ModeOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ModeOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrustModeOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->TrustModeOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QueueList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->QueueList_Len = dlq_count(&childval->v.childQ);
+    entry->QueueList = malloc((entry->QueueList_Len + 1) * sizeof(*entry->QueueList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->QueueList[cnt] = malloc(sizeof(*(entry->QueueList[cnt])));
+      res = build_to_priv_qos_WeightedFairTrafficRatioQueueEntry(
+          listval,
+          entry->QueueList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "CoSList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->CoSList_Len = dlq_count(&childval->v.childQ);
+    entry->CoSList = malloc((entry->CoSList_Len + 1) * sizeof(*entry->CoSList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->CoSList[cnt] = malloc(sizeof(*(entry->CoSList[cnt])));
+      res = build_to_priv_qos_MappingCoSDot1PToQueueEntry(
+          listval,
+          entry->CoSList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DSCPList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->DSCPList_Len = dlq_count(&childval->v.childQ);
+    entry->DSCPList = malloc((entry->DSCPList_Len + 1) * sizeof(*entry->DSCPList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->DSCPList[cnt] = malloc(sizeof(*(entry->DSCPList[cnt])));
+      res = build_to_priv_qos_MappingDSCPToQueueEntry(
+          listval,
+          entry->DSCPList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->InterfaceList_Len = dlq_count(&childval->v.childQ);
+    entry->InterfaceList = malloc((entry->InterfaceList_Len + 1) * sizeof(*entry->InterfaceList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->InterfaceList[cnt] = malloc(sizeof(*(entry->InterfaceList[cnt])));
+      res = build_to_priv_qos_InterfaceConfigEntry(
+          listval,
+          entry->InterfaceList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_qos_Mode(
+    val_value_t *parentval,
+    struct qospb_Mode *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Option");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Option = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_TrustMode(
+    val_value_t *parentval,
+    struct qospb_TrustMode *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Option");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Option = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_PriorityScheme(
+    val_value_t *parentval,
+    struct qospb_PriorityScheme *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Option");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Option = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_qos_QueueList(
+    val_value_t *parentval,
+    struct qospb_QueueList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_qos_WeightedFairTrafficRatioQueueEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_qos_CoSList(
+    val_value_t *parentval,
+    struct qospb_CoSList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_qos_MappingCoSDot1PToQueueEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_qos_DSCPList(
+    val_value_t *parentval,
+    struct qospb_DSCPList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_qos_MappingDSCPToQueueEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_qos_InterfaceList(
+    val_value_t *parentval,
+    struct qospb_InterfaceList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_qos_InterfaceConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

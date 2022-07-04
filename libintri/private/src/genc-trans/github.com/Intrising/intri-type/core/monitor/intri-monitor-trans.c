@@ -33,374 +33,471 @@
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/Intrising/intri-type/event/intri-event-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_monitor_Config (
+
+status_t build_to_xml_monitor_Config(
     val_value_t *parentval,
     struct monitorpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DeviceLimitConfig",
-    &res);
+      "DeviceLimitConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_DeviceLimitConfig(
+  res = build_to_xml_monitor_DeviceLimitConfig(
       childval,
-    entry->DeviceLimitConfig);
+      entry->DeviceLimitConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SystemLimitConfig",
-    &res);
+      "SystemLimitConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_SystemLimitConfig(
+  res = build_to_xml_monitor_SystemLimitConfig(
       childval,
-    entry->SystemLimitConfig);
+      entry->SystemLimitConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_DeviceLimitConfigEntry (
+status_t build_to_xml_monitor_DeviceLimitConfigEntry(
     val_value_t *parentval,
     struct monitorpb_DeviceLimitConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MonitorOption",
-    &res);
+      "MonitorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MonitorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MonitorOption) {
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_1:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_1";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_2:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_2";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_3:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_3";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CURRENT:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CURRENT";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_VOLTAGE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_VOLTAGE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CONSUMPTION:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CONSUMPTION";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CURRENT:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CURRENT";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_VOLTAGE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_VOLTAGE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CONSUMPTION:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CONSUMPTION";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LimitOption",
-    &res);
+      "LimitOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LimitOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LimitOption) {
+    case monitorpb_LimitBoundaryTypeOptions_LIMIT_BOUNDARY_TYPE_NONE:
+      enum_str = "LIMIT_BOUNDARY_TYPE_NONE";
+      break;
+    case monitorpb_LimitBoundaryTypeOptions_LIMIT_BOUNDARY_TYPE_INCLUDE:
+      enum_str = "LIMIT_BOUNDARY_TYPE_INCLUDE";
+      break;
+    case monitorpb_LimitBoundaryTypeOptions_LIMIT_BOUNDARY_TYPE_EXCLUDE:
+      enum_str = "LIMIT_BOUNDARY_TYPE_EXCLUDE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Boundary",
-    &res);
+      "Boundary",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_RangeValue(
+  res = build_to_xml_monitor_RangeValue(
       childval,
-    entry->Boundary);
+      entry->Boundary);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ValueOption",
-    &res);
+      "ValueOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ValueOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ValueOption) {
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_INT:
+      enum_str = "VALUE_TYPE_INT";
+      break;
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_FLOAT:
+      enum_str = "VALUE_TYPE_FLOAT";
+      break;
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_INT64:
+      enum_str = "VALUE_TYPE_INT64";
+      break;
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_FLOAT64:
+      enum_str = "VALUE_TYPE_FLOAT64";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_RangeValue(
+  res = build_to_xml_monitor_RangeValue(
       childval,
-    entry->Value);
+      entry->Value);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_DeviceLimitConfig (
+status_t build_to_xml_monitor_DeviceLimitConfig(
     val_value_t *parentval,
     struct monitorpb_DeviceLimitConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_DeviceLimitConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_DeviceLimitConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_SystemLimitConfigEntry (
+status_t build_to_xml_monitor_SystemLimitConfigEntry(
     val_value_t *parentval,
     struct monitorpb_SystemLimitConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MonitorOption",
-    &res);
+      "MonitorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MonitorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MonitorOption) {
+    case monitorpb_SystemMonitorTypeOptions_SYSTEM_MONITOR_TYPE_CPU_UTILIZATION:
+      enum_str = "SYSTEM_MONITOR_TYPE_CPU_UTILIZATION";
+      break;
+    case monitorpb_SystemMonitorTypeOptions_SYSTEM_MONITOR_TYPE_MEMORY_UTILIZATION:
+      enum_str = "SYSTEM_MONITOR_TYPE_MEMORY_UTILIZATION";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LimitOption",
-    &res);
+      "LimitOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LimitOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LimitOption) {
+    case monitorpb_LimitBoundaryTypeOptions_LIMIT_BOUNDARY_TYPE_NONE:
+      enum_str = "LIMIT_BOUNDARY_TYPE_NONE";
+      break;
+    case monitorpb_LimitBoundaryTypeOptions_LIMIT_BOUNDARY_TYPE_INCLUDE:
+      enum_str = "LIMIT_BOUNDARY_TYPE_INCLUDE";
+      break;
+    case monitorpb_LimitBoundaryTypeOptions_LIMIT_BOUNDARY_TYPE_EXCLUDE:
+      enum_str = "LIMIT_BOUNDARY_TYPE_EXCLUDE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Boundary",
-    &res);
+      "Boundary",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_RangeValue(
+  res = build_to_xml_monitor_RangeValue(
       childval,
-    entry->Boundary);
+      entry->Boundary);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ValueOption",
-    &res);
+      "ValueOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ValueOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ValueOption) {
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_INT:
+      enum_str = "VALUE_TYPE_INT";
+      break;
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_FLOAT:
+      enum_str = "VALUE_TYPE_FLOAT";
+      break;
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_INT64:
+      enum_str = "VALUE_TYPE_INT64";
+      break;
+    case monitorpb_ValueTypeOptions_VALUE_TYPE_FLOAT64:
+      enum_str = "VALUE_TYPE_FLOAT64";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_RangeValue(
+  res = build_to_xml_monitor_RangeValue(
       childval,
-    entry->Value);
+      entry->Value);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_SystemLimitConfig (
+status_t build_to_xml_monitor_SystemLimitConfig(
     val_value_t *parentval,
     struct monitorpb_SystemLimitConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_SystemLimitConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_SystemLimitConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_RangeValue (
+status_t build_to_xml_monitor_RangeValue(
     val_value_t *parentval,
     struct monitorpb_RangeValue *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IntMin",
-    &res);
+      "IntMin",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IntMin;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IntMax",
-    &res);
+      "IntMax",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IntMax;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FloatMin",
-    &res);
+      "FloatMin",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->FloatMin;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FloatMax",
-    &res);
+      "FloatMax",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->FloatMax;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Int64Min",
-    &res);
+      "Int64Min",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int64 */
   VAL_LONG(childval) = entry->Int64Min;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Int64Max",
-    &res);
+      "Int64Max",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int64 */
   VAL_LONG(childval) = entry->Int64Max;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Float64Min",
-    &res);
+      "Float64Min",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->Float64Min;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Float64Max",
-    &res);
+      "Float64Max",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -408,446 +505,952 @@ status_t build_to_xml_monitor_RangeValue (
   VAL_DOUBLE(childval) = entry->Float64Max;
   return res;
 }
-
-status_t build_to_xml_monitor_DeviceScorllBarValueEntry (
+status_t build_to_xml_monitor_DeviceScorllBarValueEntry(
     val_value_t *parentval,
     struct monitorpb_DeviceScorllBarValueEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MonitorOption",
-    &res);
+      "MonitorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MonitorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MonitorOption) {
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_1:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_1";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_2:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_2";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_3:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_3";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CURRENT:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CURRENT";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_VOLTAGE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_VOLTAGE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CONSUMPTION:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CONSUMPTION";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CURRENT:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CURRENT";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_VOLTAGE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_VOLTAGE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CONSUMPTION:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CONSUMPTION";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_RangeValue(
+  res = build_to_xml_monitor_RangeValue(
       childval,
-    entry->Value);
+      entry->Value);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_DeviceScorllBarValue (
+status_t build_to_xml_monitor_DeviceScorllBarValue(
     val_value_t *parentval,
     struct monitorpb_DeviceScorllBarValue *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_DeviceScorllBarValueEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_DeviceScorllBarValueEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_SystemScorllBarValueEntry (
+status_t build_to_xml_monitor_SystemScorllBarValueEntry(
     val_value_t *parentval,
     struct monitorpb_SystemScorllBarValueEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MonitorOption",
-    &res);
+      "MonitorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MonitorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MonitorOption) {
+    case monitorpb_SystemMonitorTypeOptions_SYSTEM_MONITOR_TYPE_CPU_UTILIZATION:
+      enum_str = "SYSTEM_MONITOR_TYPE_CPU_UTILIZATION";
+      break;
+    case monitorpb_SystemMonitorTypeOptions_SYSTEM_MONITOR_TYPE_MEMORY_UTILIZATION:
+      enum_str = "SYSTEM_MONITOR_TYPE_MEMORY_UTILIZATION";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_RangeValue(
+  res = build_to_xml_monitor_RangeValue(
       childval,
-    entry->Value);
+      entry->Value);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_SystemScorllBarValue (
+status_t build_to_xml_monitor_SystemScorllBarValue(
     val_value_t *parentval,
     struct monitorpb_SystemScorllBarValue *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_SystemScorllBarValueEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_SystemScorllBarValueEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_Status (
+status_t build_to_xml_monitor_Status(
     val_value_t *parentval,
     struct monitorpb_Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DeviceStatus",
-    &res);
+      "DeviceStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_DeviceStatus(
+  res = build_to_xml_monitor_DeviceStatus(
       childval,
-    entry->DeviceStatus);
+      entry->DeviceStatus);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SystemStatus",
-    &res);
+      "SystemStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_SystemStatus(
+  res = build_to_xml_monitor_SystemStatus(
       childval,
-    entry->SystemStatus);
+      entry->SystemStatus);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LedStatus",
-    &res);
+      "LedStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_LEDStatus(
+  res = build_to_xml_monitor_LEDStatus(
       childval,
-    entry->LedStatus);
+      entry->LedStatus);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_DeviceStatusEntry (
+status_t build_to_xml_monitor_DeviceStatusEntry(
     val_value_t *parentval,
     struct monitorpb_DeviceStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MonitorOption",
-    &res);
+      "MonitorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MonitorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MonitorOption) {
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_1:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_1";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_2:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_2";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_FAN_3:
+      enum_str = "DEVICE_MONITOR_TYPE_FAN_3";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CURRENT:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CURRENT";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_VOLTAGE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_VOLTAGE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CONSUMPTION:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_1_CONSUMPTION";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_TEMPERATURE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_TEMPERATURE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CURRENT:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CURRENT";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_VOLTAGE:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_VOLTAGE";
+      break;
+    case monitorpb_DeviceMonitorTypeOptions_DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CONSUMPTION:
+      enum_str = "DEVICE_MONITOR_TYPE_POWER_REDUNDANT_2_CONSUMPTION";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_DisplayValue(
+  res = build_to_xml_monitor_DisplayValue(
       childval,
-    entry->Value);
+      entry->Value);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingOption",
-    &res);
+      "LoggingOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingOption;
+  switch (entry->LoggingOption) {
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NONE:
+      enum_str = "LOGGING_TYPE_NONE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_ALIVE_TEST_EVENT:
+      enum_str = "LOGGING_TYPE_ALIVE_TEST_EVENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SELF_TEST:
+      enum_str = "LOGGING_TYPE_SELF_TEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_OK:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_FAIL:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_COLD_START:
+      enum_str = "LOGGING_TYPE_COLD_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_WARM_START:
+      enum_str = "LOGGING_TYPE_WARM_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FACTORY_RESET:
+      enum_str = "LOGGING_TYPE_FACTORY_RESET";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CONFIGURATION_LOADED:
+      enum_str = "LOGGING_TYPE_CONFIGURATION_LOADED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_OFFLINE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_OFFLINE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_SUCCESS:
+      enum_str = "LOGGING_TYPE_LOGIN_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL:
+      enum_str = "LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED:
+      enum_str = "LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_OUT:
+      enum_str = "LOGGING_TYPE_LOGIN_OUT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_UP:
+      enum_str = "LOGGING_TYPE_LINK_UP";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_DOWN:
+      enum_str = "LOGGING_TYPE_LINK_DOWN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_STATE_CHANGE:
+      enum_str = "LOGGING_TYPE_LINK_STATE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_ACCEPTED:
+      enum_str = "LOGGING_TYPE_MAC_ACCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_ERROR:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED_VLAN:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED_VLAN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_CHANGE:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_REQUEST:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_CONFLICT:
+      enum_str = "LOGGING_TYPE_MAC_CONFLICT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_SECURITY_VIOLATION:
+      enum_str = "LOGGING_TYPE_MAC_SECURITY_VIOLATION";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT:
+      enum_str = "LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_FULL:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_FULL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_REMOVED:
+      enum_str = "LOGGING_TYPE_LOOP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_DETECTED:
+      enum_str = "LOGGING_TYPE_LOOP_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_CONNECT:
+      enum_str = "LOGGING_TYPE_LACP_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_DISCONNECT:
+      enum_str = "LOGGING_TYPE_LACP_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_FAIL:
+      enum_str = "LOGGING_TYPE_NTP_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_SYNC:
+      enum_str = "LOGGING_TYPE_NTP_SYNC";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LLDP_POE_REQUEST:
+      enum_str = "LOGGING_TYPE_LLDP_POE_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_PACKET_INTERCEPTED:
+      enum_str = "LOGGING_TYPE_PACKET_INTERCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NETWORK_ATTACK:
+      enum_str = "LOGGING_TYPE_NETWORK_ATTACK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT:
+      enum_str = "LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_INSERTED:
+      enum_str = "LOGGING_TYPE_SFP_INSERTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_REMOVED:
+      enum_str = "LOGGING_TYPE_SFP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_PRESENT:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_PRESENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_LOSS:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_LOSS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_CHANGE:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_CONNECT:
+      enum_str = "LOGGING_TYPE_POE_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_VOLTAGE:
+      enum_str = "LOGGING_TYPE_POE_VOLTAGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_ERROR:
+      enum_str = "LOGGING_TYPE_POE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_DISCONNECT:
+      enum_str = "LOGGING_TYPE_POE_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_ON:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_ON";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_OFF:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_OFF";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LED_CONTROL:
+      enum_str = "LOGGING_TYPE_LED_CONTROL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_BUTTON_PRESSED:
+      enum_str = "LOGGING_TYPE_BUTTON_PRESSED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_HARDWARE_ERROR:
+      enum_str = "LOGGING_TYPE_HARDWARE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_OK:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_WARNING:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_FAILURE:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_OK:
+      enum_str = "LOGGING_TYPE_CPU_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_WARNING:
+      enum_str = "LOGGING_TYPE_CPU_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_FAILURE:
+      enum_str = "LOGGING_TYPE_CPU_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_OK:
+      enum_str = "LOGGING_TYPE_MEMORY_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_WARNING:
+      enum_str = "LOGGING_TYPE_MEMORY_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_FAILURE:
+      enum_str = "LOGGING_TYPE_MEMORY_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CHANGE_DETECTED:
+      enum_str = "LOGGING_TYPE_CABLE_CHANGE_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_LOST:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_LOST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_monitor_DeviceStatus (
+status_t build_to_xml_monitor_DeviceStatus(
     val_value_t *parentval,
     struct monitorpb_DeviceStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_DeviceStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_DeviceStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_SystemStatusEntry (
+status_t build_to_xml_monitor_SystemStatusEntry(
     val_value_t *parentval,
     struct monitorpb_SystemStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MonitorOption",
-    &res);
+      "MonitorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MonitorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MonitorOption) {
+    case monitorpb_SystemMonitorTypeOptions_SYSTEM_MONITOR_TYPE_CPU_UTILIZATION:
+      enum_str = "SYSTEM_MONITOR_TYPE_CPU_UTILIZATION";
+      break;
+    case monitorpb_SystemMonitorTypeOptions_SYSTEM_MONITOR_TYPE_MEMORY_UTILIZATION:
+      enum_str = "SYSTEM_MONITOR_TYPE_MEMORY_UTILIZATION";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_DisplayValue(
+  res = build_to_xml_monitor_DisplayValue(
       childval,
-    entry->Value);
+      entry->Value);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingOption",
-    &res);
+      "LoggingOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingOption;
+  switch (entry->LoggingOption) {
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NONE:
+      enum_str = "LOGGING_TYPE_NONE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_ALIVE_TEST_EVENT:
+      enum_str = "LOGGING_TYPE_ALIVE_TEST_EVENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SELF_TEST:
+      enum_str = "LOGGING_TYPE_SELF_TEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_OK:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_FAIL:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_COLD_START:
+      enum_str = "LOGGING_TYPE_COLD_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_WARM_START:
+      enum_str = "LOGGING_TYPE_WARM_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FACTORY_RESET:
+      enum_str = "LOGGING_TYPE_FACTORY_RESET";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CONFIGURATION_LOADED:
+      enum_str = "LOGGING_TYPE_CONFIGURATION_LOADED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_OFFLINE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_OFFLINE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_SUCCESS:
+      enum_str = "LOGGING_TYPE_LOGIN_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL:
+      enum_str = "LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED:
+      enum_str = "LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_OUT:
+      enum_str = "LOGGING_TYPE_LOGIN_OUT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_UP:
+      enum_str = "LOGGING_TYPE_LINK_UP";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_DOWN:
+      enum_str = "LOGGING_TYPE_LINK_DOWN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_STATE_CHANGE:
+      enum_str = "LOGGING_TYPE_LINK_STATE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_ACCEPTED:
+      enum_str = "LOGGING_TYPE_MAC_ACCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_ERROR:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED_VLAN:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED_VLAN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_CHANGE:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_REQUEST:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_CONFLICT:
+      enum_str = "LOGGING_TYPE_MAC_CONFLICT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_SECURITY_VIOLATION:
+      enum_str = "LOGGING_TYPE_MAC_SECURITY_VIOLATION";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT:
+      enum_str = "LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_FULL:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_FULL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_REMOVED:
+      enum_str = "LOGGING_TYPE_LOOP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_DETECTED:
+      enum_str = "LOGGING_TYPE_LOOP_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_CONNECT:
+      enum_str = "LOGGING_TYPE_LACP_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_DISCONNECT:
+      enum_str = "LOGGING_TYPE_LACP_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_FAIL:
+      enum_str = "LOGGING_TYPE_NTP_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_SYNC:
+      enum_str = "LOGGING_TYPE_NTP_SYNC";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LLDP_POE_REQUEST:
+      enum_str = "LOGGING_TYPE_LLDP_POE_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_PACKET_INTERCEPTED:
+      enum_str = "LOGGING_TYPE_PACKET_INTERCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NETWORK_ATTACK:
+      enum_str = "LOGGING_TYPE_NETWORK_ATTACK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT:
+      enum_str = "LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_INSERTED:
+      enum_str = "LOGGING_TYPE_SFP_INSERTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_REMOVED:
+      enum_str = "LOGGING_TYPE_SFP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_PRESENT:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_PRESENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_LOSS:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_LOSS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_CHANGE:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_CONNECT:
+      enum_str = "LOGGING_TYPE_POE_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_VOLTAGE:
+      enum_str = "LOGGING_TYPE_POE_VOLTAGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_ERROR:
+      enum_str = "LOGGING_TYPE_POE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_DISCONNECT:
+      enum_str = "LOGGING_TYPE_POE_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_ON:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_ON";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_OFF:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_OFF";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LED_CONTROL:
+      enum_str = "LOGGING_TYPE_LED_CONTROL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_BUTTON_PRESSED:
+      enum_str = "LOGGING_TYPE_BUTTON_PRESSED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_HARDWARE_ERROR:
+      enum_str = "LOGGING_TYPE_HARDWARE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_OK:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_WARNING:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_FAILURE:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_OK:
+      enum_str = "LOGGING_TYPE_CPU_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_WARNING:
+      enum_str = "LOGGING_TYPE_CPU_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_FAILURE:
+      enum_str = "LOGGING_TYPE_CPU_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_OK:
+      enum_str = "LOGGING_TYPE_MEMORY_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_WARNING:
+      enum_str = "LOGGING_TYPE_MEMORY_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_FAILURE:
+      enum_str = "LOGGING_TYPE_MEMORY_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CHANGE_DETECTED:
+      enum_str = "LOGGING_TYPE_CABLE_CHANGE_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_LOST:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_LOST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_monitor_SystemStatus (
+status_t build_to_xml_monitor_SystemStatus(
     val_value_t *parentval,
     struct monitorpb_SystemStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_SystemStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_SystemStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_DisplayValue (
+status_t build_to_xml_monitor_DisplayValue(
     val_value_t *parentval,
     struct monitorpb_DisplayValue *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ValueUnit",
-    &res);
+      "ValueUnit",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->ValueUnit;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IntValue",
-    &res);
+      "IntValue",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IntValue;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FloatValue",
-    &res);
+      "FloatValue",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->FloatValue;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Int64Value",
-    &res);
+      "Int64Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int64 */
   VAL_LONG(childval) = entry->Int64Value;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Float64Value",
-    &res);
+      "Float64Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -855,258 +1458,295 @@ status_t build_to_xml_monitor_DisplayValue (
   VAL_DOUBLE(childval) = entry->Float64Value;
   return res;
 }
-
-status_t build_to_xml_monitor_LEDStatus (
+status_t build_to_xml_monitor_LEDStatus(
     val_value_t *parentval,
     struct monitorpb_LEDStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SystemList",
-    &res);
+      "SystemList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SystemList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SystemList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_SystemLEDStatusEntry(
-    listval,
-    entry->SystemList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SystemList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_SystemLEDStatusEntry(
+        listval,
+        entry->SystemList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_monitor_PortLEDStatusEntry(
-    listval,
-    entry->PortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_monitor_PortLEDStatusEntry(
+        listval,
+        entry->PortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_monitor_SystemLEDStatusEntry (
+status_t build_to_xml_monitor_SystemLEDStatusEntry(
     val_value_t *parentval,
     struct monitorpb_SystemLEDStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LedType",
-    &res);
+      "LedType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LedType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LedType) {
+    case monitorpb_HardwareLEDTypeOptions_HARDWARE_LED_TYPE_POWER:
+      enum_str = "HARDWARE_LED_TYPE_POWER";
+      break;
+    case monitorpb_HardwareLEDTypeOptions_HARDWARE_LED_TYPE_SYSTEM:
+      enum_str = "HARDWARE_LED_TYPE_SYSTEM";
+      break;
+    case monitorpb_HardwareLEDTypeOptions_HARDWARE_LED_TYPE_POE_MAX:
+      enum_str = "HARDWARE_LED_TYPE_POE_MAX";
+      break;
+    case monitorpb_HardwareLEDTypeOptions_HARDWARE_LED_TYPE_FAN:
+      enum_str = "HARDWARE_LED_TYPE_FAN";
+      break;
+    case monitorpb_HardwareLEDTypeOptions_HARDWARE_LED_TYPE_GPS:
+      enum_str = "HARDWARE_LED_TYPE_GPS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LedState",
-    &res);
+      "LedState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_LEDStateEntry(
+  res = build_to_xml_monitor_LEDStateEntry(
       childval,
-    entry->LedState);
+      entry->LedState);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_PortLEDStatusEntry (
+status_t build_to_xml_monitor_PortLEDStatusEntry(
     val_value_t *parentval,
     struct monitorpb_PortLEDStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsSfp",
-    &res);
+      "IsSfp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsSfp;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LinkLedState",
-    &res);
+      "LinkLedState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_LEDStateEntry(
+  res = build_to_xml_monitor_LEDStateEntry(
       childval,
-    entry->LinkLedState);
+      entry->LinkLedState);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsSupportPoELed",
-    &res);
+      "IsSupportPoELed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsSupportPoELed;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PoELedState",
-    &res);
+      "PoELedState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_LEDStateEntry(
+  res = build_to_xml_monitor_LEDStateEntry(
       childval,
-    entry->PoELedState);
+      entry->PoELedState);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsSupportSpeedLed",
-    &res);
+      "IsSupportSpeedLed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsSupportSpeedLed;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SpeedLedState",
-    &res);
+      "SpeedLedState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_LEDStateEntry(
+  res = build_to_xml_monitor_LEDStateEntry(
       childval,
-    entry->SpeedLedState);
+      entry->SpeedLedState);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_monitor_LEDStateEntry (
+status_t build_to_xml_monitor_LEDStateEntry(
     val_value_t *parentval,
     struct monitorpb_LEDStateEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "StateOption",
-    &res);
+      "StateOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->StateOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->StateOption) {
+    case monitorpb_LEDStateTypeOptions_LED_STATE_TYPE_OFF:
+      enum_str = "LED_STATE_TYPE_OFF";
+      break;
+    case monitorpb_LEDStateTypeOptions_LED_STATE_TYPE_ON:
+      enum_str = "LED_STATE_TYPE_ON";
+      break;
+    case monitorpb_LEDStateTypeOptions_LED_STATE_TYPE_BLINKING:
+      enum_str = "LED_STATE_TYPE_BLINKING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ColorOption",
-    &res);
+      "ColorOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ColorOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ColorOption) {
+    case monitorpb_LEDColorTypeOptions_LED_COLOR_TYPE_GREEN:
+      enum_str = "LED_COLOR_TYPE_GREEN";
+      break;
+    case monitorpb_LEDColorTypeOptions_LED_COLOR_TYPE_RED:
+      enum_str = "LED_COLOR_TYPE_RED";
+      break;
+    case monitorpb_LEDColorTypeOptions_LED_COLOR_TYPE_ORANGE:
+      enum_str = "LED_COLOR_TYPE_ORANGE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "BlinkingIntervalMs",
-    &res);
+      "BlinkingIntervalMs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1115,3 +1755,777 @@ status_t build_to_xml_monitor_LEDStateEntry (
   return res;
 }
 
+status_t build_to_priv_monitor_Config(
+    val_value_t *parentval,
+    struct monitorpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DeviceLimitConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DeviceLimitConfig = malloc(sizeof(*(entry->DeviceLimitConfig)));
+    res = build_to_priv_monitor_DeviceLimitConfig(
+        childval,
+        entry->DeviceLimitConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SystemLimitConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemLimitConfig = malloc(sizeof(*(entry->SystemLimitConfig)));
+    res = build_to_priv_monitor_SystemLimitConfig(
+        childval,
+        entry->SystemLimitConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DeviceLimitConfigEntry(
+    val_value_t *parentval,
+    struct monitorpb_DeviceLimitConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MonitorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MonitorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LimitOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LimitOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Boundary");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Boundary = malloc(sizeof(*(entry->Boundary)));
+    res = build_to_priv_monitor_RangeValue(
+        childval,
+        entry->Boundary);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ValueOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ValueOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Value = malloc(sizeof(*(entry->Value)));
+    res = build_to_priv_monitor_RangeValue(
+        childval,
+        entry->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DeviceLimitConfig(
+    val_value_t *parentval,
+    struct monitorpb_DeviceLimitConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_monitor_DeviceLimitConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemLimitConfigEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemLimitConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MonitorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MonitorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LimitOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LimitOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Boundary");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Boundary = malloc(sizeof(*(entry->Boundary)));
+    res = build_to_priv_monitor_RangeValue(
+        childval,
+        entry->Boundary);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ValueOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ValueOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Value = malloc(sizeof(*(entry->Value)));
+    res = build_to_priv_monitor_RangeValue(
+        childval,
+        entry->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemLimitConfig(
+    val_value_t *parentval,
+    struct monitorpb_SystemLimitConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_monitor_SystemLimitConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_RangeValue(
+    val_value_t *parentval,
+    struct monitorpb_RangeValue *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IntMin");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IntMin = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IntMax");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IntMax = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FloatMin");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->FloatMin = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FloatMax");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->FloatMax = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Int64Min");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->Int64Min = VAL_LONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Int64Max");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->Int64Max = VAL_LONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Float64Min");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->Float64Min = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Float64Max");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->Float64Max = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DeviceScorllBarValueEntry(
+    val_value_t *parentval,
+    struct monitorpb_DeviceScorllBarValueEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MonitorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MonitorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Value = malloc(sizeof(*(entry->Value)));
+    res = build_to_priv_monitor_RangeValue(
+        childval,
+        entry->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DeviceScorllBarValue(
+    val_value_t *parentval,
+    struct monitorpb_DeviceScorllBarValue *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_monitor_DeviceScorllBarValueEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemScorllBarValueEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemScorllBarValueEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MonitorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MonitorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Value = malloc(sizeof(*(entry->Value)));
+    res = build_to_priv_monitor_RangeValue(
+        childval,
+        entry->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemScorllBarValue(
+    val_value_t *parentval,
+    struct monitorpb_SystemScorllBarValue *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_monitor_SystemScorllBarValueEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_Status(
+    val_value_t *parentval,
+    struct monitorpb_Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DeviceStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DeviceStatus = malloc(sizeof(*(entry->DeviceStatus)));
+    res = build_to_priv_monitor_DeviceStatus(
+        childval,
+        entry->DeviceStatus);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SystemStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemStatus = malloc(sizeof(*(entry->SystemStatus)));
+    res = build_to_priv_monitor_SystemStatus(
+        childval,
+        entry->SystemStatus);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LedStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->LedStatus = malloc(sizeof(*(entry->LedStatus)));
+    res = build_to_priv_monitor_LEDStatus(
+        childval,
+        entry->LedStatus);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DeviceStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_DeviceStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MonitorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MonitorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Value = malloc(sizeof(*(entry->Value)));
+    res = build_to_priv_monitor_DisplayValue(
+        childval,
+        entry->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoggingOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingOption = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DeviceStatus(
+    val_value_t *parentval,
+    struct monitorpb_DeviceStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_monitor_DeviceStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MonitorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MonitorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Value = malloc(sizeof(*(entry->Value)));
+    res = build_to_priv_monitor_DisplayValue(
+        childval,
+        entry->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoggingOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingOption = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemStatus(
+    val_value_t *parentval,
+    struct monitorpb_SystemStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_monitor_SystemStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_DisplayValue(
+    val_value_t *parentval,
+    struct monitorpb_DisplayValue *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ValueUnit");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ValueUnit = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IntValue");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IntValue = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FloatValue");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->FloatValue = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Int64Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->Int64Value = VAL_LONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Float64Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->Float64Value = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_monitor_LEDStatus(
+    val_value_t *parentval,
+    struct monitorpb_LEDStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SystemList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SystemList_Len = dlq_count(&childval->v.childQ);
+    entry->SystemList = malloc((entry->SystemList_Len + 1) * sizeof(*entry->SystemList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->SystemList[cnt] = malloc(sizeof(*(entry->SystemList[cnt])));
+      res = build_to_priv_monitor_SystemLEDStatusEntry(
+          listval,
+          entry->SystemList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortList_Len = dlq_count(&childval->v.childQ);
+    entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortList[cnt] = malloc(sizeof(*(entry->PortList[cnt])));
+      res = build_to_priv_monitor_PortLEDStatusEntry(
+          listval,
+          entry->PortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_SystemLEDStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemLEDStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LedType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LedType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LedState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->LedState = malloc(sizeof(*(entry->LedState)));
+    res = build_to_priv_monitor_LEDStateEntry(
+        childval,
+        entry->LedState);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_PortLEDStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_PortLEDStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsSfp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsSfp = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LinkLedState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->LinkLedState = malloc(sizeof(*(entry->LinkLedState)));
+    res = build_to_priv_monitor_LEDStateEntry(
+        childval,
+        entry->LinkLedState);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsSupportPoELed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsSupportPoELed = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoELedState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PoELedState = malloc(sizeof(*(entry->PoELedState)));
+    res = build_to_priv_monitor_LEDStateEntry(
+        childval,
+        entry->PoELedState);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsSupportSpeedLed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsSupportSpeedLed = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SpeedLedState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SpeedLedState = malloc(sizeof(*(entry->SpeedLedState)));
+    res = build_to_priv_monitor_LEDStateEntry(
+        childval,
+        entry->SpeedLedState);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_monitor_LEDStateEntry(
+    val_value_t *parentval,
+    struct monitorpb_LEDStateEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "StateOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->StateOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ColorOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ColorOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BlinkingIntervalMs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->BlinkingIntervalMs = VAL_INT(childval);
+  }
+  return res;
+}

@@ -21,10 +21,13 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_cli_ScriptAction (
+extern status_t build_to_xml_cli_ScriptAction(
     val_value_t *parentval,
     struct clipb_ScriptAction *entry);
 
+extern status_t build_to_priv_cli_ScriptAction(
+    val_value_t *parentval,
+    struct clipb_ScriptAction *entry);
 
 #endif /* _H_intri_cli_trans */
 

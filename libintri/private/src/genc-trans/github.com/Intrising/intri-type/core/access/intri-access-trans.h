@@ -21,98 +21,145 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_access_AuthenticationMode (
+extern status_t build_to_xml_access_AuthenticationMode(
     val_value_t *parentval,
     struct accesspb_AuthenticationMode *entry);
-
-extern status_t build_to_xml_access_AuthenticationConfig (
+extern status_t build_to_xml_access_AuthenticationConfig(
     val_value_t *parentval,
     struct accesspb_AuthenticationConfig *entry);
-
-extern status_t build_to_xml_access_AuthenticationTACACS (
+extern status_t build_to_xml_access_AuthenticationTACACS(
     val_value_t *parentval,
     struct accesspb_AuthenticationTACACS *entry);
-
-extern status_t build_to_xml_access_AuthenticationRADIUS (
+extern status_t build_to_xml_access_AuthenticationRADIUS(
     val_value_t *parentval,
     struct accesspb_AuthenticationRADIUS *entry);
-
-extern status_t build_to_xml_access_AuthenticationServerEntry (
+extern status_t build_to_xml_access_AuthenticationServerEntry(
     val_value_t *parentval,
     struct accesspb_AuthenticationServerEntry *entry);
-
-extern status_t build_to_xml_access_AuthenticationServersConfig (
+extern status_t build_to_xml_access_AuthenticationServersConfig(
     val_value_t *parentval,
     struct accesspb_AuthenticationServersConfig *entry);
-
-extern status_t build_to_xml_access_LoginRequest (
+extern status_t build_to_xml_access_LoginRequest(
     val_value_t *parentval,
     struct accesspb_LoginRequest *entry);
-
-extern status_t build_to_xml_access_RestrictionEntry (
+extern status_t build_to_xml_access_RestrictionEntry(
     val_value_t *parentval,
     struct accesspb_RestrictionEntry *entry);
-
-extern status_t build_to_xml_access_RestrictionsConfig (
+extern status_t build_to_xml_access_RestrictionsConfig(
     val_value_t *parentval,
     struct accesspb_RestrictionsConfig *entry);
-
-extern status_t build_to_xml_access_UserEntry (
+extern status_t build_to_xml_access_UserEntry(
     val_value_t *parentval,
     struct accesspb_UserEntry *entry);
-
-extern status_t build_to_xml_access_PatternEntry (
+extern status_t build_to_xml_access_PatternEntry(
     val_value_t *parentval,
     struct accesspb_PatternEntry *entry);
-
-extern status_t build_to_xml_access_UsersConfig (
+extern status_t build_to_xml_access_UsersConfig(
     val_value_t *parentval,
     struct accesspb_UsersConfig *entry);
-
-extern status_t build_to_xml_access_GroupEntry (
+extern status_t build_to_xml_access_GroupEntry(
     val_value_t *parentval,
     struct accesspb_GroupEntry *entry);
-
-extern status_t build_to_xml_access_GroupsConfig (
+extern status_t build_to_xml_access_GroupsConfig(
     val_value_t *parentval,
     struct accesspb_GroupsConfig *entry);
-
-extern status_t build_to_xml_access_Config (
+extern status_t build_to_xml_access_Config(
     val_value_t *parentval,
     struct accesspb_Config *entry);
-
-extern status_t build_to_xml_access_Password (
+extern status_t build_to_xml_access_Password(
     val_value_t *parentval,
     struct accesspb_Password *entry);
-
-extern status_t build_to_xml_access_EncryptedPassword (
+extern status_t build_to_xml_access_EncryptedPassword(
     val_value_t *parentval,
     struct accesspb_EncryptedPassword *entry);
-
-extern status_t build_to_xml_access_UserPasswordEntry (
+extern status_t build_to_xml_access_UserPasswordEntry(
     val_value_t *parentval,
     struct accesspb_UserPasswordEntry *entry);
-
-extern status_t build_to_xml_access_UserPassword (
+extern status_t build_to_xml_access_UserPassword(
     val_value_t *parentval,
     struct accesspb_UserPassword *entry);
-
-extern status_t build_to_xml_access_NumberOfLogins (
+extern status_t build_to_xml_access_NumberOfLogins(
     val_value_t *parentval,
     struct accesspb_NumberOfLogins *entry);
-
-extern status_t build_to_xml_access_LoginStatusEntry (
+extern status_t build_to_xml_access_LoginStatusEntry(
     val_value_t *parentval,
     struct accesspb_LoginStatusEntry *entry);
-
-extern status_t build_to_xml_access_LoginStatus (
+extern status_t build_to_xml_access_LoginStatus(
     val_value_t *parentval,
     struct accesspb_LoginStatus *entry);
-
-extern status_t build_to_xml_access_Token (
+extern status_t build_to_xml_access_Token(
     val_value_t *parentval,
     struct accesspb_Token *entry);
 
+extern status_t build_to_priv_access_AuthenticationMode(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationMode *entry);
+extern status_t build_to_priv_access_AuthenticationConfig(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationConfig *entry);
+extern status_t build_to_priv_access_AuthenticationTACACS(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationTACACS *entry);
+extern status_t build_to_priv_access_AuthenticationRADIUS(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationRADIUS *entry);
+extern status_t build_to_priv_access_AuthenticationServerEntry(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationServerEntry *entry);
+extern status_t build_to_priv_access_AuthenticationServersConfig(
+    val_value_t *parentval,
+    struct accesspb_AuthenticationServersConfig *entry);
+extern status_t build_to_priv_access_LoginRequest(
+    val_value_t *parentval,
+    struct accesspb_LoginRequest *entry);
+extern status_t build_to_priv_access_RestrictionEntry(
+    val_value_t *parentval,
+    struct accesspb_RestrictionEntry *entry);
+extern status_t build_to_priv_access_RestrictionsConfig(
+    val_value_t *parentval,
+    struct accesspb_RestrictionsConfig *entry);
+extern status_t build_to_priv_access_UserEntry(
+    val_value_t *parentval,
+    struct accesspb_UserEntry *entry);
+extern status_t build_to_priv_access_PatternEntry(
+    val_value_t *parentval,
+    struct accesspb_PatternEntry *entry);
+extern status_t build_to_priv_access_UsersConfig(
+    val_value_t *parentval,
+    struct accesspb_UsersConfig *entry);
+extern status_t build_to_priv_access_GroupEntry(
+    val_value_t *parentval,
+    struct accesspb_GroupEntry *entry);
+extern status_t build_to_priv_access_GroupsConfig(
+    val_value_t *parentval,
+    struct accesspb_GroupsConfig *entry);
+extern status_t build_to_priv_access_Config(
+    val_value_t *parentval,
+    struct accesspb_Config *entry);
+extern status_t build_to_priv_access_Password(
+    val_value_t *parentval,
+    struct accesspb_Password *entry);
+extern status_t build_to_priv_access_EncryptedPassword(
+    val_value_t *parentval,
+    struct accesspb_EncryptedPassword *entry);
+extern status_t build_to_priv_access_UserPasswordEntry(
+    val_value_t *parentval,
+    struct accesspb_UserPasswordEntry *entry);
+extern status_t build_to_priv_access_UserPassword(
+    val_value_t *parentval,
+    struct accesspb_UserPassword *entry);
+extern status_t build_to_priv_access_NumberOfLogins(
+    val_value_t *parentval,
+    struct accesspb_NumberOfLogins *entry);
+extern status_t build_to_priv_access_LoginStatusEntry(
+    val_value_t *parentval,
+    struct accesspb_LoginStatusEntry *entry);
+extern status_t build_to_priv_access_LoginStatus(
+    val_value_t *parentval,
+    struct accesspb_LoginStatus *entry);
+extern status_t build_to_priv_access_Token(
+    val_value_t *parentval,
+    struct accesspb_Token *entry);
 
 #endif /* _H_intri_access_trans */
 

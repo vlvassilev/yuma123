@@ -21,14 +21,19 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_sfp_Config (
+extern status_t build_to_xml_sfp_Config(
     val_value_t *parentval,
     struct sfppb_Config *entry);
-
-extern status_t build_to_xml_sfp_Info (
+extern status_t build_to_xml_sfp_Info(
     val_value_t *parentval,
     struct sfppb_Info *entry);
 
+extern status_t build_to_priv_sfp_Config(
+    val_value_t *parentval,
+    struct sfppb_Config *entry);
+extern status_t build_to_priv_sfp_Info(
+    val_value_t *parentval,
+    struct sfppb_Info *entry);
 
 #endif /* _H_intri_sfp_trans */
 

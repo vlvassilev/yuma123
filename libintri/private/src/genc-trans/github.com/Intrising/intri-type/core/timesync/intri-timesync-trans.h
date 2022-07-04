@@ -21,46 +21,67 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_timesync_Config (
+extern status_t build_to_xml_timesync_Config(
     val_value_t *parentval,
     struct timesyncpb_Config *entry);
-
-extern status_t build_to_xml_timesync_GNSSConfig (
+extern status_t build_to_xml_timesync_GNSSConfig(
     val_value_t *parentval,
     struct timesyncpb_GNSSConfig *entry);
-
-extern status_t build_to_xml_timesync_SyncEConfig (
+extern status_t build_to_xml_timesync_SyncEConfig(
     val_value_t *parentval,
     struct timesyncpb_SyncEConfig *entry);
-
-extern status_t build_to_xml_timesync_SyncSourceConfig (
+extern status_t build_to_xml_timesync_SyncSourceConfig(
     val_value_t *parentval,
     struct timesyncpb_SyncSourceConfig *entry);
-
-extern status_t build_to_xml_timesync_ReferenceOutput (
+extern status_t build_to_xml_timesync_ReferenceOutput(
     val_value_t *parentval,
     struct timesyncpb_ReferenceOutput *entry);
-
-extern status_t build_to_xml_timesync_ToDConfig (
+extern status_t build_to_xml_timesync_ToDConfig(
     val_value_t *parentval,
     struct timesyncpb_ToDConfig *entry);
-
-extern status_t build_to_xml_timesync_GNSStatus (
+extern status_t build_to_xml_timesync_GNSStatus(
     val_value_t *parentval,
     struct timesyncpb_GNSStatus *entry);
-
-extern status_t build_to_xml_timesync_SyncEStatus (
+extern status_t build_to_xml_timesync_SyncEStatus(
     val_value_t *parentval,
     struct timesyncpb_SyncEStatus *entry);
-
-extern status_t build_to_xml_timesync_SyncSourceStatus (
+extern status_t build_to_xml_timesync_SyncSourceStatus(
     val_value_t *parentval,
     struct timesyncpb_SyncSourceStatus *entry);
-
-extern status_t build_to_xml_timesync_SyncSourceInputStatusEntry (
+extern status_t build_to_xml_timesync_SyncSourceInputStatusEntry(
     val_value_t *parentval,
     struct timesyncpb_SyncSourceInputStatusEntry *entry);
 
+extern status_t build_to_priv_timesync_Config(
+    val_value_t *parentval,
+    struct timesyncpb_Config *entry);
+extern status_t build_to_priv_timesync_GNSSConfig(
+    val_value_t *parentval,
+    struct timesyncpb_GNSSConfig *entry);
+extern status_t build_to_priv_timesync_SyncEConfig(
+    val_value_t *parentval,
+    struct timesyncpb_SyncEConfig *entry);
+extern status_t build_to_priv_timesync_SyncSourceConfig(
+    val_value_t *parentval,
+    struct timesyncpb_SyncSourceConfig *entry);
+extern status_t build_to_priv_timesync_ReferenceOutput(
+    val_value_t *parentval,
+    struct timesyncpb_ReferenceOutput *entry);
+extern status_t build_to_priv_timesync_ToDConfig(
+    val_value_t *parentval,
+    struct timesyncpb_ToDConfig *entry);
+extern status_t build_to_priv_timesync_GNSStatus(
+    val_value_t *parentval,
+    struct timesyncpb_GNSStatus *entry);
+extern status_t build_to_priv_timesync_SyncEStatus(
+    val_value_t *parentval,
+    struct timesyncpb_SyncEStatus *entry);
+extern status_t build_to_priv_timesync_SyncSourceStatus(
+    val_value_t *parentval,
+    struct timesyncpb_SyncSourceStatus *entry);
+extern status_t build_to_priv_timesync_SyncSourceInputStatusEntry(
+    val_value_t *parentval,
+    struct timesyncpb_SyncSourceInputStatusEntry *entry);
 
 #endif /* _H_intri_timesync_trans */
 

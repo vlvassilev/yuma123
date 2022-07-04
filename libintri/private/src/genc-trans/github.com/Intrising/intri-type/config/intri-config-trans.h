@@ -21,30 +21,43 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_config_ImportAction (
+extern status_t build_to_xml_config_ImportAction(
     val_value_t *parentval,
     struct configpb_ImportAction *entry);
-
-extern status_t build_to_xml_config_ExportAction (
+extern status_t build_to_xml_config_ExportAction(
     val_value_t *parentval,
     struct configpb_ExportAction *entry);
-
-extern status_t build_to_xml_config_SaveModeStatus (
+extern status_t build_to_xml_config_SaveModeStatus(
     val_value_t *parentval,
     struct configpb_SaveModeStatus *entry);
-
-extern status_t build_to_xml_config_RestoreDefaultType (
+extern status_t build_to_xml_config_RestoreDefaultType(
     val_value_t *parentval,
     struct configpb_RestoreDefaultType *entry);
-
-extern status_t build_to_xml_config_AllServicesConfig (
+extern status_t build_to_xml_config_AllServicesConfig(
     val_value_t *parentval,
     struct configpb_AllServicesConfig *entry);
-
-extern status_t build_to_xml_config_ValidateConfigResult (
+extern status_t build_to_xml_config_ValidateConfigResult(
     val_value_t *parentval,
     struct configpb_ValidateConfigResult *entry);
 
+extern status_t build_to_priv_config_ImportAction(
+    val_value_t *parentval,
+    struct configpb_ImportAction *entry);
+extern status_t build_to_priv_config_ExportAction(
+    val_value_t *parentval,
+    struct configpb_ExportAction *entry);
+extern status_t build_to_priv_config_SaveModeStatus(
+    val_value_t *parentval,
+    struct configpb_SaveModeStatus *entry);
+extern status_t build_to_priv_config_RestoreDefaultType(
+    val_value_t *parentval,
+    struct configpb_RestoreDefaultType *entry);
+extern status_t build_to_priv_config_AllServicesConfig(
+    val_value_t *parentval,
+    struct configpb_AllServicesConfig *entry);
+extern status_t build_to_priv_config_ValidateConfigResult(
+    val_value_t *parentval,
+    struct configpb_ValidateConfigResult *entry);
 
 #endif /* _H_intri_config_trans */
 

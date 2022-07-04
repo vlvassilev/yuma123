@@ -21,58 +21,85 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_dhcp_ARPInspectionConfig (
+extern status_t build_to_xml_dhcp_ARPInspectionConfig(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionConfig *entry);
-
-extern status_t build_to_xml_dhcp_ARPInspectionPortEntry (
+extern status_t build_to_xml_dhcp_ARPInspectionPortEntry(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionPortEntry *entry);
-
-extern status_t build_to_xml_dhcp_ARPInspectionACLConfig (
+extern status_t build_to_xml_dhcp_ARPInspectionACLConfig(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionACLConfig *entry);
-
-extern status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry (
+extern status_t build_to_xml_dhcp_ARPInspectionACLRuleEntry(
     val_value_t *parentval,
     struct dhcppb_ARPInspectionACLRuleEntry *entry);
-
-extern status_t build_to_xml_dhcp_Config (
+extern status_t build_to_xml_dhcp_Config(
     val_value_t *parentval,
     struct dhcppb_Config *entry);
-
-extern status_t build_to_xml_dhcp_RelayConfig (
+extern status_t build_to_xml_dhcp_RelayConfig(
     val_value_t *parentval,
     struct dhcppb_RelayConfig *entry);
-
-extern status_t build_to_xml_dhcp_ConfigRelayPortEntry (
+extern status_t build_to_xml_dhcp_ConfigRelayPortEntry(
     val_value_t *parentval,
     struct dhcppb_ConfigRelayPortEntry *entry);
-
-extern status_t build_to_xml_dhcp_SnoopingConfig (
+extern status_t build_to_xml_dhcp_SnoopingConfig(
     val_value_t *parentval,
     struct dhcppb_SnoopingConfig *entry);
-
-extern status_t build_to_xml_dhcp_SnoopingConfigPortEntry (
+extern status_t build_to_xml_dhcp_SnoopingConfigPortEntry(
     val_value_t *parentval,
     struct dhcppb_SnoopingConfigPortEntry *entry);
-
-extern status_t build_to_xml_dhcp_SnoopingStatisticsEntry (
+extern status_t build_to_xml_dhcp_SnoopingStatisticsEntry(
     val_value_t *parentval,
     struct dhcppb_SnoopingStatisticsEntry *entry);
-
-extern status_t build_to_xml_dhcp_SnoopingStatisticsList (
+extern status_t build_to_xml_dhcp_SnoopingStatisticsList(
     val_value_t *parentval,
     struct dhcppb_SnoopingStatisticsList *entry);
-
-extern status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry (
+extern status_t build_to_xml_dhcp_SnoopingBindingDatabaseEntry(
     val_value_t *parentval,
     struct dhcppb_SnoopingBindingDatabaseEntry *entry);
-
-extern status_t build_to_xml_dhcp_SnoopingBindingDatabaseList (
+extern status_t build_to_xml_dhcp_SnoopingBindingDatabaseList(
     val_value_t *parentval,
     struct dhcppb_SnoopingBindingDatabaseList *entry);
 
+extern status_t build_to_priv_dhcp_ARPInspectionConfig(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionConfig *entry);
+extern status_t build_to_priv_dhcp_ARPInspectionPortEntry(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionPortEntry *entry);
+extern status_t build_to_priv_dhcp_ARPInspectionACLConfig(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionACLConfig *entry);
+extern status_t build_to_priv_dhcp_ARPInspectionACLRuleEntry(
+    val_value_t *parentval,
+    struct dhcppb_ARPInspectionACLRuleEntry *entry);
+extern status_t build_to_priv_dhcp_Config(
+    val_value_t *parentval,
+    struct dhcppb_Config *entry);
+extern status_t build_to_priv_dhcp_RelayConfig(
+    val_value_t *parentval,
+    struct dhcppb_RelayConfig *entry);
+extern status_t build_to_priv_dhcp_ConfigRelayPortEntry(
+    val_value_t *parentval,
+    struct dhcppb_ConfigRelayPortEntry *entry);
+extern status_t build_to_priv_dhcp_SnoopingConfig(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingConfig *entry);
+extern status_t build_to_priv_dhcp_SnoopingConfigPortEntry(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingConfigPortEntry *entry);
+extern status_t build_to_priv_dhcp_SnoopingStatisticsEntry(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingStatisticsEntry *entry);
+extern status_t build_to_priv_dhcp_SnoopingStatisticsList(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingStatisticsList *entry);
+extern status_t build_to_priv_dhcp_SnoopingBindingDatabaseEntry(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingBindingDatabaseEntry *entry);
+extern status_t build_to_priv_dhcp_SnoopingBindingDatabaseList(
+    val_value_t *parentval,
+    struct dhcppb_SnoopingBindingDatabaseList *entry);
 
 #endif /* _H_intri_dhcp_trans */
 

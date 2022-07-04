@@ -21,86 +21,127 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_monitor_Config (
+extern status_t build_to_xml_monitor_Config(
     val_value_t *parentval,
     struct monitorpb_Config *entry);
-
-extern status_t build_to_xml_monitor_DeviceLimitConfigEntry (
+extern status_t build_to_xml_monitor_DeviceLimitConfigEntry(
     val_value_t *parentval,
     struct monitorpb_DeviceLimitConfigEntry *entry);
-
-extern status_t build_to_xml_monitor_DeviceLimitConfig (
+extern status_t build_to_xml_monitor_DeviceLimitConfig(
     val_value_t *parentval,
     struct monitorpb_DeviceLimitConfig *entry);
-
-extern status_t build_to_xml_monitor_SystemLimitConfigEntry (
+extern status_t build_to_xml_monitor_SystemLimitConfigEntry(
     val_value_t *parentval,
     struct monitorpb_SystemLimitConfigEntry *entry);
-
-extern status_t build_to_xml_monitor_SystemLimitConfig (
+extern status_t build_to_xml_monitor_SystemLimitConfig(
     val_value_t *parentval,
     struct monitorpb_SystemLimitConfig *entry);
-
-extern status_t build_to_xml_monitor_RangeValue (
+extern status_t build_to_xml_monitor_RangeValue(
     val_value_t *parentval,
     struct monitorpb_RangeValue *entry);
-
-extern status_t build_to_xml_monitor_DeviceScorllBarValueEntry (
+extern status_t build_to_xml_monitor_DeviceScorllBarValueEntry(
     val_value_t *parentval,
     struct monitorpb_DeviceScorllBarValueEntry *entry);
-
-extern status_t build_to_xml_monitor_DeviceScorllBarValue (
+extern status_t build_to_xml_monitor_DeviceScorllBarValue(
     val_value_t *parentval,
     struct monitorpb_DeviceScorllBarValue *entry);
-
-extern status_t build_to_xml_monitor_SystemScorllBarValueEntry (
+extern status_t build_to_xml_monitor_SystemScorllBarValueEntry(
     val_value_t *parentval,
     struct monitorpb_SystemScorllBarValueEntry *entry);
-
-extern status_t build_to_xml_monitor_SystemScorllBarValue (
+extern status_t build_to_xml_monitor_SystemScorllBarValue(
     val_value_t *parentval,
     struct monitorpb_SystemScorllBarValue *entry);
-
-extern status_t build_to_xml_monitor_Status (
+extern status_t build_to_xml_monitor_Status(
     val_value_t *parentval,
     struct monitorpb_Status *entry);
-
-extern status_t build_to_xml_monitor_DeviceStatusEntry (
+extern status_t build_to_xml_monitor_DeviceStatusEntry(
     val_value_t *parentval,
     struct monitorpb_DeviceStatusEntry *entry);
-
-extern status_t build_to_xml_monitor_DeviceStatus (
+extern status_t build_to_xml_monitor_DeviceStatus(
     val_value_t *parentval,
     struct monitorpb_DeviceStatus *entry);
-
-extern status_t build_to_xml_monitor_SystemStatusEntry (
+extern status_t build_to_xml_monitor_SystemStatusEntry(
     val_value_t *parentval,
     struct monitorpb_SystemStatusEntry *entry);
-
-extern status_t build_to_xml_monitor_SystemStatus (
+extern status_t build_to_xml_monitor_SystemStatus(
     val_value_t *parentval,
     struct monitorpb_SystemStatus *entry);
-
-extern status_t build_to_xml_monitor_DisplayValue (
+extern status_t build_to_xml_monitor_DisplayValue(
     val_value_t *parentval,
     struct monitorpb_DisplayValue *entry);
-
-extern status_t build_to_xml_monitor_LEDStatus (
+extern status_t build_to_xml_monitor_LEDStatus(
     val_value_t *parentval,
     struct monitorpb_LEDStatus *entry);
-
-extern status_t build_to_xml_monitor_SystemLEDStatusEntry (
+extern status_t build_to_xml_monitor_SystemLEDStatusEntry(
     val_value_t *parentval,
     struct monitorpb_SystemLEDStatusEntry *entry);
-
-extern status_t build_to_xml_monitor_PortLEDStatusEntry (
+extern status_t build_to_xml_monitor_PortLEDStatusEntry(
     val_value_t *parentval,
     struct monitorpb_PortLEDStatusEntry *entry);
-
-extern status_t build_to_xml_monitor_LEDStateEntry (
+extern status_t build_to_xml_monitor_LEDStateEntry(
     val_value_t *parentval,
     struct monitorpb_LEDStateEntry *entry);
 
+extern status_t build_to_priv_monitor_Config(
+    val_value_t *parentval,
+    struct monitorpb_Config *entry);
+extern status_t build_to_priv_monitor_DeviceLimitConfigEntry(
+    val_value_t *parentval,
+    struct monitorpb_DeviceLimitConfigEntry *entry);
+extern status_t build_to_priv_monitor_DeviceLimitConfig(
+    val_value_t *parentval,
+    struct monitorpb_DeviceLimitConfig *entry);
+extern status_t build_to_priv_monitor_SystemLimitConfigEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemLimitConfigEntry *entry);
+extern status_t build_to_priv_monitor_SystemLimitConfig(
+    val_value_t *parentval,
+    struct monitorpb_SystemLimitConfig *entry);
+extern status_t build_to_priv_monitor_RangeValue(
+    val_value_t *parentval,
+    struct monitorpb_RangeValue *entry);
+extern status_t build_to_priv_monitor_DeviceScorllBarValueEntry(
+    val_value_t *parentval,
+    struct monitorpb_DeviceScorllBarValueEntry *entry);
+extern status_t build_to_priv_monitor_DeviceScorllBarValue(
+    val_value_t *parentval,
+    struct monitorpb_DeviceScorllBarValue *entry);
+extern status_t build_to_priv_monitor_SystemScorllBarValueEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemScorllBarValueEntry *entry);
+extern status_t build_to_priv_monitor_SystemScorllBarValue(
+    val_value_t *parentval,
+    struct monitorpb_SystemScorllBarValue *entry);
+extern status_t build_to_priv_monitor_Status(
+    val_value_t *parentval,
+    struct monitorpb_Status *entry);
+extern status_t build_to_priv_monitor_DeviceStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_DeviceStatusEntry *entry);
+extern status_t build_to_priv_monitor_DeviceStatus(
+    val_value_t *parentval,
+    struct monitorpb_DeviceStatus *entry);
+extern status_t build_to_priv_monitor_SystemStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemStatusEntry *entry);
+extern status_t build_to_priv_monitor_SystemStatus(
+    val_value_t *parentval,
+    struct monitorpb_SystemStatus *entry);
+extern status_t build_to_priv_monitor_DisplayValue(
+    val_value_t *parentval,
+    struct monitorpb_DisplayValue *entry);
+extern status_t build_to_priv_monitor_LEDStatus(
+    val_value_t *parentval,
+    struct monitorpb_LEDStatus *entry);
+extern status_t build_to_priv_monitor_SystemLEDStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_SystemLEDStatusEntry *entry);
+extern status_t build_to_priv_monitor_PortLEDStatusEntry(
+    val_value_t *parentval,
+    struct monitorpb_PortLEDStatusEntry *entry);
+extern status_t build_to_priv_monitor_LEDStateEntry(
+    val_value_t *parentval,
+    struct monitorpb_LEDStateEntry *entry);
 
 #endif /* _H_intri_monitor_trans */
 

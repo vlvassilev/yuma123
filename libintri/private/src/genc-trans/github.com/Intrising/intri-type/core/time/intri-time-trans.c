@@ -33,114 +33,124 @@
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/timestamp/intri-timestamp-trans.h"
-status_t build_to_xml_time_Config (
+
+status_t build_to_xml_time_Config(
     val_value_t *parentval,
     struct timepb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case timepb_ModeTypeOptions_MODE_TYPE_MANUAL:
+      enum_str = "MODE_TYPE_MANUAL";
+      break;
+    case timepb_ModeTypeOptions_MODE_TYPE_AUTO:
+      enum_str = "MODE_TYPE_AUTO";
+      break;
+    case timepb_ModeTypeOptions_MODE_TYPE_GNSS:
+      enum_str = "MODE_TYPE_GNSS";
+      break;
+    case timepb_ModeTypeOptions_MODE_TYPE_PTP:
+      enum_str = "MODE_TYPE_PTP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "MainNTPServer",
-    &res);
+      "MainNTPServer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MainNTPServer;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BackupNTPServer",
-    &res);
+      "BackupNTPServer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->BackupNTPServer;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TrustedServerEnabled",
-    &res);
+      "TrustedServerEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->TrustedServerEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SyncInterval",
-    &res);
+      "SyncInterval",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SyncInterval;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeZone",
-    &res);
+      "TimeZone",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->TimeZone;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeFormat",
-    &res);
+      "TimeFormat",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->TimeFormat;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DateFormat",
-    &res);
+      "DateFormat",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DateFormat;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Manual",
-    &res);
+      "Manual",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -148,87 +158,117 @@ status_t build_to_xml_time_Config (
   VAL_STRING(childval) = entry->Manual;
   return res;
 }
-
-status_t build_to_xml_time_ListTimeZones (
+status_t build_to_xml_time_ListTimeZones(
     val_value_t *parentval,
     struct timepb_ListTimeZones *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->List[i];
   }
   return res;
 }
-
-status_t build_to_xml_time_Status (
+status_t build_to_xml_time_Status(
     val_value_t *parentval,
     struct timepb_Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Status",
-    &res);
+      "Status",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Status;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Status) {
+    case timepb_StatusTypeOptions_STATUS_TYPE_UNSET:
+      enum_str = "STATUS_TYPE_UNSET";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_MANUALLY_SET:
+      enum_str = "STATUS_TYPE_MANUALLY_SET";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_SYNCHRONIZED:
+      enum_str = "STATUS_TYPE_SYNCHRONIZED";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_SYNC_FAILED:
+      enum_str = "STATUS_TYPE_SYNC_FAILED";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_DAY_LIGHT_SAVING_TIME:
+      enum_str = "STATUS_TYPE_DAY_LIGHT_SAVING_TIME";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_GNSS_SET:
+      enum_str = "STATUS_TYPE_GNSS_SET";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_GNSS_FAILED:
+      enum_str = "STATUS_TYPE_GNSS_FAILED";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_PTP_SET:
+      enum_str = "STATUS_TYPE_PTP_SET";
+      break;
+    case timepb_StatusTypeOptions_STATUS_TYPE_PTP_FAILED:
+      enum_str = "STATUS_TYPE_PTP_FAILED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LocalTime",
-    &res);
+      "LocalTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LocalTime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LocalDate",
-    &res);
+      "LocalDate",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LocalDate;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UsedNTPServer",
-    &res);
+      "UsedNTPServer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -236,44 +276,48 @@ status_t build_to_xml_time_Status (
   VAL_STRING(childval) = entry->UsedNTPServer;
   return res;
 }
-
-status_t build_to_xml_time_RequestWithTimestamp (
+status_t build_to_xml_time_RequestWithTimestamp(
     val_value_t *parentval,
     struct timepb_RequestWithTimestamp *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ts",
-    &res);
+      "Ts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timestamp_Timestamp(
+  res = build_to_xml_timestamp_Timestamp(
       childval,
-    entry->Ts);
+      entry->Ts);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_time_RequestWithInt64 (
+status_t build_to_xml_time_RequestWithInt64(
     val_value_t *parentval,
     struct timepb_RequestWithInt64 *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ts",
-    &res);
+      "Ts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -281,19 +325,21 @@ status_t build_to_xml_time_RequestWithInt64 (
   VAL_LONG(childval) = entry->Ts;
   return res;
 }
-
-status_t build_to_xml_time_Response (
+status_t build_to_xml_time_Response(
     val_value_t *parentval,
     struct timepb_Response *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ts",
-    &res);
+      "Ts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -302,3 +348,179 @@ status_t build_to_xml_time_Response (
   return res;
 }
 
+status_t build_to_priv_time_Config(
+    val_value_t *parentval,
+    struct timepb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MainNTPServer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MainNTPServer = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BackupNTPServer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->BackupNTPServer = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrustedServerEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TrustedServerEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SyncInterval");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SyncInterval = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeZone");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->TimeZone = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeFormat");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->TimeFormat = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DateFormat");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DateFormat = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Manual");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Manual = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_time_ListTimeZones(
+    val_value_t *parentval,
+    struct timepb_ListTimeZones *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->List[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_time_Status(
+    val_value_t *parentval,
+    struct timepb_Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Status");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Status = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LocalTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LocalTime = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LocalDate");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LocalDate = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UsedNTPServer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UsedNTPServer = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_time_RequestWithTimestamp(
+    val_value_t *parentval,
+    struct timepb_RequestWithTimestamp *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Ts = malloc(sizeof(*(entry->Ts)));
+    res = build_to_priv_timestamp_Timestamp(
+        childval,
+        entry->Ts);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_time_RequestWithInt64(
+    val_value_t *parentval,
+    struct timepb_RequestWithInt64 *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->Ts = VAL_LONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_time_Response(
+    val_value_t *parentval,
+    struct timepb_Response *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Ts = VAL_STRING(childval);
+  }
+  return res;
+}

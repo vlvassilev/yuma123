@@ -32,114 +32,119 @@
 
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_files_Config (
+
+status_t build_to_xml_files_Config(
     val_value_t *parentval,
     struct filespb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FTPEnabled",
-    &res);
+      "FTPEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->FTPEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Certificate",
-    &res);
+      "Certificate",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_files_ActivateCertificate(
+  res = build_to_xml_files_ActivateCertificate(
       childval,
-    entry->Certificate);
+      entry->Certificate);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_files_ActivateCertificate (
+status_t build_to_xml_files_ActivateCertificate(
     val_value_t *parentval,
     struct filespb_ActivateCertificate *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Web",
-    &res);
+      "Web",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_files_CertificateID(
+  res = build_to_xml_files_CertificateID(
       childval,
-    entry->Web);
+      entry->Web);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SnmpAgent",
-    &res);
+      "SnmpAgent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_files_CertificateID(
+  res = build_to_xml_files_CertificateID(
       childval,
-    entry->SnmpAgent);
+      entry->SnmpAgent);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SnmpManager",
-    &res);
+      "SnmpManager",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_files_CertificateUserIDList(
+  res = build_to_xml_files_CertificateUserIDList(
       childval,
-    entry->SnmpManager);
+      entry->SnmpManager);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_files_CertificateID (
+status_t build_to_xml_files_CertificateID(
     val_value_t *parentval,
     struct filespb_CertificateID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -147,99 +152,99 @@ status_t build_to_xml_files_CertificateID (
   VAL_STRING(childval) = entry->ID;
   return res;
 }
-
-status_t build_to_xml_files_CertificateIDList (
+status_t build_to_xml_files_CertificateIDList(
     val_value_t *parentval,
     struct filespb_CertificateIDList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->List[i];
   }
   return res;
 }
-
-status_t build_to_xml_files_CertificateData (
+status_t build_to_xml_files_CertificateData(
     val_value_t *parentval,
     struct filespb_CertificateData *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "CrtPath",
-    &res);
+      "CrtPath",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->CrtPath;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "KeyPath",
-    &res);
+      "KeyPath",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->KeyPath;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FTPSEnabled",
-    &res);
+      "FTPSEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->FTPSEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthCrtPath",
-    &res);
+      "AuthCrtPath",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -247,31 +252,32 @@ status_t build_to_xml_files_CertificateData (
   VAL_STRING(childval) = entry->AuthCrtPath;
   return res;
 }
-
-status_t build_to_xml_files_CertificateUserID (
+status_t build_to_xml_files_CertificateUserID(
     val_value_t *parentval,
     struct filespb_CertificateUserID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Username",
-    &res);
+      "Username",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -279,112 +285,123 @@ status_t build_to_xml_files_CertificateUserID (
   VAL_STRING(childval) = entry->Username;
   return res;
 }
-
-status_t build_to_xml_files_CertificateUserIDList (
+status_t build_to_xml_files_CertificateUserIDList(
     val_value_t *parentval,
     struct filespb_CertificateUserIDList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_files_CertificateUserID(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_files_CertificateUserID(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_files_CertificateType (
+status_t build_to_xml_files_CertificateType(
     val_value_t *parentval,
     struct filespb_CertificateType *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
+  switch (entry->Type) {
+    case filespb_CertificateTypeOptions_CERTIFICATE_TYPE_WEB:
+      enum_str = "CERTIFICATE_TYPE_WEB";
+      break;
+    case filespb_CertificateTypeOptions_CERTIFICATE_TYPE_SNMP:
+      enum_str = "CERTIFICATE_TYPE_SNMP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_files_CertificateInfo (
+status_t build_to_xml_files_CertificateInfo(
     val_value_t *parentval,
     struct filespb_CertificateInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "CrtPath",
-    &res);
+      "CrtPath",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->CrtPath;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "KeyPath",
-    &res);
+      "KeyPath",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->KeyPath;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Passphrase",
-    &res);
+      "Passphrase",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Passphrase;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthCrtPath",
-    &res);
+      "AuthCrtPath",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -393,3 +410,254 @@ status_t build_to_xml_files_CertificateInfo (
   return res;
 }
 
+status_t build_to_priv_files_Config(
+    val_value_t *parentval,
+    struct filespb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FTPEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->FTPEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Certificate");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Certificate = malloc(sizeof(*(entry->Certificate)));
+    res = build_to_priv_files_ActivateCertificate(
+        childval,
+        entry->Certificate);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_files_ActivateCertificate(
+    val_value_t *parentval,
+    struct filespb_ActivateCertificate *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Web");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Web = malloc(sizeof(*(entry->Web)));
+    res = build_to_priv_files_CertificateID(
+        childval,
+        entry->Web);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnmpAgent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SnmpAgent = malloc(sizeof(*(entry->SnmpAgent)));
+    res = build_to_priv_files_CertificateID(
+        childval,
+        entry->SnmpAgent);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnmpManager");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SnmpManager = malloc(sizeof(*(entry->SnmpManager)));
+    res = build_to_priv_files_CertificateUserIDList(
+        childval,
+        entry->SnmpManager);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateID(
+    val_value_t *parentval,
+    struct filespb_CertificateID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ID = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateIDList(
+    val_value_t *parentval,
+    struct filespb_CertificateIDList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->List[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateData(
+    val_value_t *parentval,
+    struct filespb_CertificateData *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "CrtPath");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->CrtPath = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "KeyPath");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->KeyPath = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FTPSEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->FTPSEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthCrtPath");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->AuthCrtPath = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateUserID(
+    val_value_t *parentval,
+    struct filespb_CertificateUserID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Username");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Username = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateUserIDList(
+    val_value_t *parentval,
+    struct filespb_CertificateUserIDList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_files_CertificateUserID(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateType(
+    val_value_t *parentval,
+    struct filespb_CertificateType *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_files_CertificateInfo(
+    val_value_t *parentval,
+    struct filespb_CertificateInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "CrtPath");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->CrtPath = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "KeyPath");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->KeyPath = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Passphrase");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Passphrase = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthCrtPath");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->AuthCrtPath = VAL_STRING(childval);
+  }
+  return res;
+}

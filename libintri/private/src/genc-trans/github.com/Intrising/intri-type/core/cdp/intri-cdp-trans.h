@@ -21,62 +21,91 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_cdp_Config (
+extern status_t build_to_xml_cdp_Config(
     val_value_t *parentval,
     struct cdppb_Config *entry);
-
-extern status_t build_to_xml_cdp_SystemConfig (
+extern status_t build_to_xml_cdp_SystemConfig(
     val_value_t *parentval,
     struct cdppb_SystemConfig *entry);
-
-extern status_t build_to_xml_cdp_LocalInfo (
+extern status_t build_to_xml_cdp_LocalInfo(
     val_value_t *parentval,
     struct cdppb_LocalInfo *entry);
-
-extern status_t build_to_xml_cdp_LocalInfoEntry (
+extern status_t build_to_xml_cdp_LocalInfoEntry(
     val_value_t *parentval,
     struct cdppb_LocalInfoEntry *entry);
-
-extern status_t build_to_xml_cdp_NeighborInfo (
+extern status_t build_to_xml_cdp_NeighborInfo(
     val_value_t *parentval,
     struct cdppb_NeighborInfo *entry);
-
-extern status_t build_to_xml_cdp_NeighborInfoEntry (
+extern status_t build_to_xml_cdp_NeighborInfoEntry(
     val_value_t *parentval,
     struct cdppb_NeighborInfoEntry *entry);
-
-extern status_t build_to_xml_cdp_RecvIdentifyInfo (
+extern status_t build_to_xml_cdp_RecvIdentifyInfo(
     val_value_t *parentval,
     struct cdppb_RecvIdentifyInfo *entry);
-
-extern status_t build_to_xml_cdp_SystemInfo (
+extern status_t build_to_xml_cdp_SystemInfo(
     val_value_t *parentval,
     struct cdppb_SystemInfo *entry);
-
-extern status_t build_to_xml_cdp_VoiceVLAN (
+extern status_t build_to_xml_cdp_VoiceVLAN(
     val_value_t *parentval,
     struct cdppb_VoiceVLAN *entry);
-
-extern status_t build_to_xml_cdp_PortInfo (
+extern status_t build_to_xml_cdp_PortInfo(
     val_value_t *parentval,
     struct cdppb_PortInfo *entry);
-
-extern status_t build_to_xml_cdp_PowerAvailable (
+extern status_t build_to_xml_cdp_PowerAvailable(
     val_value_t *parentval,
     struct cdppb_PowerAvailable *entry);
-
-extern status_t build_to_xml_cdp_NeighborPoe (
+extern status_t build_to_xml_cdp_NeighborPoe(
     val_value_t *parentval,
     struct cdppb_NeighborPoe *entry);
-
-extern status_t build_to_xml_cdp_Statistic (
+extern status_t build_to_xml_cdp_Statistic(
     val_value_t *parentval,
     struct cdppb_Statistic *entry);
-
-extern status_t build_to_xml_cdp_StatisticEntry (
+extern status_t build_to_xml_cdp_StatisticEntry(
     val_value_t *parentval,
     struct cdppb_StatisticEntry *entry);
 
+extern status_t build_to_priv_cdp_Config(
+    val_value_t *parentval,
+    struct cdppb_Config *entry);
+extern status_t build_to_priv_cdp_SystemConfig(
+    val_value_t *parentval,
+    struct cdppb_SystemConfig *entry);
+extern status_t build_to_priv_cdp_LocalInfo(
+    val_value_t *parentval,
+    struct cdppb_LocalInfo *entry);
+extern status_t build_to_priv_cdp_LocalInfoEntry(
+    val_value_t *parentval,
+    struct cdppb_LocalInfoEntry *entry);
+extern status_t build_to_priv_cdp_NeighborInfo(
+    val_value_t *parentval,
+    struct cdppb_NeighborInfo *entry);
+extern status_t build_to_priv_cdp_NeighborInfoEntry(
+    val_value_t *parentval,
+    struct cdppb_NeighborInfoEntry *entry);
+extern status_t build_to_priv_cdp_RecvIdentifyInfo(
+    val_value_t *parentval,
+    struct cdppb_RecvIdentifyInfo *entry);
+extern status_t build_to_priv_cdp_SystemInfo(
+    val_value_t *parentval,
+    struct cdppb_SystemInfo *entry);
+extern status_t build_to_priv_cdp_VoiceVLAN(
+    val_value_t *parentval,
+    struct cdppb_VoiceVLAN *entry);
+extern status_t build_to_priv_cdp_PortInfo(
+    val_value_t *parentval,
+    struct cdppb_PortInfo *entry);
+extern status_t build_to_priv_cdp_PowerAvailable(
+    val_value_t *parentval,
+    struct cdppb_PowerAvailable *entry);
+extern status_t build_to_priv_cdp_NeighborPoe(
+    val_value_t *parentval,
+    struct cdppb_NeighborPoe *entry);
+extern status_t build_to_priv_cdp_Statistic(
+    val_value_t *parentval,
+    struct cdppb_Statistic *entry);
+extern status_t build_to_priv_cdp_StatisticEntry(
+    val_value_t *parentval,
+    struct cdppb_StatisticEntry *entry);
 
 #endif /* _H_intri_cdp_trans */
 

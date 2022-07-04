@@ -32,42 +32,44 @@
 
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_maintenance_FirmwareInfo (
+
+status_t build_to_xml_maintenance_FirmwareInfo(
     val_value_t *parentval,
     struct maintenancepb_FirmwareInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Version",
-    &res);
+      "Version",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Version;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BuildDate",
-    &res);
+      "BuildDate",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->BuildDate;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BuildNumber",
-    &res);
+      "BuildNumber",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -75,43 +77,43 @@ status_t build_to_xml_maintenance_FirmwareInfo (
   VAL_STRING(childval) = entry->BuildNumber;
   return res;
 }
-
-status_t build_to_xml_maintenance_UpgradePathRequest (
+status_t build_to_xml_maintenance_UpgradePathRequest(
     val_value_t *parentval,
     struct maintenancepb_UpgradePathRequest *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Path",
-    &res);
+      "Path",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Path;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FTPSEnabled",
-    &res);
+      "FTPSEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->FTPSEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RebootAfterAction",
-    &res);
+      "RebootAfterAction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -120,3 +122,59 @@ status_t build_to_xml_maintenance_UpgradePathRequest (
   return res;
 }
 
+status_t build_to_priv_maintenance_FirmwareInfo(
+    val_value_t *parentval,
+    struct maintenancepb_FirmwareInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Version");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Version = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BuildDate");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->BuildDate = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BuildNumber");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->BuildNumber = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_maintenance_UpgradePathRequest(
+    val_value_t *parentval,
+    struct maintenancepb_UpgradePathRequest *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Path");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Path = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FTPSEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->FTPSEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RebootAfterAction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->RebootAfterAction = VAL_BOOL(childval);
+  }
+  return res;
+}

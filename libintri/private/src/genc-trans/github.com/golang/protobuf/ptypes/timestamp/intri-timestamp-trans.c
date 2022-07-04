@@ -30,30 +30,33 @@
 #include "intri-timestamp-trans.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-status_t build_to_xml_timestamp_Timestamp (
+
+status_t build_to_xml_timestamp_Timestamp(
     val_value_t *parentval,
     struct timestamppb_Timestamp *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Seconds",
-    &res);
+      "Seconds",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int64 */
   VAL_LONG(childval) = entry->Seconds;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Nanos",
-    &res);
+      "Nanos",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -62,3 +65,24 @@ status_t build_to_xml_timestamp_Timestamp (
   return res;
 }
 
+status_t build_to_priv_timestamp_Timestamp(
+    val_value_t *parentval,
+    struct timestamppb_Timestamp *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Seconds");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->Seconds = VAL_LONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Nanos");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Nanos = VAL_INT(childval);
+  }
+  return res;
+}

@@ -21,18 +21,25 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_annotations_Http (
+extern status_t build_to_xml_annotations_Http(
     val_value_t *parentval,
     struct annotationspb_Http *entry);
-
-extern status_t build_to_xml_annotations_HttpRule (
+extern status_t build_to_xml_annotations_HttpRule(
     val_value_t *parentval,
     struct annotationspb_HttpRule *entry);
-
-extern status_t build_to_xml_annotations_CustomHttpPattern (
+extern status_t build_to_xml_annotations_CustomHttpPattern(
     val_value_t *parentval,
     struct annotationspb_CustomHttpPattern *entry);
 
+extern status_t build_to_priv_annotations_Http(
+    val_value_t *parentval,
+    struct annotationspb_Http *entry);
+extern status_t build_to_priv_annotations_HttpRule(
+    val_value_t *parentval,
+    struct annotationspb_HttpRule *entry);
+extern status_t build_to_priv_annotations_CustomHttpPattern(
+    val_value_t *parentval,
+    struct annotationspb_CustomHttpPattern *entry);
 
 #endif /* _H_intri_annotations_trans */
 

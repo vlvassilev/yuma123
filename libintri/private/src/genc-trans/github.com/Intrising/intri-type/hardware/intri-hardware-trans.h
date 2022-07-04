@@ -21,234 +21,349 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_hardware_IPv4Static (
+extern status_t build_to_xml_hardware_IPv4Static(
     val_value_t *parentval,
     struct hardwarepb_IPv4Static *entry);
-
-extern status_t build_to_xml_hardware_DLDPConfig (
+extern status_t build_to_xml_hardware_DLDPConfig(
     val_value_t *parentval,
     struct hardwarepb_DLDPConfig *entry);
-
-extern status_t build_to_xml_hardware_DLDPSystemConfig (
+extern status_t build_to_xml_hardware_DLDPSystemConfig(
     val_value_t *parentval,
     struct hardwarepb_DLDPSystemConfig *entry);
-
-extern status_t build_to_xml_hardware_DLDPPortConfig (
+extern status_t build_to_xml_hardware_DLDPPortConfig(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortConfig *entry);
-
-extern status_t build_to_xml_hardware_DLDPPortConfigEntry (
+extern status_t build_to_xml_hardware_DLDPPortConfigEntry(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortConfigEntry *entry);
-
-extern status_t build_to_xml_hardware_DLDPPortStatus (
+extern status_t build_to_xml_hardware_DLDPPortStatus(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortStatus *entry);
-
-extern status_t build_to_xml_hardware_DLDPPortStatusEntry (
+extern status_t build_to_xml_hardware_DLDPPortStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortStatusEntry *entry);
-
-extern status_t build_to_xml_hardware_DLDPNeighborEntry (
+extern status_t build_to_xml_hardware_DLDPNeighborEntry(
     val_value_t *parentval,
     struct hardwarepb_DLDPNeighborEntry *entry);
-
-extern status_t build_to_xml_hardware_EnableRequest (
+extern status_t build_to_xml_hardware_EnableRequest(
     val_value_t *parentval,
     struct hardwarepb_EnableRequest *entry);
-
-extern status_t build_to_xml_hardware_EnableRequestEntry (
+extern status_t build_to_xml_hardware_EnableRequestEntry(
     val_value_t *parentval,
     struct hardwarepb_EnableRequestEntry *entry);
-
-extern status_t build_to_xml_hardware_PortLED (
+extern status_t build_to_xml_hardware_PortLED(
     val_value_t *parentval,
     struct hardwarepb_PortLED *entry);
-
-extern status_t build_to_xml_hardware_PortLEDEntry (
+extern status_t build_to_xml_hardware_PortLEDEntry(
     val_value_t *parentval,
     struct hardwarepb_PortLEDEntry *entry);
-
-extern status_t build_to_xml_hardware_BoardLED (
+extern status_t build_to_xml_hardware_BoardLED(
     val_value_t *parentval,
     struct hardwarepb_BoardLED *entry);
-
-extern status_t build_to_xml_hardware_LEDStatus (
+extern status_t build_to_xml_hardware_LEDStatus(
     val_value_t *parentval,
     struct hardwarepb_LEDStatus *entry);
-
-extern status_t build_to_xml_hardware_Coordinates (
+extern status_t build_to_xml_hardware_Coordinates(
     val_value_t *parentval,
     struct hardwarepb_Coordinates *entry);
-
-extern status_t build_to_xml_hardware_GNSSVerboseInfomation (
+extern status_t build_to_xml_hardware_GNSSVerboseInfomation(
     val_value_t *parentval,
     struct hardwarepb_GNSSVerboseInfomation *entry);
-
-extern status_t build_to_xml_hardware_GPSEnable (
+extern status_t build_to_xml_hardware_GPSEnable(
     val_value_t *parentval,
     struct hardwarepb_GPSEnable *entry);
-
-extern status_t build_to_xml_hardware_GPSStatus (
+extern status_t build_to_xml_hardware_GPSStatus(
     val_value_t *parentval,
     struct hardwarepb_GPSStatus *entry);
-
-extern status_t build_to_xml_hardware_GPSCommand (
+extern status_t build_to_xml_hardware_GPSCommand(
     val_value_t *parentval,
     struct hardwarepb_GPSCommand *entry);
-
-extern status_t build_to_xml_hardware_USBStatus (
+extern status_t build_to_xml_hardware_USBStatus(
     val_value_t *parentval,
     struct hardwarepb_USBStatus *entry);
-
-extern status_t build_to_xml_hardware_USBEthernetConfig (
+extern status_t build_to_xml_hardware_USBEthernetConfig(
     val_value_t *parentval,
     struct hardwarepb_USBEthernetConfig *entry);
-
-extern status_t build_to_xml_hardware_FanSpeedConfig (
+extern status_t build_to_xml_hardware_FanSpeedConfig(
     val_value_t *parentval,
     struct hardwarepb_FanSpeedConfig *entry);
-
-extern status_t build_to_xml_hardware_FanSpeedConfigEntry (
+extern status_t build_to_xml_hardware_FanSpeedConfigEntry(
     val_value_t *parentval,
     struct hardwarepb_FanSpeedConfigEntry *entry);
-
-extern status_t build_to_xml_hardware_FanStatus (
+extern status_t build_to_xml_hardware_FanStatus(
     val_value_t *parentval,
     struct hardwarepb_FanStatus *entry);
-
-extern status_t build_to_xml_hardware_FanStatusEntry (
+extern status_t build_to_xml_hardware_FanStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_FanStatusEntry *entry);
-
-extern status_t build_to_xml_hardware_TemperatureStatus (
+extern status_t build_to_xml_hardware_TemperatureStatus(
     val_value_t *parentval,
     struct hardwarepb_TemperatureStatus *entry);
-
-extern status_t build_to_xml_hardware_TemperatureStatusEntry (
+extern status_t build_to_xml_hardware_TemperatureStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_TemperatureStatusEntry *entry);
-
-extern status_t build_to_xml_hardware_PowerRedundantState (
+extern status_t build_to_xml_hardware_PowerRedundantState(
     val_value_t *parentval,
     struct hardwarepb_PowerRedundantState *entry);
-
-extern status_t build_to_xml_hardware_PowerRedundantStateEntry (
+extern status_t build_to_xml_hardware_PowerRedundantStateEntry(
     val_value_t *parentval,
     struct hardwarepb_PowerRedundantStateEntry *entry);
-
-extern status_t build_to_xml_hardware_PowerGeneralState (
+extern status_t build_to_xml_hardware_PowerGeneralState(
     val_value_t *parentval,
     struct hardwarepb_PowerGeneralState *entry);
-
-extern status_t build_to_xml_hardware_PowerState (
+extern status_t build_to_xml_hardware_PowerState(
     val_value_t *parentval,
     struct hardwarepb_PowerState *entry);
-
-extern status_t build_to_xml_hardware_TimeControlRegister (
+extern status_t build_to_xml_hardware_TimeControlRegister(
     val_value_t *parentval,
     struct hardwarepb_TimeControlRegister *entry);
-
-extern status_t build_to_xml_hardware_Config (
+extern status_t build_to_xml_hardware_Config(
     val_value_t *parentval,
     struct hardwarepb_Config *entry);
-
-extern status_t build_to_xml_hardware_Ports (
+extern status_t build_to_xml_hardware_Ports(
     val_value_t *parentval,
     struct hardwarepb_Ports *entry);
-
-extern status_t build_to_xml_hardware_PortEntry (
+extern status_t build_to_xml_hardware_PortEntry(
     val_value_t *parentval,
     struct hardwarepb_PortEntry *entry);
-
-extern status_t build_to_xml_hardware_SystemInfo (
+extern status_t build_to_xml_hardware_SystemInfo(
     val_value_t *parentval,
     struct hardwarepb_SystemInfo *entry);
-
-extern status_t build_to_xml_hardware_LEDConfig (
+extern status_t build_to_xml_hardware_LEDConfig(
     val_value_t *parentval,
     struct hardwarepb_LEDConfig *entry);
-
-extern status_t build_to_xml_hardware_FanPercent (
+extern status_t build_to_xml_hardware_FanPercent(
     val_value_t *parentval,
     struct hardwarepb_FanPercent *entry);
-
-extern status_t build_to_xml_hardware_FanPercentEntry (
+extern status_t build_to_xml_hardware_FanPercentEntry(
     val_value_t *parentval,
     struct hardwarepb_FanPercentEntry *entry);
-
-extern status_t build_to_xml_hardware_LEDType (
+extern status_t build_to_xml_hardware_LEDType(
     val_value_t *parentval,
     struct hardwarepb_LEDType *entry);
-
-extern status_t build_to_xml_hardware_SignalState (
+extern status_t build_to_xml_hardware_SignalState(
     val_value_t *parentval,
     struct hardwarepb_SignalState *entry);
-
-extern status_t build_to_xml_hardware_SignalStateEntry (
+extern status_t build_to_xml_hardware_SignalStateEntry(
     val_value_t *parentval,
     struct hardwarepb_SignalStateEntry *entry);
-
-extern status_t build_to_xml_hardware_SFPInfo (
+extern status_t build_to_xml_hardware_SFPInfo(
     val_value_t *parentval,
     struct hardwarepb_SFPInfo *entry);
-
-extern status_t build_to_xml_hardware_SFPInfoEntry (
+extern status_t build_to_xml_hardware_SFPInfoEntry(
     val_value_t *parentval,
     struct hardwarepb_SFPInfoEntry *entry);
-
-extern status_t build_to_xml_hardware_DeviceI2CAddress (
+extern status_t build_to_xml_hardware_DeviceI2CAddress(
     val_value_t *parentval,
     struct hardwarepb_DeviceI2CAddress *entry);
-
-extern status_t build_to_xml_hardware_DeviceI2CAddressInfo (
+extern status_t build_to_xml_hardware_DeviceI2CAddressInfo(
     val_value_t *parentval,
     struct hardwarepb_DeviceI2CAddressInfo *entry);
-
-extern status_t build_to_xml_hardware_InfoList (
+extern status_t build_to_xml_hardware_InfoList(
     val_value_t *parentval,
     struct hardwarepb_InfoList *entry);
-
-extern status_t build_to_xml_hardware_Enable (
+extern status_t build_to_xml_hardware_Enable(
     val_value_t *parentval,
     struct hardwarepb_Enable *entry);
-
-extern status_t build_to_xml_hardware_Network (
+extern status_t build_to_xml_hardware_Network(
     val_value_t *parentval,
     struct hardwarepb_Network *entry);
-
-extern status_t build_to_xml_hardware_MCUInfo (
+extern status_t build_to_xml_hardware_MCUInfo(
     val_value_t *parentval,
     struct hardwarepb_MCUInfo *entry);
-
-extern status_t build_to_xml_hardware_MCUVersion (
+extern status_t build_to_xml_hardware_MCUVersion(
     val_value_t *parentval,
     struct hardwarepb_MCUVersion *entry);
-
-extern status_t build_to_xml_hardware_PoESetting (
+extern status_t build_to_xml_hardware_PoESetting(
     val_value_t *parentval,
     struct hardwarepb_PoESetting *entry);
-
-extern status_t build_to_xml_hardware_PoESettingEntry (
+extern status_t build_to_xml_hardware_PoESettingEntry(
     val_value_t *parentval,
     struct hardwarepb_PoESettingEntry *entry);
-
-extern status_t build_to_xml_hardware_PoEPortStatusList (
+extern status_t build_to_xml_hardware_PoEPortStatusList(
     val_value_t *parentval,
     struct hardwarepb_PoEPortStatusList *entry);
-
-extern status_t build_to_xml_hardware_PoEPortStatusEntry (
+extern status_t build_to_xml_hardware_PoEPortStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_PoEPortStatusEntry *entry);
-
-extern status_t build_to_xml_hardware_PoESystemStatus (
+extern status_t build_to_xml_hardware_PoESystemStatus(
     val_value_t *parentval,
     struct hardwarepb_PoESystemStatus *entry);
-
-extern status_t build_to_xml_hardware_PoESystemBudgetEntry (
+extern status_t build_to_xml_hardware_PoESystemBudgetEntry(
     val_value_t *parentval,
     struct hardwarepb_PoESystemBudgetEntry *entry);
 
+extern status_t build_to_priv_hardware_IPv4Static(
+    val_value_t *parentval,
+    struct hardwarepb_IPv4Static *entry);
+extern status_t build_to_priv_hardware_DLDPConfig(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPConfig *entry);
+extern status_t build_to_priv_hardware_DLDPSystemConfig(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPSystemConfig *entry);
+extern status_t build_to_priv_hardware_DLDPPortConfig(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortConfig *entry);
+extern status_t build_to_priv_hardware_DLDPPortConfigEntry(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortConfigEntry *entry);
+extern status_t build_to_priv_hardware_DLDPPortStatus(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortStatus *entry);
+extern status_t build_to_priv_hardware_DLDPPortStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortStatusEntry *entry);
+extern status_t build_to_priv_hardware_DLDPNeighborEntry(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPNeighborEntry *entry);
+extern status_t build_to_priv_hardware_EnableRequest(
+    val_value_t *parentval,
+    struct hardwarepb_EnableRequest *entry);
+extern status_t build_to_priv_hardware_EnableRequestEntry(
+    val_value_t *parentval,
+    struct hardwarepb_EnableRequestEntry *entry);
+extern status_t build_to_priv_hardware_PortLED(
+    val_value_t *parentval,
+    struct hardwarepb_PortLED *entry);
+extern status_t build_to_priv_hardware_PortLEDEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PortLEDEntry *entry);
+extern status_t build_to_priv_hardware_BoardLED(
+    val_value_t *parentval,
+    struct hardwarepb_BoardLED *entry);
+extern status_t build_to_priv_hardware_LEDStatus(
+    val_value_t *parentval,
+    struct hardwarepb_LEDStatus *entry);
+extern status_t build_to_priv_hardware_Coordinates(
+    val_value_t *parentval,
+    struct hardwarepb_Coordinates *entry);
+extern status_t build_to_priv_hardware_GNSSVerboseInfomation(
+    val_value_t *parentval,
+    struct hardwarepb_GNSSVerboseInfomation *entry);
+extern status_t build_to_priv_hardware_GPSEnable(
+    val_value_t *parentval,
+    struct hardwarepb_GPSEnable *entry);
+extern status_t build_to_priv_hardware_GPSStatus(
+    val_value_t *parentval,
+    struct hardwarepb_GPSStatus *entry);
+extern status_t build_to_priv_hardware_GPSCommand(
+    val_value_t *parentval,
+    struct hardwarepb_GPSCommand *entry);
+extern status_t build_to_priv_hardware_USBStatus(
+    val_value_t *parentval,
+    struct hardwarepb_USBStatus *entry);
+extern status_t build_to_priv_hardware_USBEthernetConfig(
+    val_value_t *parentval,
+    struct hardwarepb_USBEthernetConfig *entry);
+extern status_t build_to_priv_hardware_FanSpeedConfig(
+    val_value_t *parentval,
+    struct hardwarepb_FanSpeedConfig *entry);
+extern status_t build_to_priv_hardware_FanSpeedConfigEntry(
+    val_value_t *parentval,
+    struct hardwarepb_FanSpeedConfigEntry *entry);
+extern status_t build_to_priv_hardware_FanStatus(
+    val_value_t *parentval,
+    struct hardwarepb_FanStatus *entry);
+extern status_t build_to_priv_hardware_FanStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_FanStatusEntry *entry);
+extern status_t build_to_priv_hardware_TemperatureStatus(
+    val_value_t *parentval,
+    struct hardwarepb_TemperatureStatus *entry);
+extern status_t build_to_priv_hardware_TemperatureStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_TemperatureStatusEntry *entry);
+extern status_t build_to_priv_hardware_PowerRedundantState(
+    val_value_t *parentval,
+    struct hardwarepb_PowerRedundantState *entry);
+extern status_t build_to_priv_hardware_PowerRedundantStateEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PowerRedundantStateEntry *entry);
+extern status_t build_to_priv_hardware_PowerGeneralState(
+    val_value_t *parentval,
+    struct hardwarepb_PowerGeneralState *entry);
+extern status_t build_to_priv_hardware_PowerState(
+    val_value_t *parentval,
+    struct hardwarepb_PowerState *entry);
+extern status_t build_to_priv_hardware_TimeControlRegister(
+    val_value_t *parentval,
+    struct hardwarepb_TimeControlRegister *entry);
+extern status_t build_to_priv_hardware_Config(
+    val_value_t *parentval,
+    struct hardwarepb_Config *entry);
+extern status_t build_to_priv_hardware_Ports(
+    val_value_t *parentval,
+    struct hardwarepb_Ports *entry);
+extern status_t build_to_priv_hardware_PortEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PortEntry *entry);
+extern status_t build_to_priv_hardware_SystemInfo(
+    val_value_t *parentval,
+    struct hardwarepb_SystemInfo *entry);
+extern status_t build_to_priv_hardware_LEDConfig(
+    val_value_t *parentval,
+    struct hardwarepb_LEDConfig *entry);
+extern status_t build_to_priv_hardware_FanPercent(
+    val_value_t *parentval,
+    struct hardwarepb_FanPercent *entry);
+extern status_t build_to_priv_hardware_FanPercentEntry(
+    val_value_t *parentval,
+    struct hardwarepb_FanPercentEntry *entry);
+extern status_t build_to_priv_hardware_LEDType(
+    val_value_t *parentval,
+    struct hardwarepb_LEDType *entry);
+extern status_t build_to_priv_hardware_SignalState(
+    val_value_t *parentval,
+    struct hardwarepb_SignalState *entry);
+extern status_t build_to_priv_hardware_SignalStateEntry(
+    val_value_t *parentval,
+    struct hardwarepb_SignalStateEntry *entry);
+extern status_t build_to_priv_hardware_SFPInfo(
+    val_value_t *parentval,
+    struct hardwarepb_SFPInfo *entry);
+extern status_t build_to_priv_hardware_SFPInfoEntry(
+    val_value_t *parentval,
+    struct hardwarepb_SFPInfoEntry *entry);
+extern status_t build_to_priv_hardware_DeviceI2CAddress(
+    val_value_t *parentval,
+    struct hardwarepb_DeviceI2CAddress *entry);
+extern status_t build_to_priv_hardware_DeviceI2CAddressInfo(
+    val_value_t *parentval,
+    struct hardwarepb_DeviceI2CAddressInfo *entry);
+extern status_t build_to_priv_hardware_InfoList(
+    val_value_t *parentval,
+    struct hardwarepb_InfoList *entry);
+extern status_t build_to_priv_hardware_Enable(
+    val_value_t *parentval,
+    struct hardwarepb_Enable *entry);
+extern status_t build_to_priv_hardware_Network(
+    val_value_t *parentval,
+    struct hardwarepb_Network *entry);
+extern status_t build_to_priv_hardware_MCUInfo(
+    val_value_t *parentval,
+    struct hardwarepb_MCUInfo *entry);
+extern status_t build_to_priv_hardware_MCUVersion(
+    val_value_t *parentval,
+    struct hardwarepb_MCUVersion *entry);
+extern status_t build_to_priv_hardware_PoESetting(
+    val_value_t *parentval,
+    struct hardwarepb_PoESetting *entry);
+extern status_t build_to_priv_hardware_PoESettingEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PoESettingEntry *entry);
+extern status_t build_to_priv_hardware_PoEPortStatusList(
+    val_value_t *parentval,
+    struct hardwarepb_PoEPortStatusList *entry);
+extern status_t build_to_priv_hardware_PoEPortStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PoEPortStatusEntry *entry);
+extern status_t build_to_priv_hardware_PoESystemStatus(
+    val_value_t *parentval,
+    struct hardwarepb_PoESystemStatus *entry);
+extern status_t build_to_priv_hardware_PoESystemBudgetEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PoESystemBudgetEntry *entry);
 
 #endif /* _H_intri_hardware_trans */
 

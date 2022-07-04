@@ -13,7 +13,7 @@ libintri_trans_la_CPPFLAGS = \
 $(XML_CPPFLAGS)
 
 libintri_trans_la_LDFLAGS = \
--module \
+-version-info 2:0:0 \
 $(top_builddir)/netconf/src/agt/libyumaagt.la \
 $(top_builddir)/netconf/src/ncx/libyumancx.la
 

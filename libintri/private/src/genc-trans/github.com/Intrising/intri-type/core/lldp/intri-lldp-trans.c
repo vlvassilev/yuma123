@@ -32,108 +32,109 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_lldp_Config (
+
+status_t build_to_xml_lldp_Config(
     val_value_t *parentval,
     struct lldppb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SystemConfig",
-    &res);
+      "SystemConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_SystemConfig(
+  res = build_to_xml_lldp_SystemConfig(
       childval,
-    entry->SystemConfig);
+      entry->SystemConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortConfig",
-    &res);
+      "PortConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_PortConfig(
+  res = build_to_xml_lldp_PortConfig(
       childval,
-    entry->PortConfig);
+      entry->PortConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lldp_SystemConfig (
+status_t build_to_xml_lldp_SystemConfig(
     val_value_t *parentval,
     struct lldppb_SystemConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeToLive",
-    &res);
+      "TimeToLive",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TimeToLive;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MsgTxInterval",
-    &res);
+      "MsgTxInterval",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MsgTxInterval;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VoiceDisableVlanTLV",
-    &res);
+      "VoiceDisableVlanTLV",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->VoiceDisableVlanTLV;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ForwardToLink",
-    &res);
+      "ForwardToLink",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -141,587 +142,666 @@ status_t build_to_xml_lldp_SystemConfig (
   VAL_BOOL(childval) = entry->ForwardToLink;
   return res;
 }
-
-status_t build_to_xml_lldp_PortConfig (
+status_t build_to_xml_lldp_PortConfig(
     val_value_t *parentval,
     struct lldppb_PortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lldp_PortConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lldp_PortConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_lldp_PortConfigEntry (
+status_t build_to_xml_lldp_PortConfigEntry(
     val_value_t *parentval,
     struct lldppb_PortConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case lldppb_PortModeTypeOptions_PORT_MODE_TYPE_DISABLED:
+      enum_str = "PORT_MODE_TYPE_DISABLED";
+      break;
+    case lldppb_PortModeTypeOptions_PORT_MODE_TYPE_ENABLED_TX_ONLY:
+      enum_str = "PORT_MODE_TYPE_ENABLED_TX_ONLY";
+      break;
+    case lldppb_PortModeTypeOptions_PORT_MODE_TYPE_ENABLED_RX_ONLY:
+      enum_str = "PORT_MODE_TYPE_ENABLED_RX_ONLY";
+      break;
+    case lldppb_PortModeTypeOptions_PORT_MODE_TYPE_ENABLED_TX_RX:
+      enum_str = "PORT_MODE_TYPE_ENABLED_TX_RX";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_lldp_LocalInfo (
+status_t build_to_xml_lldp_LocalInfo(
     val_value_t *parentval,
     struct lldppb_LocalInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lldp_LocalInfoEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lldp_LocalInfoEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_lldp_NeighborInfo (
+status_t build_to_xml_lldp_NeighborInfo(
     val_value_t *parentval,
     struct lldppb_NeighborInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lldp_NeighborInfoEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lldp_NeighborInfoEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_lldp_LocalInfoEntry (
+status_t build_to_xml_lldp_LocalInfoEntry(
     val_value_t *parentval,
     struct lldppb_LocalInfoEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACPhy",
-    &res);
+      "MACPhy",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_MACPHYConfig(
+  res = build_to_xml_lldp_MACPHYConfig(
       childval,
-    entry->MACPhy);
+      entry->MACPhy);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortMgmt",
-    &res);
+      "PortMgmt",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_PortManagementInfo(
+  res = build_to_xml_lldp_PortManagementInfo(
       childval,
-    entry->PortMgmt);
+      entry->PortMgmt);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Aggr",
-    &res);
+      "Aggr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_LinkAggregation(
+  res = build_to_xml_lldp_LinkAggregation(
       childval,
-    entry->Aggr);
+      entry->Aggr);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ExtendPoe",
-    &res);
+      "ExtendPoe",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_ExtendedPowerViaMDI(
+  res = build_to_xml_lldp_ExtendedPowerViaMDI(
       childval,
-    entry->ExtendPoe);
+      entry->ExtendPoe);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Power",
-    &res);
+      "Power",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_PowerViaMDI(
+  res = build_to_xml_lldp_PowerViaMDI(
       childval,
-    entry->Power);
+      entry->Power);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MediaCap",
-    &res);
+      "MediaCap",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_MediaCapability(
+  res = build_to_xml_lldp_MediaCapability(
       childval,
-    entry->MediaCap);
+      entry->MediaCap);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SystemInfo",
-    &res);
+      "SystemInfo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_SystemManagementInfo(
+  res = build_to_xml_lldp_SystemManagementInfo(
       childval,
-    entry->SystemInfo);
+      entry->SystemInfo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lldp_NeighborInfoEntry (
+status_t build_to_xml_lldp_NeighborInfoEntry(
     val_value_t *parentval,
     struct lldppb_NeighborInfoEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "RecvIdentifyNo",
-    &res);
+      "RecvIdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->RecvIdentifyNo);
+      entry->RecvIdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeToLive",
-    &res);
+      "TimeToLive",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TimeToLive;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Chassis",
-    &res);
+      "Chassis",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_ChassisInfo(
+  res = build_to_xml_lldp_ChassisInfo(
       childval,
-    entry->Chassis);
+      entry->Chassis);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MgmtAddress",
-    &res);
+      "MgmtAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MgmtAddress_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MgmtAddress_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lldp_PortManagementAddressInfo(
-    listval,
-    entry->MgmtAddress[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MgmtAddress_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lldp_PortManagementAddressInfo(
+        listval,
+        entry->MgmtAddress[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Capabilities",
-    &res);
+      "Capabilities",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Capabilities_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Capabilities_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->Capabilities[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Capabilities_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->Capabilities[i]) {
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_OTHER:
+        enum_str = "CAPABILITIES_TYPE_OTHER";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_REPEATER:
+        enum_str = "CAPABILITIES_TYPE_REPEATER";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_BRIDGE:
+        enum_str = "CAPABILITIES_TYPE_BRIDGE";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_WLAN:
+        enum_str = "CAPABILITIES_TYPE_WLAN";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_ROUTER:
+        enum_str = "CAPABILITIES_TYPE_ROUTER";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_TELEPHONE:
+        enum_str = "CAPABILITIES_TYPE_TELEPHONE";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_DOCSIS:
+        enum_str = "CAPABILITIES_TYPE_DOCSIS";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_STATION:
+        enum_str = "CAPABILITIES_TYPE_STATION";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "CapabilitiesEnabled",
-    &res);
+      "CapabilitiesEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->CapabilitiesEnabled_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "CapabilitiesEnabled_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->CapabilitiesEnabled[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "CapabilitiesEnabled_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->CapabilitiesEnabled[i]) {
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_OTHER:
+        enum_str = "CAPABILITIES_TYPE_OTHER";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_REPEATER:
+        enum_str = "CAPABILITIES_TYPE_REPEATER";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_BRIDGE:
+        enum_str = "CAPABILITIES_TYPE_BRIDGE";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_WLAN:
+        enum_str = "CAPABILITIES_TYPE_WLAN";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_ROUTER:
+        enum_str = "CAPABILITIES_TYPE_ROUTER";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_TELEPHONE:
+        enum_str = "CAPABILITIES_TYPE_TELEPHONE";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_DOCSIS:
+        enum_str = "CAPABILITIES_TYPE_DOCSIS";
+        break;
+      case lldppb_CapabilitiesTypeOptions_CAPABILITIES_TYPE_STATION:
+        enum_str = "CAPABILITIES_TYPE_STATION";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MedCapabilities",
-    &res);
+      "MedCapabilities",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MedCapabilities_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MedCapabilities_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->MedCapabilities[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MedCapabilities_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->MedCapabilities[i]) {
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_CAPABILITY:
+        enum_str = "MED_CAPABILITIES_TYPE_CAPABILITY";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_POLICY:
+        enum_str = "MED_CAPABILITIES_TYPE_POLICY";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_LOCATION:
+        enum_str = "MED_CAPABILITIES_TYPE_LOCATION";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_MDI_PSE:
+        enum_str = "MED_CAPABILITIES_TYPE_MDI_PSE";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_MDI_PD:
+        enum_str = "MED_CAPABILITIES_TYPE_MDI_PD";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_INVENTORY:
+        enum_str = "MED_CAPABILITIES_TYPE_INVENTORY";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortSubtype",
-    &res);
+      "PortSubtype",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_PortID(
+  res = build_to_xml_lldp_PortID(
       childval,
-    entry->PortSubtype);
+      entry->PortSubtype);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VoiceVlan",
-    &res);
+      "VoiceVlan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->VoiceVlan_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "VoiceVlan_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lldp_VoiceVlanEntry(
-    listval,
-    entry->VoiceVlan[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "VoiceVlan_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lldp_VoiceVlanEntry(
+        listval,
+        entry->VoiceVlan[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SystemInfo",
-    &res);
+      "SystemInfo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_SystemManagementInfo(
+  res = build_to_xml_lldp_SystemManagementInfo(
       childval,
-    entry->SystemInfo);
+      entry->SystemInfo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ExtendPoe",
-    &res);
+      "ExtendPoe",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_ExtendedPowerViaMDI(
+  res = build_to_xml_lldp_ExtendedPowerViaMDI(
       childval,
-    entry->ExtendPoe);
+      entry->ExtendPoe);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Power",
-    &res);
+      "Power",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_PowerViaMDI(
+  res = build_to_xml_lldp_PowerViaMDI(
       childval,
-    entry->Power);
+      entry->Power);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_lldp_LinkAggregation (
+status_t build_to_xml_lldp_LinkAggregation(
     val_value_t *parentval,
     struct lldppb_LinkAggregation *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Capabilities",
-    &res);
+      "Capabilities",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Capabilities;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Status",
-    &res);
+      "Status",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Status;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AggregationPortNo",
-    &res);
+      "AggregationPortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -729,55 +809,96 @@ status_t build_to_xml_lldp_LinkAggregation (
   VAL_INT(childval) = entry->AggregationPortNo;
   return res;
 }
-
-status_t build_to_xml_lldp_ExtendedPowerViaMDI (
+status_t build_to_xml_lldp_ExtendedPowerViaMDI(
     val_value_t *parentval,
     struct lldppb_ExtendedPowerViaMDI *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_2_PSE_DEVICE:
+      enum_str = "POE_INFO_TYPE_2_PSE_DEVICE";
+      break;
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_2_PD_DEVICE:
+      enum_str = "POE_INFO_TYPE_2_PD_DEVICE";
+      break;
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_1_PSE_DEVICE:
+      enum_str = "POE_INFO_TYPE_1_PSE_DEVICE";
+      break;
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_1_PD_DEVICE:
+      enum_str = "POE_INFO_TYPE_1_PD_DEVICE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Source;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Source) {
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_UNKNOWN:
+      enum_str = "POE_INFO_SOURCE_TYPE_UNKNOWN";
+      break;
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_PD_PSE_PRIMARY:
+      enum_str = "POE_INFO_SOURCE_TYPE_PD_PSE_PRIMARY";
+      break;
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_PD_LOCAL_BACKUP:
+      enum_str = "POE_INFO_SOURCE_TYPE_PD_LOCAL_BACKUP";
+      break;
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_PD_PSE_LOCAL:
+      enum_str = "POE_INFO_SOURCE_TYPE_PD_PSE_LOCAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Priority) {
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_UNKNOWN:
+      enum_str = "POE_INFO_PRIORITY_TYPE_UNKNOWN";
+      break;
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_CRITICAL:
+      enum_str = "POE_INFO_PRIORITY_TYPE_CRITICAL";
+      break;
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_HIGH:
+      enum_str = "POE_INFO_PRIORITY_TYPE_HIGH";
+      break;
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_LOW:
+      enum_str = "POE_INFO_PRIORITY_TYPE_LOW";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -785,111 +906,231 @@ status_t build_to_xml_lldp_ExtendedPowerViaMDI (
   VAL_DOUBLE(childval) = entry->Value;
   return res;
 }
-
-status_t build_to_xml_lldp_MACPHYConfig (
+status_t build_to_xml_lldp_MACPHYConfig(
     val_value_t *parentval,
     struct lldppb_MACPHYConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "AutoNegotiationConfig",
-    &res);
+      "AutoNegotiationConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->AutoNegotiationConfig;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AutoNegotiationStatus",
-    &res);
+      "AutoNegotiationStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->AutoNegotiationStatus;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AutoNegoAdvertisedCapability",
-    &res);
+      "AutoNegoAdvertisedCapability",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->AutoNegoAdvertisedCapability_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "AutoNegoAdvertisedCapability_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->AutoNegoAdvertisedCapability[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "AutoNegoAdvertisedCapability_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->AutoNegoAdvertisedCapability[i]) {
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_FULL:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_FULL";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_HALF:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_HALF";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_FULL:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_FULL";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_HALF:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_HALF";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_SYM_PAUSE:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_SYM_PAUSE";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_SYM_PAUSE:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_SYM_PAUSE";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_PAUSE:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_PAUSE";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_PAUSE:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_PAUSE";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_FULL:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_FULL";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_HALF:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_HALF";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_FULL:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_FULL";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_HALF:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_HALF";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T4:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T4";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_FULL:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_FULL";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_HALF:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_HALF";
+        break;
+      case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_OTHER_OR_UNKNOWN:
+        enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_OTHER_OR_UNKNOWN";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OperationalMAUType",
-    &res);
+      "OperationalMAUType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->OperationalMAUType;
+  switch (entry->OperationalMAUType) {
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_FULL:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_FULL";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_HALF:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_T_HALF";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_FULL:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_FULL";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_HALF:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE1000_X_HALF";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_SYM_PAUSE:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_SYM_PAUSE";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_SYM_PAUSE:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_SYM_PAUSE";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_PAUSE:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_ASYM_PAUSE";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_PAUSE:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_PAUSE";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_FULL:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_FULL";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_HALF:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T2_HALF";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_FULL:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_FULL";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_HALF:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_TX_HALF";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T4:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE100_T4";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_FULL:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_FULL";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_HALF:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_BASE10_T_HALF";
+      break;
+    case lldppb_MACPHYAdvertisedCapabilityTypeOptions_MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_OTHER_OR_UNKNOWN:
+      enum_str = "MAC_PHY_ADVERTIZED_CAPABILITY_TYPE_OTHER_OR_UNKNOWN";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_lldp_MediaCapability (
+status_t build_to_xml_lldp_MediaCapability(
     val_value_t *parentval,
     struct lldppb_MediaCapability *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Capabilities",
-    &res);
+      "Capabilities",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Capabilities_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Capabilities_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->Capabilities[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Capabilities_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->Capabilities[i]) {
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_CAPABILITY:
+        enum_str = "MED_CAPABILITIES_TYPE_CAPABILITY";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_POLICY:
+        enum_str = "MED_CAPABILITIES_TYPE_POLICY";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_LOCATION:
+        enum_str = "MED_CAPABILITIES_TYPE_LOCATION";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_MDI_PSE:
+        enum_str = "MED_CAPABILITIES_TYPE_MDI_PSE";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_MDI_PD:
+        enum_str = "MED_CAPABILITIES_TYPE_MDI_PD";
+        break;
+      case lldppb_MedCapabilitiesTypeOptions_MED_CAPABILITIES_TYPE_INVENTORY:
+        enum_str = "MED_CAPABILITIES_TYPE_INVENTORY";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ClassType",
-    &res);
+      "ClassType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -897,31 +1138,32 @@ VAL_ENUM(listval) = entry->Capabilities[i];
   VAL_INT(childval) = entry->ClassType;
   return res;
 }
-
-status_t build_to_xml_lldp_SystemManagementInfo (
+status_t build_to_xml_lldp_SystemManagementInfo(
     val_value_t *parentval,
     struct lldppb_SystemManagementInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Description",
-    &res);
+      "Description",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -929,55 +1171,55 @@ status_t build_to_xml_lldp_SystemManagementInfo (
   VAL_STRING(childval) = entry->Description;
   return res;
 }
-
-status_t build_to_xml_lldp_PortManagementInfo (
+status_t build_to_xml_lldp_PortManagementInfo(
     val_value_t *parentval,
     struct lldppb_PortManagementInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ip",
-    &res);
+      "Ip",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ip_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ip_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Ip[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ip_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Ip[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddr",
-    &res);
+      "MACAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Description",
-    &res);
+      "Description",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -985,139 +1227,221 @@ VAL_STRING(listval) = entry->Ip[i];
   VAL_STRING(childval) = entry->Description;
   return res;
 }
-
-status_t build_to_xml_lldp_PowerViaMDI (
+status_t build_to_xml_lldp_PowerViaMDI(
     val_value_t *parentval,
     struct lldppb_PowerViaMDI *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case lldppb_PoePortClassTypeOptions_POE_PORT_CLASS_TYPE_PD:
+      enum_str = "POE_PORT_CLASS_TYPE_PD";
+      break;
+    case lldppb_PoePortClassTypeOptions_POE_PORT_CLASS_TYPE_PSE:
+      enum_str = "POE_PORT_CLASS_TYPE_PSE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PoePowerSupported",
-    &res);
+      "PoePowerSupported",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PoePowerSupported;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PoePowerEnabled",
-    &res);
+      "PoePowerEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PoePowerEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PairControl",
-    &res);
+      "PairControl",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PairControl;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerPairs",
-    &res);
+      "PowerPairs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PowerPairs;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->PowerPairs) {
+    case lldppb_PoeControlPowerPairsTypeOptions_POE_CONTROL_POWER_PAIRS_TYPE_SIGNAL:
+      enum_str = "POE_CONTROL_POWER_PAIRS_TYPE_SIGNAL";
+      break;
+    case lldppb_PoeControlPowerPairsTypeOptions_POE_CONTROL_POWER_PAIRS_TYPE_SPARE:
+      enum_str = "POE_CONTROL_POWER_PAIRS_TYPE_SPARE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PowerClass",
-    &res);
+      "PowerClass",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PowerClass;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->PowerClass) {
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_NONE:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_NONE";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_0:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_0";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_1:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_1";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_2:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_2";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_3:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_3";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_4:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_4";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_5:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_5";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_6:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_6";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_7:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_7";
+      break;
+    case lldppb_PoeControlPowerClassTypeOptions_POE_CONTROL_POWER_CLASS_TYPE_8:
+      enum_str = "POE_CONTROL_POWER_CLASS_TYPE_8";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DeviceType",
-    &res);
+      "DeviceType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DeviceType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->DeviceType) {
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_2_PSE_DEVICE:
+      enum_str = "POE_INFO_TYPE_2_PSE_DEVICE";
+      break;
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_2_PD_DEVICE:
+      enum_str = "POE_INFO_TYPE_2_PD_DEVICE";
+      break;
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_1_PSE_DEVICE:
+      enum_str = "POE_INFO_TYPE_1_PSE_DEVICE";
+      break;
+    case lldppb_PoeInfoTypeOptions_POE_INFO_TYPE_1_PD_DEVICE:
+      enum_str = "POE_INFO_TYPE_1_PD_DEVICE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Source;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Source) {
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_UNKNOWN:
+      enum_str = "POE_INFO_SOURCE_TYPE_UNKNOWN";
+      break;
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_PD_PSE_PRIMARY:
+      enum_str = "POE_INFO_SOURCE_TYPE_PD_PSE_PRIMARY";
+      break;
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_PD_LOCAL_BACKUP:
+      enum_str = "POE_INFO_SOURCE_TYPE_PD_LOCAL_BACKUP";
+      break;
+    case lldppb_PoeInfoSourceTypeOptions_POE_INFO_SOURCE_TYPE_PD_PSE_LOCAL:
+      enum_str = "POE_INFO_SOURCE_TYPE_PD_PSE_LOCAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Priority) {
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_UNKNOWN:
+      enum_str = "POE_INFO_PRIORITY_TYPE_UNKNOWN";
+      break;
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_CRITICAL:
+      enum_str = "POE_INFO_PRIORITY_TYPE_CRITICAL";
+      break;
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_HIGH:
+      enum_str = "POE_INFO_PRIORITY_TYPE_HIGH";
+      break;
+    case lldppb_PoeInfoPriorityTypeOptions_POE_INFO_PRIORITY_TYPE_LOW:
+      enum_str = "POE_INFO_PRIORITY_TYPE_LOW";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PdRequestedPower",
-    &res);
+      "PdRequestedPower",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->PdRequestedPower;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PseAllocatedPower",
-    &res);
+      "PseAllocatedPower",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1125,43 +1449,57 @@ status_t build_to_xml_lldp_PowerViaMDI (
   VAL_DOUBLE(childval) = entry->PseAllocatedPower;
   return res;
 }
-
-status_t build_to_xml_lldp_PortManagementAddressInfo (
+status_t build_to_xml_lldp_PortManagementAddressInfo(
     val_value_t *parentval,
     struct lldppb_PortManagementAddressInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ip",
-    &res);
+      "Ip",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Ip;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Subtype",
-    &res);
+      "Subtype",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Subtype;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Subtype) {
+    case lldppb_ManagementAddressIfSubTypeTypeOptions_MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_DONT_USE:
+      enum_str = "MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_DONT_USE";
+      break;
+    case lldppb_ManagementAddressIfSubTypeTypeOptions_MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_UNKNOWN:
+      enum_str = "MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_UNKNOWN";
+      break;
+    case lldppb_ManagementAddressIfSubTypeTypeOptions_MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_IF_INDEX:
+      enum_str = "MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_IF_INDEX";
+      break;
+    case lldppb_ManagementAddressIfSubTypeTypeOptions_MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_SYSTEM_PORT_NUMBER:
+      enum_str = "MANAGEMENT_ADDRESS_IF_SUBTYPE_TYPE_SYSTEM_PORT_NUMBER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1169,55 +1507,55 @@ status_t build_to_xml_lldp_PortManagementAddressInfo (
   VAL_STRING(childval) = entry->ID;
   return res;
 }
-
-status_t build_to_xml_lldp_ManagementAddress (
+status_t build_to_xml_lldp_ManagementAddress(
     val_value_t *parentval,
     struct lldppb_ManagementAddress *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddr",
-    &res);
+      "MACAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ip",
-    &res);
+      "Ip",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ip_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ip_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Ip[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ip_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Ip[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortDsr",
-    &res);
+      "PortDsr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1225,31 +1563,58 @@ VAL_STRING(listval) = entry->Ip[i];
   VAL_STRING(childval) = entry->PortDsr;
   return res;
 }
-
-status_t build_to_xml_lldp_ChassisInfo (
+status_t build_to_xml_lldp_ChassisInfo(
     val_value_t *parentval,
     struct lldppb_ChassisInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_RESERVED:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_RESERVED";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_CHASSIS_COMPONENT:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_CHASSIS_COMPONENT";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_INTERFACE_ALIAS:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_INTERFACE_ALIAS";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_PORT_COMPONENT:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_PORT_COMPONENT";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_MAC_ADDRESS:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_MAC_ADDRESS";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_NETWORK_ADDRESS:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_NETWORK_ADDRESS";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_INTERFACE_NAME:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_INTERFACE_NAME";
+      break;
+    case lldppb_ChassisIdSubtypeTypeOptions_CHASSIS_ID_SUBTYPE_TYPE_LOCAL:
+      enum_str = "CHASSIS_ID_SUBTYPE_TYPE_LOCAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1257,43 +1622,69 @@ status_t build_to_xml_lldp_ChassisInfo (
   VAL_STRING(childval) = entry->ID;
   return res;
 }
-
-status_t build_to_xml_lldp_PortID (
+status_t build_to_xml_lldp_PortID(
     val_value_t *parentval,
     struct lldppb_PortID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Subtype",
-    &res);
+      "Subtype",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Subtype;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Subtype) {
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_UNKNOWN:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_UNKNOWN";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_INTERFACE_ALIAS:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_INTERFACE_ALIAS";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_PORT_COMPONENT:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_PORT_COMPONENT";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_MAC_ADDRESS:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_MAC_ADDRESS";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_NETWORK_ADDRESS:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_NETWORK_ADDRESS";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_INTERFACE_NAME:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_INTERFACE_NAME";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_AGENT_CIRCUIT_ID:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_AGENT_CIRCUIT_ID";
+      break;
+    case lldppb_PortIdSubtypeTypeOptions_PORT_ID_SUBTYPE_TYPE_LOCAL:
+      enum_str = "PORT_ID_SUBTYPE_TYPE_LOCAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1301,97 +1692,98 @@ status_t build_to_xml_lldp_PortID (
   VAL_STRING(childval) = entry->ID;
   return res;
 }
-
-status_t build_to_xml_lldp_Statistic (
+status_t build_to_xml_lldp_Statistic(
     val_value_t *parentval,
     struct lldppb_Statistic *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_lldp_StatisticEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_lldp_StatisticEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_lldp_StatisticEntry (
+status_t build_to_xml_lldp_StatisticEntry(
     val_value_t *parentval,
     struct lldppb_StatisticEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FramesOut",
-    &res);
+      "FramesOut",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->FramesOut;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FramesIn",
-    &res);
+      "FramesIn",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->FramesIn;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FramesInErrors",
-    &res);
+      "FramesInErrors",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1399,79 +1791,134 @@ status_t build_to_xml_lldp_StatisticEntry (
   VAL_INT(childval) = entry->FramesInErrors;
   return res;
 }
-
-status_t build_to_xml_lldp_VoiceVlanEntry (
+status_t build_to_xml_lldp_VoiceVlanEntry(
     val_value_t *parentval,
     struct lldppb_VoiceVlanEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ApplicationType",
-    &res);
+      "ApplicationType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ApplicationType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ApplicationType) {
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_UNKNOWN:
+      enum_str = "POLICIES_APPLICATION_TYPE_UNKNOWN";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_VOICE:
+      enum_str = "POLICIES_APPLICATION_TYPE_VOICE";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_VOICE_SIGNALING:
+      enum_str = "POLICIES_APPLICATION_TYPE_VOICE_SIGNALING";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_GUEST_VOICE:
+      enum_str = "POLICIES_APPLICATION_TYPE_GUEST_VOICE";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_GUEST_VOICE_SIGNALING:
+      enum_str = "POLICIES_APPLICATION_TYPE_GUEST_VOICE_SIGNALING";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_SOFTPHONE_VOICE:
+      enum_str = "POLICIES_APPLICATION_TYPE_SOFTPHONE_VOICE";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_VIDEO_CONFERENCING:
+      enum_str = "POLICIES_APPLICATION_TYPE_VIDEO_CONFERENCING";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_STREAMING_VIDEO:
+      enum_str = "POLICIES_APPLICATION_TYPE_STREAMING_VIDEO";
+      break;
+    case lldppb_PoliciesApplicationTypeOptions_POLICIES_APPLICATION_TYPE_VIDEO_SIGNALING:
+      enum_str = "POLICIES_APPLICATION_TYPE_VIDEO_SIGNALING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PolicyDefined",
-    &res);
+      "PolicyDefined",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PolicyDefined;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TaggedVlan",
-    &res);
+      "TaggedVlan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->TaggedVlan;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Layer_2Priority",
-    &res);
+      "Layer_2Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Layer_2Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Layer_2Priority) {
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_BEST_EFFORT:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_BEST_EFFORT";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_UNKNOWN:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_UNKNOWN";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_BACKGROUND:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_BACKGROUND";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_SPARE:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_SPARE";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_EXCELLENT_EFFORT:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_EXCELLENT_EFFORT";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_CONTROLLED_LOAD:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_CONTROLLED_LOAD";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_VIDEO:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_VIDEO";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_VOICE:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_VOICE";
+      break;
+    case lldppb_PoliciesLayer2PriorityTypeOptions_POLICIES_LAYER2_PRIORITY_TYPE_NETWORK_CONTROL:
+      enum_str = "POLICIES_LAYER2_PRIORITY_TYPE_NETWORK_CONTROL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DSCP",
-    &res);
+      "DSCP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1480,3 +1927,999 @@ status_t build_to_xml_lldp_VoiceVlanEntry (
   return res;
 }
 
+status_t build_to_priv_lldp_Config(
+    val_value_t *parentval,
+    struct lldppb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SystemConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemConfig = malloc(sizeof(*(entry->SystemConfig)));
+    res = build_to_priv_lldp_SystemConfig(
+        childval,
+        entry->SystemConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortConfig = malloc(sizeof(*(entry->PortConfig)));
+    res = build_to_priv_lldp_PortConfig(
+        childval,
+        entry->PortConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_SystemConfig(
+    val_value_t *parentval,
+    struct lldppb_SystemConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeToLive");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TimeToLive = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MsgTxInterval");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MsgTxInterval = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VoiceDisableVlanTLV");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->VoiceDisableVlanTLV = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ForwardToLink");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->ForwardToLink = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_PortConfig(
+    val_value_t *parentval,
+    struct lldppb_PortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_lldp_PortConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_PortConfigEntry(
+    val_value_t *parentval,
+    struct lldppb_PortConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_LocalInfo(
+    val_value_t *parentval,
+    struct lldppb_LocalInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_lldp_LocalInfoEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_NeighborInfo(
+    val_value_t *parentval,
+    struct lldppb_NeighborInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_lldp_NeighborInfoEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_LocalInfoEntry(
+    val_value_t *parentval,
+    struct lldppb_LocalInfoEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACPhy");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->MACPhy = malloc(sizeof(*(entry->MACPhy)));
+    res = build_to_priv_lldp_MACPHYConfig(
+        childval,
+        entry->MACPhy);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortMgmt");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortMgmt = malloc(sizeof(*(entry->PortMgmt)));
+    res = build_to_priv_lldp_PortManagementInfo(
+        childval,
+        entry->PortMgmt);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Aggr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Aggr = malloc(sizeof(*(entry->Aggr)));
+    res = build_to_priv_lldp_LinkAggregation(
+        childval,
+        entry->Aggr);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ExtendPoe");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ExtendPoe = malloc(sizeof(*(entry->ExtendPoe)));
+    res = build_to_priv_lldp_ExtendedPowerViaMDI(
+        childval,
+        entry->ExtendPoe);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Power");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Power = malloc(sizeof(*(entry->Power)));
+    res = build_to_priv_lldp_PowerViaMDI(
+        childval,
+        entry->Power);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MediaCap");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->MediaCap = malloc(sizeof(*(entry->MediaCap)));
+    res = build_to_priv_lldp_MediaCapability(
+        childval,
+        entry->MediaCap);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SystemInfo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemInfo = malloc(sizeof(*(entry->SystemInfo)));
+    res = build_to_priv_lldp_SystemManagementInfo(
+        childval,
+        entry->SystemInfo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_NeighborInfoEntry(
+    val_value_t *parentval,
+    struct lldppb_NeighborInfoEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "RecvIdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->RecvIdentifyNo = malloc(sizeof(*(entry->RecvIdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->RecvIdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeToLive");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TimeToLive = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Chassis");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Chassis = malloc(sizeof(*(entry->Chassis)));
+    res = build_to_priv_lldp_ChassisInfo(
+        childval,
+        entry->Chassis);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MgmtAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MgmtAddress_Len = dlq_count(&childval->v.childQ);
+    entry->MgmtAddress = malloc((entry->MgmtAddress_Len + 1) * sizeof(*entry->MgmtAddress));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->MgmtAddress[cnt] = malloc(sizeof(*(entry->MgmtAddress[cnt])));
+      res = build_to_priv_lldp_PortManagementAddressInfo(
+          listval,
+          entry->MgmtAddress[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Capabilities");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Capabilities_Len = dlq_count(&childval->v.childQ);
+    entry->Capabilities = malloc((entry->Capabilities_Len + 1) * sizeof(*entry->Capabilities));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->Capabilities[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "CapabilitiesEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->CapabilitiesEnabled_Len = dlq_count(&childval->v.childQ);
+    entry->CapabilitiesEnabled = malloc((entry->CapabilitiesEnabled_Len + 1) * sizeof(*entry->CapabilitiesEnabled));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->CapabilitiesEnabled[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MedCapabilities");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MedCapabilities_Len = dlq_count(&childval->v.childQ);
+    entry->MedCapabilities = malloc((entry->MedCapabilities_Len + 1) * sizeof(*entry->MedCapabilities));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->MedCapabilities[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortSubtype");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortSubtype = malloc(sizeof(*(entry->PortSubtype)));
+    res = build_to_priv_lldp_PortID(
+        childval,
+        entry->PortSubtype);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VoiceVlan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->VoiceVlan_Len = dlq_count(&childval->v.childQ);
+    entry->VoiceVlan = malloc((entry->VoiceVlan_Len + 1) * sizeof(*entry->VoiceVlan));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->VoiceVlan[cnt] = malloc(sizeof(*(entry->VoiceVlan[cnt])));
+      res = build_to_priv_lldp_VoiceVlanEntry(
+          listval,
+          entry->VoiceVlan[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SystemInfo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemInfo = malloc(sizeof(*(entry->SystemInfo)));
+    res = build_to_priv_lldp_SystemManagementInfo(
+        childval,
+        entry->SystemInfo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ExtendPoe");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ExtendPoe = malloc(sizeof(*(entry->ExtendPoe)));
+    res = build_to_priv_lldp_ExtendedPowerViaMDI(
+        childval,
+        entry->ExtendPoe);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Power");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Power = malloc(sizeof(*(entry->Power)));
+    res = build_to_priv_lldp_PowerViaMDI(
+        childval,
+        entry->Power);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_LinkAggregation(
+    val_value_t *parentval,
+    struct lldppb_LinkAggregation *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Capabilities");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Capabilities = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Status");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Status = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AggregationPortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AggregationPortNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_ExtendedPowerViaMDI(
+    val_value_t *parentval,
+    struct lldppb_ExtendedPowerViaMDI *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Source = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Priority = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->Value = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_MACPHYConfig(
+    val_value_t *parentval,
+    struct lldppb_MACPHYConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "AutoNegotiationConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->AutoNegotiationConfig = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AutoNegotiationStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->AutoNegotiationStatus = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AutoNegoAdvertisedCapability");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->AutoNegoAdvertisedCapability_Len = dlq_count(&childval->v.childQ);
+    entry->AutoNegoAdvertisedCapability = malloc((entry->AutoNegoAdvertisedCapability_Len + 1) * sizeof(*entry->AutoNegoAdvertisedCapability));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->AutoNegoAdvertisedCapability[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OperationalMAUType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->OperationalMAUType = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_MediaCapability(
+    val_value_t *parentval,
+    struct lldppb_MediaCapability *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Capabilities");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Capabilities_Len = dlq_count(&childval->v.childQ);
+    entry->Capabilities = malloc((entry->Capabilities_Len + 1) * sizeof(*entry->Capabilities));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->Capabilities[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClassType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ClassType = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_SystemManagementInfo(
+    val_value_t *parentval,
+    struct lldppb_SystemManagementInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Description");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Description = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_PortManagementInfo(
+    val_value_t *parentval,
+    struct lldppb_PortManagementInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ip");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ip_Len = dlq_count(&childval->v.childQ);
+    entry->Ip = malloc((entry->Ip_Len + 1) * sizeof(*entry->Ip));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Ip[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddr = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Description");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Description = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_PowerViaMDI(
+    val_value_t *parentval,
+    struct lldppb_PowerViaMDI *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoePowerSupported");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PoePowerSupported = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoePowerEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PoePowerEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PairControl");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PairControl = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerPairs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PowerPairs = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerClass");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PowerClass = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DeviceType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DeviceType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Source = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Priority = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PdRequestedPower");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->PdRequestedPower = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PseAllocatedPower");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->PseAllocatedPower = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_PortManagementAddressInfo(
+    val_value_t *parentval,
+    struct lldppb_PortManagementAddressInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ip");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Ip = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Subtype");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Subtype = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ID = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_ManagementAddress(
+    val_value_t *parentval,
+    struct lldppb_ManagementAddress *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MACAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddr = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ip");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ip_Len = dlq_count(&childval->v.childQ);
+    entry->Ip = malloc((entry->Ip_Len + 1) * sizeof(*entry->Ip));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Ip[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortDsr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->PortDsr = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_ChassisInfo(
+    val_value_t *parentval,
+    struct lldppb_ChassisInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ID = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_PortID(
+    val_value_t *parentval,
+    struct lldppb_PortID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Subtype");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Subtype = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ID = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_Statistic(
+    val_value_t *parentval,
+    struct lldppb_Statistic *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_lldp_StatisticEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_lldp_StatisticEntry(
+    val_value_t *parentval,
+    struct lldppb_StatisticEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FramesOut");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FramesOut = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FramesIn");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FramesIn = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FramesInErrors");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FramesInErrors = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_lldp_VoiceVlanEntry(
+    val_value_t *parentval,
+    struct lldppb_VoiceVlanEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ApplicationType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ApplicationType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PolicyDefined");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PolicyDefined = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TaggedVlan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TaggedVlan = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Layer_2Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Layer_2Priority = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DSCP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DSCP = VAL_INT(childval);
+  }
+  return res;
+}

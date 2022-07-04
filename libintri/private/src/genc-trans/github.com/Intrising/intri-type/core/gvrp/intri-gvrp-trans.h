@@ -21,18 +21,25 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_gvrp_PortConfigEntry (
+extern status_t build_to_xml_gvrp_PortConfigEntry(
     val_value_t *parentval,
     struct gvrppb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_gvrp_PortsConfig (
+extern status_t build_to_xml_gvrp_PortsConfig(
     val_value_t *parentval,
     struct gvrppb_PortsConfig *entry);
-
-extern status_t build_to_xml_gvrp_Config (
+extern status_t build_to_xml_gvrp_Config(
     val_value_t *parentval,
     struct gvrppb_Config *entry);
 
+extern status_t build_to_priv_gvrp_PortConfigEntry(
+    val_value_t *parentval,
+    struct gvrppb_PortConfigEntry *entry);
+extern status_t build_to_priv_gvrp_PortsConfig(
+    val_value_t *parentval,
+    struct gvrppb_PortsConfig *entry);
+extern status_t build_to_priv_gvrp_Config(
+    val_value_t *parentval,
+    struct gvrppb_Config *entry);
 
 #endif /* _H_intri_gvrp_trans */
 

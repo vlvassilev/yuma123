@@ -21,38 +21,55 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_poe_Config (
+extern status_t build_to_xml_poe_Config(
     val_value_t *parentval,
     struct poepb_Config *entry);
-
-extern status_t build_to_xml_poe_SystemBudget (
+extern status_t build_to_xml_poe_SystemBudget(
     val_value_t *parentval,
     struct poepb_SystemBudget *entry);
-
-extern status_t build_to_xml_poe_PortConfig (
+extern status_t build_to_xml_poe_PortConfig(
     val_value_t *parentval,
     struct poepb_PortConfig *entry);
-
-extern status_t build_to_xml_poe_ConfigEntry (
+extern status_t build_to_xml_poe_ConfigEntry(
     val_value_t *parentval,
     struct poepb_ConfigEntry *entry);
-
-extern status_t build_to_xml_poe_SystemStatus (
+extern status_t build_to_xml_poe_SystemStatus(
     val_value_t *parentval,
     struct poepb_SystemStatus *entry);
-
-extern status_t build_to_xml_poe_PortStatus (
+extern status_t build_to_xml_poe_PortStatus(
     val_value_t *parentval,
     struct poepb_PortStatus *entry);
-
-extern status_t build_to_xml_poe_PortStatusEntry (
+extern status_t build_to_xml_poe_PortStatusEntry(
     val_value_t *parentval,
     struct poepb_PortStatusEntry *entry);
-
-extern status_t build_to_xml_poe_SetPoEMaxPowerAvailableRequest (
+extern status_t build_to_xml_poe_SetPoEMaxPowerAvailableRequest(
     val_value_t *parentval,
     struct poepb_SetPoEMaxPowerAvailableRequest *entry);
 
+extern status_t build_to_priv_poe_Config(
+    val_value_t *parentval,
+    struct poepb_Config *entry);
+extern status_t build_to_priv_poe_SystemBudget(
+    val_value_t *parentval,
+    struct poepb_SystemBudget *entry);
+extern status_t build_to_priv_poe_PortConfig(
+    val_value_t *parentval,
+    struct poepb_PortConfig *entry);
+extern status_t build_to_priv_poe_ConfigEntry(
+    val_value_t *parentval,
+    struct poepb_ConfigEntry *entry);
+extern status_t build_to_priv_poe_SystemStatus(
+    val_value_t *parentval,
+    struct poepb_SystemStatus *entry);
+extern status_t build_to_priv_poe_PortStatus(
+    val_value_t *parentval,
+    struct poepb_PortStatus *entry);
+extern status_t build_to_priv_poe_PortStatusEntry(
+    val_value_t *parentval,
+    struct poepb_PortStatusEntry *entry);
+extern status_t build_to_priv_poe_SetPoEMaxPowerAvailableRequest(
+    val_value_t *parentval,
+    struct poepb_SetPoEMaxPowerAvailableRequest *entry);
 
 #endif /* _H_intri_poe_trans */
 

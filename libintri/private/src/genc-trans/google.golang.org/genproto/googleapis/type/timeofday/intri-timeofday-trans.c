@@ -30,54 +30,55 @@
 #include "intri-timeofday-trans.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-status_t build_to_xml_timeofday_TimeOfDay (
+
+status_t build_to_xml_timeofday_TimeOfDay(
     val_value_t *parentval,
     struct timeofdaypb_TimeOfDay *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Hours",
-    &res);
+      "Hours",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Hours;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Minutes",
-    &res);
+      "Minutes",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Minutes;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Seconds",
-    &res);
+      "Seconds",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Seconds;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Nanos",
-    &res);
+      "Nanos",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -86,3 +87,38 @@ status_t build_to_xml_timeofday_TimeOfDay (
   return res;
 }
 
+status_t build_to_priv_timeofday_TimeOfDay(
+    val_value_t *parentval,
+    struct timeofdaypb_TimeOfDay *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Hours");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Hours = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Minutes");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Minutes = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Seconds");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Seconds = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Nanos");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Nanos = VAL_INT(childval);
+  }
+  return res;
+}

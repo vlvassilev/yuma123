@@ -34,288 +34,345 @@
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/timestamp/intri-timestamp-trans.h"
-status_t build_to_xml_ptp_Config (
+
+status_t build_to_xml_ptp_Config(
     val_value_t *parentval,
     struct ptppb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "System",
-    &res);
+      "System",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_SystemConfig(
+  res = build_to_xml_ptp_SystemConfig(
       childval,
-    entry->System);
+      entry->System);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_PortConfig(
+  res = build_to_xml_ptp_PortConfig(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_ptp_SystemConfig (
+status_t build_to_xml_ptp_SystemConfig(
     val_value_t *parentval,
     struct ptppb_SystemConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_SystemModeConfig(
+  res = build_to_xml_ptp_SystemModeConfig(
       childval,
-    entry->Mode);
+      entry->Mode);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Timer",
-    &res);
+      "Timer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_SystemTimerConfig(
+  res = build_to_xml_ptp_SystemTimerConfig(
       childval,
-    entry->Timer);
+      entry->Timer);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Clock",
-    &res);
+      "Clock",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_SystemClockConfig(
+  res = build_to_xml_ptp_SystemClockConfig(
       childval,
-    entry->Clock);
+      entry->Clock);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Encapsulation",
-    &res);
+      "Encapsulation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Encapsulation;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Encapsulation) {
+    case ptppb_EncapsulationTypeOptions_ENCAPSULATION_TYPE_ETHER:
+      enum_str = "ENCAPSULATION_TYPE_ETHER";
+      break;
+    case ptppb_EncapsulationTypeOptions_ENCAPSULATION_TYPE_UDP_IPV4:
+      enum_str = "ENCAPSULATION_TYPE_UDP_IPV4";
+      break;
+    case ptppb_EncapsulationTypeOptions_ENCAPSULATION_TYPE_UDP_IPV6:
+      enum_str = "ENCAPSULATION_TYPE_UDP_IPV6";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Transmission",
-    &res);
+      "Transmission",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Transmission;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Transmission) {
+    case ptppb_TransmissionTypeOptions_TRANSMISSION_TYPE_UNICAST:
+      enum_str = "TRANSMISSION_TYPE_UNICAST";
+      break;
+    case ptppb_TransmissionTypeOptions_TRANSMISSION_TYPE_MULTICAST:
+      enum_str = "TRANSMISSION_TYPE_MULTICAST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddressList",
-    &res);
+      "IPAddressList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->IPAddressList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "IPAddressList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_common_IPAddress(
-    listval,
-    entry->IPAddressList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "IPAddressList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_common_IPAddress(
+        listval,
+        entry->IPAddressList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_ptp_SystemModeConfig (
+status_t build_to_xml_ptp_SystemModeConfig(
     val_value_t *parentval,
     struct ptppb_SystemModeConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Profile",
-    &res);
+      "Profile",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Profile;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Profile) {
+    case ptppb_ProfileTypeOptions_PROFILE_TYPE_IEEE_1588_V2:
+      enum_str = "PROFILE_TYPE_IEEE_1588_V2";
+      break;
+    case ptppb_ProfileTypeOptions_PROFILE_TYPE_IEEE_802_DOT_1_AS:
+      enum_str = "PROFILE_TYPE_IEEE_802_DOT_1_AS";
+      break;
+    case ptppb_ProfileTypeOptions_PROFILE_TYPE_ITU_G8275_DOT_1:
+      enum_str = "PROFILE_TYPE_ITU_G8275_DOT_1";
+      break;
+    case ptppb_ProfileTypeOptions_PROFILE_TYPE_ITU_G8275_DOT_2:
+      enum_str = "PROFILE_TYPE_ITU_G8275_DOT_2";
+      break;
+    case ptppb_ProfileTypeOptions_PROFILE_TYPE_IEEE_C37_DOT_238_DASH_2017:
+      enum_str = "PROFILE_TYPE_IEEE_C37_DOT_238_DASH_2017";
+      break;
+    case ptppb_ProfileTypeOptions_PROFILE_TYPE_IEC_61850_DASH_9_DASH_3:
+      enum_str = "PROFILE_TYPE_IEC_61850_DASH_9_DASH_3";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ClockType",
-    &res);
+      "ClockType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ClockType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ClockType) {
+    case ptppb_ClockTypeOptions_CLOCK_TYPE_BC:
+      enum_str = "CLOCK_TYPE_BC";
+      break;
+    case ptppb_ClockTypeOptions_CLOCK_TYPE_OC:
+      enum_str = "CLOCK_TYPE_OC";
+      break;
+    case ptppb_ClockTypeOptions_CLOCK_TYPE_TC:
+      enum_str = "CLOCK_TYPE_TC";
+      break;
+    case ptppb_ClockTypeOptions_CLOCK_TYPE_BRIDGE:
+      enum_str = "CLOCK_TYPE_BRIDGE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DomainNumber",
-    &res);
+      "DomainNumber",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DomainNumber;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DelayMechanism",
-    &res);
+      "DelayMechanism",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DelayMechanism;
+  switch (entry->DelayMechanism) {
+    case ptppb_DelayMechanismTypeOptions_DELAY_MECHANISM_TYPE_E2E:
+      enum_str = "DELAY_MECHANISM_TYPE_E2E";
+      break;
+    case ptppb_DelayMechanismTypeOptions_DELAY_MECHANISM_TYPE_P2P:
+      enum_str = "DELAY_MECHANISM_TYPE_P2P";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_ptp_SystemTimerConfig (
+status_t build_to_xml_ptp_SystemTimerConfig(
     val_value_t *parentval,
     struct ptppb_SystemTimerConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PdelayReq",
-    &res);
+      "PdelayReq",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PdelayReq;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Announce",
-    &res);
+      "Announce",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Announce;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AnnounceTimeOut",
-    &res);
+      "AnnounceTimeOut",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->AnnounceTimeOut;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Sync",
-    &res);
+      "Sync",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Sync;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SyncLimit",
-    &res);
+      "SyncLimit",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -323,31 +380,32 @@ status_t build_to_xml_ptp_SystemTimerConfig (
   VAL_INT(childval) = entry->SyncLimit;
   return res;
 }
-
-status_t build_to_xml_ptp_SystemClockConfig (
+status_t build_to_xml_ptp_SystemClockConfig(
     val_value_t *parentval,
     struct ptppb_SystemClockConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Priority1",
-    &res);
+      "Priority1",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority1;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority2",
-    &res);
+      "Priority2",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -355,85 +413,87 @@ status_t build_to_xml_ptp_SystemClockConfig (
   VAL_INT(childval) = entry->Priority2;
   return res;
 }
-
-status_t build_to_xml_ptp_PortConfig (
+status_t build_to_xml_ptp_PortConfig(
     val_value_t *parentval,
     struct ptppb_PortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_ptp_PortConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_ptp_PortConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_ptp_PortConfigEntry (
+status_t build_to_xml_ptp_PortConfigEntry(
     val_value_t *parentval,
     struct ptppb_PortConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MasterOnly",
-    &res);
+      "MasterOnly",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -441,199 +501,198 @@ status_t build_to_xml_ptp_PortConfigEntry (
   VAL_BOOL(childval) = entry->MasterOnly;
   return res;
 }
-
-status_t build_to_xml_ptp_Status (
+status_t build_to_xml_ptp_Status(
     val_value_t *parentval,
     struct ptppb_Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortStatusList",
-    &res);
+      "PortStatusList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortStatusList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortStatusList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_ptp_PortStatusEntry(
-    listval,
-    entry->PortStatusList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortStatusList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_ptp_PortStatusEntry(
+        listval,
+        entry->PortStatusList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortCounterList",
-    &res);
+      "PortCounterList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortCounterList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortCounterList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_ptp_PortCounterEntry(
-    listval,
-    entry->PortCounterList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortCounterList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_ptp_PortCounterEntry(
+        listval,
+        entry->PortCounterList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_ptp_ClockStatus (
+status_t build_to_xml_ptp_ClockStatus(
     val_value_t *parentval,
     struct ptppb_ClockStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ParentList",
-    &res);
+      "ParentList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->ParentList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "ParentList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_ptp_ClockInfo(
-    listval,
-    entry->ParentList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "ParentList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_ptp_ClockInfo(
+        listval,
+        entry->ParentList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Grandmaster",
-    &res);
+      "Grandmaster",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_GrandmasterInfo(
+  res = build_to_xml_ptp_GrandmasterInfo(
       childval,
-    entry->Grandmaster);
+      entry->Grandmaster);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_ptp_ClockInfo (
+status_t build_to_xml_ptp_ClockInfo(
     val_value_t *parentval,
     struct ptppb_ClockInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DomainNumber",
-    &res);
+      "DomainNumber",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DomainNumber;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ClockIdentity",
-    &res);
+      "ClockIdentity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bytes */
   VAL_STRING(childval) = entry->ClockIdentity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortIdentity",
-    &res);
+      "PortIdentity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bytes */
   VAL_STRING(childval) = entry->PortIdentity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfPorts",
-    &res);
+      "NumberOfPorts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfPorts;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority1",
-    &res);
+      "Priority1",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority1;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority2",
-    &res);
+      "Priority2",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -641,109 +700,208 @@ status_t build_to_xml_ptp_ClockInfo (
   VAL_INT(childval) = entry->Priority2;
   return res;
 }
-
-status_t build_to_xml_ptp_GrandmasterInfo (
+status_t build_to_xml_ptp_GrandmasterInfo(
     val_value_t *parentval,
     struct ptppb_GrandmasterInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ClockInfo",
-    &res);
+      "ClockInfo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_ClockInfo(
+  res = build_to_xml_ptp_ClockInfo(
       childval,
-    entry->ClockInfo);
+      entry->ClockInfo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ClockQuality",
-    &res);
+      "ClockQuality",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_ClockQuality(
+  res = build_to_xml_ptp_ClockQuality(
       childval,
-    entry->ClockQuality);
+      entry->ClockQuality);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_ptp_ClockQuality (
+status_t build_to_xml_ptp_ClockQuality(
     val_value_t *parentval,
     struct ptppb_ClockQuality *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Class",
-    &res);
+      "Class",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Class;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Accuracy",
-    &res);
+      "Accuracy",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Accuracy;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Accuracy) {
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_RESERVED_00_1F:
+      enum_str = "CLOCK_ACCURACY_RESERVED_00_1F";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_25_NS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_25_NS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_100_NS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_100_NS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_250_NS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_250_NS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_1_US:
+      enum_str = "CLOCK_ACCURACY_WITHIN_1_US";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_2_DOT_5_US:
+      enum_str = "CLOCK_ACCURACY_WITHIN_2_DOT_5_US";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_10_US:
+      enum_str = "CLOCK_ACCURACY_WITHIN_10_US";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_25_US:
+      enum_str = "CLOCK_ACCURACY_WITHIN_25_US";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_100_US:
+      enum_str = "CLOCK_ACCURACY_WITHIN_100_US";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_250_US:
+      enum_str = "CLOCK_ACCURACY_WITHIN_250_US";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_1_MS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_1_MS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_2_DOT_5_MS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_2_DOT_5_MS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_10_MS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_10_MS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_25_MS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_25_MS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_100_MS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_100_MS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_250_MS:
+      enum_str = "CLOCK_ACCURACY_WITHIN_250_MS";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_1_S:
+      enum_str = "CLOCK_ACCURACY_WITHIN_1_S";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_WITHIN_10_S:
+      enum_str = "CLOCK_ACCURACY_WITHIN_10_S";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_GREATER_THAN_10_S:
+      enum_str = "CLOCK_ACCURACY_GREATER_THAN_10_S";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_RESERVED_32_7F:
+      enum_str = "CLOCK_ACCURACY_RESERVED_32_7F";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_RESERVED_80_FD:
+      enum_str = "CLOCK_ACCURACY_RESERVED_80_FD";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_UNKNOWN:
+      enum_str = "CLOCK_ACCURACY_UNKNOWN";
+      break;
+    case ptppb_ClockAccuracyTypeOptions_CLOCK_ACCURACY_RESERVED_FF:
+      enum_str = "CLOCK_ACCURACY_RESERVED_FF";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "TimeSource",
-    &res);
+      "TimeSource",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->TimeSource;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->TimeSource) {
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_RESERVED:
+      enum_str = "TIME_SOURCE_RESERVED";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_ATOMIC_CLOCK:
+      enum_str = "TIME_SOURCE_ATOMIC_CLOCK";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_GPS:
+      enum_str = "TIME_SOURCE_GPS";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_TERRESTRIAL_RADIO:
+      enum_str = "TIME_SOURCE_TERRESTRIAL_RADIO";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_PTP:
+      enum_str = "TIME_SOURCE_PTP";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_NTP:
+      enum_str = "TIME_SOURCE_NTP";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_HAND_SET:
+      enum_str = "TIME_SOURCE_HAND_SET";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_OTHER:
+      enum_str = "TIME_SOURCE_OTHER";
+      break;
+    case ptppb_TimeSourceTypeOptions_TIME_SOURCE_INTERNAL_OSCILLATOR:
+      enum_str = "TIME_SOURCE_INTERNAL_OSCILLATOR";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "OffsetScaledLogVariance",
-    &res);
+      "OffsetScaledLogVariance",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->OffsetScaledLogVariance;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Offset",
-    &res);
+      "Offset",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -751,72 +909,99 @@ status_t build_to_xml_ptp_ClockQuality (
   VAL_INT(childval) = entry->Offset;
   return res;
 }
-
-status_t build_to_xml_ptp_PortStatusEntry (
+status_t build_to_xml_ptp_PortStatusEntry(
     val_value_t *parentval,
     struct ptppb_PortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ClockIdentity",
-    &res);
+      "ClockIdentity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bytes */
   VAL_STRING(childval) = entry->ClockIdentity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortIdentity",
-    &res);
+      "PortIdentity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bytes */
   VAL_STRING(childval) = entry->PortIdentity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->State) {
+    case ptppb_PortStateTypeOptions_PORT_STATE_INITIALIZING:
+      enum_str = "PORT_STATE_INITIALIZING";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_FAULTY:
+      enum_str = "PORT_STATE_FAULTY";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_DISABLED:
+      enum_str = "PORT_STATE_DISABLED";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_LISTENING:
+      enum_str = "PORT_STATE_LISTENING";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_PRE_MASTER:
+      enum_str = "PORT_STATE_PRE_MASTER";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_MASTER:
+      enum_str = "PORT_STATE_MASTER";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_PASSIVE:
+      enum_str = "PORT_STATE_PASSIVE";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_UNCALIBRATED:
+      enum_str = "PORT_STATE_UNCALIBRATED";
+      break;
+    case ptppb_PortStateTypeOptions_PORT_STATE_SLAVE:
+      enum_str = "PORT_STATE_SLAVE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PathDelay",
-    &res);
+      "PathDelay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -824,96 +1009,92 @@ status_t build_to_xml_ptp_PortStatusEntry (
   VAL_INT(childval) = entry->PathDelay;
   return res;
 }
-
-status_t build_to_xml_ptp_PortCounterEntry (
+status_t build_to_xml_ptp_PortCounterEntry(
     val_value_t *parentval,
     struct ptppb_PortCounterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RxPdelayReq",
-    &res);
+      "RxPdelayReq",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->RxPdelayReq;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RxPdelayResp",
-    &res);
+      "RxPdelayResp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->RxPdelayResp;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RxPdelayRespFollow",
-    &res);
+      "RxPdelayRespFollow",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->RxPdelayRespFollow;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TxPdelayReq",
-    &res);
+      "TxPdelayReq",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->TxPdelayReq;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TxPdelayResp",
-    &res);
+      "TxPdelayResp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->TxPdelayResp;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TxPdelayRespFollow",
-    &res);
+      "TxPdelayRespFollow",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -921,41 +1102,690 @@ status_t build_to_xml_ptp_PortCounterEntry (
   VAL_ULONG(childval) = entry->TxPdelayRespFollow;
   return res;
 }
-
-status_t build_to_xml_ptp_TimeStatus (
+status_t build_to_xml_ptp_TimeStatus(
     val_value_t *parentval,
     struct ptppb_TimeStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->State) {
+    case ptppb_TimeStatusTypeOptions_TIME_STATUS_TYPE_DISABLE:
+      enum_str = "TIME_STATUS_TYPE_DISABLE";
+      break;
+    case ptppb_TimeStatusTypeOptions_TIME_STATUS_TYPE_SYNC:
+      enum_str = "TIME_STATUS_TYPE_SYNC";
+      break;
+    case ptppb_TimeStatusTypeOptions_TIME_STATUS_TYPE_NOT_SYNC:
+      enum_str = "TIME_STATUS_TYPE_NOT_SYNC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DateTime",
-    &res);
+      "DateTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timestamp_Timestamp(
+  res = build_to_xml_timestamp_Timestamp(
       childval,
-    entry->DateTime);
+      entry->DateTime);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
 
+status_t build_to_priv_ptp_Config(
+    val_value_t *parentval,
+    struct ptppb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "System");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->System = malloc(sizeof(*(entry->System)));
+    res = build_to_priv_ptp_SystemConfig(
+        childval,
+        entry->System);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_ptp_PortConfig(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_ptp_SystemConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Mode = malloc(sizeof(*(entry->Mode)));
+    res = build_to_priv_ptp_SystemModeConfig(
+        childval,
+        entry->Mode);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Timer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Timer = malloc(sizeof(*(entry->Timer)));
+    res = build_to_priv_ptp_SystemTimerConfig(
+        childval,
+        entry->Timer);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Clock");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Clock = malloc(sizeof(*(entry->Clock)));
+    res = build_to_priv_ptp_SystemClockConfig(
+        childval,
+        entry->Clock);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Encapsulation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Encapsulation = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Transmission");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Transmission = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPAddressList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->IPAddressList_Len = dlq_count(&childval->v.childQ);
+    entry->IPAddressList = malloc((entry->IPAddressList_Len + 1) * sizeof(*entry->IPAddressList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->IPAddressList[cnt] = malloc(sizeof(*(entry->IPAddressList[cnt])));
+      res = build_to_priv_common_IPAddress(
+          listval,
+          entry->IPAddressList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_ptp_SystemModeConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemModeConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Profile");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Profile = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClockType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ClockType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DomainNumber");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DomainNumber = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DelayMechanism");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DelayMechanism = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_SystemTimerConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemTimerConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PdelayReq");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PdelayReq = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Announce");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Announce = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AnnounceTimeOut");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AnnounceTimeOut = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Sync");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Sync = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SyncLimit");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SyncLimit = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_SystemClockConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemClockConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Priority1");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority1 = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority2");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority2 = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_PortConfig(
+    val_value_t *parentval,
+    struct ptppb_PortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_ptp_PortConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_ptp_PortConfigEntry(
+    val_value_t *parentval,
+    struct ptppb_PortConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MasterOnly");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->MasterOnly = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_Status(
+    val_value_t *parentval,
+    struct ptppb_Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortStatusList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortStatusList_Len = dlq_count(&childval->v.childQ);
+    entry->PortStatusList = malloc((entry->PortStatusList_Len + 1) * sizeof(*entry->PortStatusList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortStatusList[cnt] = malloc(sizeof(*(entry->PortStatusList[cnt])));
+      res = build_to_priv_ptp_PortStatusEntry(
+          listval,
+          entry->PortStatusList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortCounterList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortCounterList_Len = dlq_count(&childval->v.childQ);
+    entry->PortCounterList = malloc((entry->PortCounterList_Len + 1) * sizeof(*entry->PortCounterList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortCounterList[cnt] = malloc(sizeof(*(entry->PortCounterList[cnt])));
+      res = build_to_priv_ptp_PortCounterEntry(
+          listval,
+          entry->PortCounterList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_ptp_ClockStatus(
+    val_value_t *parentval,
+    struct ptppb_ClockStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ParentList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->ParentList_Len = dlq_count(&childval->v.childQ);
+    entry->ParentList = malloc((entry->ParentList_Len + 1) * sizeof(*entry->ParentList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->ParentList[cnt] = malloc(sizeof(*(entry->ParentList[cnt])));
+      res = build_to_priv_ptp_ClockInfo(
+          listval,
+          entry->ParentList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Grandmaster");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Grandmaster = malloc(sizeof(*(entry->Grandmaster)));
+    res = build_to_priv_ptp_GrandmasterInfo(
+        childval,
+        entry->Grandmaster);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_ptp_ClockInfo(
+    val_value_t *parentval,
+    struct ptppb_ClockInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DomainNumber");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DomainNumber = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClockIdentity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bytes */
+    entry->ClockIdentity = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortIdentity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bytes */
+    entry->PortIdentity = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfPorts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfPorts = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority1");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority1 = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority2");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority2 = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_GrandmasterInfo(
+    val_value_t *parentval,
+    struct ptppb_GrandmasterInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ClockInfo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ClockInfo = malloc(sizeof(*(entry->ClockInfo)));
+    res = build_to_priv_ptp_ClockInfo(
+        childval,
+        entry->ClockInfo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClockQuality");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ClockQuality = malloc(sizeof(*(entry->ClockQuality)));
+    res = build_to_priv_ptp_ClockQuality(
+        childval,
+        entry->ClockQuality);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_ptp_ClockQuality(
+    val_value_t *parentval,
+    struct ptppb_ClockQuality *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Class");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Class = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Accuracy");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Accuracy = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeSource");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->TimeSource = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OffsetScaledLogVariance");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->OffsetScaledLogVariance = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Offset");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Offset = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_PortStatusEntry(
+    val_value_t *parentval,
+    struct ptppb_PortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClockIdentity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bytes */
+    entry->ClockIdentity = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortIdentity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bytes */
+    entry->PortIdentity = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PathDelay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PathDelay = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_PortCounterEntry(
+    val_value_t *parentval,
+    struct ptppb_PortCounterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RxPdelayReq");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->RxPdelayReq = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RxPdelayResp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->RxPdelayResp = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RxPdelayRespFollow");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->RxPdelayRespFollow = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TxPdelayReq");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->TxPdelayReq = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TxPdelayResp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->TxPdelayResp = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TxPdelayRespFollow");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->TxPdelayRespFollow = VAL_ULONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_ptp_TimeStatus(
+    val_value_t *parentval,
+    struct ptppb_TimeStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DateTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DateTime = malloc(sizeof(*(entry->DateTime)));
+    res = build_to_priv_timestamp_Timestamp(
+        childval,
+        entry->DateTime);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}

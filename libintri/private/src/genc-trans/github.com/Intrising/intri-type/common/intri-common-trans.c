@@ -30,18 +30,22 @@
 #include "intri-common-trans.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-status_t build_to_xml_common_Path (
+
+status_t build_to_xml_common_Path(
     val_value_t *parentval,
     struct commonpb_Path *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Path",
-    &res);
+      "Path",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -49,31 +53,32 @@ status_t build_to_xml_common_Path (
   VAL_STRING(childval) = entry->Path;
   return res;
 }
-
-status_t build_to_xml_common_ExportPathRequest (
+status_t build_to_xml_common_ExportPathRequest(
     val_value_t *parentval,
     struct commonpb_ExportPathRequest *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Path",
-    &res);
+      "Path",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Path;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FTPSEnabled",
-    &res);
+      "FTPSEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -81,43 +86,43 @@ status_t build_to_xml_common_ExportPathRequest (
   VAL_BOOL(childval) = entry->FTPSEnabled;
   return res;
 }
-
-status_t build_to_xml_common_ImportPathRequest (
+status_t build_to_xml_common_ImportPathRequest(
     val_value_t *parentval,
     struct commonpb_ImportPathRequest *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Path",
-    &res);
+      "Path",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Path;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FTPSEnabled",
-    &res);
+      "FTPSEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->FTPSEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RebootAfterAction",
-    &res);
+      "RebootAfterAction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -125,19 +130,21 @@ status_t build_to_xml_common_ImportPathRequest (
   VAL_BOOL(childval) = entry->RebootAfterAction;
   return res;
 }
-
-status_t build_to_xml_common_Enabled (
+status_t build_to_xml_common_Enabled(
     val_value_t *parentval,
     struct commonpb_Enabled *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -145,19 +152,21 @@ status_t build_to_xml_common_Enabled (
   VAL_BOOL(childval) = entry->IsEnabled;
   return res;
 }
-
-status_t build_to_xml_common_MACAddress (
+status_t build_to_xml_common_MACAddress(
     val_value_t *parentval,
     struct commonpb_MACAddress *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddr",
-    &res);
+      "MACAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -165,19 +174,21 @@ status_t build_to_xml_common_MACAddress (
   VAL_STRING(childval) = entry->MACAddr;
   return res;
 }
-
-status_t build_to_xml_common_IPAddress (
+status_t build_to_xml_common_IPAddress(
     val_value_t *parentval,
     struct commonpb_IPAddress *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddr",
-    &res);
+      "IPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -185,63 +196,80 @@ status_t build_to_xml_common_IPAddress (
   VAL_STRING(childval) = entry->IPAddr;
   return res;
 }
-
-status_t build_to_xml_common_IPv4List (
+status_t build_to_xml_common_IPv4List(
     val_value_t *parentval,
     struct commonpb_IPv4List *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->List[i];
   }
   return res;
 }
-
-status_t build_to_xml_common_IPv6Entry (
+status_t build_to_xml_common_IPv6Entry(
     val_value_t *parentval,
     struct commonpb_IPv6Entry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_LINK:
+      enum_str = "IPV6_SCOPE_TYPE_LINK";
+      break;
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_SITE:
+      enum_str = "IPV6_SCOPE_TYPE_SITE";
+      break;
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_GLOBAL:
+      enum_str = "IPV6_SCOPE_TYPE_GLOBAL";
+      break;
+    case commonpb_IPv6ScopeTypeOptions_IPV6_SCOPE_TYPE_OTHER:
+      enum_str = "IPV6_SCOPE_TYPE_OTHER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddr",
-    &res);
+      "IPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -249,56 +277,60 @@ status_t build_to_xml_common_IPv6Entry (
   VAL_STRING(childval) = entry->IPAddr;
   return res;
 }
-
-status_t build_to_xml_common_IPv6List (
+status_t build_to_xml_common_IPv6List(
     val_value_t *parentval,
     struct commonpb_IPv6List *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_common_IPv6Entry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_common_IPv6Entry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_common_Name (
+status_t build_to_xml_common_Name(
     val_value_t *parentval,
     struct commonpb_Name *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -306,51 +338,55 @@ status_t build_to_xml_common_Name (
   VAL_STRING(childval) = entry->Name;
   return res;
 }
-
-status_t build_to_xml_common_NameList (
+status_t build_to_xml_common_NameList(
     val_value_t *parentval,
     struct commonpb_NameList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "NameList",
-    &res);
+      "NameList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->NameList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "NameList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->NameList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "NameList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->NameList[i];
   }
   return res;
 }
-
-status_t build_to_xml_common_Reply (
+status_t build_to_xml_common_Reply(
     val_value_t *parentval,
     struct commonpb_Reply *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Reply",
-    &res);
+      "Reply",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -358,19 +394,21 @@ status_t build_to_xml_common_Reply (
   VAL_STRING(childval) = entry->Reply;
   return res;
 }
-
-status_t build_to_xml_common_Confirm (
+status_t build_to_xml_common_Confirm(
     val_value_t *parentval,
     struct commonpb_Confirm *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Confirm",
-    &res);
+      "Confirm",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -378,19 +416,21 @@ status_t build_to_xml_common_Confirm (
   VAL_STRING(childval) = entry->Confirm;
   return res;
 }
-
-status_t build_to_xml_common_DateTime (
+status_t build_to_xml_common_DateTime(
     val_value_t *parentval,
     struct commonpb_DateTime *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ts",
-    &res);
+      "Ts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -398,19 +438,21 @@ status_t build_to_xml_common_DateTime (
   VAL_STRING(childval) = entry->Ts;
   return res;
 }
-
-status_t build_to_xml_common_AllStatus (
+status_t build_to_xml_common_AllStatus(
     val_value_t *parentval,
     struct commonpb_AllStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Status",
-    &res);
+      "Status",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -418,19 +460,21 @@ status_t build_to_xml_common_AllStatus (
   VAL_STRING(childval) = entry->Status;
   return res;
 }
-
-status_t build_to_xml_common_State (
+status_t build_to_xml_common_State(
     val_value_t *parentval,
     struct commonpb_State *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -438,19 +482,21 @@ status_t build_to_xml_common_State (
   VAL_BOOL(childval) = entry->State;
   return res;
 }
-
-status_t build_to_xml_common_Index (
+status_t build_to_xml_common_Index(
     val_value_t *parentval,
     struct commonpb_Index *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -458,43 +504,43 @@ status_t build_to_xml_common_Index (
   VAL_INT(childval) = entry->Index;
   return res;
 }
-
-status_t build_to_xml_common_GRPCErrorDetail (
+status_t build_to_xml_common_GRPCErrorDetail(
     val_value_t *parentval,
     struct commonpb_GRPCErrorDetail *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FieldName",
-    &res);
+      "FieldName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FieldName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FieldValue",
-    &res);
+      "FieldValue",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FieldValue;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Description",
-    &res);
+      "Description",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -503,3 +549,330 @@ status_t build_to_xml_common_GRPCErrorDetail (
   return res;
 }
 
+status_t build_to_priv_common_Path(
+    val_value_t *parentval,
+    struct commonpb_Path *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Path");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Path = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_ExportPathRequest(
+    val_value_t *parentval,
+    struct commonpb_ExportPathRequest *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Path");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Path = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FTPSEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->FTPSEnabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_ImportPathRequest(
+    val_value_t *parentval,
+    struct commonpb_ImportPathRequest *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Path");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Path = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FTPSEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->FTPSEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RebootAfterAction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->RebootAfterAction = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_Enabled(
+    val_value_t *parentval,
+    struct commonpb_Enabled *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_MACAddress(
+    val_value_t *parentval,
+    struct commonpb_MACAddress *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MACAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddr = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_IPAddress(
+    val_value_t *parentval,
+    struct commonpb_IPAddress *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddr = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_IPv4List(
+    val_value_t *parentval,
+    struct commonpb_IPv4List *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->List[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_common_IPv6Entry(
+    val_value_t *parentval,
+    struct commonpb_IPv6Entry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddr = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_IPv6List(
+    val_value_t *parentval,
+    struct commonpb_IPv6List *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_common_IPv6Entry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_common_Name(
+    val_value_t *parentval,
+    struct commonpb_Name *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_NameList(
+    val_value_t *parentval,
+    struct commonpb_NameList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "NameList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->NameList_Len = dlq_count(&childval->v.childQ);
+    entry->NameList = malloc((entry->NameList_Len + 1) * sizeof(*entry->NameList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->NameList[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_common_Reply(
+    val_value_t *parentval,
+    struct commonpb_Reply *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Reply");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Reply = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_Confirm(
+    val_value_t *parentval,
+    struct commonpb_Confirm *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Confirm");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Confirm = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_DateTime(
+    val_value_t *parentval,
+    struct commonpb_DateTime *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Ts = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_AllStatus(
+    val_value_t *parentval,
+    struct commonpb_AllStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Status");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Status = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_State(
+    val_value_t *parentval,
+    struct commonpb_State *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->State = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_Index(
+    val_value_t *parentval,
+    struct commonpb_Index *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Index = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_common_GRPCErrorDetail(
+    val_value_t *parentval,
+    struct commonpb_GRPCErrorDetail *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FieldName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FieldName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FieldValue");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FieldValue = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Description");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Description = VAL_STRING(childval);
+  }
+  return res;
+}

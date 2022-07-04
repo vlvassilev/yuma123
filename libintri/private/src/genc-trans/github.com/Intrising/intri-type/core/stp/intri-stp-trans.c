@@ -32,447 +32,473 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_stp_MSTPConfig (
+
+status_t build_to_xml_stp_MSTPConfig(
     val_value_t *parentval,
     struct stppb_MSTPConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_DISABLED:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_DISABLED";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_STP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_STP";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_RSTP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_RSTP";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_MSTP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_MSTP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Revision",
-    &res);
+      "Revision",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Revision;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MaxAge",
-    &res);
+      "MaxAge",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MaxAge;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HelloTime",
-    &res);
+      "HelloTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->HelloTime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ForwardDelay",
-    &res);
+      "ForwardDelay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ForwardDelay;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MaxHops",
-    &res);
+      "MaxHops",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MaxHops;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TxHoldCount",
-    &res);
+      "TxHoldCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TxHoldCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Cist",
-    &res);
+      "Cist",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_CISTEntry(
+  res = build_to_xml_stp_CISTEntry(
       childval,
-    entry->Cist);
+      entry->Cist);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mstis",
-    &res);
+      "Mstis",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Mstis_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Mstis_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTIEntry(
-    listval,
-    entry->Mstis[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Mstis_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTIEntry(
+        listval,
+        entry->Mstis[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_CISTEntry (
+status_t build_to_xml_stp_CISTEntry(
     val_value_t *parentval,
     struct stppb_CISTEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTPCistPort(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTPCistPort(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTIEntry (
+status_t build_to_xml_stp_MSTIEntry(
     val_value_t *parentval,
     struct stppb_MSTIEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Vlans",
-    &res);
+      "Vlans",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Vlans_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Vlans_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->Vlans[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Vlans_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->Vlans[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTPMstiPort(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTPMstiPort(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTIList (
+status_t build_to_xml_stp_MSTIList(
     val_value_t *parentval,
     struct stppb_MSTIList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTIEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTIEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTPCistPort (
+status_t build_to_xml_stp_MSTPCistPort(
     val_value_t *parentval,
     struct stppb_MSTPCistPort *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PathCost",
-    &res);
+      "PathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PathCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "STPEnabled",
-    &res);
+      "STPEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->STPEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "P2PMode",
-    &res);
+      "P2PMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->P2PMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->P2PMode) {
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO";
+      break;
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE";
+      break;
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "EdgeMode",
-    &res);
+      "EdgeMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->EdgeMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BPDUGuard",
-    &res);
+      "BPDUGuard",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->BPDUGuard;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->BPDUGuard) {
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED";
+      break;
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT";
+      break;
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "RestrictRoot",
-    &res);
+      "RestrictRoot",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -480,43 +506,43 @@ status_t build_to_xml_stp_MSTPCistPort (
   VAL_BOOL(childval) = entry->RestrictRoot;
   return res;
 }
-
-status_t build_to_xml_stp_MSTPMstiPort (
+status_t build_to_xml_stp_MSTPMstiPort(
     val_value_t *parentval,
     struct stppb_MSTPMstiPort *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PathCost",
-    &res);
+      "PathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PathCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -524,31 +550,32 @@ status_t build_to_xml_stp_MSTPMstiPort (
   VAL_INT(childval) = entry->Priority;
   return res;
 }
-
-status_t build_to_xml_stp_MSTPID (
+status_t build_to_xml_stp_MSTPID(
     val_value_t *parentval,
     struct stppb_MSTPID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -556,287 +583,273 @@ status_t build_to_xml_stp_MSTPID (
   VAL_INT(childval) = entry->Priority;
   return res;
 }
-
-status_t build_to_xml_stp_CISTStatus (
+status_t build_to_xml_stp_CISTStatus(
     val_value_t *parentval,
     struct stppb_CISTStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BridgeID",
-    &res);
+      "BridgeID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_MSTPID(
+  res = build_to_xml_stp_MSTPID(
       childval,
-    entry->BridgeID);
+      entry->BridgeID);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RootID",
-    &res);
+      "RootID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_MSTPID(
+  res = build_to_xml_stp_MSTPID(
       childval,
-    entry->RootID);
+      entry->RootID);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RootPort",
-    &res);
+      "RootPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RootPort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RootCost",
-    &res);
+      "RootCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RootCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RegionalRoot",
-    &res);
+      "RegionalRoot",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_MSTPID(
+  res = build_to_xml_stp_MSTPID(
       childval,
-    entry->RegionalRoot);
+      entry->RegionalRoot);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InternalRootCost",
-    &res);
+      "InternalRootCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->InternalRootCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TopologyChange",
-    &res);
+      "TopologyChange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->TopologyChange;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TopologyChangeCount",
-    &res);
+      "TopologyChangeCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TopologyChangeCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeSinceTopologyChange",
-    &res);
+      "TimeSinceTopologyChange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TimeSinceTopologyChange;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_CISTPortEntryStatus(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_CISTPortEntryStatus(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_CISTPortEntryStatus (
+status_t build_to_xml_stp_CISTPortEntryStatus(
     val_value_t *parentval,
     struct stppb_CISTPortEntryStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Role",
-    &res);
+      "Role",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Role;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PathCost",
-    &res);
+      "PathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PathCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EdgeMode",
-    &res);
+      "EdgeMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->EdgeMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "P2PMode",
-    &res);
+      "P2PMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->P2PMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Uptime",
-    &res);
+      "Uptime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Uptime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BPDUGuard",
-    &res);
+      "BPDUGuard",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -844,259 +857,252 @@ status_t build_to_xml_stp_CISTPortEntryStatus (
   VAL_STRING(childval) = entry->BPDUGuard;
   return res;
 }
-
-status_t build_to_xml_stp_MSTIStatus (
+status_t build_to_xml_stp_MSTIStatus(
     val_value_t *parentval,
     struct stppb_MSTIStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTIStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTIStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTIStatusEntry (
+status_t build_to_xml_stp_MSTIStatusEntry(
     val_value_t *parentval,
     struct stppb_MSTIStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BridgeID",
-    &res);
+      "BridgeID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_MSTPID(
+  res = build_to_xml_stp_MSTPID(
       childval,
-    entry->BridgeID);
+      entry->BridgeID);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RootID",
-    &res);
+      "RootID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_MSTPID(
+  res = build_to_xml_stp_MSTPID(
       childval,
-    entry->RootID);
+      entry->RootID);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RootPort",
-    &res);
+      "RootPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RootPort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RootCost",
-    &res);
+      "RootCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RootCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TopologyChange",
-    &res);
+      "TopologyChange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->TopologyChange;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TopologyChangeCount",
-    &res);
+      "TopologyChangeCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TopologyChangeCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeSinceTopologyChange",
-    &res);
+      "TimeSinceTopologyChange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TimeSinceTopologyChange;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTIPortStatusEntry(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTIPortStatusEntry(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTIPortStatusEntry (
+status_t build_to_xml_stp_MSTIPortStatusEntry(
     val_value_t *parentval,
     struct stppb_MSTIPortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "No",
-    &res);
+      "No",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->No;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Role",
-    &res);
+      "Role",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Role;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PathCost",
-    &res);
+      "PathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PathCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Uptime",
-    &res);
+      "Uptime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1104,31 +1110,32 @@ status_t build_to_xml_stp_MSTIPortStatusEntry (
   VAL_INT(childval) = entry->Uptime;
   return res;
 }
-
-status_t build_to_xml_stp_MSTPVLANGroupPortEntry (
+status_t build_to_xml_stp_MSTPVLANGroupPortEntry(
     val_value_t *parentval,
     struct stppb_MSTPVLANGroupPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Tagged",
-    &res);
+      "Tagged",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1136,164 +1143,173 @@ status_t build_to_xml_stp_MSTPVLANGroupPortEntry (
   VAL_BOOL(childval) = entry->Tagged;
   return res;
 }
-
-status_t build_to_xml_stp_MSTPVLANGroupEntry (
+status_t build_to_xml_stp_MSTPVLANGroupEntry(
     val_value_t *parentval,
     struct stppb_MSTPVLANGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VLANID",
-    &res);
+      "VLANID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VLANID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_MSTPVLANGroupPortEntry(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_MSTPVLANGroupPortEntry(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPConfigBridge (
+status_t build_to_xml_stp_STPConfigBridge(
     val_value_t *parentval,
     struct stppb_STPConfigBridge *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_DISABLED:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_DISABLED";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_STP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_STP";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_RSTP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_RSTP";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_MSTP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_MSTP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HelloTime",
-    &res);
+      "HelloTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->HelloTime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MaxAge",
-    &res);
+      "MaxAge",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MaxAge;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ForwardDelay",
-    &res);
+      "ForwardDelay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ForwardDelay;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TxHoldCount",
-    &res);
+      "TxHoldCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->TxHoldCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPRegionName",
-    &res);
+      "MSTPRegionName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MSTPRegionName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPRevisionLevel",
-    &res);
+      "MSTPRevisionLevel",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MSTPRevisionLevel;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPMaxHops",
-    &res);
+      "MSTPMaxHops",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1301,342 +1317,374 @@ status_t build_to_xml_stp_STPConfigBridge (
   VAL_INT(childval) = entry->MSTPMaxHops;
   return res;
 }
-
-status_t build_to_xml_stp_STPConfigPortEntry (
+status_t build_to_xml_stp_STPConfigPortEntry(
     val_value_t *parentval,
     struct stppb_STPConfigPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdminP2PPort",
-    &res);
+      "AdminP2PPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AdminP2PPort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AdminP2PPort) {
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO";
+      break;
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE";
+      break;
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AdminEdgePort",
-    &res);
+      "AdminEdgePort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->AdminEdgePort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdminPathCost",
-    &res);
+      "AdminPathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->AdminPathCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPDefaultPriority",
-    &res);
+      "MSTPDefaultPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MSTPDefaultPriority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPPortPriority",
-    &res);
+      "MSTPPortPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MSTPPortPriority_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MSTPPortPriority_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->MSTPPortPriority[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MSTPPortPriority_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->MSTPPortPriority[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPDefaultAdminPathCost",
-    &res);
+      "MSTPDefaultAdminPathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MSTPDefaultAdminPathCost;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPPortAdminPathCost",
-    &res);
+      "MSTPPortAdminPathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MSTPPortAdminPathCost_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MSTPPortAdminPathCost_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->MSTPPortAdminPathCost[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MSTPPortAdminPathCost_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->MSTPPortAdminPathCost[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BPDUGuard",
-    &res);
+      "BPDUGuard",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->BPDUGuard;
+  switch (entry->BPDUGuard) {
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED";
+      break;
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT";
+      break;
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_stp_STPConfigMSTPGroupEntry (
+status_t build_to_xml_stp_STPConfigMSTPGroupEntry(
     val_value_t *parentval,
     struct stppb_STPConfigMSTPGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPID",
-    &res);
+      "MSTPID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MSTPID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BridgePriority",
-    &res);
+      "BridgePriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->BridgePriority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VIDs",
-    &res);
+      "VIDs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->VIDs_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "VIDs_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->VIDs[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "VIDs_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->VIDs[i];
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPConfig (
+status_t build_to_xml_stp_STPConfig(
     val_value_t *parentval,
     struct stppb_STPConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Bridge",
-    &res);
+      "Bridge",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_STPConfigBridge(
+  res = build_to_xml_stp_STPConfigBridge(
       childval,
-    entry->Bridge);
+      entry->Bridge);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Ports_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Ports_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPConfigPortEntry(
-    listval,
-    entry->Ports[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Ports_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPConfigPortEntry(
+        listval,
+        entry->Ports[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPGroups",
-    &res);
+      "MSTPGroups",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MSTPGroups_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MSTPGroups_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPConfigMSTPGroupEntry(
-    listval,
-    entry->MSTPGroups[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MSTPGroups_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPConfigMSTPGroupEntry(
+        listval,
+        entry->MSTPGroups[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigMode (
+status_t build_to_xml_stp_BridgeConfigMode(
     val_value_t *parentval,
     struct stppb_BridgeConfigMode *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_DISABLED:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_DISABLED";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_STP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_STP";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_RSTP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_RSTP";
+      break;
+    case stppb_BridgeConfigModeTypeOptions_BRIDGE_CONFIG_MODE_TYPE_MSTP:
+      enum_str = "BRIDGE_CONFIG_MODE_TYPE_MSTP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigPriority (
+status_t build_to_xml_stp_BridgeConfigPriority(
     val_value_t *parentval,
     struct stppb_BridgeConfigPriority *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1644,19 +1692,21 @@ status_t build_to_xml_stp_BridgeConfigPriority (
   VAL_INT(childval) = entry->Priority;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigHelloTime (
+status_t build_to_xml_stp_BridgeConfigHelloTime(
     val_value_t *parentval,
     struct stppb_BridgeConfigHelloTime *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "HelloTime",
-    &res);
+      "HelloTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1664,19 +1714,21 @@ status_t build_to_xml_stp_BridgeConfigHelloTime (
   VAL_INT(childval) = entry->HelloTime;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigMaxAge (
+status_t build_to_xml_stp_BridgeConfigMaxAge(
     val_value_t *parentval,
     struct stppb_BridgeConfigMaxAge *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MaxAge",
-    &res);
+      "MaxAge",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1684,19 +1736,21 @@ status_t build_to_xml_stp_BridgeConfigMaxAge (
   VAL_INT(childval) = entry->MaxAge;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigForwardDelay (
+status_t build_to_xml_stp_BridgeConfigForwardDelay(
     val_value_t *parentval,
     struct stppb_BridgeConfigForwardDelay *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ForwardDelay",
-    &res);
+      "ForwardDelay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1704,19 +1758,21 @@ status_t build_to_xml_stp_BridgeConfigForwardDelay (
   VAL_INT(childval) = entry->ForwardDelay;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigTxHoldCount (
+status_t build_to_xml_stp_BridgeConfigTxHoldCount(
     val_value_t *parentval,
     struct stppb_BridgeConfigTxHoldCount *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "TxHoldCount",
-    &res);
+      "TxHoldCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1724,19 +1780,21 @@ status_t build_to_xml_stp_BridgeConfigTxHoldCount (
   VAL_INT(childval) = entry->TxHoldCount;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigMSTPRegionName (
+status_t build_to_xml_stp_BridgeConfigMSTPRegionName(
     val_value_t *parentval,
     struct stppb_BridgeConfigMSTPRegionName *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPRegionName",
-    &res);
+      "MSTPRegionName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1744,19 +1802,21 @@ status_t build_to_xml_stp_BridgeConfigMSTPRegionName (
   VAL_STRING(childval) = entry->MSTPRegionName;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigMSTPRevisionLevel (
+status_t build_to_xml_stp_BridgeConfigMSTPRevisionLevel(
     val_value_t *parentval,
     struct stppb_BridgeConfigMSTPRevisionLevel *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPRevisionLevel",
-    &res);
+      "MSTPRevisionLevel",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1764,19 +1824,21 @@ status_t build_to_xml_stp_BridgeConfigMSTPRevisionLevel (
   VAL_INT(childval) = entry->MSTPRevisionLevel;
   return res;
 }
-
-status_t build_to_xml_stp_BridgeConfigMSTPMaxHops (
+status_t build_to_xml_stp_BridgeConfigMSTPMaxHops(
     val_value_t *parentval,
     struct stppb_BridgeConfigMSTPMaxHops *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPMaxHops",
-    &res);
+      "MSTPMaxHops",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1784,31 +1846,32 @@ status_t build_to_xml_stp_BridgeConfigMSTPMaxHops (
   VAL_INT(childval) = entry->MSTPMaxHops;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigEnabledEntry (
+status_t build_to_xml_stp_STPPortConfigEnabledEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigEnabledEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1816,68 +1879,71 @@ status_t build_to_xml_stp_STPPortConfigEnabledEntry (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigEnabled (
+status_t build_to_xml_stp_STPPortConfigEnabled(
     val_value_t *parentval,
     struct stppb_STPPortConfigEnabled *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigEnabledEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigEnabledEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigPriorityEntry (
+status_t build_to_xml_stp_STPPortConfigPriorityEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigPriorityEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1885,137 +1951,154 @@ status_t build_to_xml_stp_STPPortConfigPriorityEntry (
   VAL_INT(childval) = entry->Priority;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigPriority (
+status_t build_to_xml_stp_STPPortConfigPriority(
     val_value_t *parentval,
     struct stppb_STPPortConfigPriority *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigPriorityEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigPriorityEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigAdminP2PPortEntry (
+status_t build_to_xml_stp_STPPortConfigAdminP2PPortEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigAdminP2PPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdminP2PPort",
-    &res);
+      "AdminP2PPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AdminP2PPort;
+  switch (entry->AdminP2PPort) {
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_AUTO";
+      break;
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_FALSE";
+      break;
+    case stppb_PortConfigAdminP2PPortTypeOptions_PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE:
+      enum_str = "PORT_CONFIG_ADMIN_P2P_PORT_TYPE_FORCE_TRUE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigAdminP2PPort (
+status_t build_to_xml_stp_STPPortConfigAdminP2PPort(
     val_value_t *parentval,
     struct stppb_STPPortConfigAdminP2PPort *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigAdminP2PPortEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigAdminP2PPortEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigAdminEdgePortEntry (
+status_t build_to_xml_stp_STPPortConfigAdminEdgePortEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigAdminEdgePortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdminEdgePort",
-    &res);
+      "AdminEdgePort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2023,68 +2106,71 @@ status_t build_to_xml_stp_STPPortConfigAdminEdgePortEntry (
   VAL_BOOL(childval) = entry->AdminEdgePort;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigAdminEdgePort (
+status_t build_to_xml_stp_STPPortConfigAdminEdgePort(
     val_value_t *parentval,
     struct stppb_STPPortConfigAdminEdgePort *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigAdminEdgePortEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigAdminEdgePortEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigAdminPathCostEntry (
+status_t build_to_xml_stp_STPPortConfigAdminPathCostEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigAdminPathCostEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdminPathCost",
-    &res);
+      "AdminPathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2092,68 +2178,71 @@ status_t build_to_xml_stp_STPPortConfigAdminPathCostEntry (
   VAL_INT(childval) = entry->AdminPathCost;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigAdminPathCost (
+status_t build_to_xml_stp_STPPortConfigAdminPathCost(
     val_value_t *parentval,
     struct stppb_STPPortConfigAdminPathCost *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigAdminPathCostEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigAdminPathCostEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry (
+status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPDefaultPriorityEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPDefaultPriority",
-    &res);
+      "MSTPDefaultPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2161,149 +2250,155 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry (
   VAL_INT(childval) = entry->MSTPDefaultPriority;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriority (
+status_t build_to_xml_stp_STPPortConfigMSTPDefaultPriority(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPDefaultPriority *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigMSTPDefaultPriorityEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry (
+status_t build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPPortPriorityEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPPortPriority",
-    &res);
+      "MSTPPortPriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MSTPPortPriority_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MSTPPortPriority_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->MSTPPortPriority[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MSTPPortPriority_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->MSTPPortPriority[i];
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPPortPriority (
+status_t build_to_xml_stp_STPPortConfigMSTPPortPriority(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPPortPriority *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigMSTPPortPriorityEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry (
+status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPDefaultAdminPathCostEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPDefaultAdminPathCost",
-    &res);
+      "MSTPDefaultAdminPathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2311,218 +2406,238 @@ status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry (
   VAL_INT(childval) = entry->MSTPDefaultAdminPathCost;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCost (
+status_t build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCost(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPDefaultAdminPathCost *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry (
+status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPPortAdminPathCostEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPPortAdminPathCost",
-    &res);
+      "MSTPPortAdminPathCost",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MSTPPortAdminPathCost_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MSTPPortAdminPathCost_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->MSTPPortAdminPathCost[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MSTPPortAdminPathCost_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->MSTPPortAdminPathCost[i];
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCost (
+status_t build_to_xml_stp_STPPortConfigMSTPPortAdminPathCost(
     val_value_t *parentval,
     struct stppb_STPPortConfigMSTPPortAdminPathCost *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigMSTPPortAdminPathCostEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigBPDUGuardEntry (
+status_t build_to_xml_stp_STPPortConfigBPDUGuardEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigBPDUGuardEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BPDUGuard",
-    &res);
+      "BPDUGuard",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->BPDUGuard;
+  switch (entry->BPDUGuard) {
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_DISABLED";
+      break;
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_DROP_AND_EVENT";
+      break;
+    case stppb_PortConfigBPDUGuardTypeOptions_PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT:
+      enum_str = "PORT_CONFIG_BPDU_GUARD_TYPE_BLOCK_PORT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigBPDUGuard (
+status_t build_to_xml_stp_STPPortConfigBPDUGuard(
     val_value_t *parentval,
     struct stppb_STPPortConfigBPDUGuard *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigBPDUGuardEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigBPDUGuardEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry (
+status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigBPDUReceiveOnlyEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BPDUReceiveOnly",
-    &res);
+      "BPDUReceiveOnly",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2530,68 +2645,71 @@ status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry (
   VAL_BOOL(childval) = entry->BPDUReceiveOnly;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnly (
+status_t build_to_xml_stp_STPPortConfigBPDUReceiveOnly(
     val_value_t *parentval,
     struct stppb_STPPortConfigBPDUReceiveOnly *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigBPDUReceiveOnlyEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigRestrictTcnEntry (
+status_t build_to_xml_stp_STPPortConfigRestrictTcnEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigRestrictTcnEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RestrictTcn",
-    &res);
+      "RestrictTcn",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2599,68 +2717,71 @@ status_t build_to_xml_stp_STPPortConfigRestrictTcnEntry (
   VAL_BOOL(childval) = entry->RestrictTcn;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigRestrictTcn (
+status_t build_to_xml_stp_STPPortConfigRestrictTcn(
     val_value_t *parentval,
     struct stppb_STPPortConfigRestrictTcn *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigRestrictTcnEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigRestrictTcnEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigRestrictRootEntry (
+status_t build_to_xml_stp_STPPortConfigRestrictRootEntry(
     val_value_t *parentval,
     struct stppb_STPPortConfigRestrictRootEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RestrictRoot",
-    &res);
+      "RestrictRoot",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2668,166 +2789,2095 @@ status_t build_to_xml_stp_STPPortConfigRestrictRootEntry (
   VAL_BOOL(childval) = entry->RestrictRoot;
   return res;
 }
-
-status_t build_to_xml_stp_STPPortConfigRestrictRoot (
+status_t build_to_xml_stp_STPPortConfigRestrictRoot(
     val_value_t *parentval,
     struct stppb_STPPortConfigRestrictRoot *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPPortConfigRestrictRootEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPPortConfigRestrictRootEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTPIDList (
+status_t build_to_xml_stp_MSTPIDList(
     val_value_t *parentval,
     struct stppb_MSTPIDList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IDList",
-    &res);
+      "IDList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->IDList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "IDList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->IDList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "IDList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->IDList[i];
   }
   return res;
 }
-
-status_t build_to_xml_stp_STPMSTPGroupEntry (
+status_t build_to_xml_stp_STPMSTPGroupEntry(
     val_value_t *parentval,
     struct stppb_STPMSTPGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MSTPID",
-    &res);
+      "MSTPID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MSTPID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BridgePriority",
-    &res);
+      "BridgePriority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->BridgePriority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VIDs",
-    &res);
+      "VIDs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->VIDs_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "VIDs_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->VIDs[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "VIDs_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->VIDs[i];
   }
   return res;
 }
-
-status_t build_to_xml_stp_MSTPGroup (
+status_t build_to_xml_stp_MSTPGroup(
     val_value_t *parentval,
     struct stppb_MSTPGroup *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stp_STPMSTPGroupEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stp_STPMSTPGroupEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_stp_MSTPConfig(
+    val_value_t *parentval,
+    struct stppb_MSTPConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Revision");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Revision = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxAge");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxAge = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HelloTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->HelloTime = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ForwardDelay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ForwardDelay = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxHops");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxHops = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TxHoldCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TxHoldCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Cist");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Cist = malloc(sizeof(*(entry->Cist)));
+    res = build_to_priv_stp_CISTEntry(
+        childval,
+        entry->Cist);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mstis");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Mstis_Len = dlq_count(&childval->v.childQ);
+    entry->Mstis = malloc((entry->Mstis_Len + 1) * sizeof(*entry->Mstis));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Mstis[cnt] = malloc(sizeof(*(entry->Mstis[cnt])));
+      res = build_to_priv_stp_MSTIEntry(
+          listval,
+          entry->Mstis[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_CISTEntry(
+    val_value_t *parentval,
+    struct stppb_CISTEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_stp_MSTPCistPort(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTIEntry(
+    val_value_t *parentval,
+    struct stppb_MSTIEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Vlans");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Vlans_Len = dlq_count(&childval->v.childQ);
+    entry->Vlans = malloc((entry->Vlans_Len + 1) * sizeof(*entry->Vlans));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->Vlans[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_stp_MSTPMstiPort(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTIList(
+    val_value_t *parentval,
+    struct stppb_MSTIList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_MSTIEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPCistPort(
+    val_value_t *parentval,
+    struct stppb_MSTPCistPort *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PathCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "STPEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->STPEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "P2PMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->P2PMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EdgeMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->EdgeMode = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BPDUGuard");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->BPDUGuard = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RestrictRoot");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->RestrictRoot = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPMstiPort(
+    val_value_t *parentval,
+    struct stppb_MSTPMstiPort *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PathCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPID(
+    val_value_t *parentval,
+    struct stppb_MSTPID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_CISTStatus(
+    val_value_t *parentval,
+    struct stppb_CISTStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BridgeID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->BridgeID = malloc(sizeof(*(entry->BridgeID)));
+    res = build_to_priv_stp_MSTPID(
+        childval,
+        entry->BridgeID);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RootID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->RootID = malloc(sizeof(*(entry->RootID)));
+    res = build_to_priv_stp_MSTPID(
+        childval,
+        entry->RootID);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RootPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RootPort = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RootCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RootCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RegionalRoot");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->RegionalRoot = malloc(sizeof(*(entry->RegionalRoot)));
+    res = build_to_priv_stp_MSTPID(
+        childval,
+        entry->RegionalRoot);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InternalRootCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->InternalRootCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TopologyChange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TopologyChange = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TopologyChangeCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TopologyChangeCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeSinceTopologyChange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TimeSinceTopologyChange = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_stp_CISTPortEntryStatus(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_CISTPortEntryStatus(
+    val_value_t *parentval,
+    struct stppb_CISTPortEntryStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Role");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Role = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->State = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PathCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EdgeMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->EdgeMode = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "P2PMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->P2PMode = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Uptime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Uptime = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BPDUGuard");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->BPDUGuard = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTIStatus(
+    val_value_t *parentval,
+    struct stppb_MSTIStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_MSTIStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTIStatusEntry(
+    val_value_t *parentval,
+    struct stppb_MSTIStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BridgeID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->BridgeID = malloc(sizeof(*(entry->BridgeID)));
+    res = build_to_priv_stp_MSTPID(
+        childval,
+        entry->BridgeID);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RootID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->RootID = malloc(sizeof(*(entry->RootID)));
+    res = build_to_priv_stp_MSTPID(
+        childval,
+        entry->RootID);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RootPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RootPort = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RootCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RootCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TopologyChange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TopologyChange = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TopologyChangeCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TopologyChangeCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeSinceTopologyChange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TimeSinceTopologyChange = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_stp_MSTIPortStatusEntry(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTIPortStatusEntry(
+    val_value_t *parentval,
+    struct stppb_MSTIPortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "No");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->No = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Role");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Role = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->State = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PathCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Uptime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Uptime = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPVLANGroupPortEntry(
+    val_value_t *parentval,
+    struct stppb_MSTPVLANGroupPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Tagged");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Tagged = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPVLANGroupEntry(
+    val_value_t *parentval,
+    struct stppb_MSTPVLANGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VLANID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VLANID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_stp_MSTPVLANGroupPortEntry(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPConfigBridge(
+    val_value_t *parentval,
+    struct stppb_STPConfigBridge *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HelloTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->HelloTime = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxAge");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxAge = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ForwardDelay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ForwardDelay = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TxHoldCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TxHoldCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPRegionName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MSTPRegionName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPRevisionLevel");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPRevisionLevel = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPMaxHops");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPMaxHops = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPConfigPortEntry(
+    val_value_t *parentval,
+    struct stppb_STPConfigPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminP2PPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AdminP2PPort = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminEdgePort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->AdminEdgePort = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminPathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AdminPathCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPDefaultPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPDefaultPriority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPPortPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MSTPPortPriority_Len = dlq_count(&childval->v.childQ);
+    entry->MSTPPortPriority = malloc((entry->MSTPPortPriority_Len + 1) * sizeof(*entry->MSTPPortPriority));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->MSTPPortPriority[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPDefaultAdminPathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPDefaultAdminPathCost = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPPortAdminPathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MSTPPortAdminPathCost_Len = dlq_count(&childval->v.childQ);
+    entry->MSTPPortAdminPathCost = malloc((entry->MSTPPortAdminPathCost_Len + 1) * sizeof(*entry->MSTPPortAdminPathCost));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->MSTPPortAdminPathCost[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BPDUGuard");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->BPDUGuard = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPConfigMSTPGroupEntry(
+    val_value_t *parentval,
+    struct stppb_STPConfigMSTPGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MSTPID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BridgePriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->BridgePriority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VIDs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->VIDs_Len = dlq_count(&childval->v.childQ);
+    entry->VIDs = malloc((entry->VIDs_Len + 1) * sizeof(*entry->VIDs));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->VIDs[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPConfig(
+    val_value_t *parentval,
+    struct stppb_STPConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Bridge");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Bridge = malloc(sizeof(*(entry->Bridge)));
+    res = build_to_priv_stp_STPConfigBridge(
+        childval,
+        entry->Bridge);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Ports_Len = dlq_count(&childval->v.childQ);
+    entry->Ports = malloc((entry->Ports_Len + 1) * sizeof(*entry->Ports));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->Ports[cnt] = malloc(sizeof(*(entry->Ports[cnt])));
+      res = build_to_priv_stp_STPConfigPortEntry(
+          listval,
+          entry->Ports[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPGroups");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MSTPGroups_Len = dlq_count(&childval->v.childQ);
+    entry->MSTPGroups = malloc((entry->MSTPGroups_Len + 1) * sizeof(*entry->MSTPGroups));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->MSTPGroups[cnt] = malloc(sizeof(*(entry->MSTPGroups[cnt])));
+      res = build_to_priv_stp_STPConfigMSTPGroupEntry(
+          listval,
+          entry->MSTPGroups[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigMode(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigMode *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigPriority(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigPriority *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigHelloTime(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigHelloTime *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "HelloTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->HelloTime = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigMaxAge(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigMaxAge *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MaxAge");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxAge = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigForwardDelay(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigForwardDelay *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ForwardDelay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ForwardDelay = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigTxHoldCount(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigTxHoldCount *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "TxHoldCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TxHoldCount = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigMSTPRegionName(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigMSTPRegionName *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MSTPRegionName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MSTPRegionName = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigMSTPRevisionLevel(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigMSTPRevisionLevel *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MSTPRevisionLevel");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPRevisionLevel = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_BridgeConfigMSTPMaxHops(
+    val_value_t *parentval,
+    struct stppb_BridgeConfigMSTPMaxHops *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MSTPMaxHops");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPMaxHops = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigEnabledEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigEnabledEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigEnabled(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigEnabled *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigEnabledEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigPriorityEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigPriorityEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Priority = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigPriority(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigPriority *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigPriorityEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigAdminP2PPortEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigAdminP2PPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminP2PPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AdminP2PPort = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigAdminP2PPort(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigAdminP2PPort *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigAdminP2PPortEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigAdminEdgePortEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigAdminEdgePortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminEdgePort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->AdminEdgePort = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigAdminEdgePort(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigAdminEdgePort *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigAdminEdgePortEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigAdminPathCostEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigAdminPathCostEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdminPathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AdminPathCost = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigAdminPathCost(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigAdminPathCost *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigAdminPathCostEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPDefaultPriorityEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPDefaultPriorityEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPDefaultPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPDefaultPriority = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPDefaultPriority(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPDefaultPriority *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigMSTPDefaultPriorityEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPPortPriorityEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPPortPriorityEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPPortPriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MSTPPortPriority_Len = dlq_count(&childval->v.childQ);
+    entry->MSTPPortPriority = malloc((entry->MSTPPortPriority_Len + 1) * sizeof(*entry->MSTPPortPriority));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->MSTPPortPriority[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPPortPriority(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPPortPriority *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigMSTPPortPriorityEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPDefaultAdminPathCostEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPDefaultAdminPathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPDefaultAdminPathCost = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPDefaultAdminPathCost(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPDefaultAdminPathCost *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigMSTPDefaultAdminPathCostEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPPortAdminPathCostEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPPortAdminPathCostEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MSTPPortAdminPathCost");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MSTPPortAdminPathCost_Len = dlq_count(&childval->v.childQ);
+    entry->MSTPPortAdminPathCost = malloc((entry->MSTPPortAdminPathCost_Len + 1) * sizeof(*entry->MSTPPortAdminPathCost));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->MSTPPortAdminPathCost[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigMSTPPortAdminPathCost(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigMSTPPortAdminPathCost *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigMSTPPortAdminPathCostEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigBPDUGuardEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigBPDUGuardEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BPDUGuard");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->BPDUGuard = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigBPDUGuard(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigBPDUGuard *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigBPDUGuardEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigBPDUReceiveOnlyEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigBPDUReceiveOnlyEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BPDUReceiveOnly");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->BPDUReceiveOnly = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigBPDUReceiveOnly(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigBPDUReceiveOnly *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigBPDUReceiveOnlyEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigRestrictTcnEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigRestrictTcnEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RestrictTcn");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->RestrictTcn = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigRestrictTcn(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigRestrictTcn *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigRestrictTcnEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigRestrictRootEntry(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigRestrictRootEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RestrictRoot");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->RestrictRoot = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPPortConfigRestrictRoot(
+    val_value_t *parentval,
+    struct stppb_STPPortConfigRestrictRoot *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPPortConfigRestrictRootEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPIDList(
+    val_value_t *parentval,
+    struct stppb_MSTPIDList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IDList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->IDList_Len = dlq_count(&childval->v.childQ);
+    entry->IDList = malloc((entry->IDList_Len + 1) * sizeof(*entry->IDList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->IDList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_STPMSTPGroupEntry(
+    val_value_t *parentval,
+    struct stppb_STPMSTPGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MSTPID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MSTPID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BridgePriority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->BridgePriority = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VIDs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->VIDs_Len = dlq_count(&childval->v.childQ);
+    entry->VIDs = malloc((entry->VIDs_Len + 1) * sizeof(*entry->VIDs));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->VIDs[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stp_MSTPGroup(
+    val_value_t *parentval,
+    struct stppb_MSTPGroup *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stp_STPMSTPGroupEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

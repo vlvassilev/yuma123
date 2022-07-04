@@ -21,22 +21,31 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_userinterface_CLIConfig (
+extern status_t build_to_xml_userinterface_CLIConfig(
     val_value_t *parentval,
     struct userinterfacepb_CLIConfig *entry);
-
-extern status_t build_to_xml_userinterface_SNMPConfig (
+extern status_t build_to_xml_userinterface_SNMPConfig(
     val_value_t *parentval,
     struct userinterfacepb_SNMPConfig *entry);
-
-extern status_t build_to_xml_userinterface_WebConfig (
+extern status_t build_to_xml_userinterface_WebConfig(
     val_value_t *parentval,
     struct userinterfacepb_WebConfig *entry);
-
-extern status_t build_to_xml_userinterface_Config (
+extern status_t build_to_xml_userinterface_Config(
     val_value_t *parentval,
     struct userinterfacepb_Config *entry);
 
+extern status_t build_to_priv_userinterface_CLIConfig(
+    val_value_t *parentval,
+    struct userinterfacepb_CLIConfig *entry);
+extern status_t build_to_priv_userinterface_SNMPConfig(
+    val_value_t *parentval,
+    struct userinterfacepb_SNMPConfig *entry);
+extern status_t build_to_priv_userinterface_WebConfig(
+    val_value_t *parentval,
+    struct userinterfacepb_WebConfig *entry);
+extern status_t build_to_priv_userinterface_Config(
+    val_value_t *parentval,
+    struct userinterfacepb_Config *entry);
 
 #endif /* _H_intri_userinterface_trans */
 

@@ -21,10 +21,13 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_duration_Duration (
+extern status_t build_to_xml_duration_Duration(
     val_value_t *parentval,
     struct durationpb_Duration *entry);
 
+extern status_t build_to_priv_duration_Duration(
+    val_value_t *parentval,
+    struct durationpb_Duration *entry);
 
 #endif /* _H_intri_duration_trans */
 

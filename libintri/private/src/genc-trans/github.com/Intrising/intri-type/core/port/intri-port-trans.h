@@ -21,70 +21,103 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_port_ConfigEntry (
+extern status_t build_to_xml_port_ConfigEntry(
     val_value_t *parentval,
     struct portpb_ConfigEntry *entry);
-
-extern status_t build_to_xml_port_Config (
+extern status_t build_to_xml_port_Config(
     val_value_t *parentval,
     struct portpb_Config *entry);
-
-extern status_t build_to_xml_port_AliasEntry (
+extern status_t build_to_xml_port_AliasEntry(
     val_value_t *parentval,
     struct portpb_AliasEntry *entry);
-
-extern status_t build_to_xml_port_AliasConfig (
+extern status_t build_to_xml_port_AliasConfig(
     val_value_t *parentval,
     struct portpb_AliasConfig *entry);
-
-extern status_t build_to_xml_port_OperationEntry (
+extern status_t build_to_xml_port_OperationEntry(
     val_value_t *parentval,
     struct portpb_OperationEntry *entry);
-
-extern status_t build_to_xml_port_OperationConfig (
+extern status_t build_to_xml_port_OperationConfig(
     val_value_t *parentval,
     struct portpb_OperationConfig *entry);
-
-extern status_t build_to_xml_port_SpeedDuplexEntry (
+extern status_t build_to_xml_port_SpeedDuplexEntry(
     val_value_t *parentval,
     struct portpb_SpeedDuplexEntry *entry);
-
-extern status_t build_to_xml_port_SpeedDuplexConfig (
+extern status_t build_to_xml_port_SpeedDuplexConfig(
     val_value_t *parentval,
     struct portpb_SpeedDuplexConfig *entry);
-
-extern status_t build_to_xml_port_FlowControlEntry (
+extern status_t build_to_xml_port_FlowControlEntry(
     val_value_t *parentval,
     struct portpb_FlowControlEntry *entry);
-
-extern status_t build_to_xml_port_FlowControlConfig (
+extern status_t build_to_xml_port_FlowControlConfig(
     val_value_t *parentval,
     struct portpb_FlowControlConfig *entry);
-
-extern status_t build_to_xml_port_EnergyEfficiencyEntry (
+extern status_t build_to_xml_port_EnergyEfficiencyEntry(
     val_value_t *parentval,
     struct portpb_EnergyEfficiencyEntry *entry);
-
-extern status_t build_to_xml_port_EnergyEfficiencyConfig (
+extern status_t build_to_xml_port_EnergyEfficiencyConfig(
     val_value_t *parentval,
     struct portpb_EnergyEfficiencyConfig *entry);
-
-extern status_t build_to_xml_port_StatusEntry (
+extern status_t build_to_xml_port_StatusEntry(
     val_value_t *parentval,
     struct portpb_StatusEntry *entry);
-
-extern status_t build_to_xml_port_Status (
+extern status_t build_to_xml_port_Status(
     val_value_t *parentval,
     struct portpb_Status *entry);
-
-extern status_t build_to_xml_port_LgPortStatusEntry (
+extern status_t build_to_xml_port_LgPortStatusEntry(
     val_value_t *parentval,
     struct portpb_LgPortStatusEntry *entry);
-
-extern status_t build_to_xml_port_LgPortStatus (
+extern status_t build_to_xml_port_LgPortStatus(
     val_value_t *parentval,
     struct portpb_LgPortStatus *entry);
 
+extern status_t build_to_priv_port_ConfigEntry(
+    val_value_t *parentval,
+    struct portpb_ConfigEntry *entry);
+extern status_t build_to_priv_port_Config(
+    val_value_t *parentval,
+    struct portpb_Config *entry);
+extern status_t build_to_priv_port_AliasEntry(
+    val_value_t *parentval,
+    struct portpb_AliasEntry *entry);
+extern status_t build_to_priv_port_AliasConfig(
+    val_value_t *parentval,
+    struct portpb_AliasConfig *entry);
+extern status_t build_to_priv_port_OperationEntry(
+    val_value_t *parentval,
+    struct portpb_OperationEntry *entry);
+extern status_t build_to_priv_port_OperationConfig(
+    val_value_t *parentval,
+    struct portpb_OperationConfig *entry);
+extern status_t build_to_priv_port_SpeedDuplexEntry(
+    val_value_t *parentval,
+    struct portpb_SpeedDuplexEntry *entry);
+extern status_t build_to_priv_port_SpeedDuplexConfig(
+    val_value_t *parentval,
+    struct portpb_SpeedDuplexConfig *entry);
+extern status_t build_to_priv_port_FlowControlEntry(
+    val_value_t *parentval,
+    struct portpb_FlowControlEntry *entry);
+extern status_t build_to_priv_port_FlowControlConfig(
+    val_value_t *parentval,
+    struct portpb_FlowControlConfig *entry);
+extern status_t build_to_priv_port_EnergyEfficiencyEntry(
+    val_value_t *parentval,
+    struct portpb_EnergyEfficiencyEntry *entry);
+extern status_t build_to_priv_port_EnergyEfficiencyConfig(
+    val_value_t *parentval,
+    struct portpb_EnergyEfficiencyConfig *entry);
+extern status_t build_to_priv_port_StatusEntry(
+    val_value_t *parentval,
+    struct portpb_StatusEntry *entry);
+extern status_t build_to_priv_port_Status(
+    val_value_t *parentval,
+    struct portpb_Status *entry);
+extern status_t build_to_priv_port_LgPortStatusEntry(
+    val_value_t *parentval,
+    struct portpb_LgPortStatusEntry *entry);
+extern status_t build_to_priv_port_LgPortStatus(
+    val_value_t *parentval,
+    struct portpb_LgPortStatus *entry);
 
 #endif /* _H_intri_port_trans */
 

@@ -21,194 +21,289 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_event_ACLParameter (
+extern status_t build_to_xml_event_ACLParameter(
     val_value_t *parentval,
     struct eventpb_ACLParameter *entry);
-
-extern status_t build_to_xml_event_LgportUsed (
+extern status_t build_to_xml_event_LgportUsed(
     val_value_t *parentval,
     struct eventpb_LgportUsed *entry);
-
-extern status_t build_to_xml_event_ProtocolUsed (
+extern status_t build_to_xml_event_ProtocolUsed(
     val_value_t *parentval,
     struct eventpb_ProtocolUsed *entry);
-
-extern status_t build_to_xml_event_AggrParameter (
+extern status_t build_to_xml_event_AggrParameter(
     val_value_t *parentval,
     struct eventpb_AggrParameter *entry);
-
-extern status_t build_to_xml_event_AUParameter (
+extern status_t build_to_xml_event_AUParameter(
     val_value_t *parentval,
     struct eventpb_AUParameter *entry);
-
-extern status_t build_to_xml_event_FDBEntry (
+extern status_t build_to_xml_event_FDBEntry(
     val_value_t *parentval,
     struct eventpb_FDBEntry *entry);
-
-extern status_t build_to_xml_event_ButtonParameter (
+extern status_t build_to_xml_event_ButtonParameter(
     val_value_t *parentval,
     struct eventpb_ButtonParameter *entry);
-
-extern status_t build_to_xml_event_CryptoRequest (
+extern status_t build_to_xml_event_CryptoRequest(
     val_value_t *parentval,
     struct eventpb_CryptoRequest *entry);
-
-extern status_t build_to_xml_event_CryptoResponse (
+extern status_t build_to_xml_event_CryptoResponse(
     val_value_t *parentval,
     struct eventpb_CryptoResponse *entry);
-
-extern status_t build_to_xml_event_CryptoBase64Request (
+extern status_t build_to_xml_event_CryptoBase64Request(
     val_value_t *parentval,
     struct eventpb_CryptoBase64Request *entry);
-
-extern status_t build_to_xml_event_CryptoBase64Response (
+extern status_t build_to_xml_event_CryptoBase64Response(
     val_value_t *parentval,
     struct eventpb_CryptoBase64Response *entry);
-
-extern status_t build_to_xml_event_DHCPParameter (
+extern status_t build_to_xml_event_DHCPParameter(
     val_value_t *parentval,
     struct eventpb_DHCPParameter *entry);
-
-extern status_t build_to_xml_event_FDBParameter (
+extern status_t build_to_xml_event_FDBParameter(
     val_value_t *parentval,
     struct eventpb_FDBParameter *entry);
-
-extern status_t build_to_xml_event_ServiceInitialized (
+extern status_t build_to_xml_event_ServiceInitialized(
     val_value_t *parentval,
     struct eventpb_ServiceInitialized *entry);
-
-extern status_t build_to_xml_event_EthernetLayer (
+extern status_t build_to_xml_event_EthernetLayer(
     val_value_t *parentval,
     struct eventpb_EthernetLayer *entry);
-
-extern status_t build_to_xml_event_LLCLayer (
+extern status_t build_to_xml_event_LLCLayer(
     val_value_t *parentval,
     struct eventpb_LLCLayer *entry);
-
-extern status_t build_to_xml_event_IPLayer (
+extern status_t build_to_xml_event_IPLayer(
     val_value_t *parentval,
     struct eventpb_IPLayer *entry);
-
-extern status_t build_to_xml_event_Layer4Port (
+extern status_t build_to_xml_event_Layer4Port(
     val_value_t *parentval,
     struct eventpb_Layer4Port *entry);
-
-extern status_t build_to_xml_event_LinkParameter (
+extern status_t build_to_xml_event_LinkParameter(
     val_value_t *parentval,
     struct eventpb_LinkParameter *entry);
-
-extern status_t build_to_xml_event_LoginParameter (
+extern status_t build_to_xml_event_LoginParameter(
     val_value_t *parentval,
     struct eventpb_LoginParameter *entry);
-
-extern status_t build_to_xml_event_MaintenanceParameter (
+extern status_t build_to_xml_event_MaintenanceParameter(
     val_value_t *parentval,
     struct eventpb_MaintenanceParameter *entry);
-
-extern status_t build_to_xml_event_MulticastParameter (
+extern status_t build_to_xml_event_MulticastParameter(
     val_value_t *parentval,
     struct eventpb_MulticastParameter *entry);
-
-extern status_t build_to_xml_event_PacketProbe (
+extern status_t build_to_xml_event_PacketProbe(
     val_value_t *parentval,
     struct eventpb_PacketProbe *entry);
-
-extern status_t build_to_xml_event_PacketProbeEntry (
+extern status_t build_to_xml_event_PacketProbeEntry(
     val_value_t *parentval,
     struct eventpb_PacketProbeEntry *entry);
-
-extern status_t build_to_xml_event_PacketInfo (
+extern status_t build_to_xml_event_PacketInfo(
     val_value_t *parentval,
     struct eventpb_PacketInfo *entry);
-
-extern status_t build_to_xml_event_PacketContent (
+extern status_t build_to_xml_event_PacketContent(
     val_value_t *parentval,
     struct eventpb_PacketContent *entry);
-
-extern status_t build_to_xml_event_PoEParameter (
+extern status_t build_to_xml_event_PoEParameter(
     val_value_t *parentval,
     struct eventpb_PoEParameter *entry);
-
-extern status_t build_to_xml_event_PortParameter (
+extern status_t build_to_xml_event_PortParameter(
     val_value_t *parentval,
     struct eventpb_PortParameter *entry);
-
-extern status_t build_to_xml_event_PortAuthParameter (
+extern status_t build_to_xml_event_PortAuthParameter(
     val_value_t *parentval,
     struct eventpb_PortAuthParameter *entry);
-
-extern status_t build_to_xml_event_SFPInfo (
+extern status_t build_to_xml_event_SFPInfo(
     val_value_t *parentval,
     struct eventpb_SFPInfo *entry);
-
-extern status_t build_to_xml_event_SFPParameter (
+extern status_t build_to_xml_event_SFPParameter(
     val_value_t *parentval,
     struct eventpb_SFPParameter *entry);
-
-extern status_t build_to_xml_event_StormcontrolParameter (
+extern status_t build_to_xml_event_StormcontrolParameter(
     val_value_t *parentval,
     struct eventpb_StormcontrolParameter *entry);
-
-extern status_t build_to_xml_event_BootParameter (
+extern status_t build_to_xml_event_BootParameter(
     val_value_t *parentval,
     struct eventpb_BootParameter *entry);
-
-extern status_t build_to_xml_event_NetworkParameter (
+extern status_t build_to_xml_event_NetworkParameter(
     val_value_t *parentval,
     struct eventpb_NetworkParameter *entry);
-
-extern status_t build_to_xml_event_TimeRangeParameter (
+extern status_t build_to_xml_event_TimeRangeParameter(
     val_value_t *parentval,
     struct eventpb_TimeRangeParameter *entry);
-
-extern status_t build_to_xml_event_UdldParameter (
+extern status_t build_to_xml_event_UdldParameter(
     val_value_t *parentval,
     struct eventpb_UdldParameter *entry);
-
-extern status_t build_to_xml_event_UdldActionPortShutdown (
+extern status_t build_to_xml_event_UdldActionPortShutdown(
     val_value_t *parentval,
     struct eventpb_UdldActionPortShutdown *entry);
-
-extern status_t build_to_xml_event_VLANParameter (
+extern status_t build_to_xml_event_VLANParameter(
     val_value_t *parentval,
     struct eventpb_VLANParameter *entry);
-
-extern status_t build_to_xml_event_ManagmentVLANPriority (
+extern status_t build_to_xml_event_ManagmentVLANPriority(
     val_value_t *parentval,
     struct eventpb_ManagmentVLANPriority *entry);
-
-extern status_t build_to_xml_event_InternalTypeUnion (
+extern status_t build_to_xml_event_InternalTypeUnion(
     val_value_t *parentval,
     struct eventpb_InternalTypeUnion *entry);
-
-extern status_t build_to_xml_event_Internal (
+extern status_t build_to_xml_event_Internal(
     val_value_t *parentval,
     struct eventpb_Internal *entry);
-
-extern status_t build_to_xml_event_TargetLogTypeUnion (
+extern status_t build_to_xml_event_TargetLogTypeUnion(
     val_value_t *parentval,
     struct eventpb_TargetLogTypeUnion *entry);
-
-extern status_t build_to_xml_event_TargetSNMP (
+extern status_t build_to_xml_event_TargetSNMP(
     val_value_t *parentval,
     struct eventpb_TargetSNMP *entry);
-
-extern status_t build_to_xml_event_TargetCLI (
+extern status_t build_to_xml_event_TargetCLI(
     val_value_t *parentval,
     struct eventpb_TargetCLI *entry);
-
-extern status_t build_to_xml_event_TargetSysLog (
+extern status_t build_to_xml_event_TargetSysLog(
     val_value_t *parentval,
     struct eventpb_TargetSysLog *entry);
-
-extern status_t build_to_xml_event_TargetLogOptionalParameter (
+extern status_t build_to_xml_event_TargetLogOptionalParameter(
     val_value_t *parentval,
     struct eventpb_TargetLogOptionalParameter *entry);
-
-extern status_t build_to_xml_event_TargetLog (
+extern status_t build_to_xml_event_TargetLog(
     val_value_t *parentval,
     struct eventpb_TargetLog *entry);
 
+extern status_t build_to_priv_event_ACLParameter(
+    val_value_t *parentval,
+    struct eventpb_ACLParameter *entry);
+extern status_t build_to_priv_event_LgportUsed(
+    val_value_t *parentval,
+    struct eventpb_LgportUsed *entry);
+extern status_t build_to_priv_event_ProtocolUsed(
+    val_value_t *parentval,
+    struct eventpb_ProtocolUsed *entry);
+extern status_t build_to_priv_event_AggrParameter(
+    val_value_t *parentval,
+    struct eventpb_AggrParameter *entry);
+extern status_t build_to_priv_event_AUParameter(
+    val_value_t *parentval,
+    struct eventpb_AUParameter *entry);
+extern status_t build_to_priv_event_FDBEntry(
+    val_value_t *parentval,
+    struct eventpb_FDBEntry *entry);
+extern status_t build_to_priv_event_ButtonParameter(
+    val_value_t *parentval,
+    struct eventpb_ButtonParameter *entry);
+extern status_t build_to_priv_event_CryptoRequest(
+    val_value_t *parentval,
+    struct eventpb_CryptoRequest *entry);
+extern status_t build_to_priv_event_CryptoResponse(
+    val_value_t *parentval,
+    struct eventpb_CryptoResponse *entry);
+extern status_t build_to_priv_event_CryptoBase64Request(
+    val_value_t *parentval,
+    struct eventpb_CryptoBase64Request *entry);
+extern status_t build_to_priv_event_CryptoBase64Response(
+    val_value_t *parentval,
+    struct eventpb_CryptoBase64Response *entry);
+extern status_t build_to_priv_event_DHCPParameter(
+    val_value_t *parentval,
+    struct eventpb_DHCPParameter *entry);
+extern status_t build_to_priv_event_FDBParameter(
+    val_value_t *parentval,
+    struct eventpb_FDBParameter *entry);
+extern status_t build_to_priv_event_ServiceInitialized(
+    val_value_t *parentval,
+    struct eventpb_ServiceInitialized *entry);
+extern status_t build_to_priv_event_EthernetLayer(
+    val_value_t *parentval,
+    struct eventpb_EthernetLayer *entry);
+extern status_t build_to_priv_event_LLCLayer(
+    val_value_t *parentval,
+    struct eventpb_LLCLayer *entry);
+extern status_t build_to_priv_event_IPLayer(
+    val_value_t *parentval,
+    struct eventpb_IPLayer *entry);
+extern status_t build_to_priv_event_Layer4Port(
+    val_value_t *parentval,
+    struct eventpb_Layer4Port *entry);
+extern status_t build_to_priv_event_LinkParameter(
+    val_value_t *parentval,
+    struct eventpb_LinkParameter *entry);
+extern status_t build_to_priv_event_LoginParameter(
+    val_value_t *parentval,
+    struct eventpb_LoginParameter *entry);
+extern status_t build_to_priv_event_MaintenanceParameter(
+    val_value_t *parentval,
+    struct eventpb_MaintenanceParameter *entry);
+extern status_t build_to_priv_event_MulticastParameter(
+    val_value_t *parentval,
+    struct eventpb_MulticastParameter *entry);
+extern status_t build_to_priv_event_PacketProbe(
+    val_value_t *parentval,
+    struct eventpb_PacketProbe *entry);
+extern status_t build_to_priv_event_PacketProbeEntry(
+    val_value_t *parentval,
+    struct eventpb_PacketProbeEntry *entry);
+extern status_t build_to_priv_event_PacketInfo(
+    val_value_t *parentval,
+    struct eventpb_PacketInfo *entry);
+extern status_t build_to_priv_event_PacketContent(
+    val_value_t *parentval,
+    struct eventpb_PacketContent *entry);
+extern status_t build_to_priv_event_PoEParameter(
+    val_value_t *parentval,
+    struct eventpb_PoEParameter *entry);
+extern status_t build_to_priv_event_PortParameter(
+    val_value_t *parentval,
+    struct eventpb_PortParameter *entry);
+extern status_t build_to_priv_event_PortAuthParameter(
+    val_value_t *parentval,
+    struct eventpb_PortAuthParameter *entry);
+extern status_t build_to_priv_event_SFPInfo(
+    val_value_t *parentval,
+    struct eventpb_SFPInfo *entry);
+extern status_t build_to_priv_event_SFPParameter(
+    val_value_t *parentval,
+    struct eventpb_SFPParameter *entry);
+extern status_t build_to_priv_event_StormcontrolParameter(
+    val_value_t *parentval,
+    struct eventpb_StormcontrolParameter *entry);
+extern status_t build_to_priv_event_BootParameter(
+    val_value_t *parentval,
+    struct eventpb_BootParameter *entry);
+extern status_t build_to_priv_event_NetworkParameter(
+    val_value_t *parentval,
+    struct eventpb_NetworkParameter *entry);
+extern status_t build_to_priv_event_TimeRangeParameter(
+    val_value_t *parentval,
+    struct eventpb_TimeRangeParameter *entry);
+extern status_t build_to_priv_event_UdldParameter(
+    val_value_t *parentval,
+    struct eventpb_UdldParameter *entry);
+extern status_t build_to_priv_event_UdldActionPortShutdown(
+    val_value_t *parentval,
+    struct eventpb_UdldActionPortShutdown *entry);
+extern status_t build_to_priv_event_VLANParameter(
+    val_value_t *parentval,
+    struct eventpb_VLANParameter *entry);
+extern status_t build_to_priv_event_ManagmentVLANPriority(
+    val_value_t *parentval,
+    struct eventpb_ManagmentVLANPriority *entry);
+extern status_t build_to_priv_event_InternalTypeUnion(
+    val_value_t *parentval,
+    struct eventpb_InternalTypeUnion *entry);
+extern status_t build_to_priv_event_Internal(
+    val_value_t *parentval,
+    struct eventpb_Internal *entry);
+extern status_t build_to_priv_event_TargetLogTypeUnion(
+    val_value_t *parentval,
+    struct eventpb_TargetLogTypeUnion *entry);
+extern status_t build_to_priv_event_TargetSNMP(
+    val_value_t *parentval,
+    struct eventpb_TargetSNMP *entry);
+extern status_t build_to_priv_event_TargetCLI(
+    val_value_t *parentval,
+    struct eventpb_TargetCLI *entry);
+extern status_t build_to_priv_event_TargetSysLog(
+    val_value_t *parentval,
+    struct eventpb_TargetSysLog *entry);
+extern status_t build_to_priv_event_TargetLogOptionalParameter(
+    val_value_t *parentval,
+    struct eventpb_TargetLogOptionalParameter *entry);
+extern status_t build_to_priv_event_TargetLog(
+    val_value_t *parentval,
+    struct eventpb_TargetLog *entry);
 
 #endif /* _H_intri_event_trans */
 

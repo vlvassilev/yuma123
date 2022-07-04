@@ -33,60 +33,65 @@
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/Intrising/intri-type/hardware/intri-hardware-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_poe_Config (
+
+status_t build_to_xml_poe_Config(
     val_value_t *parentval,
     struct poepb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Budget",
-    &res);
+      "Budget",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_poe_SystemBudget(
+  res = build_to_xml_poe_SystemBudget(
       childval,
-    entry->Budget);
+      entry->Budget);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_poe_PortConfig(
+  res = build_to_xml_poe_PortConfig(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_poe_SystemBudget (
+status_t build_to_xml_poe_SystemBudget(
     val_value_t *parentval,
     struct poepb_SystemBudget *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MaxPowerAvailable",
-    &res);
+      "MaxPowerAvailable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -94,165 +99,192 @@ status_t build_to_xml_poe_SystemBudget (
   VAL_INT(childval) = entry->MaxPowerAvailable;
   return res;
 }
-
-status_t build_to_xml_poe_PortConfig (
+status_t build_to_xml_poe_PortConfig(
     val_value_t *parentval,
     struct poepb_PortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_poe_ConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_poe_ConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_poe_ConfigEntry (
+status_t build_to_xml_poe_ConfigEntry(
     val_value_t *parentval,
     struct poepb_ConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE:
+      enum_str = "POE_PORT_MODE_TYPE_POE";
+      break;
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE_PLUS:
+      enum_str = "POE_PORT_MODE_TYPE_POE_PLUS";
+      break;
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE_PLUS_PLUS:
+      enum_str = "POE_PORT_MODE_TYPE_POE_PLUS_PLUS";
+      break;
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE_LLDP:
+      enum_str = "POE_PORT_MODE_TYPE_POE_LLDP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Priority;
+  switch (entry->Priority) {
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_UNKNOWN:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_UNKNOWN";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_LOW:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_LOW";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_MEDIUM:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_MEDIUM";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_HIGH:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_HIGH";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_poe_SystemStatus (
+status_t build_to_xml_poe_SystemStatus(
     val_value_t *parentval,
     struct poepb_SystemStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MinShutDownVoltage",
-    &res);
+      "MinShutDownVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->MinShutDownVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MaxShutDownVoltage",
-    &res);
+      "MaxShutDownVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->MaxShutDownVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VMainVoltage",
-    &res);
+      "VMainVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->VMainVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IMainCurrent",
-    &res);
+      "IMainCurrent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->IMainCurrent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerConsumption",
-    &res);
+      "PowerConsumption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -260,145 +292,241 @@ status_t build_to_xml_poe_SystemStatus (
   VAL_DOUBLE(childval) = entry->PowerConsumption;
   return res;
 }
-
-status_t build_to_xml_poe_PortStatus (
+status_t build_to_xml_poe_PortStatus(
     val_value_t *parentval,
     struct poepb_PortStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_poe_PortStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_poe_PortStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_poe_PortStatusEntry (
+status_t build_to_xml_poe_PortStatusEntry(
     val_value_t *parentval,
     struct poepb_PortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Condition",
-    &res);
+      "Condition",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Condition;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Condition) {
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_DISABLED:
+      enum_str = "POE_CONDITION_TYPE_DISABLED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_POWER_OFF:
+      enum_str = "POE_CONDITION_TYPE_POWER_OFF";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_DTYPECOVERING:
+      enum_str = "POE_CONDITION_TYPE_DTYPECOVERING";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_POWERED:
+      enum_str = "POE_CONDITION_TYPE_POWERED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_CLASS_MTYPEMATCH:
+      enum_str = "POE_CONDITION_TYPE_CLASS_MTYPEMATCH";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_SHORT_CIRCUIT:
+      enum_str = "POE_CONDITION_TYPE_SHORT_CIRCUIT";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_REJECTED:
+      enum_str = "POE_CONDITION_TYPE_REJECTED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_OVERLOAD:
+      enum_str = "POE_CONDITION_TYPE_OVERLOAD";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_UNDERLOAD:
+      enum_str = "POE_CONDITION_TYPE_UNDERLOAD";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_OVER_TEMP:
+      enum_str = "POE_CONDITION_TYPE_OVER_TEMP";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_VOLTAGE_TOO_LOW:
+      enum_str = "POE_CONDITION_TYPE_VOLTAGE_TOO_LOW";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_VOLTAGE_TOO_HIGH:
+      enum_str = "POE_CONDITION_TYPE_VOLTAGE_TOO_HIGH";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_UNKNOW_ERROR:
+      enum_str = "POE_CONDITION_TYPE_UNKNOW_ERROR";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_BUDGET_EXCEEDED:
+      enum_str = "POE_CONDITION_TYPE_BUDGET_EXCEEDED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_TYPE_NON_STANDARD_PD:
+      enum_str = "POE_CONDITION_TYPE_TYPE_NON_STANDARD_PD";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DeterminedClass",
-    &res);
+      "DeterminedClass",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DeterminedClass;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->DeterminedClass) {
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS0:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS0";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS1:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS1";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS2:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS2";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS3:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS3";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS4:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS4";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS5:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS5";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS6:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS6";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS7:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS7";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS8:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS8";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_OVERLOAD:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_OVERLOAD";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_PROBES_NOT_EQUAL:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_PROBES_NOT_EQUAL";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_UNKNOWN:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_UNKNOWN";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Priority) {
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_UNKNOWN:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_UNKNOWN";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_LOW:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_LOW";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_MEDIUM:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_MEDIUM";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_HIGH:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_HIGH";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "OutputCurrent",
-    &res);
+      "OutputCurrent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->OutputCurrent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OutputVoltage",
-    &res);
+      "OutputVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->OutputVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OutputPower",
-    &res);
+      "OutputPower",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->OutputPower;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SupportMaxPower",
-    &res);
+      "SupportMaxPower",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -406,19 +534,21 @@ status_t build_to_xml_poe_PortStatusEntry (
   VAL_DOUBLE(childval) = entry->SupportMaxPower;
   return res;
 }
-
-status_t build_to_xml_poe_SetPoEMaxPowerAvailableRequest (
+status_t build_to_xml_poe_SetPoEMaxPowerAvailableRequest(
     val_value_t *parentval,
     struct poepb_SetPoEMaxPowerAvailableRequest *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MaxPowerAvailable",
-    &res);
+      "MaxPowerAvailable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -427,3 +557,274 @@ status_t build_to_xml_poe_SetPoEMaxPowerAvailableRequest (
   return res;
 }
 
+status_t build_to_priv_poe_Config(
+    val_value_t *parentval,
+    struct poepb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Budget");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Budget = malloc(sizeof(*(entry->Budget)));
+    res = build_to_priv_poe_SystemBudget(
+        childval,
+        entry->Budget);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_poe_PortConfig(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_poe_SystemBudget(
+    val_value_t *parentval,
+    struct poepb_SystemBudget *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MaxPowerAvailable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxPowerAvailable = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_poe_PortConfig(
+    val_value_t *parentval,
+    struct poepb_PortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_poe_ConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_poe_ConfigEntry(
+    val_value_t *parentval,
+    struct poepb_ConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Priority = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_poe_SystemStatus(
+    val_value_t *parentval,
+    struct poepb_SystemStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MinShutDownVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->MinShutDownVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxShutDownVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->MaxShutDownVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VMainVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->VMainVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IMainCurrent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->IMainCurrent = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerConsumption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->PowerConsumption = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_poe_PortStatus(
+    val_value_t *parentval,
+    struct poepb_PortStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_poe_PortStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_poe_PortStatusEntry(
+    val_value_t *parentval,
+    struct poepb_PortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Condition");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Condition = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DeterminedClass");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DeterminedClass = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Priority = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OutputCurrent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->OutputCurrent = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OutputVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->OutputVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OutputPower");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->OutputPower = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SupportMaxPower");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->SupportMaxPower = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_poe_SetPoEMaxPowerAvailableRequest(
+    val_value_t *parentval,
+    struct poepb_SetPoEMaxPowerAvailableRequest *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MaxPowerAvailable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxPowerAvailable = VAL_INT(childval);
+  }
+  return res;
+}

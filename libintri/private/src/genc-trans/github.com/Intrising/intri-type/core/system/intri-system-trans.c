@@ -31,30 +31,33 @@
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_system_Status (
+
+status_t build_to_xml_system_Status(
     val_value_t *parentval,
     struct systempb_Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LastBootTime",
-    &res);
+      "LastBootTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LastBootTime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Uptime",
-    &res);
+      "Uptime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -62,55 +65,54 @@ status_t build_to_xml_system_Status (
   VAL_LONG(childval) = entry->Uptime;
   return res;
 }
-
-status_t build_to_xml_system_Config (
+status_t build_to_xml_system_Config(
     val_value_t *parentval,
     struct systempb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SysName",
-    &res);
+      "SysName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SysName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SysLocation",
-    &res);
+      "SysLocation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SysLocation;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SysGroup",
-    &res);
+      "SysGroup",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SysGroup;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SysContact",
-    &res);
+      "SysContact",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -118,55 +120,54 @@ status_t build_to_xml_system_Config (
   VAL_STRING(childval) = entry->SysContact;
   return res;
 }
-
-status_t build_to_xml_system_IdentificationConfig (
+status_t build_to_xml_system_IdentificationConfig(
     val_value_t *parentval,
     struct systempb_IdentificationConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SysName",
-    &res);
+      "SysName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SysName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SysLocation",
-    &res);
+      "SysLocation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SysLocation;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SysGroup",
-    &res);
+      "SysGroup",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SysGroup;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SysContact",
-    &res);
+      "SysContact",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -175,3 +176,94 @@ status_t build_to_xml_system_IdentificationConfig (
   return res;
 }
 
+status_t build_to_priv_system_Status(
+    val_value_t *parentval,
+    struct systempb_Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LastBootTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LastBootTime = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Uptime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->Uptime = VAL_LONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_system_Config(
+    val_value_t *parentval,
+    struct systempb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SysName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SysLocation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysLocation = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SysGroup");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysGroup = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SysContact");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysContact = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_system_IdentificationConfig(
+    val_value_t *parentval,
+    struct systempb_IdentificationConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SysName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SysLocation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysLocation = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SysGroup");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysGroup = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SysContact");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SysContact = VAL_STRING(childval);
+  }
+  return res;
+}

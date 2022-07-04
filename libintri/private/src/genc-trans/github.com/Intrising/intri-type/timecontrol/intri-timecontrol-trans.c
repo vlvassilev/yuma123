@@ -33,153 +33,243 @@
 #include "../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/intri-timestamp-trans.h"
-status_t build_to_xml_timecontrol_InputClockManage (
+
+status_t build_to_xml_timecontrol_InputClockManage(
     val_value_t *parentval,
     struct timecontrolpb_InputClockManage *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_InputClockManageEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_InputClockManageEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_InputClockManageEntry (
+status_t build_to_xml_timecontrol_InputClockManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_InputClockManageEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "InputCLK",
-    &res);
+      "InputCLK",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InputCLK;
+  switch (entry->InputCLK) {
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_BITS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_BITS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_GPS:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_GPS";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_10MHZ_IN:
+      enum_str = "INPUT_CLOCK_TYPE_10MHZ_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_FEEDBACK:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_FEEDBACK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_MonitorStatus (
+status_t build_to_xml_timecontrol_MonitorStatus(
     val_value_t *parentval,
     struct timecontrolpb_MonitorStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_MonitorStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_MonitorStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_MonitorStatusEntry (
+status_t build_to_xml_timecontrol_MonitorStatusEntry(
     val_value_t *parentval,
     struct timecontrolpb_MonitorStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "InputCLK",
-    &res);
+      "InputCLK",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InputCLK;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->InputCLK) {
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_BITS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_BITS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_GPS:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_GPS";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_10MHZ_IN:
+      enum_str = "INPUT_CLOCK_TYPE_10MHZ_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_FEEDBACK:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_FEEDBACK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "StatusList",
-    &res);
+      "StatusList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->StatusList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "StatusList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_StatusInputBit(
-    listval,
-    entry->StatusList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "StatusList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_StatusInputBit(
+        listval,
+        entry->StatusList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Valid",
-    &res);
+      "Valid",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -187,31 +277,46 @@ if (res != NO_ERR) {
   VAL_BOOL(childval) = entry->Valid;
   return res;
 }
-
-status_t build_to_xml_timecontrol_StatusInputBit (
+status_t build_to_xml_timecontrol_StatusInputBit(
     val_value_t *parentval,
     struct timecontrolpb_StatusInputBit *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case timecontrolpb_StatusInputBitTypeOptions_STATUS_INPUT_BIT_TYPE_LOS_LIVE:
+      enum_str = "STATUS_INPUT_BIT_TYPE_LOS_LIVE";
+      break;
+    case timecontrolpb_StatusInputBitTypeOptions_STATUS_INPUT_BIT_TYPE_NO_ACTIVITY_LIVE:
+      enum_str = "STATUS_INPUT_BIT_TYPE_NO_ACTIVITY_LIVE";
+      break;
+    case timecontrolpb_StatusInputBitTypeOptions_STATUS_INPUT_BIT_TYPE_REQ_OFFS_LIM_LIVE:
+      enum_str = "STATUS_INPUT_BIT_TYPE_REQ_OFFS_LIM_LIVE";
+      break;
+    case timecontrolpb_StatusInputBitTypeOptions_STATUS_INPUT_BIT_TYPE_TRANS_DETECT_LIVE:
+      enum_str = "STATUS_INPUT_BIT_TYPE_TRANS_DETECT_LIVE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Valid",
-    &res);
+      "Valid",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -219,637 +324,1147 @@ status_t build_to_xml_timecontrol_StatusInputBit (
   VAL_BOOL(childval) = entry->Valid;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLManage (
+status_t build_to_xml_timecontrol_DPLLManage(
     val_value_t *parentval,
     struct timecontrolpb_DPLLManage *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLManageEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLManageEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLManageEntry (
+status_t build_to_xml_timecontrol_DPLLManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLManageEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLStatus (
+status_t build_to_xml_timecontrol_DPLLStatus(
     val_value_t *parentval,
     struct timecontrolpb_DPLLStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLStatusEntry (
+status_t build_to_xml_timecontrol_DPLLStatusEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "StatusType",
-    &res);
+      "StatusType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->StatusType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->StatusType) {
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_FREERUN:
+      enum_str = "DPLL_STATUS_BIT_TYPE_FREERUN";
+      break;
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_LOCKACQ:
+      enum_str = "DPLL_STATUS_BIT_TYPE_LOCKACQ";
+      break;
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_LOCKREC:
+      enum_str = "DPLL_STATUS_BIT_TYPE_LOCKREC";
+      break;
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_LOCKED:
+      enum_str = "DPLL_STATUS_BIT_TYPE_LOCKED";
+      break;
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_HOLDOVER:
+      enum_str = "DPLL_STATUS_BIT_TYPE_HOLDOVER";
+      break;
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_OPENLOOP:
+      enum_str = "DPLL_STATUS_BIT_TYPE_OPENLOOP";
+      break;
+    case timecontrolpb_DPLLStatusBitTypeOptions_DPLL_STATUS_BIT_TYPE_DISABLED:
+      enum_str = "DPLL_STATUS_BIT_TYPE_DISABLED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "InputCLK",
-    &res);
+      "InputCLK",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InputCLK;
+  switch (entry->InputCLK) {
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_BITS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_BITS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_GPS:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_GPS";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_10MHZ_IN:
+      enum_str = "INPUT_CLOCK_TYPE_10MHZ_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_FEEDBACK:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_FEEDBACK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLRefPriorityManage (
+status_t build_to_xml_timecontrol_DPLLRefPriorityManage(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriorityManage *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry (
+status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriorityManageEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PriorityList",
-    &res);
+      "PriorityList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PriorityList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PriorityList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->PriorityList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PriorityList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->PriorityList[i]) {
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_0:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_0";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_1:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_1";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_2:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_2";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_3:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_3";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_4:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_4";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_5:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_5";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_6:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_6";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_7:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_7";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_8:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_8";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_9:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_9";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_10:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_10";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_11:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_11";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_12:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_12";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_13:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_13";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_14:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_14";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_15:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_15";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_16:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_16";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_17:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_17";
+        break;
+      case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_18:
+        enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_18";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLRefPriority (
+status_t build_to_xml_timecontrol_DPLLRefPriority(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriority *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLRefPriorityEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLRefPriorityEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLRefPriorityEntry (
+status_t build_to_xml_timecontrol_DPLLRefPriorityEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriorityEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PrioritList",
-    &res);
+      "PrioritList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PrioritList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PrioritList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_PriorityList(
-    listval,
-    entry->PrioritList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PrioritList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_PriorityList(
+        listval,
+        entry->PrioritList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_PriorityList (
+status_t build_to_xml_timecontrol_PriorityList(
     val_value_t *parentval,
     struct timecontrolpb_PriorityList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Priority;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Priority) {
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_0:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_0";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_1:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_1";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_2:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_2";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_3:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_3";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_4:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_4";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_5:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_5";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_6:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_6";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_7:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_7";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_8:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_8";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_9:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_9";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_10:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_10";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_11:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_11";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_12:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_12";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_13:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_13";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_14:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_14";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_15:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_15";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_16:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_16";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_17:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_17";
+      break;
+    case timecontrolpb_DPLLRefPriorityBitTypeOptions_DPLL_REF_PRIORITY_BIT_TYPE_18:
+      enum_str = "DPLL_REF_PRIORITY_BIT_TYPE_18";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "InputCLK",
-    &res);
+      "InputCLK",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InputCLK;
+  switch (entry->InputCLK) {
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_BITS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_BITS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_GPS:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_GPS";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_10MHZ_IN:
+      enum_str = "INPUT_CLOCK_TYPE_10MHZ_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_FEEDBACK:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_FEEDBACK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_SyncEInputClockSpeed (
+status_t build_to_xml_timecontrol_SyncEInputClockSpeed(
     val_value_t *parentval,
     struct timecontrolpb_SyncEInputClockSpeed *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_SyncEInputClockSpeedEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_SyncEInputClockSpeedEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_SyncEInputClockSpeedEntry (
+status_t build_to_xml_timecontrol_SyncEInputClockSpeedEntry(
     val_value_t *parentval,
     struct timecontrolpb_SyncEInputClockSpeedEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "InputCLK",
-    &res);
+      "InputCLK",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InputCLK;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->InputCLK) {
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_MAC_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_MAC_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_A_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_A_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_B_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_B_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_0:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_0";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_PHY_C_CLOCK_1:
+      enum_str = "INPUT_CLOCK_TYPE_PHY_C_CLOCK_1";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_BITS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_BITS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_GPS:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_GPS";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_IN:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_10MHZ_IN:
+      enum_str = "INPUT_CLOCK_TYPE_10MHZ_IN";
+      break;
+    case devicepb_InputClockTypeOptions_INPUT_CLOCK_TYPE_1PPS_FEEDBACK:
+      enum_str = "INPUT_CLOCK_TYPE_1PPS_FEEDBACK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Speed",
-    &res);
+      "Speed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Speed;
+  switch (entry->Speed) {
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_10M_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_10M_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_10M_HALF:
+      enum_str = "PORT_PROPERTIES_TYPE_10M_HALF";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_100M_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_100M_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_100M_HALF:
+      enum_str = "PORT_PROPERTIES_TYPE_100M_HALF";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_1000M_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_1000M_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_2500M_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_2500M_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_5G_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_5G_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_10G_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_10G_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_25G_FULL:
+      enum_str = "PORT_PROPERTIES_TYPE_25G_FULL";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_RJ45:
+      enum_str = "PORT_PROPERTIES_TYPE_RJ45";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_SFP:
+      enum_str = "PORT_PROPERTIES_TYPE_SFP";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_POE:
+      enum_str = "PORT_PROPERTIES_TYPE_POE";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_POE_PLUS:
+      enum_str = "PORT_PROPERTIES_TYPE_POE_PLUS";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_POE_PLUS_PLUS:
+      enum_str = "PORT_PROPERTIES_TYPE_POE_PLUS_PLUS";
+      break;
+    case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_LINK_PORT:
+      enum_str = "PORT_PROPERTIES_TYPE_LINK_PORT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_ToDSource (
+status_t build_to_xml_timecontrol_ToDSource(
     val_value_t *parentval,
     struct timecontrolpb_ToDSource *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Source;
+  switch (entry->Source) {
+    case timecontrolpb_ToDSourceTypeOptions_SYSTEM:
+      enum_str = "SYSTEM";
+      break;
+    case timecontrolpb_ToDSourceTypeOptions_TIME_CONTROL:
+      enum_str = "TIME_CONTROL";
+      break;
+    case timecontrolpb_ToDSourceTypeOptions_RTC:
+      enum_str = "RTC";
+      break;
+    case timecontrolpb_ToDSourceTypeOptions_GPS:
+      enum_str = "GPS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLToDManage (
+status_t build_to_xml_timecontrol_DPLLToDManage(
     val_value_t *parentval,
     struct timecontrolpb_DPLLToDManage *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLToDManageEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLToDManageEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLToDManageEntry (
+status_t build_to_xml_timecontrol_DPLLToDManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLToDManageEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
+  switch (entry->Index) {
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_0:
+      enum_str = "DPLL_MANAGE_TOD_0";
+      break;
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_1:
+      enum_str = "DPLL_MANAGE_TOD_1";
+      break;
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_2:
+      enum_str = "DPLL_MANAGE_TOD_2";
+      break;
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_3:
+      enum_str = "DPLL_MANAGE_TOD_3";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timecontrol_ToDTime (
+status_t build_to_xml_timecontrol_ToDTime(
     val_value_t *parentval,
     struct timecontrolpb_ToDTime *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_ToDTimeEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_ToDTimeEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_ToDTimeEntry (
+status_t build_to_xml_timecontrol_ToDTimeEntry(
     val_value_t *parentval,
     struct timecontrolpb_ToDTimeEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_0:
+      enum_str = "DPLL_MANAGE_TOD_0";
+      break;
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_1:
+      enum_str = "DPLL_MANAGE_TOD_1";
+      break;
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_2:
+      enum_str = "DPLL_MANAGE_TOD_2";
+      break;
+    case timecontrolpb_DPLLToDTypeOptions_DPLL_MANAGE_TOD_3:
+      enum_str = "DPLL_MANAGE_TOD_3";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DateTime",
-    &res);
+      "DateTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timestamp_Timestamp(
+  res = build_to_xml_timestamp_Timestamp(
       childval,
-    entry->DateTime);
+      entry->DateTime);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLFrequencyControl (
+status_t build_to_xml_timecontrol_DPLLFrequencyControl(
     val_value_t *parentval,
     struct timecontrolpb_DPLLFrequencyControl *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLFrequencyControlEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLFrequencyControlEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry (
+status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLFrequencyControlEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "FreqOffset",
-    &res);
+      "FreqOffset",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -857,68 +1472,97 @@ status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry (
   VAL_LONG(childval) = entry->FreqOffset;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLPhaseControl (
+status_t build_to_xml_timecontrol_DPLLPhaseControl(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControl *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLPhaseControlEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLPhaseControlEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLPhaseControlEntry (
+status_t build_to_xml_timecontrol_DPLLPhaseControlEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControlEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PhOffset",
-    &res);
+      "PhOffset",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -926,68 +1570,97 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlEntry (
   VAL_INT(childval) = entry->PhOffset;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimit (
+status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimit(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseSlopeLimit *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry (
+status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseSlopeLimitEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Limit",
-    &res);
+      "Limit",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -995,68 +1668,97 @@ status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry (
   VAL_INT(childval) = entry->Limit;
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLPhaseControlTimer (
+status_t build_to_xml_timecontrol_DPLLPhaseControlTimer(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControlTimer *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timecontrol_DPLLPhaseControlTimerEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timecontrol_DPLLPhaseControlTimerEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry (
+status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControlTimerEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Index) {
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_0:
+      enum_str = "DPLL_MANAGE_INDEX_0";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_1:
+      enum_str = "DPLL_MANAGE_INDEX_1";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_2:
+      enum_str = "DPLL_MANAGE_INDEX_2";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_3:
+      enum_str = "DPLL_MANAGE_INDEX_3";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_4:
+      enum_str = "DPLL_MANAGE_INDEX_4";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_5:
+      enum_str = "DPLL_MANAGE_INDEX_5";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_6:
+      enum_str = "DPLL_MANAGE_INDEX_6";
+      break;
+    case timecontrolpb_DPLLManageIndexTypeOptions_DPLL_MANAGE_INDEX_7:
+      enum_str = "DPLL_MANAGE_INDEX_7";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Timeout",
-    &res);
+      "Timeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1065,3 +1767,754 @@ status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry (
   return res;
 }
 
+status_t build_to_priv_timecontrol_InputClockManage(
+    val_value_t *parentval,
+    struct timecontrolpb_InputClockManage *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_InputClockManageEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_InputClockManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_InputClockManageEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "InputCLK");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InputCLK = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_MonitorStatus(
+    val_value_t *parentval,
+    struct timecontrolpb_MonitorStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_MonitorStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_MonitorStatusEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_MonitorStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "InputCLK");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InputCLK = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "StatusList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->StatusList_Len = dlq_count(&childval->v.childQ);
+    entry->StatusList = malloc((entry->StatusList_Len + 1) * sizeof(*entry->StatusList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->StatusList[cnt] = malloc(sizeof(*(entry->StatusList[cnt])));
+      res = build_to_priv_timecontrol_StatusInputBit(
+          listval,
+          entry->StatusList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Valid");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Valid = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_StatusInputBit(
+    val_value_t *parentval,
+    struct timecontrolpb_StatusInputBit *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Valid");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Valid = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLManage(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLManage *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLManageEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLManageEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLStatus(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLStatusEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "StatusType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->StatusType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InputCLK");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InputCLK = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLRefPriorityManage(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriorityManage *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLRefPriorityManageEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLRefPriorityManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriorityManageEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PriorityList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PriorityList_Len = dlq_count(&childval->v.childQ);
+    entry->PriorityList = malloc((entry->PriorityList_Len + 1) * sizeof(*entry->PriorityList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->PriorityList[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLRefPriority(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriority *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLRefPriorityEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLRefPriorityEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriorityEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PrioritList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PrioritList_Len = dlq_count(&childval->v.childQ);
+    entry->PrioritList = malloc((entry->PrioritList_Len + 1) * sizeof(*entry->PrioritList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PrioritList[cnt] = malloc(sizeof(*(entry->PrioritList[cnt])));
+      res = build_to_priv_timecontrol_PriorityList(
+          listval,
+          entry->PrioritList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_PriorityList(
+    val_value_t *parentval,
+    struct timecontrolpb_PriorityList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Priority = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InputCLK");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InputCLK = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_SyncEInputClockSpeed(
+    val_value_t *parentval,
+    struct timecontrolpb_SyncEInputClockSpeed *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_SyncEInputClockSpeedEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_SyncEInputClockSpeedEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_SyncEInputClockSpeedEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "InputCLK");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InputCLK = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Speed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Speed = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_ToDSource(
+    val_value_t *parentval,
+    struct timecontrolpb_ToDSource *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Source = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLToDManage(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLToDManage *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLToDManageEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLToDManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLToDManageEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_ToDTime(
+    val_value_t *parentval,
+    struct timecontrolpb_ToDTime *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_ToDTimeEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_ToDTimeEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_ToDTimeEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DateTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DateTime = malloc(sizeof(*(entry->DateTime)));
+    res = build_to_priv_timestamp_Timestamp(
+        childval,
+        entry->DateTime);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLFrequencyControl(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLFrequencyControl *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLFrequencyControlEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLFrequencyControlEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLFrequencyControlEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FreqOffset");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int64 */
+    entry->FreqOffset = VAL_LONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLPhaseControl(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControl *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLPhaseControlEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLPhaseControlEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControlEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PhOffset");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PhOffset = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLPhaseSlopeLimit(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseSlopeLimit *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLPhaseSlopeLimitEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLPhaseSlopeLimitEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseSlopeLimitEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Limit");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Limit = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLPhaseControlTimer(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControlTimer *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timecontrol_DPLLPhaseControlTimerEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timecontrol_DPLLPhaseControlTimerEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControlTimerEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Index = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Timeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Timeout = VAL_INT(childval);
+  }
+  return res;
+}

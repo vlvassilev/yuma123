@@ -21,66 +21,97 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_ptp_Config (
+extern status_t build_to_xml_ptp_Config(
     val_value_t *parentval,
     struct ptppb_Config *entry);
-
-extern status_t build_to_xml_ptp_SystemConfig (
+extern status_t build_to_xml_ptp_SystemConfig(
     val_value_t *parentval,
     struct ptppb_SystemConfig *entry);
-
-extern status_t build_to_xml_ptp_SystemModeConfig (
+extern status_t build_to_xml_ptp_SystemModeConfig(
     val_value_t *parentval,
     struct ptppb_SystemModeConfig *entry);
-
-extern status_t build_to_xml_ptp_SystemTimerConfig (
+extern status_t build_to_xml_ptp_SystemTimerConfig(
     val_value_t *parentval,
     struct ptppb_SystemTimerConfig *entry);
-
-extern status_t build_to_xml_ptp_SystemClockConfig (
+extern status_t build_to_xml_ptp_SystemClockConfig(
     val_value_t *parentval,
     struct ptppb_SystemClockConfig *entry);
-
-extern status_t build_to_xml_ptp_PortConfig (
+extern status_t build_to_xml_ptp_PortConfig(
     val_value_t *parentval,
     struct ptppb_PortConfig *entry);
-
-extern status_t build_to_xml_ptp_PortConfigEntry (
+extern status_t build_to_xml_ptp_PortConfigEntry(
     val_value_t *parentval,
     struct ptppb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_ptp_Status (
+extern status_t build_to_xml_ptp_Status(
     val_value_t *parentval,
     struct ptppb_Status *entry);
-
-extern status_t build_to_xml_ptp_ClockStatus (
+extern status_t build_to_xml_ptp_ClockStatus(
     val_value_t *parentval,
     struct ptppb_ClockStatus *entry);
-
-extern status_t build_to_xml_ptp_ClockInfo (
+extern status_t build_to_xml_ptp_ClockInfo(
     val_value_t *parentval,
     struct ptppb_ClockInfo *entry);
-
-extern status_t build_to_xml_ptp_GrandmasterInfo (
+extern status_t build_to_xml_ptp_GrandmasterInfo(
     val_value_t *parentval,
     struct ptppb_GrandmasterInfo *entry);
-
-extern status_t build_to_xml_ptp_ClockQuality (
+extern status_t build_to_xml_ptp_ClockQuality(
     val_value_t *parentval,
     struct ptppb_ClockQuality *entry);
-
-extern status_t build_to_xml_ptp_PortStatusEntry (
+extern status_t build_to_xml_ptp_PortStatusEntry(
     val_value_t *parentval,
     struct ptppb_PortStatusEntry *entry);
-
-extern status_t build_to_xml_ptp_PortCounterEntry (
+extern status_t build_to_xml_ptp_PortCounterEntry(
     val_value_t *parentval,
     struct ptppb_PortCounterEntry *entry);
-
-extern status_t build_to_xml_ptp_TimeStatus (
+extern status_t build_to_xml_ptp_TimeStatus(
     val_value_t *parentval,
     struct ptppb_TimeStatus *entry);
 
+extern status_t build_to_priv_ptp_Config(
+    val_value_t *parentval,
+    struct ptppb_Config *entry);
+extern status_t build_to_priv_ptp_SystemConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemConfig *entry);
+extern status_t build_to_priv_ptp_SystemModeConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemModeConfig *entry);
+extern status_t build_to_priv_ptp_SystemTimerConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemTimerConfig *entry);
+extern status_t build_to_priv_ptp_SystemClockConfig(
+    val_value_t *parentval,
+    struct ptppb_SystemClockConfig *entry);
+extern status_t build_to_priv_ptp_PortConfig(
+    val_value_t *parentval,
+    struct ptppb_PortConfig *entry);
+extern status_t build_to_priv_ptp_PortConfigEntry(
+    val_value_t *parentval,
+    struct ptppb_PortConfigEntry *entry);
+extern status_t build_to_priv_ptp_Status(
+    val_value_t *parentval,
+    struct ptppb_Status *entry);
+extern status_t build_to_priv_ptp_ClockStatus(
+    val_value_t *parentval,
+    struct ptppb_ClockStatus *entry);
+extern status_t build_to_priv_ptp_ClockInfo(
+    val_value_t *parentval,
+    struct ptppb_ClockInfo *entry);
+extern status_t build_to_priv_ptp_GrandmasterInfo(
+    val_value_t *parentval,
+    struct ptppb_GrandmasterInfo *entry);
+extern status_t build_to_priv_ptp_ClockQuality(
+    val_value_t *parentval,
+    struct ptppb_ClockQuality *entry);
+extern status_t build_to_priv_ptp_PortStatusEntry(
+    val_value_t *parentval,
+    struct ptppb_PortStatusEntry *entry);
+extern status_t build_to_priv_ptp_PortCounterEntry(
+    val_value_t *parentval,
+    struct ptppb_PortCounterEntry *entry);
+extern status_t build_to_priv_ptp_TimeStatus(
+    val_value_t *parentval,
+    struct ptppb_TimeStatus *entry);
 
 #endif /* _H_intri_ptp_trans */
 

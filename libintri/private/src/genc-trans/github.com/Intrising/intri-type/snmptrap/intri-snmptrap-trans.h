@@ -21,10 +21,13 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_snmptrap_SNMPTrapCounter (
+extern status_t build_to_xml_snmptrap_SNMPTrapCounter(
     val_value_t *parentval,
     struct snmptrappb_SNMPTrapCounter *entry);
 
+extern status_t build_to_priv_snmptrap_SNMPTrapCounter(
+    val_value_t *parentval,
+    struct snmptrappb_SNMPTrapCounter *entry);
 
 #endif /* _H_intri_snmptrap_trans */
 

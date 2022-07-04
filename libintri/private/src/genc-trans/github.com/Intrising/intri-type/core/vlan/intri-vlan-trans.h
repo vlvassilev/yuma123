@@ -21,114 +21,169 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_vlan_MACBasedGroupEntry (
+extern status_t build_to_xml_vlan_MACBasedGroupEntry(
     val_value_t *parentval,
     struct vlanpb_MACBasedGroupEntry *entry);
-
-extern status_t build_to_xml_vlan_MACBasedGroupMemberEntry (
+extern status_t build_to_xml_vlan_MACBasedGroupMemberEntry(
     val_value_t *parentval,
     struct vlanpb_MACBasedGroupMemberEntry *entry);
-
-extern status_t build_to_xml_vlan_MACBasedConfig (
+extern status_t build_to_xml_vlan_MACBasedConfig(
     val_value_t *parentval,
     struct vlanpb_MACBasedConfig *entry);
-
-extern status_t build_to_xml_vlan_ProtocolBasedGroupEntry (
+extern status_t build_to_xml_vlan_ProtocolBasedGroupEntry(
     val_value_t *parentval,
     struct vlanpb_ProtocolBasedGroupEntry *entry);
-
-extern status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry (
+extern status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
     val_value_t *parentval,
     struct vlanpb_ProtocolBasedGroupMemberEntry *entry);
-
-extern status_t build_to_xml_vlan_ProtocolBasedConfig (
+extern status_t build_to_xml_vlan_ProtocolBasedConfig(
     val_value_t *parentval,
     struct vlanpb_ProtocolBasedConfig *entry);
-
-extern status_t build_to_xml_vlan_SelectiveQinQConfig (
+extern status_t build_to_xml_vlan_SelectiveQinQConfig(
     val_value_t *parentval,
     struct vlanpb_SelectiveQinQConfig *entry);
-
-extern status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry (
+extern status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry(
     val_value_t *parentval,
     struct vlanpb_SelectiveQinQTranslatedEntry *entry);
-
-extern status_t build_to_xml_vlan_SubnetBasedGroupEntry (
+extern status_t build_to_xml_vlan_SubnetBasedGroupEntry(
     val_value_t *parentval,
     struct vlanpb_SubnetBasedGroupEntry *entry);
-
-extern status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry (
+extern status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry(
     val_value_t *parentval,
     struct vlanpb_SubnetBasedGroupMemberEntry *entry);
-
-extern status_t build_to_xml_vlan_SubnetBasedConfig (
+extern status_t build_to_xml_vlan_SubnetBasedConfig(
     val_value_t *parentval,
     struct vlanpb_SubnetBasedConfig *entry);
-
-extern status_t build_to_xml_vlan_MappingPort (
+extern status_t build_to_xml_vlan_MappingPort(
     val_value_t *parentval,
     struct vlanpb_MappingPort *entry);
-
-extern status_t build_to_xml_vlan_MappingPortEntry (
+extern status_t build_to_xml_vlan_MappingPortEntry(
     val_value_t *parentval,
     struct vlanpb_MappingPortEntry *entry);
-
-extern status_t build_to_xml_vlan_MappingConfig (
+extern status_t build_to_xml_vlan_MappingConfig(
     val_value_t *parentval,
     struct vlanpb_MappingConfig *entry);
-
-extern status_t build_to_xml_vlan_MappingEntry (
+extern status_t build_to_xml_vlan_MappingEntry(
     val_value_t *parentval,
     struct vlanpb_MappingEntry *entry);
-
-extern status_t build_to_xml_vlan_Config (
+extern status_t build_to_xml_vlan_Config(
     val_value_t *parentval,
     struct vlanpb_Config *entry);
-
-extern status_t build_to_xml_vlan_ManagementConfig (
+extern status_t build_to_xml_vlan_ManagementConfig(
     val_value_t *parentval,
     struct vlanpb_ManagementConfig *entry);
-
-extern status_t build_to_xml_vlan_VoiceConfig (
+extern status_t build_to_xml_vlan_VoiceConfig(
     val_value_t *parentval,
     struct vlanpb_VoiceConfig *entry);
-
-extern status_t build_to_xml_vlan_PortsConfig (
+extern status_t build_to_xml_vlan_PortsConfig(
     val_value_t *parentval,
     struct vlanpb_PortsConfig *entry);
-
-extern status_t build_to_xml_vlan_PortEntry (
+extern status_t build_to_xml_vlan_PortEntry(
     val_value_t *parentval,
     struct vlanpb_PortEntry *entry);
-
-extern status_t build_to_xml_vlan_FiltersConfig (
+extern status_t build_to_xml_vlan_FiltersConfig(
     val_value_t *parentval,
     struct vlanpb_FiltersConfig *entry);
-
-extern status_t build_to_xml_vlan_FilterEntry (
+extern status_t build_to_xml_vlan_FilterEntry(
     val_value_t *parentval,
     struct vlanpb_FilterEntry *entry);
-
-extern status_t build_to_xml_vlan_Used (
+extern status_t build_to_xml_vlan_Used(
     val_value_t *parentval,
     struct vlanpb_Used *entry);
-
-extern status_t build_to_xml_vlan_VlanPortVlanEntry (
+extern status_t build_to_xml_vlan_VlanPortVlanEntry(
     val_value_t *parentval,
     struct vlanpb_VlanPortVlanEntry *entry);
-
-extern status_t build_to_xml_vlan_DefaultPortVlanEntry (
+extern status_t build_to_xml_vlan_DefaultPortVlanEntry(
     val_value_t *parentval,
     struct vlanpb_DefaultPortVlanEntry *entry);
-
-extern status_t build_to_xml_vlan_StatusEntry (
+extern status_t build_to_xml_vlan_StatusEntry(
     val_value_t *parentval,
     struct vlanpb_StatusEntry *entry);
-
-extern status_t build_to_xml_vlan_StatusMapping (
+extern status_t build_to_xml_vlan_StatusMapping(
     val_value_t *parentval,
     struct vlanpb_StatusMapping *entry);
 
+extern status_t build_to_priv_vlan_MACBasedGroupEntry(
+    val_value_t *parentval,
+    struct vlanpb_MACBasedGroupEntry *entry);
+extern status_t build_to_priv_vlan_MACBasedGroupMemberEntry(
+    val_value_t *parentval,
+    struct vlanpb_MACBasedGroupMemberEntry *entry);
+extern status_t build_to_priv_vlan_MACBasedConfig(
+    val_value_t *parentval,
+    struct vlanpb_MACBasedConfig *entry);
+extern status_t build_to_priv_vlan_ProtocolBasedGroupEntry(
+    val_value_t *parentval,
+    struct vlanpb_ProtocolBasedGroupEntry *entry);
+extern status_t build_to_priv_vlan_ProtocolBasedGroupMemberEntry(
+    val_value_t *parentval,
+    struct vlanpb_ProtocolBasedGroupMemberEntry *entry);
+extern status_t build_to_priv_vlan_ProtocolBasedConfig(
+    val_value_t *parentval,
+    struct vlanpb_ProtocolBasedConfig *entry);
+extern status_t build_to_priv_vlan_SelectiveQinQConfig(
+    val_value_t *parentval,
+    struct vlanpb_SelectiveQinQConfig *entry);
+extern status_t build_to_priv_vlan_SelectiveQinQTranslatedEntry(
+    val_value_t *parentval,
+    struct vlanpb_SelectiveQinQTranslatedEntry *entry);
+extern status_t build_to_priv_vlan_SubnetBasedGroupEntry(
+    val_value_t *parentval,
+    struct vlanpb_SubnetBasedGroupEntry *entry);
+extern status_t build_to_priv_vlan_SubnetBasedGroupMemberEntry(
+    val_value_t *parentval,
+    struct vlanpb_SubnetBasedGroupMemberEntry *entry);
+extern status_t build_to_priv_vlan_SubnetBasedConfig(
+    val_value_t *parentval,
+    struct vlanpb_SubnetBasedConfig *entry);
+extern status_t build_to_priv_vlan_MappingPort(
+    val_value_t *parentval,
+    struct vlanpb_MappingPort *entry);
+extern status_t build_to_priv_vlan_MappingPortEntry(
+    val_value_t *parentval,
+    struct vlanpb_MappingPortEntry *entry);
+extern status_t build_to_priv_vlan_MappingConfig(
+    val_value_t *parentval,
+    struct vlanpb_MappingConfig *entry);
+extern status_t build_to_priv_vlan_MappingEntry(
+    val_value_t *parentval,
+    struct vlanpb_MappingEntry *entry);
+extern status_t build_to_priv_vlan_Config(
+    val_value_t *parentval,
+    struct vlanpb_Config *entry);
+extern status_t build_to_priv_vlan_ManagementConfig(
+    val_value_t *parentval,
+    struct vlanpb_ManagementConfig *entry);
+extern status_t build_to_priv_vlan_VoiceConfig(
+    val_value_t *parentval,
+    struct vlanpb_VoiceConfig *entry);
+extern status_t build_to_priv_vlan_PortsConfig(
+    val_value_t *parentval,
+    struct vlanpb_PortsConfig *entry);
+extern status_t build_to_priv_vlan_PortEntry(
+    val_value_t *parentval,
+    struct vlanpb_PortEntry *entry);
+extern status_t build_to_priv_vlan_FiltersConfig(
+    val_value_t *parentval,
+    struct vlanpb_FiltersConfig *entry);
+extern status_t build_to_priv_vlan_FilterEntry(
+    val_value_t *parentval,
+    struct vlanpb_FilterEntry *entry);
+extern status_t build_to_priv_vlan_Used(
+    val_value_t *parentval,
+    struct vlanpb_Used *entry);
+extern status_t build_to_priv_vlan_VlanPortVlanEntry(
+    val_value_t *parentval,
+    struct vlanpb_VlanPortVlanEntry *entry);
+extern status_t build_to_priv_vlan_DefaultPortVlanEntry(
+    val_value_t *parentval,
+    struct vlanpb_DefaultPortVlanEntry *entry);
+extern status_t build_to_priv_vlan_StatusEntry(
+    val_value_t *parentval,
+    struct vlanpb_StatusEntry *entry);
+extern status_t build_to_priv_vlan_StatusMapping(
+    val_value_t *parentval,
+    struct vlanpb_StatusMapping *entry);
 
 #endif /* _H_intri_vlan_trans */
 

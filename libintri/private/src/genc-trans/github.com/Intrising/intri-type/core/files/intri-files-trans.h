@@ -21,42 +21,61 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_files_Config (
+extern status_t build_to_xml_files_Config(
     val_value_t *parentval,
     struct filespb_Config *entry);
-
-extern status_t build_to_xml_files_ActivateCertificate (
+extern status_t build_to_xml_files_ActivateCertificate(
     val_value_t *parentval,
     struct filespb_ActivateCertificate *entry);
-
-extern status_t build_to_xml_files_CertificateID (
+extern status_t build_to_xml_files_CertificateID(
     val_value_t *parentval,
     struct filespb_CertificateID *entry);
-
-extern status_t build_to_xml_files_CertificateIDList (
+extern status_t build_to_xml_files_CertificateIDList(
     val_value_t *parentval,
     struct filespb_CertificateIDList *entry);
-
-extern status_t build_to_xml_files_CertificateData (
+extern status_t build_to_xml_files_CertificateData(
     val_value_t *parentval,
     struct filespb_CertificateData *entry);
-
-extern status_t build_to_xml_files_CertificateUserID (
+extern status_t build_to_xml_files_CertificateUserID(
     val_value_t *parentval,
     struct filespb_CertificateUserID *entry);
-
-extern status_t build_to_xml_files_CertificateUserIDList (
+extern status_t build_to_xml_files_CertificateUserIDList(
     val_value_t *parentval,
     struct filespb_CertificateUserIDList *entry);
-
-extern status_t build_to_xml_files_CertificateType (
+extern status_t build_to_xml_files_CertificateType(
     val_value_t *parentval,
     struct filespb_CertificateType *entry);
-
-extern status_t build_to_xml_files_CertificateInfo (
+extern status_t build_to_xml_files_CertificateInfo(
     val_value_t *parentval,
     struct filespb_CertificateInfo *entry);
 
+extern status_t build_to_priv_files_Config(
+    val_value_t *parentval,
+    struct filespb_Config *entry);
+extern status_t build_to_priv_files_ActivateCertificate(
+    val_value_t *parentval,
+    struct filespb_ActivateCertificate *entry);
+extern status_t build_to_priv_files_CertificateID(
+    val_value_t *parentval,
+    struct filespb_CertificateID *entry);
+extern status_t build_to_priv_files_CertificateIDList(
+    val_value_t *parentval,
+    struct filespb_CertificateIDList *entry);
+extern status_t build_to_priv_files_CertificateData(
+    val_value_t *parentval,
+    struct filespb_CertificateData *entry);
+extern status_t build_to_priv_files_CertificateUserID(
+    val_value_t *parentval,
+    struct filespb_CertificateUserID *entry);
+extern status_t build_to_priv_files_CertificateUserIDList(
+    val_value_t *parentval,
+    struct filespb_CertificateUserIDList *entry);
+extern status_t build_to_priv_files_CertificateType(
+    val_value_t *parentval,
+    struct filespb_CertificateType *entry);
+extern status_t build_to_priv_files_CertificateInfo(
+    val_value_t *parentval,
+    struct filespb_CertificateInfo *entry);
 
 #endif /* _H_intri_files_trans */
 

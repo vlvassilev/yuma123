@@ -30,42 +30,44 @@
 #include "intri-date-trans.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-status_t build_to_xml_date_Date (
+
+status_t build_to_xml_date_Date(
     val_value_t *parentval,
     struct datepb_Date *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Year",
-    &res);
+      "Year",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Year;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Month",
-    &res);
+      "Month",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Month;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Day",
-    &res);
+      "Day",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -74,3 +76,31 @@ status_t build_to_xml_date_Date (
   return res;
 }
 
+status_t build_to_priv_date_Date(
+    val_value_t *parentval,
+    struct datepb_Date *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Year");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Year = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Month");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Month = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Day");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Day = VAL_INT(childval);
+  }
+  return res;
+}

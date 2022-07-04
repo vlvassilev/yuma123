@@ -21,62 +21,91 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_portauthentication_Config (
+extern status_t build_to_xml_portauthentication_Config(
     val_value_t *parentval,
     struct portauthenticationpb_Config *entry);
-
-extern status_t build_to_xml_portauthentication_AuthorizedMACsEntry (
+extern status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
     val_value_t *parentval,
     struct portauthenticationpb_AuthorizedMACsEntry *entry);
-
-extern status_t build_to_xml_portauthentication_AuthorizedMACs (
+extern status_t build_to_xml_portauthentication_AuthorizedMACs(
     val_value_t *parentval,
     struct portauthenticationpb_AuthorizedMACs *entry);
-
-extern status_t build_to_xml_portauthentication_SystemConfig (
+extern status_t build_to_xml_portauthentication_SystemConfig(
     val_value_t *parentval,
     struct portauthenticationpb_SystemConfig *entry);
-
-extern status_t build_to_xml_portauthentication_PortConfig (
+extern status_t build_to_xml_portauthentication_PortConfig(
     val_value_t *parentval,
     struct portauthenticationpb_PortConfig *entry);
-
-extern status_t build_to_xml_portauthentication_PortConfigEntry (
+extern status_t build_to_xml_portauthentication_PortConfigEntry(
     val_value_t *parentval,
     struct portauthenticationpb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_portauthentication_PortStatus (
+extern status_t build_to_xml_portauthentication_PortStatus(
     val_value_t *parentval,
     struct portauthenticationpb_PortStatus *entry);
-
-extern status_t build_to_xml_portauthentication_PortStatusEntry (
+extern status_t build_to_xml_portauthentication_PortStatusEntry(
     val_value_t *parentval,
     struct portauthenticationpb_PortStatusEntry *entry);
-
-extern status_t build_to_xml_portauthentication_PortAuthorizationStatus (
+extern status_t build_to_xml_portauthentication_PortAuthorizationStatus(
     val_value_t *parentval,
     struct portauthenticationpb_PortAuthorizationStatus *entry);
-
-extern status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry (
+extern status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
     val_value_t *parentval,
     struct portauthenticationpb_PortAuthorizationStatusEntry *entry);
-
-extern status_t build_to_xml_portauthentication_UserStatus (
+extern status_t build_to_xml_portauthentication_UserStatus(
     val_value_t *parentval,
     struct portauthenticationpb_UserStatus *entry);
-
-extern status_t build_to_xml_portauthentication_UserStatusEntry (
+extern status_t build_to_xml_portauthentication_UserStatusEntry(
     val_value_t *parentval,
     struct portauthenticationpb_UserStatusEntry *entry);
-
-extern status_t build_to_xml_portauthentication_LearnMACNowEntry (
+extern status_t build_to_xml_portauthentication_LearnMACNowEntry(
     val_value_t *parentval,
     struct portauthenticationpb_LearnMACNowEntry *entry);
-
-extern status_t build_to_xml_portauthentication_UnauthorizeMACEntry (
+extern status_t build_to_xml_portauthentication_UnauthorizeMACEntry(
     val_value_t *parentval,
     struct portauthenticationpb_UnauthorizeMACEntry *entry);
 
+extern status_t build_to_priv_portauthentication_Config(
+    val_value_t *parentval,
+    struct portauthenticationpb_Config *entry);
+extern status_t build_to_priv_portauthentication_AuthorizedMACsEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_AuthorizedMACsEntry *entry);
+extern status_t build_to_priv_portauthentication_AuthorizedMACs(
+    val_value_t *parentval,
+    struct portauthenticationpb_AuthorizedMACs *entry);
+extern status_t build_to_priv_portauthentication_SystemConfig(
+    val_value_t *parentval,
+    struct portauthenticationpb_SystemConfig *entry);
+extern status_t build_to_priv_portauthentication_PortConfig(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortConfig *entry);
+extern status_t build_to_priv_portauthentication_PortConfigEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortConfigEntry *entry);
+extern status_t build_to_priv_portauthentication_PortStatus(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortStatus *entry);
+extern status_t build_to_priv_portauthentication_PortStatusEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortStatusEntry *entry);
+extern status_t build_to_priv_portauthentication_PortAuthorizationStatus(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortAuthorizationStatus *entry);
+extern status_t build_to_priv_portauthentication_PortAuthorizationStatusEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortAuthorizationStatusEntry *entry);
+extern status_t build_to_priv_portauthentication_UserStatus(
+    val_value_t *parentval,
+    struct portauthenticationpb_UserStatus *entry);
+extern status_t build_to_priv_portauthentication_UserStatusEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_UserStatusEntry *entry);
+extern status_t build_to_priv_portauthentication_LearnMACNowEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_LearnMACNowEntry *entry);
+extern status_t build_to_priv_portauthentication_UnauthorizeMACEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_UnauthorizeMACEntry *entry);
 
 #endif /* _H_intri_portauthentication_trans */
 

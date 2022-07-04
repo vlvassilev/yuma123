@@ -21,10 +21,13 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_timeofday_TimeOfDay (
+extern status_t build_to_xml_timeofday_TimeOfDay(
     val_value_t *parentval,
     struct timeofdaypb_TimeOfDay *entry);
 
+extern status_t build_to_priv_timeofday_TimeOfDay(
+    val_value_t *parentval,
+    struct timeofdaypb_TimeOfDay *entry);
 
 #endif /* _H_intri_timeofday_trans */
 

@@ -21,22 +21,31 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_stormcontrol_SuppressionConfigEntry (
+extern status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
     val_value_t *parentval,
     struct stormcontrolpb_SuppressionConfigEntry *entry);
-
-extern status_t build_to_xml_stormcontrol_PortConfigEntry (
+extern status_t build_to_xml_stormcontrol_PortConfigEntry(
     val_value_t *parentval,
     struct stormcontrolpb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_stormcontrol_PortConfig (
+extern status_t build_to_xml_stormcontrol_PortConfig(
     val_value_t *parentval,
     struct stormcontrolpb_PortConfig *entry);
-
-extern status_t build_to_xml_stormcontrol_Config (
+extern status_t build_to_xml_stormcontrol_Config(
     val_value_t *parentval,
     struct stormcontrolpb_Config *entry);
 
+extern status_t build_to_priv_stormcontrol_SuppressionConfigEntry(
+    val_value_t *parentval,
+    struct stormcontrolpb_SuppressionConfigEntry *entry);
+extern status_t build_to_priv_stormcontrol_PortConfigEntry(
+    val_value_t *parentval,
+    struct stormcontrolpb_PortConfigEntry *entry);
+extern status_t build_to_priv_stormcontrol_PortConfig(
+    val_value_t *parentval,
+    struct stormcontrolpb_PortConfig *entry);
+extern status_t build_to_priv_stormcontrol_Config(
+    val_value_t *parentval,
+    struct stormcontrolpb_Config *entry);
 
 #endif /* _H_intri_stormcontrol_trans */
 

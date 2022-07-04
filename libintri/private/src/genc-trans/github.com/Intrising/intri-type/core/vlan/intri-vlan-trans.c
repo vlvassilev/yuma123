@@ -32,42 +32,44 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_vlan_MACBasedGroupEntry (
+
+status_t build_to_xml_vlan_MACBasedGroupEntry(
     val_value_t *parentval,
     struct vlanpb_MACBasedGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddressMask",
-    &res);
+      "MACAddressMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddressMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupID",
-    &res);
+      "GroupID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -75,170 +77,182 @@ status_t build_to_xml_vlan_MACBasedGroupEntry (
   VAL_INT(childval) = entry->GroupID;
   return res;
 }
-
-status_t build_to_xml_vlan_MACBasedGroupMemberEntry (
+status_t build_to_xml_vlan_MACBasedGroupMemberEntry(
     val_value_t *parentval,
     struct vlanpb_MACBasedGroupMemberEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupID",
-    &res);
+      "GroupID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->GroupID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyList",
-    &res);
+      "IdentifyList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->IdentifyList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "IdentifyList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->IdentifyList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "IdentifyList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->IdentifyList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_MACBasedConfig (
+status_t build_to_xml_vlan_MACBasedConfig(
     val_value_t *parentval,
     struct vlanpb_MACBasedConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "GroupList",
-    &res);
+      "GroupList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GroupList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GroupList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_MACBasedGroupEntry(
-    listval,
-    entry->GroupList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GroupList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_MACBasedGroupEntry(
+        listval,
+        entry->GroupList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupMemberList",
-    &res);
+      "GroupMemberList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GroupMemberList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GroupMemberList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_MACBasedGroupMemberEntry(
-    listval,
-    entry->GroupMemberList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GroupMemberList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_MACBasedGroupMemberEntry(
+        listval,
+        entry->GroupMemberList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_ProtocolBasedGroupEntry (
+status_t build_to_xml_vlan_ProtocolBasedGroupEntry(
     val_value_t *parentval,
     struct vlanpb_ProtocolBasedGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "GroupID",
-    &res);
+      "GroupID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->GroupID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Encapsulation",
-    &res);
+      "Encapsulation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Encapsulation;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Encapsulation) {
+    case vlanpb_ProtocolBasedEncapsulationTypeOptions_PROTOCOL_BASED_ENCAPSULATION_TYPE_ETHERNET_V2:
+      enum_str = "PROTOCOL_BASED_ENCAPSULATION_TYPE_ETHERNET_V2";
+      break;
+    case vlanpb_ProtocolBasedEncapsulationTypeOptions_PROTOCOL_BASED_ENCAPSULATION_TYPE_LLC:
+      enum_str = "PROTOCOL_BASED_ENCAPSULATION_TYPE_LLC";
+      break;
+    case vlanpb_ProtocolBasedEncapsulationTypeOptions_PROTOCOL_BASED_ENCAPSULATION_TYPE_LLCSNAP:
+      enum_str = "PROTOCOL_BASED_ENCAPSULATION_TYPE_LLCSNAP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Protocol",
-    &res);
+      "Protocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -246,195 +260,199 @@ status_t build_to_xml_vlan_ProtocolBasedGroupEntry (
   VAL_STRING(childval) = entry->Protocol;
   return res;
 }
-
-status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry (
+status_t build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
     val_value_t *parentval,
     struct vlanpb_ProtocolBasedGroupMemberEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupID",
-    &res);
+      "GroupID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->GroupID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyList",
-    &res);
+      "IdentifyList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->IdentifyList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "IdentifyList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->IdentifyList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "IdentifyList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->IdentifyList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_ProtocolBasedConfig (
+status_t build_to_xml_vlan_ProtocolBasedConfig(
     val_value_t *parentval,
     struct vlanpb_ProtocolBasedConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "GroupList",
-    &res);
+      "GroupList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GroupList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GroupList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_ProtocolBasedGroupEntry(
-    listval,
-    entry->GroupList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GroupList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_ProtocolBasedGroupEntry(
+        listval,
+        entry->GroupList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupMemberList",
-    &res);
+      "GroupMemberList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GroupMemberList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GroupMemberList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
-    listval,
-    entry->GroupMemberList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GroupMemberList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_ProtocolBasedGroupMemberEntry(
+        listval,
+        entry->GroupMemberList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_SelectiveQinQConfig (
+status_t build_to_xml_vlan_SelectiveQinQConfig(
     val_value_t *parentval,
     struct vlanpb_SelectiveQinQConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_SelectiveQinQTranslatedEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_SelectiveQinQTranslatedEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry (
+status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry(
     val_value_t *parentval,
     struct vlanpb_SelectiveQinQTranslatedEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceVlanID",
-    &res);
+      "SourceVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SourceVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TranslatedVlanID",
-    &res);
+      "TranslatedVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -442,55 +460,62 @@ status_t build_to_xml_vlan_SelectiveQinQTranslatedEntry (
   VAL_INT(childval) = entry->TranslatedVlanID;
   return res;
 }
-
-status_t build_to_xml_vlan_SubnetBasedGroupEntry (
+status_t build_to_xml_vlan_SubnetBasedGroupEntry(
     val_value_t *parentval,
     struct vlanpb_SubnetBasedGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddress",
-    &res);
+      "IPAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IPAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddressMask",
-    &res);
+      "IPAddressMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IPAddressMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPVersion",
-    &res);
+      "IPVersion",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->IPVersion;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->IPVersion) {
+    case vlanpb_IPVersionTypeOptions_IP_VERSION_TYPE_V4:
+      enum_str = "IP_VERSION_TYPE_V4";
+      break;
+    case vlanpb_IPVersionTypeOptions_IP_VERSION_TYPE_V6:
+      enum_str = "IP_VERSION_TYPE_V6";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "GroupID",
-    &res);
+      "GroupID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -498,200 +523,204 @@ status_t build_to_xml_vlan_SubnetBasedGroupEntry (
   VAL_INT(childval) = entry->GroupID;
   return res;
 }
-
-status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry (
+status_t build_to_xml_vlan_SubnetBasedGroupMemberEntry(
     val_value_t *parentval,
     struct vlanpb_SubnetBasedGroupMemberEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupID",
-    &res);
+      "GroupID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->GroupID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyList",
-    &res);
+      "IdentifyList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->IdentifyList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "IdentifyList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->IdentifyList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "IdentifyList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->IdentifyList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_SubnetBasedConfig (
+status_t build_to_xml_vlan_SubnetBasedConfig(
     val_value_t *parentval,
     struct vlanpb_SubnetBasedConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "GroupList",
-    &res);
+      "GroupList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GroupList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GroupList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_SubnetBasedGroupEntry(
-    listval,
-    entry->GroupList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GroupList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_SubnetBasedGroupEntry(
+        listval,
+        entry->GroupList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GroupMemberList",
-    &res);
+      "GroupMemberList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GroupMemberList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GroupMemberList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_SubnetBasedGroupMemberEntry(
-    listval,
-    entry->GroupMemberList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GroupMemberList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_SubnetBasedGroupMemberEntry(
+        listval,
+        entry->GroupMemberList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_MappingPort (
+status_t build_to_xml_vlan_MappingPort(
     val_value_t *parentval,
     struct vlanpb_MappingPort *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_MappingPortEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_MappingPortEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_MappingPortEntry (
+status_t build_to_xml_vlan_MappingPortEntry(
     val_value_t *parentval,
     struct vlanpb_MappingPortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -699,97 +728,99 @@ status_t build_to_xml_vlan_MappingPortEntry (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_vlan_MappingConfig (
+status_t build_to_xml_vlan_MappingConfig(
     val_value_t *parentval,
     struct vlanpb_MappingConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_MappingEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_MappingEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_MappingPortEntry(
-    listval,
-    entry->PortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_MappingPortEntry(
+        listval,
+        entry->PortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_MappingEntry (
+status_t build_to_xml_vlan_MappingEntry(
     val_value_t *parentval,
     struct vlanpb_MappingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceVlanID",
-    &res);
+      "SourceVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SourceVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TranslatedVlanID",
-    &res);
+      "TranslatedVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -797,180 +828,176 @@ status_t build_to_xml_vlan_MappingEntry (
   VAL_INT(childval) = entry->TranslatedVlanID;
   return res;
 }
-
-status_t build_to_xml_vlan_Config (
+status_t build_to_xml_vlan_Config(
     val_value_t *parentval,
     struct vlanpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Management",
-    &res);
+      "Management",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_ManagementConfig(
+  res = build_to_xml_vlan_ManagementConfig(
       childval,
-    entry->Management);
+      entry->Management);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Voice",
-    &res);
+      "Voice",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_VoiceConfig(
+  res = build_to_xml_vlan_VoiceConfig(
       childval,
-    entry->Voice);
+      entry->Voice);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ports",
-    &res);
+      "Ports",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_PortsConfig(
+  res = build_to_xml_vlan_PortsConfig(
       childval,
-    entry->Ports);
+      entry->Ports);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Filters",
-    &res);
+      "Filters",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_FiltersConfig(
+  res = build_to_xml_vlan_FiltersConfig(
       childval,
-    entry->Filters);
+      entry->Filters);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACBased",
-    &res);
+      "MACBased",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_MACBasedConfig(
+  res = build_to_xml_vlan_MACBasedConfig(
       childval,
-    entry->MACBased);
+      entry->MACBased);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SubnetBased",
-    &res);
+      "SubnetBased",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_SubnetBasedConfig(
+  res = build_to_xml_vlan_SubnetBasedConfig(
       childval,
-    entry->SubnetBased);
+      entry->SubnetBased);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ProtocolBased",
-    &res);
+      "ProtocolBased",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_ProtocolBasedConfig(
+  res = build_to_xml_vlan_ProtocolBasedConfig(
       childval,
-    entry->ProtocolBased);
+      entry->ProtocolBased);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Translation",
-    &res);
+      "Translation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_MappingConfig(
+  res = build_to_xml_vlan_MappingConfig(
       childval,
-    entry->Translation);
+      entry->Translation);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SelectiveQinQ",
-    &res);
+      "SelectiveQinQ",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_SelectiveQinQConfig(
+  res = build_to_xml_vlan_SelectiveQinQConfig(
       childval,
-    entry->SelectiveQinQ);
+      entry->SelectiveQinQ);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_vlan_ManagementConfig (
+status_t build_to_xml_vlan_ManagementConfig(
     val_value_t *parentval,
     struct vlanpb_ManagementConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ManagementVlanID",
-    &res);
+      "ManagementVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -978,67 +1005,65 @@ status_t build_to_xml_vlan_ManagementConfig (
   VAL_INT(childval) = entry->ManagementVlanID;
   return res;
 }
-
-status_t build_to_xml_vlan_VoiceConfig (
+status_t build_to_xml_vlan_VoiceConfig(
     val_value_t *parentval,
     struct vlanpb_VoiceConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Prio",
-    &res);
+      "Prio",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Prio;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SignalPrio",
-    &res);
+      "SignalPrio",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SignalPrio;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DSCP",
-    &res);
+      "DSCP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DSCP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SignalDSCP",
-    &res);
+      "SignalDSCP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1046,262 +1071,299 @@ status_t build_to_xml_vlan_VoiceConfig (
   VAL_INT(childval) = entry->SignalDSCP;
   return res;
 }
-
-status_t build_to_xml_vlan_PortsConfig (
+status_t build_to_xml_vlan_PortsConfig(
     val_value_t *parentval,
     struct vlanpb_PortsConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_PortEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_PortEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_PortEntry (
+status_t build_to_xml_vlan_PortEntry(
     val_value_t *parentval,
     struct vlanpb_PortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case vlanpb_PortConfigVLANModeTypeOptions_PORT_CONFIG_VLAN_MODE_TYPE_ACCESS:
+      enum_str = "PORT_CONFIG_VLAN_MODE_TYPE_ACCESS";
+      break;
+    case vlanpb_PortConfigVLANModeTypeOptions_PORT_CONFIG_VLAN_MODE_TYPE_HYBRID:
+      enum_str = "PORT_CONFIG_VLAN_MODE_TYPE_HYBRID";
+      break;
+    case vlanpb_PortConfigVLANModeTypeOptions_PORT_CONFIG_VLAN_MODE_TYPE_TRUNK:
+      enum_str = "PORT_CONFIG_VLAN_MODE_TYPE_TRUNK";
+      break;
+    case vlanpb_PortConfigVLANModeTypeOptions_PORT_CONFIG_VLAN_MODE_TYPE_QINQ_CUSTOMER:
+      enum_str = "PORT_CONFIG_VLAN_MODE_TYPE_QINQ_CUSTOMER";
+      break;
+    case vlanpb_PortConfigVLANModeTypeOptions_PORT_CONFIG_VLAN_MODE_TYPE_QINQ_PROVIDER:
+      enum_str = "PORT_CONFIG_VLAN_MODE_TYPE_QINQ_PROVIDER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DefaultVlanID",
-    &res);
+      "DefaultVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DefaultVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UnauthorizedVlanID",
-    &res);
+      "UnauthorizedVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->UnauthorizedVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FallBackVlanID",
-    &res);
+      "FallBackVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->FallBackVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QinQEthertype",
-    &res);
+      "QinQEthertype",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->QinQEthertype;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->QinQEthertype) {
+    case vlanpb_PortConfigQinQEtherTypeOptions_PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_8100:
+      enum_str = "PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_8100";
+      break;
+    case vlanpb_PortConfigQinQEtherTypeOptions_PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_88A8:
+      enum_str = "PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_88A8";
+      break;
+    case vlanpb_PortConfigQinQEtherTypeOptions_PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_9100:
+      enum_str = "PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_9100";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AcceptableFrametype",
-    &res);
+      "AcceptableFrametype",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AcceptableFrametype;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AcceptableFrametype) {
+    case vlanpb_AcceptFrameTypeOptions_ACCEPT_FRAME_TYPE_ALL:
+      enum_str = "ACCEPT_FRAME_TYPE_ALL";
+      break;
+    case vlanpb_AcceptFrameTypeOptions_ACCEPT_FRAME_TYPE_UNTAGGED_ONLY:
+      enum_str = "ACCEPT_FRAME_TYPE_UNTAGGED_ONLY";
+      break;
+    case vlanpb_AcceptFrameTypeOptions_ACCEPT_FRAME_TYPE_TAGGED_ONLY:
+      enum_str = "ACCEPT_FRAME_TYPE_TAGGED_ONLY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "TaggedList",
-    &res);
+      "TaggedList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->TaggedList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "TaggedList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->TaggedList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "TaggedList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->TaggedList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UntaggedList",
-    &res);
+      "UntaggedList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->UntaggedList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "UntaggedList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->UntaggedList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "UntaggedList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->UntaggedList[i];
   }
   return res;
 }
-
-status_t build_to_xml_vlan_FiltersConfig (
+status_t build_to_xml_vlan_FiltersConfig(
     val_value_t *parentval,
     struct vlanpb_FiltersConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_FilterEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_FilterEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_FilterEntry (
+status_t build_to_xml_vlan_FilterEntry(
     val_value_t *parentval,
     struct vlanpb_FilterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1309,257 +1371,1380 @@ status_t build_to_xml_vlan_FilterEntry (
   VAL_STRING(childval) = entry->Name;
   return res;
 }
-
-status_t build_to_xml_vlan_Used (
+status_t build_to_xml_vlan_Used(
     val_value_t *parentval,
     struct vlanpb_Used *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Used",
-    &res);
+      "Used",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Used;
+  switch (entry->Used) {
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_CONFIG:
+      enum_str = "STATUS_USED_TYPE_CONFIG";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_GVRP:
+      enum_str = "STATUS_USED_TYPE_GVRP";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_VIA_MAC_TABLE:
+      enum_str = "STATUS_USED_TYPE_VIA_MAC_TABLE";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_MAC_VIA_RADIUS:
+      enum_str = "STATUS_USED_TYPE_MAC_VIA_RADIUS";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_802_1X_VIA_RADIUS:
+      enum_str = "STATUS_USED_TYPE_802_1X_VIA_RADIUS";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_UNAUTHORIZED:
+      enum_str = "STATUS_USED_TYPE_UNAUTHORIZED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_vlan_VlanPortVlanEntry (
+status_t build_to_xml_vlan_VlanPortVlanEntry(
     val_value_t *parentval,
     struct vlanpb_VlanPortVlanEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Used",
-    &res);
+      "Used",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Used;
+  switch (entry->Used) {
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_CONFIG:
+      enum_str = "STATUS_USED_TYPE_CONFIG";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_GVRP:
+      enum_str = "STATUS_USED_TYPE_GVRP";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_VIA_MAC_TABLE:
+      enum_str = "STATUS_USED_TYPE_VIA_MAC_TABLE";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_MAC_VIA_RADIUS:
+      enum_str = "STATUS_USED_TYPE_MAC_VIA_RADIUS";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_802_1X_VIA_RADIUS:
+      enum_str = "STATUS_USED_TYPE_802_1X_VIA_RADIUS";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_UNAUTHORIZED:
+      enum_str = "STATUS_USED_TYPE_UNAUTHORIZED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_vlan_DefaultPortVlanEntry (
+status_t build_to_xml_vlan_DefaultPortVlanEntry(
     val_value_t *parentval,
     struct vlanpb_DefaultPortVlanEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DefaultVlanID",
-    &res);
+      "DefaultVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DefaultVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LastUpdateMethod",
-    &res);
+      "LastUpdateMethod",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LastUpdateMethod;
+  switch (entry->LastUpdateMethod) {
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_CONFIG:
+      enum_str = "STATUS_USED_TYPE_CONFIG";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_GVRP:
+      enum_str = "STATUS_USED_TYPE_GVRP";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_VIA_MAC_TABLE:
+      enum_str = "STATUS_USED_TYPE_VIA_MAC_TABLE";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_MAC_VIA_RADIUS:
+      enum_str = "STATUS_USED_TYPE_MAC_VIA_RADIUS";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_802_1X_VIA_RADIUS:
+      enum_str = "STATUS_USED_TYPE_802_1X_VIA_RADIUS";
+      break;
+    case vlanpb_StatusUsedTypeOptions_STATUS_USED_TYPE_UNAUTHORIZED:
+      enum_str = "STATUS_USED_TYPE_UNAUTHORIZED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_vlan_StatusEntry (
+status_t build_to_xml_vlan_StatusEntry(
     val_value_t *parentval,
     struct vlanpb_StatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TaggedList",
-    &res);
+      "TaggedList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->TaggedList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "TaggedList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->TaggedList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "TaggedList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->TaggedList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UntaggedList",
-    &res);
+      "UntaggedList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->UntaggedList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "UntaggedList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->UntaggedList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "UntaggedList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->UntaggedList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_vlan_StatusMapping (
+status_t build_to_xml_vlan_StatusMapping(
     val_value_t *parentval,
     struct vlanpb_StatusMapping *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mapping",
-    &res);
+      "Mapping",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* map */
   for (int i = 0; i < entry->Mapping_Len; i++) {
-  val_value_t *listval = NULL;
-val_value_t *kvval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Mapping_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-kvval =  agt_make_object(
-    listval->obj,
-    "Key",
-    &res);
-if (kvval != NULL) {
-  val_add_child(kvval, listval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(kvval) = entry->Mapping[i]->Key;
-kvval =  agt_make_object(
-    listval->obj,
-    "Value",
-    &res);
-if (kvval != NULL) {
-  val_add_child(kvval, listval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_vlan_StatusEntry(
-    kvval,
-    entry->Mapping[i]->Value);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    val_value_t *kvval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Mapping_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    kvval = agt_make_object(
+        listval->obj,
+        "Key",
+        &res);
+    if (kvval != NULL) {
+      val_add_child_sorted(kvval, listval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(kvval) = entry->Mapping[i]->Key;
+    kvval = agt_make_object(
+        listval->obj,
+        "Value",
+        &res);
+    if (kvval != NULL) {
+      val_add_child_sorted(kvval, listval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_vlan_StatusEntry(
+        kvval,
+        entry->Mapping[i]->Value);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_vlan_MACBasedGroupEntry(
+    val_value_t *parentval,
+    struct vlanpb_MACBasedGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddressMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddressMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->GroupID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_MACBasedGroupMemberEntry(
+    val_value_t *parentval,
+    struct vlanpb_MACBasedGroupMemberEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->GroupID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
+    entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->IdentifyList[cnt] = malloc(sizeof(*(entry->IdentifyList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->IdentifyList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_MACBasedConfig(
+    val_value_t *parentval,
+    struct vlanpb_MACBasedConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "GroupList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GroupList_Len = dlq_count(&childval->v.childQ);
+    entry->GroupList = malloc((entry->GroupList_Len + 1) * sizeof(*entry->GroupList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GroupList[cnt] = malloc(sizeof(*(entry->GroupList[cnt])));
+      res = build_to_priv_vlan_MACBasedGroupEntry(
+          listval,
+          entry->GroupList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupMemberList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GroupMemberList_Len = dlq_count(&childval->v.childQ);
+    entry->GroupMemberList = malloc((entry->GroupMemberList_Len + 1) * sizeof(*entry->GroupMemberList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GroupMemberList[cnt] = malloc(sizeof(*(entry->GroupMemberList[cnt])));
+      res = build_to_priv_vlan_MACBasedGroupMemberEntry(
+          listval,
+          entry->GroupMemberList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_ProtocolBasedGroupEntry(
+    val_value_t *parentval,
+    struct vlanpb_ProtocolBasedGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "GroupID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->GroupID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Encapsulation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Encapsulation = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Protocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Protocol = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_ProtocolBasedGroupMemberEntry(
+    val_value_t *parentval,
+    struct vlanpb_ProtocolBasedGroupMemberEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->GroupID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
+    entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->IdentifyList[cnt] = malloc(sizeof(*(entry->IdentifyList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->IdentifyList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_ProtocolBasedConfig(
+    val_value_t *parentval,
+    struct vlanpb_ProtocolBasedConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "GroupList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GroupList_Len = dlq_count(&childval->v.childQ);
+    entry->GroupList = malloc((entry->GroupList_Len + 1) * sizeof(*entry->GroupList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GroupList[cnt] = malloc(sizeof(*(entry->GroupList[cnt])));
+      res = build_to_priv_vlan_ProtocolBasedGroupEntry(
+          listval,
+          entry->GroupList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupMemberList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GroupMemberList_Len = dlq_count(&childval->v.childQ);
+    entry->GroupMemberList = malloc((entry->GroupMemberList_Len + 1) * sizeof(*entry->GroupMemberList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GroupMemberList[cnt] = malloc(sizeof(*(entry->GroupMemberList[cnt])));
+      res = build_to_priv_vlan_ProtocolBasedGroupMemberEntry(
+          listval,
+          entry->GroupMemberList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_SelectiveQinQConfig(
+    val_value_t *parentval,
+    struct vlanpb_SelectiveQinQConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_vlan_SelectiveQinQTranslatedEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_SelectiveQinQTranslatedEntry(
+    val_value_t *parentval,
+    struct vlanpb_SelectiveQinQTranslatedEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SourceVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TranslatedVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TranslatedVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_SubnetBasedGroupEntry(
+    val_value_t *parentval,
+    struct vlanpb_SubnetBasedGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IPAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPAddressMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddressMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPVersion");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->IPVersion = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->GroupID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_SubnetBasedGroupMemberEntry(
+    val_value_t *parentval,
+    struct vlanpb_SubnetBasedGroupMemberEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->GroupID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->IdentifyList_Len = dlq_count(&childval->v.childQ);
+    entry->IdentifyList = malloc((entry->IdentifyList_Len + 1) * sizeof(*entry->IdentifyList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->IdentifyList[cnt] = malloc(sizeof(*(entry->IdentifyList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->IdentifyList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_SubnetBasedConfig(
+    val_value_t *parentval,
+    struct vlanpb_SubnetBasedConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "GroupList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GroupList_Len = dlq_count(&childval->v.childQ);
+    entry->GroupList = malloc((entry->GroupList_Len + 1) * sizeof(*entry->GroupList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GroupList[cnt] = malloc(sizeof(*(entry->GroupList[cnt])));
+      res = build_to_priv_vlan_SubnetBasedGroupEntry(
+          listval,
+          entry->GroupList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GroupMemberList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GroupMemberList_Len = dlq_count(&childval->v.childQ);
+    entry->GroupMemberList = malloc((entry->GroupMemberList_Len + 1) * sizeof(*entry->GroupMemberList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GroupMemberList[cnt] = malloc(sizeof(*(entry->GroupMemberList[cnt])));
+      res = build_to_priv_vlan_SubnetBasedGroupMemberEntry(
+          listval,
+          entry->GroupMemberList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_MappingPort(
+    val_value_t *parentval,
+    struct vlanpb_MappingPort *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_vlan_MappingPortEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_MappingPortEntry(
+    val_value_t *parentval,
+    struct vlanpb_MappingPortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_MappingConfig(
+    val_value_t *parentval,
+    struct vlanpb_MappingConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_vlan_MappingEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortList_Len = dlq_count(&childval->v.childQ);
+    entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortList[cnt] = malloc(sizeof(*(entry->PortList[cnt])));
+      res = build_to_priv_vlan_MappingPortEntry(
+          listval,
+          entry->PortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_MappingEntry(
+    val_value_t *parentval,
+    struct vlanpb_MappingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SourceVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TranslatedVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TranslatedVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_Config(
+    val_value_t *parentval,
+    struct vlanpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Management");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Management = malloc(sizeof(*(entry->Management)));
+    res = build_to_priv_vlan_ManagementConfig(
+        childval,
+        entry->Management);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Voice");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Voice = malloc(sizeof(*(entry->Voice)));
+    res = build_to_priv_vlan_VoiceConfig(
+        childval,
+        entry->Voice);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ports");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Ports = malloc(sizeof(*(entry->Ports)));
+    res = build_to_priv_vlan_PortsConfig(
+        childval,
+        entry->Ports);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Filters");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Filters = malloc(sizeof(*(entry->Filters)));
+    res = build_to_priv_vlan_FiltersConfig(
+        childval,
+        entry->Filters);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACBased");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->MACBased = malloc(sizeof(*(entry->MACBased)));
+    res = build_to_priv_vlan_MACBasedConfig(
+        childval,
+        entry->MACBased);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SubnetBased");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SubnetBased = malloc(sizeof(*(entry->SubnetBased)));
+    res = build_to_priv_vlan_SubnetBasedConfig(
+        childval,
+        entry->SubnetBased);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ProtocolBased");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ProtocolBased = malloc(sizeof(*(entry->ProtocolBased)));
+    res = build_to_priv_vlan_ProtocolBasedConfig(
+        childval,
+        entry->ProtocolBased);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Translation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Translation = malloc(sizeof(*(entry->Translation)));
+    res = build_to_priv_vlan_MappingConfig(
+        childval,
+        entry->Translation);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SelectiveQinQ");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SelectiveQinQ = malloc(sizeof(*(entry->SelectiveQinQ)));
+    res = build_to_priv_vlan_SelectiveQinQConfig(
+        childval,
+        entry->SelectiveQinQ);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_ManagementConfig(
+    val_value_t *parentval,
+    struct vlanpb_ManagementConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ManagementVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ManagementVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_VoiceConfig(
+    val_value_t *parentval,
+    struct vlanpb_VoiceConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Prio");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Prio = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SignalPrio");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SignalPrio = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DSCP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DSCP = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SignalDSCP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SignalDSCP = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_PortsConfig(
+    val_value_t *parentval,
+    struct vlanpb_PortsConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_vlan_PortEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_PortEntry(
+    val_value_t *parentval,
+    struct vlanpb_PortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DefaultVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DefaultVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UnauthorizedVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->UnauthorizedVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FallBackVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FallBackVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QinQEthertype");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->QinQEthertype = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AcceptableFrametype");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AcceptableFrametype = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TaggedList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->TaggedList_Len = dlq_count(&childval->v.childQ);
+    entry->TaggedList = malloc((entry->TaggedList_Len + 1) * sizeof(*entry->TaggedList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->TaggedList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UntaggedList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->UntaggedList_Len = dlq_count(&childval->v.childQ);
+    entry->UntaggedList = malloc((entry->UntaggedList_Len + 1) * sizeof(*entry->UntaggedList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->UntaggedList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_FiltersConfig(
+    val_value_t *parentval,
+    struct vlanpb_FiltersConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_vlan_FilterEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_FilterEntry(
+    val_value_t *parentval,
+    struct vlanpb_FilterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_Used(
+    val_value_t *parentval,
+    struct vlanpb_Used *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Used");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Used = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_VlanPortVlanEntry(
+    val_value_t *parentval,
+    struct vlanpb_VlanPortVlanEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Used");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Used = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_DefaultPortVlanEntry(
+    val_value_t *parentval,
+    struct vlanpb_DefaultPortVlanEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DefaultVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DefaultVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastUpdateMethod");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LastUpdateMethod = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_vlan_StatusEntry(
+    val_value_t *parentval,
+    struct vlanpb_StatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TaggedList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->TaggedList_Len = dlq_count(&childval->v.childQ);
+    entry->TaggedList = malloc((entry->TaggedList_Len + 1) * sizeof(*entry->TaggedList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->TaggedList[cnt] = malloc(sizeof(*(entry->TaggedList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->TaggedList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UntaggedList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->UntaggedList_Len = dlq_count(&childval->v.childQ);
+    entry->UntaggedList = malloc((entry->UntaggedList_Len + 1) * sizeof(*entry->UntaggedList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->UntaggedList[cnt] = malloc(sizeof(*(entry->UntaggedList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->UntaggedList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_vlan_StatusMapping(
+    val_value_t *parentval,
+    struct vlanpb_StatusMapping *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  return res;
+}

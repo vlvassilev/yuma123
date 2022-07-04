@@ -30,11 +30,23 @@
 #include "intri-empty-trans.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-status_t build_to_xml_empty_Empty (
+
+status_t build_to_xml_empty_Empty(
+    val_value_t *parentval,
+    struct emptypb_Empty *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  return res;
+}
+
+status_t build_to_priv_empty_Empty(
     val_value_t *parentval,
     struct emptypb_Empty *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
   return res;
 }
-

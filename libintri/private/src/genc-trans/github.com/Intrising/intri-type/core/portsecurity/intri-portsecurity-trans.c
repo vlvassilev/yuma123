@@ -32,169 +32,193 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_portsecurity_Config (
+
+status_t build_to_xml_portsecurity_Config(
     val_value_t *parentval,
     struct portsecuritypb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portsecurity_PortSecurityConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portsecurity_PortSecurityConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portsecurity_PortSecurityConfigEntry (
+status_t build_to_xml_portsecurity_PortSecurityConfigEntry(
     val_value_t *parentval,
     struct portsecuritypb_PortSecurityConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case portsecuritypb_PortSecurityModeTypeOptions_PORT_SECURITY_MODE_TYPE_STATIC:
+      enum_str = "PORT_SECURITY_MODE_TYPE_STATIC";
+      break;
+    case portsecuritypb_PortSecurityModeTypeOptions_PORT_SECURITY_MODE_TYPE_STICKY:
+      enum_str = "PORT_SECURITY_MODE_TYPE_STICKY";
+      break;
+    case portsecuritypb_PortSecurityModeTypeOptions_PORT_SECURITY_MODE_TYPE_DYNAMIC:
+      enum_str = "PORT_SECURITY_MODE_TYPE_DYNAMIC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "MaxMACCount",
-    &res);
+      "MaxMACCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MaxMACCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SecureAddressList",
-    &res);
+      "SecureAddressList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SecureAddressList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SecureAddressList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portsecurity_SecureEntry(
-    listval,
-    entry->SecureAddressList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SecureAddressList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portsecurity_SecureEntry(
+        listval,
+        entry->SecureAddressList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ViolationMode",
-    &res);
+      "ViolationMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ViolationMode;
+  switch (entry->ViolationMode) {
+    case portsecuritypb_PortSecurityViolationTypeOptions_PORT_SECURITY_VIOLATION_TYPE_SHUTDOWN:
+      enum_str = "PORT_SECURITY_VIOLATION_TYPE_SHUTDOWN";
+      break;
+    case portsecuritypb_PortSecurityViolationTypeOptions_PORT_SECURITY_VIOLATION_TYPE_DISCARD:
+      enum_str = "PORT_SECURITY_VIOLATION_TYPE_DISCARD";
+      break;
+    case portsecuritypb_PortSecurityViolationTypeOptions_PORT_SECURITY_VIOLATION_TYPE_RESTRICT:
+      enum_str = "PORT_SECURITY_VIOLATION_TYPE_RESTRICT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_portsecurity_SecureEntry (
+status_t build_to_xml_portsecurity_SecureEntry(
     val_value_t *parentval,
     struct portsecuritypb_SecureEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -202,175 +226,196 @@ status_t build_to_xml_portsecurity_SecureEntry (
   VAL_STRING(childval) = entry->MACAddress;
   return res;
 }
-
-status_t build_to_xml_portsecurity_PortSecureEntry (
+status_t build_to_xml_portsecurity_PortSecureEntry(
     val_value_t *parentval,
     struct portsecuritypb_PortSecureEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Entry",
-    &res);
+      "Entry",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_portsecurity_SecureEntry(
+  res = build_to_xml_portsecurity_SecureEntry(
       childval,
-    entry->Entry);
+      entry->Entry);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_portsecurity_Status (
+status_t build_to_xml_portsecurity_Status(
     val_value_t *parentval,
     struct portsecuritypb_Status *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portsecurity_PortSecurityStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portsecurity_PortSecurityStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portsecurity_PortSecurityStatusEntry (
+status_t build_to_xml_portsecurity_PortSecurityStatusEntry(
     val_value_t *parentval,
     struct portsecuritypb_PortSecurityStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Status",
-    &res);
+      "Status",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Status;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Status) {
+    case portsecuritypb_PortSecurityStatusTypeOptions_PORT_SECURITY_STATUS_TYPE_SECURE_DOWN:
+      enum_str = "PORT_SECURITY_STATUS_TYPE_SECURE_DOWN";
+      break;
+    case portsecuritypb_PortSecurityStatusTypeOptions_PORT_SECURITY_STATUS_TYPE_SECURE_UP:
+      enum_str = "PORT_SECURITY_STATUS_TYPE_SECURE_UP";
+      break;
+    case portsecuritypb_PortSecurityStatusTypeOptions_PORT_SECURITY_STATUS_TYPE_SECURE_SHUTDOWN:
+      enum_str = "PORT_SECURITY_STATUS_TYPE_SECURE_SHUTDOWN";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ViolationMode",
-    &res);
+      "ViolationMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ViolationMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ViolationMode) {
+    case portsecuritypb_PortSecurityViolationTypeOptions_PORT_SECURITY_VIOLATION_TYPE_SHUTDOWN:
+      enum_str = "PORT_SECURITY_VIOLATION_TYPE_SHUTDOWN";
+      break;
+    case portsecuritypb_PortSecurityViolationTypeOptions_PORT_SECURITY_VIOLATION_TYPE_DISCARD:
+      enum_str = "PORT_SECURITY_VIOLATION_TYPE_DISCARD";
+      break;
+    case portsecuritypb_PortSecurityViolationTypeOptions_PORT_SECURITY_VIOLATION_TYPE_RESTRICT:
+      enum_str = "PORT_SECURITY_VIOLATION_TYPE_RESTRICT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "MaxMACCount",
-    &res);
+      "MaxMACCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MaxMACCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SecureMACCount",
-    &res);
+      "SecureMACCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SecureMACCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LastSourceMACaddressVlan",
-    &res);
+      "LastSourceMACaddressVlan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -378,43 +423,51 @@ status_t build_to_xml_portsecurity_PortSecurityStatusEntry (
   VAL_STRING(childval) = entry->LastSourceMACaddressVlan;
   return res;
 }
-
-status_t build_to_xml_portsecurity_PortSecurityAge (
+status_t build_to_xml_portsecurity_PortSecurityAge(
     val_value_t *parentval,
     struct portsecuritypb_PortSecurityAge *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "StaticAging",
-    &res);
+      "StaticAging",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->StaticAging;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case portsecuritypb_PortSecurityAgeModeTypeOptions_PORT_SECURITY_AGE_MODE_TYPE_ABSOULTE:
+      enum_str = "PORT_SECURITY_AGE_MODE_TYPE_ABSOULTE";
+      break;
+    case portsecuritypb_PortSecurityAgeModeTypeOptions_PORT_SECURITY_AGE_MODE_TYPE_INACTIVITY:
+      enum_str = "PORT_SECURITY_AGE_MODE_TYPE_INACTIVITY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Time",
-    &res);
+      "Time",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -423,3 +476,275 @@ status_t build_to_xml_portsecurity_PortSecurityAge (
   return res;
 }
 
+status_t build_to_priv_portsecurity_Config(
+    val_value_t *parentval,
+    struct portsecuritypb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portsecurity_PortSecurityConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portsecurity_PortSecurityConfigEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecurityConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxMACCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxMACCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SecureAddressList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SecureAddressList_Len = dlq_count(&childval->v.childQ);
+    entry->SecureAddressList = malloc((entry->SecureAddressList_Len + 1) * sizeof(*entry->SecureAddressList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->SecureAddressList[cnt] = malloc(sizeof(*(entry->SecureAddressList[cnt])));
+      res = build_to_priv_portsecurity_SecureEntry(
+          listval,
+          entry->SecureAddressList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ViolationMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ViolationMode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portsecurity_SecureEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_SecureEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portsecurity_PortSecureEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecureEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Entry");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Entry = malloc(sizeof(*(entry->Entry)));
+    res = build_to_priv_portsecurity_SecureEntry(
+        childval,
+        entry->Entry);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portsecurity_Status(
+    val_value_t *parentval,
+    struct portsecuritypb_Status *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portsecurity_PortSecurityStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portsecurity_PortSecurityStatusEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecurityStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Status");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Status = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ViolationMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ViolationMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxMACCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MaxMACCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SecureMACCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SecureMACCount = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastSourceMACaddressVlan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LastSourceMACaddressVlan = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portsecurity_PortSecurityAge(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecurityAge *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "StaticAging");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->StaticAging = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Time");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Time = VAL_INT(childval);
+  }
+  return res;
+}

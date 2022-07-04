@@ -21,10 +21,13 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_date_Date (
+extern status_t build_to_xml_date_Date(
     val_value_t *parentval,
     struct datepb_Date *entry);
 
+extern status_t build_to_priv_date_Date(
+    val_value_t *parentval,
+    struct datepb_Date *entry);
 
 #endif /* _H_intri_date_trans */
 

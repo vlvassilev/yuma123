@@ -21,94 +21,139 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_lldp_Config (
+extern status_t build_to_xml_lldp_Config(
     val_value_t *parentval,
     struct lldppb_Config *entry);
-
-extern status_t build_to_xml_lldp_SystemConfig (
+extern status_t build_to_xml_lldp_SystemConfig(
     val_value_t *parentval,
     struct lldppb_SystemConfig *entry);
-
-extern status_t build_to_xml_lldp_PortConfig (
+extern status_t build_to_xml_lldp_PortConfig(
     val_value_t *parentval,
     struct lldppb_PortConfig *entry);
-
-extern status_t build_to_xml_lldp_PortConfigEntry (
+extern status_t build_to_xml_lldp_PortConfigEntry(
     val_value_t *parentval,
     struct lldppb_PortConfigEntry *entry);
-
-extern status_t build_to_xml_lldp_LocalInfo (
+extern status_t build_to_xml_lldp_LocalInfo(
     val_value_t *parentval,
     struct lldppb_LocalInfo *entry);
-
-extern status_t build_to_xml_lldp_NeighborInfo (
+extern status_t build_to_xml_lldp_NeighborInfo(
     val_value_t *parentval,
     struct lldppb_NeighborInfo *entry);
-
-extern status_t build_to_xml_lldp_LocalInfoEntry (
+extern status_t build_to_xml_lldp_LocalInfoEntry(
     val_value_t *parentval,
     struct lldppb_LocalInfoEntry *entry);
-
-extern status_t build_to_xml_lldp_NeighborInfoEntry (
+extern status_t build_to_xml_lldp_NeighborInfoEntry(
     val_value_t *parentval,
     struct lldppb_NeighborInfoEntry *entry);
-
-extern status_t build_to_xml_lldp_LinkAggregation (
+extern status_t build_to_xml_lldp_LinkAggregation(
     val_value_t *parentval,
     struct lldppb_LinkAggregation *entry);
-
-extern status_t build_to_xml_lldp_ExtendedPowerViaMDI (
+extern status_t build_to_xml_lldp_ExtendedPowerViaMDI(
     val_value_t *parentval,
     struct lldppb_ExtendedPowerViaMDI *entry);
-
-extern status_t build_to_xml_lldp_MACPHYConfig (
+extern status_t build_to_xml_lldp_MACPHYConfig(
     val_value_t *parentval,
     struct lldppb_MACPHYConfig *entry);
-
-extern status_t build_to_xml_lldp_MediaCapability (
+extern status_t build_to_xml_lldp_MediaCapability(
     val_value_t *parentval,
     struct lldppb_MediaCapability *entry);
-
-extern status_t build_to_xml_lldp_SystemManagementInfo (
+extern status_t build_to_xml_lldp_SystemManagementInfo(
     val_value_t *parentval,
     struct lldppb_SystemManagementInfo *entry);
-
-extern status_t build_to_xml_lldp_PortManagementInfo (
+extern status_t build_to_xml_lldp_PortManagementInfo(
     val_value_t *parentval,
     struct lldppb_PortManagementInfo *entry);
-
-extern status_t build_to_xml_lldp_PowerViaMDI (
+extern status_t build_to_xml_lldp_PowerViaMDI(
     val_value_t *parentval,
     struct lldppb_PowerViaMDI *entry);
-
-extern status_t build_to_xml_lldp_PortManagementAddressInfo (
+extern status_t build_to_xml_lldp_PortManagementAddressInfo(
     val_value_t *parentval,
     struct lldppb_PortManagementAddressInfo *entry);
-
-extern status_t build_to_xml_lldp_ManagementAddress (
+extern status_t build_to_xml_lldp_ManagementAddress(
     val_value_t *parentval,
     struct lldppb_ManagementAddress *entry);
-
-extern status_t build_to_xml_lldp_ChassisInfo (
+extern status_t build_to_xml_lldp_ChassisInfo(
     val_value_t *parentval,
     struct lldppb_ChassisInfo *entry);
-
-extern status_t build_to_xml_lldp_PortID (
+extern status_t build_to_xml_lldp_PortID(
     val_value_t *parentval,
     struct lldppb_PortID *entry);
-
-extern status_t build_to_xml_lldp_Statistic (
+extern status_t build_to_xml_lldp_Statistic(
     val_value_t *parentval,
     struct lldppb_Statistic *entry);
-
-extern status_t build_to_xml_lldp_StatisticEntry (
+extern status_t build_to_xml_lldp_StatisticEntry(
     val_value_t *parentval,
     struct lldppb_StatisticEntry *entry);
-
-extern status_t build_to_xml_lldp_VoiceVlanEntry (
+extern status_t build_to_xml_lldp_VoiceVlanEntry(
     val_value_t *parentval,
     struct lldppb_VoiceVlanEntry *entry);
 
+extern status_t build_to_priv_lldp_Config(
+    val_value_t *parentval,
+    struct lldppb_Config *entry);
+extern status_t build_to_priv_lldp_SystemConfig(
+    val_value_t *parentval,
+    struct lldppb_SystemConfig *entry);
+extern status_t build_to_priv_lldp_PortConfig(
+    val_value_t *parentval,
+    struct lldppb_PortConfig *entry);
+extern status_t build_to_priv_lldp_PortConfigEntry(
+    val_value_t *parentval,
+    struct lldppb_PortConfigEntry *entry);
+extern status_t build_to_priv_lldp_LocalInfo(
+    val_value_t *parentval,
+    struct lldppb_LocalInfo *entry);
+extern status_t build_to_priv_lldp_NeighborInfo(
+    val_value_t *parentval,
+    struct lldppb_NeighborInfo *entry);
+extern status_t build_to_priv_lldp_LocalInfoEntry(
+    val_value_t *parentval,
+    struct lldppb_LocalInfoEntry *entry);
+extern status_t build_to_priv_lldp_NeighborInfoEntry(
+    val_value_t *parentval,
+    struct lldppb_NeighborInfoEntry *entry);
+extern status_t build_to_priv_lldp_LinkAggregation(
+    val_value_t *parentval,
+    struct lldppb_LinkAggregation *entry);
+extern status_t build_to_priv_lldp_ExtendedPowerViaMDI(
+    val_value_t *parentval,
+    struct lldppb_ExtendedPowerViaMDI *entry);
+extern status_t build_to_priv_lldp_MACPHYConfig(
+    val_value_t *parentval,
+    struct lldppb_MACPHYConfig *entry);
+extern status_t build_to_priv_lldp_MediaCapability(
+    val_value_t *parentval,
+    struct lldppb_MediaCapability *entry);
+extern status_t build_to_priv_lldp_SystemManagementInfo(
+    val_value_t *parentval,
+    struct lldppb_SystemManagementInfo *entry);
+extern status_t build_to_priv_lldp_PortManagementInfo(
+    val_value_t *parentval,
+    struct lldppb_PortManagementInfo *entry);
+extern status_t build_to_priv_lldp_PowerViaMDI(
+    val_value_t *parentval,
+    struct lldppb_PowerViaMDI *entry);
+extern status_t build_to_priv_lldp_PortManagementAddressInfo(
+    val_value_t *parentval,
+    struct lldppb_PortManagementAddressInfo *entry);
+extern status_t build_to_priv_lldp_ManagementAddress(
+    val_value_t *parentval,
+    struct lldppb_ManagementAddress *entry);
+extern status_t build_to_priv_lldp_ChassisInfo(
+    val_value_t *parentval,
+    struct lldppb_ChassisInfo *entry);
+extern status_t build_to_priv_lldp_PortID(
+    val_value_t *parentval,
+    struct lldppb_PortID *entry);
+extern status_t build_to_priv_lldp_Statistic(
+    val_value_t *parentval,
+    struct lldppb_Statistic *entry);
+extern status_t build_to_priv_lldp_StatisticEntry(
+    val_value_t *parentval,
+    struct lldppb_StatisticEntry *entry);
+extern status_t build_to_priv_lldp_VoiceVlanEntry(
+    val_value_t *parentval,
+    struct lldppb_VoiceVlanEntry *entry);
 
 #endif /* _H_intri_lldp_trans */
 

@@ -21,10 +21,13 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_timestamp_Timestamp (
+extern status_t build_to_xml_timestamp_Timestamp(
     val_value_t *parentval,
     struct timestamppb_Timestamp *entry);
 
+extern status_t build_to_priv_timestamp_Timestamp(
+    val_value_t *parentval,
+    struct timestamppb_Timestamp *entry);
 
 #endif /* _H_intri_timestamp_trans */
 

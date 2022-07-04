@@ -21,46 +21,67 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_network_Config (
+extern status_t build_to_xml_network_Config(
     val_value_t *parentval,
     struct networkpb_Config *entry);
-
-extern status_t build_to_xml_network_BasicConfig (
+extern status_t build_to_xml_network_BasicConfig(
     val_value_t *parentval,
     struct networkpb_BasicConfig *entry);
-
-extern status_t build_to_xml_network_IPConfig (
+extern status_t build_to_xml_network_IPConfig(
     val_value_t *parentval,
     struct networkpb_IPConfig *entry);
-
-extern status_t build_to_xml_network_IPv4Config (
+extern status_t build_to_xml_network_IPv4Config(
     val_value_t *parentval,
     struct networkpb_IPv4Config *entry);
-
-extern status_t build_to_xml_network_IPv4Static (
+extern status_t build_to_xml_network_IPv4Static(
     val_value_t *parentval,
     struct networkpb_IPv4Static *entry);
-
-extern status_t build_to_xml_network_IPv6Config (
+extern status_t build_to_xml_network_IPv6Config(
     val_value_t *parentval,
     struct networkpb_IPv6Config *entry);
-
-extern status_t build_to_xml_network_IPv6Static (
+extern status_t build_to_xml_network_IPv6Static(
     val_value_t *parentval,
     struct networkpb_IPv6Static *entry);
-
-extern status_t build_to_xml_network_IPv4Status (
+extern status_t build_to_xml_network_IPv4Status(
     val_value_t *parentval,
     struct networkpb_IPv4Status *entry);
-
-extern status_t build_to_xml_network_IPv6StatusEntry (
+extern status_t build_to_xml_network_IPv6StatusEntry(
     val_value_t *parentval,
     struct networkpb_IPv6StatusEntry *entry);
-
-extern status_t build_to_xml_network_IPv6Status (
+extern status_t build_to_xml_network_IPv6Status(
     val_value_t *parentval,
     struct networkpb_IPv6Status *entry);
 
+extern status_t build_to_priv_network_Config(
+    val_value_t *parentval,
+    struct networkpb_Config *entry);
+extern status_t build_to_priv_network_BasicConfig(
+    val_value_t *parentval,
+    struct networkpb_BasicConfig *entry);
+extern status_t build_to_priv_network_IPConfig(
+    val_value_t *parentval,
+    struct networkpb_IPConfig *entry);
+extern status_t build_to_priv_network_IPv4Config(
+    val_value_t *parentval,
+    struct networkpb_IPv4Config *entry);
+extern status_t build_to_priv_network_IPv4Static(
+    val_value_t *parentval,
+    struct networkpb_IPv4Static *entry);
+extern status_t build_to_priv_network_IPv6Config(
+    val_value_t *parentval,
+    struct networkpb_IPv6Config *entry);
+extern status_t build_to_priv_network_IPv6Static(
+    val_value_t *parentval,
+    struct networkpb_IPv6Static *entry);
+extern status_t build_to_priv_network_IPv4Status(
+    val_value_t *parentval,
+    struct networkpb_IPv4Status *entry);
+extern status_t build_to_priv_network_IPv6StatusEntry(
+    val_value_t *parentval,
+    struct networkpb_IPv6StatusEntry *entry);
+extern status_t build_to_priv_network_IPv6Status(
+    val_value_t *parentval,
+    struct networkpb_IPv6Status *entry);
 
 #endif /* _H_intri_network_trans */
 

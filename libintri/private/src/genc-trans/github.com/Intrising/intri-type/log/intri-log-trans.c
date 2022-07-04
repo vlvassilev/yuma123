@@ -34,218 +34,285 @@
 #include "../../../../github.com/Intrising/intri-type/event/intri-event-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/intri-timestamp-trans.h"
-status_t build_to_xml_log_Config (
+
+status_t build_to_xml_log_Config(
     val_value_t *parentval,
     struct logpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "BasicConfig",
-    &res);
+      "BasicConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_log_BasicConfig(
+  res = build_to_xml_log_BasicConfig(
       childval,
-    entry->BasicConfig);
+      entry->BasicConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TargetConfig",
-    &res);
+      "TargetConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_log_TargetConfig(
+  res = build_to_xml_log_TargetConfig(
       childval,
-    entry->TargetConfig);
+      entry->TargetConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ActionConfig",
-    &res);
+      "ActionConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_log_ActionConfig(
+  res = build_to_xml_log_ActionConfig(
       childval,
-    entry->ActionConfig);
+      entry->ActionConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_log_BasicConfig (
+status_t build_to_xml_log_BasicConfig(
     val_value_t *parentval,
     struct logpb_BasicConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "StorageOption",
-    &res);
+      "StorageOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->StorageOption;
+  switch (entry->StorageOption) {
+    case logpb_StorageTypeOptions_STORAGE_TYPE_FLASH:
+      enum_str = "STORAGE_TYPE_FLASH";
+      break;
+    case logpb_StorageTypeOptions_STORAGE_TYPE_RAM_DISK:
+      enum_str = "STORAGE_TYPE_RAM_DISK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_log_TargetConfig (
+status_t build_to_xml_log_TargetConfig(
     val_value_t *parentval,
     struct logpb_TargetConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_log_TargetConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_log_TargetConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_log_TargetConfigEntry (
+status_t build_to_xml_log_TargetConfigEntry(
     val_value_t *parentval,
     struct logpb_TargetConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HostAddress",
-    &res);
+      "HostAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->HostAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TargetLogType",
-    &res);
+      "TargetLogType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->TargetLogType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->TargetLogType) {
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_DISABLED:
+      enum_str = "TARGET_LOG_TYPE_DISABLED";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_SYSLOG:
+      enum_str = "TARGET_LOG_TYPE_SYSLOG";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_SNMP_TRAP_V1:
+      enum_str = "TARGET_LOG_TYPE_SNMP_TRAP_V1";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_SNMP_TRAP_V2C:
+      enum_str = "TARGET_LOG_TYPE_SNMP_TRAP_V2C";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_SNMP_TRAP_V3:
+      enum_str = "TARGET_LOG_TYPE_SNMP_TRAP_V3";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_SNMP_INFORM_V2C:
+      enum_str = "TARGET_LOG_TYPE_SNMP_INFORM_V2C";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_SNMP_INFORM_V3:
+      enum_str = "TARGET_LOG_TYPE_SNMP_INFORM_V3";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_DISPLAY_IN_CLI:
+      enum_str = "TARGET_LOG_TYPE_DISPLAY_IN_CLI";
+      break;
+    case eventpb_TargetLogTypeOptions_TARGET_LOG_TYPE_DISPLAY_IN_WEB:
+      enum_str = "TARGET_LOG_TYPE_DISPLAY_IN_WEB";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingSeverityType",
-    &res);
+      "LoggingSeverityType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingSeverityType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LoggingSeverityType) {
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_DISABLED:
+      enum_str = "LOGGING_SEVERITY_TYPE_DISABLED";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_DEBUG:
+      enum_str = "LOGGING_SEVERITY_TYPE_DEBUG";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_INFO:
+      enum_str = "LOGGING_SEVERITY_TYPE_INFO";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_NOTICE:
+      enum_str = "LOGGING_SEVERITY_TYPE_NOTICE";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_WARNING:
+      enum_str = "LOGGING_SEVERITY_TYPE_WARNING";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_ERROR:
+      enum_str = "LOGGING_SEVERITY_TYPE_ERROR";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_CRITICAL:
+      enum_str = "LOGGING_SEVERITY_TYPE_CRITICAL";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_ALERT:
+      enum_str = "LOGGING_SEVERITY_TYPE_ALERT";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_EMERGENCY:
+      enum_str = "LOGGING_SEVERITY_TYPE_EMERGENCY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LogConfigChanges",
-    &res);
+      "LogConfigChanges",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->LogConfigChanges;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LogDebugEventOnly",
-    &res);
+      "LogDebugEventOnly",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->LogDebugEventOnly;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SnmpV3Username",
-    &res);
+      "SnmpV3Username",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SnmpV3Username;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SnmpTrapCommunity",
-    &res);
+      "SnmpTrapCommunity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -253,136 +320,366 @@ status_t build_to_xml_log_TargetConfigEntry (
   VAL_STRING(childval) = entry->SnmpTrapCommunity;
   return res;
 }
-
-status_t build_to_xml_log_ActionConfig (
+status_t build_to_xml_log_ActionConfig(
     val_value_t *parentval,
     struct logpb_ActionConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_log_ActionConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_log_ActionConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_log_ActionConfigEntry (
+status_t build_to_xml_log_ActionConfigEntry(
     val_value_t *parentval,
     struct logpb_ActionConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingType",
-    &res);
+      "LoggingType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LoggingType) {
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NONE:
+      enum_str = "LOGGING_TYPE_NONE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_ALIVE_TEST_EVENT:
+      enum_str = "LOGGING_TYPE_ALIVE_TEST_EVENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SELF_TEST:
+      enum_str = "LOGGING_TYPE_SELF_TEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_OK:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_FAIL:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_COLD_START:
+      enum_str = "LOGGING_TYPE_COLD_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_WARM_START:
+      enum_str = "LOGGING_TYPE_WARM_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FACTORY_RESET:
+      enum_str = "LOGGING_TYPE_FACTORY_RESET";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CONFIGURATION_LOADED:
+      enum_str = "LOGGING_TYPE_CONFIGURATION_LOADED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_OFFLINE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_OFFLINE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_SUCCESS:
+      enum_str = "LOGGING_TYPE_LOGIN_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL:
+      enum_str = "LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED:
+      enum_str = "LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_OUT:
+      enum_str = "LOGGING_TYPE_LOGIN_OUT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_UP:
+      enum_str = "LOGGING_TYPE_LINK_UP";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_DOWN:
+      enum_str = "LOGGING_TYPE_LINK_DOWN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_STATE_CHANGE:
+      enum_str = "LOGGING_TYPE_LINK_STATE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_ACCEPTED:
+      enum_str = "LOGGING_TYPE_MAC_ACCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_ERROR:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED_VLAN:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED_VLAN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_CHANGE:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_REQUEST:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_CONFLICT:
+      enum_str = "LOGGING_TYPE_MAC_CONFLICT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_SECURITY_VIOLATION:
+      enum_str = "LOGGING_TYPE_MAC_SECURITY_VIOLATION";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT:
+      enum_str = "LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_FULL:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_FULL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_REMOVED:
+      enum_str = "LOGGING_TYPE_LOOP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_DETECTED:
+      enum_str = "LOGGING_TYPE_LOOP_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_CONNECT:
+      enum_str = "LOGGING_TYPE_LACP_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_DISCONNECT:
+      enum_str = "LOGGING_TYPE_LACP_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_FAIL:
+      enum_str = "LOGGING_TYPE_NTP_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_SYNC:
+      enum_str = "LOGGING_TYPE_NTP_SYNC";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LLDP_POE_REQUEST:
+      enum_str = "LOGGING_TYPE_LLDP_POE_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_PACKET_INTERCEPTED:
+      enum_str = "LOGGING_TYPE_PACKET_INTERCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NETWORK_ATTACK:
+      enum_str = "LOGGING_TYPE_NETWORK_ATTACK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT:
+      enum_str = "LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_INSERTED:
+      enum_str = "LOGGING_TYPE_SFP_INSERTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_REMOVED:
+      enum_str = "LOGGING_TYPE_SFP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_PRESENT:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_PRESENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_LOSS:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_LOSS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_CHANGE:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_CONNECT:
+      enum_str = "LOGGING_TYPE_POE_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_VOLTAGE:
+      enum_str = "LOGGING_TYPE_POE_VOLTAGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_ERROR:
+      enum_str = "LOGGING_TYPE_POE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_DISCONNECT:
+      enum_str = "LOGGING_TYPE_POE_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_ON:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_ON";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_OFF:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_OFF";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LED_CONTROL:
+      enum_str = "LOGGING_TYPE_LED_CONTROL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_BUTTON_PRESSED:
+      enum_str = "LOGGING_TYPE_BUTTON_PRESSED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_HARDWARE_ERROR:
+      enum_str = "LOGGING_TYPE_HARDWARE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_OK:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_WARNING:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_FAILURE:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_OK:
+      enum_str = "LOGGING_TYPE_CPU_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_WARNING:
+      enum_str = "LOGGING_TYPE_CPU_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_FAILURE:
+      enum_str = "LOGGING_TYPE_CPU_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_OK:
+      enum_str = "LOGGING_TYPE_MEMORY_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_WARNING:
+      enum_str = "LOGGING_TYPE_MEMORY_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_FAILURE:
+      enum_str = "LOGGING_TYPE_MEMORY_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CHANGE_DETECTED:
+      enum_str = "LOGGING_TYPE_CABLE_CHANGE_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_LOST:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_LOST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingSeverityType",
-    &res);
+      "LoggingSeverityType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingSeverityType;
+  switch (entry->LoggingSeverityType) {
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_DISABLED:
+      enum_str = "LOGGING_SEVERITY_TYPE_DISABLED";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_DEBUG:
+      enum_str = "LOGGING_SEVERITY_TYPE_DEBUG";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_INFO:
+      enum_str = "LOGGING_SEVERITY_TYPE_INFO";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_NOTICE:
+      enum_str = "LOGGING_SEVERITY_TYPE_NOTICE";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_WARNING:
+      enum_str = "LOGGING_SEVERITY_TYPE_WARNING";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_ERROR:
+      enum_str = "LOGGING_SEVERITY_TYPE_ERROR";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_CRITICAL:
+      enum_str = "LOGGING_SEVERITY_TYPE_CRITICAL";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_ALERT:
+      enum_str = "LOGGING_SEVERITY_TYPE_ALERT";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_EMERGENCY:
+      enum_str = "LOGGING_SEVERITY_TYPE_EMERGENCY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_log_Statistics (
+status_t build_to_xml_log_Statistics(
     val_value_t *parentval,
     struct logpb_Statistics *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfTargets",
-    &res);
+      "NumberOfTargets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->NumberOfTargets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SyslogCounter",
-    &res);
+      "SyslogCounter",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SyslogCounter;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SnmpTrapCounter",
-    &res);
+      "SnmpTrapCounter",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SnmpTrapCounter;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SnmpInfoCounter",
-    &res);
+      "SnmpInfoCounter",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SnmpInfoCounter;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DisplayInCliCounter",
-    &res);
+      "DisplayInCliCounter",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -390,72 +687,299 @@ status_t build_to_xml_log_Statistics (
   VAL_INT(childval) = entry->DisplayInCliCounter;
   return res;
 }
-
-status_t build_to_xml_log_LogFileEntry (
+status_t build_to_xml_log_LogFileEntry(
     val_value_t *parentval,
     struct logpb_LogFileEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LogID",
-    &res);
+      "LogID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->LogID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ts",
-    &res);
+      "Ts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timestamp_Timestamp(
+  res = build_to_xml_timestamp_Timestamp(
       childval,
-    entry->Ts);
+      entry->Ts);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingType",
-    &res);
+      "LoggingType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LoggingType) {
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NONE:
+      enum_str = "LOGGING_TYPE_NONE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_ALIVE_TEST_EVENT:
+      enum_str = "LOGGING_TYPE_ALIVE_TEST_EVENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SELF_TEST:
+      enum_str = "LOGGING_TYPE_SELF_TEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_OK:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FIRMWARE_UPDATE_FAIL:
+      enum_str = "LOGGING_TYPE_FIRMWARE_UPDATE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_COLD_START:
+      enum_str = "LOGGING_TYPE_COLD_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_WARM_START:
+      enum_str = "LOGGING_TYPE_WARM_START";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_FACTORY_RESET:
+      enum_str = "LOGGING_TYPE_FACTORY_RESET";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CONFIGURATION_LOADED:
+      enum_str = "LOGGING_TYPE_CONFIGURATION_LOADED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CHANGE_OFFLINE_CONFIG:
+      enum_str = "LOGGING_TYPE_CHANGE_OFFLINE_CONFIG";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_SUCCESS:
+      enum_str = "LOGGING_TYPE_LOGIN_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL:
+      enum_str = "LOGGING_TYPE_LOGIN_PASSWORD_ATTEMPT_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED:
+      enum_str = "LOGGING_TYPE_LOGIN_INTERFACE_ACCESS_DENIED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOGIN_OUT:
+      enum_str = "LOGGING_TYPE_LOGIN_OUT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_UP:
+      enum_str = "LOGGING_TYPE_LINK_UP";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_DOWN:
+      enum_str = "LOGGING_TYPE_LINK_DOWN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LINK_STATE_CHANGE:
+      enum_str = "LOGGING_TYPE_LINK_STATE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_ACCEPTED:
+      enum_str = "LOGGING_TYPE_MAC_ACCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_ERROR:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_BLOCKED_VLAN:
+      enum_str = "LOGGING_TYPE_MAC_BLOCKED_VLAN";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_CHANGE:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_AUTH_REQUEST:
+      enum_str = "LOGGING_TYPE_MAC_AUTH_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_CONFLICT:
+      enum_str = "LOGGING_TYPE_MAC_CONFLICT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_SECURITY_VIOLATION:
+      enum_str = "LOGGING_TYPE_MAC_SECURITY_VIOLATION";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT:
+      enum_str = "LOGGING_TYPE_MAC_LEARNING_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MAC_TABLE_FULL:
+      enum_str = "LOGGING_TYPE_MAC_TABLE_FULL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_REMOVED:
+      enum_str = "LOGGING_TYPE_LOOP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LOOP_DETECTED:
+      enum_str = "LOGGING_TYPE_LOOP_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_CONNECT:
+      enum_str = "LOGGING_TYPE_LACP_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LACP_DISCONNECT:
+      enum_str = "LOGGING_TYPE_LACP_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_FAIL:
+      enum_str = "LOGGING_TYPE_NTP_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NTP_SYNC:
+      enum_str = "LOGGING_TYPE_NTP_SYNC";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LLDP_POE_REQUEST:
+      enum_str = "LOGGING_TYPE_LLDP_POE_REQUEST";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_PACKET_INTERCEPTED:
+      enum_str = "LOGGING_TYPE_PACKET_INTERCEPTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_NETWORK_ATTACK:
+      enum_str = "LOGGING_TYPE_NETWORK_ATTACK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_SUCCESS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL:
+      enum_str = "LOGGING_TYPE_CLI_SCRIPT_EXECUTE_FAIL";
+      break;
+    case eventpb_LoggingTypeOptions_LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT:
+      enum_str = "LOOING_TYPE_MULTICAST_LEARNING_GROUP_OVER_LIMIT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_INSERTED:
+      enum_str = "LOGGING_TYPE_SFP_INSERTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_REMOVED:
+      enum_str = "LOGGING_TYPE_SFP_REMOVED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_PRESENT:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_PRESENT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_LOSS:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_LOSS";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_SFP_SIGNAL_CHANGE:
+      enum_str = "LOGGING_TYPE_SFP_SIGNAL_CHANGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_CONNECT:
+      enum_str = "LOGGING_TYPE_POE_CONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_VOLTAGE:
+      enum_str = "LOGGING_TYPE_POE_VOLTAGE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_ERROR:
+      enum_str = "LOGGING_TYPE_POE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_DISCONNECT:
+      enum_str = "LOGGING_TYPE_POE_DISCONNECT";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_ON:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_ON";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_POE_EMERGENCY_MODE_OFF:
+      enum_str = "LOGGING_TYPE_POE_EMERGENCY_MODE_OFF";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_LED_CONTROL:
+      enum_str = "LOGGING_TYPE_LED_CONTROL";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_BUTTON_PRESSED:
+      enum_str = "LOGGING_TYPE_BUTTON_PRESSED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_HARDWARE_ERROR:
+      enum_str = "LOGGING_TYPE_HARDWARE_ERROR";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_OK:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_WARNING:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_TEMPERATURE_FAILURE:
+      enum_str = "LOGGING_TYPE_TEMPERATURE_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_OK:
+      enum_str = "LOGGING_TYPE_CPU_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_WARNING:
+      enum_str = "LOGGING_TYPE_CPU_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CPU_FAILURE:
+      enum_str = "LOGGING_TYPE_CPU_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_OK:
+      enum_str = "LOGGING_TYPE_MEMORY_OK";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_WARNING:
+      enum_str = "LOGGING_TYPE_MEMORY_WARNING";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_MEMORY_FAILURE:
+      enum_str = "LOGGING_TYPE_MEMORY_FAILURE";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CHANGE_DETECTED:
+      enum_str = "LOGGING_TYPE_CABLE_CHANGE_DETECTED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_ESTABLISHED";
+      break;
+    case eventpb_LoggingTypeOptions_LOGGING_TYPE_CABLE_CONNECTION_LOST:
+      enum_str = "LOGGING_TYPE_CABLE_CONNECTION_LOST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LoggingSeverityType",
-    &res);
+      "LoggingSeverityType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LoggingSeverityType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LoggingSeverityType) {
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_DISABLED:
+      enum_str = "LOGGING_SEVERITY_TYPE_DISABLED";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_DEBUG:
+      enum_str = "LOGGING_SEVERITY_TYPE_DEBUG";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_INFO:
+      enum_str = "LOGGING_SEVERITY_TYPE_INFO";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_NOTICE:
+      enum_str = "LOGGING_SEVERITY_TYPE_NOTICE";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_WARNING:
+      enum_str = "LOGGING_SEVERITY_TYPE_WARNING";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_ERROR:
+      enum_str = "LOGGING_SEVERITY_TYPE_ERROR";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_CRITICAL:
+      enum_str = "LOGGING_SEVERITY_TYPE_CRITICAL";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_ALERT:
+      enum_str = "LOGGING_SEVERITY_TYPE_ALERT";
+      break;
+    case eventpb_LoggingSeverityTypeOptions_LOGGING_SEVERITY_TYPE_EMERGENCY:
+      enum_str = "LOGGING_SEVERITY_TYPE_EMERGENCY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Message",
-    &res);
+      "Message",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -463,41 +987,364 @@ status_t build_to_xml_log_LogFileEntry (
   VAL_STRING(childval) = entry->Message;
   return res;
 }
-
-status_t build_to_xml_log_LogFiles (
+status_t build_to_xml_log_LogFiles(
     val_value_t *parentval,
     struct logpb_LogFiles *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_log_LogFileEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_log_LogFileEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
 
+status_t build_to_priv_log_Config(
+    val_value_t *parentval,
+    struct logpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "BasicConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->BasicConfig = malloc(sizeof(*(entry->BasicConfig)));
+    res = build_to_priv_log_BasicConfig(
+        childval,
+        entry->BasicConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TargetConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->TargetConfig = malloc(sizeof(*(entry->TargetConfig)));
+    res = build_to_priv_log_TargetConfig(
+        childval,
+        entry->TargetConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ActionConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ActionConfig = malloc(sizeof(*(entry->ActionConfig)));
+    res = build_to_priv_log_ActionConfig(
+        childval,
+        entry->ActionConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_log_BasicConfig(
+    val_value_t *parentval,
+    struct logpb_BasicConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "StorageOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->StorageOption = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_log_TargetConfig(
+    val_value_t *parentval,
+    struct logpb_TargetConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_log_TargetConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_log_TargetConfigEntry(
+    val_value_t *parentval,
+    struct logpb_TargetConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HostAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->HostAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TargetLogType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->TargetLogType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoggingSeverityType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingSeverityType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LogConfigChanges");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->LogConfigChanges = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LogDebugEventOnly");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->LogDebugEventOnly = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnmpV3Username");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SnmpV3Username = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnmpTrapCommunity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SnmpTrapCommunity = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_log_ActionConfig(
+    val_value_t *parentval,
+    struct logpb_ActionConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_log_ActionConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_log_ActionConfigEntry(
+    val_value_t *parentval,
+    struct logpb_ActionConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LoggingType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoggingSeverityType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingSeverityType = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_log_Statistics(
+    val_value_t *parentval,
+    struct logpb_Statistics *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfTargets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->NumberOfTargets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SyslogCounter");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SyslogCounter = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnmpTrapCounter");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SnmpTrapCounter = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SnmpInfoCounter");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SnmpInfoCounter = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DisplayInCliCounter");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DisplayInCliCounter = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_log_LogFileEntry(
+    val_value_t *parentval,
+    struct logpb_LogFileEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LogID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->LogID = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Ts = malloc(sizeof(*(entry->Ts)));
+    res = build_to_priv_timestamp_Timestamp(
+        childval,
+        entry->Ts);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoggingType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoggingSeverityType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LoggingSeverityType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Message");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Message = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_log_LogFiles(
+    val_value_t *parentval,
+    struct logpb_LogFiles *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_log_LogFileEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}

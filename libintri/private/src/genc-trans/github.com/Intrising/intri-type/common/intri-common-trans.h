@@ -21,78 +21,115 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_common_Path (
+extern status_t build_to_xml_common_Path(
     val_value_t *parentval,
     struct commonpb_Path *entry);
-
-extern status_t build_to_xml_common_ExportPathRequest (
+extern status_t build_to_xml_common_ExportPathRequest(
     val_value_t *parentval,
     struct commonpb_ExportPathRequest *entry);
-
-extern status_t build_to_xml_common_ImportPathRequest (
+extern status_t build_to_xml_common_ImportPathRequest(
     val_value_t *parentval,
     struct commonpb_ImportPathRequest *entry);
-
-extern status_t build_to_xml_common_Enabled (
+extern status_t build_to_xml_common_Enabled(
     val_value_t *parentval,
     struct commonpb_Enabled *entry);
-
-extern status_t build_to_xml_common_MACAddress (
+extern status_t build_to_xml_common_MACAddress(
     val_value_t *parentval,
     struct commonpb_MACAddress *entry);
-
-extern status_t build_to_xml_common_IPAddress (
+extern status_t build_to_xml_common_IPAddress(
     val_value_t *parentval,
     struct commonpb_IPAddress *entry);
-
-extern status_t build_to_xml_common_IPv4List (
+extern status_t build_to_xml_common_IPv4List(
     val_value_t *parentval,
     struct commonpb_IPv4List *entry);
-
-extern status_t build_to_xml_common_IPv6Entry (
+extern status_t build_to_xml_common_IPv6Entry(
     val_value_t *parentval,
     struct commonpb_IPv6Entry *entry);
-
-extern status_t build_to_xml_common_IPv6List (
+extern status_t build_to_xml_common_IPv6List(
     val_value_t *parentval,
     struct commonpb_IPv6List *entry);
-
-extern status_t build_to_xml_common_Name (
+extern status_t build_to_xml_common_Name(
     val_value_t *parentval,
     struct commonpb_Name *entry);
-
-extern status_t build_to_xml_common_NameList (
+extern status_t build_to_xml_common_NameList(
     val_value_t *parentval,
     struct commonpb_NameList *entry);
-
-extern status_t build_to_xml_common_Reply (
+extern status_t build_to_xml_common_Reply(
     val_value_t *parentval,
     struct commonpb_Reply *entry);
-
-extern status_t build_to_xml_common_Confirm (
+extern status_t build_to_xml_common_Confirm(
     val_value_t *parentval,
     struct commonpb_Confirm *entry);
-
-extern status_t build_to_xml_common_DateTime (
+extern status_t build_to_xml_common_DateTime(
     val_value_t *parentval,
     struct commonpb_DateTime *entry);
-
-extern status_t build_to_xml_common_AllStatus (
+extern status_t build_to_xml_common_AllStatus(
     val_value_t *parentval,
     struct commonpb_AllStatus *entry);
-
-extern status_t build_to_xml_common_State (
+extern status_t build_to_xml_common_State(
     val_value_t *parentval,
     struct commonpb_State *entry);
-
-extern status_t build_to_xml_common_Index (
+extern status_t build_to_xml_common_Index(
     val_value_t *parentval,
     struct commonpb_Index *entry);
-
-extern status_t build_to_xml_common_GRPCErrorDetail (
+extern status_t build_to_xml_common_GRPCErrorDetail(
     val_value_t *parentval,
     struct commonpb_GRPCErrorDetail *entry);
 
+extern status_t build_to_priv_common_Path(
+    val_value_t *parentval,
+    struct commonpb_Path *entry);
+extern status_t build_to_priv_common_ExportPathRequest(
+    val_value_t *parentval,
+    struct commonpb_ExportPathRequest *entry);
+extern status_t build_to_priv_common_ImportPathRequest(
+    val_value_t *parentval,
+    struct commonpb_ImportPathRequest *entry);
+extern status_t build_to_priv_common_Enabled(
+    val_value_t *parentval,
+    struct commonpb_Enabled *entry);
+extern status_t build_to_priv_common_MACAddress(
+    val_value_t *parentval,
+    struct commonpb_MACAddress *entry);
+extern status_t build_to_priv_common_IPAddress(
+    val_value_t *parentval,
+    struct commonpb_IPAddress *entry);
+extern status_t build_to_priv_common_IPv4List(
+    val_value_t *parentval,
+    struct commonpb_IPv4List *entry);
+extern status_t build_to_priv_common_IPv6Entry(
+    val_value_t *parentval,
+    struct commonpb_IPv6Entry *entry);
+extern status_t build_to_priv_common_IPv6List(
+    val_value_t *parentval,
+    struct commonpb_IPv6List *entry);
+extern status_t build_to_priv_common_Name(
+    val_value_t *parentval,
+    struct commonpb_Name *entry);
+extern status_t build_to_priv_common_NameList(
+    val_value_t *parentval,
+    struct commonpb_NameList *entry);
+extern status_t build_to_priv_common_Reply(
+    val_value_t *parentval,
+    struct commonpb_Reply *entry);
+extern status_t build_to_priv_common_Confirm(
+    val_value_t *parentval,
+    struct commonpb_Confirm *entry);
+extern status_t build_to_priv_common_DateTime(
+    val_value_t *parentval,
+    struct commonpb_DateTime *entry);
+extern status_t build_to_priv_common_AllStatus(
+    val_value_t *parentval,
+    struct commonpb_AllStatus *entry);
+extern status_t build_to_priv_common_State(
+    val_value_t *parentval,
+    struct commonpb_State *entry);
+extern status_t build_to_priv_common_Index(
+    val_value_t *parentval,
+    struct commonpb_Index *entry);
+extern status_t build_to_priv_common_GRPCErrorDetail(
+    val_value_t *parentval,
+    struct commonpb_GRPCErrorDetail *entry);
 
 #endif /* _H_intri_common_trans */
 

@@ -32,54 +32,55 @@
 
 #include "../../../../github.com/Intrising/intri-type/core/userinterface/intri-userinterface-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_cli_ScriptAction (
+
+status_t build_to_xml_cli_ScriptAction(
     val_value_t *parentval,
     struct clipb_ScriptAction *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Token",
-    &res);
+      "Token",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Token;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FileURL",
-    &res);
+      "FileURL",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FileURL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsFTPS",
-    &res);
+      "IsFTPS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsFTPS;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ForceTFTP",
-    &res);
+      "ForceTFTP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -88,3 +89,38 @@ status_t build_to_xml_cli_ScriptAction (
   return res;
 }
 
+status_t build_to_priv_cli_ScriptAction(
+    val_value_t *parentval,
+    struct clipb_ScriptAction *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Token");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Token = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FileURL");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FileURL = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsFTPS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsFTPS = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ForceTFTP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->ForceTFTP = VAL_BOOL(childval);
+  }
+  return res;
+}

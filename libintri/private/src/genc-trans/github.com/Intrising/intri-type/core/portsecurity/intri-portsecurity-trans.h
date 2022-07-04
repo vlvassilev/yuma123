@@ -21,34 +21,49 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_portsecurity_Config (
+extern status_t build_to_xml_portsecurity_Config(
     val_value_t *parentval,
     struct portsecuritypb_Config *entry);
-
-extern status_t build_to_xml_portsecurity_PortSecurityConfigEntry (
+extern status_t build_to_xml_portsecurity_PortSecurityConfigEntry(
     val_value_t *parentval,
     struct portsecuritypb_PortSecurityConfigEntry *entry);
-
-extern status_t build_to_xml_portsecurity_SecureEntry (
+extern status_t build_to_xml_portsecurity_SecureEntry(
     val_value_t *parentval,
     struct portsecuritypb_SecureEntry *entry);
-
-extern status_t build_to_xml_portsecurity_PortSecureEntry (
+extern status_t build_to_xml_portsecurity_PortSecureEntry(
     val_value_t *parentval,
     struct portsecuritypb_PortSecureEntry *entry);
-
-extern status_t build_to_xml_portsecurity_Status (
+extern status_t build_to_xml_portsecurity_Status(
     val_value_t *parentval,
     struct portsecuritypb_Status *entry);
-
-extern status_t build_to_xml_portsecurity_PortSecurityStatusEntry (
+extern status_t build_to_xml_portsecurity_PortSecurityStatusEntry(
     val_value_t *parentval,
     struct portsecuritypb_PortSecurityStatusEntry *entry);
-
-extern status_t build_to_xml_portsecurity_PortSecurityAge (
+extern status_t build_to_xml_portsecurity_PortSecurityAge(
     val_value_t *parentval,
     struct portsecuritypb_PortSecurityAge *entry);
 
+extern status_t build_to_priv_portsecurity_Config(
+    val_value_t *parentval,
+    struct portsecuritypb_Config *entry);
+extern status_t build_to_priv_portsecurity_PortSecurityConfigEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecurityConfigEntry *entry);
+extern status_t build_to_priv_portsecurity_SecureEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_SecureEntry *entry);
+extern status_t build_to_priv_portsecurity_PortSecureEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecureEntry *entry);
+extern status_t build_to_priv_portsecurity_Status(
+    val_value_t *parentval,
+    struct portsecuritypb_Status *entry);
+extern status_t build_to_priv_portsecurity_PortSecurityStatusEntry(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecurityStatusEntry *entry);
+extern status_t build_to_priv_portsecurity_PortSecurityAge(
+    val_value_t *parentval,
+    struct portsecuritypb_PortSecurityAge *entry);
 
 #endif /* _H_intri_portsecurity_trans */
 

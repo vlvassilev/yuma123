@@ -21,14 +21,19 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_error_Detail (
+extern status_t build_to_xml_error_Detail(
     val_value_t *parentval,
     struct errorpb_Detail *entry);
-
-extern status_t build_to_xml_error_PreparingDetail (
+extern status_t build_to_xml_error_PreparingDetail(
     val_value_t *parentval,
     struct errorpb_PreparingDetail *entry);
 
+extern status_t build_to_priv_error_Detail(
+    val_value_t *parentval,
+    struct errorpb_Detail *entry);
+extern status_t build_to_priv_error_PreparingDetail(
+    val_value_t *parentval,
+    struct errorpb_PreparingDetail *entry);
 
 #endif /* _H_intri_error_trans */
 

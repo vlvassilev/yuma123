@@ -65,30 +65,33 @@
 #include "../../../../github.com/Intrising/intri-type/core/vlan/intri-vlan-trans.h"
 #include "../../../../github.com/Intrising/intri-type/log/intri-log-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_config_ImportAction (
+
+status_t build_to_xml_config_ImportAction(
     val_value_t *parentval,
     struct configpb_ImportAction *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FileURL",
-    &res);
+      "FileURL",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FileURL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RebootAfterAction",
-    &res);
+      "RebootAfterAction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -96,43 +99,43 @@ status_t build_to_xml_config_ImportAction (
   VAL_BOOL(childval) = entry->RebootAfterAction;
   return res;
 }
-
-status_t build_to_xml_config_ExportAction (
+status_t build_to_xml_config_ExportAction(
     val_value_t *parentval,
     struct configpb_ExportAction *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FileURL",
-    &res);
+      "FileURL",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FileURL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsFTPS",
-    &res);
+      "IsFTPS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsFTPS;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ForceTFTP",
-    &res);
+      "ForceTFTP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -140,55 +143,72 @@ status_t build_to_xml_config_ExportAction (
   VAL_BOOL(childval) = entry->ForceTFTP;
   return res;
 }
-
-status_t build_to_xml_config_SaveModeStatus (
+status_t build_to_xml_config_SaveModeStatus(
     val_value_t *parentval,
     struct configpb_SaveModeStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SaveStorageOption",
-    &res);
+      "SaveStorageOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SaveStorageOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SaveStorageOption) {
+    case configpb_StorageTypeOptions_STORAGE_TYPE_RAM_DISK:
+      enum_str = "STORAGE_TYPE_RAM_DISK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SaveModeOption",
-    &res);
+      "SaveModeOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SaveModeOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SaveModeOption) {
+    case configpb_SaveModeTypeOptions_SAVE_MODE_TYPE_TEMPORARILY:
+      enum_str = "SAVE_MODE_TYPE_TEMPORARILY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ConfigStateOption",
-    &res);
+      "ConfigStateOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ConfigStateOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ConfigStateOption) {
+    case configpb_ConfigStateTypeOptions_CONFIG_STATE_TYPE_SAVED:
+      enum_str = "CONFIG_STATE_TYPE_SAVED";
+      break;
+    case configpb_ConfigStateTypeOptions_CONFIG_STATE_TYPE_CHANGED:
+      enum_str = "CONFIG_STATE_TYPE_CHANGED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ConfigLastUpdated",
-    &res);
+      "ConfigLastUpdated",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -196,659 +216,1228 @@ status_t build_to_xml_config_SaveModeStatus (
   VAL_STRING(childval) = entry->ConfigLastUpdated;
   return res;
 }
-
-status_t build_to_xml_config_RestoreDefaultType (
+status_t build_to_xml_config_RestoreDefaultType(
     val_value_t *parentval,
     struct configpb_RestoreDefaultType *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
+  switch (entry->Type) {
+    case configpb_FactoryDefaultModeTypeOptions_FACTORY_DEFAULT_MODE_TYPE_KEEP_ALL:
+      enum_str = "FACTORY_DEFAULT_MODE_TYPE_KEEP_ALL";
+      break;
+    case configpb_FactoryDefaultModeTypeOptions_FACTORY_DEFAULT_MODE_TYPE_KEEP_USER_ACCOUNTS:
+      enum_str = "FACTORY_DEFAULT_MODE_TYPE_KEEP_USER_ACCOUNTS";
+      break;
+    case configpb_FactoryDefaultModeTypeOptions_FACTORY_DEFAULT_MODE_TYPE_KEEP_NETWORK_CONFIGS:
+      enum_str = "FACTORY_DEFAULT_MODE_TYPE_KEEP_NETWORK_CONFIGS";
+      break;
+    case configpb_FactoryDefaultModeTypeOptions_FACTORY_DEFAULT_MODE_TYPE_RESET_ALL:
+      enum_str = "FACTORY_DEFAULT_MODE_TYPE_RESET_ALL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_config_AllServicesConfig (
+status_t build_to_xml_config_AllServicesConfig(
     val_value_t *parentval,
     struct configpb_AllServicesConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Acl",
-    &res);
+      "Acl",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_acl_Config(
+  res = build_to_xml_acl_Config(
       childval,
-    entry->Acl);
+      entry->Acl);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Vlan",
-    &res);
+      "Vlan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_vlan_Config(
+  res = build_to_xml_vlan_Config(
       childval,
-    entry->Vlan);
+      entry->Vlan);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Gvrp",
-    &res);
+      "Gvrp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_gvrp_Config(
+  res = build_to_xml_gvrp_Config(
       childval,
-    entry->Gvrp);
+      entry->Gvrp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Access",
-    &res);
+      "Access",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_access_Config(
+  res = build_to_xml_access_Config(
       childval,
-    entry->Access);
+      entry->Access);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserInterface",
-    &res);
+      "UserInterface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_userinterface_Config(
+  res = build_to_xml_userinterface_Config(
       childval,
-    entry->UserInterface);
+      entry->UserInterface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "System",
-    &res);
+      "System",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_system_Config(
+  res = build_to_xml_system_Config(
       childval,
-    entry->System);
+      entry->System);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Network",
-    &res);
+      "Network",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_network_Config(
+  res = build_to_xml_network_Config(
       childval,
-    entry->Network);
+      entry->Network);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Time",
-    &res);
+      "Time",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_time_Config(
+  res = build_to_xml_time_Config(
       childval,
-    entry->Time);
+      entry->Time);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_port_Config(
+  res = build_to_xml_port_Config(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Sfp",
-    &res);
+      "Sfp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_sfp_Config(
+  res = build_to_xml_sfp_Config(
       childval,
-    entry->Sfp);
+      entry->Sfp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mirroring",
-    &res);
+      "Mirroring",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_mirroring_Config(
+  res = build_to_xml_mirroring_Config(
       childval,
-    entry->Mirroring);
+      entry->Mirroring);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Isolation",
-    &res);
+      "Isolation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_isolation_Config(
+  res = build_to_xml_isolation_Config(
       childval,
-    entry->Isolation);
+      entry->Isolation);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Fdb",
-    &res);
+      "Fdb",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_fdb_Config(
+  res = build_to_xml_fdb_Config(
       childval,
-    entry->Fdb);
+      entry->Fdb);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortSecurity",
-    &res);
+      "PortSecurity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_portsecurity_Config(
+  res = build_to_xml_portsecurity_Config(
       childval,
-    entry->PortSecurity);
+      entry->PortSecurity);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Files",
-    &res);
+      "Files",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_files_Config(
+  res = build_to_xml_files_Config(
       childval,
-    entry->Files);
+      entry->Files);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Lacp",
-    &res);
+      "Lacp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lacp_Config(
+  res = build_to_xml_lacp_Config(
       childval,
-    entry->Lacp);
+      entry->Lacp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Multicast",
-    &res);
+      "Multicast",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_multicast_Config(
+  res = build_to_xml_multicast_Config(
       childval,
-    entry->Multicast);
+      entry->Multicast);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "StormControl",
-    &res);
+      "StormControl",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stormcontrol_Config(
+  res = build_to_xml_stormcontrol_Config(
       childval,
-    entry->StormControl);
+      entry->StormControl);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Dhcp",
-    &res);
+      "Dhcp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_dhcp_Config(
+  res = build_to_xml_dhcp_Config(
       childval,
-    entry->Dhcp);
+      entry->Dhcp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QoS",
-    &res);
+      "QoS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_qos_Config(
+  res = build_to_xml_qos_Config(
       childval,
-    entry->QoS);
+      entry->QoS);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Loop",
-    &res);
+      "Loop",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_loop_Config(
+  res = build_to_xml_loop_Config(
       childval,
-    entry->Loop);
+      entry->Loop);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Lldp",
-    &res);
+      "Lldp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_lldp_Config(
+  res = build_to_xml_lldp_Config(
       childval,
-    entry->Lldp);
+      entry->Lldp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Poe",
-    &res);
+      "Poe",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_poe_Config(
+  res = build_to_xml_poe_Config(
       childval,
-    entry->Poe);
+      entry->Poe);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Cdp",
-    &res);
+      "Cdp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cdp_Config(
+  res = build_to_xml_cdp_Config(
       childval,
-    entry->Cdp);
+      entry->Cdp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DhcpServer",
-    &res);
+      "DhcpServer",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_dhcpserver_Config(
+  res = build_to_xml_dhcpserver_Config(
       childval,
-    entry->DhcpServer);
+      entry->DhcpServer);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Stp",
-    &res);
+      "Stp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_STPConfig(
+  res = build_to_xml_stp_STPConfig(
       childval,
-    entry->Stp);
+      entry->Stp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mstp",
-    &res);
+      "Mstp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stp_MSTPConfig(
+  res = build_to_xml_stp_MSTPConfig(
       childval,
-    entry->Mstp);
+      entry->Mstp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeRange",
-    &res);
+      "TimeRange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timerange_Config(
+  res = build_to_xml_timerange_Config(
       childval,
-    entry->TimeRange);
+      entry->TimeRange);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ArpInspection",
-    &res);
+      "ArpInspection",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_dhcp_ARPInspectionConfig(
+  res = build_to_xml_dhcp_ARPInspectionConfig(
       childval,
-    entry->ArpInspection);
+      entry->ArpInspection);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ptp",
-    &res);
+      "Ptp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_ptp_Config(
+  res = build_to_xml_ptp_Config(
       childval,
-    entry->Ptp);
+      entry->Ptp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Monitor",
-    &res);
+      "Monitor",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_monitor_Config(
+  res = build_to_xml_monitor_Config(
       childval,
-    entry->Monitor);
+      entry->Monitor);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TimeSync",
-    &res);
+      "TimeSync",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timesync_Config(
+  res = build_to_xml_timesync_Config(
       childval,
-    entry->TimeSync);
+      entry->TimeSync);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Udld",
-    &res);
+      "Udld",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_udld_Config(
+  res = build_to_xml_udld_Config(
       childval,
-    entry->Udld);
+      entry->Udld);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortAuthentication",
-    &res);
+      "PortAuthentication",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_portauthentication_Config(
+  res = build_to_xml_portauthentication_Config(
       childval,
-    entry->PortAuthentication);
+      entry->PortAuthentication);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Log",
-    &res);
+      "Log",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_log_Config(
+  res = build_to_xml_log_Config(
       childval,
-    entry->Log);
+      entry->Log);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_config_ValidateConfigResult (
+status_t build_to_xml_config_ValidateConfigResult(
     val_value_t *parentval,
     struct configpb_ValidateConfigResult *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->List[i];
   }
   return res;
 }
 
+status_t build_to_priv_config_ImportAction(
+    val_value_t *parentval,
+    struct configpb_ImportAction *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FileURL");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FileURL = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RebootAfterAction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->RebootAfterAction = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_config_ExportAction(
+    val_value_t *parentval,
+    struct configpb_ExportAction *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FileURL");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FileURL = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsFTPS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsFTPS = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ForceTFTP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->ForceTFTP = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_config_SaveModeStatus(
+    val_value_t *parentval,
+    struct configpb_SaveModeStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SaveStorageOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SaveStorageOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SaveModeOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SaveModeOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ConfigStateOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ConfigStateOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ConfigLastUpdated");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ConfigLastUpdated = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_config_RestoreDefaultType(
+    val_value_t *parentval,
+    struct configpb_RestoreDefaultType *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_config_AllServicesConfig(
+    val_value_t *parentval,
+    struct configpb_AllServicesConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Acl");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Acl = malloc(sizeof(*(entry->Acl)));
+    res = build_to_priv_acl_Config(
+        childval,
+        entry->Acl);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Vlan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Vlan = malloc(sizeof(*(entry->Vlan)));
+    res = build_to_priv_vlan_Config(
+        childval,
+        entry->Vlan);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Gvrp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Gvrp = malloc(sizeof(*(entry->Gvrp)));
+    res = build_to_priv_gvrp_Config(
+        childval,
+        entry->Gvrp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Access");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Access = malloc(sizeof(*(entry->Access)));
+    res = build_to_priv_access_Config(
+        childval,
+        entry->Access);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserInterface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->UserInterface = malloc(sizeof(*(entry->UserInterface)));
+    res = build_to_priv_userinterface_Config(
+        childval,
+        entry->UserInterface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "System");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->System = malloc(sizeof(*(entry->System)));
+    res = build_to_priv_system_Config(
+        childval,
+        entry->System);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Network");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Network = malloc(sizeof(*(entry->Network)));
+    res = build_to_priv_network_Config(
+        childval,
+        entry->Network);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Time");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Time = malloc(sizeof(*(entry->Time)));
+    res = build_to_priv_time_Config(
+        childval,
+        entry->Time);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_port_Config(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Sfp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Sfp = malloc(sizeof(*(entry->Sfp)));
+    res = build_to_priv_sfp_Config(
+        childval,
+        entry->Sfp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mirroring");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Mirroring = malloc(sizeof(*(entry->Mirroring)));
+    res = build_to_priv_mirroring_Config(
+        childval,
+        entry->Mirroring);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Isolation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Isolation = malloc(sizeof(*(entry->Isolation)));
+    res = build_to_priv_isolation_Config(
+        childval,
+        entry->Isolation);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Fdb");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Fdb = malloc(sizeof(*(entry->Fdb)));
+    res = build_to_priv_fdb_Config(
+        childval,
+        entry->Fdb);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortSecurity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortSecurity = malloc(sizeof(*(entry->PortSecurity)));
+    res = build_to_priv_portsecurity_Config(
+        childval,
+        entry->PortSecurity);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Files");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Files = malloc(sizeof(*(entry->Files)));
+    res = build_to_priv_files_Config(
+        childval,
+        entry->Files);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Lacp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Lacp = malloc(sizeof(*(entry->Lacp)));
+    res = build_to_priv_lacp_Config(
+        childval,
+        entry->Lacp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Multicast");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Multicast = malloc(sizeof(*(entry->Multicast)));
+    res = build_to_priv_multicast_Config(
+        childval,
+        entry->Multicast);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "StormControl");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->StormControl = malloc(sizeof(*(entry->StormControl)));
+    res = build_to_priv_stormcontrol_Config(
+        childval,
+        entry->StormControl);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Dhcp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Dhcp = malloc(sizeof(*(entry->Dhcp)));
+    res = build_to_priv_dhcp_Config(
+        childval,
+        entry->Dhcp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QoS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->QoS = malloc(sizeof(*(entry->QoS)));
+    res = build_to_priv_qos_Config(
+        childval,
+        entry->QoS);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Loop");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Loop = malloc(sizeof(*(entry->Loop)));
+    res = build_to_priv_loop_Config(
+        childval,
+        entry->Loop);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Lldp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Lldp = malloc(sizeof(*(entry->Lldp)));
+    res = build_to_priv_lldp_Config(
+        childval,
+        entry->Lldp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Poe");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Poe = malloc(sizeof(*(entry->Poe)));
+    res = build_to_priv_poe_Config(
+        childval,
+        entry->Poe);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Cdp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Cdp = malloc(sizeof(*(entry->Cdp)));
+    res = build_to_priv_cdp_Config(
+        childval,
+        entry->Cdp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DhcpServer");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DhcpServer = malloc(sizeof(*(entry->DhcpServer)));
+    res = build_to_priv_dhcpserver_Config(
+        childval,
+        entry->DhcpServer);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Stp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Stp = malloc(sizeof(*(entry->Stp)));
+    res = build_to_priv_stp_STPConfig(
+        childval,
+        entry->Stp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mstp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Mstp = malloc(sizeof(*(entry->Mstp)));
+    res = build_to_priv_stp_MSTPConfig(
+        childval,
+        entry->Mstp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeRange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->TimeRange = malloc(sizeof(*(entry->TimeRange)));
+    res = build_to_priv_timerange_Config(
+        childval,
+        entry->TimeRange);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ArpInspection");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ArpInspection = malloc(sizeof(*(entry->ArpInspection)));
+    res = build_to_priv_dhcp_ARPInspectionConfig(
+        childval,
+        entry->ArpInspection);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ptp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Ptp = malloc(sizeof(*(entry->Ptp)));
+    res = build_to_priv_ptp_Config(
+        childval,
+        entry->Ptp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Monitor");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Monitor = malloc(sizeof(*(entry->Monitor)));
+    res = build_to_priv_monitor_Config(
+        childval,
+        entry->Monitor);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TimeSync");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->TimeSync = malloc(sizeof(*(entry->TimeSync)));
+    res = build_to_priv_timesync_Config(
+        childval,
+        entry->TimeSync);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Udld");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Udld = malloc(sizeof(*(entry->Udld)));
+    res = build_to_priv_udld_Config(
+        childval,
+        entry->Udld);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortAuthentication");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortAuthentication = malloc(sizeof(*(entry->PortAuthentication)));
+    res = build_to_priv_portauthentication_Config(
+        childval,
+        entry->PortAuthentication);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Log");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Log = malloc(sizeof(*(entry->Log)));
+    res = build_to_priv_log_Config(
+        childval,
+        entry->Log);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_config_ValidateConfigResult(
+    val_value_t *parentval,
+    struct configpb_ValidateConfigResult *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->List[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}

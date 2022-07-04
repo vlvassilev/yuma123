@@ -32,94 +32,97 @@
 
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_timesync_Config (
+
+status_t build_to_xml_timesync_Config(
     val_value_t *parentval,
     struct timesyncpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "GNSS",
-    &res);
+      "GNSS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timesync_GNSSConfig(
+  res = build_to_xml_timesync_GNSSConfig(
       childval,
-    entry->GNSS);
+      entry->GNSS);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SyncE",
-    &res);
+      "SyncE",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timesync_SyncEConfig(
+  res = build_to_xml_timesync_SyncEConfig(
       childval,
-    entry->SyncE);
+      entry->SyncE);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SyncSource",
-    &res);
+      "SyncSource",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timesync_SyncSourceConfig(
+  res = build_to_xml_timesync_SyncSourceConfig(
       childval,
-    entry->SyncSource);
+      entry->SyncSource);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Reference",
-    &res);
+      "Reference",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timesync_ReferenceOutput(
+  res = build_to_xml_timesync_ReferenceOutput(
       childval,
-    entry->Reference);
+      entry->Reference);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_timesync_GNSSConfig (
+status_t build_to_xml_timesync_GNSSConfig(
     val_value_t *parentval,
     struct timesyncpb_GNSSConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -127,169 +130,221 @@ status_t build_to_xml_timesync_GNSSConfig (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_timesync_SyncEConfig (
+status_t build_to_xml_timesync_SyncEConfig(
     val_value_t *parentval,
     struct timesyncpb_SyncEConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case timesyncpb_SyncEModeTypeOptions_SYNCE_MODE_TYPE_DISABLED:
+      enum_str = "SYNCE_MODE_TYPE_DISABLED";
+      break;
+    case timesyncpb_SyncEModeTypeOptions_SYNCE_MODE_TYPE_STATIC:
+      enum_str = "SYNCE_MODE_TYPE_STATIC";
+      break;
+    case timesyncpb_SyncEModeTypeOptions_SYNCE_MODE_TYPE_ESMC:
+      enum_str = "SYNCE_MODE_TYPE_ESMC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ReferenceIdentifyNo",
-    &res);
+      "ReferenceIdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->ReferenceIdentifyNo);
+      entry->ReferenceIdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_timesync_SyncSourceConfig (
+status_t build_to_xml_timesync_SyncSourceConfig(
     val_value_t *parentval,
     struct timesyncpb_SyncSourceConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Source;
+  switch (entry->Source) {
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_GNSS:
+      enum_str = "SYNC_SOURCE_TYPE_GNSS";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_SYNCE:
+      enum_str = "SYNC_SOURCE_TYPE_SYNCE";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_10MHZ_INPUT:
+      enum_str = "SYNC_SOURCE_TYPE_10MHZ_INPUT";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_1PPS_INPUT:
+      enum_str = "SYNC_SOURCE_TYPE_1PPS_INPUT";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_BITS_INPUT:
+      enum_str = "SYNC_SOURCE_TYPE_BITS_INPUT";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_PTP:
+      enum_str = "SYNC_SOURCE_TYPE_PTP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timesync_ReferenceOutput (
+status_t build_to_xml_timesync_ReferenceOutput(
     val_value_t *parentval,
     struct timesyncpb_ReferenceOutput *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Tod",
-    &res);
+      "Tod",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timesync_ToDConfig(
+  res = build_to_xml_timesync_ToDConfig(
       childval,
-    entry->Tod);
+      entry->Tod);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_timesync_ToDConfig (
+status_t build_to_xml_timesync_ToDConfig(
     val_value_t *parentval,
     struct timesyncpb_ToDConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MessageType",
-    &res);
+      "MessageType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MessageType;
+  switch (entry->MessageType) {
+    case timesyncpb_ToDMessageTypeOptions_TOD_MESSAGE_TYPE_NMEA_GPZDA:
+      enum_str = "TOD_MESSAGE_TYPE_NMEA_GPZDA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timesync_GNSStatus (
+status_t build_to_xml_timesync_GNSStatus(
     val_value_t *parentval,
     struct timesyncpb_GNSStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->State) {
+    case timesyncpb_GNSSStateTypeOptions_GNSS_STATE_TYPE_DISABLE:
+      enum_str = "GNSS_STATE_TYPE_DISABLE";
+      break;
+    case timesyncpb_GNSSStateTypeOptions_GNSS_STATE_TYPE_SYNC:
+      enum_str = "GNSS_STATE_TYPE_SYNC";
+      break;
+    case timesyncpb_GNSSStateTypeOptions_GNSS_STATE_TYPE_TRACKING:
+      enum_str = "GNSS_STATE_TYPE_TRACKING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Longitude",
-    &res);
+      "Longitude",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Longitude;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Latitude",
-    &res);
+      "Latitude",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Latitude;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DateTime",
-    &res);
+      "DateTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -297,134 +352,481 @@ status_t build_to_xml_timesync_GNSStatus (
   VAL_STRING(childval) = entry->DateTime;
   return res;
 }
-
-status_t build_to_xml_timesync_SyncEStatus (
+status_t build_to_xml_timesync_SyncEStatus(
     val_value_t *parentval,
     struct timesyncpb_SyncEStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ReferenceIdentifyNo",
-    &res);
+      "ReferenceIdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->ReferenceIdentifyNo);
+      entry->ReferenceIdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Signal",
-    &res);
+      "Signal",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Signal;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Signal) {
+    case timesyncpb_SignalTypeOptions_SIGNAL_TYPE_OK:
+      enum_str = "SIGNAL_TYPE_OK";
+      break;
+    case timesyncpb_SignalTypeOptions_SIGNAL_TYPE_LOSS:
+      enum_str = "SIGNAL_TYPE_LOSS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LockStatus",
-    &res);
+      "LockStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LockStatus;
+  switch (entry->LockStatus) {
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_FREERUN:
+      enum_str = "LOCK_STATUS_TYPE_FREERUN";
+      break;
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_LOCK_ACQUISITION:
+      enum_str = "LOCK_STATUS_TYPE_LOCK_ACQUISITION";
+      break;
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_LOCKED:
+      enum_str = "LOCK_STATUS_TYPE_LOCKED";
+      break;
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_HOLDOVER:
+      enum_str = "LOCK_STATUS_TYPE_HOLDOVER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_timesync_SyncSourceStatus (
+status_t build_to_xml_timesync_SyncSourceStatus(
     val_value_t *parentval,
     struct timesyncpb_SyncSourceStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LockStatus",
-    &res);
+      "LockStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LockStatus;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LockStatus) {
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_FREERUN:
+      enum_str = "LOCK_STATUS_TYPE_FREERUN";
+      break;
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_LOCK_ACQUISITION:
+      enum_str = "LOCK_STATUS_TYPE_LOCK_ACQUISITION";
+      break;
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_LOCKED:
+      enum_str = "LOCK_STATUS_TYPE_LOCKED";
+      break;
+    case timesyncpb_LockStatusTypeOptions_LOCK_STATUS_TYPE_HOLDOVER:
+      enum_str = "LOCK_STATUS_TYPE_HOLDOVER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_timesync_SyncSourceInputStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_timesync_SyncSourceInputStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_timesync_SyncSourceInputStatusEntry (
+status_t build_to_xml_timesync_SyncSourceInputStatusEntry(
     val_value_t *parentval,
     struct timesyncpb_SyncSourceInputStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Source",
-    &res);
+      "Source",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Source;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Source) {
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_GNSS:
+      enum_str = "SYNC_SOURCE_TYPE_GNSS";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_SYNCE:
+      enum_str = "SYNC_SOURCE_TYPE_SYNCE";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_10MHZ_INPUT:
+      enum_str = "SYNC_SOURCE_TYPE_10MHZ_INPUT";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_1PPS_INPUT:
+      enum_str = "SYNC_SOURCE_TYPE_1PPS_INPUT";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_BITS_INPUT:
+      enum_str = "SYNC_SOURCE_TYPE_BITS_INPUT";
+      break;
+    case timesyncpb_SyncSourceTypeOptions_SYNC_SOURCE_TYPE_PTP:
+      enum_str = "SYNC_SOURCE_TYPE_PTP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Signal",
-    &res);
+      "Signal",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Signal;
+  switch (entry->Signal) {
+    case timesyncpb_SignalTypeOptions_SIGNAL_TYPE_OK:
+      enum_str = "SIGNAL_TYPE_OK";
+      break;
+    case timesyncpb_SignalTypeOptions_SIGNAL_TYPE_LOSS:
+      enum_str = "SIGNAL_TYPE_LOSS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
 
+status_t build_to_priv_timesync_Config(
+    val_value_t *parentval,
+    struct timesyncpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "GNSS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->GNSS = malloc(sizeof(*(entry->GNSS)));
+    res = build_to_priv_timesync_GNSSConfig(
+        childval,
+        entry->GNSS);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SyncE");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SyncE = malloc(sizeof(*(entry->SyncE)));
+    res = build_to_priv_timesync_SyncEConfig(
+        childval,
+        entry->SyncE);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SyncSource");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SyncSource = malloc(sizeof(*(entry->SyncSource)));
+    res = build_to_priv_timesync_SyncSourceConfig(
+        childval,
+        entry->SyncSource);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Reference");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Reference = malloc(sizeof(*(entry->Reference)));
+    res = build_to_priv_timesync_ReferenceOutput(
+        childval,
+        entry->Reference);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timesync_GNSSConfig(
+    val_value_t *parentval,
+    struct timesyncpb_GNSSConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timesync_SyncEConfig(
+    val_value_t *parentval,
+    struct timesyncpb_SyncEConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ReferenceIdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ReferenceIdentifyNo = malloc(sizeof(*(entry->ReferenceIdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->ReferenceIdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timesync_SyncSourceConfig(
+    val_value_t *parentval,
+    struct timesyncpb_SyncSourceConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Source = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timesync_ReferenceOutput(
+    val_value_t *parentval,
+    struct timesyncpb_ReferenceOutput *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Tod");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Tod = malloc(sizeof(*(entry->Tod)));
+    res = build_to_priv_timesync_ToDConfig(
+        childval,
+        entry->Tod);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timesync_ToDConfig(
+    val_value_t *parentval,
+    struct timesyncpb_ToDConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MessageType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MessageType = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timesync_GNSStatus(
+    val_value_t *parentval,
+    struct timesyncpb_GNSStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Longitude");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Longitude = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Latitude");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Latitude = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DateTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DateTime = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timesync_SyncEStatus(
+    val_value_t *parentval,
+    struct timesyncpb_SyncEStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ReferenceIdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->ReferenceIdentifyNo = malloc(sizeof(*(entry->ReferenceIdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->ReferenceIdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Signal");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Signal = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LockStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LockStatus = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_timesync_SyncSourceStatus(
+    val_value_t *parentval,
+    struct timesyncpb_SyncSourceStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LockStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LockStatus = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_timesync_SyncSourceInputStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_timesync_SyncSourceInputStatusEntry(
+    val_value_t *parentval,
+    struct timesyncpb_SyncSourceInputStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Source");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Source = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Signal");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Signal = VAL_ENUM(childval);
+  }
+  return res;
+}

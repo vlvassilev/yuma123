@@ -33,78 +33,104 @@
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_stormcontrol_SuppressionConfigEntry (
+
+status_t build_to_xml_stormcontrol_SuppressionConfigEntry(
     val_value_t *parentval,
     struct stormcontrolpb_SuppressionConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SuppressionOption",
-    &res);
+      "SuppressionOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SuppressionOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SuppressionOption) {
+    case stormcontrolpb_StormControlSuppressionTypeOptions_STORM_CONTROL_SUPPRESSION_TYPE_BROADCAST:
+      enum_str = "STORM_CONTROL_SUPPRESSION_TYPE_BROADCAST";
+      break;
+    case stormcontrolpb_StormControlSuppressionTypeOptions_STORM_CONTROL_SUPPRESSION_TYPE_MULTICAST:
+      enum_str = "STORM_CONTROL_SUPPRESSION_TYPE_MULTICAST";
+      break;
+    case stormcontrolpb_StormControlSuppressionTypeOptions_STORM_CONTROL_SUPPRESSION_TYPE_UNKNOWN_UNICAST:
+      enum_str = "STORM_CONTROL_SUPPRESSION_TYPE_UNKNOWN_UNICAST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnable",
-    &res);
+      "IsEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ActionOption",
-    &res);
+      "ActionOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ActionOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ActionOption) {
+    case stormcontrolpb_StormControlActionTypeOptions_STORM_CONTROL_ACTION_TYPE_SHUTDOWN:
+      enum_str = "STORM_CONTROL_ACTION_TYPE_SHUTDOWN";
+      break;
+    case stormcontrolpb_StormControlActionTypeOptions_STORM_CONTROL_ACTION_TYPE_BLOCKING:
+      enum_str = "STORM_CONTROL_ACTION_TYPE_BLOCKING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "UnitOption",
-    &res);
+      "UnitOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->UnitOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->UnitOption) {
+    case stormcontrolpb_StormControlSuppressionUnitTypeOptions_STORM_CONTROL_SUPPRESSION_TYPE_BITS_PER_SECOND:
+      enum_str = "STORM_CONTROL_SUPPRESSION_TYPE_BITS_PER_SECOND";
+      break;
+    case stormcontrolpb_StormControlSuppressionUnitTypeOptions_STORM_CONTROL_SUPPRESSION_TYPE_PACKETS_PER_SECOND:
+      enum_str = "STORM_CONTROL_SUPPRESSION_TYPE_PACKETS_PER_SECOND";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "BpsUpperThreshold",
-    &res);
+      "BpsUpperThreshold",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BpsUpperThreshold;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PpsUpperThreshold",
-    &res);
+      "PpsUpperThreshold",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -112,144 +138,301 @@ status_t build_to_xml_stormcontrol_SuppressionConfigEntry (
   VAL_ULONG(childval) = entry->PpsUpperThreshold;
   return res;
 }
-
-status_t build_to_xml_stormcontrol_PortConfigEntry (
+status_t build_to_xml_stormcontrol_PortConfigEntry(
     val_value_t *parentval,
     struct stormcontrolpb_PortConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnable",
-    &res);
+      "IsEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SuppressionList",
-    &res);
+      "SuppressionList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SuppressionList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SuppressionList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stormcontrol_SuppressionConfigEntry(
-    listval,
-    entry->SuppressionList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SuppressionList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stormcontrol_SuppressionConfigEntry(
+        listval,
+        entry->SuppressionList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stormcontrol_PortConfig (
+status_t build_to_xml_stormcontrol_PortConfig(
     val_value_t *parentval,
     struct stormcontrolpb_PortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_stormcontrol_PortConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_stormcontrol_PortConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_stormcontrol_Config (
+status_t build_to_xml_stormcontrol_Config(
     val_value_t *parentval,
     struct stormcontrolpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnable",
-    &res);
+      "IsEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortConfig",
-    &res);
+      "PortConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_stormcontrol_PortConfig(
+  res = build_to_xml_stormcontrol_PortConfig(
       childval,
-    entry->PortConfig);
+      entry->PortConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
 
+status_t build_to_priv_stormcontrol_SuppressionConfigEntry(
+    val_value_t *parentval,
+    struct stormcontrolpb_SuppressionConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SuppressionOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SuppressionOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ActionOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ActionOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UnitOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->UnitOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BpsUpperThreshold");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BpsUpperThreshold = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PpsUpperThreshold");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->PpsUpperThreshold = VAL_ULONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_stormcontrol_PortConfigEntry(
+    val_value_t *parentval,
+    struct stormcontrolpb_PortConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SuppressionList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SuppressionList_Len = dlq_count(&childval->v.childQ);
+    entry->SuppressionList = malloc((entry->SuppressionList_Len + 1) * sizeof(*entry->SuppressionList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->SuppressionList[cnt] = malloc(sizeof(*(entry->SuppressionList[cnt])));
+      res = build_to_priv_stormcontrol_SuppressionConfigEntry(
+          listval,
+          entry->SuppressionList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stormcontrol_PortConfig(
+    val_value_t *parentval,
+    struct stormcontrolpb_PortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_stormcontrol_PortConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_stormcontrol_Config(
+    val_value_t *parentval,
+    struct stormcontrolpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortConfig = malloc(sizeof(*(entry->PortConfig)));
+    res = build_to_priv_stormcontrol_PortConfig(
+        childval,
+        entry->PortConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}

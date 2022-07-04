@@ -31,18 +31,22 @@
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_cpss_Enabled (
+
+status_t build_to_xml_cpss_Enabled(
     val_value_t *parentval,
     struct cpsspb_Enabled *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -50,51 +54,55 @@ status_t build_to_xml_cpss_Enabled (
   VAL_BOOL(childval) = entry->IsEnabled;
   return res;
 }
-
-status_t build_to_xml_cpss_IndexList (
+status_t build_to_xml_cpss_IndexList(
     val_value_t *parentval,
     struct cpsspb_IndexList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->List[i];
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MACAddress (
+status_t build_to_xml_cpss_MACAddress(
     val_value_t *parentval,
     struct cpsspb_MACAddress *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Value",
-    &res);
+      "Value",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -102,133 +110,130 @@ status_t build_to_xml_cpss_MACAddress (
   VAL_STRING(childval) = entry->Value;
   return res;
 }
-
-status_t build_to_xml_cpss_DeviceArchitecture (
+status_t build_to_xml_cpss_DeviceArchitecture(
     val_value_t *parentval,
     struct cpsspb_DeviceArchitecture *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Information",
-    &res);
+      "Information",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInformation(
+  res = build_to_xml_cpss_DeviceInformation(
       childval,
-    entry->Information);
+      entry->Information);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortAllocationTable",
-    &res);
+      "PortAllocationTable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortAllocationTable(
+  res = build_to_xml_cpss_DevicePortAllocationTable(
       childval,
-    entry->PortAllocationTable);
+      entry->PortAllocationTable);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_DeviceInformation (
+status_t build_to_xml_cpss_DeviceInformation(
     val_value_t *parentval,
     struct cpsspb_DeviceInformation *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Model",
-    &res);
+      "Model",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Model;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Description",
-    &res);
+      "Description",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Description;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EnterpriseOID",
-    &res);
+      "EnterpriseOID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->EnterpriseOID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Vendor",
-    &res);
+      "Vendor",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Vendor;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HardwareVersion",
-    &res);
+      "HardwareVersion",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->HardwareVersion;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SoftwareVersion",
-    &res);
+      "SoftwareVersion",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -236,413 +241,500 @@ status_t build_to_xml_cpss_DeviceInformation (
   VAL_STRING(childval) = entry->SoftwareVersion;
   return res;
 }
-
-status_t build_to_xml_cpss_DevicePortProperty (
+status_t build_to_xml_cpss_DevicePortProperty(
     val_value_t *parentval,
     struct cpsspb_DevicePortProperty *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case cpsspb_PortTypeOptions_PORT_TYPE_10M_FULL:
+      enum_str = "PORT_TYPE_10M_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_100M_FULL:
+      enum_str = "PORT_TYPE_100M_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_1000M_FULL:
+      enum_str = "PORT_TYPE_1000M_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_2500M_FULL:
+      enum_str = "PORT_TYPE_2500M_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_5G_FULL:
+      enum_str = "PORT_TYPE_5G_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_10G_FULL:
+      enum_str = "PORT_TYPE_10G_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_25G_FULL:
+      enum_str = "PORT_TYPE_25G_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_40G_FULL:
+      enum_str = "PORT_TYPE_40G_FULL";
+      break;
+    case cpsspb_PortTypeOptions_PORT_TYPE_100G_FULL:
+      enum_str = "PORT_TYPE_100G_FULL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "MACNo",
-    &res);
+      "MACNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->MACNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYInterface",
-    &res);
+      "PHYInterface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_PHYInterface(
+  res = build_to_xml_cpss_PHYInterface(
       childval,
-    entry->PHYInterface);
+      entry->PHYInterface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYID1",
-    &res);
+      "PHYID1",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PHYID1;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYID2",
-    &res);
+      "PHYID2",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PHYID2;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYChipID",
-    &res);
+      "PHYChipID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PHYChipID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PoENo",
-    &res);
+      "PoENo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PoENo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PoEChipNo",
-    &res);
+      "PoEChipNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PoEChipNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PoELEDNo",
-    &res);
+      "PoELEDNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PoELEDNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SupportedTypeList",
-    &res);
+      "SupportedTypeList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SupportedTypeList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SupportedTypeList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->SupportedTypeList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SupportedTypeList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->SupportedTypeList[i]) {
+      case cpsspb_PortTypeOptions_PORT_TYPE_10M_FULL:
+        enum_str = "PORT_TYPE_10M_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_100M_FULL:
+        enum_str = "PORT_TYPE_100M_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_1000M_FULL:
+        enum_str = "PORT_TYPE_1000M_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_2500M_FULL:
+        enum_str = "PORT_TYPE_2500M_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_5G_FULL:
+        enum_str = "PORT_TYPE_5G_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_10G_FULL:
+        enum_str = "PORT_TYPE_10G_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_25G_FULL:
+        enum_str = "PORT_TYPE_25G_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_40G_FULL:
+        enum_str = "PORT_TYPE_40G_FULL";
+        break;
+      case cpsspb_PortTypeOptions_PORT_TYPE_100G_FULL:
+        enum_str = "PORT_TYPE_100G_FULL";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SupportedMediaList",
-    &res);
+      "SupportedMediaList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SupportedMediaList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SupportedMediaList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->SupportedMediaList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SupportedMediaList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->SupportedMediaList[i]) {
+      case cpsspb_PortMediaOptions_PORT_MEDIA_COPPER:
+        enum_str = "PORT_MEDIA_COPPER";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_RJ45:
+        enum_str = "PORT_MEDIA_RJ45";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_SFP:
+        enum_str = "PORT_MEDIA_SFP";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_STACKING:
+        enum_str = "PORT_MEDIA_STACKING";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_POE:
+        enum_str = "PORT_MEDIA_POE";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_POE_PLUS:
+        enum_str = "PORT_MEDIA_POE_PLUS";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_POE_PLUS_PLUS:
+        enum_str = "PORT_MEDIA_POE_PLUS_PLUS";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_UP_LINK_PORT:
+        enum_str = "PORT_MEDIA_UP_LINK_PORT";
+        break;
+      case cpsspb_PortMediaOptions_PORT_MEDIA_DOWN_LINK_PORT:
+        enum_str = "PORT_MEDIA_DOWN_LINK_PORT";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PHYInterface (
+status_t build_to_xml_cpss_PHYInterface(
     val_value_t *parentval,
     struct cpsspb_PHYInterface *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Interface;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
+  switch (entry->Type) {
+    case cpsspb_PHYInterfaceTypeOptions_PHY_INTERFACE_TYPE_SMI:
+      enum_str = "PHY_INTERFACE_TYPE_SMI";
+      break;
+    case cpsspb_PHYInterfaceTypeOptions_PHY_INTERFACE_TYPE_XSMI:
+      enum_str = "PHY_INTERFACE_TYPE_XSMI";
+      break;
+    case cpsspb_PHYInterfaceTypeOptions_PHY_INTERFACE_TYPE_UNUSED:
+      enum_str = "PHY_INTERFACE_TYPE_UNUSED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_DevicePortAllocationTable (
+status_t build_to_xml_cpss_DevicePortAllocationTable(
     val_value_t *parentval,
     struct cpsspb_DevicePortAllocationTable *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "CPUPortNo",
-    &res);
+      "CPUPortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->CPUPortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortPropertyList",
-    &res);
+      "PortPropertyList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortPropertyList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortPropertyList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DevicePortProperty(
-    listval,
-    entry->PortPropertyList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortPropertyList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DevicePortProperty(
+        listval,
+        entry->PortPropertyList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->PortList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->PortList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACNoList",
-    &res);
+      "MACNoList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->MACNoList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "MACNoList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->MACNoList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "MACNoList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->MACNoList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PoEList",
-    &res);
+      "PoEList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PoEList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PoEList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->PoEList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PoEList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->PoEList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SFPList",
-    &res);
+      "SFPList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SFPList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SFPList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->SFPList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SFPList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->SFPList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LAGList",
-    &res);
+      "LAGList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->LAGList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "LAGList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->LAGList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "LAGList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->LAGList[i];
   }
   return res;
 }
-
-status_t build_to_xml_cpss_DevicePortEntry (
+status_t build_to_xml_cpss_DevicePortEntry(
     val_value_t *parentval,
     struct cpsspb_DevicePortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DeviceID",
-    &res);
+      "DeviceID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DeviceID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -650,68 +742,71 @@ status_t build_to_xml_cpss_DevicePortEntry (
   VAL_INT(childval) = entry->PortNo;
   return res;
 }
-
-status_t build_to_xml_cpss_DevicePortList (
+status_t build_to_xml_cpss_DevicePortList(
     val_value_t *parentval,
     struct cpsspb_DevicePortList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DevicePortEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DevicePortEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_DeviceTrunkEntry (
+status_t build_to_xml_cpss_DeviceTrunkEntry(
     val_value_t *parentval,
     struct cpsspb_DeviceTrunkEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DeviceID",
-    &res);
+      "DeviceID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DeviceID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TrunkID",
-    &res);
+      "TrunkID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -719,92 +814,122 @@ status_t build_to_xml_cpss_DeviceTrunkEntry (
   VAL_INT(childval) = entry->TrunkID;
   return res;
 }
-
-status_t build_to_xml_cpss_DeviceTrunkList (
+status_t build_to_xml_cpss_DeviceTrunkList(
     val_value_t *parentval,
     struct cpsspb_DeviceTrunkList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DeviceTrunkEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DeviceTrunkEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_DeviceInterfaceEntry (
+status_t build_to_xml_cpss_DeviceInterfaceEntry(
     val_value_t *parentval,
     struct cpsspb_DeviceInterfaceEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN:
+      enum_str = "INTERFACE_TYPE_VLAN";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
+      enum_str = "INTERFACE_TYPE_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_TRUNK:
+      enum_str = "INTERFACE_TYPE_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VIDX:
+      enum_str = "INTERFACE_TYPE_VIDX";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
+      enum_str = "INTERFACE_TYPE_MULTICAST";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_PORT:
+      enum_str = "INTERFACE_TYPE_VLAN_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_TRUNK:
+      enum_str = "INTERFACE_TYPE_VLAN_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT_TRUNK:
+      enum_str = "INTERFACE_TYPE_PORT_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_ANY:
+      enum_str = "INTERFACE_TYPE_ANY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "DeviceID",
-    &res);
+      "DeviceID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DeviceID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LAGNo",
-    &res);
+      "LAGNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -812,147 +937,152 @@ status_t build_to_xml_cpss_DeviceInterfaceEntry (
   VAL_INT(childval) = entry->LAGNo;
   return res;
 }
-
-status_t build_to_xml_cpss_DeviceInterfaceList (
+status_t build_to_xml_cpss_DeviceInterfaceList(
     val_value_t *parentval,
     struct cpsspb_DeviceInterfaceList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DeviceInterfaceEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DeviceInterfaceEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_TrunkingGroupMemberEntry (
+status_t build_to_xml_cpss_TrunkingGroupMemberEntry(
     val_value_t *parentval,
     struct cpsspb_TrunkingGroupMemberEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LAGNo",
-    &res);
+      "LAGNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->LAGNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EnableMemberList",
-    &res);
+      "EnableMemberList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortList(
+  res = build_to_xml_cpss_DevicePortList(
       childval,
-    entry->EnableMemberList);
+      entry->EnableMemberList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DisableMemberList",
-    &res);
+      "DisableMemberList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortList(
+  res = build_to_xml_cpss_DevicePortList(
       childval,
-    entry->DisableMemberList);
+      entry->DisableMemberList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_TrunkingMemberEntry (
+status_t build_to_xml_cpss_TrunkingMemberEntry(
     val_value_t *parentval,
     struct cpsspb_TrunkingMemberEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LAGNo",
-    &res);
+      "LAGNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->LAGNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MemberList",
-    &res);
+      "MemberList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortList(
+  res = build_to_xml_cpss_DevicePortList(
       childval,
-    entry->MemberList);
+      entry->MemberList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_TrunkingGroupID (
+status_t build_to_xml_cpss_TrunkingGroupID(
     val_value_t *parentval,
     struct cpsspb_TrunkingGroupID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LAGNo",
-    &res);
+      "LAGNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -960,451 +1090,518 @@ status_t build_to_xml_cpss_TrunkingGroupID (
   VAL_INT(childval) = entry->LAGNo;
   return res;
 }
-
-status_t build_to_xml_cpss_TrunkingLoadBalanceMode (
+status_t build_to_xml_cpss_TrunkingLoadBalanceMode(
     val_value_t *parentval,
     struct cpsspb_TrunkingLoadBalanceMode *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case cpsspb_TrunkingLoadBalanceModeOptions_TRUNKING_LOAD_BALANCE_MODE_SRC_DST_MAC:
+      enum_str = "TRUNKING_LOAD_BALANCE_MODE_SRC_DST_MAC";
+      break;
+    case cpsspb_TrunkingLoadBalanceModeOptions_TRUNKING_LOAD_BALANCE_MODE_SRC_DST_IP:
+      enum_str = "TRUNKING_LOAD_BALANCE_MODE_SRC_DST_IP";
+      break;
+    case cpsspb_TrunkingLoadBalanceModeOptions_TRUNKING_LOAD_BALANCE_MODE_SRC_DST_MAC_IP:
+      enum_str = "TRUNKING_LOAD_BALANCE_MODE_SRC_DST_MAC_IP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLIndexList (
+status_t build_to_xml_cpss_ACLIndexList(
     val_value_t *parentval,
     struct cpsspb_ACLIndexList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->List[i];
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLUserDefinedRuleList (
+status_t build_to_xml_cpss_ACLUserDefinedRuleList(
     val_value_t *parentval,
     struct cpsspb_ACLUserDefinedRuleList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_ACLUserDefinedRuleEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_ACLUserDefinedRuleEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLUserDefinedRuleEntry (
+status_t build_to_xml_cpss_ACLUserDefinedRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLUserDefinedRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UniqueID",
-    &res);
+      "UniqueID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UniqueID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DirectionType",
-    &res);
+      "DirectionType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->DirectionType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->DirectionType) {
+    case cpsspb_ACLDirectionTypeOptions_ACL_DIRECTION_TYPE_INGRESS:
+      enum_str = "ACL_DIRECTION_TYPE_INGRESS";
+      break;
+    case cpsspb_ACLDirectionTypeOptions_ACL_DIRECTION_TYPE_EGRESS:
+      enum_str = "ACL_DIRECTION_TYPE_EGRESS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC:
+      enum_str = "ACL_RULE_TYPE_MAC";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_IPV4:
+      enum_str = "ACL_RULE_TYPE_IPV4";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_IPV6:
+      enum_str = "ACL_RULE_TYPE_IPV6";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_STP:
+      enum_str = "ACL_RULE_TYPE_STP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_LACP:
+      enum_str = "ACL_RULE_TYPE_LACP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_DOT1X:
+      enum_str = "ACL_RULE_TYPE_DOT1X";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_ARP:
+      enum_str = "ACL_RULE_TYPE_ARP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_DHCPV4_SRC_67_DST_68:
+      enum_str = "ACL_RULE_TYPE_DHCPV4_SRC_67_DST_68";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_DHCPV4_SRC_68_DST_67:
+      enum_str = "ACL_RULE_TYPE_DHCPV4_SRC_68_DST_67";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_LOOP:
+      enum_str = "ACL_RULE_TYPE_LOOP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_G8032:
+      enum_str = "ACL_RULE_TYPE_G8032";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC_IP_BINDING:
+      enum_str = "ACL_RULE_TYPE_MAC_IP_BINDING";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_SUBNET_BASED:
+      enum_str = "ACL_RULE_TYPE_SUBNET_BASED";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC_BASED:
+      enum_str = "ACL_RULE_TYPE_MAC_BASED";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_SELECTIVE_QINQ:
+      enum_str = "ACL_RULE_TYPE_SELECTIVE_QINQ";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_FLOW_MIRROR:
+      enum_str = "ACL_RULE_TYPE_FLOW_MIRROR";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC_COUNTING:
+      enum_str = "ACL_RULE_TYPE_MAC_COUNTING";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_PTP_MESSAGE:
+      enum_str = "ACL_RULE_TYPE_PTP_MESSAGE";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_INCOMING_BLOCK:
+      enum_str = "ACL_RULE_TYPE_INCOMING_BLOCK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SourceMAC",
-    &res);
+      "SourceMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceMACMask",
-    &res);
+      "SourceMACMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceMACMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationMAC",
-    &res);
+      "DestinationMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DestinationMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationMACMask",
-    &res);
+      "DestinationMACMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DestinationMACMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EtherType",
-    &res);
+      "EtherType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->EtherType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EtherTypeMask",
-    &res);
+      "EtherTypeMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->EtherTypeMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceIPAddr",
-    &res);
+      "SourceIPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceIPAddr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceIPMask",
-    &res);
+      "SourceIPMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceIPMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationIPAddr",
-    &res);
+      "DestinationIPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DestinationIPAddr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationIPMask",
-    &res);
+      "DestinationIPMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->DestinationIPMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPProtocol",
-    &res);
+      "IPProtocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IPProtocol;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IPProtocolMask",
-    &res);
+      "IPProtocolMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IPProtocolMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "L4SourcePort",
-    &res);
+      "L4SourcePort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->L4SourcePort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "L4SourcePortMask",
-    &res);
+      "L4SourcePortMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->L4SourcePortMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "L4DestinationPort",
-    &res);
+      "L4DestinationPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->L4DestinationPort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "L4DestinationPortMask",
-    &res);
+      "L4DestinationPortMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->L4DestinationPortMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceInterface",
-    &res);
+      "SourceInterface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_ACLSourceInterfaceEntry(
+  res = build_to_xml_cpss_ACLSourceInterfaceEntry(
       childval,
-    entry->SourceInterface);
+      entry->SourceInterface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Action",
-    &res);
+      "Action",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_ACLActionEntry(
+  res = build_to_xml_cpss_ACLActionEntry(
       childval,
-    entry->Action);
+      entry->Action);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLUserDefinedRuleRemovalList (
+status_t build_to_xml_cpss_ACLUserDefinedRuleRemovalList(
     val_value_t *parentval,
     struct cpsspb_ACLUserDefinedRuleRemovalList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_ACLUserDefinedRuleRemovalEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_ACLUserDefinedRuleRemovalEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLUserDefinedRuleRemovalEntry (
+status_t build_to_xml_cpss_ACLUserDefinedRuleRemovalEntry(
     val_value_t *parentval,
     struct cpsspb_ACLUserDefinedRuleRemovalEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UniqueID",
-    &res);
+      "UniqueID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1412,289 +1609,449 @@ status_t build_to_xml_cpss_ACLUserDefinedRuleRemovalEntry (
   VAL_STRING(childval) = entry->UniqueID;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLControlRuleEntry (
+status_t build_to_xml_cpss_ACLControlRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLControlRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC:
+      enum_str = "ACL_RULE_TYPE_MAC";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_IPV4:
+      enum_str = "ACL_RULE_TYPE_IPV4";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_IPV6:
+      enum_str = "ACL_RULE_TYPE_IPV6";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_STP:
+      enum_str = "ACL_RULE_TYPE_STP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_LACP:
+      enum_str = "ACL_RULE_TYPE_LACP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_DOT1X:
+      enum_str = "ACL_RULE_TYPE_DOT1X";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_ARP:
+      enum_str = "ACL_RULE_TYPE_ARP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_DHCPV4_SRC_67_DST_68:
+      enum_str = "ACL_RULE_TYPE_DHCPV4_SRC_67_DST_68";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_DHCPV4_SRC_68_DST_67:
+      enum_str = "ACL_RULE_TYPE_DHCPV4_SRC_68_DST_67";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_LOOP:
+      enum_str = "ACL_RULE_TYPE_LOOP";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_G8032:
+      enum_str = "ACL_RULE_TYPE_G8032";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC_IP_BINDING:
+      enum_str = "ACL_RULE_TYPE_MAC_IP_BINDING";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_SUBNET_BASED:
+      enum_str = "ACL_RULE_TYPE_SUBNET_BASED";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC_BASED:
+      enum_str = "ACL_RULE_TYPE_MAC_BASED";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_SELECTIVE_QINQ:
+      enum_str = "ACL_RULE_TYPE_SELECTIVE_QINQ";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_FLOW_MIRROR:
+      enum_str = "ACL_RULE_TYPE_FLOW_MIRROR";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_MAC_COUNTING:
+      enum_str = "ACL_RULE_TYPE_MAC_COUNTING";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_PTP_MESSAGE:
+      enum_str = "ACL_RULE_TYPE_PTP_MESSAGE";
+      break;
+    case cpsspb_ACLRuleTypeOptions_ACL_RULE_TYPE_INCOMING_BLOCK:
+      enum_str = "ACL_RULE_TYPE_INCOMING_BLOCK";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "MACIPBindingRule",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  switch (entry->Rule_Union_Option) {
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACIPBindingRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "MACIPBindingRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLMACIPBindingRuleEntry(
+          childval,
+          entry->Rule.Rule_MACIPBindingRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_SubnetBasedRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "SubnetBasedRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLSubnetBasedRuleEntry(
+          childval,
+          entry->Rule.Rule_SubnetBasedRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACBasedRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "MACBasedRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLMACBasedRuleEntry(
+          childval,
+          entry->Rule.Rule_MACBasedRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_SelectiveQinQRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "SelectiveQinQRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLSelectiveQinQRuleEntry(
+          childval,
+          entry->Rule.Rule_SelectiveQinQRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_FlowMirrorRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "FlowMirrorRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLFlowMirrorRuleEntry(
+          childval,
+          entry->Rule.Rule_FlowMirrorRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACCountingRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "MACCountingRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLMACCountingRuleEntry(
+          childval,
+          entry->Rule.Rule_MACCountingRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case cpsspb_ACLControlRuleEntry_Rule_Union_Options_PTPMessageRule:
+      childval = agt_make_object(
+          parentval->obj,
+          "PTPMessageRule",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_ACLPTPMessageRuleEntry(
+          childval,
+          entry->Rule.Rule_PTPMessageRule);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SubnetBasedRule",
-    &res);
+      "SourceInterface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "MACBasedRule",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "SelectiveQinQRule",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "FlowMirrorRule",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "MACCountingRule",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "PTPMessageRule",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
-  }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "SourceInterface",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_ACLSourceInterfaceEntry(
+  res = build_to_xml_cpss_ACLSourceInterfaceEntry(
       childval,
-    entry->SourceInterface);
+      entry->SourceInterface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Action",
-    &res);
+      "Action",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_ACLActionEntry(
+  res = build_to_xml_cpss_ACLActionEntry(
       childval,
-    entry->Action);
+      entry->Action);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLSourceInterfaceEntry (
+status_t build_to_xml_cpss_ACLSourceInterfaceEntry(
     val_value_t *parentval,
     struct cpsspb_ACLSourceInterfaceEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN:
+      enum_str = "INTERFACE_TYPE_VLAN";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
+      enum_str = "INTERFACE_TYPE_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_TRUNK:
+      enum_str = "INTERFACE_TYPE_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VIDX:
+      enum_str = "INTERFACE_TYPE_VIDX";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
+      enum_str = "INTERFACE_TYPE_MULTICAST";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_PORT:
+      enum_str = "INTERFACE_TYPE_VLAN_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_TRUNK:
+      enum_str = "INTERFACE_TYPE_VLAN_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT_TRUNK:
+      enum_str = "INTERFACE_TYPE_PORT_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_ANY:
+      enum_str = "INTERFACE_TYPE_ANY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DevicePortEntry(
-    listval,
-    entry->PortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DevicePortEntry(
+        listval,
+        entry->PortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LAGList",
-    &res);
+      "LAGList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->LAGList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "LAGList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_TrunkingGroupID(
-    listval,
-    entry->LAGList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "LAGList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_TrunkingGroupID(
+        listval,
+        entry->LAGList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLActionEntry (
+status_t build_to_xml_cpss_ACLActionEntry(
     val_value_t *parentval,
     struct cpsspb_ACLActionEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PacketCommand",
-    &res);
+      "PacketCommand",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PacketCommand;
+  switch (entry->PacketCommand) {
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_FORWARD:
+      enum_str = "PACKET_COMMAND_FORWARD";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_MIRROR:
+      enum_str = "PACKET_COMMAND_MIRROR";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_TRAP:
+      enum_str = "PACKET_COMMAND_TRAP";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_DROP:
+      enum_str = "PACKET_COMMAND_DROP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLG8032RuleEntry (
+status_t build_to_xml_cpss_ACLG8032RuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLG8032RuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "RingID",
-    &res);
+      "RingID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RingID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationRingPort",
-    &res);
+      "DestinationRingPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1702,31 +2059,32 @@ status_t build_to_xml_cpss_ACLG8032RuleEntry (
   VAL_INT(childval) = entry->DestinationRingPort;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLMACIPBindingRuleEntry (
+status_t build_to_xml_cpss_ACLMACIPBindingRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLMACIPBindingRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceMAC",
-    &res);
+      "SourceMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceIPAddr",
-    &res);
+      "SourceIPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1734,43 +2092,43 @@ status_t build_to_xml_cpss_ACLMACIPBindingRuleEntry (
   VAL_STRING(childval) = entry->SourceIPAddr;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLSubnetBasedRuleEntry (
+status_t build_to_xml_cpss_ACLSubnetBasedRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLSubnetBasedRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceIPAddr",
-    &res);
+      "SourceIPAddr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceIPAddr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceIPMask",
-    &res);
+      "SourceIPMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceIPMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ModifyVlanID",
-    &res);
+      "ModifyVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1778,43 +2136,43 @@ status_t build_to_xml_cpss_ACLSubnetBasedRuleEntry (
   VAL_INT(childval) = entry->ModifyVlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLMACBasedRuleEntry (
+status_t build_to_xml_cpss_ACLMACBasedRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLMACBasedRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceMAC",
-    &res);
+      "SourceMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceMACMask",
-    &res);
+      "SourceMACMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SourceMACMask;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ModifyVlanID",
-    &res);
+      "ModifyVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1822,31 +2180,32 @@ status_t build_to_xml_cpss_ACLMACBasedRuleEntry (
   VAL_INT(childval) = entry->ModifyVlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLSelectiveQinQRuleEntry (
+status_t build_to_xml_cpss_ACLSelectiveQinQRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLSelectiveQinQRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanFrom",
-    &res);
+      "VlanFrom",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanFrom;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanTo",
-    &res);
+      "VlanTo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1854,68 +2213,70 @@ status_t build_to_xml_cpss_ACLSelectiveQinQRuleEntry (
   VAL_INT(childval) = entry->VlanTo;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLFlowMirrorRuleEntry (
+status_t build_to_xml_cpss_ACLFlowMirrorRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLFlowMirrorRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsMirrorEnabled",
-    &res);
+      "IsMirrorEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsMirrorEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Flow",
-    &res);
+      "Flow",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_ACLUserDefinedRuleEntry(
+  res = build_to_xml_cpss_ACLUserDefinedRuleEntry(
       childval,
-    entry->Flow);
+      entry->Flow);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_ACLMACCountingRuleEntry (
+status_t build_to_xml_cpss_ACLMACCountingRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLMACCountingRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "CNCCounterIndex",
-    &res);
+      "CNCCounterIndex",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->CNCCounterIndex;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceMAC",
-    &res);
+      "SourceMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1923,19 +2284,21 @@ status_t build_to_xml_cpss_ACLMACCountingRuleEntry (
   VAL_STRING(childval) = entry->SourceMAC;
   return res;
 }
-
-status_t build_to_xml_cpss_ACLPTPMessageRuleEntry (
+status_t build_to_xml_cpss_ACLPTPMessageRuleEntry(
     val_value_t *parentval,
     struct cpsspb_ACLPTPMessageRuleEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "EtherType",
-    &res);
+      "EtherType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1943,86 +2306,106 @@ status_t build_to_xml_cpss_ACLPTPMessageRuleEntry (
   VAL_INT(childval) = entry->EtherType;
   return res;
 }
-
-status_t build_to_xml_cpss_CNCCountingEntry (
+status_t build_to_xml_cpss_CNCCountingEntry(
     val_value_t *parentval,
     struct cpsspb_CNCCountingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "MACAddressCountingEntry",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  switch (entry->Type) {
+    case cpsspb_CNCCountingTypeOptions_CNC_COUNTING_TYPE_MAC_COUNTING:
+      enum_str = "CNC_COUNTING_TYPE_MAC_COUNTING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  switch (entry->Entry_Union_Option) {
+    case cpsspb_CNCCountingEntry_Entry_Union_Options_MACAddressCountingEntry:
+      childval = agt_make_object(
+          parentval->obj,
+          "MACAddressCountingEntry",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_cpss_CNCMACAddressCountingEntry(
+          childval,
+          entry->Entry.Entry_MACAddressCountingEntry);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
   }
   return res;
 }
-
-status_t build_to_xml_cpss_CNCMACAddressCountingEntry (
+status_t build_to_xml_cpss_CNCMACAddressCountingEntry(
     val_value_t *parentval,
     struct cpsspb_CNCMACAddressCountingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_MACAddress(
+  res = build_to_xml_cpss_MACAddress(
       childval,
-    entry->Address);
+      entry->Address);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_CNCCounter (
+status_t build_to_xml_cpss_CNCCounter(
     val_value_t *parentval,
     struct cpsspb_CNCCounter *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ByteCount",
-    &res);
+      "ByteCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->ByteCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PktCount",
-    &res);
+      "PktCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2030,19 +2413,21 @@ status_t build_to_xml_cpss_CNCCounter (
   VAL_ULONG(childval) = entry->PktCount;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBAutoLearningEnable (
+status_t build_to_xml_cpss_FDBAutoLearningEnable(
     val_value_t *parentval,
     struct cpsspb_FDBAutoLearningEnable *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2050,31 +2435,32 @@ status_t build_to_xml_cpss_FDBAutoLearningEnable (
   VAL_BOOL(childval) = entry->Enable;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBIdentifyEntry (
+status_t build_to_xml_cpss_FDBIdentifyEntry(
     val_value_t *parentval,
     struct cpsspb_FDBIdentifyEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2082,36 +2468,37 @@ status_t build_to_xml_cpss_FDBIdentifyEntry (
   VAL_STRING(childval) = entry->Address;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBSecureBreachEntry (
+status_t build_to_xml_cpss_FDBSecureBreachEntry(
     val_value_t *parentval,
     struct cpsspb_FDBSecureBreachEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2119,211 +2506,252 @@ status_t build_to_xml_cpss_FDBSecureBreachEntry (
   VAL_BOOL(childval) = entry->Enable;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBMACEntry (
+status_t build_to_xml_cpss_FDBMACEntry(
     val_value_t *parentval,
     struct cpsspb_FDBMACEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceType",
-    &res);
+      "InterfaceType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InterfaceType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->InterfaceType) {
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN:
+      enum_str = "INTERFACE_TYPE_VLAN";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
+      enum_str = "INTERFACE_TYPE_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_TRUNK:
+      enum_str = "INTERFACE_TYPE_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VIDX:
+      enum_str = "INTERFACE_TYPE_VIDX";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
+      enum_str = "INTERFACE_TYPE_MULTICAST";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_PORT:
+      enum_str = "INTERFACE_TYPE_VLAN_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_TRUNK:
+      enum_str = "INTERFACE_TYPE_VLAN_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT_TRUNK:
+      enum_str = "INTERFACE_TYPE_PORT_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_ANY:
+      enum_str = "INTERFACE_TYPE_ANY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IsStatic",
-    &res);
+      "IsStatic",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsStatic;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsForward",
-    &res);
+      "IsForward",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsForward;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Trunk",
-    &res);
+      "Trunk",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceTrunkEntry(
+  res = build_to_xml_cpss_DeviceTrunkEntry(
       childval,
-    entry->Trunk);
+      entry->Trunk);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Multicast",
-    &res);
+      "Multicast",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_FDBMulticastEntry(
+  res = build_to_xml_cpss_FDBMulticastEntry(
       childval,
-    entry->Multicast);
+      entry->Multicast);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Action",
-    &res);
+      "Action",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Action;
+  switch (entry->Action) {
+    case cpsspb_FDBEntryActionTypeOptions_FDB_ENTRY_ACTION_TYPE_ADD:
+      enum_str = "FDB_ENTRY_ACTION_TYPE_ADD";
+      break;
+    case cpsspb_FDBEntryActionTypeOptions_FDB_ENTRY_ACTION_TYPE_DELETE:
+      enum_str = "FDB_ENTRY_ACTION_TYPE_DELETE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBDumpEntry (
+status_t build_to_xml_cpss_FDBDumpEntry(
     val_value_t *parentval,
     struct cpsspb_FDBDumpEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_FDBMACEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_FDBMACEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_FDBHashEntry (
+status_t build_to_xml_cpss_FDBHashEntry(
     val_value_t *parentval,
     struct cpsspb_FDBHashEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LayerType",
-    &res);
+      "LayerType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LayerType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LayerType) {
+    case cpsspb_FDBLayerTypeOptions_FDB_LAYER_TYPE_2:
+      enum_str = "FDB_LAYER_TYPE_2";
+      break;
+    case cpsspb_FDBLayerTypeOptions_FDB_LAYER_TYPE_3:
+      enum_str = "FDB_LAYER_TYPE_3";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2331,19 +2759,21 @@ status_t build_to_xml_cpss_FDBHashEntry (
   VAL_STRING(childval) = entry->Address;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBAgingTime (
+status_t build_to_xml_cpss_FDBAgingTime(
     val_value_t *parentval,
     struct cpsspb_FDBAgingTime *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Time",
-    &res);
+      "Time",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2351,145 +2781,182 @@ status_t build_to_xml_cpss_FDBAgingTime (
   VAL_INT(childval) = entry->Time;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBFlushEntry (
+status_t build_to_xml_cpss_FDBFlushEntry(
     val_value_t *parentval,
     struct cpsspb_FDBFlushEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceType",
-    &res);
+      "InterfaceType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InterfaceType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->InterfaceType) {
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN:
+      enum_str = "INTERFACE_TYPE_VLAN";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
+      enum_str = "INTERFACE_TYPE_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_TRUNK:
+      enum_str = "INTERFACE_TYPE_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VIDX:
+      enum_str = "INTERFACE_TYPE_VIDX";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
+      enum_str = "INTERFACE_TYPE_MULTICAST";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_PORT:
+      enum_str = "INTERFACE_TYPE_VLAN_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_TRUNK:
+      enum_str = "INTERFACE_TYPE_VLAN_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT_TRUNK:
+      enum_str = "INTERFACE_TYPE_PORT_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_ANY:
+      enum_str = "INTERFACE_TYPE_ANY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IsUnicastDynamic",
-    &res);
+      "IsUnicastDynamic",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsUnicastDynamic;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsUnicastAll",
-    &res);
+      "IsUnicastAll",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsUnicastAll;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsMulticast",
-    &res);
+      "IsMulticast",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsMulticast;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanList",
-    &res);
+      "VlanList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->VlanList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "VlanList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->VlanList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "VlanList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->VlanList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortList(
+  res = build_to_xml_cpss_DevicePortList(
       childval,
-    entry->PortList);
+      entry->PortList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TrunkList",
-    &res);
+      "TrunkList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceTrunkList(
+  res = build_to_xml_cpss_DeviceTrunkList(
       childval,
-    entry->TrunkList);
+      entry->TrunkList);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_FDBMulticastEntry (
+status_t build_to_xml_cpss_FDBMulticastEntry(
     val_value_t *parentval,
     struct cpsspb_FDBMulticastEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "EntryType",
-    &res);
+      "EntryType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->EntryType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->EntryType) {
+    case cpsspb_MulticastEntryTypeOptions_MULTICAST_ENTRY_TYPE_MAC:
+      enum_str = "MULTICAST_ENTRY_TYPE_MAC";
+      break;
+    case cpsspb_MulticastEntryTypeOptions_MULTICAST_ENTRY_TYPE_IPV4:
+      enum_str = "MULTICAST_ENTRY_TYPE_IPV4";
+      break;
+    case cpsspb_MulticastEntryTypeOptions_MULTICAST_ENTRY_TYPE_IPV6:
+      enum_str = "MULTICAST_ENTRY_TYPE_IPV6";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VIDX",
-    &res);
+      "VIDX",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2497,103 +2964,98 @@ status_t build_to_xml_cpss_FDBMulticastEntry (
   VAL_INT(childval) = entry->VIDX;
   return res;
 }
-
-status_t build_to_xml_cpss_FDBCounters (
+status_t build_to_xml_cpss_FDBCounters(
     val_value_t *parentval,
     struct cpsspb_FDBCounters *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfFreeEntries",
-    &res);
+      "NumberOfFreeEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfFreeEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfUsedEntries",
-    &res);
+      "NumberOfUsedEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfUsedEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfMacUnicastDynamicEntries",
-    &res);
+      "NumberOfMacUnicastDynamicEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfMacUnicastDynamicEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfMacUnicastStaticEntries",
-    &res);
+      "NumberOfMacUnicastStaticEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfMacUnicastStaticEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfMacMulticastDynamicEntries",
-    &res);
+      "NumberOfMacMulticastDynamicEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfMacMulticastDynamicEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfMacMulticastStaticEntries",
-    &res);
+      "NumberOfMacMulticastStaticEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfMacMulticastStaticEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfIpv4MulticastEntries",
-    &res);
+      "NumberOfIpv4MulticastEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfIpv4MulticastEntries;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfIpv6MulticastEntries",
-    &res);
+      "NumberOfIpv6MulticastEntries",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2601,180 +3063,237 @@ status_t build_to_xml_cpss_FDBCounters (
   VAL_INT(childval) = entry->NumberOfIpv6MulticastEntries;
   return res;
 }
-
-status_t build_to_xml_cpss_MirroringSessionEntry (
+status_t build_to_xml_cpss_MirroringSessionEntry(
     val_value_t *parentval,
     struct cpsspb_MirroringSessionEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceType",
-    &res);
+      "SourceType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SourceType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SourceType) {
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN:
+      enum_str = "INTERFACE_TYPE_VLAN";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
+      enum_str = "INTERFACE_TYPE_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_TRUNK:
+      enum_str = "INTERFACE_TYPE_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VIDX:
+      enum_str = "INTERFACE_TYPE_VIDX";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
+      enum_str = "INTERFACE_TYPE_MULTICAST";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_PORT:
+      enum_str = "INTERFACE_TYPE_VLAN_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_TRUNK:
+      enum_str = "INTERFACE_TYPE_VLAN_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT_TRUNK:
+      enum_str = "INTERFACE_TYPE_PORT_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_ANY:
+      enum_str = "INTERFACE_TYPE_ANY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SourcePortList",
-    &res);
+      "SourcePortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SourcePortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SourcePortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_MirroringSourcePortEntry(
-    listval,
-    entry->SourcePortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SourcePortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_MirroringSourcePortEntry(
+        listval,
+        entry->SourcePortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SourceVlanList",
-    &res);
+      "SourceVlanList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->SourceVlanList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "SourceVlanList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_MirroringSourceVlanEntry(
-    listval,
-    entry->SourceVlanList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "SourceVlanList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_MirroringSourceVlanEntry(
+        listval,
+        entry->SourceVlanList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationPort",
-    &res);
+      "DestinationPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->DestinationPort);
+      entry->DestinationPort);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RSPAN",
-    &res);
+      "RSPAN",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_MirroringRSPANEntry(
+  res = build_to_xml_cpss_MirroringRSPANEntry(
       childval,
-    entry->RSPAN);
+      entry->RSPAN);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MirroringSourcePortEntry (
+status_t build_to_xml_cpss_MirroringSourcePortEntry(
     val_value_t *parentval,
     struct cpsspb_MirroringSourcePortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Direction",
-    &res);
+      "Direction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Direction;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Direction) {
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_NONE:
+      enum_str = "MIRRORING_DIRECTION_TYPE_NONE";
+      break;
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_TX_ONLY:
+      enum_str = "MIRRORING_DIRECTION_TYPE_TX_ONLY";
+      break;
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_RX_ONLY:
+      enum_str = "MIRRORING_DIRECTION_TYPE_RX_ONLY";
+      break;
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_BOTH:
+      enum_str = "MIRRORING_DIRECTION_TYPE_BOTH";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MirroringSourceVlanEntry (
+status_t build_to_xml_cpss_MirroringSourceVlanEntry(
     val_value_t *parentval,
     struct cpsspb_MirroringSourceVlanEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Direction",
-    &res);
+      "Direction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Direction;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Direction) {
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_NONE:
+      enum_str = "MIRRORING_DIRECTION_TYPE_NONE";
+      break;
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_TX_ONLY:
+      enum_str = "MIRRORING_DIRECTION_TYPE_TX_ONLY";
+      break;
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_RX_ONLY:
+      enum_str = "MIRRORING_DIRECTION_TYPE_RX_ONLY";
+      break;
+    case cpsspb_MirroringDirectionTypeOptions_MIRRORING_DIRECTION_TYPE_BOTH:
+      enum_str = "MIRRORING_DIRECTION_TYPE_BOTH";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2782,117 +3301,120 @@ status_t build_to_xml_cpss_MirroringSourceVlanEntry (
   VAL_INT(childval) = entry->VlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_MirroringSessionList (
+status_t build_to_xml_cpss_MirroringSessionList(
     val_value_t *parentval,
     struct cpsspb_MirroringSessionList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_MirroringSessionEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_MirroringSessionEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MirroringPolicyBased (
+status_t build_to_xml_cpss_MirroringPolicyBased(
     val_value_t *parentval,
     struct cpsspb_MirroringPolicyBased *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DestinationPort",
-    &res);
+      "DestinationPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->DestinationPort);
+      entry->DestinationPort);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MirroringRSPANEntry (
+status_t build_to_xml_cpss_MirroringRSPANEntry(
     val_value_t *parentval,
     struct cpsspb_MirroringRSPANEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsLocalEnabled",
-    &res);
+      "IsLocalEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsLocalEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsRemoteEnabled",
-    &res);
+      "IsRemoteEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsRemoteEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AnalyzerVlanID",
-    &res);
+      "AnalyzerVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2900,31 +3422,32 @@ status_t build_to_xml_cpss_MirroringRSPANEntry (
   VAL_INT(childval) = entry->AnalyzerVlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscMACRegisterEntry (
+status_t build_to_xml_cpss_MiscMACRegisterEntry(
     val_value_t *parentval,
     struct cpsspb_MiscMACRegisterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Data",
-    &res);
+      "Data",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2932,55 +3455,54 @@ status_t build_to_xml_cpss_MiscMACRegisterEntry (
   VAL_UINT(childval) = entry->Data;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscSMIRegisterEntry (
+status_t build_to_xml_cpss_MiscSMIRegisterEntry(
     val_value_t *parentval,
     struct cpsspb_MiscSMIRegisterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PHYInterface",
-    &res);
+      "PHYInterface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->PHYInterface;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYID",
-    &res);
+      "PHYID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->PHYID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Data",
-    &res);
+      "Data",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2988,67 +3510,65 @@ status_t build_to_xml_cpss_MiscSMIRegisterEntry (
   VAL_UINT(childval) = entry->Data;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscXSMIRegisterEntry (
+status_t build_to_xml_cpss_MiscXSMIRegisterEntry(
     val_value_t *parentval,
     struct cpsspb_MiscXSMIRegisterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PHYInterface",
-    &res);
+      "PHYInterface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->PHYInterface;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYID",
-    &res);
+      "PHYID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->PHYID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PHYDev",
-    &res);
+      "PHYDev",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->PHYDev;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Data",
-    &res);
+      "Data",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3056,19 +3576,21 @@ status_t build_to_xml_cpss_MiscXSMIRegisterEntry (
   VAL_UINT(childval) = entry->Data;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscRegisterData (
+status_t build_to_xml_cpss_MiscRegisterData(
     val_value_t *parentval,
     struct cpsspb_MiscRegisterData *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Data",
-    &res);
+      "Data",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3076,19 +3598,21 @@ status_t build_to_xml_cpss_MiscRegisterData (
   VAL_UINT(childval) = entry->Data;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscTemperature (
+status_t build_to_xml_cpss_MiscTemperature(
     val_value_t *parentval,
     struct cpsspb_MiscTemperature *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Temperature",
-    &res);
+      "Temperature",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3096,31 +3620,32 @@ status_t build_to_xml_cpss_MiscTemperature (
   VAL_INT(childval) = entry->Temperature;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscPHYPortModel (
+status_t build_to_xml_cpss_MiscPHYPortModel(
     val_value_t *parentval,
     struct cpsspb_MiscPHYPortModel *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Interface;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Model",
-    &res);
+      "Model",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3128,19 +3653,21 @@ status_t build_to_xml_cpss_MiscPHYPortModel (
   VAL_STRING(childval) = entry->Model;
   return res;
 }
-
-status_t build_to_xml_cpss_MiscModel (
+status_t build_to_xml_cpss_MiscModel(
     val_value_t *parentval,
     struct cpsspb_MiscModel *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Model",
-    &res);
+      "Model",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3148,19 +3675,21 @@ status_t build_to_xml_cpss_MiscModel (
   VAL_STRING(childval) = entry->Model;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanID (
+status_t build_to_xml_cpss_VlanID(
     val_value_t *parentval,
     struct cpsspb_VlanID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3168,228 +3697,260 @@ status_t build_to_xml_cpss_VlanID (
   VAL_INT(childval) = entry->VlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanList (
+status_t build_to_xml_cpss_VlanList(
     val_value_t *parentval,
     struct cpsspb_VlanList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->List[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->List[i];
   }
   return res;
 }
-
-status_t build_to_xml_cpss_VlanMemberTaggingList (
+status_t build_to_xml_cpss_VlanMemberTaggingList(
     val_value_t *parentval,
     struct cpsspb_VlanMemberTaggingList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_VlanMemeberTaggingEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_VlanMemeberTaggingEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_VlanMemeberTaggingEntry (
+status_t build_to_xml_cpss_VlanMemeberTaggingEntry(
     val_value_t *parentval,
     struct cpsspb_VlanMemeberTaggingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Command",
-    &res);
+      "Command",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Command;
+  switch (entry->Command) {
+    case cpsspb_VlanTaggingCommandTypeOptions_VLAN_TAGGING_COMMAND_TYPE_UNTAGGED:
+      enum_str = "VLAN_TAGGING_COMMAND_TYPE_UNTAGGED";
+      break;
+    case cpsspb_VlanTaggingCommandTypeOptions_VLAN_TAGGING_COMMAND_TYPE_TAGGED:
+      enum_str = "VLAN_TAGGING_COMMAND_TYPE_TAGGED";
+      break;
+    case cpsspb_VlanTaggingCommandTypeOptions_VLAN_TAGGING_COMMAND_TYPE_QINQ_PROVIDER:
+      enum_str = "VLAN_TAGGING_COMMAND_TYPE_QINQ_PROVIDER";
+      break;
+    case cpsspb_VlanTaggingCommandTypeOptions_VLAN_TAGGING_COMMAND_TYPE_QINQ_CUSTOMER:
+      enum_str = "VLAN_TAGGING_COMMAND_TYPE_QINQ_CUSTOMER";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanDefaultVIDEntry (
+status_t build_to_xml_cpss_VlanDefaultVIDEntry(
     val_value_t *parentval,
     struct cpsspb_VlanDefaultVIDEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_VlanAcceptFrameTypeEntry (
+status_t build_to_xml_cpss_VlanAcceptFrameTypeEntry(
     val_value_t *parentval,
     struct cpsspb_VlanAcceptFrameTypeEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
+  switch (entry->Type) {
+    case cpsspb_VlanAcceptFrameTypeOptions_VLAN_ACCEPT_FRAME_TYPE_ALL:
+      enum_str = "VLAN_ACCEPT_FRAME_TYPE_ALL";
+      break;
+    case cpsspb_VlanAcceptFrameTypeOptions_VLAN_ACCEPT_FRAME_TYPE_UNTAGGED_ONLY:
+      enum_str = "VLAN_ACCEPT_FRAME_TYPE_UNTAGGED_ONLY";
+      break;
+    case cpsspb_VlanAcceptFrameTypeOptions_VLAN_ACCEPT_FRAME_TYPE_TAGGED_ONLY:
+      enum_str = "VLAN_ACCEPT_FRAME_TYPE_TAGGED_ONLY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanTPIDIndexEntry (
+status_t build_to_xml_cpss_VlanTPIDIndexEntry(
     val_value_t *parentval,
     struct cpsspb_VlanTPIDIndexEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3397,31 +3958,32 @@ status_t build_to_xml_cpss_VlanTPIDIndexEntry (
   VAL_INT(childval) = entry->Index;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanTPIDEntry (
+status_t build_to_xml_cpss_VlanTPIDEntry(
     val_value_t *parentval,
     struct cpsspb_VlanTPIDEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Index",
-    &res);
+      "Index",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Index;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TPID",
-    &res);
+      "TPID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3429,221 +3991,224 @@ status_t build_to_xml_cpss_VlanTPIDEntry (
   VAL_INT(childval) = entry->TPID;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanTPIDList (
+status_t build_to_xml_cpss_VlanTPIDList(
     val_value_t *parentval,
     struct cpsspb_VlanTPIDList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_VlanTPIDEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_VlanTPIDEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_VlanStatusEntry (
+status_t build_to_xml_cpss_VlanStatusEntry(
     val_value_t *parentval,
     struct cpsspb_VlanStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UntaggedList",
-    &res);
+      "UntaggedList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->UntaggedList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "UntaggedList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->UntaggedList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "UntaggedList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->UntaggedList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TaggedList",
-    &res);
+      "TaggedList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->TaggedList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "TaggedList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->TaggedList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "TaggedList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->TaggedList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ProviderList",
-    &res);
+      "ProviderList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->ProviderList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "ProviderList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->ProviderList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "ProviderList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->ProviderList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "CustomerList",
-    &res);
+      "CustomerList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->CustomerList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "CustomerList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->CustomerList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "CustomerList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->CustomerList[i];
   }
   return res;
 }
-
-status_t build_to_xml_cpss_VlanStatusList (
+status_t build_to_xml_cpss_VlanStatusList(
     val_value_t *parentval,
     struct cpsspb_VlanStatusList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_VlanStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_VlanStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_VlanFlushEntry (
+status_t build_to_xml_cpss_VlanFlushEntry(
     val_value_t *parentval,
     struct cpsspb_VlanFlushEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsFlushAll",
-    &res);
+      "IsFlushAll",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsFlushAll;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3651,36 +4216,37 @@ status_t build_to_xml_cpss_VlanFlushEntry (
   VAL_INT(childval) = entry->VlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanTunnelEntry (
+status_t build_to_xml_cpss_VlanTunnelEntry(
     val_value_t *parentval,
     struct cpsspb_VlanTunnelEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3688,19 +4254,21 @@ status_t build_to_xml_cpss_VlanTunnelEntry (
   VAL_BOOL(childval) = entry->IsEnabled;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanProtocolClassID (
+status_t build_to_xml_cpss_VlanProtocolClassID(
     val_value_t *parentval,
     struct cpsspb_VlanProtocolClassID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ClassID",
-    &res);
+      "ClassID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3708,92 +4276,103 @@ status_t build_to_xml_cpss_VlanProtocolClassID (
   VAL_INT(childval) = entry->ClassID;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanProtocolClassEntry (
+status_t build_to_xml_cpss_VlanProtocolClassEntry(
     val_value_t *parentval,
     struct cpsspb_VlanProtocolClassEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ClassID",
-    &res);
+      "ClassID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ClassID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EtherType",
-    &res);
+      "EtherType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->EtherType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Encapsulation",
-    &res);
+      "Encapsulation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Encapsulation;
+  switch (entry->Encapsulation) {
+    case cpsspb_VlanProtocolBasedEncapsulationTypeOptions_VLAN_PROTOCOL_BASED_ENCAPSULATION_ETHERNET_V2:
+      enum_str = "VLAN_PROTOCOL_BASED_ENCAPSULATION_ETHERNET_V2";
+      break;
+    case cpsspb_VlanProtocolBasedEncapsulationTypeOptions_VLAN_PROTOCOL_BASED_ENCAPSULATION_NON_LLC_SNAP:
+      enum_str = "VLAN_PROTOCOL_BASED_ENCAPSULATION_NON_LLC_SNAP";
+      break;
+    case cpsspb_VlanProtocolBasedEncapsulationTypeOptions_VLAN_PROTOCOL_BASED_ENCAPSULATION_LLC_SNAP:
+      enum_str = "VLAN_PROTOCOL_BASED_ENCAPSULATION_LLC_SNAP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanProtocolEntry (
+status_t build_to_xml_cpss_VlanProtocolEntry(
     val_value_t *parentval,
     struct cpsspb_VlanProtocolEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ClassID",
-    &res);
+      "ClassID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ClassID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3801,36 +4380,37 @@ status_t build_to_xml_cpss_VlanProtocolEntry (
   VAL_INT(childval) = entry->VlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanTranslationEntry (
+status_t build_to_xml_cpss_VlanTranslationEntry(
     val_value_t *parentval,
     struct cpsspb_VlanTranslationEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Interface",
-    &res);
+      "Interface",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->Interface);
+      entry->Interface);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3838,31 +4418,32 @@ status_t build_to_xml_cpss_VlanTranslationEntry (
   VAL_BOOL(childval) = entry->IsEnabled;
   return res;
 }
-
-status_t build_to_xml_cpss_VlanTranslationMappingEntry (
+status_t build_to_xml_cpss_VlanTranslationMappingEntry(
     val_value_t *parentval,
     struct cpsspb_VlanTranslationMappingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SourceVlanID",
-    &res);
+      "SourceVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SourceVlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TranslatedVlanID",
-    &res);
+      "TranslatedVlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -3870,646 +4451,785 @@ status_t build_to_xml_cpss_VlanTranslationMappingEntry (
   VAL_INT(childval) = entry->TranslatedVlanID;
   return res;
 }
-
-status_t build_to_xml_cpss_MulticastBridgeGroupEntry (
+status_t build_to_xml_cpss_MulticastBridgeGroupEntry(
     val_value_t *parentval,
     struct cpsspb_MulticastBridgeGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Identify",
-    &res);
+      "Identify",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_FDBIdentifyEntry(
+  res = build_to_xml_cpss_FDBIdentifyEntry(
       childval,
-    entry->Identify);
+      entry->Identify);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceList",
-    &res);
+      "InterfaceList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->InterfaceList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "InterfaceList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DeviceInterfaceEntry(
-    listval,
-    entry->InterfaceList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "InterfaceList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DeviceInterfaceEntry(
+        listval,
+        entry->InterfaceList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MulticastUnregisteredFloodingEntry (
+status_t build_to_xml_cpss_MulticastUnregisteredFloodingEntry(
     val_value_t *parentval,
     struct cpsspb_MulticastUnregisteredFloodingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceList",
-    &res);
+      "InterfaceList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->InterfaceList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "InterfaceList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DeviceInterfaceEntry(
-    listval,
-    entry->InterfaceList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "InterfaceList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DeviceInterfaceEntry(
+        listval,
+        entry->InterfaceList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MulticastTableVlanFloodingEntry (
+status_t build_to_xml_cpss_MulticastTableVlanFloodingEntry(
     val_value_t *parentval,
     struct cpsspb_MulticastTableVlanFloodingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VIDX",
-    &res);
+      "VIDX",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VIDX;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DevicePortEntry(
-    listval,
-    entry->PortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DevicePortEntry(
+        listval,
+        entry->PortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MulticastTableBridgeGroupEntry (
+status_t build_to_xml_cpss_MulticastTableBridgeGroupEntry(
     val_value_t *parentval,
     struct cpsspb_MulticastTableBridgeGroupEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VIDX",
-    &res);
+      "VIDX",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VIDX;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Address;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortList",
-    &res);
+      "PortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DevicePortEntry(
-    listval,
-    entry->PortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DevicePortEntry(
+        listval,
+        entry->PortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_MulticastTable (
+status_t build_to_xml_cpss_MulticastTable(
     val_value_t *parentval,
     struct cpsspb_MulticastTable *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "VlanFloodingList",
-    &res);
+      "VlanFloodingList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->VlanFloodingList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "VlanFloodingList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_MulticastTableVlanFloodingEntry(
-    listval,
-    entry->VlanFloodingList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "VlanFloodingList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_MulticastTableVlanFloodingEntry(
+        listval,
+        entry->VlanFloodingList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BridgeGroupList",
-    &res);
+      "BridgeGroupList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->BridgeGroupList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "BridgeGroupList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_MulticastTableBridgeGroupEntry(
-    listval,
-    entry->BridgeGroupList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "BridgeGroupList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_MulticastTableBridgeGroupEntry(
+        listval,
+        entry->BridgeGroupList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PacketControlActionEntry (
+status_t build_to_xml_cpss_PacketControlActionEntry(
     val_value_t *parentval,
     struct cpsspb_PacketControlActionEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PacketControlGeneralStatusEntry (
+status_t build_to_xml_cpss_PacketControlGeneralStatusEntry(
     val_value_t *parentval,
     struct cpsspb_PacketControlGeneralStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Protocol",
-    &res);
+      "Protocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Protocol;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Protocol) {
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_STP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_STP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_LACP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_LACP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DOT1X:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DOT1X";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_LOOP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_LOOP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DLDP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DLDP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_DISCOVER:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_DISCOVER";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_BROADCAST_OFFER:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_BROADCAST_OFFER";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_67:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_67";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_68:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_68";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_ARP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_ARP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_GVRP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_GVRP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_IGMP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_IGMP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_MLD:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_MLD";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PacketCommand",
-    &res);
+      "PacketCommand",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PacketCommand;
+  switch (entry->PacketCommand) {
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_FORWARD:
+      enum_str = "PACKET_COMMAND_FORWARD";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_MIRROR:
+      enum_str = "PACKET_COMMAND_MIRROR";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_TRAP:
+      enum_str = "PACKET_COMMAND_TRAP";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_DROP:
+      enum_str = "PACKET_COMMAND_DROP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_PacketControlInterfaceStatusEntry (
+status_t build_to_xml_cpss_PacketControlInterfaceStatusEntry(
     val_value_t *parentval,
     struct cpsspb_PacketControlInterfaceStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Protocol",
-    &res);
+      "Protocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Protocol;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Protocol) {
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_STP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_STP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_LACP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_LACP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DOT1X:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DOT1X";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_LOOP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_LOOP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DLDP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DLDP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_DISCOVER:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_DISCOVER";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_BROADCAST_OFFER:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_BROADCAST_OFFER";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_67:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_67";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_68:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_DHCPV4_UDP_DST_68";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_ARP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_ARP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_GVRP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_GVRP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_IGMP:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_IGMP";
+      break;
+    case cpsspb_PacketControlProtocolTypeOptions_PACKET_CONTROL_PROTOCOL_TYPE_MLD:
+      enum_str = "PACKET_CONTROL_PROTOCOL_TYPE_MLD";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Type) {
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN:
+      enum_str = "INTERFACE_TYPE_VLAN";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT:
+      enum_str = "INTERFACE_TYPE_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_TRUNK:
+      enum_str = "INTERFACE_TYPE_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VIDX:
+      enum_str = "INTERFACE_TYPE_VIDX";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_MULTICAST:
+      enum_str = "INTERFACE_TYPE_MULTICAST";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_PORT:
+      enum_str = "INTERFACE_TYPE_VLAN_PORT";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_VLAN_TRUNK:
+      enum_str = "INTERFACE_TYPE_VLAN_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_PORT_TRUNK:
+      enum_str = "INTERFACE_TYPE_PORT_TRUNK";
+      break;
+    case cpsspb_InterfaceTypeOptions_INTERFACE_TYPE_ANY:
+      enum_str = "INTERFACE_TYPE_ANY";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "EnabledList",
-    &res);
+      "EnabledList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->EnabledList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "EnabledList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->EnabledList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "EnabledList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->EnabledList[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PacketCommand",
-    &res);
+      "PacketCommand",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PacketCommand;
+  switch (entry->PacketCommand) {
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_FORWARD:
+      enum_str = "PACKET_COMMAND_FORWARD";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_MIRROR:
+      enum_str = "PACKET_COMMAND_MIRROR";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_TRAP:
+      enum_str = "PACKET_COMMAND_TRAP";
+      break;
+    case cpsspb_PacketCommandOptions_PACKET_COMMAND_DROP:
+      enum_str = "PACKET_COMMAND_DROP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_PacketControlStatusList (
+status_t build_to_xml_cpss_PacketControlStatusList(
     val_value_t *parentval,
     struct cpsspb_PacketControlStatusList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "GeneralList",
-    &res);
+      "GeneralList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->GeneralList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "GeneralList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_PacketControlGeneralStatusEntry(
-    listval,
-    entry->GeneralList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "GeneralList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_PacketControlGeneralStatusEntry(
+        listval,
+        entry->GeneralList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceList",
-    &res);
+      "InterfaceList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->InterfaceList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "InterfaceList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_PacketControlInterfaceStatusEntry(
-    listval,
-    entry->InterfaceList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "InterfaceList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_PacketControlInterfaceStatusEntry(
+        listval,
+        entry->InterfaceList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PolicerStormCountingEnableEntry (
+status_t build_to_xml_cpss_PolicerStormCountingEnableEntry(
     val_value_t *parentval,
     struct cpsspb_PolicerStormCountingEnableEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnable",
-    &res);
+      "IsEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PolicerStormCountingCounterEntry (
+status_t build_to_xml_cpss_PolicerStormCountingCounterEntry(
     val_value_t *parentval,
     struct cpsspb_PolicerStormCountingCounterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "UnknownUnicastByteCount",
-    &res);
+      "UnknownUnicastByteCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->UnknownUnicastByteCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UnknownUnicastPktCount",
-    &res);
+      "UnknownUnicastPktCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->UnknownUnicastPktCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MulticastByteCount",
-    &res);
+      "MulticastByteCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->MulticastByteCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MulticastPktCount",
-    &res);
+      "MulticastPktCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->MulticastPktCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BroadcastByteCount",
-    &res);
+      "BroadcastByteCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BroadcastByteCount;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BroadcastPktCount",
-    &res);
+      "BroadcastPktCount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4517,159 +5237,227 @@ status_t build_to_xml_cpss_PolicerStormCountingCounterEntry (
   VAL_ULONG(childval) = entry->BroadcastPktCount;
   return res;
 }
-
-status_t build_to_xml_cpss_PortEnableEntry (
+status_t build_to_xml_cpss_PortEnableEntry(
     val_value_t *parentval,
     struct cpsspb_PortEnableEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Speed",
-    &res);
+      "Speed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Speed;
+  switch (entry->Speed) {
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_AUTO:
+      enum_str = "PORT_SPEED_DUPLEX_AUTO";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_1000M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_1000M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_2500M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_2500M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_5G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_5G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_25G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_25G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_40G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_40G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100G_FULL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_PortSpeedDuplexEntry (
+status_t build_to_xml_cpss_PortSpeedDuplexEntry(
     val_value_t *parentval,
     struct cpsspb_PortSpeedDuplexEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Speed",
-    &res);
+      "Speed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Speed;
+  switch (entry->Speed) {
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_AUTO:
+      enum_str = "PORT_SPEED_DUPLEX_AUTO";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_1000M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_1000M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_2500M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_2500M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_5G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_5G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_25G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_25G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_40G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_40G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100G_FULL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_PortSpeedDuplexList (
+status_t build_to_xml_cpss_PortSpeedDuplexList(
     val_value_t *parentval,
     struct cpsspb_PortSpeedDuplexList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_PortSpeedDuplexEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_PortSpeedDuplexEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PortFlowControlEntry (
+status_t build_to_xml_cpss_PortFlowControlEntry(
     val_value_t *parentval,
     struct cpsspb_PortFlowControlEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4677,36 +5465,37 @@ status_t build_to_xml_cpss_PortFlowControlEntry (
   VAL_BOOL(childval) = entry->Enable;
   return res;
 }
-
-status_t build_to_xml_cpss_PortEEEEntry (
+status_t build_to_xml_cpss_PortEEEEntry(
     val_value_t *parentval,
     struct cpsspb_PortEEEEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -4714,444 +5503,411 @@ status_t build_to_xml_cpss_PortEEEEntry (
   VAL_BOOL(childval) = entry->Enable;
   return res;
 }
-
-status_t build_to_xml_cpss_PortCounterEntry (
+status_t build_to_xml_cpss_PortCounterEntry(
     val_value_t *parentval,
     struct cpsspb_PortCounterEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GoodOctetsRecv",
-    &res);
+      "GoodOctetsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->GoodOctetsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BadOctetsRecv",
-    &res);
+      "BadOctetsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BadOctetsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACTransmitErr",
-    &res);
+      "MACTransmitErr",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->MACTransmitErr;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GoodPktsRecv",
-    &res);
+      "GoodPktsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->GoodPktsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BadPktsRecv",
-    &res);
+      "BadPktsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BadPktsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BrdcPktsRecv",
-    &res);
+      "BrdcPktsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BrdcPktsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "McPktsRecv",
-    &res);
+      "McPktsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->McPktsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Pkts_64Octets",
-    &res);
+      "Pkts_64Octets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Pkts_64Octets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Pkts_65To_127Octets",
-    &res);
+      "Pkts_65To_127Octets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Pkts_65To_127Octets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Pkts_128To_255Octets",
-    &res);
+      "Pkts_128To_255Octets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Pkts_128To_255Octets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Pkts_256To_511Octets",
-    &res);
+      "Pkts_256To_511Octets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Pkts_256To_511Octets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Pkts_512To_1023Octets",
-    &res);
+      "Pkts_512To_1023Octets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Pkts_512To_1023Octets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Pkts_1024ToMaxOctets",
-    &res);
+      "Pkts_1024ToMaxOctets",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Pkts_1024ToMaxOctets;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GoodOctetsSent",
-    &res);
+      "GoodOctetsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->GoodOctetsSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GoodPktsSent",
-    &res);
+      "GoodPktsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->GoodPktsSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ExcessiveCollisions",
-    &res);
+      "ExcessiveCollisions",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->ExcessiveCollisions;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "McPktsSent",
-    &res);
+      "McPktsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->McPktsSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BrdcPktsSent",
-    &res);
+      "BrdcPktsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BrdcPktsSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UnrecogMACCntrRecv",
-    &res);
+      "UnrecogMACCntrRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->UnrecogMACCntrRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FCSent",
-    &res);
+      "FCSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->FCSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GoodFCRecv",
-    &res);
+      "GoodFCRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->GoodFCRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DropEvents",
-    &res);
+      "DropEvents",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->DropEvents;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UndersizePkts",
-    &res);
+      "UndersizePkts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->UndersizePkts;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FragmentsPkts",
-    &res);
+      "FragmentsPkts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->FragmentsPkts;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OversizePkts",
-    &res);
+      "OversizePkts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->OversizePkts;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "JabberPkts",
-    &res);
+      "JabberPkts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->JabberPkts;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACRecvError",
-    &res);
+      "MACRecvError",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->MACRecvError;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BadCrc",
-    &res);
+      "BadCrc",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BadCrc;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Collisions",
-    &res);
+      "Collisions",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Collisions;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LateCollisions",
-    &res);
+      "LateCollisions",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->LateCollisions;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BadFcRecv",
-    &res);
+      "BadFcRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->BadFcRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UcPktsRecv",
-    &res);
+      "UcPktsRecv",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->UcPktsRecv;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UcPktsSent",
-    &res);
+      "UcPktsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->UcPktsSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MultiplePktsSent",
-    &res);
+      "MultiplePktsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->MultiplePktsSent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DeferredPktsSent",
-    &res);
+      "DeferredPktsSent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5159,147 +5915,154 @@ status_t build_to_xml_cpss_PortCounterEntry (
   VAL_ULONG(childval) = entry->DeferredPktsSent;
   return res;
 }
-
-status_t build_to_xml_cpss_PortCounterList (
+status_t build_to_xml_cpss_PortCounterList(
     val_value_t *parentval,
     struct cpsspb_PortCounterList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_PortCounterEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_PortCounterEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PortIsolationEntry (
+status_t build_to_xml_cpss_PortIsolationEntry(
     val_value_t *parentval,
     struct cpsspb_PortIsolationEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "OutgoingList",
-    &res);
+      "OutgoingList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->OutgoingList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "OutgoingList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_DevicePortEntry(
-    listval,
-    entry->OutgoingList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "OutgoingList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_DevicePortEntry(
+        listval,
+        entry->OutgoingList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PortIsolationList (
+status_t build_to_xml_cpss_PortIsolationList(
     val_value_t *parentval,
     struct cpsspb_PortIsolationList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_PortIsolationEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_PortIsolationEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_PortIPGSize (
+status_t build_to_xml_cpss_PortIPGSize(
     val_value_t *parentval,
     struct cpsspb_PortIPGSize *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Size",
-    &res);
+      "Size",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5307,31 +6070,32 @@ status_t build_to_xml_cpss_PortIPGSize (
   VAL_INT(childval) = entry->Size;
   return res;
 }
-
-status_t build_to_xml_cpss_PortFaultStatusEntry (
+status_t build_to_xml_cpss_PortFaultStatusEntry(
     val_value_t *parentval,
     struct cpsspb_PortFaultStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IsRxFault",
-    &res);
+      "IsRxFault",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsRxFault;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsTxFault",
-    &res);
+      "IsTxFault",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5339,96 +6103,124 @@ status_t build_to_xml_cpss_PortFaultStatusEntry (
   VAL_BOOL(childval) = entry->IsTxFault;
   return res;
 }
-
-status_t build_to_xml_cpss_PortStatusEntry (
+status_t build_to_xml_cpss_PortStatusEntry(
     val_value_t *parentval,
     struct cpsspb_PortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsLinkUp",
-    &res);
+      "IsLinkUp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsLinkUp;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsFlowControlEnabled",
-    &res);
+      "IsFlowControlEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsFlowControlEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LinkSpeed",
-    &res);
+      "LinkSpeed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LinkSpeed;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LinkSpeed) {
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_AUTO:
+      enum_str = "PORT_SPEED_DUPLEX_AUTO";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_1000M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_1000M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_2500M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_2500M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_5G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_5G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_25G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_25G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_40G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_40G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100G_FULL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "EEEActive",
-    &res);
+      "EEEActive",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->EEEActive;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PMState",
-    &res);
+      "PMState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5436,31 +6228,32 @@ status_t build_to_xml_cpss_PortStatusEntry (
   VAL_STRING(childval) = entry->PMState;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPToD (
+status_t build_to_xml_cpss_PTPToD(
     val_value_t *parentval,
     struct cpsspb_PTPToD *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Sec",
-    &res);
+      "Sec",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Sec;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ns",
-    &res);
+      "Ns",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5468,19 +6261,21 @@ status_t build_to_xml_cpss_PTPToD (
   VAL_UINT(childval) = entry->Ns;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPToDFrequency (
+status_t build_to_xml_cpss_PTPToDFrequency(
     val_value_t *parentval,
     struct cpsspb_PTPToDFrequency *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FractionalNs",
-    &res);
+      "FractionalNs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5488,31 +6283,32 @@ status_t build_to_xml_cpss_PTPToDFrequency (
   VAL_UINT(childval) = entry->FractionalNs;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPQueueInfo (
+status_t build_to_xml_cpss_PTPQueueInfo(
     val_value_t *parentval,
     struct cpsspb_PTPQueueInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Sec",
-    &res);
+      "Sec",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint64 */
   VAL_ULONG(childval) = entry->Sec;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ns",
-    &res);
+      "Ns",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5520,60 +6316,59 @@ status_t build_to_xml_cpss_PTPQueueInfo (
   VAL_UINT(childval) = entry->Ns;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPMessageInfo (
+status_t build_to_xml_cpss_PTPMessageInfo(
     val_value_t *parentval,
     struct cpsspb_PTPMessageInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SeqID",
-    &res);
+      "SeqID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->SeqID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MessageType",
-    &res);
+      "MessageType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->MessageType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5581,36 +6376,37 @@ status_t build_to_xml_cpss_PTPMessageInfo (
   VAL_UINT(childval) = entry->QueueNo;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPLinkDelay (
+status_t build_to_xml_cpss_PTPLinkDelay(
     val_value_t *parentval,
     struct cpsspb_PTPLinkDelay *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Delay",
-    &res);
+      "Delay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5618,48 +6414,56 @@ status_t build_to_xml_cpss_PTPLinkDelay (
   VAL_INT(childval) = entry->Delay;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPPortDelay (
+status_t build_to_xml_cpss_PTPPortDelay(
     val_value_t *parentval,
     struct cpsspb_PTPPortDelay *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Direction",
-    &res);
+      "Direction",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Direction;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Direction) {
+    case cpsspb_PTPPortDelayTypeOptions_PTP_PORT_DELAY_INGRESS:
+      enum_str = "PTP_PORT_DELAY_INGRESS";
+      break;
+    case cpsspb_PTPPortDelayTypeOptions_PTP_PORT_DELAY_EGRESS:
+      enum_str = "PTP_PORT_DELAY_EGRESS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Delay",
-    &res);
+      "Delay",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5667,308 +6471,403 @@ status_t build_to_xml_cpss_PTPPortDelay (
   VAL_INT(childval) = entry->Delay;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPMode (
+status_t build_to_xml_cpss_PTPMode(
     val_value_t *parentval,
     struct cpsspb_PTPMode *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DomainIndex",
-    &res);
+      "DomainIndex",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->DomainIndex;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DomainNumber",
-    &res);
+      "DomainNumber",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* uint32 */
   VAL_UINT(childval) = entry->DomainNumber;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_DISABLE:
+      enum_str = "PTP_MODE_DISABLE";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_E2E_TC:
+      enum_str = "PTP_MODE_E2E_TC";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_P2P_TC:
+      enum_str = "PTP_MODE_P2P_TC";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_MASTER_BC:
+      enum_str = "PTP_MODE_MASTER_BC";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_SLAVE_BC:
+      enum_str = "PTP_MODE_SLAVE_BC";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_GPTP_MASTER:
+      enum_str = "PTP_MODE_GPTP_MASTER";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_GPTP_SLAVE:
+      enum_str = "PTP_MODE_GPTP_SLAVE";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_PASSIVE:
+      enum_str = "PTP_MODE_PASSIVE";
+      break;
+    case cpsspb_PTPModeTypeOptions_PTP_MODE_LISTENING:
+      enum_str = "PTP_MODE_LISTENING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_PTPSyncE (
+status_t build_to_xml_cpss_PTPSyncE(
     val_value_t *parentval,
     struct cpsspb_PTPSyncE *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnable",
-    &res);
+      "IsEnable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Speed",
-    &res);
+      "Speed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Speed;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Speed) {
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_AUTO:
+      enum_str = "PORT_SPEED_DUPLEX_AUTO";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_1000M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_1000M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_2500M_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_2500M_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_5G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_5G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_10G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_10G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_25G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_25G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_40G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_40G_FULL";
+      break;
+    case cpsspb_PortSpeedDuplexOptions_PORT_SPEED_DUPLEX_100G_FULL:
+      enum_str = "PORT_SPEED_DUPLEX_100G_FULL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ClockSelect",
-    &res);
+      "ClockSelect",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ClockSelect;
+  switch (entry->ClockSelect) {
+    case cpsspb_PTPSyncERecoveryClockSelectTypeOptions_PTP_SYNC_E_RECOVERY_CLOCK_SELECT_TYPE_0:
+      enum_str = "PTP_SYNC_E_RECOVERY_CLOCK_SELECT_TYPE_0";
+      break;
+    case cpsspb_PTPSyncERecoveryClockSelectTypeOptions_PTP_SYNC_E_RECOVERY_CLOCK_SELECT_TYPE_1:
+      enum_str = "PTP_SYNC_E_RECOVERY_CLOCK_SELECT_TYPE_1";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_QoSPortProfileEntry (
+status_t build_to_xml_cpss_QoSPortProfileEntry(
     val_value_t *parentval,
     struct cpsspb_QoSPortProfileEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
+  switch (entry->Mode) {
+    case cpsspb_QoSTrustModeOptions_QOS_TRUST_MODE_DISABLED:
+      enum_str = "QOS_TRUST_MODE_DISABLED";
+      break;
+    case cpsspb_QoSTrustModeOptions_QOS_TRUST_MODE_COS:
+      enum_str = "QOS_TRUST_MODE_COS";
+      break;
+    case cpsspb_QoSTrustModeOptions_QOS_TRUST_MODE_DSCP_ONLY:
+      enum_str = "QOS_TRUST_MODE_DSCP_ONLY";
+      break;
+    case cpsspb_QoSTrustModeOptions_QOS_TRUST_MODE_DSCP_FIRST:
+      enum_str = "QOS_TRUST_MODE_DSCP_FIRST";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_QoSPortProfileList (
+status_t build_to_xml_cpss_QoSPortProfileList(
     val_value_t *parentval,
     struct cpsspb_QoSPortProfileList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_QoSPortProfileEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_QoSPortProfileEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_QoSPortQueueList (
+status_t build_to_xml_cpss_QoSPortQueueList(
     val_value_t *parentval,
     struct cpsspb_QoSPortQueueList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_QoSPortQueueEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_QoSPortQueueEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_QoSPortQueueEntry (
+status_t build_to_xml_cpss_QoSPortQueueEntry(
     val_value_t *parentval,
     struct cpsspb_QoSPortQueueEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->QueueNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Ratio",
-    &res);
+      "Ratio",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Ratio;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Scheduler",
-    &res);
+      "Scheduler",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Scheduler;
+  switch (entry->Scheduler) {
+    case cpsspb_QoSSchedulerTypeOptions_QOS_SCHEDULER_TYPE_WEIGHTED:
+      enum_str = "QOS_SCHEDULER_TYPE_WEIGHTED";
+      break;
+    case cpsspb_QoSSchedulerTypeOptions_QOS_SCHEDULER_TYPE_STRICT:
+      enum_str = "QOS_SCHEDULER_TYPE_STRICT";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_QoSCoSProfile (
+status_t build_to_xml_cpss_QoSCoSProfile(
     val_value_t *parentval,
     struct cpsspb_QoSCoSProfile *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "CoSNo",
-    &res);
+      "CoSNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->CoSNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -5976,68 +6875,71 @@ status_t build_to_xml_cpss_QoSCoSProfile (
   VAL_INT(childval) = entry->QueueNo;
   return res;
 }
-
-status_t build_to_xml_cpss_QoSCoSProfileList (
+status_t build_to_xml_cpss_QoSCoSProfileList(
     val_value_t *parentval,
     struct cpsspb_QoSCoSProfileList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "CoSList",
-    &res);
+      "CoSList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->CoSList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "CoSList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_QoSCoSProfile(
-    listval,
-    entry->CoSList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "CoSList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_QoSCoSProfile(
+        listval,
+        entry->CoSList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_QoSDSCPProfile (
+status_t build_to_xml_cpss_QoSDSCPProfile(
     val_value_t *parentval,
     struct cpsspb_QoSDSCPProfile *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DSCPNo",
-    &res);
+      "DSCPNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->DSCPNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "QueueNo",
-    &res);
+      "QueueNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -6045,97 +6947,116 @@ status_t build_to_xml_cpss_QoSDSCPProfile (
   VAL_INT(childval) = entry->QueueNo;
   return res;
 }
-
-status_t build_to_xml_cpss_QoSDSCPProfileList (
+status_t build_to_xml_cpss_QoSDSCPProfileList(
     val_value_t *parentval,
     struct cpsspb_QoSDSCPProfileList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "DSCPList",
-    &res);
+      "DSCPList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->DSCPList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "DSCPList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_QoSDSCPProfile(
-    listval,
-    entry->DSCPList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "DSCPList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_QoSDSCPProfile(
+        listval,
+        entry->DSCPList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_RateLimitingIngressEntry (
+status_t build_to_xml_cpss_RateLimitingIngressEntry(
     val_value_t *parentval,
     struct cpsspb_RateLimitingIngressEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FilterTypes",
-    &res);
+      "FilterTypes",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->FilterTypes_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "FilterTypes_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->FilterTypes[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "FilterTypes_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->FilterTypes[i]) {
+      case cpsspb_RateLimitingIngressFilterTypeOptions_RATE_LIMITING_INGRESS_FILTER_TYPE_UC_KNOWN:
+        enum_str = "RATE_LIMITING_INGRESS_FILTER_TYPE_UC_KNOWN";
+        break;
+      case cpsspb_RateLimitingIngressFilterTypeOptions_RATE_LIMITING_INGRESS_FILTER_TYPE_UC_UNKNOWN:
+        enum_str = "RATE_LIMITING_INGRESS_FILTER_TYPE_UC_UNKNOWN";
+        break;
+      case cpsspb_RateLimitingIngressFilterTypeOptions_RATE_LIMITING_INGRESS_FILTER_TYPE_MC_UNREGISTERED:
+        enum_str = "RATE_LIMITING_INGRESS_FILTER_TYPE_MC_UNREGISTERED";
+        break;
+      case cpsspb_RateLimitingIngressFilterTypeOptions_RATE_LIMITING_INGRESS_FILTER_TYPE_MC_REGISTERED:
+        enum_str = "RATE_LIMITING_INGRESS_FILTER_TYPE_MC_REGISTERED";
+        break;
+      case cpsspb_RateLimitingIngressFilterTypeOptions_RATE_LIMITING_INGRESS_FILTER_TYPE_BC:
+        enum_str = "RATE_LIMITING_INGRESS_FILTER_TYPE_BC";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Rate",
-    &res);
+      "Rate",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -6143,73 +7064,76 @@ VAL_ENUM(listval) = entry->FilterTypes[i];
   VAL_INT(childval) = entry->Rate;
   return res;
 }
-
-status_t build_to_xml_cpss_RateLimitingIngressList (
+status_t build_to_xml_cpss_RateLimitingIngressList(
     val_value_t *parentval,
     struct cpsspb_RateLimitingIngressList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_RateLimitingIngressEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_RateLimitingIngressEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_RateLimitingEgressEntry (
+status_t build_to_xml_cpss_RateLimitingEgressEntry(
     val_value_t *parentval,
     struct cpsspb_RateLimitingEgressEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DevicePortEntry(
+  res = build_to_xml_cpss_DevicePortEntry(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Rate",
-    &res);
+      "Rate",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -6217,246 +7141,4850 @@ status_t build_to_xml_cpss_RateLimitingEgressEntry (
   VAL_INT(childval) = entry->Rate;
   return res;
 }
-
-status_t build_to_xml_cpss_RateLimitingEgressList (
+status_t build_to_xml_cpss_RateLimitingEgressList(
     val_value_t *parentval,
     struct cpsspb_RateLimitingEgressList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_cpss_RateLimitingEgressEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_cpss_RateLimitingEgressEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_cpss_STPID (
+status_t build_to_xml_cpss_STPID(
     val_value_t *parentval,
     struct cpsspb_STPID *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Proto",
-    &res);
+      "Proto",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Proto;
+  switch (entry->Proto) {
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_CPSS:
+      enum_str = "STP_PROTOCOL_TYPE_CPSS";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_DHCP:
+      enum_str = "STP_PROTOCOL_TYPE_DHCP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STORM_CONTROL:
+      enum_str = "STP_PROTOCOL_TYPE_STORM_CONTROL";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LOOP:
+      enum_str = "STP_PROTOCOL_TYPE_LOOP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PORT:
+      enum_str = "STP_PROTOCOL_TYPE_PORT";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LACP:
+      enum_str = "STP_PROTOCOL_TYPE_LACP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PACC:
+      enum_str = "STP_PROTOCOL_TYPE_PACC";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STP:
+      enum_str = "STP_PROTOCOL_TYPE_STP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_G8032:
+      enum_str = "STP_PROTOCOL_TYPE_G8032";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_STPPortState (
+status_t build_to_xml_cpss_STPPortState(
     val_value_t *parentval,
     struct cpsspb_STPPortState *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_cpss_DeviceInterfaceEntry(
+  res = build_to_xml_cpss_DeviceInterfaceEntry(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->State) {
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_DISABLE:
+      enum_str = "STP_PORT_STATE_TYPE_DISABLE";
+      break;
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_BLOCKING:
+      enum_str = "STP_PORT_STATE_TYPE_BLOCKING";
+      break;
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_LEARNING:
+      enum_str = "STP_PORT_STATE_TYPE_LEARNING";
+      break;
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_FORWARDING:
+      enum_str = "STP_PORT_STATE_TYPE_FORWARDING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "InActive",
-    &res);
+      "InActive",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->InActive;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Proto",
-    &res);
+      "Proto",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Proto;
+  switch (entry->Proto) {
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_CPSS:
+      enum_str = "STP_PROTOCOL_TYPE_CPSS";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_DHCP:
+      enum_str = "STP_PROTOCOL_TYPE_DHCP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STORM_CONTROL:
+      enum_str = "STP_PROTOCOL_TYPE_STORM_CONTROL";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LOOP:
+      enum_str = "STP_PROTOCOL_TYPE_LOOP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PORT:
+      enum_str = "STP_PROTOCOL_TYPE_PORT";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LACP:
+      enum_str = "STP_PROTOCOL_TYPE_LACP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PACC:
+      enum_str = "STP_PROTOCOL_TYPE_PACC";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STP:
+      enum_str = "STP_PROTOCOL_TYPE_STP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_G8032:
+      enum_str = "STP_PROTOCOL_TYPE_G8032";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_cpss_STPVlanBinding (
+status_t build_to_xml_cpss_STPVlanBinding(
     val_value_t *parentval,
     struct cpsspb_STPVlanBinding *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Proto",
-    &res);
+      "Proto",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Proto;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Proto) {
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_CPSS:
+      enum_str = "STP_PROTOCOL_TYPE_CPSS";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_DHCP:
+      enum_str = "STP_PROTOCOL_TYPE_DHCP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STORM_CONTROL:
+      enum_str = "STP_PROTOCOL_TYPE_STORM_CONTROL";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LOOP:
+      enum_str = "STP_PROTOCOL_TYPE_LOOP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PORT:
+      enum_str = "STP_PROTOCOL_TYPE_PORT";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LACP:
+      enum_str = "STP_PROTOCOL_TYPE_LACP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PACC:
+      enum_str = "STP_PROTOCOL_TYPE_PACC";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STP:
+      enum_str = "STP_PROTOCOL_TYPE_STP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_G8032:
+      enum_str = "STP_PROTOCOL_TYPE_G8032";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VlanList",
-    &res);
+      "VlanList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->VlanList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "VlanList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_INT(listval) = entry->VlanList[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "VlanList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* int32 */
+    VAL_INT(listval) = entry->VlanList[i];
   }
   return res;
 }
-
-status_t build_to_xml_cpss_STPIDState (
+status_t build_to_xml_cpss_STPIDState(
     val_value_t *parentval,
     struct cpsspb_STPIDState *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->State) {
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_DISABLE:
+      enum_str = "STP_PORT_STATE_TYPE_DISABLE";
+      break;
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_BLOCKING:
+      enum_str = "STP_PORT_STATE_TYPE_BLOCKING";
+      break;
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_LEARNING:
+      enum_str = "STP_PORT_STATE_TYPE_LEARNING";
+      break;
+    case cpsspb_STPPortStateTypeOptions_STP_PORT_STATE_TYPE_FORWARDING:
+      enum_str = "STP_PORT_STATE_TYPE_FORWARDING";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Proto",
-    &res);
+      "Proto",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Proto;
+  switch (entry->Proto) {
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_CPSS:
+      enum_str = "STP_PROTOCOL_TYPE_CPSS";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_DHCP:
+      enum_str = "STP_PROTOCOL_TYPE_DHCP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STORM_CONTROL:
+      enum_str = "STP_PROTOCOL_TYPE_STORM_CONTROL";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LOOP:
+      enum_str = "STP_PROTOCOL_TYPE_LOOP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PORT:
+      enum_str = "STP_PROTOCOL_TYPE_PORT";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_LACP:
+      enum_str = "STP_PROTOCOL_TYPE_LACP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_PACC:
+      enum_str = "STP_PROTOCOL_TYPE_PACC";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_STP:
+      enum_str = "STP_PROTOCOL_TYPE_STP";
+      break;
+    case cpsspb_STPProtocolTypeOptions_STP_PROTOCOL_TYPE_G8032:
+      enum_str = "STP_PROTOCOL_TYPE_G8032";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
 
+status_t build_to_priv_cpss_Enabled(
+    val_value_t *parentval,
+    struct cpsspb_Enabled *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_IndexList(
+    val_value_t *parentval,
+    struct cpsspb_IndexList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->List[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MACAddress(
+    val_value_t *parentval,
+    struct cpsspb_MACAddress *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Value");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Value = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DeviceArchitecture(
+    val_value_t *parentval,
+    struct cpsspb_DeviceArchitecture *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Information");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Information = malloc(sizeof(*(entry->Information)));
+    res = build_to_priv_cpss_DeviceInformation(
+        childval,
+        entry->Information);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortAllocationTable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortAllocationTable = malloc(sizeof(*(entry->PortAllocationTable)));
+    res = build_to_priv_cpss_DevicePortAllocationTable(
+        childval,
+        entry->PortAllocationTable);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DeviceInformation(
+    val_value_t *parentval,
+    struct cpsspb_DeviceInformation *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Model");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Model = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Description");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Description = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EnterpriseOID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EnterpriseOID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Vendor");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Vendor = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HardwareVersion");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->HardwareVersion = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SoftwareVersion");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SoftwareVersion = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DevicePortProperty(
+    val_value_t *parentval,
+    struct cpsspb_DevicePortProperty *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->MACNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYInterface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PHYInterface = malloc(sizeof(*(entry->PHYInterface)));
+    res = build_to_priv_cpss_PHYInterface(
+        childval,
+        entry->PHYInterface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYID1");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PHYID1 = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYID2");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PHYID2 = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYChipID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PHYChipID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoENo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PoENo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoEChipNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PoEChipNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoELEDNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PoELEDNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SupportedTypeList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SupportedTypeList_Len = dlq_count(&childval->v.childQ);
+    entry->SupportedTypeList = malloc((entry->SupportedTypeList_Len + 1) * sizeof(*entry->SupportedTypeList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->SupportedTypeList[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SupportedMediaList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SupportedMediaList_Len = dlq_count(&childval->v.childQ);
+    entry->SupportedMediaList = malloc((entry->SupportedMediaList_Len + 1) * sizeof(*entry->SupportedMediaList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->SupportedMediaList[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PHYInterface(
+    val_value_t *parentval,
+    struct cpsspb_PHYInterface *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Interface = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DevicePortAllocationTable(
+    val_value_t *parentval,
+    struct cpsspb_DevicePortAllocationTable *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "CPUPortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->CPUPortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortPropertyList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortPropertyList_Len = dlq_count(&childval->v.childQ);
+    entry->PortPropertyList = malloc((entry->PortPropertyList_Len + 1) * sizeof(*entry->PortPropertyList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortPropertyList[cnt] = malloc(sizeof(*(entry->PortPropertyList[cnt])));
+      res = build_to_priv_cpss_DevicePortProperty(
+          listval,
+          entry->PortPropertyList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortList_Len = dlq_count(&childval->v.childQ);
+    entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->PortList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACNoList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->MACNoList_Len = dlq_count(&childval->v.childQ);
+    entry->MACNoList = malloc((entry->MACNoList_Len + 1) * sizeof(*entry->MACNoList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->MACNoList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoEList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PoEList_Len = dlq_count(&childval->v.childQ);
+    entry->PoEList = malloc((entry->PoEList_Len + 1) * sizeof(*entry->PoEList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->PoEList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SFPList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SFPList_Len = dlq_count(&childval->v.childQ);
+    entry->SFPList = malloc((entry->SFPList_Len + 1) * sizeof(*entry->SFPList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->SFPList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LAGList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->LAGList_Len = dlq_count(&childval->v.childQ);
+    entry->LAGList = malloc((entry->LAGList_Len + 1) * sizeof(*entry->LAGList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->LAGList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DevicePortEntry(
+    val_value_t *parentval,
+    struct cpsspb_DevicePortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DeviceID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DeviceID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DevicePortList(
+    val_value_t *parentval,
+    struct cpsspb_DevicePortList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_DevicePortEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DeviceTrunkEntry(
+    val_value_t *parentval,
+    struct cpsspb_DeviceTrunkEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DeviceID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DeviceID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrunkID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TrunkID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DeviceTrunkList(
+    val_value_t *parentval,
+    struct cpsspb_DeviceTrunkList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_DeviceTrunkEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DeviceInterfaceEntry(
+    val_value_t *parentval,
+    struct cpsspb_DeviceInterfaceEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DeviceID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DeviceID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LAGNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->LAGNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_DeviceInterfaceList(
+    val_value_t *parentval,
+    struct cpsspb_DeviceInterfaceList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_DeviceInterfaceEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_TrunkingGroupMemberEntry(
+    val_value_t *parentval,
+    struct cpsspb_TrunkingGroupMemberEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LAGNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->LAGNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EnableMemberList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->EnableMemberList = malloc(sizeof(*(entry->EnableMemberList)));
+    res = build_to_priv_cpss_DevicePortList(
+        childval,
+        entry->EnableMemberList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DisableMemberList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DisableMemberList = malloc(sizeof(*(entry->DisableMemberList)));
+    res = build_to_priv_cpss_DevicePortList(
+        childval,
+        entry->DisableMemberList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_TrunkingMemberEntry(
+    val_value_t *parentval,
+    struct cpsspb_TrunkingMemberEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LAGNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->LAGNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MemberList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->MemberList = malloc(sizeof(*(entry->MemberList)));
+    res = build_to_priv_cpss_DevicePortList(
+        childval,
+        entry->MemberList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_TrunkingGroupID(
+    val_value_t *parentval,
+    struct cpsspb_TrunkingGroupID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LAGNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->LAGNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_TrunkingLoadBalanceMode(
+    val_value_t *parentval,
+    struct cpsspb_TrunkingLoadBalanceMode *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLIndexList(
+    val_value_t *parentval,
+    struct cpsspb_ACLIndexList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->List[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLUserDefinedRuleList(
+    val_value_t *parentval,
+    struct cpsspb_ACLUserDefinedRuleList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_ACLUserDefinedRuleEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLUserDefinedRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLUserDefinedRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Index = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UniqueID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UniqueID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DirectionType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->DirectionType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceMACMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceMACMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DestinationMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationMACMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DestinationMACMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EtherType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->EtherType = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EtherTypeMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->EtherTypeMask = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceIPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceIPAddr = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceIPMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceIPMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationIPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DestinationIPAddr = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationIPMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->DestinationIPMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPProtocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IPProtocol = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IPProtocolMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IPProtocolMask = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "L4SourcePort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->L4SourcePort = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "L4SourcePortMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->L4SourcePortMask = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "L4DestinationPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->L4DestinationPort = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "L4DestinationPortMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->L4DestinationPortMask = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceInterface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SourceInterface = malloc(sizeof(*(entry->SourceInterface)));
+    res = build_to_priv_cpss_ACLSourceInterfaceEntry(
+        childval,
+        entry->SourceInterface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Action");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Action = malloc(sizeof(*(entry->Action)));
+    res = build_to_priv_cpss_ACLActionEntry(
+        childval,
+        entry->Action);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLUserDefinedRuleRemovalList(
+    val_value_t *parentval,
+    struct cpsspb_ACLUserDefinedRuleRemovalList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_ACLUserDefinedRuleRemovalEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLUserDefinedRuleRemovalEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLUserDefinedRuleRemovalEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Index = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UniqueID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UniqueID = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLControlRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLControlRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Index = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACIPBindingRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACIPBindingRule;
+    /* message */
+    entry->Rule.Rule_MACIPBindingRule = malloc(sizeof(*(entry->Rule.Rule_MACIPBindingRule)));
+    res = build_to_priv_cpss_ACLMACIPBindingRuleEntry(
+        childval,
+        entry->Rule.Rule_MACIPBindingRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SubnetBasedRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_SubnetBasedRule;
+    /* message */
+    entry->Rule.Rule_SubnetBasedRule = malloc(sizeof(*(entry->Rule.Rule_SubnetBasedRule)));
+    res = build_to_priv_cpss_ACLSubnetBasedRuleEntry(
+        childval,
+        entry->Rule.Rule_SubnetBasedRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACBasedRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACBasedRule;
+    /* message */
+    entry->Rule.Rule_MACBasedRule = malloc(sizeof(*(entry->Rule.Rule_MACBasedRule)));
+    res = build_to_priv_cpss_ACLMACBasedRuleEntry(
+        childval,
+        entry->Rule.Rule_MACBasedRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SelectiveQinQRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_SelectiveQinQRule;
+    /* message */
+    entry->Rule.Rule_SelectiveQinQRule = malloc(sizeof(*(entry->Rule.Rule_SelectiveQinQRule)));
+    res = build_to_priv_cpss_ACLSelectiveQinQRuleEntry(
+        childval,
+        entry->Rule.Rule_SelectiveQinQRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FlowMirrorRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_FlowMirrorRule;
+    /* message */
+    entry->Rule.Rule_FlowMirrorRule = malloc(sizeof(*(entry->Rule.Rule_FlowMirrorRule)));
+    res = build_to_priv_cpss_ACLFlowMirrorRuleEntry(
+        childval,
+        entry->Rule.Rule_FlowMirrorRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACCountingRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_MACCountingRule;
+    /* message */
+    entry->Rule.Rule_MACCountingRule = malloc(sizeof(*(entry->Rule.Rule_MACCountingRule)));
+    res = build_to_priv_cpss_ACLMACCountingRuleEntry(
+        childval,
+        entry->Rule.Rule_MACCountingRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PTPMessageRule");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Rule_Union_Option = cpsspb_ACLControlRuleEntry_Rule_Union_Options_PTPMessageRule;
+    /* message */
+    entry->Rule.Rule_PTPMessageRule = malloc(sizeof(*(entry->Rule.Rule_PTPMessageRule)));
+    res = build_to_priv_cpss_ACLPTPMessageRuleEntry(
+        childval,
+        entry->Rule.Rule_PTPMessageRule);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceInterface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SourceInterface = malloc(sizeof(*(entry->SourceInterface)));
+    res = build_to_priv_cpss_ACLSourceInterfaceEntry(
+        childval,
+        entry->SourceInterface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Action");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Action = malloc(sizeof(*(entry->Action)));
+    res = build_to_priv_cpss_ACLActionEntry(
+        childval,
+        entry->Action);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLSourceInterfaceEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLSourceInterfaceEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortList_Len = dlq_count(&childval->v.childQ);
+    entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortList[cnt] = malloc(sizeof(*(entry->PortList[cnt])));
+      res = build_to_priv_cpss_DevicePortEntry(
+          listval,
+          entry->PortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LAGList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->LAGList_Len = dlq_count(&childval->v.childQ);
+    entry->LAGList = malloc((entry->LAGList_Len + 1) * sizeof(*entry->LAGList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->LAGList[cnt] = malloc(sizeof(*(entry->LAGList[cnt])));
+      res = build_to_priv_cpss_TrunkingGroupID(
+          listval,
+          entry->LAGList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLActionEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLActionEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PacketCommand");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PacketCommand = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLG8032RuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLG8032RuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "RingID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RingID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationRingPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DestinationRingPort = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLMACIPBindingRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLMACIPBindingRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceIPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceIPAddr = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLSubnetBasedRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLSubnetBasedRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceIPAddr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceIPAddr = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceIPMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceIPMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ModifyVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ModifyVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLMACBasedRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLMACBasedRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceMACMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceMACMask = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ModifyVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ModifyVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLSelectiveQinQRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLSelectiveQinQRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanFrom");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanFrom = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanTo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanTo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLFlowMirrorRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLFlowMirrorRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsMirrorEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsMirrorEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Flow");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Flow = malloc(sizeof(*(entry->Flow)));
+    res = build_to_priv_cpss_ACLUserDefinedRuleEntry(
+        childval,
+        entry->Flow);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLMACCountingRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLMACCountingRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "CNCCounterIndex");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->CNCCounterIndex = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SourceMAC = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_ACLPTPMessageRuleEntry(
+    val_value_t *parentval,
+    struct cpsspb_ACLPTPMessageRuleEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "EtherType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->EtherType = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_CNCCountingEntry(
+    val_value_t *parentval,
+    struct cpsspb_CNCCountingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddressCountingEntry");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Entry_Union_Option = cpsspb_CNCCountingEntry_Entry_Union_Options_MACAddressCountingEntry;
+    /* message */
+    entry->Entry.Entry_MACAddressCountingEntry = malloc(sizeof(*(entry->Entry.Entry_MACAddressCountingEntry)));
+    res = build_to_priv_cpss_CNCMACAddressCountingEntry(
+        childval,
+        entry->Entry.Entry_MACAddressCountingEntry);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_CNCMACAddressCountingEntry(
+    val_value_t *parentval,
+    struct cpsspb_CNCMACAddressCountingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Address = malloc(sizeof(*(entry->Address)));
+    res = build_to_priv_cpss_MACAddress(
+        childval,
+        entry->Address);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_CNCCounter(
+    val_value_t *parentval,
+    struct cpsspb_CNCCounter *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ByteCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->ByteCount = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PktCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->PktCount = VAL_ULONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBAutoLearningEnable(
+    val_value_t *parentval,
+    struct cpsspb_FDBAutoLearningEnable *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBIdentifyEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBIdentifyEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBSecureBreachEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBSecureBreachEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBMACEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBMACEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InterfaceType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsStatic");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsStatic = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsForward");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsForward = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Trunk");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Trunk = malloc(sizeof(*(entry->Trunk)));
+    res = build_to_priv_cpss_DeviceTrunkEntry(
+        childval,
+        entry->Trunk);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Multicast");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Multicast = malloc(sizeof(*(entry->Multicast)));
+    res = build_to_priv_cpss_FDBMulticastEntry(
+        childval,
+        entry->Multicast);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Action");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Action = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBDumpEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBDumpEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_FDBMACEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBHashEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBHashEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LayerType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LayerType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBAgingTime(
+    val_value_t *parentval,
+    struct cpsspb_FDBAgingTime *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Time");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Time = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBFlushEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBFlushEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InterfaceType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsUnicastDynamic");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsUnicastDynamic = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsUnicastAll");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsUnicastAll = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsMulticast");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsMulticast = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->VlanList_Len = dlq_count(&childval->v.childQ);
+    entry->VlanList = malloc((entry->VlanList_Len + 1) * sizeof(*entry->VlanList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->VlanList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortList = malloc(sizeof(*(entry->PortList)));
+    res = build_to_priv_cpss_DevicePortList(
+        childval,
+        entry->PortList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrunkList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->TrunkList = malloc(sizeof(*(entry->TrunkList)));
+    res = build_to_priv_cpss_DeviceTrunkList(
+        childval,
+        entry->TrunkList);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBMulticastEntry(
+    val_value_t *parentval,
+    struct cpsspb_FDBMulticastEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "EntryType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->EntryType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VIDX");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VIDX = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_FDBCounters(
+    val_value_t *parentval,
+    struct cpsspb_FDBCounters *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfFreeEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfFreeEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfUsedEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfUsedEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfMacUnicastDynamicEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfMacUnicastDynamicEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfMacUnicastStaticEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfMacUnicastStaticEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfMacMulticastDynamicEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfMacMulticastDynamicEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfMacMulticastStaticEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfMacMulticastStaticEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfIpv4MulticastEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfIpv4MulticastEntries = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfIpv6MulticastEntries");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfIpv6MulticastEntries = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MirroringSessionEntry(
+    val_value_t *parentval,
+    struct cpsspb_MirroringSessionEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SourceType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourcePortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SourcePortList_Len = dlq_count(&childval->v.childQ);
+    entry->SourcePortList = malloc((entry->SourcePortList_Len + 1) * sizeof(*entry->SourcePortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->SourcePortList[cnt] = malloc(sizeof(*(entry->SourcePortList[cnt])));
+      res = build_to_priv_cpss_MirroringSourcePortEntry(
+          listval,
+          entry->SourcePortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SourceVlanList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->SourceVlanList_Len = dlq_count(&childval->v.childQ);
+    entry->SourceVlanList = malloc((entry->SourceVlanList_Len + 1) * sizeof(*entry->SourceVlanList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->SourceVlanList[cnt] = malloc(sizeof(*(entry->SourceVlanList[cnt])));
+      res = build_to_priv_cpss_MirroringSourceVlanEntry(
+          listval,
+          entry->SourceVlanList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DestinationPort = malloc(sizeof(*(entry->DestinationPort)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->DestinationPort);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RSPAN");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->RSPAN = malloc(sizeof(*(entry->RSPAN)));
+    res = build_to_priv_cpss_MirroringRSPANEntry(
+        childval,
+        entry->RSPAN);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MirroringSourcePortEntry(
+    val_value_t *parentval,
+    struct cpsspb_MirroringSourcePortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Direction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Direction = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MirroringSourceVlanEntry(
+    val_value_t *parentval,
+    struct cpsspb_MirroringSourceVlanEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Direction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Direction = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MirroringSessionList(
+    val_value_t *parentval,
+    struct cpsspb_MirroringSessionList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_MirroringSessionEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MirroringPolicyBased(
+    val_value_t *parentval,
+    struct cpsspb_MirroringPolicyBased *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DestinationPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DestinationPort = malloc(sizeof(*(entry->DestinationPort)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->DestinationPort);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MirroringRSPANEntry(
+    val_value_t *parentval,
+    struct cpsspb_MirroringRSPANEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsLocalEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsLocalEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsRemoteEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsRemoteEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AnalyzerVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AnalyzerVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscMACRegisterEntry(
+    val_value_t *parentval,
+    struct cpsspb_MiscMACRegisterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Address = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Data");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Data = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscSMIRegisterEntry(
+    val_value_t *parentval,
+    struct cpsspb_MiscSMIRegisterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PHYInterface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->PHYInterface = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->PHYID = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Address = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Data");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Data = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscXSMIRegisterEntry(
+    val_value_t *parentval,
+    struct cpsspb_MiscXSMIRegisterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PHYInterface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->PHYInterface = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->PHYID = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PHYDev");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->PHYDev = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Address = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Data");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Data = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscRegisterData(
+    val_value_t *parentval,
+    struct cpsspb_MiscRegisterData *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Data");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Data = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscTemperature(
+    val_value_t *parentval,
+    struct cpsspb_MiscTemperature *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Temperature");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Temperature = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscPHYPortModel(
+    val_value_t *parentval,
+    struct cpsspb_MiscPHYPortModel *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Interface = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Model");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Model = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MiscModel(
+    val_value_t *parentval,
+    struct cpsspb_MiscModel *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Model");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Model = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanID(
+    val_value_t *parentval,
+    struct cpsspb_VlanID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanList(
+    val_value_t *parentval,
+    struct cpsspb_VlanList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->List[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanMemberTaggingList(
+    val_value_t *parentval,
+    struct cpsspb_VlanMemberTaggingList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_VlanMemeberTaggingEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanMemeberTaggingEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanMemeberTaggingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Command");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Command = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanDefaultVIDEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanDefaultVIDEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanAcceptFrameTypeEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanAcceptFrameTypeEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanTPIDIndexEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanTPIDIndexEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Index = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanTPIDEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanTPIDEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Index");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Index = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TPID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TPID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanTPIDList(
+    val_value_t *parentval,
+    struct cpsspb_VlanTPIDList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_VlanTPIDEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanStatusEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UntaggedList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->UntaggedList_Len = dlq_count(&childval->v.childQ);
+    entry->UntaggedList = malloc((entry->UntaggedList_Len + 1) * sizeof(*entry->UntaggedList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->UntaggedList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TaggedList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->TaggedList_Len = dlq_count(&childval->v.childQ);
+    entry->TaggedList = malloc((entry->TaggedList_Len + 1) * sizeof(*entry->TaggedList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->TaggedList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ProviderList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->ProviderList_Len = dlq_count(&childval->v.childQ);
+    entry->ProviderList = malloc((entry->ProviderList_Len + 1) * sizeof(*entry->ProviderList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->ProviderList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "CustomerList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->CustomerList_Len = dlq_count(&childval->v.childQ);
+    entry->CustomerList = malloc((entry->CustomerList_Len + 1) * sizeof(*entry->CustomerList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->CustomerList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanStatusList(
+    val_value_t *parentval,
+    struct cpsspb_VlanStatusList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_VlanStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanFlushEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanFlushEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsFlushAll");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsFlushAll = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanTunnelEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanTunnelEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanProtocolClassID(
+    val_value_t *parentval,
+    struct cpsspb_VlanProtocolClassID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ClassID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ClassID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanProtocolClassEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanProtocolClassEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ClassID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ClassID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EtherType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->EtherType = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Encapsulation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Encapsulation = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanProtocolEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanProtocolEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClassID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ClassID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanTranslationEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanTranslationEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Interface");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Interface = malloc(sizeof(*(entry->Interface)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->Interface);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_VlanTranslationMappingEntry(
+    val_value_t *parentval,
+    struct cpsspb_VlanTranslationMappingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SourceVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SourceVlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TranslatedVlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TranslatedVlanID = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MulticastBridgeGroupEntry(
+    val_value_t *parentval,
+    struct cpsspb_MulticastBridgeGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Identify");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Identify = malloc(sizeof(*(entry->Identify)));
+    res = build_to_priv_cpss_FDBIdentifyEntry(
+        childval,
+        entry->Identify);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->InterfaceList_Len = dlq_count(&childval->v.childQ);
+    entry->InterfaceList = malloc((entry->InterfaceList_Len + 1) * sizeof(*entry->InterfaceList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->InterfaceList[cnt] = malloc(sizeof(*(entry->InterfaceList[cnt])));
+      res = build_to_priv_cpss_DeviceInterfaceEntry(
+          listval,
+          entry->InterfaceList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MulticastUnregisteredFloodingEntry(
+    val_value_t *parentval,
+    struct cpsspb_MulticastUnregisteredFloodingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->InterfaceList_Len = dlq_count(&childval->v.childQ);
+    entry->InterfaceList = malloc((entry->InterfaceList_Len + 1) * sizeof(*entry->InterfaceList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->InterfaceList[cnt] = malloc(sizeof(*(entry->InterfaceList[cnt])));
+      res = build_to_priv_cpss_DeviceInterfaceEntry(
+          listval,
+          entry->InterfaceList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MulticastTableVlanFloodingEntry(
+    val_value_t *parentval,
+    struct cpsspb_MulticastTableVlanFloodingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VIDX");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VIDX = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortList_Len = dlq_count(&childval->v.childQ);
+    entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortList[cnt] = malloc(sizeof(*(entry->PortList[cnt])));
+      res = build_to_priv_cpss_DevicePortEntry(
+          listval,
+          entry->PortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MulticastTableBridgeGroupEntry(
+    val_value_t *parentval,
+    struct cpsspb_MulticastTableBridgeGroupEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VIDX");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VIDX = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Address = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PortList_Len = dlq_count(&childval->v.childQ);
+    entry->PortList = malloc((entry->PortList_Len + 1) * sizeof(*entry->PortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PortList[cnt] = malloc(sizeof(*(entry->PortList[cnt])));
+      res = build_to_priv_cpss_DevicePortEntry(
+          listval,
+          entry->PortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_MulticastTable(
+    val_value_t *parentval,
+    struct cpsspb_MulticastTable *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "VlanFloodingList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->VlanFloodingList_Len = dlq_count(&childval->v.childQ);
+    entry->VlanFloodingList = malloc((entry->VlanFloodingList_Len + 1) * sizeof(*entry->VlanFloodingList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->VlanFloodingList[cnt] = malloc(sizeof(*(entry->VlanFloodingList[cnt])));
+      res = build_to_priv_cpss_MulticastTableVlanFloodingEntry(
+          listval,
+          entry->VlanFloodingList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BridgeGroupList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->BridgeGroupList_Len = dlq_count(&childval->v.childQ);
+    entry->BridgeGroupList = malloc((entry->BridgeGroupList_Len + 1) * sizeof(*entry->BridgeGroupList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->BridgeGroupList[cnt] = malloc(sizeof(*(entry->BridgeGroupList[cnt])));
+      res = build_to_priv_cpss_MulticastTableBridgeGroupEntry(
+          listval,
+          entry->BridgeGroupList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PacketControlActionEntry(
+    val_value_t *parentval,
+    struct cpsspb_PacketControlActionEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PacketControlGeneralStatusEntry(
+    val_value_t *parentval,
+    struct cpsspb_PacketControlGeneralStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Protocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Protocol = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PacketCommand");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PacketCommand = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PacketControlInterfaceStatusEntry(
+    val_value_t *parentval,
+    struct cpsspb_PacketControlInterfaceStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Protocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Protocol = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EnabledList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->EnabledList_Len = dlq_count(&childval->v.childQ);
+    entry->EnabledList = malloc((entry->EnabledList_Len + 1) * sizeof(*entry->EnabledList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->EnabledList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PacketCommand");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PacketCommand = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PacketControlStatusList(
+    val_value_t *parentval,
+    struct cpsspb_PacketControlStatusList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "GeneralList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->GeneralList_Len = dlq_count(&childval->v.childQ);
+    entry->GeneralList = malloc((entry->GeneralList_Len + 1) * sizeof(*entry->GeneralList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->GeneralList[cnt] = malloc(sizeof(*(entry->GeneralList[cnt])));
+      res = build_to_priv_cpss_PacketControlGeneralStatusEntry(
+          listval,
+          entry->GeneralList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->InterfaceList_Len = dlq_count(&childval->v.childQ);
+    entry->InterfaceList = malloc((entry->InterfaceList_Len + 1) * sizeof(*entry->InterfaceList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->InterfaceList[cnt] = malloc(sizeof(*(entry->InterfaceList[cnt])));
+      res = build_to_priv_cpss_PacketControlInterfaceStatusEntry(
+          listval,
+          entry->InterfaceList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PolicerStormCountingEnableEntry(
+    val_value_t *parentval,
+    struct cpsspb_PolicerStormCountingEnableEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PolicerStormCountingCounterEntry(
+    val_value_t *parentval,
+    struct cpsspb_PolicerStormCountingCounterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "UnknownUnicastByteCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->UnknownUnicastByteCount = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UnknownUnicastPktCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->UnknownUnicastPktCount = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MulticastByteCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->MulticastByteCount = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MulticastPktCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->MulticastPktCount = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BroadcastByteCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BroadcastByteCount = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BroadcastPktCount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BroadcastPktCount = VAL_ULONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortEnableEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortEnableEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Speed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Speed = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortSpeedDuplexEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortSpeedDuplexEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Speed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Speed = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortSpeedDuplexList(
+    val_value_t *parentval,
+    struct cpsspb_PortSpeedDuplexList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_PortSpeedDuplexEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortFlowControlEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortFlowControlEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortEEEEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortEEEEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortCounterEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortCounterEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GoodOctetsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->GoodOctetsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BadOctetsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BadOctetsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACTransmitErr");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->MACTransmitErr = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GoodPktsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->GoodPktsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BadPktsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BadPktsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BrdcPktsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BrdcPktsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "McPktsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->McPktsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Pkts_64Octets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Pkts_64Octets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Pkts_65To_127Octets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Pkts_65To_127Octets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Pkts_128To_255Octets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Pkts_128To_255Octets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Pkts_256To_511Octets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Pkts_256To_511Octets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Pkts_512To_1023Octets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Pkts_512To_1023Octets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Pkts_1024ToMaxOctets");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Pkts_1024ToMaxOctets = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GoodOctetsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->GoodOctetsSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GoodPktsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->GoodPktsSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ExcessiveCollisions");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->ExcessiveCollisions = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "McPktsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->McPktsSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BrdcPktsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BrdcPktsSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UnrecogMACCntrRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->UnrecogMACCntrRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FCSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->FCSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GoodFCRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->GoodFCRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DropEvents");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->DropEvents = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UndersizePkts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->UndersizePkts = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FragmentsPkts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->FragmentsPkts = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OversizePkts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->OversizePkts = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "JabberPkts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->JabberPkts = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACRecvError");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->MACRecvError = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BadCrc");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BadCrc = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Collisions");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Collisions = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LateCollisions");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->LateCollisions = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BadFcRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->BadFcRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UcPktsRecv");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->UcPktsRecv = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UcPktsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->UcPktsSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MultiplePktsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->MultiplePktsSent = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DeferredPktsSent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->DeferredPktsSent = VAL_ULONG(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortCounterList(
+    val_value_t *parentval,
+    struct cpsspb_PortCounterList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_PortCounterEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortIsolationEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortIsolationEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "OutgoingList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->OutgoingList_Len = dlq_count(&childval->v.childQ);
+    entry->OutgoingList = malloc((entry->OutgoingList_Len + 1) * sizeof(*entry->OutgoingList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->OutgoingList[cnt] = malloc(sizeof(*(entry->OutgoingList[cnt])));
+      res = build_to_priv_cpss_DevicePortEntry(
+          listval,
+          entry->OutgoingList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortIsolationList(
+    val_value_t *parentval,
+    struct cpsspb_PortIsolationList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_PortIsolationEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortIPGSize(
+    val_value_t *parentval,
+    struct cpsspb_PortIPGSize *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Size");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Size = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortFaultStatusEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortFaultStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IsRxFault");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsRxFault = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsTxFault");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsTxFault = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PortStatusEntry(
+    val_value_t *parentval,
+    struct cpsspb_PortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsLinkUp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsLinkUp = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsFlowControlEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsFlowControlEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LinkSpeed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LinkSpeed = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EEEActive");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->EEEActive = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PMState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->PMState = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPToD(
+    val_value_t *parentval,
+    struct cpsspb_PTPToD *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Sec");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Sec = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ns");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Ns = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPToDFrequency(
+    val_value_t *parentval,
+    struct cpsspb_PTPToDFrequency *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FractionalNs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->FractionalNs = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPQueueInfo(
+    val_value_t *parentval,
+    struct cpsspb_PTPQueueInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Sec");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint64 */
+    entry->Sec = VAL_ULONG(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ns");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->Ns = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPMessageInfo(
+    val_value_t *parentval,
+    struct cpsspb_PTPMessageInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SeqID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->SeqID = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MessageType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->MessageType = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->QueueNo = VAL_UINT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPLinkDelay(
+    val_value_t *parentval,
+    struct cpsspb_PTPLinkDelay *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Delay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Delay = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPPortDelay(
+    val_value_t *parentval,
+    struct cpsspb_PTPPortDelay *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Direction");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Direction = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Delay");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Delay = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPMode(
+    val_value_t *parentval,
+    struct cpsspb_PTPMode *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DomainIndex");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->DomainIndex = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DomainNumber");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* uint32 */
+    entry->DomainNumber = VAL_UINT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_PTPSyncE(
+    val_value_t *parentval,
+    struct cpsspb_PTPSyncE *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Speed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Speed = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ClockSelect");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ClockSelect = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSPortProfileEntry(
+    val_value_t *parentval,
+    struct cpsspb_QoSPortProfileEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSPortProfileList(
+    val_value_t *parentval,
+    struct cpsspb_QoSPortProfileList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_QoSPortProfileEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSPortQueueList(
+    val_value_t *parentval,
+    struct cpsspb_QoSPortQueueList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_QoSPortQueueEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSPortQueueEntry(
+    val_value_t *parentval,
+    struct cpsspb_QoSPortQueueEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->QueueNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Ratio");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Ratio = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Scheduler");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Scheduler = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSCoSProfile(
+    val_value_t *parentval,
+    struct cpsspb_QoSCoSProfile *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "CoSNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->CoSNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->QueueNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSCoSProfileList(
+    val_value_t *parentval,
+    struct cpsspb_QoSCoSProfileList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "CoSList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->CoSList_Len = dlq_count(&childval->v.childQ);
+    entry->CoSList = malloc((entry->CoSList_Len + 1) * sizeof(*entry->CoSList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->CoSList[cnt] = malloc(sizeof(*(entry->CoSList[cnt])));
+      res = build_to_priv_cpss_QoSCoSProfile(
+          listval,
+          entry->CoSList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSDSCPProfile(
+    val_value_t *parentval,
+    struct cpsspb_QoSDSCPProfile *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DSCPNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->DSCPNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "QueueNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->QueueNo = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_QoSDSCPProfileList(
+    val_value_t *parentval,
+    struct cpsspb_QoSDSCPProfileList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "DSCPList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->DSCPList_Len = dlq_count(&childval->v.childQ);
+    entry->DSCPList = malloc((entry->DSCPList_Len + 1) * sizeof(*entry->DSCPList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->DSCPList[cnt] = malloc(sizeof(*(entry->DSCPList[cnt])));
+      res = build_to_priv_cpss_QoSDSCPProfile(
+          listval,
+          entry->DSCPList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_RateLimitingIngressEntry(
+    val_value_t *parentval,
+    struct cpsspb_RateLimitingIngressEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FilterTypes");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->FilterTypes_Len = dlq_count(&childval->v.childQ);
+    entry->FilterTypes = malloc((entry->FilterTypes_Len + 1) * sizeof(*entry->FilterTypes));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->FilterTypes[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Rate");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Rate = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_RateLimitingIngressList(
+    val_value_t *parentval,
+    struct cpsspb_RateLimitingIngressList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_RateLimitingIngressEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_RateLimitingEgressEntry(
+    val_value_t *parentval,
+    struct cpsspb_RateLimitingEgressEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_cpss_DevicePortEntry(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Rate");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Rate = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_RateLimitingEgressList(
+    val_value_t *parentval,
+    struct cpsspb_RateLimitingEgressList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_cpss_RateLimitingEgressEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_STPID(
+    val_value_t *parentval,
+    struct cpsspb_STPID *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Proto");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Proto = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_STPPortState(
+    val_value_t *parentval,
+    struct cpsspb_STPPortState *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_cpss_DeviceInterfaceEntry(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InActive");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->InActive = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Proto");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Proto = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_cpss_STPVlanBinding(
+    val_value_t *parentval,
+    struct cpsspb_STPVlanBinding *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Proto");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Proto = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->VlanList_Len = dlq_count(&childval->v.childQ);
+    entry->VlanList = malloc((entry->VlanList_Len + 1) * sizeof(*entry->VlanList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* int32 */
+      entry->VlanList[cnt] = VAL_INT(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_cpss_STPIDState(
+    val_value_t *parentval,
+    struct cpsspb_STPIDState *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Proto");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Proto = VAL_ENUM(childval);
+  }
+  return res;
+}

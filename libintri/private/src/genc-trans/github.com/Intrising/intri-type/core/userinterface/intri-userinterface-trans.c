@@ -32,54 +32,55 @@
 
 #include "../../../../../github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_userinterface_CLIConfig (
+
+status_t build_to_xml_userinterface_CLIConfig(
     val_value_t *parentval,
     struct userinterfacepb_CLIConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "TelnetEnabled",
-    &res);
+      "TelnetEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->TelnetEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SSHEnabled",
-    &res);
+      "SSHEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SSHEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "WelcomeMessage",
-    &res);
+      "WelcomeMessage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->WelcomeMessage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InactivityTimeout",
-    &res);
+      "InactivityTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -87,127 +88,131 @@ status_t build_to_xml_userinterface_CLIConfig (
   VAL_INT(childval) = entry->InactivityTimeout;
   return res;
 }
-
-status_t build_to_xml_userinterface_SNMPConfig (
+status_t build_to_xml_userinterface_SNMPConfig(
     val_value_t *parentval,
     struct userinterfacepb_SNMPConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV1Enabled",
-    &res);
+      "SNMPV1Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SNMPV1Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV2CEnabled",
-    &res);
+      "SNMPV2CEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SNMPV2CEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GetCommunity",
-    &res);
+      "GetCommunity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->GetCommunity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SetCommunity",
-    &res);
+      "SetCommunity",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SetCommunity;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV1V2Username",
-    &res);
+      "SNMPV1V2Username",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SNMPV1V2Username;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PermitV1V2SetCommands",
-    &res);
+      "PermitV1V2SetCommands",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PermitV1V2SetCommands;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPV3Enabled",
-    &res);
+      "SNMPV3Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SNMPV3Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SecurityModel",
-    &res);
+      "SecurityModel",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SecurityModel;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->SecurityModel) {
+    case userinterfacepb_SNMPV3ConfigSecurityModelTypeOptions_SNMP_V3_CONFIG_SECURITY_MODEL_USM:
+      enum_str = "SNMP_V3_CONFIG_SECURITY_MODEL_USM";
+      break;
+    case userinterfacepb_SNMPV3ConfigSecurityModelTypeOptions_SNMP_V3_CONFIG_SECURITY_MODEL_VACM:
+      enum_str = "SNMP_V3_CONFIG_SECURITY_MODEL_VACM";
+      break;
+    case userinterfacepb_SNMPV3ConfigSecurityModelTypeOptions_SNMP_V3_CONFIG_SECURITY_MODEL_TSM:
+      enum_str = "SNMP_V3_CONFIG_SECURITY_MODEL_TSM";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SNMPEngineID",
-    &res);
+      "SNMPEngineID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->SNMPEngineID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TrapEngineID",
-    &res);
+      "TrapEngineID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -215,79 +220,90 @@ status_t build_to_xml_userinterface_SNMPConfig (
   VAL_STRING(childval) = entry->TrapEngineID;
   return res;
 }
-
-status_t build_to_xml_userinterface_WebConfig (
+status_t build_to_xml_userinterface_WebConfig(
     val_value_t *parentval,
     struct userinterfacepb_WebConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Protocol",
-    &res);
+      "Protocol",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Protocol;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Protocol) {
+    case userinterfacepb_WebProtocolTypeOptions_WEB_PROTOCOL_TYPE_DISABLED:
+      enum_str = "WEB_PROTOCOL_TYPE_DISABLED";
+      break;
+    case userinterfacepb_WebProtocolTypeOptions_WEB_PROTOCOL_TYPE_HTTP_UNSECURE:
+      enum_str = "WEB_PROTOCOL_TYPE_HTTP_UNSECURE";
+      break;
+    case userinterfacepb_WebProtocolTypeOptions_WEB_PROTOCOL_TYPE_HTTPS_SECURE:
+      enum_str = "WEB_PROTOCOL_TYPE_HTTPS_SECURE";
+      break;
+    case userinterfacepb_WebProtocolTypeOptions_WEB_PROTOCOL_TYPE_HTTP_AND_HTTPS:
+      enum_str = "WEB_PROTOCOL_TYPE_HTTP_AND_HTTPS";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "WebTimeout",
-    &res);
+      "WebTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->WebTimeout;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HTTPPort",
-    &res);
+      "HTTPPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->HTTPPort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HTTPSPort",
-    &res);
+      "HTTPSPort",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->HTTPSPort;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "EncryptedCertPassphrase",
-    &res);
+      "EncryptedCertPassphrase",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->EncryptedCertPassphrase;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoginMessage",
-    &res);
+      "LoginMessage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -295,63 +311,270 @@ status_t build_to_xml_userinterface_WebConfig (
   VAL_STRING(childval) = entry->LoginMessage;
   return res;
 }
-
-status_t build_to_xml_userinterface_Config (
+status_t build_to_xml_userinterface_Config(
     val_value_t *parentval,
     struct userinterfacepb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Cli",
-    &res);
+      "Cli",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_userinterface_CLIConfig(
+  res = build_to_xml_userinterface_CLIConfig(
       childval,
-    entry->Cli);
+      entry->Cli);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Snmp",
-    &res);
+      "Snmp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_userinterface_SNMPConfig(
+  res = build_to_xml_userinterface_SNMPConfig(
       childval,
-    entry->Snmp);
+      entry->Snmp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Web",
-    &res);
+      "Web",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_userinterface_WebConfig(
+  res = build_to_xml_userinterface_WebConfig(
       childval,
-    entry->Web);
+      entry->Web);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
 
+status_t build_to_priv_userinterface_CLIConfig(
+    val_value_t *parentval,
+    struct userinterfacepb_CLIConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "TelnetEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TelnetEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SSHEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SSHEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "WelcomeMessage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->WelcomeMessage = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InactivityTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->InactivityTimeout = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_userinterface_SNMPConfig(
+    val_value_t *parentval,
+    struct userinterfacepb_SNMPConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV1Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SNMPV1Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV2CEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SNMPV2CEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GetCommunity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->GetCommunity = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SetCommunity");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SetCommunity = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV1V2Username");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SNMPV1V2Username = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PermitV1V2SetCommands");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PermitV1V2SetCommands = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPV3Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SNMPV3Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SecurityModel");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SecurityModel = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SNMPEngineID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SNMPEngineID = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrapEngineID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->TrapEngineID = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_userinterface_WebConfig(
+    val_value_t *parentval,
+    struct userinterfacepb_WebConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Protocol");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Protocol = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "WebTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->WebTimeout = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HTTPPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->HTTPPort = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HTTPSPort");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->HTTPSPort = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "EncryptedCertPassphrase");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->EncryptedCertPassphrase = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoginMessage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LoginMessage = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_userinterface_Config(
+    val_value_t *parentval,
+    struct userinterfacepb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Cli");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Cli = malloc(sizeof(*(entry->Cli)));
+    res = build_to_priv_userinterface_CLIConfig(
+        childval,
+        entry->Cli);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Snmp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Snmp = malloc(sizeof(*(entry->Snmp)));
+    res = build_to_priv_userinterface_SNMPConfig(
+        childval,
+        entry->Snmp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Web");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Web = malloc(sizeof(*(entry->Web)));
+    res = build_to_priv_userinterface_WebConfig(
+        childval,
+        entry->Web);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}

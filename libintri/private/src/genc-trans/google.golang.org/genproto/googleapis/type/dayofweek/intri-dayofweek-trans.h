@@ -22,5 +22,6 @@
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
 
+
 #endif /* _H_intri_dayofweek_trans */
 

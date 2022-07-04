@@ -33,30 +33,33 @@
 #include "../../../../github.com/Intrising/intri-type/core/access/intri-access-trans.h"
 #include "../../../../github.com/Intrising/intri-type/core/userinterface/intri-userinterface-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_snmptrap_SNMPTrapCounter (
+
+status_t build_to_xml_snmptrap_SNMPTrapCounter(
     val_value_t *parentval,
     struct snmptrappb_SNMPTrapCounter *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "ErrorCounts",
-    &res);
+      "ErrorCounts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ErrorCounts;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TrapCounts",
-    &res);
+      "TrapCounts",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -65,3 +68,24 @@ status_t build_to_xml_snmptrap_SNMPTrapCounter (
   return res;
 }
 
+status_t build_to_priv_snmptrap_SNMPTrapCounter(
+    val_value_t *parentval,
+    struct snmptrappb_SNMPTrapCounter *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "ErrorCounts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ErrorCounts = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TrapCounts");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->TrapCounts = VAL_INT(childval);
+  }
+  return res;
+}

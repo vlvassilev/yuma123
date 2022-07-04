@@ -21,18 +21,25 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_system_Status (
+extern status_t build_to_xml_system_Status(
     val_value_t *parentval,
     struct systempb_Status *entry);
-
-extern status_t build_to_xml_system_Config (
+extern status_t build_to_xml_system_Config(
     val_value_t *parentval,
     struct systempb_Config *entry);
-
-extern status_t build_to_xml_system_IdentificationConfig (
+extern status_t build_to_xml_system_IdentificationConfig(
     val_value_t *parentval,
     struct systempb_IdentificationConfig *entry);
 
+extern status_t build_to_priv_system_Status(
+    val_value_t *parentval,
+    struct systempb_Status *entry);
+extern status_t build_to_priv_system_Config(
+    val_value_t *parentval,
+    struct systempb_Config *entry);
+extern status_t build_to_priv_system_IdentificationConfig(
+    val_value_t *parentval,
+    struct systempb_IdentificationConfig *entry);
 
 #endif /* _H_intri_system_trans */
 

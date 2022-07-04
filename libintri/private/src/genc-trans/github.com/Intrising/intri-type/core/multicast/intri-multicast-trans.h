@@ -21,86 +21,127 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_multicast_Config (
+extern status_t build_to_xml_multicast_Config(
     val_value_t *parentval,
     struct multicastpb_Config *entry);
-
-extern status_t build_to_xml_multicast_Snooping (
+extern status_t build_to_xml_multicast_Snooping(
     val_value_t *parentval,
     struct multicastpb_Snooping *entry);
-
-extern status_t build_to_xml_multicast_SnoopingConfigEntry (
+extern status_t build_to_xml_multicast_SnoopingConfigEntry(
     val_value_t *parentval,
     struct multicastpb_SnoopingConfigEntry *entry);
-
-extern status_t build_to_xml_multicast_UnregisterFlood (
+extern status_t build_to_xml_multicast_UnregisterFlood(
     val_value_t *parentval,
     struct multicastpb_UnregisterFlood *entry);
-
-extern status_t build_to_xml_multicast_UnregisterFloodVlan (
+extern status_t build_to_xml_multicast_UnregisterFloodVlan(
     val_value_t *parentval,
     struct multicastpb_UnregisterFloodVlan *entry);
-
-extern status_t build_to_xml_multicast_RouterPort (
+extern status_t build_to_xml_multicast_RouterPort(
     val_value_t *parentval,
     struct multicastpb_RouterPort *entry);
-
-extern status_t build_to_xml_multicast_RouterPortVlanEntry (
+extern status_t build_to_xml_multicast_RouterPortVlanEntry(
     val_value_t *parentval,
     struct multicastpb_RouterPortVlanEntry *entry);
-
-extern status_t build_to_xml_multicast_PortEnabledEntry (
+extern status_t build_to_xml_multicast_PortEnabledEntry(
     val_value_t *parentval,
     struct multicastpb_PortEnabledEntry *entry);
-
-extern status_t build_to_xml_multicast_Static (
+extern status_t build_to_xml_multicast_Static(
     val_value_t *parentval,
     struct multicastpb_Static *entry);
-
-extern status_t build_to_xml_multicast_StaticGroupsConfigEntry (
+extern status_t build_to_xml_multicast_StaticGroupsConfigEntry(
     val_value_t *parentval,
     struct multicastpb_StaticGroupsConfigEntry *entry);
-
-extern status_t build_to_xml_multicast_IGMPStatistics (
+extern status_t build_to_xml_multicast_IGMPStatistics(
     val_value_t *parentval,
     struct multicastpb_IGMPStatistics *entry);
-
-extern status_t build_to_xml_multicast_IGMPStatisticEntry (
+extern status_t build_to_xml_multicast_IGMPStatisticEntry(
     val_value_t *parentval,
     struct multicastpb_IGMPStatisticEntry *entry);
-
-extern status_t build_to_xml_multicast_RouterStatus (
+extern status_t build_to_xml_multicast_RouterStatus(
     val_value_t *parentval,
     struct multicastpb_RouterStatus *entry);
-
-extern status_t build_to_xml_multicast_RouterStatusEntry (
+extern status_t build_to_xml_multicast_RouterStatusEntry(
     val_value_t *parentval,
     struct multicastpb_RouterStatusEntry *entry);
-
-extern status_t build_to_xml_multicast_RouterPortStatusEntry (
+extern status_t build_to_xml_multicast_RouterPortStatusEntry(
     val_value_t *parentval,
     struct multicastpb_RouterPortStatusEntry *entry);
-
-extern status_t build_to_xml_multicast_DynamicGroups (
+extern status_t build_to_xml_multicast_DynamicGroups(
     val_value_t *parentval,
     struct multicastpb_DynamicGroups *entry);
-
-extern status_t build_to_xml_multicast_DynamicGroupEntry (
+extern status_t build_to_xml_multicast_DynamicGroupEntry(
     val_value_t *parentval,
     struct multicastpb_DynamicGroupEntry *entry);
-
-extern status_t build_to_xml_multicast_MLDStatistics (
+extern status_t build_to_xml_multicast_MLDStatistics(
     val_value_t *parentval,
     struct multicastpb_MLDStatistics *entry);
-
-extern status_t build_to_xml_multicast_MLDStatisticEntry (
+extern status_t build_to_xml_multicast_MLDStatisticEntry(
     val_value_t *parentval,
     struct multicastpb_MLDStatisticEntry *entry);
-
-extern status_t build_to_xml_multicast_VlanList (
+extern status_t build_to_xml_multicast_VlanList(
     val_value_t *parentval,
     struct multicastpb_VlanList *entry);
 
+extern status_t build_to_priv_multicast_Config(
+    val_value_t *parentval,
+    struct multicastpb_Config *entry);
+extern status_t build_to_priv_multicast_Snooping(
+    val_value_t *parentval,
+    struct multicastpb_Snooping *entry);
+extern status_t build_to_priv_multicast_SnoopingConfigEntry(
+    val_value_t *parentval,
+    struct multicastpb_SnoopingConfigEntry *entry);
+extern status_t build_to_priv_multicast_UnregisterFlood(
+    val_value_t *parentval,
+    struct multicastpb_UnregisterFlood *entry);
+extern status_t build_to_priv_multicast_UnregisterFloodVlan(
+    val_value_t *parentval,
+    struct multicastpb_UnregisterFloodVlan *entry);
+extern status_t build_to_priv_multicast_RouterPort(
+    val_value_t *parentval,
+    struct multicastpb_RouterPort *entry);
+extern status_t build_to_priv_multicast_RouterPortVlanEntry(
+    val_value_t *parentval,
+    struct multicastpb_RouterPortVlanEntry *entry);
+extern status_t build_to_priv_multicast_PortEnabledEntry(
+    val_value_t *parentval,
+    struct multicastpb_PortEnabledEntry *entry);
+extern status_t build_to_priv_multicast_Static(
+    val_value_t *parentval,
+    struct multicastpb_Static *entry);
+extern status_t build_to_priv_multicast_StaticGroupsConfigEntry(
+    val_value_t *parentval,
+    struct multicastpb_StaticGroupsConfigEntry *entry);
+extern status_t build_to_priv_multicast_IGMPStatistics(
+    val_value_t *parentval,
+    struct multicastpb_IGMPStatistics *entry);
+extern status_t build_to_priv_multicast_IGMPStatisticEntry(
+    val_value_t *parentval,
+    struct multicastpb_IGMPStatisticEntry *entry);
+extern status_t build_to_priv_multicast_RouterStatus(
+    val_value_t *parentval,
+    struct multicastpb_RouterStatus *entry);
+extern status_t build_to_priv_multicast_RouterStatusEntry(
+    val_value_t *parentval,
+    struct multicastpb_RouterStatusEntry *entry);
+extern status_t build_to_priv_multicast_RouterPortStatusEntry(
+    val_value_t *parentval,
+    struct multicastpb_RouterPortStatusEntry *entry);
+extern status_t build_to_priv_multicast_DynamicGroups(
+    val_value_t *parentval,
+    struct multicastpb_DynamicGroups *entry);
+extern status_t build_to_priv_multicast_DynamicGroupEntry(
+    val_value_t *parentval,
+    struct multicastpb_DynamicGroupEntry *entry);
+extern status_t build_to_priv_multicast_MLDStatistics(
+    val_value_t *parentval,
+    struct multicastpb_MLDStatistics *entry);
+extern status_t build_to_priv_multicast_MLDStatisticEntry(
+    val_value_t *parentval,
+    struct multicastpb_MLDStatisticEntry *entry);
+extern status_t build_to_priv_multicast_VlanList(
+    val_value_t *parentval,
+    struct multicastpb_VlanList *entry);
 
 #endif /* _H_intri_multicast_trans */
 

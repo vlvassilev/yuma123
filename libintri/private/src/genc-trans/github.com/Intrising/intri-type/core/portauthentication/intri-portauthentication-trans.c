@@ -34,130 +34,131 @@
 #include "../../../../../github.com/Intrising/intri-type/core/access/intri-access-trans.h"
 #include "../../../../../github.com/Intrising/intri-type/device/intri-device-trans.h"
 #include "../../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
-status_t build_to_xml_portauthentication_Config (
+
+status_t build_to_xml_portauthentication_Config(
     val_value_t *parentval,
     struct portauthenticationpb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "SystemConfig",
-    &res);
+      "SystemConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_portauthentication_SystemConfig(
+  res = build_to_xml_portauthentication_SystemConfig(
       childval,
-    entry->SystemConfig);
+      entry->SystemConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortConfig",
-    &res);
+      "PortConfig",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_portauthentication_PortConfig(
+  res = build_to_xml_portauthentication_PortConfig(
       childval,
-    entry->PortConfig);
+      entry->PortConfig);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizedMACs",
-    &res);
+      "AuthorizedMACs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_portauthentication_AuthorizedMACs(
+  res = build_to_xml_portauthentication_AuthorizedMACs(
       childval,
-    entry->AuthorizedMACs);
+      entry->AuthorizedMACs);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_portauthentication_AuthorizedMACsEntry (
+status_t build_to_xml_portauthentication_AuthorizedMACsEntry(
     val_value_t *parentval,
     struct portauthenticationpb_AuthorizedMACsEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PermittedPortList",
-    &res);
+      "PermittedPortList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->PermittedPortList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "PermittedPortList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_device_InterfaceIdentify(
-    listval,
-    entry->PermittedPortList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "PermittedPortList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_device_InterfaceIdentify(
+        listval,
+        entry->PermittedPortList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "TreatAsVendorMAC",
-    &res);
+      "TreatAsVendorMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -165,188 +166,197 @@ if (res != NO_ERR) {
   VAL_BOOL(childval) = entry->TreatAsVendorMAC;
   return res;
 }
-
-status_t build_to_xml_portauthentication_AuthorizedMACs (
+status_t build_to_xml_portauthentication_AuthorizedMACs(
     val_value_t *parentval,
     struct portauthenticationpb_AuthorizedMACs *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portauthentication_AuthorizedMACsEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portauthentication_AuthorizedMACsEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portauthentication_SystemConfig (
+status_t build_to_xml_portauthentication_SystemConfig(
     val_value_t *parentval,
     struct portauthenticationpb_SystemConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortAccessControlEnabled",
-    &res);
+      "PortAccessControlEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PortAccessControlEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ReauthenticationPeriod",
-    &res);
+      "ReauthenticationPeriod",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ReauthenticationPeriod;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NASIdentifier",
-    &res);
+      "NASIdentifier",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->NASIdentifier;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACSeparatorChar",
-    &res);
+      "MACSeparatorChar",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACSeparatorChar;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACSpelling",
-    &res);
+      "MACSpelling",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MACSpelling;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MACSpelling) {
+    case portauthenticationpb_MACSpellingTypeOptions_MAC_SPELLING_TYPE_LOWERCASE:
+      enum_str = "MAC_SPELLING_TYPE_LOWERCASE";
+      break;
+    case portauthenticationpb_MACSpellingTypeOptions_MAC_SPELLING_TYPE_UPPERCASE:
+      enum_str = "MAC_SPELLING_TYPE_UPPERCASE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "MACPasswordSource",
-    &res);
+      "MACPasswordSource",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MACPasswordSource;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->MACPasswordSource) {
+    case portauthenticationpb_MACPasswordSourceTypeOptions_MAC_PASSWORD_SOURCE_TYPE_USEMAC:
+      enum_str = "MAC_PASSWORD_SOURCE_TYPE_USEMAC";
+      break;
+    case portauthenticationpb_MACPasswordSourceTypeOptions_MAC_PASSWORD_SOURCE_TYPE_USEPASSWORD:
+      enum_str = "MAC_PASSWORD_SOURCE_TYPE_USEPASSWORD";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "MACPasswordString",
-    &res);
+      "MACPasswordString",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->MACPasswordString;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PrimaryAuthServerName",
-    &res);
+      "PrimaryAuthServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->PrimaryAuthServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PrimaryAcctServerName",
-    &res);
+      "PrimaryAcctServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->PrimaryAcctServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FallbackAuthServerName",
-    &res);
+      "FallbackAuthServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FallbackAuthServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "FallbackAcctServerName",
-    &res);
+      "FallbackAcctServerName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->FallbackAcctServerName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ServerDownTimeout",
-    &res);
+      "ServerDownTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -354,243 +364,332 @@ status_t build_to_xml_portauthentication_SystemConfig (
   VAL_INT(childval) = entry->ServerDownTimeout;
   return res;
 }
-
-status_t build_to_xml_portauthentication_PortConfig (
+status_t build_to_xml_portauthentication_PortConfig(
     val_value_t *parentval,
     struct portauthenticationpb_PortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portauthentication_PortConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portauthentication_PortConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portauthentication_PortConfigEntry (
+status_t build_to_xml_portauthentication_PortConfigEntry(
     val_value_t *parentval,
     struct portauthenticationpb_PortConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizedMode",
-    &res);
+      "AuthorizedMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthorizedMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthorizedMode) {
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_ALWAYSAUTH:
+      enum_str = "AUTHORIZATION_MODE_TYPE_ALWAYSAUTH";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_FORCEUNAUTH:
+      enum_str = "AUTHORIZATION_MODE_TYPE_FORCEUNAUTH";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_VIAMACTABLE:
+      enum_str = "AUTHORIZATION_MODE_TYPE_VIAMACTABLE";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_MACVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_MACVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_8021XVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_8021XVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_MAC8021XVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_MAC8021XVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_8021XMACVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_8021XMACVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_NONE:
+      enum_str = "AUTHORIZATION_MODE_TYPE_NONE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "UnAuthorizedMode",
-    &res);
+      "UnAuthorizedMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->UnAuthorizedMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->UnAuthorizedMode) {
+    case portauthenticationpb_UnAuthorizationModeTypeOptions_UNAUTHORIZATION_MODE_TYPE_BLOCKED:
+      enum_str = "UNAUTHORIZATION_MODE_TYPE_BLOCKED";
+      break;
+    case portauthenticationpb_UnAuthorizationModeTypeOptions_UNAUTHORIZATION_MODE_TYPE_USE_UNAUTHORIZEDVLAN:
+      enum_str = "UNAUTHORIZATION_MODE_TYPE_USE_UNAUTHORIZEDVLAN";
+      break;
+    case portauthenticationpb_UnAuthorizationModeTypeOptions_UNAUTHORIZATION_MODE_TYPE_INCOMING_BLOCKED:
+      enum_str = "UNAUTHORIZATION_MODE_TYPE_INCOMING_BLOCKED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AuthFailRetryInterval",
-    &res);
+      "AuthFailRetryInterval",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->AuthFailRetryInterval;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LimitedNumberOfMACs",
-    &res);
+      "LimitedNumberOfMACs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->LimitedNumberOfMACs;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACTimeout",
-    &res);
+      "MACTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->MACTimeout;
+  switch (entry->MACTimeout) {
+    case portauthenticationpb_MACTimeoutTypeOptions_MAC_TIMEOUT_TYPE_NONE:
+      enum_str = "MAC_TIMEOUT_TYPE_NONE";
+      break;
+    case portauthenticationpb_MACTimeoutTypeOptions_MAC_TIMEOUT_TYPE_SLOW:
+      enum_str = "MAC_TIMEOUT_TYPE_SLOW";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_portauthentication_PortStatus (
+status_t build_to_xml_portauthentication_PortStatus(
     val_value_t *parentval,
     struct portauthenticationpb_PortStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portauthentication_PortStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portauthentication_PortStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portauthentication_PortStatusEntry (
+status_t build_to_xml_portauthentication_PortStatusEntry(
     val_value_t *parentval,
     struct portauthenticationpb_PortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizationState",
-    &res);
+      "AuthorizationState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthorizationState;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthorizationState) {
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_UNDEFINED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_UNDEFINED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_DISABLED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_DISABLED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_UNAUTHORIZED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_UNAUTHORIZED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_PROCESSING:
+      enum_str = "AUTHORIZATION_STATE_TYPE_PROCESSING";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_AUTHORIZED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_AUTHORIZED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_REJECTED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_REJECTED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizationMode",
-    &res);
+      "AuthorizationMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthorizationMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthorizationMode) {
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_ALWAYSAUTH:
+      enum_str = "AUTHORIZATION_MODE_TYPE_ALWAYSAUTH";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_FORCEUNAUTH:
+      enum_str = "AUTHORIZATION_MODE_TYPE_FORCEUNAUTH";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_VIAMACTABLE:
+      enum_str = "AUTHORIZATION_MODE_TYPE_VIAMACTABLE";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_MACVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_MACVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_8021XVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_8021XVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_MAC8021XVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_MAC8021XVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_8021XMACVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_8021XMACVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_NONE:
+      enum_str = "AUTHORIZATION_MODE_TYPE_NONE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "LastStateChange",
-    &res);
+      "LastStateChange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->LastStateChange;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfMACsToLearn",
-    &res);
+      "NumberOfMACsToLearn",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NumberOfMACsToLearn;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NumberOfLearnedMACs",
-    &res);
+      "NumberOfLearnedMACs",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -598,133 +697,151 @@ status_t build_to_xml_portauthentication_PortStatusEntry (
   VAL_INT(childval) = entry->NumberOfLearnedMACs;
   return res;
 }
-
-status_t build_to_xml_portauthentication_PortAuthorizationStatus (
+status_t build_to_xml_portauthentication_PortAuthorizationStatus(
     val_value_t *parentval,
     struct portauthenticationpb_PortAuthorizationStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portauthentication_PortAuthorizationStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portauthentication_PortAuthorizationStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry (
+status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry(
     val_value_t *parentval,
     struct portauthenticationpb_PortAuthorizationStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizationState",
-    &res);
+      "AuthorizationState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthorizationState;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthorizationState) {
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_UNDEFINED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_UNDEFINED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_DISABLED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_DISABLED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_UNAUTHORIZED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_UNAUTHORIZED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_PROCESSING:
+      enum_str = "AUTHORIZATION_STATE_TYPE_PROCESSING";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_AUTHORIZED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_AUTHORIZED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_REJECTED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_REJECTED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "UserMAC",
-    &res);
+      "UserMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserName",
-    &res);
+      "UserName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdleTimeout",
-    &res);
+      "IdleTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IdleTimeout;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SessionTimeout",
-    &res);
+      "SessionTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SessionTimeout;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LastStateChange",
-    &res);
+      "LastStateChange",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -732,169 +849,221 @@ status_t build_to_xml_portauthentication_PortAuthorizationStatusEntry (
   VAL_STRING(childval) = entry->LastStateChange;
   return res;
 }
-
-status_t build_to_xml_portauthentication_UserStatus (
+status_t build_to_xml_portauthentication_UserStatus(
     val_value_t *parentval,
     struct portauthenticationpb_UserStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_portauthentication_UserStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_portauthentication_UserStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_portauthentication_UserStatusEntry (
+status_t build_to_xml_portauthentication_UserStatusEntry(
     val_value_t *parentval,
     struct portauthenticationpb_UserStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "EntryState",
-    &res);
+      "EntryState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->EntryState;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->EntryState) {
+    case portauthenticationpb_EntryStateTypeOptions_ENTRY_STATE_TYPE_UNUSED:
+      enum_str = "ENTRY_STATE_TYPE_UNUSED";
+      break;
+    case portauthenticationpb_EntryStateTypeOptions_ENTRY_STATE_TYPE_INACTIVE:
+      enum_str = "ENTRY_STATE_TYPE_INACTIVE";
+      break;
+    case portauthenticationpb_EntryStateTypeOptions_ENTRY_STATE_TYPE_ACTIVE:
+      enum_str = "ENTRY_STATE_TYPE_ACTIVE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizationState",
-    &res);
+      "AuthorizationState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthorizationState;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthorizationState) {
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_UNDEFINED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_UNDEFINED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_DISABLED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_DISABLED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_UNAUTHORIZED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_UNAUTHORIZED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_PROCESSING:
+      enum_str = "AUTHORIZATION_STATE_TYPE_PROCESSING";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_AUTHORIZED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_AUTHORIZED";
+      break;
+    case portauthenticationpb_AuthorizationStateTypeOptions_AUTHORIZATION_STATE_TYPE_REJECTED:
+      enum_str = "AUTHORIZATION_STATE_TYPE_REJECTED";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AuthorizationMode",
-    &res);
+      "AuthorizationMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthorizationMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthorizationMode) {
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_ALWAYSAUTH:
+      enum_str = "AUTHORIZATION_MODE_TYPE_ALWAYSAUTH";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_FORCEUNAUTH:
+      enum_str = "AUTHORIZATION_MODE_TYPE_FORCEUNAUTH";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_VIAMACTABLE:
+      enum_str = "AUTHORIZATION_MODE_TYPE_VIAMACTABLE";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_MACVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_MACVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_8021XVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_8021XVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_MAC8021XVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_MAC8021XVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_8021XMACVIARADIUS:
+      enum_str = "AUTHORIZATION_MODE_TYPE_8021XMACVIARADIUS";
+      break;
+    case portauthenticationpb_AuthorizationModeTypeOptions_AUTHORIZATION_MODE_TYPE_NONE:
+      enum_str = "AUTHORIZATION_MODE_TYPE_NONE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserMAC",
-    &res);
+      "UserMAC",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserMAC;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "UserName",
-    &res);
+      "UserName",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->UserName;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VlanID",
-    &res);
+      "VlanID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->VlanID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IdleTimeout",
-    &res);
+      "IdleTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->IdleTimeout;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SessionTimeout",
-    &res);
+      "SessionTimeout",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SessionTimeout;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LoginTimeStamp",
-    &res);
+      "LoginTimeStamp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -902,36 +1071,37 @@ status_t build_to_xml_portauthentication_UserStatusEntry (
   VAL_STRING(childval) = entry->LoginTimeStamp;
   return res;
 }
-
-status_t build_to_xml_portauthentication_LearnMACNowEntry (
+status_t build_to_xml_portauthentication_LearnMACNowEntry(
     val_value_t *parentval,
     struct portauthenticationpb_LearnMACNowEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Amount",
-    &res);
+      "Amount",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -939,36 +1109,37 @@ status_t build_to_xml_portauthentication_LearnMACNowEntry (
   VAL_INT(childval) = entry->Amount;
   return res;
 }
-
-status_t build_to_xml_portauthentication_UnauthorizeMACEntry (
+status_t build_to_xml_portauthentication_UnauthorizeMACEntry(
     val_value_t *parentval,
     struct portauthenticationpb_UnauthorizeMACEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MACAddress",
-    &res);
+      "MACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -977,3 +1148,644 @@ status_t build_to_xml_portauthentication_UnauthorizeMACEntry (
   return res;
 }
 
+status_t build_to_priv_portauthentication_Config(
+    val_value_t *parentval,
+    struct portauthenticationpb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "SystemConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemConfig = malloc(sizeof(*(entry->SystemConfig)));
+    res = build_to_priv_portauthentication_SystemConfig(
+        childval,
+        entry->SystemConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortConfig");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortConfig = malloc(sizeof(*(entry->PortConfig)));
+    res = build_to_priv_portauthentication_PortConfig(
+        childval,
+        entry->PortConfig);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizedMACs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->AuthorizedMACs = malloc(sizeof(*(entry->AuthorizedMACs)));
+    res = build_to_priv_portauthentication_AuthorizedMACs(
+        childval,
+        entry->AuthorizedMACs);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_AuthorizedMACsEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_AuthorizedMACsEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PermittedPortList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PermittedPortList_Len = dlq_count(&childval->v.childQ);
+    entry->PermittedPortList = malloc((entry->PermittedPortList_Len + 1) * sizeof(*entry->PermittedPortList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->PermittedPortList[cnt] = malloc(sizeof(*(entry->PermittedPortList[cnt])));
+      res = build_to_priv_device_InterfaceIdentify(
+          listval,
+          entry->PermittedPortList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "TreatAsVendorMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->TreatAsVendorMAC = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_AuthorizedMACs(
+    val_value_t *parentval,
+    struct portauthenticationpb_AuthorizedMACs *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portauthentication_AuthorizedMACsEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_SystemConfig(
+    val_value_t *parentval,
+    struct portauthenticationpb_SystemConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortAccessControlEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PortAccessControlEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ReauthenticationPeriod");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ReauthenticationPeriod = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NASIdentifier");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->NASIdentifier = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACSeparatorChar");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACSeparatorChar = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACSpelling");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MACSpelling = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACPasswordSource");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MACPasswordSource = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACPasswordString");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACPasswordString = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PrimaryAuthServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->PrimaryAuthServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PrimaryAcctServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->PrimaryAcctServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FallbackAuthServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FallbackAuthServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "FallbackAcctServerName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->FallbackAcctServerName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ServerDownTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ServerDownTimeout = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_PortConfig(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portauthentication_PortConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_PortConfigEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizedMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthorizedMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UnAuthorizedMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->UnAuthorizedMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthFailRetryInterval");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AuthFailRetryInterval = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LimitedNumberOfMACs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->LimitedNumberOfMACs = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->MACTimeout = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_PortStatus(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portauthentication_PortStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_PortStatusEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizationState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthorizationState = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizationMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthorizationMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastStateChange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LastStateChange = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfMACsToLearn");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfMACsToLearn = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NumberOfLearnedMACs");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NumberOfLearnedMACs = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_PortAuthorizationStatus(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortAuthorizationStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portauthentication_PortAuthorizationStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_PortAuthorizationStatusEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_PortAuthorizationStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizationState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthorizationState = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdleTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IdleTimeout = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SessionTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SessionTimeout = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LastStateChange");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LastStateChange = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_UserStatus(
+    val_value_t *parentval,
+    struct portauthenticationpb_UserStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_portauthentication_UserStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_UserStatusEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_UserStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "EntryState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->EntryState = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizationState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthorizationState = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthorizationMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthorizationMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserMAC");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserMAC = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "UserName");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->UserName = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VlanID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->VlanID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IdleTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->IdleTimeout = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SessionTimeout");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SessionTimeout = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LoginTimeStamp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->LoginTimeStamp = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_LearnMACNowEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_LearnMACNowEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Amount");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Amount = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_portauthentication_UnauthorizeMACEntry(
+    val_value_t *parentval,
+    struct portauthenticationpb_UnauthorizeMACEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->MACAddress = VAL_STRING(childval);
+  }
+  return res;
+}

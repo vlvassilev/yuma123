@@ -21,30 +21,43 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_mirroring_Config (
+extern status_t build_to_xml_mirroring_Config(
     val_value_t *parentval,
     struct mirroringpb_Config *entry);
-
-extern status_t build_to_xml_mirroring_DestinationSessionEntry (
+extern status_t build_to_xml_mirroring_DestinationSessionEntry(
     val_value_t *parentval,
     struct mirroringpb_DestinationSessionEntry *entry);
-
-extern status_t build_to_xml_mirroring_DestinationSession (
+extern status_t build_to_xml_mirroring_DestinationSession(
     val_value_t *parentval,
     struct mirroringpb_DestinationSession *entry);
-
-extern status_t build_to_xml_mirroring_SourceSessionEntry (
+extern status_t build_to_xml_mirroring_SourceSessionEntry(
     val_value_t *parentval,
     struct mirroringpb_SourceSessionEntry *entry);
-
-extern status_t build_to_xml_mirroring_SourceSession (
+extern status_t build_to_xml_mirroring_SourceSession(
     val_value_t *parentval,
     struct mirroringpb_SourceSession *entry);
-
-extern status_t build_to_xml_mirroring_RSPANConfig (
+extern status_t build_to_xml_mirroring_RSPANConfig(
     val_value_t *parentval,
     struct mirroringpb_RSPANConfig *entry);
 
+extern status_t build_to_priv_mirroring_Config(
+    val_value_t *parentval,
+    struct mirroringpb_Config *entry);
+extern status_t build_to_priv_mirroring_DestinationSessionEntry(
+    val_value_t *parentval,
+    struct mirroringpb_DestinationSessionEntry *entry);
+extern status_t build_to_priv_mirroring_DestinationSession(
+    val_value_t *parentval,
+    struct mirroringpb_DestinationSession *entry);
+extern status_t build_to_priv_mirroring_SourceSessionEntry(
+    val_value_t *parentval,
+    struct mirroringpb_SourceSessionEntry *entry);
+extern status_t build_to_priv_mirroring_SourceSession(
+    val_value_t *parentval,
+    struct mirroringpb_SourceSession *entry);
+extern status_t build_to_priv_mirroring_RSPANConfig(
+    val_value_t *parentval,
+    struct mirroringpb_RSPANConfig *entry);
 
 #endif /* _H_intri_mirroring_trans */
 

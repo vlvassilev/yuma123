@@ -21,122 +21,181 @@
 
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_timecontrol_InputClockManage (
+extern status_t build_to_xml_timecontrol_InputClockManage(
     val_value_t *parentval,
     struct timecontrolpb_InputClockManage *entry);
-
-extern status_t build_to_xml_timecontrol_InputClockManageEntry (
+extern status_t build_to_xml_timecontrol_InputClockManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_InputClockManageEntry *entry);
-
-extern status_t build_to_xml_timecontrol_MonitorStatus (
+extern status_t build_to_xml_timecontrol_MonitorStatus(
     val_value_t *parentval,
     struct timecontrolpb_MonitorStatus *entry);
-
-extern status_t build_to_xml_timecontrol_MonitorStatusEntry (
+extern status_t build_to_xml_timecontrol_MonitorStatusEntry(
     val_value_t *parentval,
     struct timecontrolpb_MonitorStatusEntry *entry);
-
-extern status_t build_to_xml_timecontrol_StatusInputBit (
+extern status_t build_to_xml_timecontrol_StatusInputBit(
     val_value_t *parentval,
     struct timecontrolpb_StatusInputBit *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLManage (
+extern status_t build_to_xml_timecontrol_DPLLManage(
     val_value_t *parentval,
     struct timecontrolpb_DPLLManage *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLManageEntry (
+extern status_t build_to_xml_timecontrol_DPLLManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLManageEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLStatus (
+extern status_t build_to_xml_timecontrol_DPLLStatus(
     val_value_t *parentval,
     struct timecontrolpb_DPLLStatus *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLStatusEntry (
+extern status_t build_to_xml_timecontrol_DPLLStatusEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLStatusEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLRefPriorityManage (
+extern status_t build_to_xml_timecontrol_DPLLRefPriorityManage(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriorityManage *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry (
+extern status_t build_to_xml_timecontrol_DPLLRefPriorityManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriorityManageEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLRefPriority (
+extern status_t build_to_xml_timecontrol_DPLLRefPriority(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriority *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLRefPriorityEntry (
+extern status_t build_to_xml_timecontrol_DPLLRefPriorityEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLRefPriorityEntry *entry);
-
-extern status_t build_to_xml_timecontrol_PriorityList (
+extern status_t build_to_xml_timecontrol_PriorityList(
     val_value_t *parentval,
     struct timecontrolpb_PriorityList *entry);
-
-extern status_t build_to_xml_timecontrol_SyncEInputClockSpeed (
+extern status_t build_to_xml_timecontrol_SyncEInputClockSpeed(
     val_value_t *parentval,
     struct timecontrolpb_SyncEInputClockSpeed *entry);
-
-extern status_t build_to_xml_timecontrol_SyncEInputClockSpeedEntry (
+extern status_t build_to_xml_timecontrol_SyncEInputClockSpeedEntry(
     val_value_t *parentval,
     struct timecontrolpb_SyncEInputClockSpeedEntry *entry);
-
-extern status_t build_to_xml_timecontrol_ToDSource (
+extern status_t build_to_xml_timecontrol_ToDSource(
     val_value_t *parentval,
     struct timecontrolpb_ToDSource *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLToDManage (
+extern status_t build_to_xml_timecontrol_DPLLToDManage(
     val_value_t *parentval,
     struct timecontrolpb_DPLLToDManage *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLToDManageEntry (
+extern status_t build_to_xml_timecontrol_DPLLToDManageEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLToDManageEntry *entry);
-
-extern status_t build_to_xml_timecontrol_ToDTime (
+extern status_t build_to_xml_timecontrol_ToDTime(
     val_value_t *parentval,
     struct timecontrolpb_ToDTime *entry);
-
-extern status_t build_to_xml_timecontrol_ToDTimeEntry (
+extern status_t build_to_xml_timecontrol_ToDTimeEntry(
     val_value_t *parentval,
     struct timecontrolpb_ToDTimeEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLFrequencyControl (
+extern status_t build_to_xml_timecontrol_DPLLFrequencyControl(
     val_value_t *parentval,
     struct timecontrolpb_DPLLFrequencyControl *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry (
+extern status_t build_to_xml_timecontrol_DPLLFrequencyControlEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLFrequencyControlEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLPhaseControl (
+extern status_t build_to_xml_timecontrol_DPLLPhaseControl(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControl *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLPhaseControlEntry (
+extern status_t build_to_xml_timecontrol_DPLLPhaseControlEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControlEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimit (
+extern status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimit(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseSlopeLimit *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry (
+extern status_t build_to_xml_timecontrol_DPLLPhaseSlopeLimitEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseSlopeLimitEntry *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLPhaseControlTimer (
+extern status_t build_to_xml_timecontrol_DPLLPhaseControlTimer(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControlTimer *entry);
-
-extern status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry (
+extern status_t build_to_xml_timecontrol_DPLLPhaseControlTimerEntry(
     val_value_t *parentval,
     struct timecontrolpb_DPLLPhaseControlTimerEntry *entry);
 
+extern status_t build_to_priv_timecontrol_InputClockManage(
+    val_value_t *parentval,
+    struct timecontrolpb_InputClockManage *entry);
+extern status_t build_to_priv_timecontrol_InputClockManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_InputClockManageEntry *entry);
+extern status_t build_to_priv_timecontrol_MonitorStatus(
+    val_value_t *parentval,
+    struct timecontrolpb_MonitorStatus *entry);
+extern status_t build_to_priv_timecontrol_MonitorStatusEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_MonitorStatusEntry *entry);
+extern status_t build_to_priv_timecontrol_StatusInputBit(
+    val_value_t *parentval,
+    struct timecontrolpb_StatusInputBit *entry);
+extern status_t build_to_priv_timecontrol_DPLLManage(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLManage *entry);
+extern status_t build_to_priv_timecontrol_DPLLManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLManageEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLStatus(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLStatus *entry);
+extern status_t build_to_priv_timecontrol_DPLLStatusEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLStatusEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLRefPriorityManage(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriorityManage *entry);
+extern status_t build_to_priv_timecontrol_DPLLRefPriorityManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriorityManageEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLRefPriority(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriority *entry);
+extern status_t build_to_priv_timecontrol_DPLLRefPriorityEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLRefPriorityEntry *entry);
+extern status_t build_to_priv_timecontrol_PriorityList(
+    val_value_t *parentval,
+    struct timecontrolpb_PriorityList *entry);
+extern status_t build_to_priv_timecontrol_SyncEInputClockSpeed(
+    val_value_t *parentval,
+    struct timecontrolpb_SyncEInputClockSpeed *entry);
+extern status_t build_to_priv_timecontrol_SyncEInputClockSpeedEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_SyncEInputClockSpeedEntry *entry);
+extern status_t build_to_priv_timecontrol_ToDSource(
+    val_value_t *parentval,
+    struct timecontrolpb_ToDSource *entry);
+extern status_t build_to_priv_timecontrol_DPLLToDManage(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLToDManage *entry);
+extern status_t build_to_priv_timecontrol_DPLLToDManageEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLToDManageEntry *entry);
+extern status_t build_to_priv_timecontrol_ToDTime(
+    val_value_t *parentval,
+    struct timecontrolpb_ToDTime *entry);
+extern status_t build_to_priv_timecontrol_ToDTimeEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_ToDTimeEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLFrequencyControl(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLFrequencyControl *entry);
+extern status_t build_to_priv_timecontrol_DPLLFrequencyControlEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLFrequencyControlEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLPhaseControl(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControl *entry);
+extern status_t build_to_priv_timecontrol_DPLLPhaseControlEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControlEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLPhaseSlopeLimit(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseSlopeLimit *entry);
+extern status_t build_to_priv_timecontrol_DPLLPhaseSlopeLimitEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseSlopeLimitEntry *entry);
+extern status_t build_to_priv_timecontrol_DPLLPhaseControlTimer(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControlTimer *entry);
+extern status_t build_to_priv_timecontrol_DPLLPhaseControlTimerEntry(
+    val_value_t *parentval,
+    struct timecontrolpb_DPLLPhaseControlTimerEntry *entry);
 
 #endif /* _H_intri_timecontrol_trans */
 

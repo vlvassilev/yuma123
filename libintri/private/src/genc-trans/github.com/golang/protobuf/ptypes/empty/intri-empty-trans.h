@@ -21,10 +21,13 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_empty_Empty (
+extern status_t build_to_xml_empty_Empty(
     val_value_t *parentval,
     struct emptypb_Empty *entry);
 
+extern status_t build_to_priv_empty_Empty(
+    val_value_t *parentval,
+    struct emptypb_Empty *entry);
 
 #endif /* _H_intri_empty_trans */
 

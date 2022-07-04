@@ -21,38 +21,55 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_lacp_Config (
+extern status_t build_to_xml_lacp_Config(
     val_value_t *parentval,
     struct lacppb_Config *entry);
-
-extern status_t build_to_xml_lacp_SystemConfig (
+extern status_t build_to_xml_lacp_SystemConfig(
     val_value_t *parentval,
     struct lacppb_SystemConfig *entry);
-
-extern status_t build_to_xml_lacp_LAGConfig (
+extern status_t build_to_xml_lacp_LAGConfig(
     val_value_t *parentval,
     struct lacppb_LAGConfig *entry);
-
-extern status_t build_to_xml_lacp_LAGConfigEntry (
+extern status_t build_to_xml_lacp_LAGConfigEntry(
     val_value_t *parentval,
     struct lacppb_LAGConfigEntry *entry);
-
-extern status_t build_to_xml_lacp_Status (
+extern status_t build_to_xml_lacp_Status(
     val_value_t *parentval,
     struct lacppb_Status *entry);
-
-extern status_t build_to_xml_lacp_StatusEntry (
+extern status_t build_to_xml_lacp_StatusEntry(
     val_value_t *parentval,
     struct lacppb_StatusEntry *entry);
-
-extern status_t build_to_xml_lacp_ActorPartnerInfo (
+extern status_t build_to_xml_lacp_ActorPartnerInfo(
     val_value_t *parentval,
     struct lacppb_ActorPartnerInfo *entry);
-
-extern status_t build_to_xml_lacp_State (
+extern status_t build_to_xml_lacp_State(
     val_value_t *parentval,
     struct lacppb_State *entry);
 
+extern status_t build_to_priv_lacp_Config(
+    val_value_t *parentval,
+    struct lacppb_Config *entry);
+extern status_t build_to_priv_lacp_SystemConfig(
+    val_value_t *parentval,
+    struct lacppb_SystemConfig *entry);
+extern status_t build_to_priv_lacp_LAGConfig(
+    val_value_t *parentval,
+    struct lacppb_LAGConfig *entry);
+extern status_t build_to_priv_lacp_LAGConfigEntry(
+    val_value_t *parentval,
+    struct lacppb_LAGConfigEntry *entry);
+extern status_t build_to_priv_lacp_Status(
+    val_value_t *parentval,
+    struct lacppb_Status *entry);
+extern status_t build_to_priv_lacp_StatusEntry(
+    val_value_t *parentval,
+    struct lacppb_StatusEntry *entry);
+extern status_t build_to_priv_lacp_ActorPartnerInfo(
+    val_value_t *parentval,
+    struct lacppb_ActorPartnerInfo *entry);
+extern status_t build_to_priv_lacp_State(
+    val_value_t *parentval,
+    struct lacppb_State *entry);
 
 #endif /* _H_intri_lacp_trans */
 

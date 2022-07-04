@@ -21,46 +21,67 @@
 
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
-extern status_t build_to_xml_dhcpserver_Config (
+extern status_t build_to_xml_dhcpserver_Config(
     val_value_t *parentval,
     struct dhcpserverpb_Config *entry);
-
-extern status_t build_to_xml_dhcpserver_V4Config (
+extern status_t build_to_xml_dhcpserver_V4Config(
     val_value_t *parentval,
     struct dhcpserverpb_V4Config *entry);
-
-extern status_t build_to_xml_dhcpserver_System (
+extern status_t build_to_xml_dhcpserver_System(
     val_value_t *parentval,
     struct dhcpserverpb_System *entry);
-
-extern status_t build_to_xml_dhcpserver_Pool (
+extern status_t build_to_xml_dhcpserver_Pool(
     val_value_t *parentval,
     struct dhcpserverpb_Pool *entry);
-
-extern status_t build_to_xml_dhcpserver_PoolEntry (
+extern status_t build_to_xml_dhcpserver_PoolEntry(
     val_value_t *parentval,
     struct dhcpserverpb_PoolEntry *entry);
-
-extern status_t build_to_xml_dhcpserver_Basic (
+extern status_t build_to_xml_dhcpserver_Basic(
     val_value_t *parentval,
     struct dhcpserverpb_Basic *entry);
-
-extern status_t build_to_xml_dhcpserver_MACBased (
+extern status_t build_to_xml_dhcpserver_MACBased(
     val_value_t *parentval,
     struct dhcpserverpb_MACBased *entry);
-
-extern status_t build_to_xml_dhcpserver_PortBased (
+extern status_t build_to_xml_dhcpserver_PortBased(
     val_value_t *parentval,
     struct dhcpserverpb_PortBased *entry);
-
-extern status_t build_to_xml_dhcpserver_StatusEntry (
+extern status_t build_to_xml_dhcpserver_StatusEntry(
     val_value_t *parentval,
     struct dhcpserverpb_StatusEntry *entry);
-
-extern status_t build_to_xml_dhcpserver_Status (
+extern status_t build_to_xml_dhcpserver_Status(
     val_value_t *parentval,
     struct dhcpserverpb_Status *entry);
 
+extern status_t build_to_priv_dhcpserver_Config(
+    val_value_t *parentval,
+    struct dhcpserverpb_Config *entry);
+extern status_t build_to_priv_dhcpserver_V4Config(
+    val_value_t *parentval,
+    struct dhcpserverpb_V4Config *entry);
+extern status_t build_to_priv_dhcpserver_System(
+    val_value_t *parentval,
+    struct dhcpserverpb_System *entry);
+extern status_t build_to_priv_dhcpserver_Pool(
+    val_value_t *parentval,
+    struct dhcpserverpb_Pool *entry);
+extern status_t build_to_priv_dhcpserver_PoolEntry(
+    val_value_t *parentval,
+    struct dhcpserverpb_PoolEntry *entry);
+extern status_t build_to_priv_dhcpserver_Basic(
+    val_value_t *parentval,
+    struct dhcpserverpb_Basic *entry);
+extern status_t build_to_priv_dhcpserver_MACBased(
+    val_value_t *parentval,
+    struct dhcpserverpb_MACBased *entry);
+extern status_t build_to_priv_dhcpserver_PortBased(
+    val_value_t *parentval,
+    struct dhcpserverpb_PortBased *entry);
+extern status_t build_to_priv_dhcpserver_StatusEntry(
+    val_value_t *parentval,
+    struct dhcpserverpb_StatusEntry *entry);
+extern status_t build_to_priv_dhcpserver_Status(
+    val_value_t *parentval,
+    struct dhcpserverpb_Status *entry);
 
 #endif /* _H_intri_dhcpserver_trans */
 

@@ -35,30 +35,33 @@
 #include "../../../../github.com/Intrising/intri-type/event/intri-event-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
 #include "../../../../github.com/golang/protobuf/ptypes/timestamp/intri-timestamp-trans.h"
-status_t build_to_xml_hardware_IPv4Static (
+
+status_t build_to_xml_hardware_IPv4Static(
     val_value_t *parentval,
     struct hardwarepb_IPv4Static *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IPAddress",
-    &res);
+      "IPAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IPAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SubnetMask",
-    &res);
+      "SubnetMask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -66,183 +69,212 @@ status_t build_to_xml_hardware_IPv4Static (
   VAL_STRING(childval) = entry->SubnetMask;
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPConfig (
+status_t build_to_xml_hardware_DLDPConfig(
     val_value_t *parentval,
     struct hardwarepb_DLDPConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "System",
-    &res);
+      "System",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_DLDPSystemConfig(
+  res = build_to_xml_hardware_DLDPSystemConfig(
       childval,
-    entry->System);
+      entry->System);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Port",
-    &res);
+      "Port",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_DLDPPortConfig(
+  res = build_to_xml_hardware_DLDPPortConfig(
       childval,
-    entry->Port);
+      entry->Port);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPSystemConfig (
+status_t build_to_xml_hardware_DLDPSystemConfig(
     val_value_t *parentval,
     struct hardwarepb_DLDPSystemConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "AdvertisementInterval",
-    &res);
+      "AdvertisementInterval",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->AdvertisementInterval;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ShutDownMode",
-    &res);
+      "ShutDownMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->ShutDownMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->ShutDownMode) {
+    case hardwarepb_ShutdownModeTypeOptions_SHUT_MODE_TYPE_AUTO:
+      enum_str = "SHUT_MODE_TYPE_AUTO";
+      break;
+    case hardwarepb_ShutdownModeTypeOptions_SHUT_MODE_TYPE_MANUAL:
+      enum_str = "SHUT_MODE_TYPE_MANUAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "AuthMode",
-    &res);
+      "AuthMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->AuthMode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->AuthMode) {
+    case hardwarepb_DLDPAuthCationModeTypeOptions_DLDP_AUTHCATION_MODE_TYPE_NONE:
+      enum_str = "DLDP_AUTHCATION_MODE_TYPE_NONE";
+      break;
+    case hardwarepb_DLDPAuthCationModeTypeOptions_DLDP_AUTHCATION_MODE_TYPE_PLAINTEXT:
+      enum_str = "DLDP_AUTHCATION_MODE_TYPE_PLAINTEXT";
+      break;
+    case hardwarepb_DLDPAuthCationModeTypeOptions_DLDP_AUTHCATION_MODE_TYPE_MD5:
+      enum_str = "DLDP_AUTHCATION_MODE_TYPE_MD5";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "WorkMode",
-    &res);
+      "WorkMode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->WorkMode;
+  switch (entry->WorkMode) {
+    case hardwarepb_DLDPWorkModeTypeOptions_DLDP_WORK_MODE_TYPE_NORMAL:
+      enum_str = "DLDP_WORK_MODE_TYPE_NORMAL";
+      break;
+    case hardwarepb_DLDPWorkModeTypeOptions_DLDP_WORK_MODE_TYPE_ENHANCE:
+      enum_str = "DLDP_WORK_MODE_TYPE_ENHANCE";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPPortConfig (
+status_t build_to_xml_hardware_DLDPPortConfig(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_DLDPPortConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_DLDPPortConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPPortConfigEntry (
+status_t build_to_xml_hardware_DLDPPortConfigEntry(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -250,85 +282,109 @@ status_t build_to_xml_hardware_DLDPPortConfigEntry (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPPortStatus (
+status_t build_to_xml_hardware_DLDPPortStatus(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_DLDPPortStatusEntry(
+  res = build_to_xml_hardware_DLDPPortStatusEntry(
       childval,
-    entry->List);
+      entry->List);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPPortStatusEntry (
+status_t build_to_xml_hardware_DLDPPortStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_DLDPPortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->State) {
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_INITAL:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_INITAL";
+      break;
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_INACTIVE:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_INACTIVE";
+      break;
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_ACTIVE:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_ACTIVE";
+      break;
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_ADVERTISEMENT:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_ADVERTISEMENT";
+      break;
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_PROBE:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_PROBE";
+      break;
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_DISABLE:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_DISABLE";
+      break;
+    case hardwarepb_DLDPProtocolStateTypeOptions_DLDP_PROTOCOL_STATE_TYPE_DELAY_DOWN:
+      enum_str = "DLDP_PROTOCOL_STATE_TYPE_DELAY_DOWN";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Link",
-    &res);
+      "Link",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -336,129 +392,139 @@ status_t build_to_xml_hardware_DLDPPortStatusEntry (
   VAL_BOOL(childval) = entry->Link;
   return res;
 }
-
-status_t build_to_xml_hardware_DLDPNeighborEntry (
+status_t build_to_xml_hardware_DLDPNeighborEntry(
     val_value_t *parentval,
     struct hardwarepb_DLDPNeighborEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "NeighborMACAddress",
-    &res);
+      "NeighborMACAddress",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->NeighborMACAddress;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PortNo",
-    &res);
+      "PortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->PortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NeighborAgetime",
-    &res);
+      "NeighborAgetime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->NeighborAgetime;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NeighborState",
-    &res);
+      "NeighborState",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->NeighborState;
+  switch (entry->NeighborState) {
+    case hardwarepb_DLDPNeighobrStateTypeOptions_DLDP_NEIGHBOR_STATE_TYPE_UNCONFIRM:
+      enum_str = "DLDP_NEIGHBOR_STATE_TYPE_UNCONFIRM";
+      break;
+    case hardwarepb_DLDPNeighobrStateTypeOptions_DLDP_NEIGHBOR_STATE_TYPE_CONFIRM:
+      enum_str = "DLDP_NEIGHBOR_STATE_TYPE_CONFIRM";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_EnableRequest (
+status_t build_to_xml_hardware_EnableRequest(
     val_value_t *parentval,
     struct hardwarepb_EnableRequest *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_EnableRequestEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_EnableRequestEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_EnableRequestEntry (
+status_t build_to_xml_hardware_EnableRequestEntry(
     val_value_t *parentval,
     struct hardwarepb_EnableRequestEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -466,215 +532,716 @@ status_t build_to_xml_hardware_EnableRequestEntry (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_hardware_PortLED (
+status_t build_to_xml_hardware_PortLED(
     val_value_t *parentval,
     struct hardwarepb_PortLED *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_PortLEDEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_PortLEDEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_PortLEDEntry (
+status_t build_to_xml_hardware_PortLEDEntry(
     val_value_t *parentval,
     struct hardwarepb_PortLEDEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->State;
+  switch (entry->State) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_BoardLED (
+status_t build_to_xml_hardware_BoardLED(
     val_value_t *parentval,
     struct hardwarepb_BoardLED *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Power",
-    &res);
+      "Power",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Power;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Power) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "System",
-    &res);
+      "System",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->System;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->System) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PoEMax",
-    &res);
+      "PoEMax",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PoEMax;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->PoEMax) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Fan",
-    &res);
+      "Fan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Fan;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Fan) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "GPS",
-    &res);
+      "GPS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->GPS;
+  switch (entry->GPS) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_LEDStatus (
+status_t build_to_xml_hardware_LEDStatus(
     val_value_t *parentval,
     struct hardwarepb_LEDStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PortLED",
-    &res);
+      "PortLED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_PortLED(
+  res = build_to_xml_hardware_PortLED(
       childval,
-    entry->PortLED);
+      entry->PortLED);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SystemLED",
-    &res);
+      "SystemLED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_BoardLED(
+  res = build_to_xml_hardware_BoardLED(
       childval,
-    entry->SystemLED);
+      entry->SystemLED);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_Coordinates (
+status_t build_to_xml_hardware_Coordinates(
     val_value_t *parentval,
     struct hardwarepb_Coordinates *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Latitude",
-    &res);
+      "Latitude",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Latitude;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Longitude",
-    &res);
+      "Longitude",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -682,67 +1249,65 @@ status_t build_to_xml_hardware_Coordinates (
   VAL_STRING(childval) = entry->Longitude;
   return res;
 }
-
-status_t build_to_xml_hardware_GNSSVerboseInfomation (
+status_t build_to_xml_hardware_GNSSVerboseInfomation(
     val_value_t *parentval,
     struct hardwarepb_GNSSVerboseInfomation *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "NavigationalStatus",
-    &res);
+      "NavigationalStatus",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->NavigationalStatus;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Speed",
-    &res);
+      "Speed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->Speed;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Course",
-    &res);
+      "Course",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->Course;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MagneticVariation",
-    &res);
+      "MagneticVariation",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -750,19 +1315,21 @@ status_t build_to_xml_hardware_GNSSVerboseInfomation (
   VAL_DOUBLE(childval) = entry->MagneticVariation;
   return res;
 }
-
-status_t build_to_xml_hardware_GPSEnable (
+status_t build_to_xml_hardware_GPSEnable(
     val_value_t *parentval,
     struct hardwarepb_GPSEnable *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -770,170 +1337,180 @@ status_t build_to_xml_hardware_GPSEnable (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_hardware_GPSStatus (
+status_t build_to_xml_hardware_GPSStatus(
     val_value_t *parentval,
     struct hardwarepb_GPSStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Status",
-    &res);
+      "Status",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Status;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Status) {
+    case hardwarepb_GPSStatusTypeOptions_GPS_STATUS_TYPE_DISABLED:
+      enum_str = "GPS_STATUS_TYPE_DISABLED";
+      break;
+    case hardwarepb_GPSStatusTypeOptions_GPS_STATUS_TYPE_TRACKING:
+      enum_str = "GPS_STATUS_TYPE_TRACKING";
+      break;
+    case hardwarepb_GPSStatusTypeOptions_GPS_STATUS_TYPE_SYNC:
+      enum_str = "GPS_STATUS_TYPE_SYNC";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "VerboseInfo",
-    &res);
+      "VerboseInfo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_GNSSVerboseInfomation(
+  res = build_to_xml_hardware_GNSSVerboseInfomation(
       childval,
-    entry->VerboseInfo);
+      entry->VerboseInfo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Location",
-    &res);
+      "Location",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_Coordinates(
+  res = build_to_xml_hardware_Coordinates(
       childval,
-    entry->Location);
+      entry->Location);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "DateTime",
-    &res);
+      "DateTime",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_timestamp_Timestamp(
+  res = build_to_xml_timestamp_Timestamp(
       childval,
-    entry->DateTime);
+      entry->DateTime);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_GPSCommand (
+status_t build_to_xml_hardware_GPSCommand(
     val_value_t *parentval,
     struct hardwarepb_GPSCommand *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Request",
-    &res);
+      "Request",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Request;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Respond",
-    &res);
+      "Respond",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Respond_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Respond_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Respond[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Respond_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Respond[i];
   }
   return res;
 }
-
-status_t build_to_xml_hardware_USBStatus (
+status_t build_to_xml_hardware_USBStatus(
     val_value_t *parentval,
     struct hardwarepb_USBStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Connected",
-    &res);
+      "Connected",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Connected;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ConnectedDevice",
-    &res);
+      "ConnectedDevice",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -941,93 +1518,98 @@ status_t build_to_xml_hardware_USBStatus (
   VAL_STRING(childval) = entry->ConnectedDevice;
   return res;
 }
-
-status_t build_to_xml_hardware_USBEthernetConfig (
+status_t build_to_xml_hardware_USBEthernetConfig(
     val_value_t *parentval,
     struct hardwarepb_USBEthernetConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Static",
-    &res);
+      "Static",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_IPv4Static(
+  res = build_to_xml_hardware_IPv4Static(
       childval,
-    entry->Static);
+      entry->Static);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_FanSpeedConfig (
+status_t build_to_xml_hardware_FanSpeedConfig(
     val_value_t *parentval,
     struct hardwarepb_FanSpeedConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_FanSpeedConfigEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_FanSpeedConfigEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_FanSpeedConfigEntry (
+status_t build_to_xml_hardware_FanSpeedConfigEntry(
     val_value_t *parentval,
     struct hardwarepb_FanSpeedConfigEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FanNo",
-    &res);
+      "FanNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->FanNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RotatingSpeed",
-    &res);
+      "RotatingSpeed",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1035,68 +1617,71 @@ status_t build_to_xml_hardware_FanSpeedConfigEntry (
   VAL_INT(childval) = entry->RotatingSpeed;
   return res;
 }
-
-status_t build_to_xml_hardware_FanStatus (
+status_t build_to_xml_hardware_FanStatus(
     val_value_t *parentval,
     struct hardwarepb_FanStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_FanStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_FanStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_FanStatusEntry (
+status_t build_to_xml_hardware_FanStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_FanStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FanNo",
-    &res);
+      "FanNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->FanNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "RotatingSpeedRPM",
-    &res);
+      "RotatingSpeedRPM",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1104,80 +1689,82 @@ status_t build_to_xml_hardware_FanStatusEntry (
   VAL_INT(childval) = entry->RotatingSpeedRPM;
   return res;
 }
-
-status_t build_to_xml_hardware_TemperatureStatus (
+status_t build_to_xml_hardware_TemperatureStatus(
     val_value_t *parentval,
     struct hardwarepb_TemperatureStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_TemperatureStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_TemperatureStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_TemperatureStatusEntry (
+status_t build_to_xml_hardware_TemperatureStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_TemperatureStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "ID",
-    &res);
+      "ID",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->ID;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Temperature",
-    &res);
+      "Temperature",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1185,140 +1772,145 @@ status_t build_to_xml_hardware_TemperatureStatusEntry (
   VAL_INT(childval) = entry->Temperature;
   return res;
 }
-
-status_t build_to_xml_hardware_PowerRedundantState (
+status_t build_to_xml_hardware_PowerRedundantState(
     val_value_t *parentval,
     struct hardwarepb_PowerRedundantState *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "RedundantList",
-    &res);
+      "RedundantList",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->RedundantList_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "RedundantList_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_PowerRedundantStateEntry(
-    listval,
-    entry->RedundantList[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "RedundantList_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_PowerRedundantStateEntry(
+        listval,
+        entry->RedundantList[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_PowerRedundantStateEntry (
+status_t build_to_xml_hardware_PowerRedundantStateEntry(
     val_value_t *parentval,
     struct hardwarepb_PowerRedundantStateEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "PwOption",
-    &res);
+      "PwOption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PwOption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->PwOption) {
+    case hardwarepb_PowerRedundantTypeOptions_POWER_REDUNDANT_TYPE_A:
+      enum_str = "POWER_REDUNDANT_TYPE_A";
+      break;
+    case hardwarepb_PowerRedundantTypeOptions_POWER_REDUNDANT_TYPE_B:
+      enum_str = "POWER_REDUNDANT_TYPE_B";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantPlugIn",
-    &res);
+      "PowerRedundantPlugIn",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PowerRedundantPlugIn;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantACOk",
-    &res);
+      "PowerRedundantACOk",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PowerRedundantACOk;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantOk",
-    &res);
+      "PowerRedundantOk",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->PowerRedundantOk;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantVoltage",
-    &res);
+      "PowerRedundantVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->PowerRedundantVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantCurrent",
-    &res);
+      "PowerRedundantCurrent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->PowerRedundantCurrent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantPowerConsumption",
-    &res);
+      "PowerRedundantPowerConsumption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* float */
   VAL_DOUBLE(childval) = entry->PowerRedundantPowerConsumption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerRedundantTemperature",
-    &res);
+      "PowerRedundantTemperature",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1326,31 +1918,32 @@ status_t build_to_xml_hardware_PowerRedundantStateEntry (
   VAL_DOUBLE(childval) = entry->PowerRedundantTemperature;
   return res;
 }
-
-status_t build_to_xml_hardware_PowerGeneralState (
+status_t build_to_xml_hardware_PowerGeneralState(
     val_value_t *parentval,
     struct hardwarepb_PowerGeneralState *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Power_12V",
-    &res);
+      "Power_12V",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Power_12V;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Power_54V",
-    &res);
+      "Power_54V",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1358,83 +1951,111 @@ status_t build_to_xml_hardware_PowerGeneralState (
   VAL_BOOL(childval) = entry->Power_54V;
   return res;
 }
-
-status_t build_to_xml_hardware_PowerState (
+status_t build_to_xml_hardware_PowerState(
     val_value_t *parentval,
     struct hardwarepb_PowerState *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Type",
-    &res);
+      "Type",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Type;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "PowerRedundantState",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  switch (entry->Type) {
+    case hardwarepb_PowerTypeOptions_POWER_TYPE_REDUNDANT:
+      enum_str = "POWER_TYPE_REDUNDANT";
+      break;
+    case hardwarepb_PowerTypeOptions_POWER_TYPE_GENERAL:
+      enum_str = "POWER_TYPE_GENERAL";
+      break;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
-      parentval->obj,
-    "PowerGeneralState",
-    &res);
-  if (childval != NULL) {
-    val_add_child(childval, parentval);
-  } else if (res != NO_ERR) {
-    return SET_ERROR(res);
+  VAL_ENUM_NAME(childval) = enum_str;
+  switch (entry->PowerType_Union_Option) {
+    case hardwarepb_PowerState_PowerType_Union_Options_PowerRedundantState:
+      childval = agt_make_object(
+          parentval->obj,
+          "PowerRedundantState",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_hardware_PowerRedundantState(
+          childval,
+          entry->PowerType.PowerType_PowerRedundantState);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
+    case hardwarepb_PowerState_PowerType_Union_Options_PowerGeneralState:
+      childval = agt_make_object(
+          parentval->obj,
+          "PowerGeneralState",
+          &res);
+      if (childval != NULL) {
+        val_add_child_sorted(childval, parentval);
+      } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      /* message */
+      res = build_to_xml_hardware_PowerGeneralState(
+          childval,
+          entry->PowerType.PowerType_PowerGeneralState);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      break;
   }
   return res;
 }
-
-status_t build_to_xml_hardware_TimeControlRegister (
+status_t build_to_xml_hardware_TimeControlRegister(
     val_value_t *parentval,
     struct hardwarepb_TimeControlRegister *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "RegBase",
-    &res);
+      "RegBase",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->RegBase;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Offset",
-    &res);
+      "Offset",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Offset;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Data",
-    &res);
+      "Data",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1442,348 +2063,664 @@ status_t build_to_xml_hardware_TimeControlRegister (
   VAL_STRING(childval) = entry->Data;
   return res;
 }
-
-status_t build_to_xml_hardware_Config (
+status_t build_to_xml_hardware_Config(
     val_value_t *parentval,
     struct hardwarepb_Config *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LED",
-    &res);
+      "LED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_LEDConfig(
+  res = build_to_xml_hardware_LEDConfig(
       childval,
-    entry->LED);
+      entry->LED);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Fan",
-    &res);
+      "Fan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_FanSpeedConfig(
+  res = build_to_xml_hardware_FanSpeedConfig(
       childval,
-    entry->Fan);
+      entry->Fan);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GPS",
-    &res);
+      "GPS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_GPSEnable(
+  res = build_to_xml_hardware_GPSEnable(
       childval,
-    entry->GPS);
+      entry->GPS);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_Ports (
+status_t build_to_xml_hardware_Ports(
     val_value_t *parentval,
     struct hardwarepb_Ports *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_PortEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_PortEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_PortEntry (
+status_t build_to_xml_hardware_PortEntry(
     val_value_t *parentval,
     struct hardwarepb_PortEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "HardwarePortNo",
-    &res);
+      "HardwarePortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->HardwarePortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SwitchPortNo",
-    &res);
+      "SwitchPortNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->SwitchPortNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "InterfaceType",
-    &res);
+      "InterfaceType",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->InterfaceType;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->InterfaceType) {
+    case devicepb_PortInterfaceTypeOptions_PORT_INTERFACE_TYPE_COPPER:
+      enum_str = "PORT_INTERFACE_TYPE_COPPER";
+      break;
+    case devicepb_PortInterfaceTypeOptions_PORT_INTERFACE_TYPE_OPTICAL:
+      enum_str = "PORT_INTERFACE_TYPE_OPTICAL";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Properies",
-    &res);
+      "Properies",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Properies_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Properies_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_ENUM(listval) = entry->Properies[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Properies_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* enum */
+    switch (entry->Properies[i]) {
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_10M_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_10M_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_10M_HALF:
+        enum_str = "PORT_PROPERTIES_TYPE_10M_HALF";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_100M_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_100M_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_100M_HALF:
+        enum_str = "PORT_PROPERTIES_TYPE_100M_HALF";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_1000M_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_1000M_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_2500M_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_2500M_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_5G_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_5G_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_10G_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_10G_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_25G_FULL:
+        enum_str = "PORT_PROPERTIES_TYPE_25G_FULL";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_RJ45:
+        enum_str = "PORT_PROPERTIES_TYPE_RJ45";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_SFP:
+        enum_str = "PORT_PROPERTIES_TYPE_SFP";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_POE:
+        enum_str = "PORT_PROPERTIES_TYPE_POE";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_POE_PLUS:
+        enum_str = "PORT_PROPERTIES_TYPE_POE_PLUS";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_POE_PLUS_PLUS:
+        enum_str = "PORT_PROPERTIES_TYPE_POE_PLUS_PLUS";
+        break;
+      case devicepb_PortPropertyTypeOptions_PORT_PROPERTIES_TYPE_LINK_PORT:
+        enum_str = "PORT_PROPERTIES_TYPE_LINK_PORT";
+        break;
+    }
+    VAL_ENUM_NAME(listval) = enum_str;
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SupportPoE",
-    &res);
+      "SupportPoE",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SupportPoE;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "SupportSFP",
-    &res);
+      "SupportSFP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->SupportSFP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "LinkLED",
-    &res);
+      "LinkLED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LinkLED;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->LinkLED) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PoELED",
-    &res);
+      "PoELED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->PoELED;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->PoELED) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "SpeedLED",
-    &res);
+      "SpeedLED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->SpeedLED;
+  switch (entry->SpeedLED) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_SystemInfo (
+status_t build_to_xml_hardware_SystemInfo(
     val_value_t *parentval,
     struct hardwarepb_SystemInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Fan",
-    &res);
+      "Fan",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_FanPercent(
+  res = build_to_xml_hardware_FanPercent(
       childval,
-    entry->Fan);
+      entry->Fan);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Temp",
-    &res);
+      "Temp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_TemperatureStatus(
+  res = build_to_xml_hardware_TemperatureStatus(
       childval,
-    entry->Temp);
+      entry->Temp);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "BoardLED",
-    &res);
+      "BoardLED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_BoardLED(
+  res = build_to_xml_hardware_BoardLED(
       childval,
-    entry->BoardLED);
+      entry->BoardLED);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "GPS",
-    &res);
+      "GPS",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_hardware_GPSStatus(
+  res = build_to_xml_hardware_GPSStatus(
       childval,
-    entry->GPS);
+      entry->GPS);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_LEDConfig (
+status_t build_to_xml_hardware_LEDConfig(
     val_value_t *parentval,
     struct hardwarepb_LEDConfig *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case hardwarepb_LEDModeTypeOptions_LED_MODE_TYPE_DYNAMIC:
+      enum_str = "LED_MODE_TYPE_DYNAMIC";
+      break;
+    case hardwarepb_LEDModeTypeOptions_LED_MODE_TYPE_STATIC:
+      enum_str = "LED_MODE_TYPE_STATIC";
+      break;
+    case hardwarepb_LEDModeTypeOptions_LED_MODE_TYPE_QUIET_DISPLAY:
+      enum_str = "LED_MODE_TYPE_QUIET_DISPLAY";
+      break;
+    case hardwarepb_LEDModeTypeOptions_LED_MODE_TYPE_ALL_DARK:
+      enum_str = "LED_MODE_TYPE_ALL_DARK";
+      break;
+    case hardwarepb_LEDModeTypeOptions_LED_MODE_TYPE_LIGHTSHOW:
+      enum_str = "LED_MODE_TYPE_LIGHTSHOW";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "ResetButton",
-    &res);
+      "ResetButton",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1791,68 +2728,71 @@ status_t build_to_xml_hardware_LEDConfig (
   VAL_BOOL(childval) = entry->ResetButton;
   return res;
 }
-
-status_t build_to_xml_hardware_FanPercent (
+status_t build_to_xml_hardware_FanPercent(
     val_value_t *parentval,
     struct hardwarepb_FanPercent *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_FanPercentEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_FanPercentEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_FanPercentEntry (
+status_t build_to_xml_hardware_FanPercentEntry(
     val_value_t *parentval,
     struct hardwarepb_FanPercentEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "FanNo",
-    &res);
+      "FanNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->FanNo;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PercentRPM",
-    &res);
+      "PercentRPM",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1860,93 +2800,181 @@ status_t build_to_xml_hardware_FanPercentEntry (
   VAL_INT(childval) = entry->PercentRPM;
   return res;
 }
-
-status_t build_to_xml_hardware_LEDType (
+status_t build_to_xml_hardware_LEDType(
     val_value_t *parentval,
     struct hardwarepb_LEDType *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "LED",
-    &res);
+      "LED",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->LED;
+  switch (entry->LED) {
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK1G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK1G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_LINK5G10G:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_LINK5G10G";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLOCKED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLOCKED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REJECT:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REJECT";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_IDLE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_IDLE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_POEPLUSPLUS";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_OFF:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_OFF";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MINOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_SYS_MAJOR_ALARM";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF1:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF1";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_USER_DEF2:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_USER_DEF2";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_GREEN";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_ORANGE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_RED:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_RED";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_BLUE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_COLOR_MAGENTA";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_REQUEST_NMP_IP";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NETWORK";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_KEEP_NONE";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_FACTORY_DEFAULT_NO_OPERATION";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_NORMAL";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_SLOW";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_BLINKING_FAST";
+      break;
+    case hardwarepb_LEDBehaviorModeTypeOptions_LED_BEHAVIOR_MODE_TYPE_NA:
+      enum_str = "LED_BEHAVIOR_MODE_TYPE_NA";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_SignalState (
+status_t build_to_xml_hardware_SignalState(
     val_value_t *parentval,
     struct hardwarepb_SignalState *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_SignalStateEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_SignalStateEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_SignalStateEntry (
+status_t build_to_xml_hardware_SignalStateEntry(
     val_value_t *parentval,
     struct hardwarepb_SignalStateEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "State",
-    &res);
+      "State",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -1954,247 +2982,255 @@ status_t build_to_xml_hardware_SignalStateEntry (
   VAL_BOOL(childval) = entry->State;
   return res;
 }
-
-status_t build_to_xml_hardware_SFPInfo (
+status_t build_to_xml_hardware_SFPInfo(
     val_value_t *parentval,
     struct hardwarepb_SFPInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_SFPInfoEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_SFPInfoEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_SFPInfoEntry (
+status_t build_to_xml_hardware_SFPInfoEntry(
     val_value_t *parentval,
     struct hardwarepb_SFPInfoEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Info",
-    &res);
+      "Info",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_event_SFPInfo(
+  res = build_to_xml_event_SFPInfo(
       childval,
-    entry->Info);
+      entry->Info);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   return res;
 }
-
-status_t build_to_xml_hardware_DeviceI2CAddress (
+status_t build_to_xml_hardware_DeviceI2CAddress(
     val_value_t *parentval,
     struct hardwarepb_DeviceI2CAddress *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Bus0",
-    &res);
+      "Bus0",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Bus0_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Bus0_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Bus0[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Bus0_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Bus0[i];
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mux",
-    &res);
+      "Mux",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Mux;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_DeviceI2CAddressInfo(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_DeviceI2CAddressInfo(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_DeviceI2CAddressInfo (
+status_t build_to_xml_hardware_DeviceI2CAddressInfo(
     val_value_t *parentval,
     struct hardwarepb_DeviceI2CAddressInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Ch",
-    &res);
+      "Ch",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Ch;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Address",
-    &res);
+      "Address",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Address_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Address_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Address[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Address_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Address[i];
   }
   return res;
 }
-
-status_t build_to_xml_hardware_InfoList (
+status_t build_to_xml_hardware_InfoList(
     val_value_t *parentval,
     struct hardwarepb_InfoList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Info",
-    &res);
+      "Info",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->Info_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "Info_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-VAL_STRING(listval) = entry->Info[i];
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "Info_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* string */
+    VAL_STRING(listval) = entry->Info[i];
   }
   return res;
 }
-
-status_t build_to_xml_hardware_Enable (
+status_t build_to_xml_hardware_Enable(
     val_value_t *parentval,
     struct hardwarepb_Enable *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Enabled",
-    &res);
+      "Enabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2202,31 +3238,32 @@ status_t build_to_xml_hardware_Enable (
   VAL_BOOL(childval) = entry->Enabled;
   return res;
 }
-
-status_t build_to_xml_hardware_Network (
+status_t build_to_xml_hardware_Network(
     val_value_t *parentval,
     struct hardwarepb_Network *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IP",
-    &res);
+      "IP",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->IP;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mask",
-    &res);
+      "Mask",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2234,68 +3271,71 @@ status_t build_to_xml_hardware_Network (
   VAL_STRING(childval) = entry->Mask;
   return res;
 }
-
-status_t build_to_xml_hardware_MCUInfo (
+status_t build_to_xml_hardware_MCUInfo(
     val_value_t *parentval,
     struct hardwarepb_MCUInfo *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_MCUVersion(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_MCUVersion(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_MCUVersion (
+status_t build_to_xml_hardware_MCUVersion(
     val_value_t *parentval,
     struct hardwarepb_MCUVersion *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Name",
-    &res);
+      "Name",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* string */
   VAL_STRING(childval) = entry->Name;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Version",
-    &res);
+      "Version",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2303,347 +3343,453 @@ status_t build_to_xml_hardware_MCUVersion (
   VAL_STRING(childval) = entry->Version;
   return res;
 }
-
-status_t build_to_xml_hardware_PoESetting (
+status_t build_to_xml_hardware_PoESetting(
     val_value_t *parentval,
     struct hardwarepb_PoESetting *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_PoESettingEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_PoESettingEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_PoESettingEntry (
+status_t build_to_xml_hardware_PoESettingEntry(
     val_value_t *parentval,
     struct hardwarepb_PoESettingEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Enable",
-    &res);
+      "Enable",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->Enable;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Mode",
-    &res);
+      "Mode",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Mode;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Mode) {
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE:
+      enum_str = "POE_PORT_MODE_TYPE_POE";
+      break;
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE_PLUS:
+      enum_str = "POE_PORT_MODE_TYPE_POE_PLUS";
+      break;
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE_PLUS_PLUS:
+      enum_str = "POE_PORT_MODE_TYPE_POE_PLUS_PLUS";
+      break;
+    case hardwarepb_PoEPortModeTypeOptions_POE_PORT_MODE_TYPE_POE_LLDP:
+      enum_str = "POE_PORT_MODE_TYPE_POE_LLDP";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "Priority",
-    &res);
+      "Priority",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Priority;
+  switch (entry->Priority) {
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_UNKNOWN:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_UNKNOWN";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_LOW:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_LOW";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_MEDIUM:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_MEDIUM";
+      break;
+    case hardwarepb_PoEPriorityLevelTypeOptions_POE_PRIORITY_LEVEL_TYPE_HIGH:
+      enum_str = "POE_PRIORITY_LEVEL_TYPE_HIGH";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_PoEPortStatusList (
+status_t build_to_xml_hardware_PoEPortStatusList(
     val_value_t *parentval,
     struct hardwarepb_PoEPortStatusList *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "List",
-    &res);
+      "List",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* list */
   for (int i = 0; i < entry->List_Len; i++) {
-  val_value_t *listval = NULL;
-listval =  agt_make_object(
-    childval->obj,
-    "List_Entry",
-    &res);
-if (listval != NULL) {
-  val_add_child(listval, childval);
-} else if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
-res =  build_to_xml_hardware_PoEPortStatusEntry(
-    listval,
-    entry->List[i]);
-if (res != NO_ERR) {
-  return SET_ERROR(res);
-}
+    val_value_t *listval = NULL;
+    listval = agt_make_object(
+        childval->obj,
+        "List_Entry",
+        &res);
+    if (listval != NULL) {
+      val_add_child_sorted(listval, childval);
+    } else if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+    /* message */
+    res = build_to_xml_hardware_PoEPortStatusEntry(
+        listval,
+        entry->List[i]);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
   }
   return res;
 }
-
-status_t build_to_xml_hardware_PoEPortStatusEntry (
+status_t build_to_xml_hardware_PoEPortStatusEntry(
     val_value_t *parentval,
     struct hardwarepb_PoEPortStatusEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "IdentifyNo",
-    &res);
+      "IdentifyNo",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* message */
-   build_to_xml_device_InterfaceIdentify(
+  res = build_to_xml_device_InterfaceIdentify(
       childval,
-    entry->IdentifyNo);
+      entry->IdentifyNo);
   if (res != NO_ERR) {
     return SET_ERROR(res);
   }
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsEnabled",
-    &res);
+      "IsEnabled",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsEnabled;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IsLinkUp",
-    &res);
+      "IsLinkUp",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* bool */
   VAL_BOOL(childval) = entry->IsLinkUp;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Class",
-    &res);
+      "Class",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Class;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  switch (entry->Class) {
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS0:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS0";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS1:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS1";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS2:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS2";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS3:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS3";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS4:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS4";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS5:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS5";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS6:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS6";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS7:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS7";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_CLASS8:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_CLASS8";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_OVERLOAD:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_OVERLOAD";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_PROBES_NOT_EQUAL:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_PROBES_NOT_EQUAL";
+      break;
+    case hardwarepb_PoEDeterminedClassTypeOptions_POE_DETERMINED_CLASS_TYPE_UNKNOWN:
+      enum_str = "POE_DETERMINED_CLASS_TYPE_UNKNOWN";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
+  childval = agt_make_object(
       parentval->obj,
-    "PowerConsumption",
-    &res);
+      "PowerConsumption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->PowerConsumption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Current",
-    &res);
+      "Current",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->Current;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Voltage",
-    &res);
+      "Voltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->Voltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Temperature",
-    &res);
+      "Temperature",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->Temperature;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Condition",
-    &res);
+      "Condition",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* enum */
-  VAL_ENUM(childval) = entry->Condition;
+  switch (entry->Condition) {
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_DISABLED:
+      enum_str = "POE_CONDITION_TYPE_DISABLED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_POWER_OFF:
+      enum_str = "POE_CONDITION_TYPE_POWER_OFF";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_DTYPECOVERING:
+      enum_str = "POE_CONDITION_TYPE_DTYPECOVERING";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_POWERED:
+      enum_str = "POE_CONDITION_TYPE_POWERED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_CLASS_MTYPEMATCH:
+      enum_str = "POE_CONDITION_TYPE_CLASS_MTYPEMATCH";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_SHORT_CIRCUIT:
+      enum_str = "POE_CONDITION_TYPE_SHORT_CIRCUIT";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_REJECTED:
+      enum_str = "POE_CONDITION_TYPE_REJECTED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_OVERLOAD:
+      enum_str = "POE_CONDITION_TYPE_OVERLOAD";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_UNDERLOAD:
+      enum_str = "POE_CONDITION_TYPE_UNDERLOAD";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_OVER_TEMP:
+      enum_str = "POE_CONDITION_TYPE_OVER_TEMP";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_VOLTAGE_TOO_LOW:
+      enum_str = "POE_CONDITION_TYPE_VOLTAGE_TOO_LOW";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_VOLTAGE_TOO_HIGH:
+      enum_str = "POE_CONDITION_TYPE_VOLTAGE_TOO_HIGH";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_UNKNOW_ERROR:
+      enum_str = "POE_CONDITION_TYPE_UNKNOW_ERROR";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_BUDGET_EXCEEDED:
+      enum_str = "POE_CONDITION_TYPE_BUDGET_EXCEEDED";
+      break;
+    case hardwarepb_PoEConditionTypeOptions_POE_CONDITION_TYPE_TYPE_NON_STANDARD_PD:
+      enum_str = "POE_CONDITION_TYPE_TYPE_NON_STANDARD_PD";
+      break;
+  }
+  VAL_ENUM_NAME(childval) = enum_str;
   return res;
 }
-
-status_t build_to_xml_hardware_PoESystemStatus (
+status_t build_to_xml_hardware_PoESystemStatus(
     val_value_t *parentval,
     struct hardwarepb_PoESystemStatus *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "MinShutDownVoltage",
-    &res);
+      "MinShutDownVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->MinShutDownVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "MaxShutDownVoltage",
-    &res);
+      "MaxShutDownVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->MaxShutDownVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "VMainVoltage",
-    &res);
+      "VMainVoltage",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->VMainVoltage;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "IMainCurrent",
-    &res);
+      "IMainCurrent",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->IMainCurrent;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "PowerConsumption",
-    &res);
+      "PowerConsumption",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* double */
   VAL_DOUBLE(childval) = entry->PowerConsumption;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Budget",
-    &res);
+      "Budget",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
   /* int32 */
   VAL_INT(childval) = entry->Budget;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  childval = agt_make_object(
       parentval->obj,
-    "Version",
-    &res);
+      "Version",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2651,19 +3797,21 @@ status_t build_to_xml_hardware_PoESystemStatus (
   VAL_STRING(childval) = entry->Version;
   return res;
 }
-
-status_t build_to_xml_hardware_PoESystemBudgetEntry (
+status_t build_to_xml_hardware_PoESystemBudgetEntry(
     val_value_t *parentval,
     struct hardwarepb_PoESystemBudgetEntry *entry) {
   status_t res = NO_ERR;
   val_value_t *childval = NULL;
-  /* ---------------------------------------------------------------------------------------------------- */
-  childval =  agt_make_object(
+  const xmlChar *enum_str = EMPTY_STRING;
+  if (entry == NULL) {
+    return res;
+  }
+  childval = agt_make_object(
       parentval->obj,
-    "Budget",
-    &res);
+      "Budget",
+      &res);
   if (childval != NULL) {
-    val_add_child(childval, parentval);
+    val_add_child_sorted(childval, parentval);
   } else if (res != NO_ERR) {
     return SET_ERROR(res);
   }
@@ -2672,3 +3820,1857 @@ status_t build_to_xml_hardware_PoESystemBudgetEntry (
   return res;
 }
 
+status_t build_to_priv_hardware_IPv4Static(
+    val_value_t *parentval,
+    struct hardwarepb_IPv4Static *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IPAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IPAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SubnetMask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->SubnetMask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPConfig(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "System");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->System = malloc(sizeof(*(entry->System)));
+    res = build_to_priv_hardware_DLDPSystemConfig(
+        childval,
+        entry->System);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Port");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Port = malloc(sizeof(*(entry->Port)));
+    res = build_to_priv_hardware_DLDPPortConfig(
+        childval,
+        entry->Port);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPSystemConfig(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPSystemConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AdvertisementInterval");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->AdvertisementInterval = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ShutDownMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->ShutDownMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "AuthMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->AuthMode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "WorkMode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->WorkMode = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPPortConfig(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_DLDPPortConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPPortConfigEntry(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPPortStatus(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->List = malloc(sizeof(*(entry->List)));
+    res = build_to_priv_hardware_DLDPPortStatusEntry(
+        childval,
+        entry->List);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPPortStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPPortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Link");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Link = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DLDPNeighborEntry(
+    val_value_t *parentval,
+    struct hardwarepb_DLDPNeighborEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "NeighborMACAddress");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->NeighborMACAddress = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NeighborAgetime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->NeighborAgetime = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NeighborState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->NeighborState = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_EnableRequest(
+    val_value_t *parentval,
+    struct hardwarepb_EnableRequest *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_EnableRequestEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_EnableRequestEntry(
+    val_value_t *parentval,
+    struct hardwarepb_EnableRequestEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PortLED(
+    val_value_t *parentval,
+    struct hardwarepb_PortLED *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_PortLEDEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PortLEDEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PortLEDEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->State = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_BoardLED(
+    val_value_t *parentval,
+    struct hardwarepb_BoardLED *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Power");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Power = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "System");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->System = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoEMax");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PoEMax = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Fan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Fan = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GPS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->GPS = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_LEDStatus(
+    val_value_t *parentval,
+    struct hardwarepb_LEDStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PortLED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->PortLED = malloc(sizeof(*(entry->PortLED)));
+    res = build_to_priv_hardware_PortLED(
+        childval,
+        entry->PortLED);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SystemLED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->SystemLED = malloc(sizeof(*(entry->SystemLED)));
+    res = build_to_priv_hardware_BoardLED(
+        childval,
+        entry->SystemLED);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_Coordinates(
+    val_value_t *parentval,
+    struct hardwarepb_Coordinates *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Latitude");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Latitude = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Longitude");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Longitude = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_GNSSVerboseInfomation(
+    val_value_t *parentval,
+    struct hardwarepb_GNSSVerboseInfomation *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Mode = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "NavigationalStatus");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->NavigationalStatus = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Speed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->Speed = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Course");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->Course = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MagneticVariation");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->MagneticVariation = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_GPSEnable(
+    val_value_t *parentval,
+    struct hardwarepb_GPSEnable *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_GPSStatus(
+    val_value_t *parentval,
+    struct hardwarepb_GPSStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Status");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Status = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VerboseInfo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->VerboseInfo = malloc(sizeof(*(entry->VerboseInfo)));
+    res = build_to_priv_hardware_GNSSVerboseInfomation(
+        childval,
+        entry->VerboseInfo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Location");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Location = malloc(sizeof(*(entry->Location)));
+    res = build_to_priv_hardware_Coordinates(
+        childval,
+        entry->Location);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "DateTime");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->DateTime = malloc(sizeof(*(entry->DateTime)));
+    res = build_to_priv_timestamp_Timestamp(
+        childval,
+        entry->DateTime);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_GPSCommand(
+    val_value_t *parentval,
+    struct hardwarepb_GPSCommand *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Request");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Request = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Respond");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Respond_Len = dlq_count(&childval->v.childQ);
+    entry->Respond = malloc((entry->Respond_Len + 1) * sizeof(*entry->Respond));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Respond[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_USBStatus(
+    val_value_t *parentval,
+    struct hardwarepb_USBStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Connected");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Connected = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ConnectedDevice");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->ConnectedDevice = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_USBEthernetConfig(
+    val_value_t *parentval,
+    struct hardwarepb_USBEthernetConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Static");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Static = malloc(sizeof(*(entry->Static)));
+    res = build_to_priv_hardware_IPv4Static(
+        childval,
+        entry->Static);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_FanSpeedConfig(
+    val_value_t *parentval,
+    struct hardwarepb_FanSpeedConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_FanSpeedConfigEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_FanSpeedConfigEntry(
+    val_value_t *parentval,
+    struct hardwarepb_FanSpeedConfigEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FanNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FanNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RotatingSpeed");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RotatingSpeed = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_FanStatus(
+    val_value_t *parentval,
+    struct hardwarepb_FanStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_FanStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_FanStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_FanStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FanNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FanNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "RotatingSpeedRPM");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RotatingSpeedRPM = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_TemperatureStatus(
+    val_value_t *parentval,
+    struct hardwarepb_TemperatureStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_TemperatureStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_TemperatureStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_TemperatureStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ID");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->ID = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Temperature");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Temperature = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PowerRedundantState(
+    val_value_t *parentval,
+    struct hardwarepb_PowerRedundantState *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "RedundantList");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->RedundantList_Len = dlq_count(&childval->v.childQ);
+    entry->RedundantList = malloc((entry->RedundantList_Len + 1) * sizeof(*entry->RedundantList));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->RedundantList[cnt] = malloc(sizeof(*(entry->RedundantList[cnt])));
+      res = build_to_priv_hardware_PowerRedundantStateEntry(
+          listval,
+          entry->RedundantList[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PowerRedundantStateEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PowerRedundantStateEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "PwOption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PwOption = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantPlugIn");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PowerRedundantPlugIn = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantACOk");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PowerRedundantACOk = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantOk");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->PowerRedundantOk = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->PowerRedundantVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantCurrent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->PowerRedundantCurrent = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantPowerConsumption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->PowerRedundantPowerConsumption = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantTemperature");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* float */
+    entry->PowerRedundantTemperature = VAL_DOUBLE(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PowerGeneralState(
+    val_value_t *parentval,
+    struct hardwarepb_PowerGeneralState *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Power_12V");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Power_12V = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Power_54V");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Power_54V = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PowerState(
+    val_value_t *parentval,
+    struct hardwarepb_PowerState *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Type");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Type = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerRedundantState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PowerType_Union_Option = hardwarepb_PowerState_PowerType_Union_Options_PowerRedundantState;
+    /* message */
+    entry->PowerType.PowerType_PowerRedundantState = malloc(sizeof(*(entry->PowerType.PowerType_PowerRedundantState)));
+    res = build_to_priv_hardware_PowerRedundantState(
+        childval,
+        entry->PowerType.PowerType_PowerRedundantState);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerGeneralState");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->PowerType_Union_Option = hardwarepb_PowerState_PowerType_Union_Options_PowerGeneralState;
+    /* message */
+    entry->PowerType.PowerType_PowerGeneralState = malloc(sizeof(*(entry->PowerType.PowerType_PowerGeneralState)));
+    res = build_to_priv_hardware_PowerGeneralState(
+        childval,
+        entry->PowerType.PowerType_PowerGeneralState);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_TimeControlRegister(
+    val_value_t *parentval,
+    struct hardwarepb_TimeControlRegister *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "RegBase");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->RegBase = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Offset");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Offset = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Data");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bytes */
+    entry->Data = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_Config(
+    val_value_t *parentval,
+    struct hardwarepb_Config *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->LED = malloc(sizeof(*(entry->LED)));
+    res = build_to_priv_hardware_LEDConfig(
+        childval,
+        entry->LED);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Fan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Fan = malloc(sizeof(*(entry->Fan)));
+    res = build_to_priv_hardware_FanSpeedConfig(
+        childval,
+        entry->Fan);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GPS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->GPS = malloc(sizeof(*(entry->GPS)));
+    res = build_to_priv_hardware_GPSEnable(
+        childval,
+        entry->GPS);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_Ports(
+    val_value_t *parentval,
+    struct hardwarepb_Ports *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_PortEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PortEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PortEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "HardwarePortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->HardwarePortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SwitchPortNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->SwitchPortNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "InterfaceType");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->InterfaceType = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Properies");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Properies_Len = dlq_count(&childval->v.childQ);
+    entry->Properies = malloc((entry->Properies_Len + 1) * sizeof(*entry->Properies));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* enum */
+      entry->Properies[cnt] = VAL_ENUM(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SupportPoE");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SupportPoE = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SupportSFP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->SupportSFP = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "LinkLED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LinkLED = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PoELED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->PoELED = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "SpeedLED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->SpeedLED = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_SystemInfo(
+    val_value_t *parentval,
+    struct hardwarepb_SystemInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Fan");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Fan = malloc(sizeof(*(entry->Fan)));
+    res = build_to_priv_hardware_FanPercent(
+        childval,
+        entry->Fan);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Temp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Temp = malloc(sizeof(*(entry->Temp)));
+    res = build_to_priv_hardware_TemperatureStatus(
+        childval,
+        entry->Temp);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "BoardLED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->BoardLED = malloc(sizeof(*(entry->BoardLED)));
+    res = build_to_priv_hardware_BoardLED(
+        childval,
+        entry->BoardLED);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "GPS");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->GPS = malloc(sizeof(*(entry->GPS)));
+    res = build_to_priv_hardware_GPSStatus(
+        childval,
+        entry->GPS);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_LEDConfig(
+    val_value_t *parentval,
+    struct hardwarepb_LEDConfig *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "ResetButton");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->ResetButton = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_FanPercent(
+    val_value_t *parentval,
+    struct hardwarepb_FanPercent *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_FanPercentEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_FanPercentEntry(
+    val_value_t *parentval,
+    struct hardwarepb_FanPercentEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "FanNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->FanNo = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PercentRPM");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->PercentRPM = VAL_INT(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_LEDType(
+    val_value_t *parentval,
+    struct hardwarepb_LEDType *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "LED");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->LED = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_SignalState(
+    val_value_t *parentval,
+    struct hardwarepb_SignalState *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_SignalStateEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_SignalStateEntry(
+    val_value_t *parentval,
+    struct hardwarepb_SignalStateEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "State");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->State = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_SFPInfo(
+    val_value_t *parentval,
+    struct hardwarepb_SFPInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_SFPInfoEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_SFPInfoEntry(
+    val_value_t *parentval,
+    struct hardwarepb_SFPInfoEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Info");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->Info = malloc(sizeof(*(entry->Info)));
+    res = build_to_priv_event_SFPInfo(
+        childval,
+        entry->Info);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DeviceI2CAddress(
+    val_value_t *parentval,
+    struct hardwarepb_DeviceI2CAddress *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Bus0");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Bus0_Len = dlq_count(&childval->v.childQ);
+    entry->Bus0 = malloc((entry->Bus0_Len + 1) * sizeof(*entry->Bus0));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Bus0[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mux");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Mux = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_DeviceI2CAddressInfo(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_DeviceI2CAddressInfo(
+    val_value_t *parentval,
+    struct hardwarepb_DeviceI2CAddressInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Ch");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Ch = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Address");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Address_Len = dlq_count(&childval->v.childQ);
+    entry->Address = malloc((entry->Address_Len + 1) * sizeof(*entry->Address));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Address[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_InfoList(
+    val_value_t *parentval,
+    struct hardwarepb_InfoList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Info");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->Info_Len = dlq_count(&childval->v.childQ);
+    entry->Info = malloc((entry->Info_Len + 1) * sizeof(*entry->Info));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* string */
+      entry->Info[cnt] = VAL_STRING(listval);
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_Enable(
+    val_value_t *parentval,
+    struct hardwarepb_Enable *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Enabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enabled = VAL_BOOL(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_Network(
+    val_value_t *parentval,
+    struct hardwarepb_Network *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IP");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->IP = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mask");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Mask = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_MCUInfo(
+    val_value_t *parentval,
+    struct hardwarepb_MCUInfo *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_MCUVersion(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_MCUVersion(
+    val_value_t *parentval,
+    struct hardwarepb_MCUVersion *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Name");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Name = VAL_STRING(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Version");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Version = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PoESetting(
+    val_value_t *parentval,
+    struct hardwarepb_PoESetting *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_PoESettingEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PoESettingEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PoESettingEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Enable");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->Enable = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Mode");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Mode = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Priority");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Priority = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PoEPortStatusList(
+    val_value_t *parentval,
+    struct hardwarepb_PoEPortStatusList *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "List");
+  if (childval != NULL && childval->res == NO_ERR) {
+    entry->List_Len = dlq_count(&childval->v.childQ);
+    entry->List = malloc((entry->List_Len + 1) * sizeof(*entry->List));
+    unsigned int cnt = 0;
+    val_value_t *listval = NULL;
+    for (listval = (val_value_t *)dlq_firstEntry(&childval->v.childQ);
+         listval != NULL;
+         listval = (val_value_t *)dlq_nextEntry(listval)) {
+      /* message */
+      entry->List[cnt] = malloc(sizeof(*(entry->List[cnt])));
+      res = build_to_priv_hardware_PoEPortStatusEntry(
+          listval,
+          entry->List[cnt]);
+      if (res != NO_ERR) {
+        return SET_ERROR(res);
+      }
+      cnt++;
+    }
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PoEPortStatusEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PoEPortStatusEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "IdentifyNo");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* message */
+    entry->IdentifyNo = malloc(sizeof(*(entry->IdentifyNo)));
+    res = build_to_priv_device_InterfaceIdentify(
+        childval,
+        entry->IdentifyNo);
+    if (res != NO_ERR) {
+      return SET_ERROR(res);
+    }
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsEnabled");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsEnabled = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IsLinkUp");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* bool */
+    entry->IsLinkUp = VAL_BOOL(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Class");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Class = VAL_ENUM(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerConsumption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->PowerConsumption = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Current");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->Current = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Voltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->Voltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Temperature");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->Temperature = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Condition");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* enum */
+    entry->Condition = VAL_ENUM(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PoESystemStatus(
+    val_value_t *parentval,
+    struct hardwarepb_PoESystemStatus *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "MinShutDownVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->MinShutDownVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "MaxShutDownVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->MaxShutDownVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "VMainVoltage");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->VMainVoltage = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "IMainCurrent");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->IMainCurrent = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "PowerConsumption");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* double */
+    entry->PowerConsumption = VAL_DOUBLE(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Budget");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Budget = VAL_INT(childval);
+  }
+  childval = val_first_child_name(
+      parentval,
+      "Version");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* string */
+    entry->Version = VAL_STRING(childval);
+  }
+  return res;
+}
+status_t build_to_priv_hardware_PoESystemBudgetEntry(
+    val_value_t *parentval,
+    struct hardwarepb_PoESystemBudgetEntry *entry) {
+  status_t res = NO_ERR;
+  val_value_t *childval = NULL;
+  childval = val_first_child_name(
+      parentval,
+      "Budget");
+  if (childval != NULL && childval->res == NO_ERR) {
+    /* int32 */
+    entry->Budget = VAL_INT(childval);
+  }
+  return res;
+}

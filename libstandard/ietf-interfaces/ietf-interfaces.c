@@ -545,53 +545,47 @@ ietf_interfaces_state_list_get(
         log_debug("\nEnter intri_device_intri_device_port_list_get");
     }
 
-    struct emptypb_Empty in;
-    struct portpb_Config out;
-    port_Port_GetConfig(&in, &out);
+    struct emptypb_Empty *in = malloc(sizeof(*(in)));
+    struct portpb_Config *out= malloc(sizeof(*(out)));
+    port_Port_GetConfig(in, out);
 
-    struct emptypb_Empty in2;
-    struct portpb_Status status_out;
-    port_Port_GetStatus(&in2, &status_out);
+    struct emptypb_Empty *in2 = malloc(sizeof(*(in2)));
+    struct portpb_Status *status_out = malloc(sizeof(*(status_out)));
+    port_Port_GetStatus(in2, status_out);
 
-    struct emptypb_Empty in3;
-    struct devicepb_Info device_out;
-    device_Device_GetDeviceInfo(&in2, &device_out);
+    struct emptypb_Empty *in3 = malloc(sizeof(*(in3)));
+    struct devicepb_Info *device_out = malloc(sizeof(*(device_out)));
+    device_Device_GetDeviceInfo(in3, device_out);
 
-    struct devicepb_PortList in4;
-    struct rmonpb_Ingress ingress_out;
-    struct devicepb_PortList in5;
-    struct rmonpb_Egress egress_out;
-    in4.List_Len = 30;
-    in5.List_Len = 30;
-    in4.List = malloc(in4.List_Len * sizeof(*(in4.List)));
-    in5.List = malloc(in5.List_Len * sizeof(*(in5.List)));
+    struct devicepb_PortList *in4 = malloc(sizeof(*(in4)));
+    struct rmonpb_Ingress *ingress_out = malloc(sizeof(*(ingress_out)));
+    struct devicepb_PortList *in5 = malloc(sizeof(*(in5)));
+    struct rmonpb_Egress *egress_out = malloc(sizeof(*(egress_out)));
+    in4->List_Len = 30;
+    in5->List_Len = 30;
+    in4->List = malloc(in4->List_Len * sizeof(*(in4->List)));
+    in5->List = malloc(in5->List_Len * sizeof(*(in5->List)));
 
-    for (int i = 0; i< in4.List_Len;i++) {
-        struct devicepb_InterfaceIdentify *tmp = malloc(sizeof(*(tmp)));
-        struct devicepb_InterfaceIdentify *tmp2 = malloc(sizeof(*(tmp2)));
-        tmp->PortNo = i+1;
-        tmp->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
-        tmp->DeviceID = 0;
-        tmp->LAGNo = 0;
+    log_debug("\nEnter intri_device_intri_device_port_list_get4\n");
 
-        tmp2->PortNo = i+1;
-        tmp2->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
-        tmp2->DeviceID = 0;
-        tmp2->LAGNo = 0;
-        log_debug("\nprinting list1 %d\n", i);
-        in4.List[i] = tmp;
-        log_debug("\nprinting list2 %d\n", i);
-        in5.List[i] = tmp2;
-        free(tmp);
-        free(tmp2);
+    for (int i = 0; i<=29 ;i++) {
+        // struct devicepb_InterfaceIdentify *tmp = malloc(sizeof(*(tmp)));
+        // struct devicepb_InterfaceIdentify *tmp2 = malloc(sizeof(*(tmp2)));
+        in4->List[i] = malloc(sizeof(*(in4->List[i])));
+        in4->List[i]->PortNo = i+1;
+        in4->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
+        in4->List[i]->DeviceID = 0;
+
+        in5->List[i] = malloc(sizeof(*(in5->List[i])));;
+        in5->List[i]->PortNo = i+1;
+        in5->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
+        in5->List[i]->DeviceID = 0;
     }
 
-    rmon_RMON_GetIngress(&in4, &ingress_out);
-    rmon_RMON_GetEgress(&in5, &egress_out);
+    rmon_RMON_GetIngress(in4, ingress_out);
+    rmon_RMON_GetEgress(in5, egress_out);
 
-    log_debug("\nlen of ingeress_out %d\n", ingress_out.List_Len);
-    log_debug("\nlen of out_list_len %d\n", out.List_Len);
-    for (int i =0; i < out.List_Len; i++) {
+    for (int i =0; i < out->List_Len; i++) {
         val_value_t *entry_val = NULL;
         entry_val = agt_make_list(
             dstval->obj,
@@ -602,11 +596,23 @@ ietf_interfaces_state_list_get(
         } else if (res!=NO_ERR) {
             return SET_ERROR(res);
         }
-        res = add_interface_state_entry(entry_val, out.List[i], status_out.List[i], &device_out, ingress_out.List[i], egress_out.List[i]);
+        res = add_interface_state_entry(entry_val, out->List[i], status_out->List[i], device_out, ingress_out->List[i], egress_out->List[i]);
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
     }
+
+    free(out);
+    free(status_out);
+    free(device_out);
+    free(ingress_out);
+    free(egress_out);
+
+    free(in);
+    free(in2);
+    free(in3);
+    free(in4);
+    free(in5);
     return res;
 }
 

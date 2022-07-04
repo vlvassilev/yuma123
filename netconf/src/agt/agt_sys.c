@@ -1433,28 +1433,31 @@ ietf_system_authentication_get (
         log_debug("\nEnter ietf_system_authentication_get");
     }
     /* calls the private api */
-    struct emptypb_Empty in;
-    struct accesspb_UsersConfig out;
-    access_Access_GetUsers(&in, &out);
+    struct emptypb_Empty *in = malloc(sizeof(*in));
+    struct accesspb_UsersConfig *out = malloc(sizeof(*out));
+    access_Access_GetUsers(in, out);
 
-    for (int i = 0; i<(out.List_Len);i++) {
+    for (int i = 0; i<(out->List_Len);i++) {
         val_value_t *child_val = NULL;
 
         child_val = agt_make_list(
             dstval->obj,
             ietf_system_authentication_user,
             &res);
+
         if (child_val != NULL) {
             val_add_child(child_val, dstval);
         } else if (res != NO_ERR) {
             return SET_ERROR(res);
         }
 
-        res = build_authentication_user(child_val, out.List[i]);
+        res = build_authentication_user(child_val, out->List[i]);
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
     }
+    free(in);
+    free(out);
 
     return res;
 }

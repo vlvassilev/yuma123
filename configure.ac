@@ -113,9 +113,9 @@ AC_CONFIG_FILES([
         libintri/private/src/realize/Makefile
 
         libstandard/ietf-interfaces/Makefile
-        libstandard/ietf-system/Makefile
 
 ])
+        # libstandard/ietf-system/Makefile
         # libintri/tests/src/intri-test/Makefile
         # libintri/tests/src/intri-device/Makefile
         # libintri/tests/src/intri-core/intri-system/Makefile

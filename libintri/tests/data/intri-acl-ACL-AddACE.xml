@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<intri-acl-ACL-AddACE xmlns="intri:intri-acl">
+  <Name>ian-test</Name>
+  <Action>RULE_ACTION_TYPE_PERMIT</Action>
+  <Priority>2</Priority>
+  <TimeRangeName>ian-test</TimeRangeName>
+  <ParamType>RULE_PARAM_TYPE_IP_V_4</ParamType>
+  <IPv4>
+    <Protocol>
+      <Protocol>0x0600</Protocol>
+      <ProtocolMask/>
+    </Protocol>
+    <Source>
+      <Address>192.168.100.100</Address>
+      <AddressMask/>
+    </Source>
+  </IPv4>
+</intri-acl-ACL-AddACE>

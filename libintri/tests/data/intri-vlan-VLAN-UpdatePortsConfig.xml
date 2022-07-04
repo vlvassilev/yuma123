@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<intri-vlan-VLAN-UpdatePortsConfig xmlns="intri:intri-vlan">
+  <List>
+    <List_Entry>
+      <IdentifyNo>
+        <Type>INTERFACE_TYPE_PORT</Type>
+        <DeviceID>0</DeviceID>
+        <PortNo>4</PortNo>
+        <LAGNo>0</LAGNo>
+        <VlanID>0</VlanID>
+      </IdentifyNo>
+      <Mode>PORT_CONFIG_VLAN_MODE_TYPE_ACCESS</Mode>
+      <DefaultVlanID>1</DefaultVlanID>
+      <UnauthorizedVlanID>1</UnauthorizedVlanID>
+      <FallBackVlanID>1</FallBackVlanID>
+      <QinQEthertype>PORT_CONFIG_QINQ_ETHERTYPE_TYPE_0X_8100</QinQEthertype>
+      <AcceptableFrametype>ACCEPT_FRAME_TYPE_ALL</AcceptableFrametype>
+      <TaggedList>
+        <TaggedList_Entry>1</TaggedList_Entry>
+      </TaggedList>
+      <UntaggedList>
+        <UntaggedList_Entry>1</UntaggedList_Entry>
+      </UntaggedList>
+    </List_Entry>
+  </List>
+</intri-vlan-VLAN-UpdatePortsConfig>

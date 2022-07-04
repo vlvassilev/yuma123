@@ -111,16 +111,16 @@ AC_CONFIG_FILES([
         libintri/private/modules/Makefile
         libintri/private/src/genc-trans/Makefile
         libintri/private/src/realize/Makefile
-        libintri/tests/src/intri-test/Makefile
-        libintri/tests/src/intri-device/Makefile
-        libintri/tests/src/intri-core/intri-system/Makefile
-        libintri/tests/src/intri-core/intri-time/Makefile
-        libintri/tests/src/intri-core/intri-vlan/Makefile
 
         libstandard/ietf-interfaces/Makefile
         libstandard/ietf-system/Makefile
 
 ])
+        # libintri/tests/src/intri-test/Makefile
+        # libintri/tests/src/intri-device/Makefile
+        # libintri/tests/src/intri-core/intri-system/Makefile
+        # libintri/tests/src/intri-core/intri-time/Makefile
+        # libintri/tests/src/intri-core/intri-vlan/Makefile
 
         # libtoaster/src/Makefile
         # netconf/src/yangrpc/example/Makefile

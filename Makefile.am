@@ -14,12 +14,13 @@ libstandard/ietf-interfaces \
 libstandard/ietf-system \
 libintri/private/modules \
 libintri/private/src/genc-trans \
-libintri/private/src/realize \
-libintri/tests/src/intri-test \
-libintri/tests/src/intri-device \
-libintri/tests/src/intri-core/intri-system \
-libintri/tests/src/intri-core/intri-time \
-libintri/tests/src/intri-core/intri-vlan
+libintri/private/src/realize
+
+# libintri/tests/src/intri-test \
+# libintri/tests/src/intri-device \
+# libintri/tests/src/intri-core/intri-system \
+# libintri/tests/src/intri-core/intri-time \
+# libintri/tests/src/intri-core/intri-vlan
 
 # libtoaster/src \
 # netconf/src/yangrpc/example \

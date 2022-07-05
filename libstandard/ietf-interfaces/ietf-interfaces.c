@@ -78,27 +78,14 @@
 /* module static variables */
 static val_value_t* with_nmda_param_val;
 
-
-
-
-
 static status_t
     add_interface_entry(val_value_t *parentval,
         struct portpb_ConfigEntry *entry)
 {
     /*objs*/
-    obj_template_t* name_obj;
-    obj_template_t* oper_status_obj;
-    obj_template_t* last_change_obj;
-    obj_template_t* statistics_obj;
     obj_template_t* obj;
 
     /*vals*/
-    val_value_t* interface_state_val;
-    val_value_t* name_val;
-    val_value_t* oper_status_val;
-    val_value_t* last_change_val;
-    val_value_t* statistics_val;
     val_value_t* val;
 
     status_t res=NO_ERR;
@@ -183,19 +170,9 @@ static status_t
         struct rmonpb_EgressEntry *egress_entry)
 {
     /*objs*/
-    obj_template_t* interface_state_obj;
-    obj_template_t* name_obj;
-    obj_template_t* oper_status_obj;
-    obj_template_t* last_change_obj;
-    obj_template_t* statistics_obj;
     obj_template_t* obj;
 
     /*vals*/
-    val_value_t* interface_state_val;
-    val_value_t* name_val;
-    val_value_t* oper_status_val;
-    val_value_t* last_change_val;
-    val_value_t* statistics_val;
     val_value_t* val;
 
     status_t res=NO_ERR;
@@ -207,22 +184,6 @@ static status_t
     unsigned int i;
     uint64_t counter;
     int ret;
-
-
-// #define ietf_interfaces_interfaces_state_statistic_in_octets (const xmlChar *)"in-octets"
-// #define ietf_interfaces_interfaces_state_statistic_in_unicast_pkts (const xmlChar *)"in-unicast-pkts"
-// #define ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts (const xmlChar *)"in-broadcast-pkts"
-// #define ietf_interfaces_interfaces_state_statistic_in_multicast_pkts (const xmlChar *)"in-multicast-pkts"
-// #define ietf_interfaces_interfaces_state_statistic_in_discards (const xmlChar *)"in-discards"
-// #define ietf_interfaces_interfaces_state_statistic_in_errors (const xmlChar *)"in-errors"
-// #define ietf_interfaces_interfaces_state_statistic_in_unknown_protos (const xmlChar *)"in-unknown-protos"
-
-// #define ietf_interfaces_interfaces_state_statistic_out_octets (const xmlChar *)"out-octets"
-// #define ietf_interfaces_interfaces_state_statistic_out_unicast_pkts (const xmlChar *)"out-unicast-pkts"
-// #define ietf_interfaces_interfaces_state_statistic_out_broadcast_pkts (const xmlChar *)"out-broadcast-pkts"
-// #define ietf_interfaces_interfaces_state_statistic_out_multicast_pkts (const xmlChar *)"out-multicast-pkts"
-// #define ietf_interfaces_interfaces_state_statistic_out_discards (const xmlChar *)"out-discards"
-// #define ietf_interfaces_interfaces_state_statistic_out_errors (const xmlChar *)"out-errors"
 
     char* counter_names_array[12] = {
         ietf_interfaces_interfaces_state_statistic_in_octets,
@@ -402,22 +363,15 @@ static status_t
         return SET_ERROR(res);
     }
 
-    // done = FALSE;
-    log_debug("\nchildval name: %s", childval->name);
+
+    if (LOGDEBUG) {
+        log_debug("\nchildval name: %s", childval->name);
+    }
     for(int i=0;i<(sizeof(counter_names_array)/sizeof(char*));i++) {
         val_value_t *stats_val = NULL;
         uint64_t target_val;
         xmlChar *counter = counter_names_array[i];
 
-        log_debug("\nidx: %d", i);
-        log_debug("\n port number is %d", &ingress_entry->IdentifyNo->PortNo);
-        log_debug("\n port number is %d", ingress_entry->IdentifyNo->PortNo);
-        log_debug("\nchildval name: %s", childval->name);
-        log_debug("\ncounter name: %s", counter_names_array[i]);
-        log_debug("\ncounter equal %s\n", counter == ietf_interfaces_interfaces_state_statistic_in_octets ? "true": "false");
-        log_debug("\ncounter goodOctets %d\n", ingress_entry->InGoodOctets);
-        log_debug("\ncounter badOctets %d\n", ingress_entry->InBadOctets);
-        log_debug("\ncounter badOctets %d\n", ingress_entry->InBroadcasts);
         if (counter == ietf_interfaces_interfaces_state_statistic_in_octets) {
             target_val = ingress_entry->InGoodOctets + ingress_entry->InBadOctets;
         } else if (counter == ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts) {
@@ -443,7 +397,6 @@ static status_t
         } else if (counter == ietf_interfaces_interfaces_state_statistic_out_discards) {
             target_val = egress_entry->OutDroppedPackets;
         }
-        log_debug("\ncounter equal4 %s\n", counter == ietf_interfaces_interfaces_state_statistic_in_octets ? "true": "false");
 
         stats_val = agt_make_uint64_leaf(
             childval->obj,
@@ -462,34 +415,6 @@ static status_t
             return SET_ERROR(res);
         }
     }
-    //     endptr = NULL;
-    //     counter = strtoull((const char *)str, &endptr, 10);
-    //     if (counter == 0 && str == endptr) {
-    //         /* number conversion failed */
-    //         log_error("Error: /proc/net/dev number conversion failed.");
-    //         return ERR_NCX_OPERATION_FAILED;
-    //     }
-
-    //     if(counter_names_array[i]!=NULL) {
-    //         obj = obj_find_child(statistics_obj,
-    //                              "ietf-interfaces",
-    //                              counter_names_array[i]);
-    // 	    assert(obj != NULL);
-
-    //         val = val_new_value();
-    //         if (val == NULL) {
-    //             return ERR_INTERNAL_MEM;
-    //         }
-    //         val_init_from_template(val, obj);
-    //         VAL_UINT64(val) = counter;
-    //         val_add_child(val, statistics_val);
-    //     }
-
-    //     str = (xmlChar *)endptr;
-    //     if (*str == '\0' || *str == '\n') {
-    //         break;
-    //     }
-    // }
     return res;
 }
 
@@ -816,10 +741,6 @@ status_t
         &mod);
     assert(res == NO_ERR);
 
-    res=agt_commit_complete_register("ietf-interfaces" /*SIL id string*/,
-                                     y_commit_complete);
-    assert(res == NO_ERR);
-
     return res;
 }
 
@@ -892,7 +813,6 @@ status_t y_ietf_interfaces_init2(void)
         return SET_ERROR(res);
     }
 
-    y_commit_complete();
 
     return res;
 }

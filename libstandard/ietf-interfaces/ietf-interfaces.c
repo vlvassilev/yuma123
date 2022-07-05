@@ -101,13 +101,18 @@ static val_value_t* with_nmda_param_val;
 
 static status_t
     add_interface_entry(val_value_t *parentval,
-        struct portpb_ConfigEntry *entry)
+        struct portpb_ConfigEntry *entry,
+        struct networkpb_Config *network_cfg,
+        struct networkpb_IPv4Status *ipv4_status,
+        struct networkpb_IPv6Status *ipv6_status)
 {
     /*objs*/
     obj_template_t* obj;
 
     /*vals*/
-    val_value_t* val;
+    val_value_t* tmp_val=NULL;
+    val_value_t* v4_address_val=NULL;
+    val_value_t* v6_address_val=NULL;
 
     status_t res=NO_ERR;
     val_value_t *childval = NULL;
@@ -184,6 +189,161 @@ static status_t
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
     }
+
+    /* [ietf-ip] interface/ipv4 */
+    res = agt_add_container(
+        ietf_ip,
+        ietf_ip_common_ipv4,
+        parentval,
+        &childval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    if (LOGDEBUG) {
+        log_debug("\n current childval name: %s", childval->name);
+    }
+
+    /* [ietf-ip] interface/ipv4/forwarding */
+    xmlChar *is_v4_forarding = "true";
+    tmp_val = agt_make_leaf(
+            childval->obj,
+            ietf_ip_common_forwarding,
+            is_v4_forarding,
+            &res);
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, childval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* [ietf-ip] interface/ipv4/mtu */
+    log_debug("\n mtu is %d", network_cfg->Basic->LocalMTU);
+    tmp_val = agt_make_int_leaf(
+            childval->obj,
+            ietf_ip_common_mtu,
+            network_cfg->Basic->LocalMTU,
+            &res);
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, childval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+
+    /* [ietf-ip] interface/ipv4/address */
+    v4_address_val = agt_make_list(
+        childval->obj,
+        ietf_ip_common_address_list_container,
+        &res);
+    if (v4_address_val != NULL) {
+        val_add_child(v4_address_val, childval);
+    } else if (res!=NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    tmp_val = agt_make_leaf(
+        v4_address_val->obj,
+        ietf_ip_common_ip,
+        ipv4_status->OutgoingDeviceIP,
+        &res);
+
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, v4_address_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    tmp_val = agt_make_leaf(
+        v4_address_val->obj,
+        ietf_ip_interfaces_ipv4_address_netmask,
+        ipv4_status->DynamicSubnetMask,
+        &res);
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, v4_address_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+
+    /* [ietf-ip] interface/ipv6 */
+    if (network_cfg->IP->V6->Enabled) {
+        res = agt_add_container(
+            ietf_ip,
+            ietf_ip_common_ipv6,
+            parentval,
+            &childval);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        if (LOGDEBUG) {
+            log_debug("\n current childval name: %s", childval->name);
+        }
+
+        /* [ietf-ip] interface/ipv6/forwarding */
+        xmlChar *is_v6_forarding = "true";
+        tmp_val = agt_make_leaf(
+                childval->obj,
+                ietf_ip_common_forwarding,
+                is_v6_forarding,
+                &res);
+        if (tmp_val != NULL) {
+            val_add_child_sorted(tmp_val, childval);
+        } else if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        if (ipv6_status->List_Len > 0) {
+            /*[ietf-ip] interface/ipv6/address */
+            v6_address_val = agt_make_list(
+                childval->obj,
+                ietf_ip_common_address_list_container,
+                &res);
+            if (v4_address_val != NULL) {
+                val_add_child(v6_address_val, childval);
+            } else if (res!=NO_ERR) {
+                return SET_ERROR(res);
+            }
+        }
+
+        for (int i = 0; i<ipv6_status->List_Len;i++) {
+            /* split fe80::eade:d6ff:fe00:205/64 =>  fe80::eade:d6ff:fe00:205 and 64*/
+            char *addr=malloc(128);
+            char *prefix_len=malloc(128);
+            char *origin_addr=malloc(128);
+            strcpy(origin_addr,ipv6_status->List[i]->IPAddress);
+            strcpy(addr, strtok(origin_addr, "/"));
+            strcpy(prefix_len, strtok(NULL, "/"));
+
+            /* interface/ipv6/address/ip */
+            tmp_val = agt_make_leaf(
+                v6_address_val->obj,
+                ietf_ip_common_ip,
+                addr,
+                &res);
+            if (tmp_val != NULL) {
+                val_add_child_sorted(tmp_val, v6_address_val);
+            } else if (res != NO_ERR) {
+                return SET_ERROR(res);
+            }
+
+            /* interface/ipv6/address/prefix-length */
+            tmp_val = agt_make_int_leaf(
+                v6_address_val->obj,
+                ietf_ip_interfaces_ipv6_prefix_length,
+                atoi(prefix_len),
+                &res);
+            if (tmp_val != NULL) {
+                val_add_child_sorted(tmp_val, v6_address_val);
+            } else if (res != NO_ERR) {
+                return SET_ERROR(res);
+            }
+            free(addr);
+            free(prefix_len);
+            free(origin_addr);
+        }
+    } // end of ipv6_status->Enabled
 
     return res;
 }
@@ -455,7 +615,7 @@ static status_t
         return SET_ERROR(res);
     }
 
-    /* interface/ipv6 */
+    /* [ietf-ip] interface/ipv6 */
     if (network_cfg->IP->V6->Enabled) {
         res = agt_add_container(
             ietf_ip,
@@ -470,7 +630,7 @@ static status_t
             log_debug("\n current childval name: %s", childval->name);
         }
 
-        /* interface/ipv6/forwarding */
+        /* [ietf-ip] interface/ipv6/forwarding */
         xmlChar *is_v6_forarding = "true";
         tmp_val = agt_make_leaf(
                 childval->obj,
@@ -484,7 +644,7 @@ static status_t
         }
 
         if (ipv6_status->List_Len > 0) {
-            /* [ietf-ip] interface/ipv4/address */
+            /*[ietf-ip] interface/ipv6/address */
             v6_address_val = agt_make_list(
                 childval->obj,
                 ietf_ip_common_address_list_container,
@@ -497,21 +657,15 @@ static status_t
         }
 
         for (int i = 0; i<ipv6_status->List_Len;i++) {
-            /* interface/ipv6/address/ip */
             /* split fe80::eade:d6ff:fe00:205/64 =>  fe80::eade:d6ff:fe00:205 and 64*/
             char *addr=malloc(128);
             char *prefix_len=malloc(128);
             char *origin_addr=malloc(128);
             strcpy(origin_addr,ipv6_status->List[i]->IPAddress);
-            log_debug("\n1");
             strcpy(addr, strtok(origin_addr, "/"));
-            log_debug("\n2");
             strcpy(prefix_len, strtok(NULL, "/"));
-            log_debug("\norigin_address is %s\n", ipv6_status->List[i]->IPAddress);
-            log_debug("\nsplited_address is %s\n", origin_addr);
-            log_debug("\niplen is %s\n", addr);
-            log_debug("\niplen is %s\n", prefix_len);
 
+            /* interface/ipv6/address/ip */
             tmp_val = agt_make_leaf(
                 v6_address_val->obj,
                 ietf_ip_common_ip,
@@ -523,6 +677,7 @@ static status_t
                 return SET_ERROR(res);
             }
 
+            /* interface/ipv6/address/prefix-length */
             tmp_val = agt_make_int_leaf(
                 v6_address_val->obj,
                 ietf_ip_interfaces_ipv6_prefix_length,
@@ -748,6 +903,18 @@ ietf_interfaces_list_get(
     struct portpb_Config *out= malloc(sizeof(*(out)));
     port_Port_GetConfig(in, out);
 
+    struct emptypb_Empty *in6 = malloc(sizeof(*(in6)));
+    struct networkpb_IPv4Status *network_v4_status = malloc(sizeof(*(network_v4_status)));
+    network_Network_GetV4Status(in6, network_v4_status);
+
+    struct emptypb_Empty *in7 = malloc(sizeof(*(in7)));
+    struct networkpb_IPv6Status *network_v6_status = malloc(sizeof(*(network_v6_status)));
+    network_Network_GetV6Status(in7, network_v6_status);
+
+    struct emptypb_Empty *in8 = malloc(sizeof(*(in8)));
+    struct networkpb_Config *network_cfg = malloc(sizeof(*(network_cfg)));
+    network_Network_GetConfig(in8, network_cfg);
+
     for (int i =0; i < out->List_Len; i++) {
         val_value_t *entry_val = NULL;
         entry_val = agt_make_list(
@@ -759,13 +926,25 @@ ietf_interfaces_list_get(
         } else if (res!=NO_ERR) {
             return SET_ERROR(res);
         }
-        res = add_interface_entry(entry_val, out->List[i]);
+        res = add_interface_entry(
+            entry_val,
+            out->List[i],
+            network_cfg,
+            network_v4_status,
+            network_v6_status);
+
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
     }
-
+    free(in);
+    free(in6);
+    free(in7);
+    free(in8);
     free(out);
+    free(network_v4_status);
+    free(network_v6_status);
+    free(network_cfg);
     return res;
 }
 

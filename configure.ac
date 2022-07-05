@@ -113,7 +113,6 @@ AC_CONFIG_FILES([
         libintri/private/src/realize/Makefile
 
         libstandard/ietf-interfaces/Makefile
-        libstandard/ietf-ip/Makefile
 
 ])
         # libstandard/ietf-system/Makefile

@@ -70,6 +70,26 @@
 #define ietf_interfaces_interfaces_state_statistic_out_discards (const xmlChar *)"out-discards"
 #define ietf_interfaces_interfaces_state_statistic_out_errors (const xmlChar *)"out-errors"
 
+#define ietf_ip (const xmlChar *)"ietf-ip"
+/* common const */
+#define ietf_ip_common_forwarding (const xmlChar *)"forwarding"
+#define ietf_ip_common_mtu (const xmlChar *)"mtu"
+#define ietf_ip_common_address_list_container (const xmlChar *)"address"
+#define ietf_ip_common_ip (const xmlChar *)"ip"
+#define ietf_ip_common_ipv4 (const xmlChar *)"ipv4"
+#define ietf_ip_common_ipv6 (const xmlChar *)"ipv6"
+
+/* [RW] */
+#define ietf_ip_interfaces_ipv4_address_ip (const xmlChar *)"ip"
+#define ietf_ip_interfaces_ipv4_address_netmask (const xmlChar *)"netmask"
+
+#define ietf_ip_interfaces_ipv6_enabled (const xmlChar *)"enabled"
+#define ietf_ip_interfaces_ipv6_address_container (const xmlChar *)"address"
+
+/* [RO] */
+#define ietf_ip_interfaces_state_ipv4_address_netmask (const xmlChar *)"netmask"
+
+
 /********************************************************************
 *                                                                   *
 *                       V A R I A B L E S                           *
@@ -167,23 +187,19 @@ static status_t
         struct portpb_StatusEntry *status_entry,
         struct devicepb_Info *device_entry,
         struct rmonpb_IngressEntry *ingress_entry,
-        struct rmonpb_EgressEntry *egress_entry)
+        struct rmonpb_EgressEntry *egress_entry,
+        struct networkpb_BasicConfig *network_basic_cfg,
+        struct networkpb_IPv4Status *ipv4_status,
+        struct networkpb_IPv6Status *ipv6_status
+        )
 {
-    /*objs*/
-    obj_template_t* obj;
-
     /*vals*/
-    val_value_t* val;
-
     status_t res=NO_ERR;
-    val_value_t *childval = NULL;
+    val_value_t *tmp_val=NULL;
+    val_value_t *childval=NULL;
+    val_value_t *v4_address_val=NULL;
+    val_value_t *v6_address_val=NULL;
     boolean done;
-    char name[6];
-    char* str;
-    char* endptr;
-    unsigned int i;
-    uint64_t counter;
-    int ret;
 
     char* counter_names_array[12] = {
         ietf_interfaces_interfaces_state_statistic_in_octets,
@@ -342,7 +358,7 @@ static status_t
 
 
     // /* interface/speed */
-     childval = agt_make_int_leaf(
+    childval = agt_make_int_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_speed,
         speed_int,
@@ -353,7 +369,81 @@ static status_t
         return SET_ERROR(res);
     }
 
-    // /* interface/statistics */
+    /* [ietf-ip] interface/ipv4 */
+    res = agt_add_container(
+        ietf_ip,
+        ietf_ip_common_ipv4,
+        parentval,
+        &childval);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    if (LOGDEBUG) {
+        log_debug("\n current childval name: %s", childval->name);
+    }
+
+    /* [ietf-ip] interfaces/ipv4/forwarding */
+    xmlChar *is_forarding = "true";
+    tmp_val = agt_make_leaf(
+            childval->obj,
+            ietf_ip_common_forwarding,
+            is_forarding,
+            &res);
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, childval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* [ietf-ip] interfaces/ipv4/mtu */
+    tmp_val = agt_make_int_leaf(
+            childval->obj,
+            ietf_ip_common_mtu,
+            network_basic_cfg->LocalMTU,
+            &res);
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, childval);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+
+    /* [ietf-ip] interface/address */
+    v4_address_val = agt_make_list(
+        childval->obj,
+        ietf_ip_common_address_list_container,
+        &res);
+    if (v4_address_val != NULL) {
+        val_add_child(v4_address_val, childval);
+    } else if (res!=NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    tmp_val = agt_make_leaf(
+        v4_address_val->obj,
+        ietf_ip_common_ip,
+        ipv4_status->OutgoingDeviceIP,
+        &res);
+
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, v4_address_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    tmp_val = agt_make_leaf(
+        v4_address_val->obj,
+        ietf_ip_interfaces_ipv4_address_netmask,
+        ipv4_status->DynamicSubnetMask,
+        &res);
+    if (tmp_val != NULL) {
+        val_add_child_sorted(tmp_val, v4_address_val);
+    } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    /* interface/statistics */
     res = agt_add_container(
         ietf_interfaces,
         ietf_interfaces_interfaces_state_statistic,
@@ -364,9 +454,6 @@ static status_t
     }
 
 
-    if (LOGDEBUG) {
-        log_debug("\nchildval name: %s", childval->name);
-    }
     for(int i=0;i<(sizeof(counter_names_array)/sizeof(char*));i++) {
         val_value_t *stats_val = NULL;
         uint64_t target_val;
@@ -615,6 +702,19 @@ ietf_interfaces_state_list_get(
     struct rmonpb_Ingress *ingress_out = malloc(sizeof(*(ingress_out)));
     struct devicepb_PortList *in5 = malloc(sizeof(*(in5)));
     struct rmonpb_Egress *egress_out = malloc(sizeof(*(egress_out)));
+
+    struct emptypb_Empty *in6 = malloc(sizeof(*(in6)));
+    struct networkpb_IPv4Status *network_v4_status = malloc(sizeof(*(network_v4_status)));
+    network_Network_GetV4Status(in6, network_v4_status);
+
+    struct emptypb_Empty *in7 = malloc(sizeof(*(in7)));
+    struct networkpb_IPv6Status *network_v6_status = malloc(sizeof(*(network_v6_status)));
+    network_Network_GetV6Status(in7, network_v6_status);
+
+    struct emptypb_Empty *in8 = malloc(sizeof(*(in8)));
+    struct networkpb_BasicConfig *network_basic_cfg = malloc(sizeof(*(network_basic_cfg)));
+    network_Network_GetBasicConfig(in8, network_basic_cfg);
+
     in4->List_Len = 30;
     in5->List_Len = 30;
     in4->List = malloc(in4->List_Len * sizeof(*(in4->List)));
@@ -644,11 +744,20 @@ ietf_interfaces_state_list_get(
             ietf_interfaces_interface,
             &res);
         if (entry_val != NULL) {
-            val_add_child(entry_val, dstval);
+            val_add_child_sorted(entry_val, dstval);
         } else if (res!=NO_ERR) {
             return SET_ERROR(res);
         }
-        res = add_interface_state_entry(entry_val, out->List[i], status_out->List[i], device_out, ingress_out->List[i], egress_out->List[i]);
+        res = add_interface_state_entry(
+            entry_val,
+            out->List[i],
+            status_out->List[i],
+            device_out,
+            ingress_out->List[i],
+            egress_out->List[i],
+            network_basic_cfg,
+            network_v4_status,
+            network_v6_status);
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
@@ -659,12 +768,18 @@ ietf_interfaces_state_list_get(
     free(device_out);
     free(ingress_out);
     free(egress_out);
+    free(network_v4_status);
+    free(network_v6_status);
+    free(network_basic_cfg);
 
     free(in);
     free(in2);
     free(in3);
     free(in4);
     free(in5);
+    free(in6);
+    free(in7);
+    free(in8);
     return res;
 }
 
@@ -734,6 +849,13 @@ status_t
 
     res = ncxmod_load_module(
         "interfaces-notifications",
+        NULL,
+        &agt_profile->agt_savedevQ,
+        &mod);
+    assert(res == NO_ERR);
+
+    res = ncxmod_load_module(
+        "ietf-ip",
         NULL,
         &agt_profile->agt_savedevQ,
         &mod);

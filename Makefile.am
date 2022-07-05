@@ -11,7 +11,6 @@ netconf/man \
 netconf/src/yangdump \
 libintri/.libintrishare \
 libstandard/ietf-interfaces \
-libstandard/ietf-ip \
 libintri/private/modules \
 libintri/private/src/genc-trans \
 libintri/private/src/realize

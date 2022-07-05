@@ -623,8 +623,6 @@ ietf_interfaces_state_list_get(
     log_debug("\nEnter intri_device_intri_device_port_list_get4\n");
 
     for (int i = 0; i<=29 ;i++) {
-        // struct devicepb_InterfaceIdentify *tmp = malloc(sizeof(*(tmp)));
-        // struct devicepb_InterfaceIdentify *tmp2 = malloc(sizeof(*(tmp2)));
         in4->List[i] = malloc(sizeof(*(in4->List[i])));
         in4->List[i]->PortNo = i+1;
         in4->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;

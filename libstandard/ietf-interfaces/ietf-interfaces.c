@@ -84,6 +84,7 @@
 #define ietf_ip_interfaces_ipv4_address_netmask (const xmlChar *)"netmask"
 
 #define ietf_ip_interfaces_ipv6_enabled (const xmlChar *)"enabled"
+#define ietf_ip_interfaces_ipv6_prefix_length (const xmlChar *)"prefix-length"
 #define ietf_ip_interfaces_ipv6_address_container (const xmlChar *)"address"
 
 /* [RO] */
@@ -134,6 +135,11 @@ static status_t
     if (childval != NULL) {
         val_add_child_sorted(childval, parentval);
     } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = val_gen_index_chain(parentval->obj, parentval);
+    if (res != NO_ERR) {
         return SET_ERROR(res);
     }
 
@@ -188,7 +194,7 @@ static status_t
         struct devicepb_Info *device_entry,
         struct rmonpb_IngressEntry *ingress_entry,
         struct rmonpb_EgressEntry *egress_entry,
-        struct networkpb_BasicConfig *network_basic_cfg,
+        struct networkpb_Config *network_cfg,
         struct networkpb_IPv4Status *ipv4_status,
         struct networkpb_IPv6Status *ipv6_status
         )
@@ -232,6 +238,11 @@ static status_t
     if (childval != NULL) {
         val_add_child_sorted(childval, parentval);
     } else if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
+    res = val_gen_index_chain(parentval->obj, parentval);
+    if (res != NO_ERR) {
         return SET_ERROR(res);
     }
 
@@ -383,12 +394,12 @@ static status_t
         log_debug("\n current childval name: %s", childval->name);
     }
 
-    /* [ietf-ip] interfaces/ipv4/forwarding */
-    xmlChar *is_forarding = "true";
+    /* [ietf-ip] interface/ipv4/forwarding */
+    xmlChar *is_v4_forarding = "true";
     tmp_val = agt_make_leaf(
             childval->obj,
             ietf_ip_common_forwarding,
-            is_forarding,
+            is_v4_forarding,
             &res);
     if (tmp_val != NULL) {
         val_add_child_sorted(tmp_val, childval);
@@ -396,11 +407,12 @@ static status_t
         return SET_ERROR(res);
     }
 
-    /* [ietf-ip] interfaces/ipv4/mtu */
+    /* [ietf-ip] interface/ipv4/mtu */
+    log_debug("\n mtu is %d", network_cfg->Basic->LocalMTU);
     tmp_val = agt_make_int_leaf(
             childval->obj,
             ietf_ip_common_mtu,
-            network_basic_cfg->LocalMTU,
+            network_cfg->Basic->LocalMTU,
             &res);
     if (tmp_val != NULL) {
         val_add_child_sorted(tmp_val, childval);
@@ -409,7 +421,7 @@ static status_t
     }
 
 
-    /* [ietf-ip] interface/address */
+    /* [ietf-ip] interface/ipv4/address */
     v4_address_val = agt_make_list(
         childval->obj,
         ietf_ip_common_address_list_container,
@@ -442,6 +454,90 @@ static status_t
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
     }
+
+    /* interface/ipv6 */
+    if (network_cfg->IP->V6->Enabled) {
+        res = agt_add_container(
+            ietf_ip,
+            ietf_ip_common_ipv6,
+            parentval,
+            &childval);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        if (LOGDEBUG) {
+            log_debug("\n current childval name: %s", childval->name);
+        }
+
+        /* interface/ipv6/forwarding */
+        xmlChar *is_v6_forarding = "true";
+        tmp_val = agt_make_leaf(
+                childval->obj,
+                ietf_ip_common_forwarding,
+                is_v6_forarding,
+                &res);
+        if (tmp_val != NULL) {
+            val_add_child_sorted(tmp_val, childval);
+        } else if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
+
+        if (ipv6_status->List_Len > 0) {
+            /* [ietf-ip] interface/ipv4/address */
+            v6_address_val = agt_make_list(
+                childval->obj,
+                ietf_ip_common_address_list_container,
+                &res);
+            if (v4_address_val != NULL) {
+                val_add_child(v6_address_val, childval);
+            } else if (res!=NO_ERR) {
+                return SET_ERROR(res);
+            }
+        }
+
+        for (int i = 0; i<ipv6_status->List_Len;i++) {
+            /* interface/ipv6/address/ip */
+            /* split fe80::eade:d6ff:fe00:205/64 =>  fe80::eade:d6ff:fe00:205 and 64*/
+            char *addr=malloc(128);
+            char *prefix_len=malloc(128);
+            char *origin_addr=malloc(128);
+            strcpy(origin_addr,ipv6_status->List[i]->IPAddress);
+            log_debug("\n1");
+            strcpy(addr, strtok(origin_addr, "/"));
+            log_debug("\n2");
+            strcpy(prefix_len, strtok(NULL, "/"));
+            log_debug("\norigin_address is %s\n", ipv6_status->List[i]->IPAddress);
+            log_debug("\nsplited_address is %s\n", origin_addr);
+            log_debug("\niplen is %s\n", addr);
+            log_debug("\niplen is %s\n", prefix_len);
+
+            tmp_val = agt_make_leaf(
+                v6_address_val->obj,
+                ietf_ip_common_ip,
+                addr,
+                &res);
+            if (tmp_val != NULL) {
+                val_add_child_sorted(tmp_val, v6_address_val);
+            } else if (res != NO_ERR) {
+                return SET_ERROR(res);
+            }
+
+            tmp_val = agt_make_int_leaf(
+                v6_address_val->obj,
+                ietf_ip_interfaces_ipv6_prefix_length,
+                atoi(prefix_len),
+                &res);
+            if (tmp_val != NULL) {
+                val_add_child_sorted(tmp_val, v6_address_val);
+            } else if (res != NO_ERR) {
+                return SET_ERROR(res);
+            }
+            free(addr);
+            free(prefix_len);
+            free(origin_addr);
+        }
+    } // end of ipv6_status->Enabled
 
     /* interface/statistics */
     res = agt_add_container(
@@ -490,7 +586,6 @@ static status_t
             counter_names_array[i],
             target_val,
             &res);
-        log_debug("\nstats_val name2: %s", stats_val->name);
         if (stats_val != NULL) {
             val_add_child(stats_val, childval);
         } else if (res != NO_ERR) {
@@ -712,8 +807,8 @@ ietf_interfaces_state_list_get(
     network_Network_GetV6Status(in7, network_v6_status);
 
     struct emptypb_Empty *in8 = malloc(sizeof(*(in8)));
-    struct networkpb_BasicConfig *network_basic_cfg = malloc(sizeof(*(network_basic_cfg)));
-    network_Network_GetBasicConfig(in8, network_basic_cfg);
+    struct networkpb_Config *network_cfg = malloc(sizeof(*(network_cfg)));
+    network_Network_GetConfig(in8, network_cfg);
 
     in4->List_Len = 30;
     in5->List_Len = 30;
@@ -755,7 +850,7 @@ ietf_interfaces_state_list_get(
             device_out,
             ingress_out->List[i],
             egress_out->List[i],
-            network_basic_cfg,
+            network_cfg,
             network_v4_status,
             network_v6_status);
         if (res != NO_ERR) {
@@ -770,7 +865,7 @@ ietf_interfaces_state_list_get(
     free(egress_out);
     free(network_v4_status);
     free(network_v6_status);
-    free(network_basic_cfg);
+    free(network_cfg);
 
     free(in);
     free(in2);

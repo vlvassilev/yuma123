@@ -484,7 +484,7 @@ static status_t
                          const val_value_t *virval,
                          val_value_t  *dstval)
 {
-    boolean      *buff;
+    boolean      buff=false;
 
     (void)scb;
     (void)virval;
@@ -495,7 +495,9 @@ static status_t
         time_out = malloc(sizeof(*(time_out)));
 
         time_Time_GetConfig(epty, time_out);
-        buff = time_out->Mode==timepb_ModeTypeOptions_MODE_TYPE_AUTO;
+        if (time_out->Mode==timepb_ModeTypeOptions_MODE_TYPE_AUTO){
+            buff = true;
+        }
         free(time_out);
         free(epty);
         VAL_BOOL(dstval) = buff;
@@ -1372,6 +1374,10 @@ ietf_system_radius_get (
     access_Access_GetAuthenticatorServerConfig(&in, &out);
 
     for (int i = 0; i<(out.List_Len);i++) {
+        /* Only show the tacacs server*/
+        if (out.List[i]->ServerType == accesspb_AuthenticationServerTypeOptions_AUTHENTICATION_SERVER_TYPE_TACACS) {
+            continue;
+        }
         val_value_t *child_val = NULL;
 
         child_val = agt_make_list(
@@ -1544,25 +1550,57 @@ status_t ietf_system_mro(val_value_t *parentval) {
     val_value_t *ntp_val = NULL;
     val_value_t *server_val = NULL;
 
+
     // [FIXME] after done all other system
     // printf("\n@@@@ add /system/ntp\n");
-    // res = agt_add_container(
-    //     ietf_system,
-    //     ietf_system_ntp,
-    //     parentval,
-    //     &ntp_val);
+    // struct emptypb_Empty *in3 = malloc(sizeof(*(in3)));
+    // struct timepb_Config *time_out = malloc(sizeof(*(time_out)));
+    // time_Time_GetConfig(in3, time_out);
+    // if (time_out->Mode == timepb_ModeTypeOptions_MODE_TYPE_AUTO) {
+    //     /* /system/ntp */
+    //     res = agt_add_container(
+    //         ietf_system,
+    //         ietf_system_ntp,
+    //         parentval,
+    //         &ntp_val);
+    //     if (res != NO_ERR) {
+    //         return SET_ERROR(res);
+    //     }
 
-    // printf("\n val has contetn b4 ntp_mro %s\n", val_has_content(ntp_val) ? "TRUE" : "False");
-    // // // If ntp is enabled, add the ntp container, else rm it
-    // res = ietf_system_ntp_mro(ntp_val);
-    // // res = ietf_system_ntp_mro(parentval);
-    // if (res != NO_ERR) {
-    //     return SET_ERROR(res);
+    //     res = add_child_mro(ntp_val, ietf_system_ntp_enabled, get_ntp_enabled);
+    //      /* Add /system/ntp/server */
+    //     primary_val = agt_make_list(
+    //         ntp_val->obj,
+    //         ietf_system_ntp_server,
+    //         &res);
+    //     if (primary_val != NULL) {
+    //         val_add_child(primary_val, ntp_val);
+    //     } else if (res != NO_ERR) {
+    //         return SET_ERROR(res);
+    //     }
+    //     res = build_ntp_server(primary_val, "primary", time_out->MainNTPServer);
+    //     if (res != NO_ERR) {
+    //         return SET_ERROR(res);
+    //     }
+
+    //     // support secondary later
+    //     // secondary_val = agt_make_list(
+    //     //     ntp_val->obj,
+    //     //     ietf_system_ntp_server,
+    //     //     &res);
+    //     // if (secondary_val != NULL) {
+    //     //     val_add_child(secondary_val, ntp_val);
+    //     // } else if (res != NO_ERR) {
+    //     //     return SET_ERROR(res);
+    //     // }
+
+    //     // res = build_ntp_server(secondary_val, "secondary", time_out->BackupNTPServer);
+    //     // if (res != NO_ERR) {
+    //     //     return SET_ERROR(res);
+    //     // }
+
     // }
-    // printf("\n val has contetn %s\n", val_has_content(ntp_val) ? "TRUE" : "False");
-    // if (val_has_content(ntp_val)) {
-    //     val_add_child(ntp_val, parentval);
-    // }
+
 
     /* Add /system/hostname */
     printf("\n@@@@ add hostname\n");

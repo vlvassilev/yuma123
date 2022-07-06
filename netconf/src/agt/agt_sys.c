@@ -1785,7 +1785,8 @@ status_t
 status_t
     agt_sys_init2 (void)
 {
-    val_value_t           *ietf_system_val, *ietf_system_state_val;
+    val_value_t           *ietf_system_val=NULL;
+    val_value_t           *ietf_system_state_val=NULL;
     cfg_template_t        *runningcfg;
     status_t               res;
 
@@ -1808,9 +1809,11 @@ status_t
 
     printf("\n @@@@@@ what b4 add system-state\n");
     /* Add /system-state */
-    res = agt_add_top_container(ietf_system_state_obj, &ietf_system_state_val);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
+    if (ietf_system_state_val == NULL) {
+        res = agt_add_top_container(ietf_system_state_obj, &ietf_system_state_val);
+        if (res != NO_ERR) {
+            return SET_ERROR(res);
+        }
     }
     res = ietf_system_state_mro(ietf_system_state_val);
     printf("\n @@@@@@ done adding system-state\n");

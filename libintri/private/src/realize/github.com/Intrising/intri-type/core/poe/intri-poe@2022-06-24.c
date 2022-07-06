@@ -238,7 +238,7 @@ status_t y_intri_poe_init(
       &agt_profile->agt_savedevQ,
       &intri_poe_mod);
   if (res != NO_ERR) {
-    return res;
+    return SET_ERROR(res);
   }
 
   res = agt_rpc_register_method(

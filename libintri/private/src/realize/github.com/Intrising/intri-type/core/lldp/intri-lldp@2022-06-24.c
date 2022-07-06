@@ -362,7 +362,7 @@ status_t y_intri_lldp_init(
       &agt_profile->agt_savedevQ,
       &intri_lldp_mod);
   if (res != NO_ERR) {
-    return res;
+    return SET_ERROR(res);
   }
 
   res = agt_rpc_register_method(

@@ -53,7 +53,7 @@ status_t y_intri_dayofweek_init(
       &agt_profile->agt_savedevQ,
       &intri_dayofweek_mod);
   if (res != NO_ERR) {
-    return res;
+    return SET_ERROR(res);
   }
 
   return res;

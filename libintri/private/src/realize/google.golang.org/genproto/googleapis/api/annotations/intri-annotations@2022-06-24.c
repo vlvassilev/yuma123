@@ -54,7 +54,7 @@ status_t y_intri_annotations_init(
       &agt_profile->agt_savedevQ,
       &intri_annotations_mod);
   if (res != NO_ERR) {
-    return res;
+    return SET_ERROR(res);
   }
 
   return res;

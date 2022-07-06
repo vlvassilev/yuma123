@@ -399,7 +399,7 @@ status_t y_intri_timesync_init(
       &agt_profile->agt_savedevQ,
       &intri_timesync_mod);
   if (res != NO_ERR) {
-    return res;
+    return SET_ERROR(res);
   }
 
   res = agt_rpc_register_method(

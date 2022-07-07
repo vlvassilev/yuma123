@@ -30,6 +30,8 @@
 #include "intri-cpss@2022-06-24.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
+#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
+
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/cpss/intri-cpss-trans.h"
 #include "../../../../../genc-trans/github.com/golang/protobuf/ptypes/empty/intri-empty-trans.h"
 
@@ -3910,6 +3912,14 @@ status_t y_intri_cpss_init(
   }
   if (revision && xml_strcmp(revision, y_R_intri_cpss)) {
     return ERR_NCX_WRONG_VERSION;
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_empty,
+    y_R_intri_empty,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
   }
 
   res = ncxmod_load_module(

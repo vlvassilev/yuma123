@@ -30,6 +30,7 @@
 #include "intri-annotations@2022-06-24.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
+
 #include "../../../../../../genc-trans/google.golang.org/genproto/googleapis/api/annotations/intri-annotations-trans.h"
 
 static ncx_module_t *intri_annotations_mod;

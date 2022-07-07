@@ -30,6 +30,42 @@
 #include "intri-config@2022-06-24.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
+#include "../../../../../realize/github.com/Intrising/intri-type/common/intri-common@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/access/intri-access@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/acl/intri-acl@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/cdp/intri-cdp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/dhcp/intri-dhcp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/dhcpserver/intri-dhcpserver@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/fdb/intri-fdb@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/files/intri-files@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/gvrp/intri-gvrp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/isolation/intri-isolation@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/lacp/intri-lacp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/lldp/intri-lldp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/loop/intri-loop@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/mirroring/intri-mirroring@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/monitor/intri-monitor@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/multicast/intri-multicast@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/network/intri-network@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/poe/intri-poe@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/port/intri-port@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/portauthentication/intri-portauthentication@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/portsecurity/intri-portsecurity@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/ptp/intri-ptp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/qos/intri-qos@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/sfp/intri-sfp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/stormcontrol/intri-stormcontrol@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/stp/intri-stp@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/system/intri-system@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/time/intri-time@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/timerange/intri-timerange@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/timesync/intri-timesync@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/udld/intri-udld@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/userinterface/intri-userinterface@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/vlan/intri-vlan@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/log/intri-log@2022-06-24.h"
+#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
+
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/config/intri-config-trans.h"
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/core/access/intri-access-trans.h"
@@ -3113,6 +3149,286 @@ status_t y_intri_config_init(
   }
   if (revision && xml_strcmp(revision, y_R_intri_config)) {
     return ERR_NCX_WRONG_VERSION;
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_acl,
+    y_R_intri_acl,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_vlan,
+    y_R_intri_vlan,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_gvrp,
+    y_R_intri_gvrp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_access,
+    y_R_intri_access,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_userinterface,
+    y_R_intri_userinterface,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_system,
+    y_R_intri_system,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_network,
+    y_R_intri_network,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_time,
+    y_R_intri_time,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_port,
+    y_R_intri_port,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_sfp,
+    y_R_intri_sfp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_mirroring,
+    y_R_intri_mirroring,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_isolation,
+    y_R_intri_isolation,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_fdb,
+    y_R_intri_fdb,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_portsecurity,
+    y_R_intri_portsecurity,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_files,
+    y_R_intri_files,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_lacp,
+    y_R_intri_lacp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_multicast,
+    y_R_intri_multicast,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_stormcontrol,
+    y_R_intri_stormcontrol,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_dhcp,
+    y_R_intri_dhcp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_qos,
+    y_R_intri_qos,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_loop,
+    y_R_intri_loop,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_lldp,
+    y_R_intri_lldp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_poe,
+    y_R_intri_poe,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_cdp,
+    y_R_intri_cdp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_dhcpserver,
+    y_R_intri_dhcpserver,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_stp,
+    y_R_intri_stp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_timerange,
+    y_R_intri_timerange,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_ptp,
+    y_R_intri_ptp,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_monitor,
+    y_R_intri_monitor,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_timesync,
+    y_R_intri_timesync,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_udld,
+    y_R_intri_udld,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_portauthentication,
+    y_R_intri_portauthentication,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_log,
+    y_R_intri_log,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_common,
+    y_R_intri_common,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_empty,
+    y_R_intri_empty,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
   }
 
   res = ncxmod_load_module(

@@ -30,6 +30,10 @@
 #include "intri-gvrp@2022-06-24.h"
 #include "../../../../../../../../.libintrishare/libintrishare.h"
 
+#include "../../../../../../realize/github.com/Intrising/intri-type/common/intri-common@2022-06-24.h"
+#include "../../../../../../realize/github.com/Intrising/intri-type/device/intri-device@2022-06-24.h"
+#include "../../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
+
 #include "../../../../../../genc-trans/github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../../genc-trans/github.com/Intrising/intri-type/core/gvrp/intri-gvrp-trans.h"
 #include "../../../../../../genc-trans/github.com/Intrising/intri-type/device/intri-device-trans.h"
@@ -223,6 +227,30 @@ status_t y_intri_gvrp_init(
   }
   if (revision && xml_strcmp(revision, y_R_intri_gvrp)) {
     return ERR_NCX_WRONG_VERSION;
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_device,
+    y_R_intri_device,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_empty,
+    y_R_intri_empty,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_common,
+    y_R_intri_common,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
   }
 
   res = ncxmod_load_module(

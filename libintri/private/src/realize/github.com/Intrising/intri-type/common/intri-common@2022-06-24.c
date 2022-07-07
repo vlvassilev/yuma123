@@ -30,6 +30,7 @@
 #include "intri-common@2022-06-24.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
+
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/common/intri-common-trans.h"
 
 static ncx_module_t *intri_common_mod;

@@ -30,6 +30,12 @@
 #include "intri-snmp@2022-06-24.h"
 #include "../../../../../../../.libintrishare/libintrishare.h"
 
+#include "../../../../../realize/github.com/Intrising/intri-type/common/intri-common@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/access/intri-access@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/files/intri-files@2022-06-24.h"
+#include "../../../../../realize/github.com/Intrising/intri-type/core/userinterface/intri-userinterface@2022-06-24.h"
+#include "../../../../../realize/github.com/golang/protobuf/ptypes/empty/intri-empty@2022-06-24.h"
+
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/common/intri-common-trans.h"
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/core/access/intri-access-trans.h"
 #include "../../../../../genc-trans/github.com/Intrising/intri-type/core/files/intri-files-trans.h"
@@ -235,6 +241,46 @@ status_t y_intri_snmp_init(
   }
   if (revision && xml_strcmp(revision, y_R_intri_snmp)) {
     return ERR_NCX_WRONG_VERSION;
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_userinterface,
+    y_R_intri_userinterface,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_empty,
+    y_R_intri_empty,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_access,
+    y_R_intri_access,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_common,
+    y_R_intri_common,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
+  }
+
+  res = agt_load_sil_code(
+    y_M_intri_files,
+    y_R_intri_files,
+    true);
+  if (res != NO_ERR) {
+    return SET_ERROR(res);
   }
 
   res = ncxmod_load_module(

@@ -12,9 +12,11 @@ module intri-portsecurity {
 
   import intri-device {
     prefix intri-device;
+    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
+    revision-date "2022-06-24";
   }
   typedef PortSecurityModeTypeOptions {
     type enumeration {

@@ -12,108 +12,143 @@ module intri-config {
 
   import intri-acl {
     prefix intri-acl;
+    revision-date "2022-06-24";
   }
   import intri-vlan {
     prefix intri-vlan;
+    revision-date "2022-06-24";
   }
   import intri-gvrp {
     prefix intri-gvrp;
+    revision-date "2022-06-24";
   }
   import intri-access {
     prefix intri-access;
+    revision-date "2022-06-24";
   }
   import intri-userinterface {
     prefix intri-userinterface;
+    revision-date "2022-06-24";
   }
   import intri-system {
     prefix intri-system;
+    revision-date "2022-06-24";
   }
   import intri-network {
     prefix intri-network;
+    revision-date "2022-06-24";
   }
   import intri-time {
     prefix intri-time;
+    revision-date "2022-06-24";
   }
   import intri-port {
     prefix intri-port;
+    revision-date "2022-06-24";
   }
   import intri-sfp {
     prefix intri-sfp;
+    revision-date "2022-06-24";
   }
   import intri-mirroring {
     prefix intri-mirroring;
+    revision-date "2022-06-24";
   }
   import intri-isolation {
     prefix intri-isolation;
+    revision-date "2022-06-24";
   }
   import intri-fdb {
     prefix intri-fdb;
+    revision-date "2022-06-24";
   }
   import intri-portsecurity {
     prefix intri-portsecurity;
+    revision-date "2022-06-24";
   }
   import intri-files {
     prefix intri-files;
+    revision-date "2022-06-24";
   }
   import intri-lacp {
     prefix intri-lacp;
+    revision-date "2022-06-24";
   }
   import intri-multicast {
     prefix intri-multicast;
+    revision-date "2022-06-24";
   }
   import intri-stormcontrol {
     prefix intri-stormcontrol;
+    revision-date "2022-06-24";
   }
   import intri-dhcp {
     prefix intri-dhcp;
+    revision-date "2022-06-24";
   }
   import intri-qos {
     prefix intri-qos;
+    revision-date "2022-06-24";
   }
   import intri-loop {
     prefix intri-loop;
+    revision-date "2022-06-24";
   }
   import intri-lldp {
     prefix intri-lldp;
+    revision-date "2022-06-24";
   }
   import intri-poe {
     prefix intri-poe;
+    revision-date "2022-06-24";
   }
   import intri-cdp {
     prefix intri-cdp;
+    revision-date "2022-06-24";
   }
   import intri-dhcpserver {
     prefix intri-dhcpserver;
+    revision-date "2022-06-24";
   }
   import intri-stp {
     prefix intri-stp;
+    revision-date "2022-06-24";
   }
   import intri-timerange {
     prefix intri-timerange;
+    revision-date "2022-06-24";
   }
   import intri-ptp {
     prefix intri-ptp;
+    revision-date "2022-06-24";
   }
   import intri-monitor {
     prefix intri-monitor;
+    revision-date "2022-06-24";
   }
   import intri-timesync {
     prefix intri-timesync;
+    revision-date "2022-06-24";
   }
   import intri-udld {
     prefix intri-udld;
+    revision-date "2022-06-24";
   }
   import intri-portauthentication {
     prefix intri-portauthentication;
+    revision-date "2022-06-24";
   }
   import intri-log {
     prefix intri-log;
+    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
+    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
+    revision-date "2022-06-24";
   }
   typedef StorageTypeOptions {
     type enumeration {

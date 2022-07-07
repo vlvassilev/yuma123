@@ -12,12 +12,15 @@ module intri-loop {
 
   import intri-device {
     prefix intri-device;
+    revision-date "2022-06-24";
   }
   import intri-timestamp {
     prefix intri-timestamp;
+    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
+    revision-date "2022-06-24";
   }
   grouping Config {
     container PortList {

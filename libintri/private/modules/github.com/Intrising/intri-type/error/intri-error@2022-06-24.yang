@@ -269,7 +269,7 @@ module intri-error {
         value 311;
       }
       enum ERROR_TYPE_STP_FORWARD_DELAY_OUT_OF_RANGE {
-        description "	max age need to meet formulas: (2x(ForwardDelay-1)) >= MaxAge";
+        description "\tmax age need to meet formulas: (2x(ForwardDelay-1)) >= MaxAge";
         value 312;
       }
       enum ERROR_TYPE_QOS_QUEUE_NO_OUT_OF_RANGE {

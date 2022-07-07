@@ -12,18 +12,23 @@ module intri-timerange {
 
   import intri-timeofday {
     prefix intri-timeofday;
+    revision-date "2022-06-24";
   }
   import intri-date {
     prefix intri-date;
+    revision-date "2022-06-24";
   }
   import intri-dayofweek {
     prefix intri-dayofweek;
+    revision-date "2022-06-24";
   }
   import intri-empty {
     prefix intri-empty;
+    revision-date "2022-06-24";
   }
   import intri-common {
     prefix intri-common;
+    revision-date "2022-06-24";
   }
   typedef CommandTypeOptions {
     type enumeration {

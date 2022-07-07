@@ -6,6 +6,8 @@
 #include <libxml/xmlstring.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include "procdefs.h"
 #include "agt.h"
@@ -55,20 +57,20 @@
 
 #define ietf_interfaces_interfaces_state_statistic (const xmlChar *)"statistics"
 
-#define ietf_interfaces_interfaces_state_statistic_in_octets (const xmlChar *)"in-octets"
-#define ietf_interfaces_interfaces_state_statistic_in_unicast_pkts (const xmlChar *)"in-unicast-pkts"
-#define ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts (const xmlChar *)"in-broadcast-pkts"
-#define ietf_interfaces_interfaces_state_statistic_in_multicast_pkts (const xmlChar *)"in-multicast-pkts"
-#define ietf_interfaces_interfaces_state_statistic_in_discards (const xmlChar *)"in-discards"
-#define ietf_interfaces_interfaces_state_statistic_in_errors (const xmlChar *)"in-errors"
-#define ietf_interfaces_interfaces_state_statistic_in_unknown_protos (const xmlChar *)"in-unknown-protos"
+#define ietf_interfaces_interfaces_state_statistic_in_octets (xmlChar *)"in-octets"
+#define ietf_interfaces_interfaces_state_statistic_in_unicast_pkts (xmlChar *)"in-unicast-pkts"
+#define ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts (xmlChar *)"in-broadcast-pkts"
+#define ietf_interfaces_interfaces_state_statistic_in_multicast_pkts (xmlChar *)"in-multicast-pkts"
+#define ietf_interfaces_interfaces_state_statistic_in_discards (xmlChar *)"in-discards"
+#define ietf_interfaces_interfaces_state_statistic_in_errors (xmlChar *)"in-errors"
+#define ietf_interfaces_interfaces_state_statistic_in_unknown_protos (xmlChar *)"in-unknown-protos"
 
-#define ietf_interfaces_interfaces_state_statistic_out_octets (const xmlChar *)"out-octets"
-#define ietf_interfaces_interfaces_state_statistic_out_unicast_pkts (const xmlChar *)"out-unicast-pkts"
-#define ietf_interfaces_interfaces_state_statistic_out_broadcast_pkts (const xmlChar *)"out-broadcast-pkts"
-#define ietf_interfaces_interfaces_state_statistic_out_multicast_pkts (const xmlChar *)"out-multicast-pkts"
-#define ietf_interfaces_interfaces_state_statistic_out_discards (const xmlChar *)"out-discards"
-#define ietf_interfaces_interfaces_state_statistic_out_errors (const xmlChar *)"out-errors"
+#define ietf_interfaces_interfaces_state_statistic_out_octets (xmlChar *)"out-octets"
+#define ietf_interfaces_interfaces_state_statistic_out_unicast_pkts (xmlChar *)"out-unicast-pkts"
+#define ietf_interfaces_interfaces_state_statistic_out_broadcast_pkts (xmlChar *)"out-broadcast-pkts"
+#define ietf_interfaces_interfaces_state_statistic_out_multicast_pkts (xmlChar *)"out-multicast-pkts"
+#define ietf_interfaces_interfaces_state_statistic_out_discards (xmlChar *)"out-discards"
+#define ietf_interfaces_interfaces_state_statistic_out_errors (xmlChar *)"out-errors"
 
 #define ietf_ip (const xmlChar *)"ietf-ip"
 /* common const */
@@ -128,9 +130,8 @@ static status_t
     assert(entry != NULL);
 
     /* interface/name */
-    xmlChar *name_as_index[10];
+    xmlChar name_as_index[10];
     sprintf(name_as_index, "Port%d", entry->IdentifyNo->PortNo);
-
     childval = agt_make_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_name,
@@ -356,8 +357,7 @@ static status_t
         struct rmonpb_EgressEntry *egress_entry,
         struct networkpb_Config *network_cfg,
         struct networkpb_IPv4Status *ipv4_status,
-        struct networkpb_IPv6Status *ipv6_status
-        )
+        struct networkpb_IPv6Status *ipv6_status)
 {
     /*vals*/
     status_t res=NO_ERR;
@@ -366,7 +366,7 @@ static status_t
     val_value_t *v4_address_val=NULL;
     val_value_t *v6_address_val=NULL;
     boolean done;
-
+    log_debug("\n in add_interface_state_entry 1");
     char* counter_names_array[12] = {
         ietf_interfaces_interfaces_state_statistic_in_octets,
         ietf_interfaces_interfaces_state_statistic_in_unicast_pkts,
@@ -381,33 +381,44 @@ static status_t
         ietf_interfaces_interfaces_state_statistic_out_discards,
         ietf_interfaces_interfaces_state_statistic_out_errors,
     };
-    assert(entry != NULL);
-    assert(status_entry != NULL);
+    assert(entry !=NULL);
+    assert(status_entry !=NULL);
+    assert(device_entry !=NULL);
+    assert(ingress_entry !=NULL);
+    assert(egress_entry !=NULL);
+    assert(network_cfg !=NULL);
+    assert(ipv4_status !=NULL);
+    assert(ipv6_status !=NULL);
 
+    log_debug("\n in add_interface_state_entry 2");
 
-    /* interface/name */
-    xmlChar *name_as_index[10];
+    /* /interfaces-state/interface/name */
+    char name_as_index[20];
     sprintf(name_as_index, "Port%d", entry->IdentifyNo->PortNo);
-
+    log_debug("\n in add_interface_state_entry 3, name_as_index is %s ", name_as_index);
+    const xmlChar *key = name_as_index;
     childval = agt_make_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_name,
-        name_as_index,
+        key,
         &res);
+    log_debug("\n in add_interface_state_entry 4");
 
     if (childval != NULL) {
         val_add_child_sorted(childval, parentval);
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
     }
+    log_debug("\n in add_interface_state_entry 5");
 
     res = val_gen_index_chain(parentval->obj, parentval);
     if (res != NO_ERR) {
         return SET_ERROR(res);
     }
+    log_debug("\n in add_interface_state_entry 6");
 
-    // [FIXME] open this will get Error 258 invalid value, check it later
-    // /* interface/type */
+    // [DEPRECATED][FIXME] open this will get Error 258 invalid value, check it later
+    // /* /interfaces-state/interface/type */
     // int32_t *if_type = 6; // ethernetCsmacd(6)
     // childval = agt_make_int_leaf(
     //     parentval->obj,
@@ -420,7 +431,7 @@ static status_t
     //     return SET_ERROR(res);
     // }
 
-    /* interface/oper-state */
+    /* /interfaces-state/interface/oper-state */
     const xmlChar *link_up = "down";
     if (status_entry->LinkUp) {
         link_up = "up";
@@ -430,13 +441,14 @@ static status_t
         ietf_interfaces_interfaces_state_oper_status,
         link_up,
         &res);
+    log_debug("\n in add_interface_state_entry 7");
     if (childval != NULL) {
         val_add_child_sorted(childval, parentval);
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
     }
-
-    /* interface/admin-state */
+    log_debug("\n in add_interface_state_entry 9");
+    /* /interfaces-state/interface/admin-state */
     const xmlChar * enabled = "down";
     if (status_entry->Enabled) {
         enabled = "up";
@@ -454,22 +466,41 @@ static status_t
 
 
 
-    /** interface/last-change
-        required pattern is
-        `\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})`
-    **/
-    xmlChar *time[20];
-    memset(time, 0, 20);
-    xmlChar *tmp = strtok(status_entry->LastLinkChange, " ");
-    strcat(time, tmp);
-    strcat(time, "T");
-    tmp = strtok(NULL, " ");
-    strcat(time, tmp);
-    strcat(time, "Z");
+    // /** /interfaces-state/interface/last-change
+    //     required pattern is
+    //     `\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[\+\-]\d{2}:\d{2})`
+    // **/
+    // // "2022-07-07 08:57:44" => "2022-07-07T08:57:43Z"
+    assert(status_entry->LastLinkChange!=NULL);
+    log_debug("\n b4 last-change, %s", status_entry->LastLinkChange);
+    log_debug("\n b4 last-change, %p", status_entry->LastLinkChange);
+    char strT[]="T";
+    char strZ[]="Z";
+    char final[20];
+    char *tmp = status_entry->LastLinkChange;
+    char *timebuf = strchr(tmp, ' ');
+    if (timebuf != NULL) {
+        timebuf+=1;
+    }
+    log_debug("\n b4 last-change1 %s", timebuf);
+    memset(final, '\0', sizeof(final));
+    log_debug("\n b4 last-change1.1 %s", final);
+    memcpy(final, tmp, 10); // memcpy will force final char -> char*
+    log_debug("\n b4 last-change1.2 %s", final);
+    strcat(final, strT);
+    log_debug("\n b4 last-change2 %s", final);
+    log_debug("\n b4 last-change2,1 %s", timebuf);
+    strcat(final, timebuf);
+    log_debug("\n b4 last-change3 %s", final);
+    strcat(final, strZ);
+    log_debug("\n b4 last-change4 %s", final);
+    log_debug("\n in add_interface_state_entry 10");
+
+    xmlChar *what = final;
     childval = agt_make_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_last_change,
-        time,
+        what,
         &res);
     if (childval != NULL) {
         val_add_child_sorted(childval, parentval);
@@ -477,7 +508,9 @@ static status_t
         return SET_ERROR(res);
     }
 
-    /* interface/phys-address */
+    log_debug("\n in add_interface_state_entry after 10");
+    log_debug("\n in add_interface_state_entry mac addr is %s", device_entry->MACAddr);
+    /* /interfaces-state/interface/phys-address */
     childval = agt_make_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_phy_address,
@@ -489,7 +522,8 @@ static status_t
         return SET_ERROR(res);
     }
 
-    /* interface/if-index */
+    /* /interfaces-state/interface/if-index */
+    printf("\n portno is %d", status_entry->IdentifyNo->PortNo);
     childval = agt_make_int_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_if_index,
@@ -502,6 +536,7 @@ static status_t
     }
 
     int32 speed_int = 0;
+    printf("\n speed duplicexed is %d", status_entry->SpeedDuplexUsed);
     switch (status_entry->SpeedDuplexUsed) {
         case eventpb_PortSpeedDuplexTypeOptions_PORT_SPEED_DUPLEX_TYPE_NA:
             speed_int = 0;
@@ -528,7 +563,7 @@ static status_t
     }
 
 
-    // /* interface/speed */
+    /* /interfaces-state/interface/speed */
     childval = agt_make_int_leaf(
         parentval->obj,
         ietf_interfaces_interfaces_state_speed,
@@ -539,8 +574,9 @@ static status_t
     } else if (res != NO_ERR) {
         return SET_ERROR(res);
     }
+    log_debug("\n current childval name after speed is : %s", childval->name);
 
-    /* [ietf-ip] interface/ipv4 */
+    /* [ietf-ip] /interfaces-state/interface/ipv4 */
     res = agt_add_container(
         ietf_ip,
         ietf_ip_common_ipv4,
@@ -554,7 +590,7 @@ static status_t
         log_debug("\n current childval name: %s", childval->name);
     }
 
-    /* [ietf-ip] interface/ipv4/forwarding */
+    /* [ietf-ip] /interfaces-state/interface/ipv4/forwarding */
     xmlChar *is_v4_forarding = "true";
     tmp_val = agt_make_leaf(
             childval->obj,
@@ -567,7 +603,7 @@ static status_t
         return SET_ERROR(res);
     }
 
-    /* [ietf-ip] interface/ipv4/mtu */
+    /* [ietf-ip] /interfaces-state/interface/ipv4/mtu */
     log_debug("\n mtu is %d", network_cfg->Basic->LocalMTU);
     tmp_val = agt_make_int_leaf(
             childval->obj,
@@ -581,7 +617,7 @@ static status_t
     }
 
 
-    /* [ietf-ip] interface/ipv4/address */
+    /* [ietf-ip] /interfaces-state/interface/ipv4/address */
     v4_address_val = agt_make_list(
         childval->obj,
         ietf_ip_common_address_list_container,
@@ -592,6 +628,7 @@ static status_t
         return SET_ERROR(res);
     }
 
+    log_debug("\n outgoingDeviceIP is %s", ipv4_status->OutgoingDeviceIP);
     tmp_val = agt_make_leaf(
         v4_address_val->obj,
         ietf_ip_common_ip,
@@ -604,19 +641,26 @@ static status_t
         return SET_ERROR(res);
     }
 
+    log_debug("\n dynmiac subnetmask is %s", ipv4_status->DynamicSubnetMask);
     tmp_val = agt_make_leaf(
         v4_address_val->obj,
         ietf_ip_interfaces_ipv4_address_netmask,
         ipv4_status->DynamicSubnetMask,
         &res);
+    log_debug("\n b4 add child %s", ipv4_status->DynamicSubnetMask);
     if (tmp_val != NULL) {
+        log_debug("\n b4 add child2 %s", ipv4_status->DynamicSubnetMask);
         val_add_child_sorted(tmp_val, v4_address_val);
+        log_debug("\n after add child2 %s", ipv4_status->DynamicSubnetMask);
     } else if (res != NO_ERR) {
+        log_debug("\n res != NO_ERR %s", ipv4_status->DynamicSubnetMask);
         return SET_ERROR(res);
     }
 
-    /* [ietf-ip] interface/ipv6 */
+    /* [ietf-ip] /interfaces-state/interface/ipv6 */
     if (network_cfg->IP->V6->Enabled) {
+        log_debug("\n ipv6 enabled");
+        log_debug("\n start add ipv6");
         res = agt_add_container(
             ietf_ip,
             ietf_ip_common_ipv6,
@@ -630,13 +674,14 @@ static status_t
             log_debug("\n current childval name: %s", childval->name);
         }
 
-        /* [ietf-ip] interface/ipv6/forwarding */
+        /* [ietf-ip] /interfaces-state/interface/ipv6/forwarding */
         xmlChar *is_v6_forarding = "true";
         tmp_val = agt_make_leaf(
                 childval->obj,
                 ietf_ip_common_forwarding,
                 is_v6_forarding,
                 &res);
+        log_debug("\n ipv6 is forwarding %s", is_v6_forarding);
         if (tmp_val != NULL) {
             val_add_child_sorted(tmp_val, childval);
         } else if (res != NO_ERR) {
@@ -644,7 +689,7 @@ static status_t
         }
 
         if (ipv6_status->List_Len > 0) {
-            /*[ietf-ip] interface/ipv6/address */
+            /*[ietf-ip] /interfaces-state/interface/ipv6/address */
             v6_address_val = agt_make_list(
                 childval->obj,
                 ietf_ip_common_address_list_container,
@@ -658,6 +703,7 @@ static status_t
 
         for (int i = 0; i<ipv6_status->List_Len;i++) {
             /* split fe80::eade:d6ff:fe00:205/64 =>  fe80::eade:d6ff:fe00:205 and 64*/
+            log_debug("\n adding ipv6/address/ip");
             char *addr=malloc(128);
             char *prefix_len=malloc(128);
             char *origin_addr=malloc(128);
@@ -665,7 +711,7 @@ static status_t
             strcpy(addr, strtok(origin_addr, "/"));
             strcpy(prefix_len, strtok(NULL, "/"));
 
-            /* interface/ipv6/address/ip */
+            /* /interfaces-state/interface/ipv6/address/ip */
             tmp_val = agt_make_leaf(
                 v6_address_val->obj,
                 ietf_ip_common_ip,
@@ -677,7 +723,7 @@ static status_t
                 return SET_ERROR(res);
             }
 
-            /* interface/ipv6/address/prefix-length */
+            /* /interfaces-state/interface/ipv6/address/prefix-length */
             tmp_val = agt_make_int_leaf(
                 v6_address_val->obj,
                 ietf_ip_interfaces_ipv6_prefix_length,
@@ -694,7 +740,7 @@ static status_t
         }
     } // end of ipv6_status->Enabled
 
-    /* interface/statistics */
+    /* /interfaces-state/interface/statistics */
     res = agt_add_container(
         ietf_interfaces,
         ietf_interfaces_interfaces_state_statistic,
@@ -705,11 +751,15 @@ static status_t
     }
 
 
+    log_debug("\n start statistic loop");
+    log_debug("\n start statistic loo %u", sizeof(counter_names_array));
+    log_debug("\n start statistic loo %u",sizeof(counter_names_array)/sizeof(char*));
     for(int i=0;i<(sizeof(counter_names_array)/sizeof(char*));i++) {
         val_value_t *stats_val = NULL;
         uint64_t target_val;
         xmlChar *counter = counter_names_array[i];
-
+        log_debug("\n start statistic loop , counter name is %s ", counter_names_array[i]);
+        log_debug("\n start statistic loop , counter name is %s ", counter);
         if (counter == ietf_interfaces_interfaces_state_statistic_in_octets) {
             target_val = ingress_entry->InGoodOctets + ingress_entry->InBadOctets;
         } else if (counter == ietf_interfaces_interfaces_state_statistic_in_broadcast_pkts) {
@@ -742,7 +792,7 @@ static status_t
             target_val,
             &res);
         if (stats_val != NULL) {
-            val_add_child(stats_val, childval);
+            val_add_child_sorted(stats_val, childval);
         } else if (res != NO_ERR) {
             if (LOGDEBUG) {
                 log_debug("\n[debug] parent name: %s", stats_val->name);
@@ -752,6 +802,7 @@ static status_t
             return SET_ERROR(res);
         }
     }
+    log_debug("\n res is %s", get_error_string(res));
     return res;
 }
 
@@ -1007,21 +1058,26 @@ ietf_interfaces_state_list_get(
         in5->List[i]->Type = devicepb_InterfaceTypeOptions_INTERFACE_TYPE_PORT;
         in5->List[i]->DeviceID = 0;
     }
+    log_debug("\nEnter intri_device_intri_device_port_list_get5\n");
 
     rmon_RMON_GetIngress(in4, ingress_out);
     rmon_RMON_GetEgress(in5, egress_out);
+    log_debug("\nEnter intri_device_intri_device_port_list_get6\n");
 
     for (int i =0; i < out->List_Len; i++) {
         val_value_t *entry_val = NULL;
+        log_debug("\nEnter intri_device_intri_device_port_list_get6.1, index is %d", i);
         entry_val = agt_make_list(
             dstval->obj,
             ietf_interfaces_interface,
             &res);
         if (entry_val != NULL) {
-            val_add_child_sorted(entry_val, dstval);
+            val_add_child(entry_val, dstval);
         } else if (res!=NO_ERR) {
             return SET_ERROR(res);
         }
+        log_debug("\nEnter intri_device_intri_device_port_list_get6.5, entry_val is %s", entry_val->name);
+        log_debug("\nEnter intri_device_intri_device_port_list_get6.5, out->List[i] is %d", out->List[i]->IdentifyNo->PortNo);
         res = add_interface_state_entry(
             entry_val,
             out->List[i],
@@ -1032,10 +1088,12 @@ ietf_interfaces_state_list_get(
             network_cfg,
             network_v4_status,
             network_v6_status);
+        fprintf(stderr, "\n walter: done add_interface_state_entry");
         if (res != NO_ERR) {
             return SET_ERROR(res);
         }
     }
+    log_debug("\nEnter intri_device_intri_device_port_list_get7\n");
 
     free(out);
     free(status_out);
